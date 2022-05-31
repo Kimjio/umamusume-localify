@@ -1,5 +1,13 @@
 #pragma once
 
+#if _MSC_VER
+typedef wchar_t Il2CppChar;
+#elif __has_feature(cxx_unicode_literals)
+typedef char16_t Il2CppChar;
+#else
+typedef uint16_t Il2CppChar;
+#endif
+
 // UnityEngine.Color
 struct Color_t
 {
@@ -86,13 +94,9 @@ public:
 	bool generateOutOfBounds;
 };
 
-// not real Il2CppString class
-struct Il2CppString
+struct Il2CppInt32
 {
-	void* Empty;
-	void* WhiteChars;
-	int32_t length;
-	wchar_t start_char[1];
+	int32_t value;
 };
 
 enum Il2CppTypeEnum
@@ -176,14 +180,121 @@ struct MethodInfo
 	uint8_t is_marshaled_from_native : 1;
 };
 
+typedef struct FieldInfo
+{
+	const char* name;
+	const Il2CppType* type;
+	void* parent;
+	int32_t offset; // If offset is -1, then it's thread static
+	uint32_t token;
+} FieldInfo;
+
+typedef struct Il2CppClass
+{
+	// The following fields are always valid for a Il2CppClass structure
+	const void* image;
+	void* gc_desc;
+	const char* name;
+	const char* namespaze;
+	Il2CppType byval_arg;
+	Il2CppType this_arg;
+	Il2CppClass* element_class;
+	Il2CppClass* castClass;
+	Il2CppClass* declaringType;
+	Il2CppClass* parent;
+	void* generic_class;
+	void* typeMetadataHandle; // non-NULL for Il2CppClass's constructed from type defintions
+	const void* interopData;
+	Il2CppClass* klass; // hack to pretend we are a MonoVTable. Points to ourself
+	// End always valid fields
+
+	// The following fields need initialized before access. This can be done per field or as an aggregate via a call to Class::Init
+	FieldInfo* fields; // Initialized in SetupFields
+	const void* events; // Initialized in SetupEvents
+	const void* properties; // Initialized in SetupProperties
+	const MethodInfo** methods; // Initialized in SetupMethods
+	Il2CppClass** nestedTypes; // Initialized in SetupNestedTypes
+	Il2CppClass** implementedInterfaces; // Initialized in SetupInterfaces
+	void* interfaceOffsets; // Initialized in Init
+	void* static_fields; // Initialized in Init
+	const void* rgctx_data; // Initialized in Init
+	// used for fast parent checks
+	Il2CppClass** typeHierarchy; // Initialized in SetupTypeHierachy
+	// End initialization required fields
+
+	void* unity_user_data;
+
+	uint32_t initializationExceptionGCHandle;
+
+	uint32_t cctor_started;
+	uint32_t cctor_finished;
+	size_t cctor_thread;
+
+	// Remaining fields are always valid except where noted
+	void* genericContainerHandle;
+	uint32_t instance_size; // valid when size_inited is true
+	uint32_t actualSize;
+	uint32_t element_size;
+	int32_t native_size;
+	uint32_t static_fields_size;
+	uint32_t thread_static_fields_size;
+	int32_t thread_static_fields_offset;
+	uint32_t flags;
+	uint32_t token;
+
+	uint16_t method_count; // lazily calculated for arrays, i.e. when rank > 0
+	uint16_t property_count;
+	uint16_t field_count;
+	uint16_t event_count;
+	uint16_t nested_type_count;
+	uint16_t vtable_count; // lazily calculated for arrays, i.e. when rank > 0
+	uint16_t interfaces_count;
+	uint16_t interface_offsets_count; // lazily calculated for arrays, i.e. when rank > 0
+
+	uint8_t typeHierarchyDepth; // Initialized in SetupTypeHierachy
+	uint8_t genericRecursionDepth;
+	uint8_t rank;
+	uint8_t minimumAlignment; // Alignment of this type
+	uint8_t naturalAligment; // Alignment of this type without accounting for packing
+	uint8_t packingSize;
+
+	// this is critical for performance of Class::InitFromCodegen. Equals to initialized && !has_initialization_error at all times.
+	// Use Class::UpdateInitializedAndNoError to update
+	uint8_t initialized_and_no_error : 1;
+
+	uint8_t valuetype : 1;
+	uint8_t initialized : 1;
+	uint8_t enumtype : 1;
+	uint8_t is_generic : 1;
+	uint8_t has_references : 1; // valid when size_inited is true
+	uint8_t init_pending : 1;
+	uint8_t size_init_pending : 1;
+	uint8_t size_inited : 1;
+	uint8_t has_finalize : 1;
+	uint8_t has_cctor : 1;
+	uint8_t is_blittable : 1;
+	uint8_t is_import_or_windows_runtime : 1;
+	uint8_t is_vtable_initialized : 1;
+	uint8_t has_initialization_error : 1;
+	void* vtable[0];
+} Il2CppClass;
+
 struct Il2CppObject
 {
 	union
 	{
-		void* klass;
+		Il2CppClass* klass;
 		void* vtable;
 	};
 	void* monitor;
+};
+
+// not real Il2CppString class
+struct Il2CppString
+{
+	Il2CppObject object;
+	int32_t length;                             ///< Length of string *excluding* the trailing null (which is included in 'chars').
+	Il2CppChar start_char[0];
 };
 
 typedef struct Il2CppArraySize
@@ -212,6 +323,14 @@ typedef void* (*il2cpp_resolve_icall_t)(const char* name);
 typedef void* (*il2cpp_array_new_t)(void* klass, uintptr_t count);
 typedef void* (*il2cpp_thread_attach_t)(void* domain);
 typedef void (*il2cpp_thread_detach_t)(void* thread);
+typedef const Il2CppType* (*il2cpp_class_get_type_t)(void* klass);
+typedef uint32_t (*il2cpp_class_get_type_token_t)(void* klass);
+typedef FieldInfo* (*il2cpp_class_get_field_from_name_t)(void* klass, const char* name);
+typedef void (*il2cpp_field_get_value_t)(Il2CppObject* obj, FieldInfo* field, void* value);
+typedef void (*il2cpp_field_set_value_t)(Il2CppObject* obj, FieldInfo* field, void* value);
+typedef void (*il2cpp_field_static_get_value_t)(FieldInfo* field, void* value);
+typedef void (*il2cpp_field_static_set_value_t)(FieldInfo* field, void* value);
+typedef const Il2CppType* (*il2cpp_field_get_type_t)(FieldInfo* field);
 
 // function defines
 extern il2cpp_string_new_utf16_t il2cpp_string_new_utf16;
@@ -228,6 +347,14 @@ extern il2cpp_resolve_icall_t il2cpp_resolve_icall;
 extern il2cpp_array_new_t il2cpp_array_new;
 extern il2cpp_thread_attach_t il2cpp_thread_attach;
 extern il2cpp_thread_detach_t il2cpp_thread_detach;
+extern il2cpp_class_get_type_t il2cpp_class_get_type;
+extern il2cpp_class_get_type_token_t il2cpp_class_get_type_token;
+extern il2cpp_class_get_field_from_name_t il2cpp_class_get_field_from_name;
+extern il2cpp_field_get_value_t il2cpp_field_get_value;
+extern il2cpp_field_set_value_t il2cpp_field_set_value;
+extern il2cpp_field_static_get_value_t il2cpp_field_static_get_value;
+extern il2cpp_field_static_set_value_t il2cpp_field_static_set_value;
+extern il2cpp_field_get_type_t il2cpp_field_get_type;
 
 char* il2cpp_array_addr_with_size(void* arr, int32_t size, uintptr_t idx);
 
@@ -236,7 +363,7 @@ char* il2cpp_array_addr_with_size(void* arr, int32_t size, uintptr_t idx);
 
 #define il2cpp_array_setref(array, index, value)  \
     do {    \
-        void* *__p = (void* *) il2cpp_array_addr ((array), void*, (index)); \
+        void* *__p = (void* *) il2cpp_array_addr ((array), void*, (index));; \
          *__p = (value);    \
     } while (0)
 

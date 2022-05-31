@@ -5,7 +5,11 @@
     "maxFps": 0,
     "unlockSize": true,
     "uiScale": 1.0,
+    "uiAnimationScale": 1.0,
     "replaceFont": true,
+    "replaceToCustomFont": true,
+    "fontAssetBundlePath": "custom_font/GyeonggiTitle_Medium/font",
+    "fontAssetName": "GyeonggiTitle_Medium.fontsettings",
     "autoFullscreen": true,
     "dicts": [
         "localized_data/static.json",
@@ -13,6 +17,10 @@
         "localized_data/chara.json",
         "localized_data/race_comment.json",
         "localized_data/race_message.json",
-        "localized_data/hash_entries.json"
+        "localized_data/hash_entries.json",
+        "localized_data/kor_main.json",
+        "localized_data/kor_race.json",
+        "localized_data/kor_story.json",
+        "localized_data/kor_umastory.json"
     ]
 }

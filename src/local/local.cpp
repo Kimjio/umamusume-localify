@@ -15,7 +15,19 @@ namespace local
 		string result;
 		result.resize(str.length() * 4);
 
-		int len = WideCharToMultiByte(CP_UTF8, 0, str.data(), str.length(), result.data(), result.size(), nullptr, nullptr);
+		int len = WideCharToMultiByte(CP_UTF8, 0, str.data(), str.length(), result.data(), result.length(), nullptr, nullptr);
+
+		result.resize(len);
+
+		return result;
+	}
+
+	wstring u8_wide(string str)
+	{
+		wstring result;
+		result.resize(str.length() * 4);
+
+		int len = MultiByteToWideChar(CP_UTF8, 0, str.data(), str.length(), result.data(), result.length());
 
 		result.resize(len);
 

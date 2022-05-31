@@ -14,6 +14,14 @@ il2cpp_resolve_icall_t il2cpp_resolve_icall;
 il2cpp_array_new_t il2cpp_array_new;
 il2cpp_thread_attach_t il2cpp_thread_attach;
 il2cpp_thread_detach_t il2cpp_thread_detach;
+il2cpp_class_get_type_t il2cpp_class_get_type;
+il2cpp_class_get_type_token_t il2cpp_class_get_type_token; 
+il2cpp_class_get_field_from_name_t il2cpp_class_get_field_from_name;
+il2cpp_field_get_value_t il2cpp_field_get_value;
+il2cpp_field_set_value_t il2cpp_field_set_value;
+il2cpp_field_static_get_value_t il2cpp_field_static_get_value;
+il2cpp_field_static_set_value_t il2cpp_field_static_set_value;
+il2cpp_field_get_type_t il2cpp_field_get_type;
 
 char* il2cpp_array_addr_with_size(void* array, int32_t size, uintptr_t idx)
 {
@@ -42,6 +50,12 @@ namespace il2cpp_symbols
 		RESOLVE_IMPORT(il2cpp_array_new);
 		RESOLVE_IMPORT(il2cpp_thread_attach);
 		RESOLVE_IMPORT(il2cpp_thread_detach);
+		RESOLVE_IMPORT(il2cpp_class_get_type);
+		RESOLVE_IMPORT(il2cpp_class_get_type_token);
+		RESOLVE_IMPORT(il2cpp_class_get_field_from_name);
+		RESOLVE_IMPORT(il2cpp_field_get_value);
+		RESOLVE_IMPORT(il2cpp_field_set_value);
+		RESOLVE_IMPORT(il2cpp_field_get_type);
 
 		il2cpp_domain = il2cpp_domain_get();
 	}

@@ -60,11 +60,11 @@ workspace "umamusume-localify"
 
 	staticruntime "Off"
 
-	configuration "Release"
+	filter "configurations:Release"
 		optimize "Full"
 		buildoptions "/Os"
 
-	configuration "Debug"
+	filter "configurations:Debug"
 		optimize "Debug"
 
 	dependencies.projects()
@@ -81,6 +81,10 @@ workspace "umamusume-localify"
 			"./src/**.asm",
 			"./src/**.def",
 		}
+		
+		links {
+			"Shlwapi",
+		}
 
 		includedirs {
 			"./src",
@@ -89,13 +93,13 @@ workspace "umamusume-localify"
 
 		dependencies.imports()
 
-		configuration "Release"
+		filter "configurations:Release"
 			linkoptions "/SAFESEH:NO"
 			syslibdirs {
 				"./libs/Release",
 			}
 
-		configuration "Debug"
+		filter "configurations:Debug"
 			linkoptions "/SAFESEH:NO"
 			syslibdirs {
 				"./libs/Debug",
