@@ -6,7 +6,7 @@
     "unlockSize": true,
     "uiScale": 1.0,
     "uiAnimationScale": 1.0,
-    "replaceFont": true,
+    "replaceToBuiltinFont": true,
     "replaceToCustomFont": true,
     "fontAssetBundlePath": "custom_font/GyeonggiTitle_Medium/font",
     "fontAssetName": "GyeonggiTitle_Medium.fontsettings",
