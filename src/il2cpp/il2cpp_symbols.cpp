@@ -22,6 +22,7 @@ il2cpp_field_set_value_t il2cpp_field_set_value;
 il2cpp_field_static_get_value_t il2cpp_field_static_get_value;
 il2cpp_field_static_set_value_t il2cpp_field_static_set_value;
 il2cpp_field_get_type_t il2cpp_field_get_type;
+il2cpp_type_get_object_t il2cpp_type_get_object;
 
 char* il2cpp_array_addr_with_size(void* array, int32_t size, uintptr_t idx)
 {
@@ -56,11 +57,12 @@ namespace il2cpp_symbols
 		RESOLVE_IMPORT(il2cpp_field_get_value);
 		RESOLVE_IMPORT(il2cpp_field_set_value);
 		RESOLVE_IMPORT(il2cpp_field_get_type);
+		RESOLVE_IMPORT(il2cpp_type_get_object);
 
 		il2cpp_domain = il2cpp_domain_get();
 	}
 
-	void* get_class(const char* assemblyName, const char* namespaze, const char* klassName)
+	Il2CppClass* get_class(const char* assemblyName, const char* namespaze, const char* klassName)
 	{
 		auto assembly = il2cpp_domain_assembly_open(il2cpp_domain, assemblyName);
 		auto image = il2cpp_assembly_get_image(assembly);

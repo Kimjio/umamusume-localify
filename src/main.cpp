@@ -78,6 +78,9 @@ namespace
 			if (document.HasMember("replaceFont")) {
 				g_replace_to_builtin_font = document["replaceFont"].GetBool();
 			}
+			if (!document.HasMember("replaceFont") && document.HasMember("replaceToBuiltinFont")) {
+				g_replace_to_builtin_font = document["replaceToBuiltinFont"].GetBool();
+			}
 			if (document.HasMember("replaceToCustomFont")) {
 				g_replace_to_custom_font = document["replaceToCustomFont"].GetBool();
 			}
