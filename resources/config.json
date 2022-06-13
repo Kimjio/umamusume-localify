@@ -11,6 +11,10 @@
     "fontAssetBundlePath": "custom_font/GyeonggiTitle_Medium/font",
     "fontAssetName": "GyeonggiTitle_Medium.fontsettings",
     "autoFullscreen": true,
+    "graphicsQuality": 4,
+    "antiAliasing": -1,
+	"customTitleName": "우마무스메 프리티더비",
+	"replaceAssetsPath": "replace_assets",
     "dicts": [
         "localized_data/static.json",
         "localized_data/common.json",
