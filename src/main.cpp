@@ -19,6 +19,7 @@ std::string g_font_asset_name;
 bool g_auto_fullscreen = true;
 int g_graphics_quality = -1;
 int g_anti_aliasing = -1;
+std::string g_custom_title_name;
 
 namespace
 {

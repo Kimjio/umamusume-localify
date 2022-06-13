@@ -38,6 +38,10 @@ namespace
 			MH_DisableHook(LoadLibraryW);
 			MH_RemoveHook(LoadLibraryW);
 
+			if (!g_custom_title_name.empty()) {
+				SetWindowText(GetActiveWindow(), g_custom_title_name.data());
+			}
+
 			// use original function beacuse we have unhooked that
 			return LoadLibraryW(path);
 		}

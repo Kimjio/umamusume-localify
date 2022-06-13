@@ -41,6 +41,7 @@ extern std::string g_font_asset_name;
 extern bool g_auto_fullscreen;
 extern int g_graphics_quality;
 extern int g_anti_aliasing;
+extern std::string g_custom_title_name;
 
 namespace {
 	// copy-pasted from https://stackoverflow.com/questions/3418231/replace-part-of-a-string-with-another-string
