@@ -20,6 +20,7 @@ bool g_auto_fullscreen = true;
 int g_graphics_quality = -1;
 int g_anti_aliasing = -1;
 std::string g_custom_title_name;
+std::unordered_map<std::string, ReplaceAsset> g_replace_assets;
 
 namespace
 {
@@ -110,18 +111,40 @@ namespace
 				std::vector<int> options = { 0, 2, 4, 8, -1 };
 				g_anti_aliasing = std::find(options.begin(), options.end(), g_anti_aliasing) - options.begin();
 			}
+			if (document.HasMember("customTitleName")) {
+				g_custom_title_name = document["customTitleName"].GetString();
+			}
+
+			if (document.HasMember("replaceAssetsPath")) {
+				auto replaceAssetsPath = local::u8_wide(document["replaceAssetsPath"].GetString());
+				if (PathIsRelativeW(replaceAssetsPath.data()))
+				{
+					replaceAssetsPath.insert(0, ((std::wstring)std::filesystem::current_path().native()).append(L"/"));
+				}
+				if (std::filesystem::exists(replaceAssetsPath) && std::filesystem::is_directory(replaceAssetsPath))
+				{
+					for (auto &file : std::filesystem::directory_iterator(replaceAssetsPath))
+					{
+						if (file.is_regular_file())
+						{
+							g_replace_assets.emplace(file.path().filename().string(), ReplaceAsset{ file.path().string(), nullptr });
+						}
+					}
+				}
+			}
 
 			// Looks like not working for now
 			// g_aspect_ratio = document["customAspectRatio"].GetFloat();
+			if (document.HasMember("dicts")) {
+				auto& dicts_arr = document["dicts"];
+				auto len = dicts_arr.Size();
 
-			auto& dicts_arr = document["dicts"];
-			auto len = dicts_arr.Size();
+				for (size_t i = 0; i < len; ++i)
+				{
+					auto dict = dicts_arr[i].GetString();
 
-			for (size_t i = 0; i < len; ++i)
-			{
-				auto dict = dicts_arr[i].GetString();
-
-				dicts.push_back(dict);
+					dicts.push_back(dict);
+				}
 			}
 		}
 

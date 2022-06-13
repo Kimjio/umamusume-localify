@@ -51,9 +51,12 @@ namespace
 
 	Il2CppObject* assets = nullptr;
 
+	Il2CppObject* (*load_from_file)(Il2CppString* path);
+
 	Il2CppObject* (*load_assets)(Il2CppObject* _this, Il2CppString* name, Il2CppObject* runtimeType);
 
 	Il2CppString* (*uobject_get_name)(Il2CppObject* uObject);
+
 
 	void PrintStackTrace()
 	{
@@ -702,6 +705,52 @@ namespace
 	{
 		reinterpret_cast<decltype(apply_graphics_quality_hook)*>(apply_graphics_quality_orig)(thisObj, g_graphics_quality, true);
 	}
+
+	void* load_one_orig = nullptr;
+	Boolean load_one_hook(Il2CppObject* _this, Il2CppObject* handle, Il2CppObject* request)
+	{
+		FieldInfo* hNameField = il2cpp_class_get_field_from_name(request->klass, "hname");
+		Il2CppString* hName = nullptr;
+		il2cpp_field_get_value(request, hNameField, &hName);
+		auto hNameStr = local::wide_u8(hName->start_char);
+
+		if (g_replace_assets.find(hNameStr) != g_replace_assets.end())
+		{
+			auto& replaceAsset = g_replace_assets.at(hNameStr);
+			auto set_assetBundle = reinterpret_cast<void (*)(
+				Il2CppObject * thisObj, Il2CppObject * assetBundle)>(il2cpp_symbols::get_method_pointer(
+					"_Cyan.dll", "Cyan.Loader", "AssetHandle", "set_assetBundle",
+					1));
+
+			auto get_IsLoaded = reinterpret_cast<Boolean(*)(
+				Il2CppObject * thisObj)>(il2cpp_symbols::get_method_pointer(
+					"_Cyan.dll", "Cyan.Loader", "AssetHandle", "get_IsLoaded",
+					0));
+
+			if (!replaceAsset.asset)
+			{
+				replaceAsset.asset = load_from_file(il2cpp_string_new(replaceAsset.path.data()));
+			}
+			set_assetBundle(handle, replaceAsset.asset);
+			return get_IsLoaded(handle);
+
+		}
+		return reinterpret_cast<decltype(load_one_hook)*>(load_one_orig)(_this, handle, request);
+	}
+
+	void* assetbundle_unload_orig = nullptr;
+	void assetbundle_unload_hook(Il2CppObject* _this, Boolean unloadAllLoadedObjects)
+	{
+		for (auto& pair : g_replace_assets)
+		{
+			if (pair.second.asset == _this)
+			{
+				pair.second.asset = nullptr;
+			}
+		}
+		reinterpret_cast<decltype(assetbundle_unload_hook)*>(assetbundle_unload_orig)(_this, unloadAllLoadedObjects);
+	}
+
 	void* set_resolution_orig;
 	void set_resolution_hook(int width, int height, bool fullscreen)
 	{
@@ -1051,7 +1100,6 @@ namespace
 
 		auto wait_resize_ui_addr = reinterpret_cast<void (*)(Il2CppObject * _this, bool isPortrait, bool isShowOrientationGuide)>(il2cpp_symbols::get_method_pointer("umamusume.dll", "Gallop", "UIManager", "WaitResizeUI", 2));
 
-		auto load_from_file = reinterpret_cast<Il2CppObject * (*)(Il2CppString * path)>(il2cpp_symbols::get_method_pointer("UnityEngine.AssetBundleModule.dll", "UnityEngine", "AssetBundle", "LoadFromFile", 1));
 		auto set_anti_aliasing_addr = reinterpret_cast<void (*)(
 			int)>(il2cpp_symbols::get_method_pointer("UnityEngine.CoreModule.dll", "UnityEngine",
 				"QualitySettings", "set_antiAliasing", 1));
@@ -1061,6 +1109,14 @@ namespace
 				"umamusume.dll",
 				"Gallop",
 				"GraphicSettings", "ApplyGraphicsQuality", 2));
+
+		load_from_file = reinterpret_cast<Il2CppObject * (*)(Il2CppString * path)>(il2cpp_symbols::get_method_pointer(
+			"UnityEngine.AssetBundleModule.dll", "UnityEngine", "AssetBundle",
+			"LoadFromFile", 1));
+
+		auto assetbundle_unload_addr = reinterpret_cast<Il2CppObject * (*)(Il2CppString * path)>(il2cpp_symbols::get_method_pointer("UnityEngine.AssetBundleModule.dll", "UnityEngine", "AssetBundle", "Unload", 1));
+
+		auto load_one_addr = reinterpret_cast<Boolean(*)(Il2CppObject * _this, Il2CppObject * handle, Il2CppObject * request)>(il2cpp_symbols::get_method_pointer("_Cyan.dll", "Cyan.Loader", "AssetLoader", "LoadOne", 2));
 
 		auto load_scene_internal_addr = il2cpp_resolve_icall("UnityEngine.SceneManagement.SceneManager::LoadSceneAsyncNameIndexInternal_Injected(System.String,System.Int32,UnityEngine.SceneManagement.LoadSceneParameters&,System.bool)");
 #pragma endregion
@@ -1089,6 +1145,10 @@ namespace
 			cout << "Asset loaded: " << assets << "\n";
 		}
 #pragma endregion
+
+		ADD_HOOK(assetbundle_unload, "UnityEngine.AssetBundle::Unload at %p\n");
+
+		ADD_HOOK(load_one, "Cyan.Loader.AssetLoader::LoadOne at %p\n");
 
 		ADD_HOOK(get_preferred_width, "UnityEngine.TextGenerator::GetPreferredWidth at %p\n");
 

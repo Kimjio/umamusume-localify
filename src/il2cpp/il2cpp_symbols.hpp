@@ -8,6 +8,10 @@ typedef char16_t Il2CppChar;
 typedef uint16_t Il2CppChar;
 #endif
 
+struct Boolean {
+	bool m_value;
+};
+
 // UnityEngine.Color
 struct Color_t
 {

@@ -26,6 +26,11 @@
 #include "local/local.hpp"
 #include "logger/logger.hpp"
 
+struct ReplaceAsset {
+	std::string path;
+	Il2CppObject* asset;
+};
+
 extern bool g_dump_entries;
 extern bool g_enable_logger;
 extern bool g_enable_console;
@@ -42,6 +47,7 @@ extern bool g_auto_fullscreen;
 extern int g_graphics_quality;
 extern int g_anti_aliasing;
 extern std::string g_custom_title_name;
+extern std::unordered_map<std::string, ReplaceAsset> g_replace_assets;
 
 namespace {
 	// copy-pasted from https://stackoverflow.com/questions/3418231/replace-part-of-a-string-with-another-string
