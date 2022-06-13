@@ -17,6 +17,8 @@ bool g_replace_to_custom_font = false;
 std::string g_font_assetbundle_path;
 std::string g_font_asset_name;
 bool g_auto_fullscreen = true;
+int g_graphics_quality = -1;
+int g_anti_aliasing = -1;
 
 namespace
 {
@@ -92,6 +94,20 @@ namespace
 			}
 			if (document.HasMember("autoFullscreen")) {
 				g_auto_fullscreen = document["autoFullscreen"].GetBool();
+			}
+			if (document.HasMember("graphicsQuality")) {
+				g_graphics_quality = document["graphicsQuality"].GetInt();
+				if (g_graphics_quality < -1) {
+					g_graphics_quality = -1;
+				}
+				if (g_graphics_quality > 4) {
+					g_graphics_quality = 4;
+				}
+			}
+			if (document.HasMember("antiAliasing")) {
+				g_anti_aliasing = document["antiAliasing"].GetInt();
+				std::vector<int> options = { 0, 2, 4, 8, -1 };
+				g_anti_aliasing = std::find(options.begin(), options.end(), g_anti_aliasing) - options.begin();
 			}
 
 			// Looks like not working for now

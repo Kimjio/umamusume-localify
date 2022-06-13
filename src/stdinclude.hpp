@@ -2,6 +2,7 @@
 
 #include <Windows.h>
 #include <shlobj.h>
+#include <Shlwapi.h>
 
 #include <cinttypes>
 
@@ -38,6 +39,8 @@ extern bool g_replace_to_custom_font;
 extern std::string g_font_assetbundle_path;
 extern std::string g_font_asset_name;
 extern bool g_auto_fullscreen;
+extern int g_graphics_quality;
+extern int g_anti_aliasing;
 
 namespace {
 	// copy-pasted from https://stackoverflow.com/questions/3418231/replace-part-of-a-string-with-another-string

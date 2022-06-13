@@ -1,5 +1,4 @@
 #include <stdinclude.hpp>
-#include <Shlwapi.h>
 
 using namespace std;
 
@@ -688,6 +687,17 @@ namespace
 		return text;
 	}
 
+	void* set_anti_aliasing_orig = nullptr;
+	void set_anti_aliasing_hook(int level)
+	{
+		reinterpret_cast<decltype(set_anti_aliasing_hook)*>(set_anti_aliasing_orig)(g_anti_aliasing);
+	}
+
+	void* apply_graphics_quality_orig = nullptr;
+	void apply_graphics_quality_hook(Il2CppObject* thisObj, int quality, bool force)
+	{
+		reinterpret_cast<decltype(apply_graphics_quality_hook)*>(apply_graphics_quality_orig)(thisObj, g_graphics_quality, true);
+	}
 	void* set_resolution_orig;
 	void set_resolution_hook(int width, int height, bool fullscreen)
 	{
@@ -1038,6 +1048,15 @@ namespace
 		auto wait_resize_ui_addr = reinterpret_cast<void (*)(Il2CppObject * _this, bool isPortrait, bool isShowOrientationGuide)>(il2cpp_symbols::get_method_pointer("umamusume.dll", "Gallop", "UIManager", "WaitResizeUI", 2));
 
 		auto load_from_file = reinterpret_cast<Il2CppObject * (*)(Il2CppString * path)>(il2cpp_symbols::get_method_pointer("UnityEngine.AssetBundleModule.dll", "UnityEngine", "AssetBundle", "LoadFromFile", 1));
+		auto set_anti_aliasing_addr = reinterpret_cast<void (*)(
+			int)>(il2cpp_symbols::get_method_pointer("UnityEngine.CoreModule.dll", "UnityEngine",
+				"QualitySettings", "set_antiAliasing", 1));
+
+		auto apply_graphics_quality_addr = reinterpret_cast<void (*)(
+			Il2CppObject*, Il2CppObject*, bool)>(il2cpp_symbols::get_method_pointer(
+				"umamusume.dll",
+				"Gallop",
+				"GraphicSettings", "ApplyGraphicsQuality", 2));
 
 		auto load_scene_internal_addr = il2cpp_resolve_icall("UnityEngine.SceneManagement.SceneManager::LoadSceneAsyncNameIndexInternal_Injected(System.String,System.Int32,UnityEngine.SceneManagement.LoadSceneParameters&,System.bool)");
 #pragma endregion
@@ -1150,6 +1169,14 @@ namespace
 
 		if (g_dump_entries)
 			dump_all_entries();
+
+		if (g_graphics_quality != -1) {
+			ADD_HOOK(apply_graphics_quality, "Gallop.GraphicSettings.ApplyGraphicsQuality at %p\n");
+		}
+
+		if (g_anti_aliasing != -1) {
+			ADD_HOOK(set_anti_aliasing, "UnityEngine.QualitySettings.set_antiAliasing(int) at %p\n");
+		}
 	}
 }
 
