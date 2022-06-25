@@ -12,6 +12,10 @@ struct Boolean {
 	bool m_value;
 };
 
+struct Byte {
+	uint8_t m_value;
+};
+
 // UnityEngine.Color
 struct Color_t
 {

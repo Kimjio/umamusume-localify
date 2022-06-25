@@ -92,7 +92,11 @@ namespace
 	void* localizeextension_text_orig = nullptr;
 	Il2CppString* localizeextension_text_hook(int id)
 	{
-		return local::get_localized_string(id);
+		Il2CppString* localized = local::get_localized_string(id);
+		return localized ? localized
+			: reinterpret_cast<decltype(localizeextension_text_hook)*>(localizeextension_text_orig)(
+				id
+				);
 	}
 
 	void ReplaceTextMeshFont(Il2CppObject* textMesh, Il2CppObject* meshRenderer) {
@@ -719,7 +723,7 @@ namespace
 			auto& replaceAsset = g_replace_assets.at(hNameStr);
 			auto set_assetBundle = reinterpret_cast<void (*)(
 				Il2CppObject * thisObj, Il2CppObject * assetBundle)>(il2cpp_symbols::get_method_pointer(
-					"_Cyan.dll", "Cyan.Loader", "AssetHandle", "set_assetBundle",
+					"_Cyan.dll", "Cyan.Loader", "AssetHandle", "SetAssetBundle",
 					1));
 
 			auto get_IsLoaded = reinterpret_cast<Boolean(*)(
@@ -741,6 +745,7 @@ namespace
 	void* assetbundle_unload_orig = nullptr;
 	void assetbundle_unload_hook(Il2CppObject* _this, Boolean unloadAllLoadedObjects)
 	{
+		reinterpret_cast<decltype(assetbundle_unload_hook)*>(assetbundle_unload_orig)(_this, unloadAllLoadedObjects);
 		for (auto& pair : g_replace_assets)
 		{
 			if (pair.second.asset == _this)
@@ -748,7 +753,6 @@ namespace
 				pair.second.asset = nullptr;
 			}
 		}
-		reinterpret_cast<decltype(assetbundle_unload_hook)*>(assetbundle_unload_orig)(_this, unloadAllLoadedObjects);
 	}
 
 	void* set_resolution_orig;
