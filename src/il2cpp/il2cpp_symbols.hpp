@@ -30,6 +30,18 @@ public:
 	float a;
 };
 
+
+// UnityEngine.ScreenOrientation
+enum class ScreenOrientation {
+	Unknown,
+	Portrait,
+	PortraitUpsideDown,
+	LandscapeLeft,
+	LandscapeRight,
+	AutoRotation,
+	Landscape = 3
+};
+
 // UnityEngine.Vector2
 struct Vector2_t
 {

@@ -19,6 +19,9 @@ std::string g_font_asset_name;
 bool g_auto_fullscreen = true;
 int g_graphics_quality = -1;
 int g_anti_aliasing = -1;
+bool g_force_landscape = false;
+float g_force_landscape_ui_scale = 0.5;
+bool g_ui_loading_show_orientation_guide = true;
 std::string g_custom_title_name;
 std::unordered_map<std::string, ReplaceAsset> g_replace_assets;
 
@@ -103,7 +106,7 @@ namespace
 					g_graphics_quality = -1;
 				}
 				if (g_graphics_quality > 4) {
-					g_graphics_quality = 4;
+					g_graphics_quality = 3;
 				}
 			}
 			if (document.HasMember("antiAliasing")) {
@@ -111,6 +114,20 @@ namespace
 				std::vector<int> options = { 0, 2, 4, 8, -1 };
 				g_anti_aliasing = std::find(options.begin(), options.end(), g_anti_aliasing) - options.begin();
 			}
+
+			if (document.HasMember("forceLandscape")) {
+				g_force_landscape = document["forceLandscape"].GetBool();
+			}
+			if (document.HasMember("forceLandscapeUiScale")) {
+				g_force_landscape_ui_scale = document["forceLandscapeUiScale"].GetFloat();
+				if (g_force_landscape_ui_scale <= 0) {
+					g_force_landscape_ui_scale = 1;
+				}
+			}
+			if (document.HasMember("uiLoadingShowOrientationGuide")) {
+				g_ui_loading_show_orientation_guide = document["uiLoadingShowOrientationGuide"].GetBool();
+			}
+
 			if (document.HasMember("customTitleName")) {
 				g_custom_title_name = document["customTitleName"].GetString();
 			}

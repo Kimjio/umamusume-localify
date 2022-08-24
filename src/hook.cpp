@@ -57,6 +57,7 @@ namespace
 
 	Il2CppString* (*uobject_get_name)(Il2CppObject* uObject);
 
+	Il2CppString* (*get_unityVersion)();
 
 	void PrintStackTrace()
 	{
@@ -72,6 +73,11 @@ namespace
 	Il2CppObject* GetCustomFont() {
 		if (!assets) return nullptr;
 		return load_assets(assets, il2cpp_string_new(g_font_asset_name.data()), GetRuntimeType("UnityEngine.TextRenderingModule.dll", "UnityEngine", "Font"));
+	}
+
+	string GetUnityVersion() {
+		string version(local::wide_u8(get_unityVersion()->start_char));
+		return version;
 	}
 
 	void* populate_with_errors_orig = nullptr;
@@ -599,13 +605,19 @@ namespace
 	void (*set_scale_factor)(void*, float);
 
 	void* canvas_scaler_setres_orig;
-	void canvas_scaler_setres_hook(void* _this, Vector2_t res)
+	void canvas_scaler_setres_hook(Il2CppObject* _this, Vector2_t res)
 	{
+		if (g_force_landscape)
+		{
+			res.x /= (max(1.0f, res.x / 1920.f) * g_force_landscape_ui_scale);
+			res.y /= (max(1.0f, res.y / 1080.f) * g_force_landscape_ui_scale);
+		}
+
 		Resolution_t r;
 		get_resolution_stub(&r);
 
 		// set scale factor to make ui bigger on hi-res screen
-		set_scale_factor(_this, max(1.0f, r.width / 1920.f) * g_ui_scale);
+		set_scale_factor(_this, max(1.0f, r.width / 1920.f) * g_force_landscape ? g_force_landscape_ui_scale : g_ui_scale);
 
 		return reinterpret_cast<decltype(canvas_scaler_setres_hook)*>(canvas_scaler_setres_orig)(_this, res);
 	}
@@ -705,9 +717,9 @@ namespace
 	}
 
 	void* apply_graphics_quality_orig = nullptr;
-	void apply_graphics_quality_hook(Il2CppObject* thisObj, int quality, bool force)
+	void apply_graphics_quality_hook(Il2CppObject* _this, int quality, bool force)
 	{
-		reinterpret_cast<decltype(apply_graphics_quality_hook)*>(apply_graphics_quality_orig)(thisObj, g_graphics_quality, true);
+		reinterpret_cast<decltype(apply_graphics_quality_hook)*>(apply_graphics_quality_orig)(_this, g_graphics_quality, true);
 	}
 
 	void* load_one_orig = nullptr;
@@ -722,12 +734,12 @@ namespace
 		{
 			auto& replaceAsset = g_replace_assets.at(hNameStr);
 			auto set_assetBundle = reinterpret_cast<void (*)(
-				Il2CppObject * thisObj, Il2CppObject * assetBundle)>(il2cpp_symbols::get_method_pointer(
+				Il2CppObject * _this, Il2CppObject * assetBundle)>(il2cpp_symbols::get_method_pointer(
 					"_Cyan.dll", "Cyan.Loader", "AssetHandle", "SetAssetBundle",
 					1));
 
 			auto get_IsLoaded = reinterpret_cast<Boolean(*)(
-				Il2CppObject * thisObj)>(il2cpp_symbols::get_method_pointer(
+				Il2CppObject * _this)>(il2cpp_symbols::get_method_pointer(
 					"_Cyan.dll", "Cyan.Loader", "AssetHandle", "get_IsLoaded",
 					0));
 
@@ -755,6 +767,48 @@ namespace
 		}
 	}
 
+	void* ChangeScreenOrientation_orig = nullptr;
+
+	Il2CppObject* ChangeScreenOrientation_hook(ScreenOrientation targetOrientation, bool isForce) {
+		return reinterpret_cast<decltype(ChangeScreenOrientation_hook)*>(ChangeScreenOrientation_orig)(
+			g_force_landscape ? ScreenOrientation::Landscape : targetOrientation, isForce);
+	}
+
+	void* Screen_set_orientation_orig = nullptr;
+
+	void Screen_set_orientation_hook(ScreenOrientation orientation) {
+		if ((orientation == ScreenOrientation::Portrait ||
+			orientation == ScreenOrientation::PortraitUpsideDown) && g_force_landscape) {
+			orientation = ScreenOrientation::Landscape;
+		}
+		reinterpret_cast<decltype(Screen_set_orientation_hook)*>(Screen_set_orientation_orig)(
+			orientation);
+	}
+
+	void* DeviceOrientationGuide_Show_orig = nullptr;
+
+	void DeviceOrientationGuide_Show_hook(Il2CppObject* _this, bool isTargetOrientationPortrait,
+		int target) {
+		reinterpret_cast<decltype(DeviceOrientationGuide_Show_hook)*>(DeviceOrientationGuide_Show_orig)(
+			_this,
+			!g_force_landscape && isTargetOrientationPortrait, g_force_landscape ? 2 : target);
+	}
+
+	void* NowLoading_Show_orig = nullptr;
+
+	void NowLoading_Show_hook(Il2CppObject* _this, int type, Il2CppObject* onComplete,
+		float overrideDuration) {
+		// NowLoadingOrientation
+		if (type == 2 && (g_force_landscape || !g_ui_loading_show_orientation_guide)) {
+			// NowLoadingTips
+			type = 0;
+		}
+		reinterpret_cast<decltype(NowLoading_Show_hook)*>(NowLoading_Show_orig)(
+			_this,
+			type,
+			onComplete, overrideDuration);
+	}
+
 	void* set_resolution_orig;
 	void set_resolution_hook(int width, int height, bool fullscreen)
 	{
@@ -771,6 +825,21 @@ namespace
 		return reinterpret_cast<decltype(set_resolution_hook)*>(set_resolution_orig)(
 			need_fullscreen ? r.width : width, need_fullscreen ? r.height : height, need_fullscreen
 			);
+	}
+
+	void* BootSystem_Awake_orig = nullptr;
+
+	void BootSystem_Awake_hook(Il2CppObject* _this) {
+		auto enumerator1 = reinterpret_cast<Il2CppObject * (*)()>(il2cpp_symbols::get_method_pointer(
+			"umamusume.dll",
+			"Gallop",
+			"Screen", "ChangeScreenOrientationLandscapeAsync", -1))();
+		auto move_next1 = reinterpret_cast<void* (*)(
+			Il2CppObject * _this)>(il2cpp_class_get_method_from_name(enumerator1->klass,
+				"MoveNext",
+				0)->methodPointer);
+		move_next1(enumerator1);
+		reinterpret_cast<decltype(BootSystem_Awake_hook)*>(BootSystem_Awake_orig)(_this);
 	}
 
 	void adjust_size()
@@ -850,6 +919,12 @@ namespace
 			il2cpp_symbols::get_method_pointer(
 				"UnityEngine.CoreModule.dll", "UnityEngine",
 				"Object", "GetName", -1)
+			);
+
+		get_unityVersion = reinterpret_cast<Il2CppString * (*)()>(
+			il2cpp_symbols::get_method_pointer(
+				"UnityEngine.CoreModule.dll", "UnityEngine",
+				"Application", "get_unityVersion", -1)
 			);
 
 		auto populate_with_errors_addr = il2cpp_symbols::get_method_pointer(
@@ -1114,6 +1189,37 @@ namespace
 				"Gallop",
 				"GraphicSettings", "ApplyGraphicsQuality", 2));
 
+		auto ChangeScreenOrientation_addr = reinterpret_cast<void (*)(
+			ScreenOrientation, bool)>(il2cpp_symbols::get_method_pointer(
+				"umamusume.dll",
+				"Gallop",
+				"Screen", "ChangeScreenOrientation", 2));
+
+		auto Screen_set_orientation_addr = reinterpret_cast<void (*)(
+			ScreenOrientation)>(il2cpp_symbols::get_method_pointer(
+				"UnityEngine.CoreModule.dll",
+				"UnityEngine",
+				"Screen", "set_orientation", 1));
+
+		auto DeviceOrientationGuide_Show_addr = reinterpret_cast<void (*)(bool,
+			int)>(il2cpp_symbols::get_method_pointer(
+				"umamusume.dll",
+				"Gallop", "DeviceOrientationGuide", "Show", 2));
+
+		auto NowLoading_Show_addr = reinterpret_cast<void (*)(int, Il2CppObject*,
+			float)>(il2cpp_symbols::get_method_pointer(
+				"umamusume.dll",
+				"Gallop", "NowLoading", "Show", 3));
+
+		auto WaitDeviceOrientation_addr = reinterpret_cast<void (*)(
+			ScreenOrientation)>(il2cpp_symbols::get_method_pointer(
+				"umamusume.dll",
+				"Gallop", "Screen", "WaitDeviceOrientation", 1));
+
+		auto BootSystem_Awake_addr = reinterpret_cast<void (*)(Il2CppObject*)>(il2cpp_symbols::get_method_pointer(
+			"umamusume.dll",
+			"Gallop", "BootSystem", "Awake", 0));
+
 		load_from_file = reinterpret_cast<Il2CppObject * (*)(Il2CppString * path)>(il2cpp_symbols::get_method_pointer(
 			"UnityEngine.AssetBundleModule.dll", "UnityEngine", "AssetBundle",
 			"LoadFromFile", 1));
@@ -1149,6 +1255,8 @@ namespace
 			cout << "Asset loaded: " << assets << "\n";
 		}
 #pragma endregion
+
+		ADD_HOOK(NowLoading_Show, "Gallop.NowLoading::Show at %p\n");
 
 		ADD_HOOK(assetbundle_unload, "UnityEngine.AssetBundle::Unload at %p\n");
 
@@ -1203,6 +1311,22 @@ namespace
 
 		// ADD_HOOK(load_scene_internal, "SceneManager::LoadSceneAsyncNameIndexInternal at %p\n");
 
+		if (g_force_landscape) {
+			ADD_HOOK(BootSystem_Awake, "Gallop.BootSystem::Awake at %p\n");
+			ADD_HOOK(Screen_set_orientation, "Gallop.NowLoading::Show at %p\n");
+			ADD_HOOK(DeviceOrientationGuide_Show, "Gallop.NowLoading::Show at %p\n");
+			ADD_HOOK(ChangeScreenOrientation, "Gallop.NowLoading::Show at %p\n");
+			auto enumerator1 = reinterpret_cast<Il2CppObject * (*)()>(il2cpp_symbols::get_method_pointer(
+				"umamusume.dll",
+				"Gallop",
+				"Screen", "ChangeScreenOrientationLandscapeAsync", -1))();
+			auto move_next1 = reinterpret_cast<void* (*)(
+				Il2CppObject * _this)>(il2cpp_class_get_method_from_name(enumerator1->klass,
+					"MoveNext",
+					0)->methodPointer);
+			move_next1(enumerator1);
+		}
+
 		if (g_replace_to_builtin_font || g_replace_to_custom_font)
 		{
 			ADD_HOOK(on_populate, "Gallop.TextCommon::OnPopulateMesh at %p\n");
@@ -1225,7 +1349,10 @@ namespace
 			// remove fixed 1080p render resolution
 			ADD_HOOK(gallop_get_screenheight, "Gallop.Screen::get_Height at %p\n");
 			ADD_HOOK(gallop_get_screenwidth, "Gallop.Screen::get_Width at %p\n");
+		}
 
+		if (g_unlock_size || g_force_landscape)
+		{
 			ADD_HOOK(canvas_scaler_setres, "UnityEngine.UI.CanvasScaler::set_referenceResolution at %p\n");
 		}
 
