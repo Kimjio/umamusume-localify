@@ -141,7 +141,7 @@ namespace
 	void an_text_set_material_to_textmesh_hook(Il2CppObject* _this)
 	{
 		reinterpret_cast<decltype(an_text_set_material_to_textmesh_hook)*>(an_text_set_material_to_textmesh_orig)(_this);
-		if (!assets || !g_replace_to_custom_font) return;
+		if (!(assets && g_replace_to_custom_font)) return;
 
 		FieldInfo* mainField = il2cpp_class_get_field_from_name(_this->klass, "_mainTextMesh");
 		FieldInfo* mainRenderer = il2cpp_class_get_field_from_name(_this->klass, "_mainTextMeshRenderer");
@@ -1231,7 +1231,7 @@ namespace
 		auto load_scene_internal_addr = il2cpp_resolve_icall("UnityEngine.SceneManagement.SceneManager::LoadSceneAsyncNameIndexInternal_Injected(System.String,System.Int32,UnityEngine.SceneManagement.LoadSceneParameters&,System.bool)");
 #pragma endregion
 #pragma region LOAD_ASSETBUNDLE
-		if (!assets)
+		if (!assets && !g_font_assetbundle_path.empty() && g_replace_to_custom_font)
 		{
 			auto assetbundlePath = local::u8_wide(g_font_assetbundle_path);
 			if (PathIsRelativeW(assetbundlePath.data()))
