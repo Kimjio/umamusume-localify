@@ -39,7 +39,7 @@ namespace
 			MH_RemoveHook(LoadLibraryW);
 
 			if (!g_custom_title_name.empty()) {
-				SetWindowText(GetActiveWindow(), g_custom_title_name.data());
+				SetWindowText(GetActiveWindow(), local::wide_acp(local::u8_wide(g_custom_title_name)).data());
 			}
 
 			// use original function beacuse we have unhooked that
@@ -483,7 +483,49 @@ namespace
 	}
 
 	bool (*is_virt)() = nullptr;
-	int last_height = 0, last_width = 0;
+
+	Il2CppObject* (*display_get_main)();
+
+	int (*get_system_width)(Il2CppObject* thisObj);
+
+	int (*get_system_height)(Il2CppObject* thisObj);
+
+	Resolution_t* (*get_resolution)(Resolution_t* buffer);
+
+	void get_resolution_stub(Resolution_t* r)
+	{
+		*r = *get_resolution(r);
+
+		int width = min(r->height, r->width) * g_aspect_ratio;
+		if (r->width > r->height)
+			r->width = width;
+		else
+			r->height = width;
+	}
+
+	void* set_resolution_orig;
+	void set_resolution_hook(int width, int height, bool fullscreen)
+	{
+		Resolution_t r;
+		r = *get_resolution(&r);
+
+		if (g_force_landscape && !g_auto_fullscreen) {
+			return reinterpret_cast<decltype(set_resolution_hook)*>(set_resolution_orig)(
+				height, width, false
+				);
+		}
+
+		bool need_fullscreen = false;
+
+		if (is_virt() && r.width / static_cast<double>(r.height) == (9.0 / 16.0))
+			need_fullscreen = true;
+		else if (!is_virt() && r.width / static_cast<double>(r.height) == (16.0 / 9.0))
+			need_fullscreen = true;
+
+		return reinterpret_cast<decltype(set_resolution_hook)*>(set_resolution_orig)(
+			need_fullscreen ? r.width : width, need_fullscreen ? r.height : height, need_fullscreen
+			);
+	}
 
 	void* wndproc_orig = nullptr;
 	LRESULT wndproc_hook(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
@@ -493,42 +535,56 @@ namespace
 			RECT* rect = reinterpret_cast<RECT*>(lParam);
 
 			float ratio = is_virt() ? 1.f / g_aspect_ratio : g_aspect_ratio;
+
+			RECT windowRect;
+			GetWindowRect(hWnd, &windowRect);
+
+			RECT clientRect;
+			GetClientRect(hWnd, &clientRect);
+
+			int borderWidth = windowRect.right - windowRect.left - (clientRect.right - clientRect.left);
+			int borderHeight = windowRect.bottom - windowRect.top - (clientRect.bottom - clientRect.top);
+
 			float height = rect->bottom - rect->top;
 			float width = rect->right - rect->left;
 
 			float new_ratio = width / height;
 
-			if (new_ratio > ratio && height >= last_height || width < last_width)
-				height = width / ratio;
-			else if (new_ratio < ratio && width >= last_width || height < last_height)
-				width = height * ratio;
-
-			switch (wParam)
-			{
-			case WMSZ_TOP:
-			case WMSZ_TOPLEFT:
-			case WMSZ_TOPRIGHT:
-				rect->top = rect->bottom - height;
-				break;
-			default:
-				rect->bottom = rect->top + height;
-				break;
-			}
+			rect->right -= borderWidth;
+			rect->bottom -= borderHeight;
 
 			switch (wParam)
 			{
 			case WMSZ_LEFT:
-			case WMSZ_TOPLEFT:
-			case WMSZ_BOTTOMLEFT:
+			case WMSZ_LEFT + WMSZ_BOTTOM:
 				rect->left = rect->right - width;
+				rect->bottom = rect->top + roundf(width / ratio);
 				break;
-			default:
+			case WMSZ_LEFT + WMSZ_TOP:
+				rect->left = rect->right - width;
+				rect->top = rect->bottom - roundf(width / ratio);
+				break;
+			case WMSZ_RIGHT:
+			case WMSZ_RIGHT + WMSZ_BOTTOM:
 				rect->right = rect->left + width;
+				rect->bottom = rect->top + roundf(width / ratio);
+				break;
+			case WMSZ_RIGHT + WMSZ_TOP:
+				rect->right = rect->left + width;
+				rect->top = rect->bottom - roundf(width / ratio);
+				break;
+			case WMSZ_TOP:
+				rect->top = rect->bottom - height;
+				rect->right = rect->left + roundf(height * ratio);
+				break;
+			case WMSZ_BOTTOM:
+				rect->bottom = rect->top + height;
+				rect->right = rect->left + roundf(height * ratio);
 				break;
 			}
 
-			last_height = height;
-			last_width = width;
+			rect->right += borderWidth;
+			rect->bottom += borderHeight;
 
 			return TRUE;
 		}
@@ -565,19 +621,6 @@ namespace
 		size->z = g_aspect_ratio;
 
 		return size;
-	}
-
-	Resolution_t* (*get_resolution)(Resolution_t* buffer);
-
-	void get_resolution_stub(Resolution_t* r)
-	{
-		*r = *get_resolution(r);
-
-		int width = min(r->height, r->width) * g_aspect_ratio;
-		if (r->width > r->height)
-			r->width = width;
-		else
-			r->height = width;
 	}
 
 	void* gallop_get_screenheight_orig;
@@ -809,24 +852,6 @@ namespace
 			onComplete, overrideDuration);
 	}
 
-	void* set_resolution_orig;
-	void set_resolution_hook(int width, int height, bool fullscreen)
-	{
-		Resolution_t r;
-		r = *get_resolution(&r);
-
-		bool need_fullscreen = false;
-
-		if (is_virt() && r.width / static_cast<double>(r.height) == (9.0 / 16.0))
-			need_fullscreen = true;
-		else if (!is_virt() && r.width / static_cast<double>(r.height) == (16.0 / 9.0))
-			need_fullscreen = true;
-
-		return reinterpret_cast<decltype(set_resolution_hook)*>(set_resolution_orig)(
-			need_fullscreen ? r.width : width, need_fullscreen ? r.height : height, need_fullscreen
-			);
-	}
-
 	void* BootSystem_Awake_orig = nullptr;
 
 	void BootSystem_Awake_hook(Il2CppObject* _this) {
@@ -1041,6 +1066,22 @@ namespace
 			"StandaloneWindowResize", "getOptimizedWindowSizeHori", 2
 		);
 
+		display_get_main = reinterpret_cast<Il2CppObject * (*)()>(il2cpp_symbols::get_method_pointer(
+			"UnityEngine.CoreModule.dll",
+			"UnityEngine",
+			"Display", "get_main", -1));
+
+		get_system_width = reinterpret_cast<int (*)(Il2CppObject*)>(il2cpp_symbols::get_method_pointer(
+			"UnityEngine.CoreModule.dll",
+			"UnityEngine",
+			"Display", "get_systemWidth", 0));
+
+		get_system_height = reinterpret_cast<int (*)(
+			Il2CppObject*)>(il2cpp_symbols::get_method_pointer(
+				"UnityEngine.CoreModule.dll",
+				"UnityEngine",
+				"Display", "get_systemHeight", 0));
+
 		is_virt = reinterpret_cast<bool(*)()>(
 			il2cpp_symbols::get_method_pointer(
 				"umamusume.dll", "Gallop",
@@ -1246,12 +1287,7 @@ namespace
 			}
 		}
 
-		if (!assets)
-		{
-			cout << "Asset not loaded.\n";
-		}
-		else
-		{
+		if (assets) {
 			cout << "Asset loaded: " << assets << "\n";
 		}
 #pragma endregion
@@ -1356,7 +1392,7 @@ namespace
 			ADD_HOOK(canvas_scaler_setres, "UnityEngine.UI.CanvasScaler::set_referenceResolution at %p\n");
 		}
 
-		if (g_auto_fullscreen)
+		if (g_auto_fullscreen || g_force_landscape)
 		{
 			ADD_HOOK(set_resolution, "UnityEngine.Screen.SetResolution(int, int, bool) at %p\n");
 			adjust_size();

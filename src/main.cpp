@@ -144,7 +144,7 @@ namespace
 					{
 						if (file.is_regular_file())
 						{
-							g_replace_assets.emplace(file.path().filename().string(), ReplaceAsset{ file.path().string(), nullptr });
+							g_replace_assets.emplace(local::wide_u8(local::acp_wide(file.path().filename().string())), ReplaceAsset{ local::wide_u8(local::acp_wide(file.path().string())), nullptr});
 						}
 					}
 				}

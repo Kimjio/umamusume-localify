@@ -34,6 +34,30 @@ namespace local
 		return result;
 	}
 
+	string wide_acp(wstring str)
+	{
+		string result;
+		result.resize(str.length() * 4);
+
+		int len = WideCharToMultiByte(CP_ACP, 0, str.data(), str.length(), result.data(), result.length(), nullptr, nullptr);
+
+		result.resize(len);
+
+		return result;
+	}
+
+	wstring acp_wide(string str)
+	{
+		wstring result;
+		result.resize(str.length() * 4);
+
+		int len = MultiByteToWideChar(CP_ACP, 0, str.data(), str.length(), result.data(), result.length());
+
+		result.resize(len);
+
+		return result;
+	}
+
 	void reload_textdb(const vector<string>* dicts)
 	{
 		text_db.clear();
