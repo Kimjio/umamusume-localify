@@ -510,6 +510,7 @@ namespace
 	int last_hriz_window_width = 0, last_hriz_window_height = 0;
 
 	bool fullScreenFl = g_force_landscape && g_auto_fullscreen;
+	bool fullScreenFlOverride = false;
 
 	Resolution_t* (*get_resolution)(Resolution_t* buffer);
 
@@ -544,6 +545,7 @@ namespace
 		if (is_virt() && fullScreenFl)
 		{
 			fullScreenFl = false;
+			fullScreenFlOverride = false;
 			return reinterpret_cast<decltype(set_resolution_hook)*>(set_resolution_orig)(last_virt_window_width, last_virt_window_height, false);
 		}
 
@@ -551,7 +553,8 @@ namespace
 
 		if (reqVirt && (get_rendering_width(display) > get_rendering_height(display)))
 		{
-			cout << last_virt_window_width << " " << last_virt_window_height << "\n";
+			fullScreenFl = false;
+			fullScreenFlOverride = false;
 			if (last_virt_window_width > last_virt_window_height)
 			{
 				return reinterpret_cast<decltype(set_resolution_hook)*>(set_resolution_orig)(last_virt_window_height, last_virt_window_width, false);
@@ -574,6 +577,12 @@ namespace
 			{
 				last_virt_window_width = get_rendering_width(display);
 				last_virt_window_height = get_rendering_height(display);
+				if (need_fullscreen && (!last_hriz_window_width || !last_hriz_window_height)) {
+					float new_ratio = static_cast<float>(r.width) / r.height;
+
+					last_hriz_window_width = r.width - 400;
+					last_hriz_window_height = last_hriz_window_width / new_ratio;
+				}
 			}
 			else
 			{
@@ -582,16 +591,18 @@ namespace
 			}
 		}
 
-		fullScreenFl = need_fullscreen;
+		if (!fullScreenFlOverride) {
+			fullScreenFl = need_fullscreen;
+		}
 
-		if (!reqVirt && !need_fullscreen && last_hriz_window_width && last_hriz_window_height)
+		if (!reqVirt && !fullScreenFl && last_hriz_window_width && last_hriz_window_height)
 		{
 			width = last_hriz_window_width;
 			height = last_hriz_window_height;
 		}
 
 		return reinterpret_cast<decltype(set_resolution_hook)*>(set_resolution_orig)(
-			need_fullscreen ? r.width : width, need_fullscreen ? r.height : height, need_fullscreen
+			need_fullscreen ? r.width : width, need_fullscreen ? r.height : height, fullScreenFl
 			);
 	}
 
@@ -752,6 +763,10 @@ namespace
 				altEnterPressed = true;
 				if (!is_virt())
 				{
+					if (!fullScreenFlOverride)
+					{
+						fullScreenFlOverride = true;
+					}
 					fullScreenFl = !fullScreenFl;
 					Resolution_t r;
 					get_resolution_stub(&r);
