@@ -1,4 +1,5 @@
 #include <stdinclude.hpp>
+#include <set>
 
 using namespace std;
 
@@ -51,6 +52,8 @@ namespace
 
 	Il2CppObject* assets = nullptr;
 
+	Il2CppObject* uiManager = nullptr;
+
 	Il2CppObject* (*load_from_file)(Il2CppString* path);
 
 	Il2CppObject* (*load_assets)(Il2CppObject* _this, Il2CppString* name, Il2CppObject* runtimeType);
@@ -68,6 +71,13 @@ namespace
 	Il2CppObject* GetRuntimeType(const char* assemblyName, const char* namespaze, const char* klassName)
 	{
 		return il2cpp_type_get_object(il2cpp_class_get_type(il2cpp_symbols::get_class(assemblyName, namespaze, klassName)));
+	}
+
+	Boolean GetBoolean(bool value)
+	{
+		return reinterpret_cast<Boolean(*)(Il2CppString * value)>(il2cpp_symbols::get_method_pointer(
+			"mscorlib.dll", "System", "Boolean", "Parse", 1))(
+				il2cpp_string_new(value ? "true" : "false"));
 	}
 
 	Il2CppObject* GetCustomFont() {
@@ -475,11 +485,12 @@ namespace
 		reinterpret_cast<decltype(story_race_textasset_load_hook)*>(story_race_textasset_load_orig)(_this);
 	}
 
+	bool useDefaultFPS = false;
 
 	void* set_fps_orig = nullptr;
 	void set_fps_hook(int value)
 	{
-		return reinterpret_cast<decltype(set_fps_hook)*>(set_fps_orig)(g_max_fps);
+		return reinterpret_cast<decltype(set_fps_hook)*>(set_fps_orig)(useDefaultFPS ? value : g_max_fps);
 	}
 
 	bool (*is_virt)() = nullptr;
@@ -489,6 +500,16 @@ namespace
 	int (*get_system_width)(Il2CppObject* thisObj);
 
 	int (*get_system_height)(Il2CppObject* thisObj);
+
+	int (*get_rendering_width)(Il2CppObject* thisObj);
+
+	int (*get_rendering_height)(Il2CppObject* thisObj);
+
+	int last_display_width = 0, last_display_height = 0;
+	int last_virt_window_width = 0, last_virt_window_height = 0;
+	int last_hriz_window_width = 0, last_hriz_window_height = 0;
+
+	bool fullScreenFl = g_force_landscape && g_auto_fullscreen;
 
 	Resolution_t* (*get_resolution)(Resolution_t* buffer);
 
@@ -509,90 +530,69 @@ namespace
 		Resolution_t r;
 		r = *get_resolution(&r);
 
-		if (g_force_landscape && !g_auto_fullscreen) {
-			return reinterpret_cast<decltype(set_resolution_hook)*>(set_resolution_orig)(
-				height, width, false
-				);
+		if (g_force_landscape && !g_auto_fullscreen)
+		{
+			fullScreenFl = false;
+			if (width < height)
+			{
+				return reinterpret_cast<decltype(set_resolution_hook)*>(set_resolution_orig)(height, width, false);
+			}
+			return reinterpret_cast<decltype(set_resolution_hook)*>(set_resolution_orig)(width, height, false);
+		}
+		bool reqVirt = width < height;
+
+		if (is_virt() && fullScreenFl)
+		{
+			fullScreenFl = false;
+			return reinterpret_cast<decltype(set_resolution_hook)*>(set_resolution_orig)(last_virt_window_width, last_virt_window_height, false);
+		}
+
+		auto display = display_get_main();
+
+		if (reqVirt && (get_rendering_width(display) > get_rendering_height(display)))
+		{
+			cout << last_virt_window_width << " " << last_virt_window_height << "\n";
+			if (last_virt_window_width > last_virt_window_height)
+			{
+				return reinterpret_cast<decltype(set_resolution_hook)*>(set_resolution_orig)(last_virt_window_height, last_virt_window_width, false);
+			}
+			return reinterpret_cast<decltype(set_resolution_hook)*>(set_resolution_orig)(last_virt_window_width, last_virt_window_height, false);
 		}
 
 		bool need_fullscreen = false;
 
-		if (is_virt() && r.width / static_cast<double>(r.height) == (9.0 / 16.0))
-			need_fullscreen = true;
-		else if (!is_virt() && r.width / static_cast<double>(r.height) == (16.0 / 9.0))
-			need_fullscreen = true;
+		if (g_auto_fullscreen) {
+			if (is_virt() && r.width / static_cast<double>(r.height) == (9.0 / 16.0))
+				need_fullscreen = true;
+			else if (!is_virt() && r.width / static_cast<double>(r.height) == (16.0 / 9.0))
+				need_fullscreen = true;
+		}
+
+		if (!fullScreenFl && !g_force_landscape)
+		{
+			if (!(get_rendering_width(display) > get_rendering_height(display)))
+			{
+				last_virt_window_width = get_rendering_width(display);
+				last_virt_window_height = get_rendering_height(display);
+			}
+			else
+			{
+				last_hriz_window_width = get_rendering_width(display);
+				last_hriz_window_height = get_rendering_height(display);
+			}
+		}
+
+		fullScreenFl = need_fullscreen;
+
+		if (!reqVirt && !need_fullscreen && last_hriz_window_width && last_hriz_window_height)
+		{
+			width = last_hriz_window_width;
+			height = last_hriz_window_height;
+		}
 
 		return reinterpret_cast<decltype(set_resolution_hook)*>(set_resolution_orig)(
 			need_fullscreen ? r.width : width, need_fullscreen ? r.height : height, need_fullscreen
 			);
-	}
-
-	void* wndproc_orig = nullptr;
-	LRESULT wndproc_hook(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
-	{
-		if (uMsg == WM_SIZING)
-		{
-			RECT* rect = reinterpret_cast<RECT*>(lParam);
-
-			float ratio = is_virt() ? 1.f / g_aspect_ratio : g_aspect_ratio;
-
-			RECT windowRect;
-			GetWindowRect(hWnd, &windowRect);
-
-			RECT clientRect;
-			GetClientRect(hWnd, &clientRect);
-
-			int borderWidth = windowRect.right - windowRect.left - (clientRect.right - clientRect.left);
-			int borderHeight = windowRect.bottom - windowRect.top - (clientRect.bottom - clientRect.top);
-
-			float height = rect->bottom - rect->top;
-			float width = rect->right - rect->left;
-
-			float new_ratio = width / height;
-
-			rect->right -= borderWidth;
-			rect->bottom -= borderHeight;
-
-			switch (wParam)
-			{
-			case WMSZ_LEFT:
-			case WMSZ_LEFT + WMSZ_BOTTOM:
-				rect->left = rect->right - width;
-				rect->bottom = rect->top + roundf(width / ratio);
-				break;
-			case WMSZ_LEFT + WMSZ_TOP:
-				rect->left = rect->right - width;
-				rect->top = rect->bottom - roundf(width / ratio);
-				break;
-			case WMSZ_RIGHT:
-			case WMSZ_RIGHT + WMSZ_BOTTOM:
-				rect->right = rect->left + width;
-				rect->bottom = rect->top + roundf(width / ratio);
-				break;
-			case WMSZ_RIGHT + WMSZ_TOP:
-				rect->right = rect->left + width;
-				rect->top = rect->bottom - roundf(width / ratio);
-				break;
-			case WMSZ_TOP:
-				rect->top = rect->bottom - height;
-				rect->right = rect->left + roundf(height * ratio);
-				break;
-			case WMSZ_BOTTOM:
-				rect->bottom = rect->top + height;
-				rect->right = rect->left + roundf(height * ratio);
-				break;
-			}
-
-			rect->right += borderWidth;
-			rect->bottom += borderHeight;
-
-			return TRUE;
-		}
-		if (uMsg == WM_CLOSE) {
-			exit(0);
-			return TRUE;
-		}
-		return reinterpret_cast<decltype(wndproc_hook)*>(wndproc_orig)(hWnd, uMsg, wParam, lParam);
 	}
 
 	void* get_virt_size_orig = nullptr;
@@ -626,10 +626,7 @@ namespace
 	void* gallop_get_screenheight_orig;
 	int gallop_get_screenheight_hook()
 	{
-		Resolution_t res;
-		get_resolution_stub(&res);
-
-		int w = max(res.width, res.height), h = min(res.width, res.height);
+		int w = max(last_display_width, last_display_height), h = min(last_display_width, last_display_height);
 
 		return is_virt() ? w : h;
 	}
@@ -637,10 +634,7 @@ namespace
 	void* gallop_get_screenwidth_orig;
 	int gallop_get_screenwidth_hook()
 	{
-		Resolution_t res;
-		get_resolution_stub(&res);
-
-		int w = max(res.width, res.height), h = min(res.width, res.height);
+		int w = max(last_display_width, last_display_height), h = min(last_display_width, last_display_height);
 
 		return is_virt() ? h : w;
 	}
@@ -650,19 +644,235 @@ namespace
 	void* canvas_scaler_setres_orig;
 	void canvas_scaler_setres_hook(Il2CppObject* _this, Vector2_t res)
 	{
-		if (g_force_landscape)
-		{
-			res.x /= (max(1.0f, res.x / 1920.f) * g_force_landscape_ui_scale);
-			res.y /= (max(1.0f, res.y / 1080.f) * g_force_landscape_ui_scale);
-		}
-
 		Resolution_t r;
 		get_resolution_stub(&r);
+
+		if (g_force_landscape)
+		{
+			res.x /= (max(1.0f, r.width / 1920.f) * g_force_landscape_ui_scale);
+			res.y /= (max(1.0f, r.height / 1080.f) * g_force_landscape_ui_scale);
+		}
+		else
+		{
+			res.x = r.width;
+			res.y = r.height;
+		}
 
 		// set scale factor to make ui bigger on hi-res screen
 		set_scale_factor(_this, max(1.0f, r.width / 1920.f) * g_force_landscape ? g_force_landscape_ui_scale : g_ui_scale);
 
 		return reinterpret_cast<decltype(canvas_scaler_setres_hook)*>(canvas_scaler_setres_orig)(_this, res);
+	}
+
+	void* UIManager_ChangeResizeUIForPC_orig = nullptr;
+	void UIManager_ChangeResizeUIForPC_hook(Il2CppObject* _this, int width, int height) {
+		uiManager = _this;
+		reinterpret_cast<decltype(UIManager_ChangeResizeUIForPC_hook)*>(UIManager_ChangeResizeUIForPC_orig)(_this, width, height);
+	}
+
+	void* GetLimitSize_orig = nullptr;
+	Vector2_t GetLimitSize_hook() {
+		auto orig = reinterpret_cast<decltype(GetLimitSize_hook)*>(GetLimitSize_orig)();
+		Resolution_t r;
+		get_resolution_stub(&r);
+		orig.x = r.width;
+		orig.y = r.height;
+		return orig;
+	}
+
+	bool altEnterPressed = false;
+
+	void* wndproc_orig = nullptr;
+	LRESULT wndproc_hook(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
+	{
+		//if (uMsg == WM_MOVING)
+		//{
+		//	auto currentMonitor = MonitorFromWindow(hWnd, MONITOR_DEFAULTTONEAREST);
+		//	MONITORINFO monitor;
+		//	monitor.cbSize = sizeof(MONITORINFO);
+		//	GetMonitorInfoW(currentMonitor, &monitor);
+		//	float height = monitor.rcMonitor.bottom - monitor.rcMonitor.top;
+		//	float width = monitor.rcMonitor.right - monitor.rcMonitor.left;
+		//	if (last_display_width != width || last_display_height != height) {
+		//		cout << "monitor: " << " " << width << " " << height << "\n";
+		//		last_display_width = width;
+		//		last_display_height = height;
+		//		reinterpret_cast<void (*)(int)>(il2cpp_symbols::get_method_pointer("umamusume.dll", "Gallop", "Screen", "set_OriginalScreenWidth", 1))(width);
+		//		reinterpret_cast<void (*)(int)>(il2cpp_symbols::get_method_pointer("umamusume.dll", "Gallop", "Screen", "set_OriginalScreenHeight", 1))(height);
+		//		if (uiManager) {
+		//			// Gallop.UIManager:ChangeResizeUIForPC
+		//			reinterpret_cast<Boolean(*)()>(il2cpp_symbols::get_method_pointer("umamusume.dll", "Gallop", "Screen", "UpdateForPC", -1))();
+		//			reinterpret_cast<void (*)(Il2CppObject*, int, int)>(il2cpp_class_get_method_from_name(uiManager->klass, "ChangeResizeUIForPC", 2)->methodPointer)(uiManager, width, height);
+		//			auto scalerList = reinterpret_cast<Il2CppArraySize * (*)(Il2CppObject*)>(il2cpp_class_get_method_from_name(uiManager->klass, "GetCanvasScalerList", 0)->methodPointer)(uiManager);
+		//			cout << "scalerList: " << scalerList->max_length << "\n";
+		//			if (scalerList) {
+		//				for (int i = 0; i < scalerList->max_length; i++) {
+		//					auto item = scalerList->vector[i];
+		//					canvas_scaler_setres_hook(reinterpret_cast<Il2CppObject*>(item), Vector2_t{ width,height });
+		//					reinterpret_cast<void (*)(Il2CppObject*)>(il2cpp_symbols::get_method_pointer(
+		//						"UnityEngine.UI.dll", "UnityEngine.UI",
+		//						"CanvasScaler", "Handle", 0
+		//					))(reinterpret_cast<Il2CppObject*>(item));
+		//					auto methodPtr = il2cpp_symbols::get_method_pointer(
+		//						"umamusume.dll", "Gallop", "UIManager", "UpdateCanvasScaler", 1);
+		//					if (methodPtr && item) reinterpret_cast<void (*)(void*)>(methodPtr)(item);
+		//				}
+		//			}
+		//			else {
+		//				cout << "scalerList == nullptr";
+		//			}
+
+		//			/*auto enumerator1 = reinterpret_cast<Il2CppObject * (*)()>(il2cpp_symbols::get_method_pointer(
+		//				"umamusume.dll",
+		//				"Gallop",
+		//				"Screen", "ChangeScreenScaleForPC", -1))();
+		//			auto move_next1 = reinterpret_cast<void* (*)(
+		//				Il2CppObject * _this)>(il2cpp_class_get_method_from_name(enumerator1->klass,
+		//					"MoveNext",
+		//					0)->methodPointer);
+		//			move_next1(enumerator1);*/
+		//		}
+		//	}
+		//}
+		if (uMsg == WM_SYSCOMMAND)
+		{
+			if (wParam == SC_MAXIMIZE)
+			{
+				return TRUE;
+			}
+		}
+		if (uMsg == WM_SYSKEYDOWN)
+		{
+			bool altDown = (lParam & (static_cast<long long>(1) << 29)) != 0;
+			if (g_unlock_size &&
+				wParam == VK_RETURN &&
+				altDown &&
+				!altEnterPressed)
+			{
+				altEnterPressed = true;
+				if (!is_virt())
+				{
+					fullScreenFl = !fullScreenFl;
+					Resolution_t r;
+					get_resolution_stub(&r);
+					if (!fullScreenFl)
+					{
+						r.width = last_hriz_window_height;
+						r.height = last_hriz_window_width;
+						if (r.width < r.height)
+						{
+							r.width = last_hriz_window_width;
+							r.height = last_hriz_window_height;
+						}
+					}
+					else
+					{
+						RECT windowRect;
+						GetClientRect(hWnd, &windowRect);
+						last_hriz_window_width = windowRect.right - windowRect.left;
+						last_hriz_window_height = windowRect.bottom - windowRect.top;
+					}
+					reinterpret_cast<decltype(set_resolution_hook)*>(set_resolution_orig)(r.width, r.height, fullScreenFl);
+				}
+				return TRUE;
+
+			}
+			if (g_max_fps > -1 && wParam == 'F' && altDown)
+			{
+				useDefaultFPS = !useDefaultFPS;
+				set_fps_hook(30);
+				return TRUE;
+			}
+		}
+		if (g_unlock_size)
+		{
+
+			if (uMsg == WM_SYSKEYUP)
+			{
+				if (wParam == VK_RETURN && (lParam & (static_cast<long long>(1) << 29)) != 0)
+				{
+					altEnterPressed = false;
+					return TRUE;
+				}
+			}
+			if (uMsg == WM_SIZING)
+			{
+				RECT* rect = reinterpret_cast<RECT*>(lParam);
+
+				float ratio = is_virt() ? 1.f / g_aspect_ratio : g_aspect_ratio;
+
+				RECT windowRect;
+				GetWindowRect(hWnd, &windowRect);
+				int windowWidth = windowRect.right - windowRect.left,
+					windowHeight = windowRect.bottom - windowRect.top;
+
+				RECT clientRect;
+				GetClientRect(hWnd, &clientRect);
+				int clientWidth = (clientRect.right - clientRect.left),
+					clientHeight = (clientRect.bottom - clientRect.top);
+
+				float width = rect->right - rect->left;
+				float height = rect->bottom - rect->top;
+
+				int borderWidth = windowWidth - clientWidth;
+				int borderHeight = windowHeight - clientHeight;
+
+				rect->right -= borderWidth;
+				rect->bottom -= borderHeight;
+
+				switch (wParam)
+				{
+				case WMSZ_LEFT:
+				case WMSZ_LEFT + WMSZ_BOTTOM:
+					rect->left = rect->right - width;
+					rect->bottom = rect->top + roundf(width / ratio);
+					break;
+				case WMSZ_LEFT + WMSZ_TOP:
+					rect->left = rect->right - width;
+					rect->top = rect->bottom - roundf(width / ratio);
+					break;
+				case WMSZ_RIGHT:
+				case WMSZ_RIGHT + WMSZ_BOTTOM:
+					rect->right = rect->left + width;
+					rect->bottom = rect->top + roundf(width / ratio);
+					break;
+				case WMSZ_RIGHT + WMSZ_TOP:
+					rect->right = rect->left + width;
+					rect->top = rect->bottom - roundf(width / ratio);
+					break;
+				case WMSZ_TOP:
+					rect->top = rect->bottom - height;
+					rect->right = rect->left + roundf(height * ratio);
+					break;
+				case WMSZ_BOTTOM:
+					rect->bottom = rect->top + height;
+					rect->right = rect->left + roundf(height * ratio);
+					break;
+				}
+
+				if (width > height)
+				{
+					last_hriz_window_width = rect->right - rect->left;
+					last_hriz_window_height = rect->bottom - rect->top;
+				}
+				else
+				{
+					last_virt_window_width = rect->right - rect->left;
+					last_virt_window_height = rect->bottom - rect->top;
+				}
+
+				rect->right += borderWidth;
+				rect->bottom += borderHeight;
+
+				return TRUE;
+			}
+		}
+		if (uMsg == WM_CLOSE)
+		{
+			exit(0);
+			return TRUE;
+		}
+		return reinterpret_cast<decltype(wndproc_hook)*>(wndproc_orig)(hWnd, uMsg, wParam, lParam);
 	}
 
 	void (*text_assign_font)(void*);
@@ -685,10 +895,12 @@ namespace
 			text_set_size(_this, text_get_size(_this) - 4);
 			text_set_linespacing(_this, 1.05f);
 		}
-		if (g_replace_to_custom_font) {
+		if (g_replace_to_custom_font)
+		{
 			auto font = text_get_font(_this);
 			Il2CppString* name = uobject_get_name(font);
-			if (g_font_asset_name.find(local::wide_u8(name->start_char)) == string::npos) {
+			if (g_font_asset_name.find(local::wide_u8(name->start_char)) == string::npos)
+			{
 				text_set_font(_this, GetCustomFont());
 			}
 		}
@@ -697,7 +909,8 @@ namespace
 	}
 
 	void* textcommon_awake_orig = nullptr;
-	void textcommon_awake_hook(Il2CppObject* _this) {
+	void textcommon_awake_hook(Il2CppObject* _this)
+	{
 		if (g_replace_to_builtin_font)
 		{
 			text_assign_font(_this);
@@ -715,7 +928,8 @@ namespace
 	}
 
 	void* load_zekken_composite_resource_orig = nullptr;
-	void load_zekken_composite_resource_hook(Il2CppObject* _this) {
+	void load_zekken_composite_resource_hook(Il2CppObject* _this)
+	{
 		if (assets && g_replace_to_custom_font)
 		{
 			auto font = GetCustomFont();
@@ -731,14 +945,7 @@ namespace
 	void* wait_resize_ui_orig = nullptr;
 	Il2CppObject* wait_resize_ui_hook(Il2CppObject* _this, bool isPortrait, bool isShowOrientationGuide)
 	{
-		Il2CppObject* enumerator = reinterpret_cast<decltype(wait_resize_ui_hook)*>(wait_resize_ui_orig)(_this, isPortrait, isShowOrientationGuide);
-		auto move_next = reinterpret_cast<void* (*)(Il2CppObject * _this)>(il2cpp_class_get_method_from_name(enumerator->klass, "MoveNext", 0)->methodPointer);
-		/*if (_this != NULL)
-		{
-			*(int*)((uint64_t)_this + 0x4C) = 1;
-		}*/
-		move_next(_this);
-		return enumerator;
+		return reinterpret_cast<decltype(wait_resize_ui_hook)*>(wait_resize_ui_orig)(_this, g_force_landscape ? false : isPortrait, g_ui_loading_show_orientation_guide ? false : isShowOrientationGuide);
 	}
 
 	void* get_modified_string_orig = nullptr;
@@ -776,23 +983,24 @@ namespace
 		if (g_replace_assets.find(hNameStr) != g_replace_assets.end())
 		{
 			auto& replaceAsset = g_replace_assets.at(hNameStr);
-			auto set_assetBundle = reinterpret_cast<void (*)(
-				Il2CppObject * _this, Il2CppObject * assetBundle)>(il2cpp_symbols::get_method_pointer(
-					"_Cyan.dll", "Cyan.Loader", "AssetHandle", "SetAssetBundle",
-					1));
+			if (!replaceAsset.path.empty()) {
+				auto set_assetBundle = reinterpret_cast<void (*)(
+					Il2CppObject * _this, Il2CppObject * assetBundle)>(il2cpp_symbols::get_method_pointer(
+						"_Cyan.dll", "Cyan.Loader", "AssetHandle", "SetAssetBundle",
+						1));
 
-			auto get_IsLoaded = reinterpret_cast<Boolean(*)(
-				Il2CppObject * _this)>(il2cpp_symbols::get_method_pointer(
-					"_Cyan.dll", "Cyan.Loader", "AssetHandle", "get_IsLoaded",
-					0));
+				auto get_IsLoaded = reinterpret_cast<Boolean(*)(
+					Il2CppObject * _this)>(il2cpp_symbols::get_method_pointer(
+						"_Cyan.dll", "Cyan.Loader", "AssetHandle", "get_IsLoaded",
+						0));
 
-			if (!replaceAsset.asset)
-			{
-				replaceAsset.asset = load_from_file(il2cpp_string_new(replaceAsset.path.data()));
+				if (!replaceAsset.asset)
+				{
+					replaceAsset.asset = load_from_file(il2cpp_string_new(replaceAsset.path.data()));
+				}
+				set_assetBundle(handle, replaceAsset.asset);
+				return get_IsLoaded(handle);
 			}
-			set_assetBundle(handle, replaceAsset.asset);
-			return get_IsLoaded(handle);
-
 		}
 		return reinterpret_cast<decltype(load_one_hook)*>(load_one_orig)(_this, handle, request);
 	}
@@ -814,12 +1022,28 @@ namespace
 
 	Il2CppObject* ChangeScreenOrientation_hook(ScreenOrientation targetOrientation, bool isForce) {
 		return reinterpret_cast<decltype(ChangeScreenOrientation_hook)*>(ChangeScreenOrientation_orig)(
-			g_force_landscape ? ScreenOrientation::Landscape : targetOrientation, isForce);
+			g_force_landscape ? ScreenOrientation::Landscape : targetOrientation, g_force_landscape ? false : isForce);
+	}
+
+	void* ChangeScreenOrientationPortraitAsync_orig = nullptr;
+
+	Il2CppObject* ChangeScreenOrientationPortraitAsync_hook() {
+		return reinterpret_cast<Il2CppObject * (*)()>(il2cpp_symbols::get_method_pointer(
+			"umamusume.dll",
+			"Gallop",
+			"Screen", "ChangeScreenOrientationLandscapeAsync", -1))();
+	}
+
+	void* get_IsVertical_orig = nullptr;
+
+	Boolean get_IsVertical_hook() {
+		return GetBoolean(false);
 	}
 
 	void* Screen_set_orientation_orig = nullptr;
 
-	void Screen_set_orientation_hook(ScreenOrientation orientation) {
+	void Screen_set_orientation_hook(ScreenOrientation orientation)
+	{
 		if ((orientation == ScreenOrientation::Portrait ||
 			orientation == ScreenOrientation::PortraitUpsideDown) && g_force_landscape) {
 			orientation = ScreenOrientation::Landscape;
@@ -831,7 +1055,8 @@ namespace
 	void* DeviceOrientationGuide_Show_orig = nullptr;
 
 	void DeviceOrientationGuide_Show_hook(Il2CppObject* _this, bool isTargetOrientationPortrait,
-		int target) {
+		int target)
+	{
 		reinterpret_cast<decltype(DeviceOrientationGuide_Show_hook)*>(DeviceOrientationGuide_Show_orig)(
 			_this,
 			!g_force_landscape && isTargetOrientationPortrait, g_force_landscape ? 2 : target);
@@ -840,9 +1065,11 @@ namespace
 	void* NowLoading_Show_orig = nullptr;
 
 	void NowLoading_Show_hook(Il2CppObject* _this, int type, Il2CppObject* onComplete,
-		float overrideDuration) {
+		float overrideDuration)
+	{
 		// NowLoadingOrientation
-		if (type == 2 && (g_force_landscape || !g_ui_loading_show_orientation_guide)) {
+		if (type == 2 && (g_force_landscape || !g_ui_loading_show_orientation_guide))
+		{
 			// NowLoadingTips
 			type = 0;
 		}
@@ -852,18 +1079,28 @@ namespace
 			onComplete, overrideDuration);
 	}
 
+	void* WaitDeviceOrientation_orig = nullptr;
+
+	void WaitDeviceOrientation_hook(ScreenOrientation targetOrientation)
+	{
+		if ((targetOrientation == ScreenOrientation::Portrait ||
+			targetOrientation == ScreenOrientation::PortraitUpsideDown) &&
+			g_force_landscape)
+		{
+			targetOrientation = ScreenOrientation::Landscape;
+		}
+		reinterpret_cast<decltype(WaitDeviceOrientation_hook)*>(WaitDeviceOrientation_orig)(
+			targetOrientation);
+	}
+
 	void* BootSystem_Awake_orig = nullptr;
 
-	void BootSystem_Awake_hook(Il2CppObject* _this) {
-		auto enumerator1 = reinterpret_cast<Il2CppObject * (*)()>(il2cpp_symbols::get_method_pointer(
-			"umamusume.dll",
-			"Gallop",
-			"Screen", "ChangeScreenOrientationLandscapeAsync", -1))();
-		auto move_next1 = reinterpret_cast<void* (*)(
-			Il2CppObject * _this)>(il2cpp_class_get_method_from_name(enumerator1->klass,
-				"MoveNext",
-				0)->methodPointer);
-		move_next1(enumerator1);
+	void BootSystem_Awake_hook(Il2CppObject* _this)
+	{
+		Resolution_t r;
+		get_resolution_stub(&r);
+		last_display_width = r.width;
+		last_display_height = r.height;
 		reinterpret_cast<decltype(BootSystem_Awake_hook)*>(BootSystem_Awake_orig)(_this);
 	}
 
@@ -927,8 +1164,8 @@ namespace
 #define ADD_HOOK(_name_, _fmt_) \
 	auto _name_##_offset = reinterpret_cast<void*>(_name_##_addr); \
 	\
-	printf(_fmt_, _name_##_offset); \
-	dump_bytes(_name_##_offset); \
+	/*printf(_fmt_, _name_##_offset); */\
+	/*dump_bytes(_name_##_offset); */\
 	\
 	MH_CreateHook(_name_##_offset, _name_##_hook, &_name_##_orig); \
 	MH_EnableHook(_name_##_offset); 
@@ -1081,6 +1318,17 @@ namespace
 				"UnityEngine.CoreModule.dll",
 				"UnityEngine",
 				"Display", "get_systemHeight", 0));
+
+		get_rendering_width = reinterpret_cast<int (*)(Il2CppObject*)>(il2cpp_symbols::get_method_pointer(
+			"UnityEngine.CoreModule.dll",
+			"UnityEngine",
+			"Display", "get_renderingWidth", 0));
+
+		get_rendering_height = reinterpret_cast<int (*)(
+			Il2CppObject*)>(il2cpp_symbols::get_method_pointer(
+				"UnityEngine.CoreModule.dll",
+				"UnityEngine",
+				"Display", "get_renderingHeight", 0));
 
 		is_virt = reinterpret_cast<bool(*)()>(
 			il2cpp_symbols::get_method_pointer(
@@ -1261,6 +1509,18 @@ namespace
 			"umamusume.dll",
 			"Gallop", "BootSystem", "Awake", 0));
 
+		auto UIManager_ChangeResizeUIForPC_addr = il2cpp_symbols::get_method_pointer(
+			"umamusume.dll", "Gallop", "UIManager", "ChangeResizeUIForPC", 2);
+
+		auto GetLimitSize_addr = il2cpp_symbols::get_method_pointer(
+			"umamusume.dll", "Gallop", "StandaloneWindowResize", "GetLimitSize", -1);
+
+		auto ChangeScreenOrientationPortraitAsync_addr = reinterpret_cast<Il2CppObject * (*)()>(il2cpp_symbols::get_method_pointer(
+			"umamusume.dll", "Gallop", "Screen", "ChangeScreenOrientationPortraitAsync", -1));
+
+		auto get_IsVertical_addr = reinterpret_cast<Boolean(*)()>(il2cpp_symbols::get_method_pointer(
+			"umamusume.dll", "Gallop", "Screen", "get_IsVertical", -1));
+
 		load_from_file = reinterpret_cast<Il2CppObject * (*)(Il2CppString * path)>(il2cpp_symbols::get_method_pointer(
 			"UnityEngine.AssetBundleModule.dll", "UnityEngine", "AssetBundle",
 			"LoadFromFile", 1));
@@ -1291,6 +1551,10 @@ namespace
 			cout << "Asset loaded: " << assets << "\n";
 		}
 #pragma endregion
+
+		ADD_HOOK(GetLimitSize, "Gallop.StandaloneWindowResize::GetChangedSize at %p\n");
+
+		ADD_HOOK(UIManager_ChangeResizeUIForPC, "Gallop.UIManager::ChangeResizeUIForPC at %p\n");
 
 		ADD_HOOK(NowLoading_Show, "Gallop.NowLoading::Show at %p\n");
 
@@ -1347,20 +1611,33 @@ namespace
 
 		// ADD_HOOK(load_scene_internal, "SceneManager::LoadSceneAsyncNameIndexInternal at %p\n");
 
-		if (g_force_landscape) {
+		if (g_force_landscape || g_unlock_size)
+		{
 			ADD_HOOK(BootSystem_Awake, "Gallop.BootSystem::Awake at %p\n");
-			ADD_HOOK(Screen_set_orientation, "Gallop.NowLoading::Show at %p\n");
-			ADD_HOOK(DeviceOrientationGuide_Show, "Gallop.NowLoading::Show at %p\n");
-			ADD_HOOK(ChangeScreenOrientation, "Gallop.NowLoading::Show at %p\n");
-			auto enumerator1 = reinterpret_cast<Il2CppObject * (*)()>(il2cpp_symbols::get_method_pointer(
+		}
+
+		if (g_force_landscape) {
+			Resolution_t r;
+			get_resolution_stub(&r);
+			float new_ratio = static_cast<float>(r.width) / r.height;
+
+			last_hriz_window_width = r.width - 400;
+			last_hriz_window_height = last_hriz_window_width / new_ratio;
+			ADD_HOOK(WaitDeviceOrientation, "Gallop.Screen::WaitDeviceOrientation at %p");
+			ADD_HOOK(Screen_set_orientation, "Gallop.Screen::set_orientation at %p\n");
+			ADD_HOOK(DeviceOrientationGuide_Show, "DeviceOrientationGuide::Show at %p\n");
+			ADD_HOOK(ChangeScreenOrientation, "ChangeScreenOrientation at %p\n");
+			ADD_HOOK(ChangeScreenOrientationPortraitAsync, "ChangeScreenOrientationPortraitAsync at %p\n");
+			ADD_HOOK(get_IsVertical, "get_IsVertical at %p\n");
+			auto enumerator = reinterpret_cast<Il2CppObject * (*)()>(il2cpp_symbols::get_method_pointer(
 				"umamusume.dll",
 				"Gallop",
 				"Screen", "ChangeScreenOrientationLandscapeAsync", -1))();
-			auto move_next1 = reinterpret_cast<void* (*)(
-				Il2CppObject * _this)>(il2cpp_class_get_method_from_name(enumerator1->klass,
+			auto move_next = reinterpret_cast<void* (*)(
+				Il2CppObject * _this)>(il2cpp_class_get_method_from_name(enumerator->klass,
 					"MoveNext",
 					0)->methodPointer);
-			move_next1(enumerator1);
+			move_next(enumerator);
 		}
 
 		if (g_replace_to_builtin_font || g_replace_to_custom_font)
@@ -1380,11 +1657,20 @@ namespace
 			// break 1080p size limit
 			ADD_HOOK(get_virt_size, "Gallop.StandaloneWindowResize.getOptimizedWindowSizeVirt at %p \n");
 			ADD_HOOK(get_hori_size, "Gallop.StandaloneWindowResize.getOptimizedWindowSizeHori at %p \n");
-			ADD_HOOK(wndproc, "Gallop.StandaloneWindowResize.WndProc at %p \n");
 
 			// remove fixed 1080p render resolution
 			ADD_HOOK(gallop_get_screenheight, "Gallop.Screen::get_Height at %p\n");
 			ADD_HOOK(gallop_get_screenwidth, "Gallop.Screen::get_Width at %p\n");
+
+			Resolution_t r;
+			get_resolution_stub(&r);
+			last_display_width = r.width;
+			last_display_height = r.height;
+		}
+
+		if (g_max_fps > -1 || g_unlock_size)
+		{
+			ADD_HOOK(wndproc, "Gallop.StandaloneWindowResize.WndProc at %p \n");
 		}
 
 		if (g_unlock_size || g_force_landscape)
@@ -1392,10 +1678,13 @@ namespace
 			ADD_HOOK(canvas_scaler_setres, "UnityEngine.UI.CanvasScaler::set_referenceResolution at %p\n");
 		}
 
-		if (g_auto_fullscreen || g_force_landscape)
+		if (g_auto_fullscreen || g_force_landscape || g_unlock_size)
 		{
 			ADD_HOOK(set_resolution, "UnityEngine.Screen.SetResolution(int, int, bool) at %p\n");
-			adjust_size();
+			if (g_auto_fullscreen || g_force_landscape)
+			{
+				adjust_size();
+			}
 		}
 
 		if (g_dump_entries)
