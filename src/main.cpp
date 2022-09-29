@@ -5,6 +5,7 @@ extern void uninit_hook();
 extern void start_console();
 
 bool g_dump_entries = false;
+bool g_static_entries_use_hash = false;
 bool g_enable_logger = false;
 bool g_enable_console = false;
 int g_max_fps = -1;
@@ -69,6 +70,9 @@ namespace
 			}
 			if (document.HasMember("dumpStaticEntries")) {
 				g_dump_entries = document["dumpStaticEntries"].GetBool();
+			}
+			if (document.HasMember("staticEntriesUseHash")) {
+				g_static_entries_use_hash = document["staticEntriesUseHash"].GetBool();
 			}
 			if (document.HasMember("maxFps")) {
 				g_max_fps = document["maxFps"].GetInt();

@@ -108,11 +108,9 @@ namespace
 	void* localizeextension_text_orig = nullptr;
 	Il2CppString* localizeextension_text_hook(int id)
 	{
-		Il2CppString* localized = local::get_localized_string(id);
-		return localized ? localized
-			: reinterpret_cast<decltype(localizeextension_text_hook)*>(localizeextension_text_orig)(
-				id
-				);
+		auto orig_result = reinterpret_cast<decltype(localizeextension_text_hook)*>(localizeextension_text_orig)(id);
+		auto result = g_static_entries_use_hash ? local::get_localized_string(orig_result) : local::get_localized_string(id);
+		return result ? result : orig_result;
 	}
 
 	void ReplaceTextMeshFont(Il2CppObject* textMesh, Il2CppObject* meshRenderer) {
@@ -142,7 +140,7 @@ namespace
 	Il2CppString* localize_get_hook(int id)
 	{
 		auto orig_result = reinterpret_cast<decltype(localize_get_hook)*>(localize_get_orig)(id);
-		auto result = local::get_localized_string(id);
+		auto result = g_static_entries_use_hash ? local::get_localized_string(orig_result) : local::get_localized_string(id);
 
 		return result ? result : orig_result;
 	}
@@ -1144,6 +1142,7 @@ namespace
 
 	void dump_all_entries()
 	{
+		vector<wstring> static_entries;
 		// 0 is None
 		for (int i = 1;; i++)
 		{
@@ -1151,7 +1150,14 @@ namespace
 
 			if (str && *str->start_char)
 			{
-				logger::write_entry(i, str->start_char);
+				if (g_static_entries_use_hash)
+				{
+					static_entries.push_back(str->start_char);
+				}
+				else
+				{
+					logger::write_entry(i, str->start_char);
+				}
 			}
 			else
 			{
@@ -1160,6 +1166,9 @@ namespace
 				if (!(nextStr && *nextStr->start_char))
 					break;
 			}
+		}
+		if (g_static_entries_use_hash) {
+			logger::write_static_dict(static_entries);
 		}
 	}
 
