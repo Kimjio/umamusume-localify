@@ -1,5 +1,6 @@
 #include <stdinclude.hpp>
 #include <set>
+#include <sstream>
 
 using namespace std;
 
@@ -59,6 +60,8 @@ namespace
 	Il2CppObject* (*load_assets)(Il2CppObject* _this, Il2CppString* name, Il2CppObject* runtimeType);
 
 	Il2CppString* (*uobject_get_name)(Il2CppObject* uObject);
+
+	bool (*uobject_IsNativeObjectAlive)(Il2CppObject* uObject);
 
 	Il2CppString* (*get_unityVersion)();
 
@@ -985,41 +988,29 @@ namespace
 		reinterpret_cast<decltype(apply_graphics_quality_hook)*>(apply_graphics_quality_orig)(_this, g_graphics_quality, true);
 	}
 
-	void* load_one_orig = nullptr;
-	Boolean load_one_hook(Il2CppObject* _this, Il2CppObject* handle, Il2CppObject* request)
-	{
-		FieldInfo* hNameField = il2cpp_class_get_field_from_name(request->klass, "hname");
-		Il2CppString* hName = nullptr;
-		il2cpp_field_get_value(request, hNameField, &hName);
-		auto hNameStr = local::wide_u8(hName->start_char);
+	void* assetbundle_LoadFromFile_orig = nullptr;
 
-		if (g_replace_assets.find(hNameStr) != g_replace_assets.end())
+	Il2CppObject* assetbundle_LoadFromFile_hook(Il2CppString* path) {
+		stringstream pathStream(local::wide_u8(path->start_char));
+		string segment;
+		vector<string> splited;
+		while (getline(pathStream, segment, '\\'))
 		{
-			auto& replaceAsset = g_replace_assets.at(hNameStr);
-			if (!replaceAsset.path.empty()) {
-				auto set_assetBundle = reinterpret_cast<void (*)(
-					Il2CppObject * _this, Il2CppObject * assetBundle)>(il2cpp_symbols::get_method_pointer(
-						"_Cyan.dll", "Cyan.Loader", "AssetHandle", "SetAssetBundle",
-						1));
-
-				auto get_IsLoaded = reinterpret_cast<Boolean(*)(
-					Il2CppObject * _this)>(il2cpp_symbols::get_method_pointer(
-						"_Cyan.dll", "Cyan.Loader", "AssetHandle", "get_IsLoaded",
-						0));
-
-				if (!replaceAsset.asset)
-				{
-					replaceAsset.asset = load_from_file(il2cpp_string_new(replaceAsset.path.data()));
-				}
-				set_assetBundle(handle, replaceAsset.asset);
-				return get_IsLoaded(handle);
-			}
+			splited.push_back(segment);
 		}
-		return reinterpret_cast<decltype(load_one_hook)*>(load_one_orig)(_this, handle, request);
+		if (g_replace_assets.find(splited[splited.size() - 1]) != g_replace_assets.end())
+		{
+			auto& replaceAsset = g_replace_assets.at(splited[splited.size() - 1]);
+			auto assets = reinterpret_cast<decltype(assetbundle_LoadFromFile_hook)*>(assetbundle_LoadFromFile_orig)(il2cpp_string_new(replaceAsset.path.data()));
+			replaceAsset.asset = assets;
+			return assets;
+		}
+		return reinterpret_cast<decltype(assetbundle_LoadFromFile_hook)*>(assetbundle_LoadFromFile_orig)(path);
 	}
 
+
 	void* assetbundle_unload_orig = nullptr;
-	void assetbundle_unload_hook(Il2CppObject* _this, Boolean unloadAllLoadedObjects)
+	void assetbundle_unload_hook(Il2CppObject* _this, bool unloadAllLoadedObjects)
 	{
 		reinterpret_cast<decltype(assetbundle_unload_hook)*>(assetbundle_unload_orig)(_this, unloadAllLoadedObjects);
 		for (auto& pair : g_replace_assets)
@@ -1117,6 +1108,30 @@ namespace
 		reinterpret_cast<decltype(BootSystem_Awake_hook)*>(BootSystem_Awake_orig)(_this);
 	}
 
+	void* MoviePlayerForUI_AdjustScreenSize_orig = nullptr;
+
+	void MoviePlayerForUI_AdjustScreenSize_hook(Il2CppObject* _this, Vector2_t dispRectWH, bool isPanScan) {
+		Resolution_t r;
+		get_resolution_stub(&r);
+		if (roundf(1920 / (max(1.0f, r.height / 1080.f) * g_force_landscape_ui_scale)) == dispRectWH.y) {
+			dispRectWH.y = r.width;
+		}
+		dispRectWH.x = r.height;
+		reinterpret_cast<decltype(MoviePlayerForUI_AdjustScreenSize_hook)*>(MoviePlayerForUI_AdjustScreenSize_orig)(_this, dispRectWH, isPanScan);
+	}
+
+	void* MoviePlayerForObj_AdjustScreenSize_orig = nullptr;
+
+	void MoviePlayerForObj_AdjustScreenSize_hook(Il2CppObject* _this, Vector2_t dispRectWH, bool isPanScan) {
+		Resolution_t r;
+		get_resolution_stub(&r);
+		if (roundf(1920 / (max(1.0f, r.height / 1080.f) * g_force_landscape_ui_scale)) == dispRectWH.y) {
+			dispRectWH.y = r.width;
+		}
+		dispRectWH.x = r.height;
+		reinterpret_cast<decltype(MoviePlayerForObj_AdjustScreenSize_hook)*>(MoviePlayerForObj_AdjustScreenSize_orig)(_this, dispRectWH, isPanScan);
+	}
+
 	void adjust_size()
 	{
 		thread([]() {
@@ -1188,8 +1203,8 @@ namespace
 #define ADD_HOOK(_name_, _fmt_) \
 	auto _name_##_offset = reinterpret_cast<void*>(_name_##_addr); \
 	\
-	/*printf(_fmt_, _name_##_offset); */\
-	/*dump_bytes(_name_##_offset); */\
+	printf(_fmt_, _name_##_offset); \
+	dump_bytes(_name_##_offset); \
 	\
 	MH_CreateHook(_name_##_offset, _name_##_hook, &_name_##_orig); \
 	MH_EnableHook(_name_##_offset); 
@@ -1205,6 +1220,12 @@ namespace
 			il2cpp_symbols::get_method_pointer(
 				"UnityEngine.CoreModule.dll", "UnityEngine",
 				"Object", "GetName", -1)
+			);
+
+		uobject_IsNativeObjectAlive = reinterpret_cast<bool (*)(Il2CppObject * uObject)>(
+			il2cpp_symbols::get_method_pointer(
+				"UnityEngine.CoreModule.dll", "UnityEngine",
+				"Object", "IsNativeObjectAlive", 1)
 			);
 
 		get_unityVersion = reinterpret_cast<Il2CppString * (*)()>(
@@ -1545,13 +1566,21 @@ namespace
 		auto get_IsVertical_addr = reinterpret_cast<Boolean(*)()>(il2cpp_symbols::get_method_pointer(
 			"umamusume.dll", "Gallop", "Screen", "get_IsVertical", -1));
 
+		auto MoviePlayerForUI_AdjustScreenSize_addr = reinterpret_cast<void(*)(Il2CppObject*, Vector2_t, bool)>(il2cpp_symbols::get_method_pointer(
+			"Cute.Cri.Assembly.dll", "Cute.Cri", "MoviePlayerForUI", "AdjustScreenSize", 2));
+
+		auto MoviePlayerForObj_AdjustScreenSize_addr = reinterpret_cast<void(*)(Il2CppObject*, Vector2_t, bool)>(il2cpp_symbols::get_method_pointer(
+			"Cute.Cri.Assembly.dll", "Cute.Cri", "MoviePlayerForObj", "AdjustScreenSize", 2));
+
 		load_from_file = reinterpret_cast<Il2CppObject * (*)(Il2CppString * path)>(il2cpp_symbols::get_method_pointer(
 			"UnityEngine.AssetBundleModule.dll", "UnityEngine", "AssetBundle",
 			"LoadFromFile", 1));
 
-		auto assetbundle_unload_addr = reinterpret_cast<Il2CppObject * (*)(Il2CppString * path)>(il2cpp_symbols::get_method_pointer("UnityEngine.AssetBundleModule.dll", "UnityEngine", "AssetBundle", "Unload", 1));
+		auto assetbundle_LoadFromFile_addr = reinterpret_cast<Il2CppObject * (*)(Il2CppString * path)>(il2cpp_symbols::get_method_pointer(
+			"UnityEngine.AssetBundleModule.dll", "UnityEngine", "AssetBundle",
+			"LoadFromFile", 1));
 
-		auto load_one_addr = reinterpret_cast<Boolean(*)(Il2CppObject * _this, Il2CppObject * handle, Il2CppObject * request)>(il2cpp_symbols::get_method_pointer("_Cyan.dll", "Cyan.Loader", "AssetLoader", "LoadOne", 2));
+		auto assetbundle_unload_addr = reinterpret_cast<Il2CppObject * (*)(Il2CppString * path)>(il2cpp_symbols::get_method_pointer("UnityEngine.AssetBundleModule.dll", "UnityEngine", "AssetBundle", "Unload", 1));
 
 		auto load_scene_internal_addr = il2cpp_resolve_icall("UnityEngine.SceneManagement.SceneManager::LoadSceneAsyncNameIndexInternal_Injected(System.String,System.Int32,UnityEngine.SceneManagement.LoadSceneParameters&,System.bool)");
 #pragma endregion
@@ -1582,9 +1611,9 @@ namespace
 
 		ADD_HOOK(NowLoading_Show, "Gallop.NowLoading::Show at %p\n");
 
-		ADD_HOOK(assetbundle_unload, "UnityEngine.AssetBundle::Unload at %p\n");
+		ADD_HOOK(assetbundle_LoadFromFile, "UnityEngine.AssetBundle::LoadFromFile at %p\n");
 
-		ADD_HOOK(load_one, "Cyan.Loader.AssetLoader::LoadOne at %p\n");
+		ADD_HOOK(assetbundle_unload, "UnityEngine.AssetBundle::Unload at %p\n");
 
 		ADD_HOOK(get_preferred_width, "UnityEngine.TextGenerator::GetPreferredWidth at %p\n");
 
@@ -1653,6 +1682,8 @@ namespace
 			ADD_HOOK(ChangeScreenOrientation, "ChangeScreenOrientation at %p\n");
 			ADD_HOOK(ChangeScreenOrientationPortraitAsync, "ChangeScreenOrientationPortraitAsync at %p\n");
 			ADD_HOOK(get_IsVertical, "get_IsVertical at %p\n");
+			ADD_HOOK(MoviePlayerForUI_AdjustScreenSize, "MoviePlayerForUI::AdjustScreenSize at %p\n");
+			ADD_HOOK(MoviePlayerForObj_AdjustScreenSize, "MoviePlayerForObj::AdjustScreenSize at %p\n");
 			auto enumerator = reinterpret_cast<Il2CppObject * (*)()>(il2cpp_symbols::get_method_pointer(
 				"umamusume.dll",
 				"Gallop",
