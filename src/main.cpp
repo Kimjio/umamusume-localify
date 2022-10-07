@@ -25,6 +25,7 @@ float g_force_landscape_ui_scale = 0.5;
 bool g_ui_loading_show_orientation_guide = true;
 std::string g_custom_title_name;
 std::unordered_map<std::string, ReplaceAsset> g_replace_assets;
+std::string g_replace_assetbundle_file_path;
 
 namespace
 {
@@ -152,6 +153,10 @@ namespace
 						}
 					}
 				}
+			}
+
+			if (document.HasMember("replaceAssetBundleFilePath")) {
+				g_replace_assetbundle_file_path = document["replaceAssetBundleFilePath"].GetString();
 			}
 
 			// Looks like not working for now

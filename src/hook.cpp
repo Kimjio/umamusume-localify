@@ -53,11 +53,17 @@ namespace
 
 	Il2CppObject* assets = nullptr;
 
+	Il2CppObject* replaceAssets = nullptr;
+
 	Il2CppObject* uiManager = nullptr;
+
+	vector<string> replaceAssetNames;
 
 	Il2CppObject* (*load_from_file)(Il2CppString* path);
 
 	Il2CppObject* (*load_assets)(Il2CppObject* _this, Il2CppString* name, Il2CppObject* runtimeType);
+
+	Il2CppArraySize* (*get_all_asset_names)(Il2CppObject* _this);
 
 	Il2CppString* (*uobject_get_name)(Il2CppObject* uObject);
 
@@ -989,8 +995,8 @@ namespace
 	}
 
 	void* assetbundle_LoadFromFile_orig = nullptr;
-
-	Il2CppObject* assetbundle_LoadFromFile_hook(Il2CppString* path) {
+	Il2CppObject* assetbundle_LoadFromFile_hook(Il2CppString* path)
+	{
 		stringstream pathStream(local::wide_u8(path->start_char));
 		string segment;
 		vector<string> splited;
@@ -1008,6 +1014,16 @@ namespace
 		return reinterpret_cast<decltype(assetbundle_LoadFromFile_hook)*>(assetbundle_LoadFromFile_orig)(path);
 	}
 
+	void* assetbundle_load_asset_orig = nullptr;
+	Il2CppObject* assetbundle_load_asset_hook(Il2CppObject* _this, Il2CppString* name, Il2CppType* type)
+	{
+		string u8Name = local::wide_u8(name->start_char);
+		if (find(replaceAssetNames.begin(), replaceAssetNames.end(), u8Name) != replaceAssetNames.end())
+		{
+			return reinterpret_cast<decltype(assetbundle_load_asset_hook)*>(assetbundle_load_asset_orig)(replaceAssets, name, type);
+		}
+		return reinterpret_cast<decltype(assetbundle_load_asset_hook)*>(assetbundle_load_asset_orig)(_this, name, type);
+	}
 
 	void* assetbundle_unload_orig = nullptr;
 	void assetbundle_unload_hook(Il2CppObject* _this, bool unloadAllLoadedObjects)
@@ -1214,6 +1230,12 @@ namespace
 			il2cpp_symbols::get_method_pointer(
 				"UnityEngine.AssetBundleModule.dll", "UnityEngine",
 				"AssetBundle", "LoadAsset", 2)
+			);
+
+		get_all_asset_names = reinterpret_cast<Il2CppArraySize * (*)(Il2CppObject * _this)>(
+			il2cpp_symbols::get_method_pointer(
+				"UnityEngine.AssetBundleModule.dll", "UnityEngine",
+				"AssetBundle", "GetAllAssetNames", 0)
 			);
 
 		uobject_get_name = reinterpret_cast<Il2CppString * (*)(Il2CppObject * uObject)>(
@@ -1580,6 +1602,12 @@ namespace
 			"UnityEngine.AssetBundleModule.dll", "UnityEngine", "AssetBundle",
 			"LoadFromFile", 1));
 
+		auto assetbundle_load_asset_addr = reinterpret_cast<Il2CppObject * (*)(Il2CppObject * _this, Il2CppString * name, Il2CppObject * runtimeType)>(
+			il2cpp_symbols::get_method_pointer(
+				"UnityEngine.AssetBundleModule.dll", "UnityEngine",
+				"AssetBundle", "LoadAsset", 2)
+			);
+
 		auto assetbundle_unload_addr = reinterpret_cast<Il2CppObject * (*)(Il2CppString * path)>(il2cpp_symbols::get_method_pointer("UnityEngine.AssetBundleModule.dll", "UnityEngine", "AssetBundle", "Unload", 1));
 
 		auto load_scene_internal_addr = il2cpp_resolve_icall("UnityEngine.SceneManagement.SceneManager::LoadSceneAsyncNameIndexInternal_Injected(System.String,System.Int32,UnityEngine.SceneManagement.LoadSceneParameters&,System.bool)");
@@ -1600,8 +1628,35 @@ namespace
 			}
 		}
 
-		if (assets) {
+		if (assets)
+		{
 			cout << "Asset loaded: " << assets << "\n";
+		}
+
+		if (!replaceAssets && !g_replace_assetbundle_file_path.empty())
+		{
+			auto assetbundlePath = local::u8_wide(g_replace_assetbundle_file_path);
+			if (PathIsRelativeW(assetbundlePath.data()))
+			{
+				assetbundlePath.insert(0, ((wstring)std::filesystem::current_path().native()).append(L"/"));
+			}
+			replaceAssets = load_from_file(il2cpp_string_new_utf16(assetbundlePath.data(), assetbundlePath.length()));
+
+			if (!replaceAssets && filesystem::exists(assetbundlePath))
+			{
+				cout << "Replacement AssetBundle founded but not loaded. Maybe Asset BuildTarget is not for Windows\n";
+			}
+		}
+
+		if (replaceAssets)
+		{
+			cout << "Replacement AssetBundle loaded: " << replaceAssets << "\n";
+			auto names = get_all_asset_names(replaceAssets);
+			for (int i = 0; i < names->max_length; i++)
+			{
+				auto u8Name = local::wide_u8(static_cast<Il2CppString*>(names->vector[i])->start_char);
+				replaceAssetNames.emplace_back(u8Name);
+			}
 		}
 #pragma endregion
 
@@ -1612,6 +1667,8 @@ namespace
 		ADD_HOOK(NowLoading_Show, "Gallop.NowLoading::Show at %p\n");
 
 		ADD_HOOK(assetbundle_LoadFromFile, "UnityEngine.AssetBundle::LoadFromFile at %p\n");
+
+		ADD_HOOK(assetbundle_load_asset, "UnityEngine.AssetBundle::LoadAsset at %p\n");
 
 		ADD_HOOK(assetbundle_unload, "UnityEngine.AssetBundle::Unload at %p\n");
 
