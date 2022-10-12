@@ -64,6 +64,29 @@ public:
 	float z;
 };
 
+// UnityEngine.Vector4
+struct Vector4_t
+{
+public:
+	// System.Single UnityEngine.Vector4::x
+	float x;
+	// System.Single UnityEngine.Vector4::y
+	float y;
+	// System.Single UnityEngine.Vector4::z
+	float z;
+	// System.Single UnityEngine.Vector4::w
+	float w;
+};
+
+struct Rect_t
+{
+public:
+	short x;
+	short y;
+	short width;
+	short height;
+};
+
 struct Resolution_t
 {
 public:
@@ -171,35 +194,6 @@ typedef struct Il2CppType
 	unsigned int pinned : 1;
 } Il2CppType;
 
-struct ParameterInfo
-{
-	const char* name;
-	int32_t position;
-	uint32_t token;
-	const Il2CppType* parameter_type;
-};
-
-struct MethodInfo
-{
-	uintptr_t methodPointer;
-	uintptr_t invoker_method;
-	const char* name;
-	uintptr_t klass;
-	uintptr_t return_type;
-	const ParameterInfo* parameters;
-	uintptr_t methodDefinition;
-	uintptr_t genericContainer;
-	uint32_t token;
-	uint16_t flags;
-	uint16_t iflags;
-	uint16_t slot;
-	uint8_t parameters_count;
-	uint8_t is_generic : 1;
-	uint8_t is_inflated : 1;
-	uint8_t wrapper_type : 1;
-	uint8_t is_marshaled_from_native : 1;
-};
-
 typedef struct FieldInfo
 {
 	const char* name;
@@ -208,6 +202,8 @@ typedef struct FieldInfo
 	int32_t offset; // If offset is -1, then it's thread static
 	uint32_t token;
 } FieldInfo;
+
+struct MethodInfo;
 
 typedef struct Il2CppClass
 {
@@ -299,6 +295,54 @@ typedef struct Il2CppClass
 	void* vtable[0];
 } Il2CppClass;
 
+struct ParameterInfo
+{
+	const char* name;
+	int32_t position;
+	uint32_t token;
+	const Il2CppType* parameter_type;
+};
+
+typedef struct Il2CppGenericContainer
+{
+	/* index of the generic type definition or the generic method definition corresponding to this container */
+	int32_t ownerIndex; // either index into Il2CppClass metadata array or Il2CppMethodDefinition array
+	int32_t type_argc;
+	/* If true, we're a generic method, otherwise a generic type definition. */
+	int32_t is_method;
+	/* Our type parameters. */
+	int32_t genericParameterStart;
+} Il2CppGenericContainer;
+
+struct MethodInfo
+{
+	uintptr_t methodPointer;
+	uintptr_t invoker_method;
+	const char* name;
+	Il2CppClass* klass;
+	const Il2CppType* return_type;
+	const ParameterInfo* parameters;
+	union
+	{
+		uintptr_t rgctx_data;
+		uintptr_t methodDefinition;
+	};
+	union
+	{
+		uintptr_t genericMethod;
+		Il2CppGenericContainer* genericContainer;
+	};
+	uint32_t token;
+	uint16_t flags;
+	uint16_t iflags;
+	uint16_t slot;
+	uint8_t parameters_count;
+	uint8_t is_generic : 1;
+	uint8_t is_inflated : 1;
+	uint8_t wrapper_type : 1;
+	uint8_t is_marshaled_from_native : 1;
+};
+
 struct Il2CppObject
 {
 	union
@@ -323,10 +367,47 @@ typedef struct Il2CppArraySize
 	void* bounds;
 	uintptr_t max_length;
 	alignas(8)
-	void* vector[0];
+		void* vector[0];
 } Il2CppArraySize;
 
 static const size_t kIl2CppSizeOfArray = (offsetof(Il2CppArraySize, vector));
+
+struct CourseBaseObjectContext
+{
+	Il2CppObject* coursePrefab;
+	Il2CppObject* courseGrassFurPrefab;
+	Il2CppObject* monitorRenderTexture;
+	Il2CppArraySize* swapTextures;
+	Il2CppArraySize* swapSubTextures;
+	Il2CppObject* postFilmSetGroup;
+	Il2CppObject* grassParam;
+};
+
+struct RaceLoaderManagerCourceContext
+{
+	int courseId;
+	int timeEnum;
+	int seasonEnum;
+	int turfGoalGate;
+	int turfGoalFlower;
+	int dirtGoalGate;
+	int dirtGoalFlower;
+	int skydomeCourseId;
+	int skydomeSeasonEnum;
+	int skydomeWeatherEnum;
+	int skydomeTimeEnum;
+	int audienceEnum;
+	int audienceWeatherEnum;
+	int audienceSeasonEnum;
+	int treeWeaterEnum;
+	int treeTimeEnum;
+	int RotationCategoryEnum;
+	int lightProbeId;
+	Il2CppArraySize* materialTeturePairs;
+	Il2CppArraySize* materialSubTexturePairs;
+	bool halfStartGate;
+	int CourseStartGateBaseId;
+};
 
 // function types
 typedef Il2CppString* (*il2cpp_string_new_utf16_t)(const wchar_t* str, unsigned int len);
@@ -334,17 +415,19 @@ typedef Il2CppString* (*il2cpp_string_new_t)(const char* str);
 typedef void* (*il2cpp_domain_get_t)();
 typedef void* (*il2cpp_domain_assembly_open_t)(void* domain, const char* name);
 typedef void* (*il2cpp_assembly_get_image_t)(void* assembly);
-typedef Il2CppClass * (*il2cpp_class_from_name_t)(void* image, const char* namespaze, const char* name);
+typedef Il2CppClass* (*il2cpp_class_from_name_t)(void* image, const char* namespaze, const char* name);
 typedef MethodInfo* (*il2cpp_class_get_methods_t)(Il2CppClass* klass, void** iter);
 typedef MethodInfo* (*il2cpp_class_get_method_from_name_t)(Il2CppClass* klass, const char* name, int argsCount);
+typedef MethodInfo* (*il2cpp_method_get_from_reflection_t)(Il2CppObject* ref);
 typedef void* (*il2cpp_method_get_param_t)(const MethodInfo* method, uint32_t index);
 typedef Il2CppObject* (*il2cpp_object_new_t)(Il2CppClass* klass);
+typedef void (*il2cpp_add_internal_call_t)(const char* name, uintptr_t pointer);
 typedef void* (*il2cpp_resolve_icall_t)(const char* name);
 typedef void* (*il2cpp_array_new_t)(Il2CppClass* klass, uintptr_t count);
 typedef void* (*il2cpp_thread_attach_t)(void* domain);
 typedef void (*il2cpp_thread_detach_t)(void* thread);
 typedef const Il2CppType* (*il2cpp_class_get_type_t)(Il2CppClass* klass);
-typedef uint32_t (*il2cpp_class_get_type_token_t)(Il2CppClass* klass);
+typedef uint32_t(*il2cpp_class_get_type_token_t)(Il2CppClass* klass);
 typedef FieldInfo* (*il2cpp_class_get_field_from_name_t)(Il2CppClass* klass, const char* name);
 typedef void (*il2cpp_field_get_value_t)(Il2CppObject* obj, FieldInfo* field, void* value);
 typedef void (*il2cpp_field_set_value_t)(Il2CppObject* obj, FieldInfo* field, void* value);
@@ -362,8 +445,10 @@ extern il2cpp_assembly_get_image_t il2cpp_assembly_get_image;
 extern il2cpp_class_from_name_t il2cpp_class_from_name;
 extern il2cpp_class_get_methods_t il2cpp_class_get_methods;
 extern il2cpp_class_get_method_from_name_t il2cpp_class_get_method_from_name;
+extern il2cpp_method_get_from_reflection_t il2cpp_method_get_from_reflection;
 extern il2cpp_method_get_param_t il2cpp_method_get_param;
 extern il2cpp_object_new_t il2cpp_object_new;
+extern il2cpp_add_internal_call_t il2cpp_add_internal_call;
 extern il2cpp_resolve_icall_t il2cpp_resolve_icall;
 extern il2cpp_array_new_t il2cpp_array_new;
 extern il2cpp_thread_attach_t il2cpp_thread_attach;
@@ -393,13 +478,13 @@ namespace il2cpp_symbols
 {
 	void init(HMODULE game_module);
 	uintptr_t get_method_pointer(const char* assemblyName, const char* namespaze,
-								 const char* klassName, const char* name, int argsCount);
+		const char* klassName, const char* name, int argsCount);
 
 	Il2CppClass* get_class(const char* assemblyName, const char* namespaze, const char* klassName);
 
 	MethodInfo* get_method(const char* assemblyName, const char* namespaze,
-						   const char* klassName, const char* name, int argsCount);
+		const char* klassName, const char* name, int argsCount);
 
 	uintptr_t find_method(const char* assemblyName, const char* namespaze,
-						  const char* klassName, std::function<bool(const MethodInfo*)> predict);
+		const char* klassName, std::function<bool(const MethodInfo*)> predict);
 }
