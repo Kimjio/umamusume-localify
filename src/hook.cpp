@@ -1539,7 +1539,7 @@ namespace
 	void* NowLoading_Show_orig = nullptr;
 
 	void NowLoading_Show_hook(Il2CppObject* _this, int type, Il2CppObject* onComplete,
-		float overrideDuration)
+		Il2CppObject* overrideDuration, int easeType)
 	{
 		// NowLoadingOrientation
 		if (type == 2 && (g_force_landscape || !g_ui_loading_show_orientation_guide))
@@ -1550,7 +1550,7 @@ namespace
 		reinterpret_cast<decltype(NowLoading_Show_hook)*>(NowLoading_Show_orig)(
 			_this,
 			type,
-			onComplete, overrideDuration);
+			onComplete, overrideDuration, easeType);
 	}
 
 	void* WaitDeviceOrientation_orig = nullptr;
@@ -1618,6 +1618,29 @@ namespace
 			dispRectWH.x = r.height;
 		}
 		reinterpret_cast<decltype(MoviePlayerForObj_AdjustScreenSize_hook)*>(MoviePlayerForObj_AdjustScreenSize_orig)(_this, dispRectWH, isPanScan);
+	}
+
+	void* FrameRateController_OverrideByNormalFrameRate_orig = nullptr;
+	void FrameRateController_OverrideByNormalFrameRate_hook(Il2CppObject* _this, int layer) {
+		// FrameRateOverrideLayer.SystemValue
+		reinterpret_cast<decltype(FrameRateController_OverrideByNormalFrameRate_hook)*>(FrameRateController_OverrideByNormalFrameRate_orig)(_this, 0);
+	}
+
+	void* FrameRateController_OverrideByMaxFrameRate_orig = nullptr;
+	void FrameRateController_OverrideByMaxFrameRate_hook(Il2CppObject* _this, int layer) {
+		// FrameRateOverrideLayer.SystemValue
+		reinterpret_cast<decltype(FrameRateController_OverrideByMaxFrameRate_hook)*>(FrameRateController_OverrideByMaxFrameRate_orig)(_this, 0);
+	}
+
+	void* FrameRateController_ResetOverride_orig = nullptr;
+	void FrameRateController_ResetOverride_hook(Il2CppObject* _this, int layer) {
+		// FrameRateOverrideLayer.SystemValue
+		reinterpret_cast<decltype(FrameRateController_ResetOverride_hook)*>(FrameRateController_ResetOverride_orig)(_this, 0);
+	}
+
+	void* FrameRateController_ReflectionFrameRate_orig = nullptr;
+	void FrameRateController_ReflectionFrameRate_hook(Il2CppObject* _this) {
+		set_fps_hook(30);
 	}
 
 	void adjust_size()
@@ -2037,7 +2060,7 @@ namespace
 		auto NowLoading_Show_addr = reinterpret_cast<void (*)(int, Il2CppObject*,
 			float)>(il2cpp_symbols::get_method_pointer(
 				"umamusume.dll",
-				"Gallop", "NowLoading", "Show", 3));
+				"Gallop", "NowLoading", "Show", 4));
 
 		auto WaitDeviceOrientation_addr = reinterpret_cast<void (*)(
 			ScreenOrientation)>(il2cpp_symbols::get_method_pointer(
@@ -2117,6 +2140,14 @@ namespace
 		auto CourseBaseObject_InitMaterialArray_addr = reinterpret_cast<void (*)(Il2CppObject*)>(il2cpp_symbols::get_method_pointer("umamusume.dll", "Gallop", "CourseBaseObject", "InitMaterialArray", 0));
 
 		auto CharaPropRendererAccessor_SetTexture_addr = reinterpret_cast<Il2CppObject * (*)(Il2CppObject*)>(il2cpp_symbols::get_method_pointer("umamusume.dll", "Gallop", "CharaPropRendererAccessor", "SetTexture", 1));
+
+		auto FrameRateController_OverrideByNormalFrameRate_addr = reinterpret_cast<void (*)(Il2CppObject*, int)>(il2cpp_symbols::get_method_pointer("umamusume.dll", "Gallop", "FrameRateController", "OverrideByNormalFrameRate", 1));
+
+		auto FrameRateController_OverrideByMaxFrameRate_addr = reinterpret_cast<void (*)(Il2CppObject*, int)>(il2cpp_symbols::get_method_pointer("umamusume.dll", "Gallop", "FrameRateController", "OverrideByMaxFrameRate", 1));
+
+		auto FrameRateController_ResetOverride_addr = reinterpret_cast<void (*)(Il2CppObject*, int)>(il2cpp_symbols::get_method_pointer("umamusume.dll", "Gallop", "FrameRateController", "ResetOverride", 1));
+
+		auto FrameRateController_ReflectionFrameRate_addr = reinterpret_cast<void (*)(Il2CppObject*, int)>(il2cpp_symbols::get_method_pointer("umamusume.dll", "Gallop", "FrameRateController", "ReflectionFrameRate", 0));
 
 		auto load_scene_internal_addr = il2cpp_resolve_icall("UnityEngine.SceneManagement.SceneManager::LoadSceneAsyncNameIndexInternal_Injected(System.String,System.Int32,UnityEngine.SceneManagement.LoadSceneParameters&,System.bool)");
 #pragma endregion
@@ -2300,6 +2331,10 @@ namespace
 		if (g_max_fps > -1)
 		{
 			// break 30-40fps limit
+			ADD_HOOK(FrameRateController_OverrideByNormalFrameRate, "Gallop.FrameRateController::OverrideByNormalFrameRate at %p\n");
+			ADD_HOOK(FrameRateController_OverrideByMaxFrameRate, "Gallop.FrameRateController::OverrideByMaxFrameRate at %p\n");
+			ADD_HOOK(FrameRateController_ResetOverride, "Gallop.FrameRateController::ResetOverride at %p\n");
+			ADD_HOOK(FrameRateController_ReflectionFrameRate, "Gallop.FrameRateController::ReflectionFrameRate at %p\n");
 			ADD_HOOK(set_fps, "UnityEngine.Application.set_targetFrameRate at %p \n");
 		}
 
