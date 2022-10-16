@@ -12,20 +12,23 @@ namespace
 
 	void dump_bytes(void* pos)
 	{
-		printf("Hex dump of %p\n", pos);
-
-		char* memory = reinterpret_cast<char*>(pos);
-
-		for (int i = 0; i < 0x20; i++)
+		if (pos)
 		{
-			if (i > 0 && i % 16 == 0)
-				printf("\n");
+			printf("Hex dump of %p\n", pos);
 
-			char byte = *(memory++);
+			char* memory = reinterpret_cast<char*>(pos);
 
-			printf("%02hhX ", byte);
+			for (int i = 0; i < 0x20; i++)
+			{
+				if (i > 0 && i % 16 == 0)
+					printf("\n");
+
+				char byte = *(memory++);
+
+				printf("%02hhX ", byte);
+			}
+
 		}
-
 		printf("\n\n");
 	}
 
@@ -40,7 +43,8 @@ namespace
 			MH_DisableHook(LoadLibraryW);
 			MH_RemoveHook(LoadLibraryW);
 
-			if (!g_custom_title_name.empty()) {
+			if (!g_custom_title_name.empty())
+			{
 				SetWindowText(GetActiveWindow(), local::wide_acp(local::u8_wide(g_custom_title_name)).data());
 			}
 
@@ -105,13 +109,6 @@ namespace
 		return reinterpret_cast<decltype(populate_with_errors_hook)*>(populate_with_errors_orig) (
 			_this, local::get_localized_string(str), settings, context
 			);
-	}
-
-	// UnityEngine.UI.dll UnityEngine.UI Text
-	void* text_get_text_orig = nullptr;
-	Il2CppString* text_get_text_hook(Il2CppObject* _this)
-	{
-		return local::get_localized_string(reinterpret_cast<decltype(text_get_text_hook)*>(text_get_text_orig) (_this));
 	}
 
 	void* localizeextension_text_orig = nullptr;
@@ -327,8 +324,8 @@ namespace
 
 	std::unordered_map<void*, bool> text_queries;
 
-	void* query_ctor_orig = nullptr;
-	void* query_ctor_hook(void* _this, void* conn, Il2CppString* sql)
+	void* query_setup_orig = nullptr;
+	void* query_setup_hook(void* _this, void* conn, Il2CppString* sql)
 	{
 		auto ssql = std::wstring(sql->start_char);
 
@@ -340,7 +337,7 @@ namespace
 			text_queries.emplace(_this, true);
 		}
 
-		return reinterpret_cast<decltype(query_ctor_hook)*>(query_ctor_orig)(_this, conn, sql);
+		return reinterpret_cast<decltype(query_setup_hook)*>(query_setup_orig)(_this, conn, sql);
 	}
 
 	void* query_dispose_orig = nullptr;
@@ -532,20 +529,22 @@ namespace
 			r->height = width;
 	}
 
+	void (*set_resolution)(int width, int height, bool fullscreen);
+
 	void* set_resolution_orig;
-	void set_resolution_hook(int width, int height, bool fullscreen)
+	void set_resolution_hook(int width, int height, int fullscreenMode, int perferredRefreshRate)
 	{
 		Resolution_t r;
 		r = *get_resolution(&r);
-
 		if (g_force_landscape && !g_auto_fullscreen)
 		{
 			fullScreenFl = false;
+
 			if (width < height)
 			{
-				return reinterpret_cast<decltype(set_resolution_hook)*>(set_resolution_orig)(height, width, false);
+				return reinterpret_cast<decltype(set_resolution_hook)*>(set_resolution_orig)(height, width, 3, perferredRefreshRate);
 			}
-			return reinterpret_cast<decltype(set_resolution_hook)*>(set_resolution_orig)(width, height, false);
+			return reinterpret_cast<decltype(set_resolution_hook)*>(set_resolution_orig)(width, height, 3, perferredRefreshRate);
 		}
 		bool reqVirt = width < height;
 
@@ -553,7 +552,7 @@ namespace
 		{
 			fullScreenFl = false;
 			fullScreenFlOverride = false;
-			return reinterpret_cast<decltype(set_resolution_hook)*>(set_resolution_orig)(last_virt_window_width, last_virt_window_height, false);
+			return reinterpret_cast<decltype(set_resolution_hook)*>(set_resolution_orig)(last_virt_window_width, last_virt_window_height, 3, perferredRefreshRate);
 		}
 
 		auto display = display_get_main();
@@ -562,16 +561,17 @@ namespace
 		{
 			fullScreenFl = false;
 			fullScreenFlOverride = false;
-			if (last_virt_window_width > last_virt_window_height)
+			if (last_virt_window_width < last_virt_window_height && g_force_landscape)
 			{
-				return reinterpret_cast<decltype(set_resolution_hook)*>(set_resolution_orig)(last_virt_window_height, last_virt_window_width, false);
+				return reinterpret_cast<decltype(set_resolution_hook)*>(set_resolution_orig)(last_virt_window_height, last_virt_window_width, 3, perferredRefreshRate);
 			}
-			return reinterpret_cast<decltype(set_resolution_hook)*>(set_resolution_orig)(last_virt_window_width, last_virt_window_height, false);
+			return reinterpret_cast<decltype(set_resolution_hook)*>(set_resolution_orig)(last_virt_window_width, last_virt_window_height, 3, perferredRefreshRate);
 		}
 
 		bool need_fullscreen = false;
 
-		if (g_auto_fullscreen) {
+		if (g_auto_fullscreen)
+		{
 			if (is_virt() && r.width / static_cast<double>(r.height) == (9.0 / 16.0))
 				need_fullscreen = true;
 			else if (!is_virt() && r.width / static_cast<double>(r.height) == (16.0 / 9.0))
@@ -584,7 +584,8 @@ namespace
 			{
 				last_virt_window_width = get_rendering_width(display);
 				last_virt_window_height = get_rendering_height(display);
-				if (need_fullscreen && (!last_hriz_window_width || !last_hriz_window_height)) {
+				if (need_fullscreen && (!last_hriz_window_width || !last_hriz_window_height))
+				{
 					float new_ratio = static_cast<float>(r.width) / r.height;
 
 					last_hriz_window_width = r.width - 400;
@@ -598,7 +599,8 @@ namespace
 			}
 		}
 
-		if (!fullScreenFlOverride) {
+		if (!fullScreenFlOverride)
+		{
 			fullScreenFl = need_fullscreen;
 		}
 
@@ -607,10 +609,8 @@ namespace
 			width = last_hriz_window_width;
 			height = last_hriz_window_height;
 		}
-
 		return reinterpret_cast<decltype(set_resolution_hook)*>(set_resolution_orig)(
-			need_fullscreen ? r.width : width, need_fullscreen ? r.height : height, fullScreenFl
-			);
+			fullScreenFl ? r.width : width, fullScreenFl ? r.height : height, fullScreenFl ? 1 : 3, perferredRefreshRate);
 	}
 
 	void* get_virt_size_orig = nullptr;
@@ -682,14 +682,45 @@ namespace
 		return reinterpret_cast<decltype(canvas_scaler_setres_hook)*>(canvas_scaler_setres_orig)(_this, res);
 	}
 
+	void* UIManager_UpdateCanvasScaler_orig = nullptr;
+
+	void UIManager_UpdateCanvasScaler_hook(Il2CppObject* canvasScaler)
+	{
+		auto display = display_get_main();
+		canvas_scaler_setres_hook(
+			canvasScaler, Vector2_t{ .x = (float)get_system_width(display),
+									.y = (float)get_system_height(display) });
+		reinterpret_cast<decltype(UIManager_UpdateCanvasScaler_hook)*>(
+			UIManager_UpdateCanvasScaler_orig)(canvasScaler);
+	}
+
 	void* UIManager_ChangeResizeUIForPC_orig = nullptr;
-	void UIManager_ChangeResizeUIForPC_hook(Il2CppObject* _this, int width, int height) {
+	void UIManager_ChangeResizeUIForPC_hook(Il2CppObject* _this, int width, int height)
+	{
 		uiManager = _this;
+		if (g_force_landscape && (width < height)) {
+			reinterpret_cast<decltype(UIManager_ChangeResizeUIForPC_hook)*>(UIManager_ChangeResizeUIForPC_orig)(_this, height, width);
+			return;
+		}
 		reinterpret_cast<decltype(UIManager_ChangeResizeUIForPC_hook)*>(UIManager_ChangeResizeUIForPC_orig)(_this, width, height);
 	}
 
+	void* BGManager_CalcBgScale_orig = nullptr;
+	float BGManager_CalcBgScale_hook(Il2CppObject* _this, int width, int height, int renderTextureWidth, int renderTextureHeight)
+	{
+		if (width > height)
+		{
+			return 3;
+		}
+		else
+		{
+			return 1.5;
+		}
+	}
+
 	void* GetLimitSize_orig = nullptr;
-	Vector2_t GetLimitSize_hook() {
+	Vector2_t GetLimitSize_hook()
+	{
 		auto orig = reinterpret_cast<decltype(GetLimitSize_hook)*>(GetLimitSize_orig)();
 		Resolution_t r;
 		get_resolution_stub(&r);
@@ -794,7 +825,7 @@ namespace
 						last_hriz_window_width = windowRect.right - windowRect.left;
 						last_hriz_window_height = windowRect.bottom - windowRect.top;
 					}
-					reinterpret_cast<decltype(set_resolution_hook)*>(set_resolution_orig)(r.width, r.height, fullScreenFl);
+					set_resolution(r.width, r.height, fullScreenFl);
 				}
 				return TRUE;
 
@@ -994,6 +1025,18 @@ namespace
 		reinterpret_cast<decltype(apply_graphics_quality_hook)*>(apply_graphics_quality_orig)(_this, g_graphics_quality, true);
 	}
 
+	void* PathResolver_GetLocalPath_orig = nullptr;
+	Il2CppString* PathResolver_GetLocalPath_hook(Il2CppObject* _this, int kind, Il2CppString* hname)
+	{
+		auto hnameU8 = local::wide_u8(hname->start_char);
+		if (g_replace_assets.find(hnameU8) != g_replace_assets.end())
+		{
+			auto& replaceAsset = g_replace_assets.at(hnameU8);
+			return il2cpp_string_new(replaceAsset.path.data());
+		}
+		return reinterpret_cast<decltype(PathResolver_GetLocalPath_hook)*>(PathResolver_GetLocalPath_orig)(_this, kind, hname);
+	}
+
 	void* assetbundle_LoadFromFile_orig = nullptr;
 	Il2CppObject* assetbundle_LoadFromFile_hook(Il2CppString* path)
 	{
@@ -1015,7 +1058,7 @@ namespace
 	}
 
 	void* assetbundle_load_asset_orig = nullptr;
-	Il2CppObject* assetbundle_load_asset_hook(Il2CppObject* _this, Il2CppString* name, Il2CppType* type)
+	Il2CppObject* assetbundle_load_asset_hook(Il2CppObject* _this, Il2CppString* name, const Il2CppType* type)
 	{
 		string u8Name = local::wide_u8(name->start_char);
 		if (find(replaceAssetNames.begin(), replaceAssetNames.end(), u8Name) != replaceAssetNames.end())
@@ -1100,6 +1143,22 @@ namespace
 				pair.second.asset = nullptr;
 			}
 		}
+	}
+
+	void* AssetBundleRequest_GetResult_orig = nullptr;
+	Il2CppObject* AssetBundleRequest_GetResult_hook(Il2CppObject* _this)
+	{
+		auto obj = reinterpret_cast<decltype(AssetBundleRequest_GetResult_hook)*>(AssetBundleRequest_GetResult_orig)(_this);
+		if (obj)
+		{
+			auto name = uobject_get_name(obj);
+			auto u8Name = local::wide_u8(name->start_char);
+			if (find(replaceAssetNames.begin(), replaceAssetNames.end(), u8Name) != replaceAssetNames.end())
+			{
+				return reinterpret_cast<decltype(assetbundle_load_asset_hook)*>(assetbundle_load_asset_orig)(replaceAssets, name, il2cpp_class_get_type(obj->klass));
+			}
+		}
+		return obj;
 	}
 
 	void* resources_load_orig = nullptr;
@@ -1510,7 +1569,7 @@ namespace
 
 	Boolean get_IsVertical_hook()
 	{
-		return GetBoolean(false);
+		return GetBoolean(true);
 	}
 
 	void* Screen_set_orientation_orig = nullptr;
@@ -1523,6 +1582,32 @@ namespace
 			orientation = ScreenOrientation::Landscape;
 		}
 		reinterpret_cast<decltype(Screen_set_orientation_hook)*>(Screen_set_orientation_orig)(
+			orientation);
+	}
+
+	void* Screen_get_ScreenOrientation_orig = nullptr;
+
+	ScreenOrientation Screen_get_ScreenOrientation_hook()
+	{
+		auto orientation = reinterpret_cast<decltype(Screen_get_ScreenOrientation_hook)*>(Screen_get_ScreenOrientation_orig)();
+		if ((orientation == ScreenOrientation::Portrait ||
+			orientation == ScreenOrientation::PortraitUpsideDown) && g_force_landscape)
+		{
+			orientation = ScreenOrientation::Landscape;
+		}
+		return orientation;
+	}
+
+	void* Screen_RequestOrientation_orig = nullptr;
+
+	void Screen_RequestOrientation_hook(ScreenOrientation orientation)
+	{
+		if ((orientation == ScreenOrientation::Portrait ||
+			orientation == ScreenOrientation::PortraitUpsideDown) && g_force_landscape)
+		{
+			orientation = ScreenOrientation::Landscape;
+		}
+		reinterpret_cast<decltype(Screen_RequestOrientation_hook)*>(Screen_RequestOrientation_orig)(
 			orientation);
 	}
 
@@ -1582,17 +1667,20 @@ namespace
 
 	void* MoviePlayerForUI_AdjustScreenSize_orig = nullptr;
 
-	void MoviePlayerForUI_AdjustScreenSize_hook(Il2CppObject* _this, Vector2_t dispRectWH, bool isPanScan) {
+	void MoviePlayerForUI_AdjustScreenSize_hook(Il2CppObject* _this, Vector2_t dispRectWH, bool isPanScan)
+	{
 		auto movieInfo = MoviePlayerBase_get_MovieInfo(_this);
 		auto widthField = il2cpp_class_get_field_from_name(movieInfo->klass, "width");
 		auto heightField = il2cpp_class_get_field_from_name(movieInfo->klass, "height");
 		unsigned int width, height;
 		il2cpp_field_get_value(movieInfo, widthField, &width);
 		il2cpp_field_get_value(movieInfo, heightField, &height);
-		if (width < height) {
+		if (width < height)
+		{
 			Resolution_t r;
 			get_resolution_stub(&r);
-			if (roundf(1920 / (max(1.0f, r.height / 1080.f) * g_force_landscape_ui_scale)) == dispRectWH.y) {
+			if (roundf(1920 / (max(1.0f, r.height / 1080.f) * g_force_landscape_ui_scale)) == dispRectWH.y)
+			{
 				dispRectWH.y = r.width;
 			}
 			dispRectWH.x = r.height;
@@ -1602,17 +1690,20 @@ namespace
 
 	void* MoviePlayerForObj_AdjustScreenSize_orig = nullptr;
 
-	void MoviePlayerForObj_AdjustScreenSize_hook(Il2CppObject* _this, Vector2_t dispRectWH, bool isPanScan) {
+	void MoviePlayerForObj_AdjustScreenSize_hook(Il2CppObject* _this, Vector2_t dispRectWH, bool isPanScan)
+	{
 		auto movieInfo = MoviePlayerBase_get_MovieInfo(_this);
 		auto widthField = il2cpp_class_get_field_from_name(movieInfo->klass, "width");
 		auto heightField = il2cpp_class_get_field_from_name(movieInfo->klass, "height");
 		unsigned int width, height;
 		il2cpp_field_get_value(movieInfo, widthField, &width);
 		il2cpp_field_get_value(movieInfo, heightField, &height);
-		if (width < height) {
+		if (width < height)
+		{
 			Resolution_t r;
 			get_resolution_stub(&r);
-			if (roundf(1920 / (max(1.0f, r.height / 1080.f) * g_force_landscape_ui_scale)) == dispRectWH.y) {
+			if (roundf(1920 / (max(1.0f, r.height / 1080.f) * g_force_landscape_ui_scale)) == dispRectWH.y)
+			{
 				dispRectWH.y = r.width;
 			}
 			dispRectWH.x = r.height;
@@ -1621,25 +1712,29 @@ namespace
 	}
 
 	void* FrameRateController_OverrideByNormalFrameRate_orig = nullptr;
-	void FrameRateController_OverrideByNormalFrameRate_hook(Il2CppObject* _this, int layer) {
+	void FrameRateController_OverrideByNormalFrameRate_hook(Il2CppObject* _this, int layer)
+	{
 		// FrameRateOverrideLayer.SystemValue
 		reinterpret_cast<decltype(FrameRateController_OverrideByNormalFrameRate_hook)*>(FrameRateController_OverrideByNormalFrameRate_orig)(_this, 0);
 	}
 
 	void* FrameRateController_OverrideByMaxFrameRate_orig = nullptr;
-	void FrameRateController_OverrideByMaxFrameRate_hook(Il2CppObject* _this, int layer) {
+	void FrameRateController_OverrideByMaxFrameRate_hook(Il2CppObject* _this, int layer)
+	{
 		// FrameRateOverrideLayer.SystemValue
 		reinterpret_cast<decltype(FrameRateController_OverrideByMaxFrameRate_hook)*>(FrameRateController_OverrideByMaxFrameRate_orig)(_this, 0);
 	}
 
 	void* FrameRateController_ResetOverride_orig = nullptr;
-	void FrameRateController_ResetOverride_hook(Il2CppObject* _this, int layer) {
+	void FrameRateController_ResetOverride_hook(Il2CppObject* _this, int layer)
+	{
 		// FrameRateOverrideLayer.SystemValue
 		reinterpret_cast<decltype(FrameRateController_ResetOverride_hook)*>(FrameRateController_ResetOverride_orig)(_this, 0);
 	}
 
 	void* FrameRateController_ReflectionFrameRate_orig = nullptr;
-	void FrameRateController_ReflectionFrameRate_hook(Il2CppObject* _this) {
+	void FrameRateController_ReflectionFrameRate_hook(Il2CppObject* _this)
+	{
 		set_fps_hook(30);
 	}
 
@@ -1653,7 +1748,7 @@ namespace
 
 			auto target_height = r.height - 100;
 
-			set_resolution_hook(target_height * 0.5625f, target_height, false);
+			set_resolution(target_height * 0.5625f, target_height, false);
 
 			il2cpp_thread_detach(tr);
 			}).detach();
@@ -1763,10 +1858,6 @@ namespace
 			"GetPreferredWidth", 2
 		);
 
-		auto text_get_text_addr = il2cpp_symbols::get_method_pointer(
-			"UnityEngine.UI.dll", "UnityEngine.UI", "Text", "get_text", 0
-		);
-
 		auto localizeextension_text_addr = il2cpp_symbols::get_method_pointer(
 			"umamusume.dll", "Gallop", "LocalizeExtention", "Text", 1
 		);
@@ -1830,9 +1921,9 @@ namespace
 			"umamusume.dll", "Gallop.CutIn.Cutt", "CutInTimelineController", "GetTimeFromFrame", 2
 		);
 
-		auto query_ctor_addr = il2cpp_symbols::get_method_pointer(
+		auto query_setup_addr = il2cpp_symbols::get_method_pointer(
 			"LibNative.Runtime.dll", "LibNative.Sqlite3",
-			"Query", ".ctor", 2
+			"Query", "_Setup", 2
 		);
 
 		auto query_getstr_addr = il2cpp_symbols::get_method_pointer(
@@ -1845,10 +1936,7 @@ namespace
 			"Query", "Dispose", 0
 		);
 
-		auto set_fps_addr = il2cpp_symbols::get_method_pointer(
-			"UnityEngine.CoreModule.dll", "UnityEngine",
-			"Application", "set_targetFrameRate", 1
-		);
+		auto set_fps_addr = il2cpp_resolve_icall("UnityEngine.Application::set_targetFrameRate(System.Int32)");
 
 		auto wndproc_addr = il2cpp_symbols::get_method_pointer(
 			"umamusume.dll", "Gallop",
@@ -1930,6 +2018,11 @@ namespace
 			"UnityEngine.UI.dll", "UnityEngine.UI",
 			"CanvasScaler", "set_referenceResolution", 1
 		);
+
+		auto UIManager_UpdateCanvasScaler_addr =
+			reinterpret_cast<void (*)(Il2CppObject*)>(
+				il2cpp_symbols::get_method_pointer(
+					"umamusume.dll", "Gallop", "UIManager", "UpdateCanvasScaler", 1));
 
 		set_scale_factor = reinterpret_cast<void(*)(void*, float)>(
 			il2cpp_symbols::get_method_pointer(
@@ -2017,10 +2110,12 @@ namespace
 			)
 			);
 
-		auto set_resolution_addr = il2cpp_symbols::get_method_pointer(
+		set_resolution = reinterpret_cast<void (*)(int, int, bool)>(il2cpp_symbols::get_method_pointer(
 			"UnityEngine.CoreModule.dll", "UnityEngine",
 			"Screen", "SetResolution", 3
-		);
+		));
+
+		auto set_resolution_addr = il2cpp_resolve_icall("UnityEngine.Screen::SetResolution(System.Int32,System.Int32,UnityEngine.FullScreenMode,System.Int32)");
 
 		auto an_text_fix_data_addr = reinterpret_cast<void (*)(Il2CppObject * _this)>(il2cpp_symbols::get_method_pointer("Plugins.dll", "AnimateToUnity", "AnText", "_FixData", 0));
 
@@ -2051,6 +2146,19 @@ namespace
 				"UnityEngine.CoreModule.dll",
 				"UnityEngine",
 				"Screen", "set_orientation", 1));
+
+		auto Screen_get_ScreenOrientation_addr = reinterpret_cast<void (*)(
+			ScreenOrientation)>(il2cpp_symbols::get_method_pointer(
+				"umamusume.dll",
+				"Gallop",
+				"Screen", "get_ScreenOrientation", 0));
+
+		auto Screen_RequestOrientation_addr = il2cpp_resolve_icall("UnityEngine.Screen::RequestOrientation(UnityEngine.ScreenOrientation)");
+		/*reinterpret_cast<void (*)(
+			ScreenOrientation)>(il2cpp_symbols::get_method_pointer(
+				"UnityEngine.CoreModule.dll",
+				"UnityEngine",
+				"Screen", "set_orientation", 1));*/
 
 		auto DeviceOrientationGuide_Show_addr = reinterpret_cast<void (*)(bool,
 			int)>(il2cpp_symbols::get_method_pointer(
@@ -2096,21 +2204,27 @@ namespace
 			"UnityEngine.AssetBundleModule.dll", "UnityEngine", "AssetBundle",
 			"LoadFromFile", 1));
 
+		auto PathResolver_GetLocalPath_addr = reinterpret_cast<Il2CppObject * (*)(Il2CppString * path)>(il2cpp_symbols::get_method_pointer(
+			"_Cyan.dll", "Cyan.LocalFile", "PathResolver",
+			"GetLocalPath", 2));
+
 		auto assetbundle_LoadFromFile_addr = reinterpret_cast<Il2CppObject * (*)(Il2CppString * path)>(il2cpp_symbols::get_method_pointer(
 			"UnityEngine.AssetBundleModule.dll", "UnityEngine", "AssetBundle",
 			"LoadFromFile", 1));
 
+		auto AssetBundleRequest_GetResult_addr = reinterpret_cast<Il2CppObject * (*)(Il2CppString * path)>(il2cpp_symbols::get_method_pointer(
+			"UnityEngine.AssetBundleModule.dll", "UnityEngine", "AssetBundleRequest",
+			"GetResult", 0));
+
 		auto assetbundle_load_asset_addr = reinterpret_cast<Il2CppObject * (*)(Il2CppObject * _this, Il2CppString * name, Il2CppObject * runtimeType)>(
-			il2cpp_symbols::get_method_pointer(
-				"UnityEngine.AssetBundleModule.dll", "UnityEngine",
-				"AssetBundle", "LoadAsset", 2)
+			il2cpp_resolve_icall("UnityEngine.AssetBundle::LoadAsset_Internal(System.String,System.Type)")
 			);
 
 		auto assetbundle_unload_addr = reinterpret_cast<Il2CppObject * (*)(Il2CppString * path)>(il2cpp_symbols::get_method_pointer("UnityEngine.AssetBundleModule.dll", "UnityEngine", "AssetBundle", "Unload", 1));
 
 		auto resources_load_addr = reinterpret_cast<Il2CppObject * (*)(Il2CppString * path, Il2CppType*)>(il2cpp_symbols::get_method_pointer("UnityEngine.CoreModule.dll", "UnityEngine", "Resources", "Load", 2));
 
-		auto Sprite_get_texture_addr = reinterpret_cast<Il2CppObject * (*)(Il2CppObject*)>(il2cpp_symbols::get_method_pointer("UnityEngine.CoreModule.dll", "UnityEngine", "Sprite", "get_texture", 0));
+		auto Sprite_get_texture_addr = reinterpret_cast<Il2CppObject * (*)(Il2CppObject*)>(il2cpp_resolve_icall("UnityEngine.Sprite::get_texture(UnityEngine.Sprite)"));
 
 		auto Renderer_get_material_addr = reinterpret_cast<Il2CppObject * (*)(Il2CppObject*)>(il2cpp_symbols::get_method_pointer("UnityEngine.CoreModule.dll", "UnityEngine", "Renderer", "get_material", 0));
 
@@ -2137,8 +2251,6 @@ namespace
 				method->parameters->parameter_type->type == IL2CPP_TYPE_I4;
 			});
 
-		auto CourseBaseObject_InitMaterialArray_addr = reinterpret_cast<void (*)(Il2CppObject*)>(il2cpp_symbols::get_method_pointer("umamusume.dll", "Gallop", "CourseBaseObject", "InitMaterialArray", 0));
-
 		auto CharaPropRendererAccessor_SetTexture_addr = reinterpret_cast<Il2CppObject * (*)(Il2CppObject*)>(il2cpp_symbols::get_method_pointer("umamusume.dll", "Gallop", "CharaPropRendererAccessor", "SetTexture", 1));
 
 		auto FrameRateController_OverrideByNormalFrameRate_addr = reinterpret_cast<void (*)(Il2CppObject*, int)>(il2cpp_symbols::get_method_pointer("umamusume.dll", "Gallop", "FrameRateController", "OverrideByNormalFrameRate", 1));
@@ -2149,7 +2261,10 @@ namespace
 
 		auto FrameRateController_ReflectionFrameRate_addr = reinterpret_cast<void (*)(Il2CppObject*, int)>(il2cpp_symbols::get_method_pointer("umamusume.dll", "Gallop", "FrameRateController", "ReflectionFrameRate", 0));
 
+		auto BGManager_CalcBgScale_addr = reinterpret_cast<float (*)(Il2CppObject*, int, int, int, int)>(il2cpp_symbols::get_method_pointer("umamusume.dll", "Gallop", "BGManager", "CalcBgScale", 4));
+
 		auto load_scene_internal_addr = il2cpp_resolve_icall("UnityEngine.SceneManagement.SceneManager::LoadSceneAsyncNameIndexInternal_Injected(System.String,System.Int32,UnityEngine.SceneManagement.LoadSceneParameters&,System.bool)");
+
 #pragma endregion
 #pragma region LOAD_ASSETBUNDLE
 		if (!assets && !g_font_assetbundle_path.empty() && g_replace_to_custom_font)
@@ -2201,18 +2316,20 @@ namespace
 
 		ADD_HOOK(GetLimitSize, "Gallop.StandaloneWindowResize::GetChangedSize at %p\n");
 
-		ADD_HOOK(UIManager_ChangeResizeUIForPC, "Gallop.UIManager::ChangeResizeUIForPC at %p\n");
-
 		ADD_HOOK(NowLoading_Show, "Gallop.NowLoading::Show at %p\n");
 
-		ADD_HOOK(assetbundle_LoadFromFile, "UnityEngine.AssetBundle::LoadFromFile at %p\n");
+		ADD_HOOK(PathResolver_GetLocalPath, "Cyan.Loader.PathResolver::GetLocalPath at %p\n");
 
-		ADD_HOOK(assetbundle_load_asset, "UnityEngine.AssetBundle::LoadAsset at %p\n");
+		ADD_HOOK(AssetBundleRequest_GetResult, "UnityEngine.AssetBundleRequest::GetResult at %p\n");
+
+		ADD_HOOK(assetbundle_LoadFromFile, "UnityEngine.AssetBundle::LoadFromFile at %p\n");
 
 		ADD_HOOK(assetbundle_unload, "UnityEngine.AssetBundle::Unload at %p\n");
 
 		if (replaceAssets)
 		{
+			ADD_HOOK(assetbundle_load_asset, "UnityEngine.AssetBundle::LoadAsset at %p\n");
+
 			ADD_HOOK(resources_load, "UnityEngine.Resources::Load at %p\n");
 
 			ADD_HOOK(Sprite_get_texture, "UnityEngine.Sprite::get_texture at %p\n");
@@ -2285,7 +2402,7 @@ namespace
 
 		// ADD_HOOK(timeline_audioclip_ctor, "Gallop.StoryTimelineController::GetTimeScaleHighSpeed at %p\n");
 
-		ADD_HOOK(query_ctor, "Query::ctor at %p\n");
+		ADD_HOOK(query_setup, "Query::ctor at %p\n");
 		ADD_HOOK(query_getstr, "Query::GetString at %p\n");
 		ADD_HOOK(query_dispose, "Query::Dispose at %p\n");
 
@@ -2294,6 +2411,7 @@ namespace
 		if (g_force_landscape || g_unlock_size)
 		{
 			ADD_HOOK(BootSystem_Awake, "Gallop.BootSystem::Awake at %p\n");
+			ADD_HOOK(BGManager_CalcBgScale, "Gallop.BGManager::CalcBgScale at %p\n");
 		}
 
 		if (g_force_landscape) {
@@ -2303,8 +2421,13 @@ namespace
 
 			last_hriz_window_width = r.width - 400;
 			last_hriz_window_height = last_hriz_window_width / new_ratio;
+			last_virt_window_width = r.width - 400;
+			last_virt_window_height = last_virt_window_width / new_ratio;
+			ADD_HOOK(UIManager_ChangeResizeUIForPC, "Gallop.UIManager::ChangeResizeUIForPC at %p\n");
 			ADD_HOOK(WaitDeviceOrientation, "Gallop.Screen::WaitDeviceOrientation at %p");
 			ADD_HOOK(Screen_set_orientation, "Gallop.Screen::set_orientation at %p\n");
+			ADD_HOOK(Screen_get_ScreenOrientation, "Gallop.Screen::get_ScreenOrientation at %p\n");
+			ADD_HOOK(Screen_RequestOrientation, "Gallop.Screen::RequestOrientation at %p\n");
 			ADD_HOOK(DeviceOrientationGuide_Show, "DeviceOrientationGuide::Show at %p\n");
 			ADD_HOOK(ChangeScreenOrientation, "ChangeScreenOrientation at %p\n");
 			ADD_HOOK(ChangeScreenOrientationPortraitAsync, "ChangeScreenOrientationPortraitAsync at %p\n");
@@ -2354,7 +2477,7 @@ namespace
 			last_display_height = r.height;
 		}
 
-		if (g_max_fps > -1 || g_unlock_size)
+		if (g_max_fps > -1 || g_unlock_size || g_force_landscape)
 		{
 			ADD_HOOK(wndproc, "Gallop.StandaloneWindowResize.WndProc at %p \n");
 		}
@@ -2362,6 +2485,7 @@ namespace
 		if (g_unlock_size || g_force_landscape)
 		{
 			ADD_HOOK(canvas_scaler_setres, "UnityEngine.UI.CanvasScaler::set_referenceResolution at %p\n");
+			ADD_HOOK(UIManager_UpdateCanvasScaler, "Gallop.UIManager::UpdateCanvasScaler at %p\n");
 		}
 
 		if (g_auto_fullscreen || g_force_landscape || g_unlock_size)
