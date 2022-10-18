@@ -5,6 +5,7 @@ extern void uninit_hook();
 extern void start_console();
 
 bool g_dump_entries = false;
+bool g_dump_il2cpp = false;
 bool g_static_entries_use_hash = false;
 bool g_enable_logger = false;
 bool g_enable_console = false;
@@ -71,6 +72,9 @@ namespace
 			}
 			if (document.HasMember("dumpStaticEntries")) {
 				g_dump_entries = document["dumpStaticEntries"].GetBool();
+			}
+			if (document.HasMember("dumpIl2Cpp")) {
+				g_dump_il2cpp = document["dumpIl2Cpp"].GetBool();
 			}
 			if (document.HasMember("staticEntriesUseHash")) {
 				g_static_entries_use_hash = document["staticEntriesUseHash"].GetBool();

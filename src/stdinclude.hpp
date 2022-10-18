@@ -32,6 +32,7 @@ struct ReplaceAsset {
 };
 
 extern bool g_dump_entries;
+extern bool g_dump_il2cpp;
 extern bool g_enable_logger;
 extern bool g_enable_console;
 extern bool g_static_entries_use_hash;

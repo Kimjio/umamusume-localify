@@ -2,6 +2,8 @@
 #include <set>
 #include <sstream>
 
+#include "il2cpp_dump.h"
+
 using namespace std;
 
 namespace
@@ -1016,12 +1018,21 @@ namespace
 	void* set_anti_aliasing_orig = nullptr;
 	void set_anti_aliasing_hook(int level)
 	{
+		cout << "set_anti_aliasing\n";
 		reinterpret_cast<decltype(set_anti_aliasing_hook)*>(set_anti_aliasing_orig)(g_anti_aliasing);
+	}
+
+	void* set_shadow_distance_orig = nullptr;
+	void set_shadow_distance_hook(float level)
+	{
+		cout << "set_shadow_distance " << level << "\n";
+		reinterpret_cast<decltype(set_shadow_distance_hook)*>(set_shadow_distance_orig)(level);
 	}
 
 	void* apply_graphics_quality_orig = nullptr;
 	void apply_graphics_quality_hook(Il2CppObject* _this, int quality, bool force)
 	{
+		cout << "apply_graphics_quality\n";
 		reinterpret_cast<decltype(apply_graphics_quality_hook)*>(apply_graphics_quality_orig)(_this, g_graphics_quality, true);
 	}
 
@@ -1805,6 +1816,11 @@ namespace
 		// load il2cpp exported functions
 		il2cpp_symbols::init(il2cpp_module);
 
+		if (g_dump_il2cpp)
+		{
+			il2cpp_dump();
+		}
+
 #pragma region HOOK_MACRO
 #define ADD_HOOK(_name_, _fmt_) \
 	auto _name_##_offset = reinterpret_cast<void*>(_name_##_addr); \
@@ -2125,9 +2141,14 @@ namespace
 
 		auto wait_resize_ui_addr = reinterpret_cast<void (*)(Il2CppObject * _this, bool isPortrait, bool isShowOrientationGuide)>(il2cpp_symbols::get_method_pointer("umamusume.dll", "Gallop", "UIManager", "WaitResizeUI", 2));
 
-		auto set_anti_aliasing_addr = reinterpret_cast<void (*)(
-			int)>(il2cpp_symbols::get_method_pointer("UnityEngine.CoreModule.dll", "UnityEngine",
-				"QualitySettings", "set_antiAliasing", 1));
+		auto set_anti_aliasing_addr = il2cpp_resolve_icall("UnityEngine.QualitySettings::set_antiAliasing(System.Int32)");
+
+		auto set_shadow_distance_addr = il2cpp_resolve_icall("UnityEngine.QualitySettings::set_shadowDistance(System.Single)");
+
+		cout << "Test: " << il2cpp_resolve_icall("UnityEngine.QualitySettings::set_antiAliasing(System.Int32)") << "\n";
+		cout << "Test1 set_vSyncCount: " << il2cpp_resolve_icall("UnityEngine.QualitySettings::set_vSyncCount(System.Int32)") << "\n";
+		cout << "Test2 set_shadowDistance: " << il2cpp_resolve_icall("UnityEngine.QualitySettings::set_shadowDistance(System.Single)") << "\n";
+		cout << "Test3 set_pixelLightCount: " << il2cpp_resolve_icall("UnityEngine.QualitySettings::set_pixelLightCount(System.Int32)") << "\n";
 
 		auto apply_graphics_quality_addr = reinterpret_cast<void (*)(
 			Il2CppObject*, Il2CppObject*, bool)>(il2cpp_symbols::get_method_pointer(
@@ -2313,6 +2334,7 @@ namespace
 			}
 		}
 #pragma endregion
+		ADD_HOOK(set_shadow_distance, "UnityEngine.QualitySettings.set_shadow_distance(float) at %p\n")
 
 		ADD_HOOK(GetLimitSize, "Gallop.StandaloneWindowResize::GetChangedSize at %p\n");
 
