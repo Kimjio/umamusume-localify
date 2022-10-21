@@ -7,6 +7,7 @@ extern void start_console();
 bool g_dump_entries = false;
 bool g_dump_il2cpp = false;
 bool g_static_entries_use_hash = false;
+bool g_static_entries_use_text_id_name = false;
 bool g_enable_logger = false;
 bool g_enable_console = false;
 int g_max_fps = -1;
@@ -27,6 +28,7 @@ bool g_ui_loading_show_orientation_guide = true;
 std::string g_custom_title_name;
 std::unordered_map<std::string, ReplaceAsset> g_replace_assets;
 std::string g_replace_assetbundle_file_path;
+std::string text_id_dict;
 
 namespace
 {
@@ -63,85 +65,113 @@ namespace
 
 		if (!document.HasParseError())
 		{
-
-			if (document.HasMember("enableConsole")) {
+			if (document.HasMember("enableConsole"))
+			{
 				g_enable_console = document["enableConsole"].GetBool();
 			}
-			if (document.HasMember("enableLogger")) {
+			if (document.HasMember("enableLogger"))
+			{
 				g_enable_logger = document["enableLogger"].GetBool();
 			}
-			if (document.HasMember("dumpStaticEntries")) {
+			if (document.HasMember("dumpStaticEntries"))
+			{
 				g_dump_entries = document["dumpStaticEntries"].GetBool();
 			}
-			if (document.HasMember("dumpIl2Cpp")) {
+			if (document.HasMember("dumpIl2Cpp"))
+			{
 				g_dump_il2cpp = document["dumpIl2Cpp"].GetBool();
 			}
-			if (document.HasMember("staticEntriesUseHash")) {
+			if (document.HasMember("staticEntriesUseHash"))
+			{
 				g_static_entries_use_hash = document["staticEntriesUseHash"].GetBool();
 			}
-			if (document.HasMember("maxFps")) {
+			if (document.HasMember("staticEntriesUseTextIdName"))
+			{
+				g_static_entries_use_text_id_name = document["staticEntriesUseTextIdName"].GetBool();
+			}
+			if (document.HasMember("maxFps"))
+			{
 				g_max_fps = document["maxFps"].GetInt();
 			}
-			if (document.HasMember("unlockSize")) {
+			if (document.HasMember("unlockSize"))
+			{
 				g_unlock_size = document["unlockSize"].GetBool();
 			}
-			if (document.HasMember("uiScale")) {
+			if (document.HasMember("uiScale"))
+			{
 				g_ui_scale = document["uiScale"].GetFloat();
 			}
-			if (document.HasMember("uiAnimationScale")) {
+			if (document.HasMember("uiAnimationScale"))
+			{
 				g_ui_animation_scale = document["uiAnimationScale"].GetFloat();
 			}
-			if (document.HasMember("replaceFont")) {
+			if (document.HasMember("replaceFont"))
+			{
 				g_replace_to_builtin_font = document["replaceFont"].GetBool();
 			}
-			if (!document.HasMember("replaceFont") && document.HasMember("replaceToBuiltinFont")) {
+			if (!document.HasMember("replaceFont") && document.HasMember("replaceToBuiltinFont"))
+			{
 				g_replace_to_builtin_font = document["replaceToBuiltinFont"].GetBool();
 			}
-			if (document.HasMember("replaceToCustomFont")) {
+			if (document.HasMember("replaceToCustomFont"))
+			{
 				g_replace_to_custom_font = document["replaceToCustomFont"].GetBool();
 			}
-			if (document.HasMember("fontAssetBundlePath")) {
+			if (document.HasMember("fontAssetBundlePath"))
+			{
 				g_font_assetbundle_path = std::string(document["fontAssetBundlePath"].GetString());
 			}
-			if (document.HasMember("fontAssetName")) {
+			if (document.HasMember("fontAssetName"))
+			{
 				g_font_asset_name = std::string(document["fontAssetName"].GetString());
 			}
-			if (document.HasMember("autoFullscreen")) {
+			if (document.HasMember("autoFullscreen"))
+			{
 				g_auto_fullscreen = document["autoFullscreen"].GetBool();
 			}
-			if (document.HasMember("graphicsQuality")) {
+			if (document.HasMember("graphicsQuality"))
+			{
 				g_graphics_quality = document["graphicsQuality"].GetInt();
-				if (g_graphics_quality < -1) {
+				if (g_graphics_quality < -1)
+				{
 					g_graphics_quality = -1;
 				}
-				if (g_graphics_quality > 4) {
+				if (g_graphics_quality > 4)
+				{
 					g_graphics_quality = 3;
 				}
 			}
-			if (document.HasMember("antiAliasing")) {
+			if (document.HasMember("antiAliasing"))
+			{
 				g_anti_aliasing = document["antiAliasing"].GetInt();
 				std::vector<int> options = { 0, 2, 4, 8, -1 };
 				g_anti_aliasing = std::find(options.begin(), options.end(), g_anti_aliasing) - options.begin();
 			}
 
-			if (document.HasMember("forceLandscape")) {
+			if (document.HasMember("forceLandscape"))
+			{
 				g_force_landscape = document["forceLandscape"].GetBool();
 			}
-			if (document.HasMember("forceLandscapeUiScale")) {
+			if (document.HasMember("forceLandscapeUiScale"))
+			{
 				g_force_landscape_ui_scale = document["forceLandscapeUiScale"].GetFloat();
-				if (g_force_landscape_ui_scale <= 0) {
+				if (g_force_landscape_ui_scale <= 0)
+				{
 					g_force_landscape_ui_scale = 1;
 				}
 			}
-			if (document.HasMember("uiLoadingShowOrientationGuide")) {
+			if (document.HasMember("uiLoadingShowOrientationGuide"))
+			{
 				g_ui_loading_show_orientation_guide = document["uiLoadingShowOrientationGuide"].GetBool();
 			}
 
-			if (document.HasMember("customTitleName")) {
+			if (document.HasMember("customTitleName"))
+			{
 				g_custom_title_name = document["customTitleName"].GetString();
 			}
 
-			if (document.HasMember("replaceAssetsPath")) {
+			if (document.HasMember("replaceAssetsPath"))
+			{
 				auto replaceAssetsPath = local::u8_wide(document["replaceAssetsPath"].GetString());
 				if (PathIsRelativeW(replaceAssetsPath.data()))
 				{
@@ -159,13 +189,21 @@ namespace
 				}
 			}
 
-			if (document.HasMember("replaceAssetBundleFilePath")) {
+			if (document.HasMember("replaceAssetBundleFilePath"))
+			{
 				g_replace_assetbundle_file_path = document["replaceAssetBundleFilePath"].GetString();
 			}
 
 			// Looks like not working for now
 			// g_aspect_ratio = document["customAspectRatio"].GetFloat();
-			if (document.HasMember("dicts")) {
+
+			if (document.HasMember("textIdDict"))
+			{
+				text_id_dict = document["textIdDict"].GetString();
+			}
+
+			if (document.HasMember("dicts"))
+			{
 				auto& dicts_arr = document["dicts"];
 				auto len = dicts_arr.Size();
 
@@ -173,7 +211,7 @@ namespace
 				{
 					auto dict = dicts_arr[i].GetString();
 
-					dicts.push_back(dict);
+					dicts.emplace_back(dict);
 				}
 			}
 		}
@@ -210,6 +248,10 @@ int __stdcall DllMain(HINSTANCE, DWORD reason, LPVOID)
 		std::thread init_thread([dicts]() {
 			logger::init_logger();
 			local::load_textdb(&dicts);
+			if (!text_id_dict.empty())
+			{ 
+				local::load_textId_textdb(text_id_dict);
+			}
 			init_hook();
 
 			if (g_enable_console)

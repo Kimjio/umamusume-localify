@@ -337,7 +337,7 @@ void il2cpp_dump() {
 			auto type = il2cpp_class_get_type(const_cast<Il2CppClass*>(klass));
 			//LOGD("type name : %s", il2cpp_type_get_name(type));
 			auto outPut = imageStr.str() + dump_type(type);
-			outPuts.push_back(outPut);
+			outPuts.emplace_back(outPut);
 		}
 	}
 	cout << "write dump file\n";

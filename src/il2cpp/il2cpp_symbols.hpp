@@ -8,6 +8,8 @@ typedef char16_t Il2CppChar;
 typedef uint16_t Il2CppChar;
 #endif
 
+struct Int32Object;
+
 struct Boolean {
 	bool m_value;
 };
@@ -135,11 +137,6 @@ public:
 	Vector2_t  pivot;
 	// System.Boolean UnityEngine.TextGenerationSettings::generateOutOfBounds
 	bool generateOutOfBounds;
-};
-
-struct Il2CppInt32
-{
-	int32_t value;
 };
 
 enum Il2CppTypeEnum
@@ -465,14 +462,16 @@ typedef const char* (*il2cpp_class_get_namespace_t)(Il2CppClass* klass);
 typedef int (*il2cpp_class_get_flags_t)(const Il2CppClass* klass);
 typedef bool (*il2cpp_class_is_valuetype_t)(const Il2CppClass* klass);
 typedef uint32_t(*il2cpp_property_get_flags_t) (PropertyInfo* prop);
-typedef const MethodInfo* (*il2cpp_property_get_get_method_t) (PropertyInfo* prop);
-typedef const MethodInfo* (*il2cpp_property_get_set_method_t) (PropertyInfo* prop);
-typedef const char* (*il2cpp_property_get_name_t) (PropertyInfo* prop);
-typedef Il2CppClass* (*il2cpp_property_get_parent_t) (PropertyInfo* prop);
+typedef const MethodInfo* (*il2cpp_property_get_get_method_t) (const PropertyInfo* prop);
+typedef const MethodInfo* (*il2cpp_property_get_set_method_t) (const PropertyInfo* prop);
+typedef const char* (*il2cpp_property_get_name_t) (const PropertyInfo* prop);
+typedef Il2CppClass* (*il2cpp_property_get_parent_t) (const PropertyInfo* prop);
 typedef int (*il2cpp_field_get_flags_t)(FieldInfo* field);
 typedef const char* (*il2cpp_field_get_name_t)(FieldInfo* field);
 typedef Il2CppClass* (*il2cpp_field_get_parent_t)(FieldInfo* field);
 typedef size_t (*il2cpp_field_get_offset_t)(FieldInfo* field);
+typedef const PropertyInfo* (*il2cpp_class_get_property_from_name_t)(Il2CppClass* klass, const char* name);
+typedef void (*il2cpp_runtime_object_init_t)(Il2CppObject* obj);
 
 // function defines
 extern il2cpp_string_new_utf16_t il2cpp_string_new_utf16;
@@ -529,7 +528,8 @@ extern il2cpp_field_get_flags_t il2cpp_field_get_flags;
 extern il2cpp_field_get_name_t il2cpp_field_get_name;
 extern il2cpp_field_get_parent_t il2cpp_field_get_parent;
 extern il2cpp_field_get_offset_t il2cpp_field_get_offset;
-
+extern il2cpp_class_get_property_from_name_t il2cpp_class_get_property_from_name;
+extern il2cpp_runtime_object_init_t il2cpp_runtime_object_init;
 
 char* il2cpp_array_addr_with_size(void* arr, int32_t size, uintptr_t idx);
 
@@ -552,6 +552,8 @@ namespace il2cpp_symbols
 
 	MethodInfo* get_method(const char* assemblyName, const char* namespaze,
 		const char* klassName, const char* name, int argsCount);
+
+	Il2CppClass* find_class(const char* assemblyName, const char* namespaze, std::function<bool(Il2CppClass*)> predict);
 
 	uintptr_t find_method(const char* assemblyName, const char* namespaze,
 		const char* klassName, std::function<bool(const MethodInfo*)> predict);

@@ -50,11 +50,12 @@ il2cpp_property_get_get_method_t il2cpp_property_get_get_method;
 il2cpp_property_get_set_method_t il2cpp_property_get_set_method;
 il2cpp_property_get_name_t il2cpp_property_get_name;
 il2cpp_property_get_parent_t il2cpp_property_get_parent;
- il2cpp_field_get_flags_t il2cpp_field_get_flags;
- il2cpp_field_get_name_t il2cpp_field_get_name;
- il2cpp_field_get_parent_t il2cpp_field_get_parent;
- il2cpp_field_get_offset_t il2cpp_field_get_offset;
-
+il2cpp_field_get_flags_t il2cpp_field_get_flags;
+il2cpp_field_get_name_t il2cpp_field_get_name;
+il2cpp_field_get_parent_t il2cpp_field_get_parent;
+il2cpp_field_get_offset_t il2cpp_field_get_offset;
+il2cpp_class_get_property_from_name_t il2cpp_class_get_property_from_name;
+il2cpp_runtime_object_init_t il2cpp_runtime_object_init;
 
 char* il2cpp_array_addr_with_size(void* array, int32_t size, uintptr_t idx)
 {
@@ -121,6 +122,8 @@ namespace il2cpp_symbols
 		RESOLVE_IMPORT(il2cpp_field_get_name);
 		RESOLVE_IMPORT(il2cpp_field_get_parent);
 		RESOLVE_IMPORT(il2cpp_field_get_offset);
+		RESOLVE_IMPORT(il2cpp_class_get_property_from_name);
+		RESOLVE_IMPORT(il2cpp_runtime_object_init);
 
 		il2cpp_domain = il2cpp_domain_get();
 	}
@@ -161,6 +164,23 @@ namespace il2cpp_symbols
 		{
 			return il2cpp_class_get_method_from_name(klass, name, argsCount);
 		}
+		return nullptr;
+	}
+
+	Il2CppClass* find_class(const char* assemblyName, const char* namespaze, std::function<bool(Il2CppClass*)> predict)
+	{
+		auto assembly = il2cpp_domain_assembly_open(il2cpp_domain, assemblyName);
+		auto image = il2cpp_assembly_get_image(assembly);
+		auto classCount = il2cpp_image_get_class_count(image);
+
+		for (int i = 0; i < classCount; i++)
+		{
+			if (predict((Il2CppClass*)il2cpp_image_get_class(image, i)))
+			{
+				return (Il2CppClass*)il2cpp_image_get_class(image, i);
+			}
+		}
+
 		return nullptr;
 	}
 

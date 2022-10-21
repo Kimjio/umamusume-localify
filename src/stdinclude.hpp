@@ -36,6 +36,7 @@ extern bool g_dump_il2cpp;
 extern bool g_enable_logger;
 extern bool g_enable_console;
 extern bool g_static_entries_use_hash;
+extern bool g_static_entries_use_text_id_name;
 extern int g_max_fps;
 extern bool g_unlock_size;
 extern float g_ui_scale;

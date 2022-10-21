@@ -95,6 +95,41 @@ namespace
 				il2cpp_string_new(value ? "true" : "false"));
 	}
 
+	Int32Object* GetInt32Instance(int value)
+	{
+		auto int32Class = il2cpp_symbols::get_class("mscorlib.dll", "System", "Int32");
+		auto instance = il2cpp_object_new(int32Class);
+		il2cpp_runtime_object_init(instance);
+		auto m_value = il2cpp_class_get_field_from_name(int32Class, "m_value");
+		il2cpp_field_set_value(instance, m_value, &value);
+		return (Int32Object*)instance;
+	}
+
+	Il2CppObject* ParseEnum(Il2CppObject* runtimeType, string name)
+	{
+		return reinterpret_cast<Il2CppObject * (*)(Il2CppObject*, Il2CppString*)>(il2cpp_symbols::get_method_pointer("mscorlib.dll", "System", "Enum", "Parse", 2))(runtimeType, il2cpp_string_new(name.data()));
+	}
+
+	Il2CppString* GetEnumName(Il2CppObject* runtimeType, int id)
+	{
+		return reinterpret_cast<Il2CppString * (*)(Il2CppObject*, Int32Object*)>(il2cpp_symbols::get_method_pointer("mscorlib.dll", "System", "Enum", "GetName", 2))(runtimeType, GetInt32Instance(id));
+	}
+
+	unsigned long GetEnumValue(Il2CppObject* runtimeEnum)
+	{
+		return reinterpret_cast<unsigned long (*)(Il2CppObject*)>(il2cpp_symbols::get_method_pointer("mscorlib.dll", "System", "Enum", "ToUInt64", 1))(runtimeEnum);
+	}
+
+	unsigned long GetTextIdByName(string name)
+	{
+		return GetEnumValue(ParseEnum(GetRuntimeType("umamusume.dll", "Gallop", "TextId"), name));
+	}
+
+	string GetTextIdNameById(int id)
+	{
+		return local::wide_u8(GetEnumName(GetRuntimeType("umamusume.dll", "Gallop", "TextId"), id)->start_char);
+	}
+
 	Il2CppObject* GetCustomFont() {
 		if (!assets) return nullptr;
 		return load_assets(assets, il2cpp_string_new(g_font_asset_name.data()), GetRuntimeType("UnityEngine.TextRenderingModule.dll", "UnityEngine", "Font"));
@@ -117,7 +152,11 @@ namespace
 	Il2CppString* localizeextension_text_hook(int id)
 	{
 		auto orig_result = reinterpret_cast<decltype(localizeextension_text_hook)*>(localizeextension_text_orig)(id);
-		auto result = g_static_entries_use_hash ? local::get_localized_string(orig_result) : local::get_localized_string(id);
+		auto result = g_static_entries_use_text_id_name ?
+			local::get_localized_string(GetTextIdNameById(id)) :
+			g_static_entries_use_hash ?
+			local::get_localized_string(orig_result) : local::get_localized_string(id);
+
 		return result ? result : orig_result;
 	}
 
@@ -148,7 +187,10 @@ namespace
 	Il2CppString* localize_get_hook(int id)
 	{
 		auto orig_result = reinterpret_cast<decltype(localize_get_hook)*>(localize_get_orig)(id);
-		auto result = g_static_entries_use_hash ? local::get_localized_string(orig_result) : local::get_localized_string(id);
+		auto result = g_static_entries_use_text_id_name ?
+			local::get_localized_string(GetTextIdNameById(id)) :
+			g_static_entries_use_hash ?
+			local::get_localized_string(orig_result) : local::get_localized_string(id);
 
 		return result ? result : orig_result;
 	}
@@ -198,7 +240,7 @@ namespace
 					{
 						break;
 					}
-					textMeshies.push_back(mesh);
+					textMeshies.emplace_back(mesh);
 				}
 			}
 		}
@@ -1018,22 +1060,57 @@ namespace
 	void* set_anti_aliasing_orig = nullptr;
 	void set_anti_aliasing_hook(int level)
 	{
-		cout << "set_anti_aliasing\n";
 		reinterpret_cast<decltype(set_anti_aliasing_hook)*>(set_anti_aliasing_orig)(g_anti_aliasing);
 	}
 
-	void* set_shadow_distance_orig = nullptr;
-	void set_shadow_distance_hook(float level)
+	void* set_shadowResolution_orig = nullptr;
+	void set_shadowResolution_hook(int level)
 	{
-		cout << "set_shadow_distance " << level << "\n";
-		reinterpret_cast<decltype(set_shadow_distance_hook)*>(set_shadow_distance_orig)(level);
+		reinterpret_cast<decltype(set_shadowResolution_hook)*>(set_shadowResolution_orig)(3);
+	}
+
+	void* set_anisotropicFiltering_orig = nullptr;
+	void set_anisotropicFiltering_hook(int mode)
+	{
+		reinterpret_cast<decltype(set_anisotropicFiltering_hook)*>(set_anisotropicFiltering_orig)(2);
+	}
+
+	void* set_shadows_orig = nullptr;
+	void set_shadows_hook(int quality)
+	{
+		reinterpret_cast<decltype(set_shadows_hook)*>(set_shadows_orig)(2);
+	}
+
+	void* set_softVegetation_orig = nullptr;
+	void set_softVegetation_hook(bool enable)
+	{
+		reinterpret_cast<decltype(set_softVegetation_hook)*>(set_softVegetation_orig)(true);
+	}
+
+	void* set_realtimeReflectionProbes_orig = nullptr;
+	void set_realtimeReflectionProbes_hook(bool enable)
+	{
+		reinterpret_cast<decltype(set_realtimeReflectionProbes_hook)*>(set_realtimeReflectionProbes_orig)(true);
+	}
+
+	void* Light_set_shadowResolution_orig = nullptr;
+	void Light_set_shadowResolution_hook(Il2CppObject* _this, int level)
+	{
+		reinterpret_cast<decltype(Light_set_shadowResolution_hook)*>(Light_set_shadowResolution_orig)(_this, 3);
 	}
 
 	void* apply_graphics_quality_orig = nullptr;
 	void apply_graphics_quality_hook(Il2CppObject* _this, int quality, bool force)
 	{
-		cout << "apply_graphics_quality\n";
 		reinterpret_cast<decltype(apply_graphics_quality_hook)*>(apply_graphics_quality_orig)(_this, g_graphics_quality, true);
+		if (g_graphics_quality >= 3)
+		{
+			set_shadowResolution_hook(3);
+			set_anisotropicFiltering_hook(2);
+			set_shadows_hook(2);
+			set_softVegetation_hook(true);
+			set_realtimeReflectionProbes_hook(true);
+		}
 	}
 
 	void* PathResolver_GetLocalPath_orig = nullptr;
@@ -1749,6 +1826,114 @@ namespace
 		set_fps_hook(30);
 	}
 
+	void* GallopUtil_GetFovFactor_orig = nullptr;
+	float GallopUtil_GetFovFactor_hook() {
+		cout << "GallopUtil_GetFovFactor\n";
+		return reinterpret_cast<decltype(GallopUtil_GetFovFactor_hook)*>(GallopUtil_GetFovFactor_orig)();
+	}
+
+	void* GallopUtil_GetFovFactor2_orig = nullptr;
+	float GallopUtil_GetFovFactor2_hook(bool isVertical, float screenAspect) {
+		cout << "GallopUtil_GetFovFactor2\n";
+		return reinterpret_cast<decltype(GallopUtil_GetFovFactor2_hook)*>(GallopUtil_GetFovFactor2_orig)(true, screenAspect);
+	}
+
+	void* GallopUtil_GetFovFactorToIncrease_orig = nullptr;
+	float GallopUtil_GetFovFactorToIncrease_hook(bool isVertical, float screenAspect) {
+		cout << "GallopUtil_GetFovFactorToIncrease\n";
+		return reinterpret_cast<decltype(GallopUtil_GetFovFactorToIncrease_hook)*>(GallopUtil_GetFovFactorToIncrease_orig)(true, screenAspect);
+	}
+
+	void* GallopUtil_GetFovFactorToIncrease16By9_orig = nullptr;
+	float GallopUtil_GetFovFactorToIncrease16By9_hook(bool isVertical, float screenAspect) {
+		cout << "GallopUtil_GetFovFactorToIncrease16By9\n";
+		return reinterpret_cast<decltype(GallopUtil_GetFovFactorToIncrease16By9_hook)*>(GallopUtil_GetFovFactorToIncrease16By9_orig)(true, screenAspect);
+	}
+
+	Il2CppObject* errorDialog = nullptr;
+	Il2CppObject* storyViewController = nullptr;
+
+	void* StoryViewController_set_CheckErrorDialogForPause_orig = nullptr;
+	void StoryViewController_set_CheckErrorDialogForPause_hook(Il2CppObject* _this, bool value)
+	{
+		cout << "StoryViewController_set_CheckErrorDialogForPause\n";
+		reinterpret_cast<decltype(StoryViewController_set_CheckErrorDialogForPause_hook)*>(StoryViewController_set_CheckErrorDialogForPause_orig)(_this, value);
+	}
+
+	void* StoryViewController_ResumeTimelineUpdateByDialog_orig = nullptr;
+	void StoryViewController_ResumeTimelineUpdateByDialog_hook(Il2CppObject* _this)
+	{
+		cout << "StoryViewController_ResumeTimelineUpdateByDialog\n";
+		reinterpret_cast<decltype(StoryViewController_ResumeTimelineUpdateByDialog_hook)*>(StoryViewController_ResumeTimelineUpdateByDialog_orig)(_this);
+	}
+
+	void* StoryViewController_PauseTimelineUpdateByDialog_orig = nullptr;
+	void StoryViewController_PauseTimelineUpdateByDialog_hook(Il2CppObject* _this)
+	{
+		cout << "StoryViewController_PauseTimelineUpdateByDialog\n";
+		reinterpret_cast<decltype(StoryViewController_PauseTimelineUpdateByDialog_hook)*>(StoryViewController_PauseTimelineUpdateByDialog_orig)(_this);
+	}
+
+	void* DialogCommon_Close_orig = nullptr;
+	void DialogCommon_Close_hook(Il2CppObject* _this)
+	{
+		if (_this == errorDialog) {
+			cout << "Closed!!\n";
+			errorDialog = nullptr;
+			if (storyViewController)
+			{
+				StoryViewController_ResumeTimelineUpdateByDialog_hook(storyViewController);
+				StoryViewController_set_CheckErrorDialogForPause_hook(storyViewController, false);
+			}
+		}
+		reinterpret_cast<decltype(DialogCommon_Close_hook)*>(DialogCommon_Close_orig)(_this);
+	}
+
+	void* GallopUtil_GotoTitleOnError_orig = nullptr;
+	void GallopUtil_GotoTitleOnError_hook(Il2CppString* text)
+	{
+		PrintStackTrace();
+
+		auto okText = GetTextIdByName("Common0009");
+		auto errorText = GetTextIdByName("Common0071");
+
+		auto dialogData = il2cpp_object_new(il2cpp_symbols::get_class("umamusume.dll", "Gallop", "DialogCommon/Data"));
+		il2cpp_runtime_object_init(dialogData);
+		dialogData = reinterpret_cast<Il2CppObject * (*)(Il2CppObject * _this, unsigned long headerTextId, Il2CppString * message, Il2CppObject * onClickCenterButton, unsigned long closeTextId)>(
+			il2cpp_class_get_method_from_name(dialogData->klass, "SetSimpleOneButtonMessage", 4)->methodPointer
+			)(dialogData, errorText, il2cpp_string_new("내부적으로 의도치 않은 오류가 발생했습니다.\n\n게임은 문제 없이 플레이 가능하나,\n경우에 따라서 <color=#ff911c><i>타이틀</i></color>로 돌아가거나,\n게임 <color=#ff911c><i>다시 시작</i></color>이 필요할 수 있습니다."), nullptr, okText);
+		errorDialog = reinterpret_cast<Il2CppObject * (*)(Il2CppObject * data, bool isEnableOutsideClick)>(il2cpp_symbols::get_method_pointer("umamusume.dll", "Gallop", "DialogManager", "PushSystemDialog", 2))(dialogData, true);
+	}
+
+	void* StoryViewController_ctor_orig = nullptr;
+	void StoryViewController_ctor_hook(Il2CppObject* _this)
+	{
+		storyViewController = _this;
+		reinterpret_cast<decltype(StoryViewController_ctor_hook)*>(StoryViewController_ctor_orig)(_this);
+	}
+
+	void* StoryViewController_OnFinishPlayingTimelineAsync_MoveNext_orig = nullptr;
+	bool StoryViewController_OnFinishPlayingTimelineAsync_MoveNext_hook(Il2CppObject* _this)
+	{
+		if (useDefaultFPS) {
+			reinterpret_cast<decltype(set_fps_hook)*>(set_fps_orig)(30);
+		}
+		else {
+			useDefaultFPS = true;
+			reinterpret_cast<decltype(set_fps_hook)*>(set_fps_orig)(30);
+			useDefaultFPS = false;
+		}
+		reinterpret_cast<decltype(StoryViewController_OnFinishPlayingTimelineAsync_MoveNext_hook)*>(StoryViewController_OnFinishPlayingTimelineAsync_MoveNext_orig)(_this);
+		reinterpret_cast<decltype(set_fps_hook)*>(set_fps_orig)(60);
+		auto _hasLoadError = il2cpp_class_get_field_from_name(storyViewController->klass, "_hasLoadError");
+		bool hasLoadError;
+		il2cpp_field_get_value(storyViewController, _hasLoadError, &hasLoadError);
+		cout << "_hasLoadError: " << hasLoadError << "\n";
+		hasLoadError = false;
+		il2cpp_field_set_value(storyViewController, _hasLoadError, &hasLoadError);
+		return true;
+	}
+
 	void adjust_size()
 	{
 		thread([]() {
@@ -1775,6 +1960,7 @@ namespace
 	void dump_all_entries()
 	{
 		vector<wstring> static_entries;
+		vector<pair<const string, const wstring>> text_id_static_entries;
 		// 0 is None
 		for (int i = 1;; i++)
 		{
@@ -1782,9 +1968,13 @@ namespace
 
 			if (str && *str->start_char)
 			{
-				if (g_static_entries_use_hash)
+				if (g_static_entries_use_text_id_name)
 				{
-					static_entries.push_back(str->start_char);
+					text_id_static_entries.emplace_back(make_pair(GetTextIdNameById(i), str->start_char));
+				}
+				else if (g_static_entries_use_hash)
+				{
+					static_entries.emplace_back(str->start_char);
 				}
 				else
 				{
@@ -1799,7 +1989,12 @@ namespace
 					break;
 			}
 		}
-		if (g_static_entries_use_hash) {
+		if (g_static_entries_use_text_id_name)
+		{
+			logger::write_text_id_static_dict(text_id_static_entries);
+		}
+		else if (g_static_entries_use_hash)
+		{
 			logger::write_static_dict(static_entries);
 		}
 	}
@@ -2143,12 +2338,17 @@ namespace
 
 		auto set_anti_aliasing_addr = il2cpp_resolve_icall("UnityEngine.QualitySettings::set_antiAliasing(System.Int32)");
 
-		auto set_shadow_distance_addr = il2cpp_resolve_icall("UnityEngine.QualitySettings::set_shadowDistance(System.Single)");
+		auto set_shadowResolution_addr = il2cpp_resolve_icall("UnityEngine.QualitySettings::set_shadowResolution(UnityEngine.ShadowResolution)");
 
-		cout << "Test: " << il2cpp_resolve_icall("UnityEngine.QualitySettings::set_antiAliasing(System.Int32)") << "\n";
-		cout << "Test1 set_vSyncCount: " << il2cpp_resolve_icall("UnityEngine.QualitySettings::set_vSyncCount(System.Int32)") << "\n";
-		cout << "Test2 set_shadowDistance: " << il2cpp_resolve_icall("UnityEngine.QualitySettings::set_shadowDistance(System.Single)") << "\n";
-		cout << "Test3 set_pixelLightCount: " << il2cpp_resolve_icall("UnityEngine.QualitySettings::set_pixelLightCount(System.Int32)") << "\n";
+		auto set_anisotropicFiltering_addr = il2cpp_resolve_icall("UnityEngine.QualitySettings::set_anisotropicFiltering(UnityEngine.AnisotropicFiltering)");
+
+		auto set_shadows_addr = il2cpp_resolve_icall("UnityEngine.QualitySettings::set_shadows(UnityEngine.ShadowQuality)");
+
+		auto set_softVegetation_addr = il2cpp_resolve_icall("UnityEngine.QualitySettings::set_softVegetation(System.Boolean)");
+
+		auto set_realtimeReflectionProbes_addr = il2cpp_resolve_icall("UnityEngine.QualitySettings::set_realtimeReflectionProbes(System.Boolean)");
+
+		auto Light_set_shadowResolution_addr = il2cpp_resolve_icall("UnityEngine.Light::set_shadowResolution(UnityEngine.Light,UnityEngine.Rendering.LightShadowResolution)");
 
 		auto apply_graphics_quality_addr = reinterpret_cast<void (*)(
 			Il2CppObject*, Il2CppObject*, bool)>(il2cpp_symbols::get_method_pointer(
@@ -2284,6 +2484,32 @@ namespace
 
 		auto BGManager_CalcBgScale_addr = reinterpret_cast<float (*)(Il2CppObject*, int, int, int, int)>(il2cpp_symbols::get_method_pointer("umamusume.dll", "Gallop", "BGManager", "CalcBgScale", 4));
 
+		auto GallopUtil_GetFovFactor_addr = reinterpret_cast<float (*)()>(il2cpp_symbols::get_method_pointer("umamusume.dll", "Gallop", "GallopUtil", "GetFovFactor", -1));
+
+		auto GallopUtil_GetFovFactor2_addr = reinterpret_cast<float (*)(bool, float)>(il2cpp_symbols::get_method_pointer("umamusume.dll", "Gallop", "GallopUtil", "GetFovFactor", 2));
+
+		auto GallopUtil_GetFovFactorToIncrease_addr = reinterpret_cast<float (*)(bool, float)>(il2cpp_symbols::get_method_pointer("umamusume.dll", "Gallop", "GallopUtil", "GetFovFactorToIncrease", 2));
+
+		auto GallopUtil_GetFovFactorToIncrease16By9_addr = reinterpret_cast<float (*)(bool, float)>(il2cpp_symbols::get_method_pointer("umamusume.dll", "Gallop", "GallopUtil", "GetFovFactorToIncrease16By9", 2));
+
+		auto GallopUtil_GotoTitleOnError_addr = reinterpret_cast<void (*)(Il2CppString*)>(il2cpp_symbols::get_method_pointer("umamusume.dll", "Gallop", "GallopUtil", "GotoTitleOnError", 1));
+
+		auto DialogCommon_Close_addr = reinterpret_cast<void (*)(Il2CppObject*)>(il2cpp_symbols::get_method_pointer("umamusume.dll", "Gallop", "DialogCommon", "Close", 0));
+
+		auto StoryViewController_ctor_addr = il2cpp_symbols::get_method_pointer("umamusume.dll", "Gallop", "StoryViewController", ".ctor", 0);
+
+		auto StoryViewController_set_CheckErrorDialogForPause_addr = il2cpp_symbols::get_method_pointer("umamusume.dll", "Gallop", "StoryViewController", "set_CheckErrorDialogForPause", 1);
+
+		auto StoryViewController_PauseTimelineUpdateByDialog_addr = il2cpp_symbols::get_method_pointer("umamusume.dll", "Gallop", "StoryViewController", "PauseTimelineUpdateByDialog", 0);
+
+		auto StoryViewController_ResumeTimelineUpdateByDialog_addr = il2cpp_symbols::get_method_pointer("umamusume.dll", "Gallop", "StoryViewController", "ResumeTimelineUpdateByDialog", 0);
+
+		auto klass = il2cpp_symbols::find_class("umamusume.dll", "Gallop", [](Il2CppClass* klass) {
+			return string(klass->name).find("<OnFinishPlayingTimelineAsync>") != string::npos;
+			});
+
+		auto StoryViewController_OnFinishPlayingTimelineAsync_MoveNext_addr = il2cpp_class_get_method_from_name(klass, "MoveNext", 0);
+
 		auto load_scene_internal_addr = il2cpp_resolve_icall("UnityEngine.SceneManagement.SceneManager::LoadSceneAsyncNameIndexInternal_Injected(System.String,System.Int32,UnityEngine.SceneManagement.LoadSceneParameters&,System.bool)");
 
 #pragma endregion
@@ -2334,7 +2560,40 @@ namespace
 			}
 		}
 #pragma endregion
-		ADD_HOOK(set_shadow_distance, "UnityEngine.QualitySettings.set_shadow_distance(float) at %p\n")
+
+		ADD_HOOK(StoryViewController_OnFinishPlayingTimelineAsync_MoveNext, "Gallop.StoryViewController::OnFinishPlayingTimelineAsync_MoveNext at %p\n");
+
+		ADD_HOOK(StoryViewController_PauseTimelineUpdateByDialog, "Gallop.StoryViewController::PauseTimelineUpdateByDialog at %p\n");
+
+		ADD_HOOK(StoryViewController_ResumeTimelineUpdateByDialog, "Gallop.StoryViewController::ResumeTimelineUpdateByDialog at %p\n");
+
+		ADD_HOOK(StoryViewController_set_CheckErrorDialogForPause, "Gallop.StoryViewController::set_CheckErrorDialogForPause at %p\n");
+
+		ADD_HOOK(StoryViewController_ctor, "Gallop.StoryViewController::.ctor at %p\n");
+
+		ADD_HOOK(DialogCommon_Close, "Gallop.DialogCommon.Close() at %p\n");
+
+		ADD_HOOK(GallopUtil_GotoTitleOnError, "Gallop.GallopUtil.GotoTitleOnError() at %p\n");
+
+		ADD_HOOK(GallopUtil_GetFovFactor, "Gallop.GallopUtil.GetFovFactor() at %p\n");
+
+		ADD_HOOK(GallopUtil_GetFovFactor2, "Gallop.GallopUtil.GetFovFactor() at %p\n");
+
+		ADD_HOOK(GallopUtil_GetFovFactorToIncrease, "Gallop.GallopUtil.GetFovFactorToIncrease() at %p\n");
+
+		ADD_HOOK(GallopUtil_GetFovFactorToIncrease16By9, "Gallop.GallopUtil.GetFovFactorToIncrease16By9() at %p\n");
+
+		ADD_HOOK(set_shadowResolution, "UnityEngine.QualitySettings.set_shadowResolution(ShadowResolution) at %p\n");
+
+		ADD_HOOK(set_anisotropicFiltering, "UnityEngine.QualitySettings.set_anisotropicFiltering(UnityEngine.AnisotropicFiltering) at %p\n");
+
+		ADD_HOOK(set_shadows, "UnityEngine.QualitySettings.set_shadows(UnityEngine.ShadowQuality) at %p\n");
+
+		ADD_HOOK(set_softVegetation, "UnityEngine.QualitySettings.set_softVegetation(System.Boolean) at %p\n");
+
+		ADD_HOOK(set_realtimeReflectionProbes, "UnityEngine.QualitySettings.set_realtimeReflectionProbes(System.Boolean) at %p\n");
+
+		ADD_HOOK(Light_set_shadowResolution, "UnityEngine.Light.set_shadowResolution(UnityEngine.Rendering.LightShadowResolution) at %p\n");
 
 		ADD_HOOK(GetLimitSize, "Gallop.StandaloneWindowResize::GetChangedSize at %p\n");
 

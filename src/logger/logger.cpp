@@ -47,7 +47,7 @@ namespace logger
 		request_exit = true;
 	}
 
-	void write_entry(size_t hash, wstring text)
+	void write_entry(size_t hash, const wstring& text)
 	{
 		if (!enabled)
 			return;
@@ -61,7 +61,7 @@ namespace logger
 		has_change = true;
 	}
 
-	void write_static_dict(std::vector<std::wstring> dict)
+	void write_static_dict(const std::vector<std::wstring>& dict)
 	{
 		if (g_enable_logger)
 		{
@@ -90,5 +90,33 @@ namespace logger
 			t.detach();
 		}
 
+	}
+
+	void write_text_id_static_dict(const vector<pair<const string, const wstring>>& dict)
+	{
+		if (g_enable_logger)
+		{
+			static_json.open("text_id_static.json", ios::out);
+			static_json << "{\n";
+			thread t([dict]() {
+				for (auto pair = dict.begin(); pair != dict.end(); pair++) {
+					auto u8str = local::wide_u8(pair->second);
+					replaceAll(u8str, "\n", "\\n");
+					replaceAll(u8str, "\"", "\\\"");
+					if (next(pair) == dict.end())
+					{
+						static_json << "\"" << pair->first << "\": \"" << u8str << "\"\n";
+					}
+					else
+					{
+						static_json << "\"" << pair->first << "\": \"" << u8str << "\",\n";
+					}
+				}
+				static_json << "}\n";
+				static_json.close();
+				});
+
+			t.detach();
+		}
 	}
 }
