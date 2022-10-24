@@ -1961,6 +1961,7 @@ namespace
 	{
 		vector<wstring> static_entries;
 		vector<pair<const string, const wstring>> text_id_static_entries;
+		vector<pair<const string, const wstring>> text_id_not_matched_entries;
 		// 0 is None
 		for (int i = 1;; i++)
 		{
@@ -1970,7 +1971,13 @@ namespace
 			{
 				if (g_static_entries_use_text_id_name)
 				{
-					text_id_static_entries.emplace_back(make_pair(GetTextIdNameById(i), str->start_char));
+					string textIdName = GetTextIdNameById(i);
+					text_id_static_entries.emplace_back(make_pair(textIdName, str->start_char));
+					if (local::get_localized_string(textIdName) == nullptr ||
+						local::wide_u8(local::get_localized_string(textIdName)->start_char) == local::wide_u8(str->start_char))
+					{
+						text_id_not_matched_entries.emplace_back(make_pair(textIdName, str->start_char));
+					}
 				}
 				else if (g_static_entries_use_hash)
 				{
@@ -1991,7 +1998,7 @@ namespace
 		}
 		if (g_static_entries_use_text_id_name)
 		{
-			logger::write_text_id_static_dict(text_id_static_entries);
+			logger::write_text_id_static_dict(text_id_static_entries, text_id_not_matched_entries);
 		}
 		else if (g_static_entries_use_hash)
 		{

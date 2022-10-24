@@ -13,6 +13,7 @@ namespace logger
 		bool has_change = false;
 
 		fstream static_json;
+		fstream not_matched_json;
 	}
 
 	void init_logger()
@@ -36,7 +37,7 @@ namespace logger
 				}
 
 				log_file.close();
-			});
+				});
 
 			t.detach();
 		}
@@ -68,13 +69,13 @@ namespace logger
 			static_json.open("static.json", ios::out);
 			static_json << "{\n";
 			thread t([dict]() {
-				for (int i = 0; i < dict.size(); i++) 
+				for (int i = 0; i < dict.size(); i++)
 				{
 					auto hash = std::hash<wstring>{}(dict[i]);
 					auto u8str = local::wide_u8(dict[i]);
 					replaceAll(u8str, "\n", "\\n");
 					replaceAll(u8str, "\"", "\\\"");
-					if (i == dict.size() - 1) 
+					if (i == dict.size() - 1)
 					{
 						static_json << "\"" << hash << "\": \"" << u8str << "\"\n";
 					}
@@ -85,21 +86,23 @@ namespace logger
 				}
 				static_json << "}\n";
 				static_json.close();
-			});
+				});
 
 			t.detach();
 		}
 
 	}
 
-	void write_text_id_static_dict(const vector<pair<const string, const wstring>>& dict)
+	void write_text_id_static_dict(const vector<pair<const string, const wstring>>& dict,
+		const vector<pair<const string, const wstring>>& not_matched)
 	{
 		if (g_enable_logger)
 		{
 			static_json.open("text_id_static.json", ios::out);
 			static_json << "{\n";
 			thread t([dict]() {
-				for (auto pair = dict.begin(); pair != dict.end(); pair++) {
+				for (auto pair = dict.begin(); pair != dict.end(); pair++)
+				{
 					auto u8str = local::wide_u8(pair->second);
 					replaceAll(u8str, "\n", "\\n");
 					replaceAll(u8str, "\"", "\\\"");
@@ -117,6 +120,31 @@ namespace logger
 				});
 
 			t.detach();
+			if (!not_matched.empty())
+			{
+				not_matched_json.open("text_id_not_matched.json", ios::out);
+				not_matched_json << "{\n";
+				thread t1([not_matched]() {
+					for (auto pair = not_matched.begin(); pair != not_matched.end(); pair++)
+					{
+						auto u8str = local::wide_u8(pair->second);
+						replaceAll(u8str, "\n", "\\n");
+						replaceAll(u8str, "\"", "\\\"");
+						if (next(pair) == not_matched.end())
+						{
+							not_matched_json << "\"" << pair->first << "\": \"" << u8str << "\"\n";
+						}
+						else
+						{
+							not_matched_json << "\"" << pair->first << "\": \"" << u8str << "\",\n";
+						}
+					}
+					not_matched_json << "}\n";
+					not_matched_json.close();
+					});
+
+				t1.detach();
+			}
 		}
 	}
 }
