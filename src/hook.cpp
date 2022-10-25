@@ -63,6 +63,8 @@ namespace
 
 	Il2CppObject* uiManager = nullptr;
 
+	Il2CppObject* sceneManager = nullptr;
+
 	vector<string> replaceAssetNames;
 
 	Il2CppObject* (*load_from_file)(Il2CppString* path);
@@ -726,6 +728,8 @@ namespace
 		return reinterpret_cast<decltype(canvas_scaler_setres_hook)*>(canvas_scaler_setres_orig)(_this, res);
 	}
 
+	Il2CppArraySize* (*UIManager_GetCanvasScalerList)(Il2CppObject* _this);
+
 	void* UIManager_UpdateCanvasScaler_orig = nullptr;
 
 	void UIManager_UpdateCanvasScaler_hook(Il2CppObject* canvasScaler)
@@ -746,19 +750,46 @@ namespace
 			reinterpret_cast<decltype(UIManager_ChangeResizeUIForPC_hook)*>(UIManager_ChangeResizeUIForPC_orig)(_this, height, width);
 			return;
 		}
+		auto scalers = UIManager_GetCanvasScalerList(_this);
+		for (int i = 0; i < scalers->max_length; i++)
+		{
+			auto scaler = scalers->vector[i];
+			if (scaler)
+			{
+				set_scale_factor(scaler, max(1.0f, width / 1920.f) * g_force_landscape ? g_force_landscape_ui_scale : g_ui_scale);
+			}
+		}
 		reinterpret_cast<decltype(UIManager_ChangeResizeUIForPC_hook)*>(UIManager_ChangeResizeUIForPC_orig)(_this, width, height);
 	}
 
 	void* BGManager_CalcBgScale_orig = nullptr;
 	float BGManager_CalcBgScale_hook(Il2CppObject* _this, int width, int height, int renderTextureWidth, int renderTextureHeight)
 	{
-		if (width > height)
+		if (g_force_landscape)
 		{
-			return 3;
+			if (width > height)
+			{
+				return (1.0f - (static_cast<float>(width) / renderTextureWidth)) * 10;
+			}
+			else
+			{
+				return ((1.0f - (static_cast<float>(width) / renderTextureWidth)) * 10) / 4;
+			}
 		}
 		else
 		{
-			return 1.5;
+			if (renderTextureWidth == 1080)
+			{
+				return reinterpret_cast<decltype(BGManager_CalcBgScale_hook)*>(BGManager_CalcBgScale_orig)(_this, width, height, renderTextureWidth, renderTextureHeight);
+			}
+			if (width > height)
+			{
+				return ((1.0f - (static_cast<float>(height) / renderTextureHeight)) * 10) / 1.5;
+			}
+			else
+			{
+				return ((1.0f - (static_cast<float>(height) / renderTextureHeight)) * 10) / 2.15;
+			}
 		}
 	}
 
@@ -982,6 +1013,9 @@ namespace
 	void (*text_set_linespacing)(void*, float);
 	Il2CppString* (*text_get_text)(void*);
 	void (*text_set_text)(void*, Il2CppString*);
+	void (*text_set_horizontalOverflow)(void*, int);
+	void (*text_set_verticalOverflow)(void*, int);
+	int (*textcommon_get_TextId)(void*);
 
 	void* on_populate_orig = nullptr;
 	void on_populate_hook(Il2CppObject* _this, void* toFill)
@@ -1001,7 +1035,19 @@ namespace
 				text_set_font(_this, GetCustomFont());
 			}
 		}
+		auto textId = textcommon_get_TextId(_this);
+		if (textId) {
+			if (GetTextIdByName("Common0121") == textId ||
+				GetTextIdByName("Common0186") == textId ||
+				GetTextIdByName("Outgame0028") == textId ||
+				GetTextIdByName("Outgame0231") == textId ||
+				GetTextIdByName("Character0325") == textId)
+			{
+				text_set_horizontalOverflow(_this, 1);
+				text_set_verticalOverflow(_this, 1);
+			}
 
+		}
 		return reinterpret_cast<decltype(on_populate_hook)*>(on_populate_orig)(_this, toFill);
 	}
 
@@ -1856,12 +1902,12 @@ namespace
 	void DialogCommon_Close_hook(Il2CppObject* _this)
 	{
 		if (_this == errorDialog) {
-			cout << "Closed!!\n";
-			errorDialog = nullptr;
-			if (storyViewController)
+			if (sceneManager)
 			{
-				StoryViewController_ResumeTimelineUpdateByDialog_hook(storyViewController);
-				StoryViewController_set_CheckErrorDialogForPause_hook(storyViewController, false);
+				// Home 100
+				reinterpret_cast<void (*)(Il2CppObject*, int, Il2CppObject*, Il2CppObject*, Il2CppObject*, bool)>(
+					il2cpp_class_get_method_from_name(sceneManager->klass, "ChangeView", 5)->methodPointer
+					)(sceneManager, 100, nullptr, nullptr, nullptr, true);
 			}
 		}
 		reinterpret_cast<decltype(DialogCommon_Close_hook)*>(DialogCommon_Close_orig)(_this);
@@ -1870,8 +1916,7 @@ namespace
 	void* GallopUtil_GotoTitleOnError_orig = nullptr;
 	void GallopUtil_GotoTitleOnError_hook(Il2CppString* text)
 	{
-		PrintStackTrace();
-
+		// Bypass SoftwareReset
 		auto okText = GetTextIdByName("Common0009");
 		auto errorText = GetTextIdByName("Common0071");
 
@@ -1879,15 +1924,16 @@ namespace
 		il2cpp_runtime_object_init(dialogData);
 		dialogData = reinterpret_cast<Il2CppObject * (*)(Il2CppObject * _this, unsigned long headerTextId, Il2CppString * message, Il2CppObject * onClickCenterButton, unsigned long closeTextId)>(
 			il2cpp_class_get_method_from_name(dialogData->klass, "SetSimpleOneButtonMessage", 4)->methodPointer
-			)(dialogData, errorText, il2cpp_string_new("내부적으로 의도치 않은 오류가 발생했습니다.\n\n게임은 문제 없이 플레이 가능하나,\n경우에 따라서 <color=#ff911c><i>타이틀</i></color>로 돌아가거나,\n게임 <color=#ff911c><i>다시 시작</i></color>이 필요할 수 있습니다."), nullptr, okText);
+			)(dialogData, errorText, il2cpp_string_new("내부적으로 오류가 발생하여 홈으로 이동합니다.\n\n경우에 따라서 <color=#ff911c><i>타이틀</i></color>로 돌아가거나,\n게임 <color=#ff911c><i>다시 시작</i></color>이 필요할 수 있습니다."), nullptr, okText);
 		errorDialog = reinterpret_cast<Il2CppObject * (*)(Il2CppObject * data, bool isEnableOutsideClick)>(il2cpp_symbols::get_method_pointer("umamusume.dll", "Gallop", "DialogManager", "PushSystemDialog", 2))(dialogData, true);
 	}
 
-	void* StoryViewController_ctor_orig = nullptr;
-	void StoryViewController_ctor_hook(Il2CppObject* _this)
+	void* GameSystem_FixedUpdate_orig = nullptr;
+	void GameSystem_FixedUpdate_hook(Il2CppObject* _this)
 	{
-		storyViewController = _this;
-		reinterpret_cast<decltype(StoryViewController_ctor_hook)*>(StoryViewController_ctor_orig)(_this);
+		auto sceneManagerField = il2cpp_class_get_field_from_name(_this->klass, "_sceneManagerInstance");
+		il2cpp_field_get_value(_this, sceneManagerField, &sceneManager);
+		reinterpret_cast<decltype(GameSystem_FixedUpdate_hook)*>(GameSystem_FixedUpdate_orig)(_this);
 	}
 
 	void adjust_size()
@@ -2215,6 +2261,11 @@ namespace
 			"TextCommon", "Awake", 0
 		);
 
+		textcommon_get_TextId = reinterpret_cast<int (*)(void*)>(il2cpp_symbols::get_method_pointer(
+			"umamusume.dll", "Gallop",
+			"TextCommon", "get_TextId", 0
+		));
+
 		text_get_text = reinterpret_cast<Il2CppString * (*)(void*)>(
 			il2cpp_symbols::get_method_pointer(
 				"UnityEngine.UI.dll", "UnityEngine.UI",
@@ -2281,6 +2332,20 @@ namespace
 			il2cpp_symbols::get_method_pointer(
 				"UnityEngine.UI.dll", "UnityEngine.UI",
 				"Text", "set_lineSpacing", 1
+			)
+			);
+
+		text_set_horizontalOverflow = reinterpret_cast<void(*)(void*, int)>(
+			il2cpp_symbols::get_method_pointer(
+				"UnityEngine.UI.dll", "UnityEngine.UI",
+				"Text", "set_horizontalOverflow", 1
+			)
+			);
+
+		text_set_verticalOverflow = reinterpret_cast<void(*)(void*, int)>(
+			il2cpp_symbols::get_method_pointer(
+				"UnityEngine.UI.dll", "UnityEngine.UI",
+				"Text", "set_verticalOverflow", 1
 			)
 			);
 
@@ -2372,6 +2437,9 @@ namespace
 		auto UIManager_ChangeResizeUIForPC_addr = il2cpp_symbols::get_method_pointer(
 			"umamusume.dll", "Gallop", "UIManager", "ChangeResizeUIForPC", 2);
 
+		UIManager_GetCanvasScalerList = reinterpret_cast<Il2CppArraySize * (*)(Il2CppObject*)>(il2cpp_symbols::get_method_pointer(
+			"umamusume.dll", "Gallop", "UIManager", "GetCanvasScalerList", 0));
+
 		auto GetLimitSize_addr = il2cpp_symbols::get_method_pointer(
 			"umamusume.dll", "Gallop", "StandaloneWindowResize", "GetLimitSize", -1);
 
@@ -2453,31 +2521,13 @@ namespace
 
 		auto BGManager_CalcBgScale_addr = reinterpret_cast<float (*)(Il2CppObject*, int, int, int, int)>(il2cpp_symbols::get_method_pointer("umamusume.dll", "Gallop", "BGManager", "CalcBgScale", 4));
 
-		auto GallopUtil_GetFovFactor_addr = reinterpret_cast<float (*)()>(il2cpp_symbols::get_method_pointer("umamusume.dll", "Gallop", "GallopUtil", "GetFovFactor", -1));
-
-		auto GallopUtil_GetFovFactor2_addr = reinterpret_cast<float (*)(bool, float)>(il2cpp_symbols::get_method_pointer("umamusume.dll", "Gallop", "GallopUtil", "GetFovFactor", 2));
-
-		auto GallopUtil_GetFovFactorToIncrease_addr = reinterpret_cast<float (*)(bool, float)>(il2cpp_symbols::get_method_pointer("umamusume.dll", "Gallop", "GallopUtil", "GetFovFactorToIncrease", 2));
-
-		auto GallopUtil_GetFovFactorToIncrease16By9_addr = reinterpret_cast<float (*)(bool, float)>(il2cpp_symbols::get_method_pointer("umamusume.dll", "Gallop", "GallopUtil", "GetFovFactorToIncrease16By9", 2));
-
 		auto GallopUtil_GotoTitleOnError_addr = reinterpret_cast<void (*)(Il2CppString*)>(il2cpp_symbols::get_method_pointer("umamusume.dll", "Gallop", "GallopUtil", "GotoTitleOnError", 1));
 
 		auto DialogCommon_Close_addr = reinterpret_cast<void (*)(Il2CppObject*)>(il2cpp_symbols::get_method_pointer("umamusume.dll", "Gallop", "DialogCommon", "Close", 0));
 
 		auto StoryViewController_ctor_addr = il2cpp_symbols::get_method_pointer("umamusume.dll", "Gallop", "StoryViewController", ".ctor", 0);
 
-		auto StoryViewController_set_CheckErrorDialogForPause_addr = il2cpp_symbols::get_method_pointer("umamusume.dll", "Gallop", "StoryViewController", "set_CheckErrorDialogForPause", 1);
-
-		auto StoryViewController_PauseTimelineUpdateByDialog_addr = il2cpp_symbols::get_method_pointer("umamusume.dll", "Gallop", "StoryViewController", "PauseTimelineUpdateByDialog", 0);
-
-		auto StoryViewController_ResumeTimelineUpdateByDialog_addr = il2cpp_symbols::get_method_pointer("umamusume.dll", "Gallop", "StoryViewController", "ResumeTimelineUpdateByDialog", 0);
-
-		auto klass = il2cpp_symbols::find_class("umamusume.dll", "Gallop", [](Il2CppClass* klass) {
-			return string(klass->name).find("<OnFinishPlayingTimelineAsync>") != string::npos;
-			});
-
-		auto StoryViewController_OnFinishPlayingTimelineAsync_MoveNext_addr = il2cpp_class_get_method_from_name(klass, "MoveNext", 0);
+		auto GameSystem_FixedUpdate_addr = il2cpp_symbols::get_method_pointer("umamusume.dll", "Gallop", "GameSystem", "FixedUpdate", 0);
 
 		auto load_scene_internal_addr = il2cpp_resolve_icall("UnityEngine.SceneManagement.SceneManager::LoadSceneAsyncNameIndexInternal_Injected(System.String,System.Int32,UnityEngine.SceneManagement.LoadSceneParameters&,System.bool)");
 
@@ -2530,27 +2580,11 @@ namespace
 		}
 #pragma endregion
 
-		ADD_HOOK(StoryViewController_OnFinishPlayingTimelineAsync_MoveNext, "Gallop.StoryViewController::OnFinishPlayingTimelineAsync_MoveNext at %p\n");
-
-		ADD_HOOK(StoryViewController_PauseTimelineUpdateByDialog, "Gallop.StoryViewController::PauseTimelineUpdateByDialog at %p\n");
-
-		ADD_HOOK(StoryViewController_ResumeTimelineUpdateByDialog, "Gallop.StoryViewController::ResumeTimelineUpdateByDialog at %p\n");
-
-		ADD_HOOK(StoryViewController_set_CheckErrorDialogForPause, "Gallop.StoryViewController::set_CheckErrorDialogForPause at %p\n");
-
-		ADD_HOOK(StoryViewController_ctor, "Gallop.StoryViewController::.ctor at %p\n");
+		ADD_HOOK(GameSystem_FixedUpdate, "Gallop.GameSystem::FixedUpdate at %p\n");
 
 		ADD_HOOK(DialogCommon_Close, "Gallop.DialogCommon.Close() at %p\n");
 
 		ADD_HOOK(GallopUtil_GotoTitleOnError, "Gallop.GallopUtil.GotoTitleOnError() at %p\n");
-
-		ADD_HOOK(GallopUtil_GetFovFactor, "Gallop.GallopUtil.GetFovFactor() at %p\n");
-
-		ADD_HOOK(GallopUtil_GetFovFactor2, "Gallop.GallopUtil.GetFovFactor() at %p\n");
-
-		ADD_HOOK(GallopUtil_GetFovFactorToIncrease, "Gallop.GallopUtil.GetFovFactorToIncrease() at %p\n");
-
-		ADD_HOOK(GallopUtil_GetFovFactorToIncrease16By9, "Gallop.GallopUtil.GetFovFactorToIncrease16By9() at %p\n");
 
 		ADD_HOOK(set_shadowResolution, "UnityEngine.QualitySettings.set_shadowResolution(ShadowResolution) at %p\n");
 

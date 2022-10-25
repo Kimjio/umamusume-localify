@@ -42,6 +42,7 @@ extern bool g_unlock_size;
 extern float g_ui_scale;
 extern float g_ui_animation_scale;
 extern float g_aspect_ratio;
+extern float g_resolution_3d_scale;
 extern bool g_replace_to_builtin_font;
 extern bool g_replace_to_custom_font;
 extern std::string g_font_assetbundle_path;
