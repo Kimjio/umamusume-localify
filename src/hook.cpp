@@ -538,7 +538,7 @@ namespace
 	void* set_fps_orig = nullptr;
 	void set_fps_hook(int value)
 	{
-		return reinterpret_cast<decltype(set_fps_hook)*>(set_fps_orig)(useDefaultFPS ? value : g_max_fps);
+		reinterpret_cast<decltype(set_fps_hook)*>(set_fps_orig)(useDefaultFPS ? value : g_max_fps);
 	}
 
 	bool (*is_virt)() = nullptr;
@@ -1111,6 +1111,30 @@ namespace
 			set_softVegetation_hook(true);
 			set_realtimeReflectionProbes_hook(true);
 		}
+	}
+
+	void* GraphicSettings_GetVirtualResolution3D_orig = nullptr;
+	Vector2Int_t GraphicSettings_GetVirtualResolution3D_hook(Il2CppObject* _this, bool isForcedWideAspect)
+	{
+		auto resolution = reinterpret_cast<decltype(GraphicSettings_GetVirtualResolution3D_hook)*>(GraphicSettings_GetVirtualResolution3D_orig)(_this, isForcedWideAspect);
+		if (g_unlock_size)
+		{
+			Resolution_t res;
+			get_resolution(&res);
+			if (resolution.x > resolution.y)
+			{
+				resolution.x = res.width;
+				resolution.y = res.height;
+			}
+			else
+			{
+				resolution.x = res.height;
+				resolution.y = res.width;
+			}
+		}
+		resolution.x *= g_resolution_3d_scale;
+		resolution.y *= g_resolution_3d_scale;
+		return resolution;
 	}
 
 	void* PathResolver_GetLocalPath_orig = nullptr;
@@ -1826,53 +1850,7 @@ namespace
 		set_fps_hook(30);
 	}
 
-	void* GallopUtil_GetFovFactor_orig = nullptr;
-	float GallopUtil_GetFovFactor_hook() {
-		cout << "GallopUtil_GetFovFactor\n";
-		return reinterpret_cast<decltype(GallopUtil_GetFovFactor_hook)*>(GallopUtil_GetFovFactor_orig)();
-	}
-
-	void* GallopUtil_GetFovFactor2_orig = nullptr;
-	float GallopUtil_GetFovFactor2_hook(bool isVertical, float screenAspect) {
-		cout << "GallopUtil_GetFovFactor2\n";
-		return reinterpret_cast<decltype(GallopUtil_GetFovFactor2_hook)*>(GallopUtil_GetFovFactor2_orig)(true, screenAspect);
-	}
-
-	void* GallopUtil_GetFovFactorToIncrease_orig = nullptr;
-	float GallopUtil_GetFovFactorToIncrease_hook(bool isVertical, float screenAspect) {
-		cout << "GallopUtil_GetFovFactorToIncrease\n";
-		return reinterpret_cast<decltype(GallopUtil_GetFovFactorToIncrease_hook)*>(GallopUtil_GetFovFactorToIncrease_orig)(true, screenAspect);
-	}
-
-	void* GallopUtil_GetFovFactorToIncrease16By9_orig = nullptr;
-	float GallopUtil_GetFovFactorToIncrease16By9_hook(bool isVertical, float screenAspect) {
-		cout << "GallopUtil_GetFovFactorToIncrease16By9\n";
-		return reinterpret_cast<decltype(GallopUtil_GetFovFactorToIncrease16By9_hook)*>(GallopUtil_GetFovFactorToIncrease16By9_orig)(true, screenAspect);
-	}
-
 	Il2CppObject* errorDialog = nullptr;
-	Il2CppObject* storyViewController = nullptr;
-
-	void* StoryViewController_set_CheckErrorDialogForPause_orig = nullptr;
-	void StoryViewController_set_CheckErrorDialogForPause_hook(Il2CppObject* _this, bool value)
-	{
-		cout << "StoryViewController_set_CheckErrorDialogForPause\n";
-		reinterpret_cast<decltype(StoryViewController_set_CheckErrorDialogForPause_hook)*>(StoryViewController_set_CheckErrorDialogForPause_orig)(_this, value);
-	}
-
-	void* StoryViewController_ResumeTimelineUpdateByDialog_orig = nullptr;
-	void StoryViewController_ResumeTimelineUpdateByDialog_hook(Il2CppObject* _this)
-	{
-		cout << "StoryViewController_ResumeTimelineUpdateByDialog\n";
-		reinterpret_cast<decltype(StoryViewController_ResumeTimelineUpdateByDialog_hook)*>(StoryViewController_ResumeTimelineUpdateByDialog_orig)(_this);
-	}
-
-	void* StoryViewController_PauseTimelineUpdateByDialog_orig = nullptr;
-	void StoryViewController_PauseTimelineUpdateByDialog_hook(Il2CppObject* _this)
-	{
-		cout << "StoryViewController_PauseTimelineUpdateByDialog\n";
-		reinterpret_cast<decltype(StoryViewController_PauseTimelineUpdateByDialog_hook)*>(StoryViewController_PauseTimelineUpdateByDialog_orig)(_this);
-	}
 
 	void* DialogCommon_Close_orig = nullptr;
 	void DialogCommon_Close_hook(Il2CppObject* _this)
@@ -1910,28 +1888,6 @@ namespace
 	{
 		storyViewController = _this;
 		reinterpret_cast<decltype(StoryViewController_ctor_hook)*>(StoryViewController_ctor_orig)(_this);
-	}
-
-	void* StoryViewController_OnFinishPlayingTimelineAsync_MoveNext_orig = nullptr;
-	bool StoryViewController_OnFinishPlayingTimelineAsync_MoveNext_hook(Il2CppObject* _this)
-	{
-		if (useDefaultFPS) {
-			reinterpret_cast<decltype(set_fps_hook)*>(set_fps_orig)(30);
-		}
-		else {
-			useDefaultFPS = true;
-			reinterpret_cast<decltype(set_fps_hook)*>(set_fps_orig)(30);
-			useDefaultFPS = false;
-		}
-		reinterpret_cast<decltype(StoryViewController_OnFinishPlayingTimelineAsync_MoveNext_hook)*>(StoryViewController_OnFinishPlayingTimelineAsync_MoveNext_orig)(_this);
-		reinterpret_cast<decltype(set_fps_hook)*>(set_fps_orig)(60);
-		auto _hasLoadError = il2cpp_class_get_field_from_name(storyViewController->klass, "_hasLoadError");
-		bool hasLoadError;
-		il2cpp_field_get_value(storyViewController, _hasLoadError, &hasLoadError);
-		cout << "_hasLoadError: " << hasLoadError << "\n";
-		hasLoadError = false;
-		il2cpp_field_set_value(storyViewController, _hasLoadError, &hasLoadError);
-		return true;
 	}
 
 	void adjust_size()
@@ -2363,6 +2319,12 @@ namespace
 				"Gallop",
 				"GraphicSettings", "ApplyGraphicsQuality", 2));
 
+		auto GraphicSettings_GetVirtualResolution3D_addr = reinterpret_cast<Vector2Int_t(*)(
+			Il2CppObject*, bool)>(il2cpp_symbols::get_method_pointer(
+				"umamusume.dll",
+				"Gallop",
+				"GraphicSettings", "GetVirtualResolution3D", 1));
+
 		auto ChangeScreenOrientation_addr = reinterpret_cast<void (*)(
 			ScreenOrientation, bool)>(il2cpp_symbols::get_method_pointer(
 				"umamusume.dll",
@@ -2690,7 +2652,7 @@ namespace
 
 		// ADD_HOOK(timeline_audioclip_ctor, "Gallop.StoryTimelineController::GetTimeScaleHighSpeed at %p\n");
 
-		ADD_HOOK(query_setup, "Query::ctor at %p\n");
+		ADD_HOOK(query_setup, "Query::Setup at %p\n");
 		ADD_HOOK(query_getstr, "Query::GetString at %p\n");
 		ADD_HOOK(query_dispose, "Query::Dispose at %p\n");
 
@@ -2712,7 +2674,7 @@ namespace
 			last_virt_window_width = r.width - 400;
 			last_virt_window_height = last_virt_window_width / new_ratio;
 			ADD_HOOK(UIManager_ChangeResizeUIForPC, "Gallop.UIManager::ChangeResizeUIForPC at %p\n");
-			ADD_HOOK(WaitDeviceOrientation, "Gallop.Screen::WaitDeviceOrientation at %p");
+			ADD_HOOK(WaitDeviceOrientation, "Gallop.Screen::WaitDeviceOrientation at %p\n");
 			ADD_HOOK(Screen_set_orientation, "Gallop.Screen::set_orientation at %p\n");
 			ADD_HOOK(Screen_get_ScreenOrientation, "Gallop.Screen::get_ScreenOrientation at %p\n");
 			ADD_HOOK(Screen_RequestOrientation, "Gallop.Screen::RequestOrientation at %p\n");
@@ -2786,13 +2748,22 @@ namespace
 		}
 
 		if (g_dump_entries)
+		{
 			dump_all_entries();
+		}
 
-		if (g_graphics_quality != -1) {
+		if (g_graphics_quality != -1)
+		{
 			ADD_HOOK(apply_graphics_quality, "Gallop.GraphicSettings.ApplyGraphicsQuality at %p\n");
 		}
 
-		if (g_anti_aliasing != -1) {
+		if (g_resolution_3d_scale != 1.0f)
+		{
+			ADD_HOOK(GraphicSettings_GetVirtualResolution3D, "Gallop.GraphicSettings.GetVirtualResolution3D at %p\n");
+		}
+
+		if (g_anti_aliasing != -1)
+		{
 			ADD_HOOK(set_anti_aliasing, "UnityEngine.QualitySettings.set_antiAliasing(int) at %p\n");
 		}
 	}

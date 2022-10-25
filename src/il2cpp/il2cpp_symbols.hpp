@@ -54,6 +54,16 @@ public:
 	float y;
 };
 
+// UnityEngine.Vector2Int
+struct Vector2Int_t
+{
+public:
+	// System.Int32 UnityEngine.Vector2Int::m_X
+	int x;
+	// System.Int32 UnityEngine.Vector2Int::m_Y
+	int y;
+};
+
 // UnityEngine.Vector3
 struct Vector3_t
 {

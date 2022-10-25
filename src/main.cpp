@@ -15,6 +15,7 @@ bool g_unlock_size = false;
 float g_ui_scale = 1.0f;
 float g_ui_animation_scale = 1.0f;
 float g_aspect_ratio = 16.f / 9.f;
+float g_resolution_3d_scale = 1.0f;
 bool g_replace_to_builtin_font = true;
 bool g_replace_to_custom_font = false;
 std::string g_font_assetbundle_path;
@@ -104,6 +105,10 @@ namespace
 			if (document.HasMember("uiAnimationScale"))
 			{
 				g_ui_animation_scale = document["uiAnimationScale"].GetFloat();
+			}
+			if (document.HasMember("resolution3dScale"))
+			{
+				g_resolution_3d_scale = document["resolution3dScale"].GetFloat();
 			}
 			if (document.HasMember("replaceFont"))
 			{
