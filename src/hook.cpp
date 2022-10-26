@@ -8,6 +8,16 @@ using namespace std;
 
 namespace
 {
+	std::string GotoTitleError =
+		"내부적으로 오류가 발생하여 홈으로 이동합니다.\n\n"
+		"경우에 따라서 <color=#ff911c><i>타이틀</i></color>로 돌아가거나, \n"
+		"게임 <color=#ff911c><i>다시 시작</i></color>이 필요할 수 있습니다.";
+
+	std::string GotoTitleErrorJa =
+		"内部的にエラーが発生し、ホームに移動します。\n\n"
+		"場合によっては、<color=#ff911c><i>タイトル</i></color>に戻るか、\n"
+		"ゲーム<color=#ff911c><i>再起動</i></color>が必要になる場合がありますあります。";
+
 	void path_game_assembly();
 
 	bool mh_inited = false;
@@ -1924,7 +1934,7 @@ namespace
 		il2cpp_runtime_object_init(dialogData);
 		dialogData = reinterpret_cast<Il2CppObject * (*)(Il2CppObject * _this, unsigned long headerTextId, Il2CppString * message, Il2CppObject * onClickCenterButton, unsigned long closeTextId)>(
 			il2cpp_class_get_method_from_name(dialogData->klass, "SetSimpleOneButtonMessage", 4)->methodPointer
-			)(dialogData, errorText, il2cpp_string_new("내부적으로 오류가 발생하여 홈으로 이동합니다.\n\n경우에 따라서 <color=#ff911c><i>타이틀</i></color>로 돌아가거나,\n게임 <color=#ff911c><i>다시 시작</i></color>이 필요할 수 있습니다."), nullptr, okText);
+			)(dialogData, errorText, local::get_localized_string(il2cpp_string_new(GotoTitleErrorJa.data())), nullptr, okText);
 		errorDialog = reinterpret_cast<Il2CppObject * (*)(Il2CppObject * data, bool isEnableOutsideClick)>(il2cpp_symbols::get_method_pointer("umamusume.dll", "Gallop", "DialogManager", "PushSystemDialog", 2))(dialogData, true);
 	}
 
@@ -2686,7 +2696,7 @@ namespace
 
 		// ADD_HOOK(timeline_audioclip_ctor, "Gallop.StoryTimelineController::GetTimeScaleHighSpeed at %p\n");
 
-		ADD_HOOK(query_setup, "Query::Setup at %p\n");
+		ADD_HOOK(query_setup, "Query::_Setup at %p\n");
 		ADD_HOOK(query_getstr, "Query::GetString at %p\n");
 		ADD_HOOK(query_dispose, "Query::Dispose at %p\n");
 
