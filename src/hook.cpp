@@ -117,7 +117,7 @@ namespace
 		return (Int32Object*)instance;
 	}
 
-	Il2CppObject* ParseEnum(Il2CppObject* runtimeType, string name)
+	Il2CppObject* ParseEnum(Il2CppObject* runtimeType, const string& name)
 	{
 		return reinterpret_cast<Il2CppObject * (*)(Il2CppObject*, Il2CppString*)>(il2cpp_symbols::get_method_pointer("mscorlib.dll", "System", "Enum", "Parse", 2))(runtimeType, il2cpp_string_new(name.data()));
 	}
@@ -775,8 +775,17 @@ namespace
 	void* BGManager_CalcBgScale_orig = nullptr;
 	float BGManager_CalcBgScale_hook(Il2CppObject* _this, int width, int height, int renderTextureWidth, int renderTextureHeight)
 	{
+		int floorWidth = floorf(renderTextureWidth / 0.8333);
+		int floorHeight = floorf(renderTextureHeight / 0.8333);
 		if (g_force_landscape)
 		{
+			if (renderTextureHeight == 1080 || floorHeight == 1080)
+			{
+				if (width > height) {
+					return 2.0f;
+				}
+				return 1.05f;
+			}
 			if (width > height)
 			{
 				return (1.0f - (static_cast<float>(width) / renderTextureWidth)) * 10;
@@ -788,7 +797,7 @@ namespace
 		}
 		else
 		{
-			if (renderTextureWidth == 1080)
+			if (renderTextureWidth == 1080 || floorWidth == 1080)
 			{
 				return reinterpret_cast<decltype(BGManager_CalcBgScale_hook)*>(BGManager_CalcBgScale_orig)(_this, width, height, renderTextureWidth, renderTextureHeight);
 			}
@@ -2431,7 +2440,7 @@ namespace
 				"Gallop", "DeviceOrientationGuide", "Show", 2));
 
 		auto NowLoading_Show_addr = reinterpret_cast<void (*)(int, Il2CppObject*,
-			float)>(il2cpp_symbols::get_method_pointer(
+			Il2CppObject*, int)>(il2cpp_symbols::get_method_pointer(
 				"umamusume.dll",
 				"Gallop", "NowLoading", "Show", 4));
 
