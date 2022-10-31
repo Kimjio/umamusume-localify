@@ -132,7 +132,7 @@ namespace
 		return reinterpret_cast<unsigned long (*)(Il2CppObject*)>(il2cpp_symbols::get_method_pointer("mscorlib.dll", "System", "Enum", "ToUInt64", 1))(runtimeEnum);
 	}
 
-	unsigned long GetTextIdByName(string name)
+	unsigned long GetTextIdByName(const string& name)
 	{
 		return GetEnumValue(ParseEnum(GetRuntimeType("umamusume.dll", "Gallop", "TextId"), name));
 	}
@@ -1237,10 +1237,19 @@ namespace
 	void* assetbundle_load_asset_orig = nullptr;
 	Il2CppObject* assetbundle_load_asset_hook(Il2CppObject* _this, Il2CppString* name, const Il2CppType* type)
 	{
-		string u8Name = local::wide_u8(name->start_char);
-		if (find(replaceAssetNames.begin(), replaceAssetNames.end(), u8Name) != replaceAssetNames.end())
+		stringstream pathStream(local::wide_u8(name->start_char));
+		string segment;
+		vector<string> splited;
+		while (getline(pathStream, segment, '/'))
 		{
-			return reinterpret_cast<decltype(assetbundle_load_asset_hook)*>(assetbundle_load_asset_orig)(replaceAssets, name, type);
+			splited.emplace_back(segment);
+		}
+		auto &fileName = splited.back();
+		if (find_if(replaceAssetNames.begin(), replaceAssetNames.end(), [fileName](const string& item) {
+			return item.find(fileName) != string::npos;
+			}) != replaceAssetNames.end())
+		{
+			return reinterpret_cast<decltype(assetbundle_load_asset_hook)*>(assetbundle_load_asset_orig)(replaceAssets, il2cpp_string_new(fileName.data()), type);
 		}
 		auto obj = reinterpret_cast<decltype(assetbundle_load_asset_hook)*>(assetbundle_load_asset_orig)(_this, name, type);
 		if (obj->klass->name == "GameObject"s)
