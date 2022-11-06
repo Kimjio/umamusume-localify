@@ -1964,6 +1964,23 @@ namespace
 		reinterpret_cast<decltype(GameSystem_FixedUpdate_hook)*>(GameSystem_FixedUpdate_orig)(_this);
 	}
 
+	void* CriMana_Player_SetFile_orig = nullptr;
+	bool CriMana_Player_SetFile_hook(Il2CppObject* _this, Il2CppObject* binder, Il2CppString* moviePath, int setMode) {
+		stringstream pathStream(local::wide_u8(moviePath->start_char));
+		string segment;
+		vector<string> splited;
+		while (getline(pathStream, segment, '\\'))
+		{
+			splited.emplace_back(segment);
+		}
+		if (g_replace_assets.find(splited[splited.size() - 1]) != g_replace_assets.end())
+		{
+			auto& replaceAsset = g_replace_assets.at(splited[splited.size() - 1]);
+			moviePath = il2cpp_string_new(replaceAsset.path.data());
+		}
+		return reinterpret_cast<decltype(CriMana_Player_SetFile_hook)*>(CriMana_Player_SetFile_orig)(_this, binder, moviePath, setMode);
+	}
+
 	void adjust_size()
 	{
 		thread([]() {
@@ -2557,6 +2574,8 @@ namespace
 
 		auto GameSystem_FixedUpdate_addr = il2cpp_symbols::get_method_pointer("umamusume.dll", "Gallop", "GameSystem", "FixedUpdate", 0);
 
+		auto CriMana_Player_SetFile_addr = il2cpp_symbols::get_method_pointer("CriMw.CriWare.Runtime.dll", "CriWare.CriMana", "Player", "SetFile", 3);
+
 		auto load_scene_internal_addr = il2cpp_resolve_icall("UnityEngine.SceneManagement.SceneManager::LoadSceneAsyncNameIndexInternal_Injected(System.String,System.Int32,UnityEngine.SceneManagement.LoadSceneParameters&,System.bool)");
 
 #pragma endregion
@@ -2607,6 +2626,8 @@ namespace
 			}
 		}
 #pragma endregion
+
+		ADD_HOOK(CriMana_Player_SetFile, "CriWare.CriMana.Player::SetFile at %p\n");
 
 		ADD_HOOK(GameSystem_FixedUpdate, "Gallop.GameSystem::FixedUpdate at %p\n");
 
