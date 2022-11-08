@@ -786,13 +786,25 @@ namespace
 				}
 				return 1.05f;
 			}
+			if (renderTextureHeight == 2160)
+			{
+				if (width < height) {
+					return 2.1f;
+				}
+			}
+			if (floorHeight == 3110)
+			{
+				if (width < height) {
+					return 2.55f;
+				}
+			}
 			if (width > height)
 			{
 				return (1.0f - (static_cast<float>(width) / renderTextureWidth)) * 10;
 			}
 			else
 			{
-				return ((1.0f - (static_cast<float>(width) / renderTextureWidth)) * 10) / 4;
+				return ((1.0f - (static_cast<float>(width) / floorWidth)) * 10) / 4;
 			}
 		}
 		else
