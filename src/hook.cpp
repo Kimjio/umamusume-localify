@@ -777,34 +777,26 @@ namespace
 	{
 		int floorWidth = floorf(renderTextureWidth / 0.8333);
 		int floorHeight = floorf(renderTextureHeight / 0.8333);
+		int ceilWidth = ceilf((floorWidth / g_resolution_3d_scale) * 0.8333);
+		int ceilHeight = ceilf((floorHeight / g_resolution_3d_scale) * 0.8333);
 		if (g_force_landscape)
 		{
-			if (renderTextureHeight == 1080 || floorHeight == 1080)
+			Resolution_t r;
+			get_resolution_stub(&r);
+			if (renderTextureHeight == 1080 || floorHeight == 1080 || ceilHeight == 1080)
 			{
 				if (width > height) {
-					return 2.0f;
-				}
-				return 1.05f;
+					return 2.0f / (max(1.0f, r.width / 1920.f) * g_force_landscape_ui_scale);
 			}
-			if (renderTextureHeight == 2160)
-			{
-				if (width < height) {
-					return 2.1f;
-				}
-			}
-			if (floorHeight == 3110)
-			{
-				if (width < height) {
-					return 2.55f;
-				}
+				return 1.05f / (max(1.0f, r.width / 1920.f) * g_force_landscape_ui_scale);
 			}
 			if (width > height)
 			{
-				return (1.0f - (static_cast<float>(width) / renderTextureWidth)) * 10;
+				return (((1.0f - (static_cast<float>(width) / renderTextureWidth)) * 10) * g_resolution_3d_scale) * (max(1.0f, r.width / 1920.f) * g_force_landscape_ui_scale);
 			}
 			else
 			{
-				return ((1.0f - (static_cast<float>(width) / floorWidth)) * 10) / 4;
+				return ((((1.0f - (static_cast<float>(width) / floorWidth)) * 10) / 4) * g_resolution_3d_scale) * (max(1.0f, r.width / 1920.f) * g_force_landscape_ui_scale);
 			}
 		}
 		else
@@ -812,6 +804,10 @@ namespace
 			if (renderTextureWidth == 1080 || floorWidth == 1080)
 			{
 				return reinterpret_cast<decltype(BGManager_CalcBgScale_hook)*>(BGManager_CalcBgScale_orig)(_this, width, height, renderTextureWidth, renderTextureHeight);
+			}
+			if (ceilWidth == 1080)
+			{
+				return reinterpret_cast<decltype(BGManager_CalcBgScale_hook)*>(BGManager_CalcBgScale_orig)(_this, width, height, renderTextureWidth, renderTextureHeight) * g_resolution_3d_scale;
 			}
 			if (width > height)
 			{
