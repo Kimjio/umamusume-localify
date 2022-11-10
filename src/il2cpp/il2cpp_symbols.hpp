@@ -32,6 +32,14 @@ public:
 	float a;
 };
 
+// UnityEngine.Color32
+struct Color32_t
+{
+public:
+	// System.Single UnityEngine.Color32::rgba
+	unsigned int rgba;
+};
+
 
 // UnityEngine.ScreenOrientation
 enum class ScreenOrientation {

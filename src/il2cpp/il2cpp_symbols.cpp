@@ -92,6 +92,8 @@ namespace il2cpp_symbols
 		RESOLVE_IMPORT(il2cpp_class_get_field_from_name);
 		RESOLVE_IMPORT(il2cpp_field_get_value);
 		RESOLVE_IMPORT(il2cpp_field_set_value);
+		RESOLVE_IMPORT(il2cpp_field_static_get_value);
+		RESOLVE_IMPORT(il2cpp_field_static_set_value);
 		RESOLVE_IMPORT(il2cpp_field_get_type);
 		RESOLVE_IMPORT(il2cpp_type_get_object);
 		RESOLVE_IMPORT(il2cpp_image_get_name);

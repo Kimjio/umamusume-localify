@@ -144,7 +144,37 @@ namespace
 
 	Il2CppObject* GetCustomFont() {
 		if (!assets) return nullptr;
-		return load_assets(assets, il2cpp_string_new(g_font_asset_name.data()), GetRuntimeType("UnityEngine.TextRenderingModule.dll", "UnityEngine", "Font"));
+		if (!g_font_asset_name.empty())
+		{
+			return load_assets(assets, il2cpp_string_new(g_font_asset_name.data()), GetRuntimeType("UnityEngine.TextRenderingModule.dll", "UnityEngine", "Font"));
+		}
+		return nullptr;
+	}
+
+	// Fallback not support outline style
+	Il2CppObject* GetCustomTMPFontFallback() {
+		if (!assets) return nullptr;
+		auto font = GetCustomFont();
+		if (font)
+		{
+			return reinterpret_cast<Il2CppObject * (*)(
+				Il2CppObject * font, int samplingPointSize, int atlasPadding, int renderMode, int atlasWidth, int atlasHeight, int atlasPopulationMode, bool enableMultiAtlasSupport
+				)>
+				(
+					il2cpp_symbols::get_method_pointer("Unity.TextMeshPro.dll", "TMPro", "TMP_FontAsset", "CreateFontAsset", 1)
+					)(font, 36, 4, 4165, 8192, 8192, 1, false);
+		}
+		return nullptr;
+	}
+
+	Il2CppObject* GetCustomTMPFont() {
+		if (!assets) return nullptr;
+		if (!g_tmpro_font_asset_name.empty())
+		{
+			auto tmpFont = load_assets(assets, il2cpp_string_new(g_tmpro_font_asset_name.data()), GetRuntimeType("Unity.TextMeshPro.dll", "TMPro", "TMP_FontAsset"));
+			return tmpFont ? tmpFont : GetCustomTMPFontFallback();
+		}
+		return GetCustomTMPFontFallback();
 	}
 
 	string GetUnityVersion() {
@@ -291,71 +321,10 @@ namespace
 		il2cpp_field_set_value(_this, field, local::get_localized_string(str));
 	}
 
-	void* text_clip_data_ctor_orig = nullptr;
-	void text_clip_data_ctor_hook(Il2CppObject* _this)
-	{
-		// cout << "FinishTypewrite\n";
-		// Il2CppString* (*trace)() = reinterpret_cast<Il2CppString * (*)()>(il2cpp_symbols::get_method_pointer("UnityEngine.CoreModule.dll", "UnityEngine", "StackTraceUtility", "ExtractStackTrace", 0));
-		// cout << local::wide_u8(wstring(trace()->start_char)) << "\n";
-
-		//auto field = il2cpp_class_get_field_from_name(il2cpp_symbols::get_class("umamusume.dll", "Gallop", "StoryTimelineData"), "TypewriteCountPerSecond");
-		//cout << field->name << "\n";
-		//cout << (field->type->type == IL2CPP_TYPE_I4) << "\n";
-		//// il2cpp_object_new(il2cpp_symbols::get_class("mscorlib.dll", "System", "Int32"));
-
-		//int value = 20;
-		//il2cpp_field_set_value(_this, field, &value);
-		//int result = 0;
-		//il2cpp_field_get_value(_this, field, &result);
-		//printf("%d\n", result);
-		return;
-	}
-
-	/*void* get_time_from_frame_orig = nullptr;
-	float get_time_from_frame_hook(Il2CppObject* _this, int frame, float fps) {
-		return reinterpret_cast<decltype(get_time_from_frame_hook)*>(get_time_from_frame_orig)(_this, frame, 144);
-	}*/
-
 	void* update_orig = nullptr;
 	void* update_hook(Il2CppObject* _this, void* updateType, float deltaTime, float independentTime)
 	{
 		return reinterpret_cast<decltype(update_hook)*>(update_orig)(_this, updateType, deltaTime * g_ui_animation_scale, independentTime * g_ui_animation_scale);
-	}
-
-	/*void* timeline_audioclip_ctor_orig = nullptr;
-	void* timeline_audioclip_ctor_hook(Il2CppObject* _this, int frameCount, float currentTime, bool isWaiting) {
-		cout << "frameCount: " << frameCount << "\n";
-		cout << "currentTime: " << currentTime << "\n";
-		cout << "isWaiting: " << isWaiting << "\n";
-		return reinterpret_cast<decltype(timeline_audioclip_ctor_hook)*>(timeline_audioclip_ctor_orig)(_this, round(currentTime * 144), currentTime, isWaiting);
-	}*/
-
-	void* get_start_frame_orig = nullptr;
-	int get_start_frame_hook(Il2CppObject* _this)
-	{
-		auto orig_result = reinterpret_cast<decltype(get_start_frame_hook)*>(get_start_frame_orig)(_this);
-		if (orig_result == 0) return 0;
-		// cout << "get_StartFrame: " << orig_result << "\n";
-		if (orig_result < 100) {
-			return orig_result;
-		}
-		return round(orig_result);
-	}
-
-	void* get_end_frame_orig = nullptr;
-	int get_end_frame_hook(Il2CppObject* _this)
-	{
-		auto orig_result = reinterpret_cast<decltype(get_end_frame_hook)*>(get_end_frame_orig)(_this);
-		// cout << "get_EndFrame: " << orig_result << "\n";
-		return round(orig_result);
-	}
-
-	void* get_end_frame1_orig = nullptr;
-	int get_end_frame1_hook(Il2CppObject* _this)
-	{
-		auto orig_result = reinterpret_cast<decltype(get_end_frame1_hook)*>(get_end_frame1_orig)(_this);
-		// cout << "get_EndFrame1: " << orig_result << "\n";
-		return round(orig_result);
 	}
 
 	void* update_timeline_data_orig = nullptr;
@@ -787,7 +756,7 @@ namespace
 			{
 				if (width > height) {
 					return 2.0f / (max(1.0f, r.width / 1920.f) * g_force_landscape_ui_scale);
-			}
+				}
 				return 1.05f / (max(1.0f, r.width / 1920.f) * g_force_landscape_ui_scale);
 			}
 			if (width > height)
@@ -1097,6 +1066,63 @@ namespace
 		reinterpret_cast<decltype(textcommon_awake_hook)*>(textcommon_awake_orig)(_this);
 	}
 
+	void* TextMeshProUguiCommon_Awake_orig = nullptr;
+	void TextMeshProUguiCommon_Awake_hook(Il2CppObject* _this)
+	{
+		reinterpret_cast<decltype(TextMeshProUguiCommon_Awake_hook)*>(TextMeshProUguiCommon_Awake_orig)(_this);
+		auto customFont = GetCustomTMPFont();
+		auto customFontMaterialField = il2cpp_class_get_field_from_name(customFont->klass, "material");
+		Il2CppObject* customFontMaterial;
+		il2cpp_field_get_value(customFont, customFontMaterialField, &customFontMaterial);
+
+		auto SetFloat = reinterpret_cast<void (*)(Il2CppObject*, Il2CppString*, float)>(il2cpp_class_get_method_from_name(customFontMaterial->klass, "SetFloat", 2)->methodPointer);
+		auto SetColor = reinterpret_cast<void (*)(Il2CppObject*, Il2CppString*, Color_t)>(il2cpp_class_get_method_from_name(customFontMaterial->klass, "SetColor", 2)->methodPointer);
+
+		auto origOutlineWidth = reinterpret_cast<float (*)(Il2CppObject*)>(il2cpp_class_get_method_from_name(_this->klass, "get_outlineWidth", 0)->methodPointer)(_this);
+
+		auto outlineColorDictField = il2cpp_class_get_field_from_name(il2cpp_symbols::get_class("umamusume.dll", "Gallop", "ColorPreset"), "OutlineColorDictionary");
+		Il2CppObject* outlineColorDict;
+		il2cpp_field_static_get_value(outlineColorDictField, &outlineColorDict);
+		auto colorEnum = reinterpret_cast<int (*)(Il2CppObject*)>(il2cpp_class_get_method_from_name(_this->klass, "get_OutlineColor", 0)->methodPointer)(_this);
+
+		auto entriesField = il2cpp_class_get_field_from_name(outlineColorDict->klass, "entries");
+		Il2CppArraySize* entries;
+		il2cpp_field_get_value(outlineColorDict, entriesField, &entries);
+
+		auto colorType = GetRuntimeType("umamusume.dll", "Gallop", "OutlineColorType");
+
+		auto color32 = 0xFFFFFFFF;
+		for (int i = 0; i < entries->max_length; i++)
+		{
+			auto entry = reinterpret_cast<unsigned long long>(entries->vector[i]);
+			auto color = (entry & 0xFFFFFFFF00000000) >> 32;
+			auto key = entry & 0xFFFFFFFF;
+			if (key == colorEnum && (color != 0xFFFFFFFF && color != 0))
+			{
+				color32 = color;
+				break;
+			}
+			auto enumName = local::wide_u8(GetEnumName(colorType, colorEnum)->start_char);
+			if (enumName == "White"s || enumName == "Black"s)
+			{
+				color32 = color;
+				break;
+			}
+		}
+
+		float a = ((color32 & 0xFF000000) >> 24) / static_cast<float>(0xff);
+		float b = ((color32 & 0xFF0000) >> 16) / static_cast<float>(0xff);
+		float g = ((color32 & 0xFF00) >> 8) / static_cast<float>(0xff);
+		float r = (color32 & 0xFF) / static_cast<float>(0xff);
+		auto origOutlineColor = Color_t{ r, g, b, a };
+
+		SetFloat(customFontMaterial, il2cpp_string_new("_OutlineWidth"), origOutlineWidth);
+		SetColor(customFontMaterial, il2cpp_string_new("_OutlineColor"), origOutlineColor);
+
+		reinterpret_cast<void (*)(Il2CppObject*, Il2CppObject*)>(il2cpp_class_get_method_from_name(_this->klass, "set_font", 1)->methodPointer)(_this, customFont);
+		reinterpret_cast<void (*)(Il2CppObject*, bool)>(il2cpp_class_get_method_from_name(_this->klass, "set_enableWordWrapping", 1)->methodPointer)(_this, false);
+	}
+
 	void* load_zekken_composite_resource_orig = nullptr;
 	void load_zekken_composite_resource_hook(Il2CppObject* _this)
 	{
@@ -1252,57 +1278,35 @@ namespace
 		{
 			splited.emplace_back(segment);
 		}
-		auto &fileName = splited.back();
+		auto& fileName = splited.back();
 		if (find_if(replaceAssetNames.begin(), replaceAssetNames.end(), [fileName](const string& item) {
 			return item.find(fileName) != string::npos;
 			}) != replaceAssetNames.end())
 		{
 			return reinterpret_cast<decltype(assetbundle_load_asset_hook)*>(assetbundle_load_asset_orig)(replaceAssets, il2cpp_string_new(fileName.data()), type);
 		}
-		auto obj = reinterpret_cast<decltype(assetbundle_load_asset_hook)*>(assetbundle_load_asset_orig)(_this, name, type);
-		if (obj->klass->name == "GameObject"s)
-		{
-			auto getComponent = reinterpret_cast<Il2CppObject * (*)(Il2CppObject*, Il2CppType*)>(il2cpp_class_get_method_from_name(obj->klass, "GetComponent", 1)->methodPointer);
-			auto assetholder = getComponent(obj, (Il2CppType*)GetRuntimeType("umamusume.dll", "Gallop", "AssetHolder"));
-			if (assetholder)
+			auto obj = reinterpret_cast<decltype(assetbundle_load_asset_hook)*>(assetbundle_load_asset_orig)(_this, name, type);
+			if (obj->klass->name == "GameObject"s)
 			{
-				auto objectList = reinterpret_cast<Il2CppObject * (*)(Il2CppObject*)>(il2cpp_class_get_method_from_name(assetholder->klass, "get_ObjectList", 0)->methodPointer)(assetholder);
-				FieldInfo* itemsField = il2cpp_class_get_field_from_name(objectList->klass, "_items");
-				Il2CppArraySize* arr;
-				il2cpp_field_get_value(objectList, itemsField, &arr);
-				for (int i = 0; i < arr->max_length; i++)
+				auto getComponent = reinterpret_cast<Il2CppObject * (*)(Il2CppObject*, Il2CppType*)>(il2cpp_class_get_method_from_name(obj->klass, "GetComponent", 1)->methodPointer);
+				auto assetholder = getComponent(obj, (Il2CppType*)GetRuntimeType("umamusume.dll", "Gallop", "AssetHolder"));
+				if (assetholder)
 				{
-					auto pair = (Il2CppObject*)arr->vector[i];
-					auto field = il2cpp_class_get_field_from_name(pair->klass, "Value");
-					Il2CppObject* obj;
-					il2cpp_field_get_value(pair, field, &obj);
-					if (obj)
+					auto objectList = reinterpret_cast<Il2CppObject * (*)(Il2CppObject*)>(il2cpp_class_get_method_from_name(assetholder->klass, "get_ObjectList", 0)->methodPointer)(assetholder);
+					FieldInfo* itemsField = il2cpp_class_get_field_from_name(objectList->klass, "_items");
+					Il2CppArraySize* arr;
+					il2cpp_field_get_value(objectList, itemsField, &arr);
+					for (int i = 0; i < arr->max_length; i++)
 					{
-						if (obj->klass->name == "Texture2D"s)
+						auto pair = (Il2CppObject*)arr->vector[i];
+						auto field = il2cpp_class_get_field_from_name(pair->klass, "Value");
+						Il2CppObject* obj;
+						il2cpp_field_get_value(pair, field, &obj);
+						if (obj)
 						{
-							auto uobject_name = uobject_get_name(obj);
-							if (!local::wide_u8(uobject_name->start_char).empty())
+							if (obj->klass->name == "Texture2D"s)
 							{
-								auto newTexture = reinterpret_cast<decltype(assetbundle_load_asset_hook)*>(assetbundle_load_asset_orig)(replaceAssets,
-									uobject_name,
-									(Il2CppType*)GetRuntimeType("UnityEngine.CoreModule.dll", "UnityEngine", "Texture2D"));
-								if (newTexture)
-								{
-									reinterpret_cast<void (*)(Il2CppObject*, int)>(
-										il2cpp_symbols::get_method_pointer("UnityEngine.CoreModule.dll", "UnityEngine", "Object", "set_hideFlags", 1)
-										)(newTexture, 32);
-									il2cpp_field_set_value(pair, field, newTexture);
-								}
-							}
-						}
-						if (obj->klass->name == "Material"s)
-						{
-							auto get_mainTexture = reinterpret_cast<Il2CppObject * (*)(Il2CppObject*)>(il2cpp_class_get_method_from_name(obj->klass, "get_mainTexture", 0)->methodPointer);
-							auto set_mainTexture = reinterpret_cast<Il2CppObject * (*)(Il2CppObject*, Il2CppObject*)>(il2cpp_class_get_method_from_name(obj->klass, "set_mainTexture", 1)->methodPointer);
-							auto mainTexture = get_mainTexture(obj);
-							if (mainTexture)
-							{
-								auto uobject_name = uobject_get_name(mainTexture);
+								auto uobject_name = uobject_get_name(obj);
 								if (!local::wide_u8(uobject_name->start_char).empty())
 								{
 									auto newTexture = reinterpret_cast<decltype(assetbundle_load_asset_hook)*>(assetbundle_load_asset_orig)(replaceAssets,
@@ -1313,17 +1317,39 @@ namespace
 										reinterpret_cast<void (*)(Il2CppObject*, int)>(
 											il2cpp_symbols::get_method_pointer("UnityEngine.CoreModule.dll", "UnityEngine", "Object", "set_hideFlags", 1)
 											)(newTexture, 32);
-										set_mainTexture(obj, newTexture);
+										il2cpp_field_set_value(pair, field, newTexture);
 									}
 								}
 							}
+							if (obj->klass->name == "Material"s)
+							{
+								auto get_mainTexture = reinterpret_cast<Il2CppObject * (*)(Il2CppObject*)>(il2cpp_class_get_method_from_name(obj->klass, "get_mainTexture", 0)->methodPointer);
+								auto set_mainTexture = reinterpret_cast<Il2CppObject * (*)(Il2CppObject*, Il2CppObject*)>(il2cpp_class_get_method_from_name(obj->klass, "set_mainTexture", 1)->methodPointer);
+								auto mainTexture = get_mainTexture(obj);
+								if (mainTexture)
+								{
+									auto uobject_name = uobject_get_name(mainTexture);
+									if (!local::wide_u8(uobject_name->start_char).empty())
+									{
+										auto newTexture = reinterpret_cast<decltype(assetbundle_load_asset_hook)*>(assetbundle_load_asset_orig)(replaceAssets,
+											uobject_name,
+											(Il2CppType*)GetRuntimeType("UnityEngine.CoreModule.dll", "UnityEngine", "Texture2D"));
+										if (newTexture)
+										{
+											reinterpret_cast<void (*)(Il2CppObject*, int)>(
+												il2cpp_symbols::get_method_pointer("UnityEngine.CoreModule.dll", "UnityEngine", "Object", "set_hideFlags", 1)
+												)(newTexture, 32);
+											set_mainTexture(obj, newTexture);
+										}
+									}
+								}
 
+							}
 						}
 					}
 				}
 			}
-		}
-		return obj;
+			return obj;
 	}
 
 	void* assetbundle_unload_orig = nullptr;
@@ -2142,56 +2168,12 @@ namespace
 				method->parameters->parameter_type->type == IL2CPP_TYPE_VALUETYPE;
 			});
 
-		auto text_clip_data_ctor_addr = il2cpp_symbols::get_method_pointer(
-			"umamusume.dll", "Gallop", "StoryTimelineTextClipData", "FinishTypewrite", 0
-		);
-
-		auto cutin_timeline_controller_GetCurrentSpeed_addr = il2cpp_symbols::get_method_pointer(
-			"umamusume.dll", "Gallop", "CutInHelper", "GetTargetSpeed", 0
-		);
-
-		auto frame_to_time_addr = il2cpp_symbols::get_method_pointer(
-			"umamusume.dll", "Gallop", "TweenAnimationTimelineUtil", "FrameToTime", 1
-		);
-
-		auto time_to_frame_addr = il2cpp_symbols::get_method_pointer(
-			"umamusume.dll", "Gallop", "TweenAnimationTimelineUtil", "TimeToFrame", 1
-		);
-
 		auto update_addr = il2cpp_symbols::get_method_pointer(
 			"DOTween.dll", "DG.Tweening.Core", "TweenManager", "Update", 3
 		);
 
-		auto timeline_audioclip_ctor_addr = il2cpp_symbols::get_method_pointer(
-			"umamusume.dll", "Gallop", "StoryTimelineData", "UpdateTimelineData", 3
-		);
-
-		/*auto get_start_frame_addr = il2cpp_symbols::get_method_pointer(
-			"umamusume.dll", "Gallop", "StoryTimelineBlockData", "get_StartFrame", 0
-		);*/
-
-		/*auto get_end_frame_addr = il2cpp_symbols::get_method_pointer(
-			"umamusume.dll", "Gallop", "StoryTimelineBlockData", "get_EndFrame", 0
-		);*/
-
-		/*auto get_end_frame1_addr = il2cpp_symbols::get_method_pointer(
-			"umamusume.dll", "Gallop", "StoryTimelineClipData", "get_EndFrame", 0
-		);*/
-
 		auto update_timeline_data_addr = il2cpp_symbols::get_method_pointer(
 			"umamusume.dll", "Gallop", "StoryTimelineBlockData", "UpdateBlockData", 4
-		);
-
-		/*auto get_fixed_start_frame_addr = il2cpp_symbols::get_method_pointer(
-			"umamusume.dll", "Gallop", "StoryTimelineClipData", "get_FixedStartFrame", 0
-		);*/
-
-		/*auto get_fixed_end_frame_addr = il2cpp_symbols::get_method_pointer(
-			"umamusume.dll", "Gallop", "StoryTimelineClipData", "get_FixedEndFrame", 0
-		);*/
-
-		auto get_time_from_frame_addr = il2cpp_symbols::get_method_pointer(
-			"umamusume.dll", "Gallop.CutIn.Cutt", "CutInTimelineController", "GetTimeFromFrame", 2
 		);
 
 		auto query_setup_addr = il2cpp_symbols::get_method_pointer(
@@ -2312,6 +2294,11 @@ namespace
 		auto textcommon_awake_addr = il2cpp_symbols::get_method_pointer(
 			"umamusume.dll", "Gallop",
 			"TextCommon", "Awake", 0
+		);
+
+		auto TextMeshProUguiCommon_Awake_addr = il2cpp_symbols::get_method_pointer(
+			"umamusume.dll", "Gallop",
+			"TextMeshProUguiCommon", "Awake", 0
 		);
 
 		textcommon_get_TextId = reinterpret_cast<int (*)(void*)>(il2cpp_symbols::get_method_pointer(
@@ -2655,8 +2642,6 @@ namespace
 
 		ADD_HOOK(Light_set_shadowResolution, "UnityEngine.Light.set_shadowResolution(UnityEngine.Rendering.LightShadowResolution) at %p\n");
 
-		ADD_HOOK(GetLimitSize, "Gallop.StandaloneWindowResize::GetChangedSize at %p\n");
-
 		ADD_HOOK(NowLoading_Show, "Gallop.NowLoading::Show at %p\n");
 
 		ADD_HOOK(PathResolver_GetLocalPath, "Cyan.Loader.PathResolver::GetLocalPath at %p\n");
@@ -2752,7 +2737,8 @@ namespace
 		if (g_force_landscape || g_unlock_size)
 		{
 			ADD_HOOK(BootSystem_Awake, "Gallop.BootSystem::Awake at %p\n");
-			ADD_HOOK(BGManager_CalcBgScale, "Gallop.BGManager::CalcBgScale at %p\n");
+			ADD_HOOK(canvas_scaler_setres, "UnityEngine.UI.CanvasScaler::set_referenceResolution at %p\n");
+			ADD_HOOK(UIManager_UpdateCanvasScaler, "Gallop.UIManager::UpdateCanvasScaler at %p\n");
 		}
 
 		if (g_force_landscape) {
@@ -2790,6 +2776,7 @@ namespace
 		{
 			ADD_HOOK(on_populate, "Gallop.TextCommon::OnPopulateMesh at %p\n");
 			ADD_HOOK(textcommon_awake, "Gallop.TextCommon::Awake at %p\n");
+			ADD_HOOK(TextMeshProUguiCommon_Awake, "Gallop.TextMeshProUguiCommon::Awake at %p\n");
 		}
 
 		if (g_max_fps > -1)
@@ -2812,6 +2799,8 @@ namespace
 			ADD_HOOK(gallop_get_screenheight, "Gallop.Screen::get_Height at %p\n");
 			ADD_HOOK(gallop_get_screenwidth, "Gallop.Screen::get_Width at %p\n");
 
+			ADD_HOOK(GetLimitSize, "Gallop.StandaloneWindowResize::GetChangedSize at %p\n");
+
 			Resolution_t r;
 			get_resolution_stub(&r);
 			last_display_width = r.width;
@@ -2821,12 +2810,6 @@ namespace
 		if (g_max_fps > -1 || g_unlock_size || g_force_landscape)
 		{
 			ADD_HOOK(wndproc, "Gallop.StandaloneWindowResize.WndProc at %p \n");
-		}
-
-		if (g_unlock_size || g_force_landscape)
-		{
-			ADD_HOOK(canvas_scaler_setres, "UnityEngine.UI.CanvasScaler::set_referenceResolution at %p\n");
-			ADD_HOOK(UIManager_UpdateCanvasScaler, "Gallop.UIManager::UpdateCanvasScaler at %p\n");
 		}
 
 		if (g_auto_fullscreen || g_force_landscape || g_unlock_size)
@@ -2846,6 +2829,11 @@ namespace
 		if (g_graphics_quality != -1)
 		{
 			ADD_HOOK(apply_graphics_quality, "Gallop.GraphicSettings.ApplyGraphicsQuality at %p\n");
+		}
+
+		if (g_force_landscape || g_unlock_size || g_resolution_3d_scale != 1.0f)
+		{
+			ADD_HOOK(BGManager_CalcBgScale, "Gallop.BGManager::CalcBgScale at %p\n");
 		}
 
 		if (g_resolution_3d_scale != 1.0f)

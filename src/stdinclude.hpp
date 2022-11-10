@@ -47,6 +47,7 @@ extern bool g_replace_to_builtin_font;
 extern bool g_replace_to_custom_font;
 extern std::string g_font_assetbundle_path;
 extern std::string g_font_asset_name;
+extern std::string g_tmpro_font_asset_name;
 extern bool g_auto_fullscreen;
 extern int g_graphics_quality;
 extern int g_anti_aliasing;

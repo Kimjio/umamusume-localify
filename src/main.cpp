@@ -20,6 +20,7 @@ bool g_replace_to_builtin_font = true;
 bool g_replace_to_custom_font = false;
 std::string g_font_assetbundle_path;
 std::string g_font_asset_name;
+std::string g_tmpro_font_asset_name;
 bool g_auto_fullscreen = true;
 int g_graphics_quality = -1;
 int g_anti_aliasing = -1;
@@ -129,6 +130,10 @@ namespace
 			if (document.HasMember("fontAssetName"))
 			{
 				g_font_asset_name = std::string(document["fontAssetName"].GetString());
+			}
+			if (document.HasMember("tmproFontAssetName"))
+			{
+				g_tmpro_font_asset_name = std::string(document["tmproFontAssetName"].GetString());
 			}
 			if (document.HasMember("autoFullscreen"))
 			{
