@@ -1037,6 +1037,9 @@ namespace
 				GetTextIdByName("Common0186") == textId ||
 				GetTextIdByName("Outgame0028") == textId ||
 				GetTextIdByName("Outgame0231") == textId ||
+				GetTextIdByName("Outgame0393") == textId ||
+				GetTextIdByName("SingleMode0265") == textId ||
+				GetTextIdByName("Character0039") == textId ||
 				GetTextIdByName("Character0325") == textId)
 			{
 				text_set_horizontalOverflow(_this, 1);
