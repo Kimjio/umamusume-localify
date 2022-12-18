@@ -30,6 +30,7 @@ bool g_ui_loading_show_orientation_guide = true;
 std::string g_custom_title_name;
 std::unordered_map<std::string, ReplaceAsset> g_replace_assets;
 std::string g_replace_assetbundle_file_path;
+std::string g_replace_text_db_path;
 std::string text_id_dict;
 
 namespace
@@ -202,6 +203,11 @@ namespace
 			if (document.HasMember("replaceAssetBundleFilePath"))
 			{
 				g_replace_assetbundle_file_path = document["replaceAssetBundleFilePath"].GetString();
+			}
+
+			if (document.HasMember("replaceTextDBPath"))
+			{
+				g_replace_text_db_path = document["replaceTextDBPath"].GetString();
 			}
 
 			// Looks like not working for now

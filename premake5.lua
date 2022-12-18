@@ -30,6 +30,7 @@ end
 
 include "deps/minhook.lua"
 include "deps/rapidjson.lua"
+include "deps/SQLiteCpp.lua"
 
 workspace "umamusume-localify"
 	location "./build"
@@ -78,6 +79,8 @@ workspace "umamusume-localify"
 		files {
 			"./src/**.hpp",
 			"./src/**.cpp",
+			"./src/**.h",
+			"./src/**.c",
 			"./src/**.asm",
 			"./src/**.def",
 		}

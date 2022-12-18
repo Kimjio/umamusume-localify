@@ -2,6 +2,8 @@
 #include <set>
 #include <sstream>
 
+#include <SQLiteCpp/SQLiteCpp.h>
+
 #include "il2cpp_dump.h"
 
 using namespace std;
@@ -142,7 +144,8 @@ namespace
 		return local::wide_u8(GetEnumName(GetRuntimeType("umamusume.dll", "Gallop", "TextId"), id)->start_char);
 	}
 
-	Il2CppObject* GetCustomFont() {
+	Il2CppObject* GetCustomFont()
+	{
 		if (!assets) return nullptr;
 		if (!g_font_asset_name.empty())
 		{
@@ -152,7 +155,8 @@ namespace
 	}
 
 	// Fallback not support outline style
-	Il2CppObject* GetCustomTMPFontFallback() {
+	Il2CppObject* GetCustomTMPFontFallback()
+	{
 		if (!assets) return nullptr;
 		auto font = GetCustomFont();
 		if (font)
@@ -167,7 +171,8 @@ namespace
 		return nullptr;
 	}
 
-	Il2CppObject* GetCustomTMPFont() {
+	Il2CppObject* GetCustomTMPFont()
+	{
 		if (!assets) return nullptr;
 		if (!g_tmpro_font_asset_name.empty())
 		{
@@ -177,7 +182,8 @@ namespace
 		return GetCustomTMPFontFallback();
 	}
 
-	string GetUnityVersion() {
+	string GetUnityVersion()
+	{
 		string version(local::wide_u8(get_unityVersion()->start_char));
 		return version;
 	}
@@ -202,7 +208,8 @@ namespace
 		return result ? result : orig_result;
 	}
 
-	void ReplaceTextMeshFont(Il2CppObject* textMesh, Il2CppObject* meshRenderer) {
+	void ReplaceTextMeshFont(Il2CppObject* textMesh, Il2CppObject* meshRenderer)
+	{
 		Il2CppObject* font = GetCustomFont();
 		Il2CppObject* fontMaterial = reinterpret_cast<Il2CppObject * (*)(Il2CppObject * _this)>(il2cpp_class_get_method_from_name(font->klass, "get_material", 0)->methodPointer)(font);
 		Il2CppObject* fontTexture = reinterpret_cast<Il2CppObject * (*)(Il2CppObject * _this)>(il2cpp_class_get_method_from_name(fontMaterial->klass, "get_mainTexture", 0)->methodPointer)(fontMaterial);
@@ -347,11 +354,16 @@ namespace
 		return round(orig_result);
 	}
 
-	std::unordered_map<void*, bool> text_queries;
+	std::unordered_map<void*, SQLite::Statement*> text_queries;
+	std::unordered_map<void*, bool> replacement_queries_can_next;
+
+	SQLite::Database* replacementMDB;
 
 	void* query_setup_orig = nullptr;
-	void* query_setup_hook(void* _this, void* conn, Il2CppString* sql)
+	void query_setup_hook(Il2CppObject* _this, void* conn, Il2CppString* sql)
 	{
+		reinterpret_cast<decltype(query_setup_hook)*>(query_setup_orig)(_this, conn, sql);
+
 		auto ssql = std::wstring(sql->start_char);
 
 		if (ssql.find(L"text_data") != std::string::npos ||
@@ -359,30 +371,334 @@ namespace
 			ssql.find(L"race_jikkyo_comment") != std::string::npos ||
 			ssql.find(L"race_jikkyo_message") != std::string::npos)
 		{
-			text_queries.emplace(_this, true);
+			auto stmtField = il2cpp_class_get_field_from_name(_this->klass, "_stmt");
+			intptr_t* stmtPtr;
+			il2cpp_field_get_value(_this, stmtField, &stmtPtr);
+			try
+			{
+				if (replacementMDB)
+				{
+					text_queries.emplace(stmtPtr, new SQLite::Statement(*replacementMDB, local::wide_u8(ssql)));
+				}
+				else
+				{
+					text_queries.emplace(stmtPtr, nullptr);
+				}
+			}
+			catch (exception& e)
+			{
+				cout << "query_setup ERROR: " << e.what() << endl;
+			}
+		}
+	}
+
+	void* Plugin_sqlite3_step_orig = nullptr;
+	bool Plugin_sqlite3_step_hook(intptr_t* pStmt)
+	{
+		if (text_queries.contains(pStmt))
+		{
+			try
+			{
+				auto stmt = text_queries.at(pStmt);
+				if (stmt)
+				{
+					stmt->executeStep();
+				}
+			}
+			catch (exception& e)
+			{
+			}
 		}
 
-		return reinterpret_cast<decltype(query_setup_hook)*>(query_setup_orig)(_this, conn, sql);
+		return reinterpret_cast<decltype(Plugin_sqlite3_step_hook)*>(Plugin_sqlite3_step_orig)(pStmt);
+	}
+
+	void* Plugin_sqlite3_reset_orig = nullptr;
+	bool Plugin_sqlite3_reset_hook(intptr_t* pStmt)
+	{
+		if (text_queries.contains(pStmt))
+		{
+			try
+			{
+				auto stmt = text_queries.at(pStmt);
+				if (stmt)
+				{
+					stmt->reset();
+					stmt->clearBindings();
+					replacement_queries_can_next.insert_or_assign(pStmt, true);
+				}
+			}
+			catch (exception& e)
+			{
+			}
+		}
+		return reinterpret_cast<decltype(Plugin_sqlite3_reset_hook)*>(Plugin_sqlite3_reset_orig)(pStmt);
+	}
+
+	void* query_step_orig = nullptr;
+	bool query_step_hook(Il2CppObject* _this)
+	{
+		auto stmtField = il2cpp_class_get_field_from_name(_this->klass, "_stmt");
+		intptr_t* stmtPtr;
+		il2cpp_field_get_value(_this, stmtField, &stmtPtr);
+		if (text_queries.contains(stmtPtr))
+		{
+			try
+			{
+				auto stmt = text_queries.at(stmtPtr);
+				if (stmt)
+				{
+					stmt->executeStep();
+				}
+			}
+			catch (exception& e)
+			{
+			}
+		}
+		return reinterpret_cast<decltype(query_step_hook)*>(query_step_orig)(_this);
+	}
+
+	void* prepared_query_reset_orig = nullptr;
+	bool prepared_query_reset_hook(Il2CppObject* _this)
+	{
+		auto stmtField = il2cpp_class_get_field_from_name(_this->klass, "_stmt");
+		intptr_t* stmtPtr;
+		il2cpp_field_get_value(_this, stmtField, &stmtPtr);
+		if (text_queries.contains(stmtPtr))
+		{
+			try
+			{
+				auto stmt = text_queries.at(stmtPtr);
+				if (stmt)
+				{
+
+					stmt->reset();
+					stmt->clearBindings();
+					replacement_queries_can_next.insert_or_assign(stmtPtr, true);
+				}
+			}
+			catch (exception& e)
+			{
+			}
+		}
+		return reinterpret_cast<decltype(prepared_query_reset_hook)*>(prepared_query_reset_orig)(_this);
+	}
+
+	void* prepared_query_bind_text_orig = nullptr;
+	bool prepared_query_bind_text_hook(Il2CppObject* _this, int idx, Il2CppString* text)
+	{
+		auto stmtField = il2cpp_class_get_field_from_name(_this->klass, "_stmt");
+		intptr_t* stmtPtr;
+		il2cpp_field_get_value(_this, stmtField, &stmtPtr);
+		if (text_queries.contains(stmtPtr))
+		{
+			try
+			{
+				auto stmt = text_queries.at(stmtPtr);
+				if (stmt)
+				{
+					stmt->bind(idx, local::wide_u8(text->start_char));
+				}
+			}
+			catch (exception& e)
+			{
+			}
+		}
+		return reinterpret_cast<decltype(prepared_query_bind_text_hook)*>(prepared_query_bind_text_orig)(_this, idx, text);
+	}
+
+	void* prepared_query_bind_int_orig = nullptr;
+	bool prepared_query_bind_int_hook(Il2CppObject* _this, int idx, int iValue)
+	{
+		auto stmtField = il2cpp_class_get_field_from_name(_this->klass, "_stmt");
+		intptr_t* stmtPtr;
+		il2cpp_field_get_value(_this, stmtField, &stmtPtr);
+		if (text_queries.contains(stmtPtr))
+		{
+			try
+			{
+				auto stmt = text_queries.at(stmtPtr);
+				if (stmt)
+				{
+					stmt->bind(idx, iValue);
+				}
+			}
+			catch (exception& e)
+			{
+			}
+		}
+		return reinterpret_cast<decltype(prepared_query_bind_int_hook)*>(prepared_query_bind_int_orig)(_this, idx, iValue);
+	}
+
+	void* prepared_query_bind_long_orig = nullptr;
+	bool prepared_query_bind_long_hook(Il2CppObject* _this, int idx, int64_t lValue)
+	{
+		auto stmtField = il2cpp_class_get_field_from_name(_this->klass, "_stmt");
+		intptr_t* stmtPtr;
+		il2cpp_field_get_value(_this, stmtField, &stmtPtr);
+		if (text_queries.contains(stmtPtr))
+		{
+			try
+			{
+				auto stmt = text_queries.at(stmtPtr);
+				if (stmt)
+				{
+					stmt->bind(idx, lValue);
+				}
+			}
+			catch (exception& e)
+			{
+			}
+		}
+		return reinterpret_cast<decltype(prepared_query_bind_long_hook)*>(prepared_query_bind_long_orig)(_this, idx, lValue);
+	}
+
+	void* prepared_query_bind_double_orig = nullptr;
+	bool prepared_query_bind_double_hook(Il2CppObject* _this, int idx, double rValue)
+	{
+		auto stmtField = il2cpp_class_get_field_from_name(_this->klass, "_stmt");
+		intptr_t* stmtPtr;
+		il2cpp_field_get_value(_this, stmtField, &stmtPtr);
+		if (text_queries.contains(stmtPtr))
+		{
+			try
+			{
+				auto stmt = text_queries.at(stmtPtr);
+				if (stmt)
+				{
+					stmt->bind(idx, rValue);
+				}
+			}
+			catch (exception& e)
+			{
+			}
+		}
+		return reinterpret_cast<decltype(prepared_query_bind_double_hook)*>(prepared_query_bind_double_orig)(_this, idx, rValue);
 	}
 
 	void* query_dispose_orig = nullptr;
-	void query_dispose_hook(void* _this)
+	void query_dispose_hook(Il2CppObject* _this)
 	{
-		if (text_queries.contains(_this))
-			text_queries.erase(_this);
+		auto stmtField = il2cpp_class_get_field_from_name(_this->klass, "_stmt");
+		intptr_t* stmtPtr;
+		il2cpp_field_get_value(_this, stmtField, &stmtPtr);
+		if (text_queries.contains(stmtPtr))
+			text_queries.erase(stmtPtr);
 
 		return reinterpret_cast<decltype(query_dispose_hook)*>(query_dispose_orig)(_this);
 	}
 
-	void* query_getstr_orig = nullptr;
-	Il2CppString* query_getstr_hook(void* _this, int idx)
-	{
-		auto result = reinterpret_cast<decltype(query_getstr_hook)*>(query_getstr_orig)(_this, idx);
+	int (*query_getint)(Il2CppObject* _this, int index) = nullptr;
 
-		if (text_queries.contains(_this))
+	void* query_gettext_orig = nullptr;
+	Il2CppString* query_gettext_hook(Il2CppObject* _this, int idx)
+	{
+		auto stmtField = il2cpp_class_get_field_from_name(_this->klass, "_stmt");
+		intptr_t* stmtPtr;
+		il2cpp_field_get_value(_this, stmtField, &stmtPtr);
+		auto result = reinterpret_cast<decltype(query_gettext_hook)*>(query_gettext_orig)(_this, idx);
+
+		if (text_queries.contains(stmtPtr))
+		{
+			try
+			{
+				auto stmt = text_queries.at(stmtPtr);
+				if (stmt)
+				{
+					string text;
+					if (stmt->hasRow())
+					{
+						text = stmt->getColumn(idx).getString();
+						if (!text.empty())
+						{
+							if (stmt->getQuery().find("character_system_text") != string::npos)
+							{
+								int cueId, cueId1;
+								if (stmt->getQuery().find("`voice_id`=?") != string::npos)
+								{
+									cueId = query_getint(_this, 2);
+									cueId1 = stmt->getColumn(2).getInt();
+								}
+								else
+								{
+									cueId = query_getint(_this, 3);
+									cueId1 = stmt->getColumn(3).getInt();
+								}
+								if (cueId == cueId1)
+								{
+									return il2cpp_string_new(text.data());
+								}
+							}
+							else
+							{
+								return il2cpp_string_new(text.data());
+							}
+						}
+					}
+				}
+			}
+			catch (exception& e)
+			{
+			}
 			return local::get_localized_string(result);
+		}
 
 		return result;
+	}
+
+	void* MasterCharacterSystemText_CreateOrmByQueryResultWithCharacterId_orig = nullptr;
+	Il2CppObject* MasterCharacterSystemText_CreateOrmByQueryResultWithCharacterId_hook(Il2CppObject* _this, Il2CppObject* query, int characterId)
+	{
+		auto stmtField = il2cpp_class_get_field_from_name(query->klass, "_stmt");
+		intptr_t* stmtPtr;
+		il2cpp_field_get_value(query, stmtField, &stmtPtr);
+		if (text_queries.contains(stmtPtr))
+		{
+
+			try
+			{
+				auto stmt = text_queries.at(stmtPtr);
+				if (stmt)
+				{
+					if (replacement_queries_can_next.find(stmtPtr) == replacement_queries_can_next.end())
+					{
+						replacement_queries_can_next.emplace(stmtPtr, true);
+					}
+					if (replacement_queries_can_next.at(stmtPtr))
+					{
+						try
+						{
+							stmt->executeStep();
+						}
+						catch (exception& e)
+						{
+						}
+					}
+					if (stmt->hasRow())
+					{
+						int voiceId = query_getint(query, 0);
+						int voiceId1 = stmt->getColumn(0).getInt();
+						int cueId = query_getint(query, 3);
+						int cueId1 = stmt->getColumn(3).getInt();
+
+						if (voiceId == voiceId1 && cueId == cueId1)
+						{
+							replacement_queries_can_next.insert_or_assign(stmtPtr, true);
+						}
+						else
+						{
+							replacement_queries_can_next.insert_or_assign(stmtPtr, false);
+						}
+					}
+				}
+			}
+			catch (exception& e)
+			{
+			}
+		}
+		return  reinterpret_cast<decltype(MasterCharacterSystemText_CreateOrmByQueryResultWithCharacterId_hook)*>(
+			MasterCharacterSystemText_CreateOrmByQueryResultWithCharacterId_orig
+			)(_this, query, characterId);
 	}
 
 	void* story_timeline_controller_play_orig;
@@ -725,7 +1041,8 @@ namespace
 	void UIManager_ChangeResizeUIForPC_hook(Il2CppObject* _this, int width, int height)
 	{
 		uiManager = _this;
-		if (g_force_landscape && (width < height)) {
+		if (g_force_landscape && (width < height))
+		{
 			reinterpret_cast<decltype(UIManager_ChangeResizeUIForPC_hook)*>(UIManager_ChangeResizeUIForPC_orig)(_this, height, width);
 			return;
 		}
@@ -754,7 +1071,8 @@ namespace
 			get_resolution_stub(&r);
 			if (renderTextureHeight == 1080 || floorHeight == 1080 || ceilHeight == 1080)
 			{
-				if (width > height) {
+				if (width > height)
+				{
 					return 2.0f / (max(1.0f, r.width / 1920.f) * g_force_landscape_ui_scale);
 				}
 				return 1.05f / (max(1.0f, r.width / 1920.f) * g_force_landscape_ui_scale);
@@ -1032,7 +1350,8 @@ namespace
 			}
 		}
 		auto textId = textcommon_get_TextId(_this);
-		if (textId) {
+		if (textId)
+		{
 			if (GetTextIdByName("Common0121") == textId ||
 				GetTextIdByName("Common0186") == textId ||
 				GetTextIdByName("Outgame0028") == textId ||
@@ -1282,8 +1601,9 @@ namespace
 			splited.emplace_back(segment);
 		}
 		auto& fileName = splited.back();
-		if (find_if(replaceAssetNames.begin(), replaceAssetNames.end(), [fileName](const string& item) {
-			return item.find(fileName) != string::npos;
+		if (find_if(replaceAssetNames.begin(), replaceAssetNames.end(), [fileName](const string& item)
+			{
+				return item.find(fileName) != string::npos;
 			}) != replaceAssetNames.end())
 		{
 			return reinterpret_cast<decltype(assetbundle_load_asset_hook)*>(assetbundle_load_asset_orig)(replaceAssets, il2cpp_string_new(fileName.data()), type);
@@ -1390,7 +1710,8 @@ namespace
 		string u8Name = local::wide_u8(path->start_char);
 		if (u8Name == "ui/views/titleview"s)
 		{
-			if (find(replaceAssetNames.begin(), replaceAssetNames.end(), "assets/title/utx_obj_title_logo_umamusume.png") != replaceAssetNames.end()) {
+			if (find(replaceAssetNames.begin(), replaceAssetNames.end(), "assets/title/utx_obj_title_logo_umamusume.png") != replaceAssetNames.end())
+			{
 				auto gameObj = reinterpret_cast<decltype(resources_load_hook)*>(resources_load_orig)(path, type);
 				auto getComponent = reinterpret_cast<Il2CppObject * (*)(Il2CppObject*, Il2CppType*)>(il2cpp_class_get_method_from_name(gameObj->klass, "GetComponent", 1)->methodPointer);
 				auto component = getComponent(gameObj, (Il2CppType*)GetRuntimeType("umamusume.dll", "Gallop", "TitleView"));
@@ -1966,7 +2287,8 @@ namespace
 	void* DialogCommon_Close_orig = nullptr;
 	void DialogCommon_Close_hook(Il2CppObject* _this)
 	{
-		if (_this == errorDialog) {
+		if (_this == errorDialog)
+		{
 			if (sceneManager)
 			{
 				// Home 100
@@ -2002,7 +2324,8 @@ namespace
 	}
 
 	void* CriMana_Player_SetFile_orig = nullptr;
-	bool CriMana_Player_SetFile_hook(Il2CppObject* _this, Il2CppObject* binder, Il2CppString* moviePath, int setMode) {
+	bool CriMana_Player_SetFile_hook(Il2CppObject* _this, Il2CppObject* binder, Il2CppString* moviePath, int setMode)
+	{
 		stringstream pathStream(local::wide_u8(moviePath->start_char));
 		string segment;
 		vector<string> splited;
@@ -2020,17 +2343,18 @@ namespace
 
 	void adjust_size()
 	{
-		thread([]() {
-			auto tr = il2cpp_thread_attach(il2cpp_domain_get());
+		thread([]()
+			{
+				auto tr = il2cpp_thread_attach(il2cpp_domain_get());
 
-			Resolution_t r;
-			get_resolution_stub(&r);
+				Resolution_t r;
+				get_resolution_stub(&r);
 
-			auto target_height = r.height - 100;
+				auto target_height = r.height - 100;
 
-			set_resolution(target_height * 0.5625f, target_height, false);
+				set_resolution(target_height * 0.5625f, target_height, false);
 
-			il2cpp_thread_detach(tr);
+				il2cpp_thread_detach(tr);
 			}).detach();
 	}
 
@@ -2166,9 +2490,10 @@ namespace
 
 		// have to do this way because there's Get(TextId id) and Get(string id)
 		// the string one looks like will not be called by elsewhere
-		auto localize_get_addr = il2cpp_symbols::find_method("umamusume.dll", "Gallop", "Localize", [](const MethodInfo* method) {
-			return method->name == "Get"s &&
-				method->parameters->parameter_type->type == IL2CPP_TYPE_VALUETYPE;
+		auto localize_get_addr = il2cpp_symbols::find_method("umamusume.dll", "Gallop", "Localize", [](const MethodInfo* method)
+			{
+				return method->name == "Get"s &&
+					method->parameters->parameter_type->type == IL2CPP_TYPE_VALUETYPE;
 			});
 
 		auto update_addr = il2cpp_symbols::get_method_pointer(
@@ -2184,14 +2509,64 @@ namespace
 			"Query", "_Setup", 2
 		);
 
-		auto query_getstr_addr = il2cpp_symbols::get_method_pointer(
+		auto Plugin_sqlite3_step_addr = il2cpp_symbols::get_method_pointer(
+			"LibNative.Runtime.dll", "LibNative.Sqlite3",
+			"Plugin", "sqlite3_step", 1
+		);
+
+		auto Plugin_sqlite3_reset_addr = il2cpp_symbols::get_method_pointer(
+			"LibNative.Runtime.dll", "LibNative.Sqlite3",
+			"Plugin", "sqlite3_reset", 1
+		);
+
+		auto query_step_addr = il2cpp_symbols::get_method_pointer(
+			"LibNative.Runtime.dll", "LibNative.Sqlite3",
+			"Query", "Step", 0
+		);
+
+		auto prepared_query_reset_addr = il2cpp_symbols::get_method_pointer(
+			"LibNative.Runtime.dll", "LibNative.Sqlite3",
+			"PreparedQuery", "Reset", 0
+		);
+
+		auto prepared_query_bind_text_addr = il2cpp_symbols::get_method_pointer(
+			"LibNative.Runtime.dll", "LibNative.Sqlite3",
+			"PreparedQuery", "BindText", 2
+		);
+
+		auto prepared_query_bind_int_addr = il2cpp_symbols::get_method_pointer(
+			"LibNative.Runtime.dll", "LibNative.Sqlite3",
+			"PreparedQuery", "BindInt", 2
+		);
+
+		auto prepared_query_bind_long_addr = il2cpp_symbols::get_method_pointer(
+			"LibNative.Runtime.dll", "LibNative.Sqlite3",
+			"PreparedQuery", "BindLong", 2
+		);
+
+		auto prepared_query_bind_double_addr = il2cpp_symbols::get_method_pointer(
+			"LibNative.Runtime.dll", "LibNative.Sqlite3",
+			"PreparedQuery", "BindDouble", 2
+		);
+
+		auto query_gettext_addr = il2cpp_symbols::get_method_pointer(
 			"LibNative.Runtime.dll", "LibNative.Sqlite3",
 			"Query", "GetText", 1
 		);
 
+		query_getint = reinterpret_cast<int (*)(Il2CppObject*, int)>(il2cpp_symbols::get_method_pointer(
+			"LibNative.Runtime.dll", "LibNative.Sqlite3",
+			"Query", "GetInt", 1
+		));
+
 		auto query_dispose_addr = il2cpp_symbols::get_method_pointer(
 			"LibNative.Runtime.dll", "LibNative.Sqlite3",
 			"Query", "Dispose", 0
+		);
+
+		auto MasterCharacterSystemText_CreateOrmByQueryResultWithCharacterId_addr = il2cpp_symbols::get_method_pointer(
+			"umamusume.dll", "Gallop",
+			"MasterCharacterSystemText", "_CreateOrmByQueryResultWithCharacterId", 2
 		);
 
 		auto set_fps_addr = il2cpp_resolve_icall("UnityEngine.Application::set_targetFrameRate(System.Int32)");
@@ -2547,9 +2922,10 @@ namespace
 
 		auto Material_set_mainTexture_addr = reinterpret_cast<Il2CppObject * (*)(Il2CppObject*)>(il2cpp_symbols::get_method_pointer("UnityEngine.CoreModule.dll", "UnityEngine", "Material", "set_mainTexture", 1));
 
-		auto Material_SetTextureI4_addr = il2cpp_symbols::find_method("UnityEngine.CoreModule.dll", "UnityEngine", "Material", [](const MethodInfo* method) {
-			return method->name == "SetTexture"s &&
-				method->parameters->parameter_type->type == IL2CPP_TYPE_I4;
+		auto Material_SetTextureI4_addr = il2cpp_symbols::find_method("UnityEngine.CoreModule.dll", "UnityEngine", "Material", [](const MethodInfo* method)
+			{
+				return method->name == "SetTexture"s &&
+					method->parameters->parameter_type->type == IL2CPP_TYPE_I4;
 			});
 
 		auto CharaPropRendererAccessor_SetTexture_addr = reinterpret_cast<Il2CppObject * (*)(Il2CppObject*)>(il2cpp_symbols::get_method_pointer("umamusume.dll", "Gallop", "CharaPropRendererAccessor", "SetTexture", 1));
@@ -2732,8 +3108,29 @@ namespace
 		// ADD_HOOK(timeline_audioclip_ctor, "Gallop.StoryTimelineController::GetTimeScaleHighSpeed at %p\n");
 
 		ADD_HOOK(query_setup, "Query::_Setup at %p\n");
-		ADD_HOOK(query_getstr, "Query::GetString at %p\n");
+		ADD_HOOK(query_gettext, "Query::GetString at %p\n");
 		ADD_HOOK(query_dispose, "Query::Dispose at %p\n");
+
+		if (!g_replace_text_db_path.empty())
+		{
+			try
+			{
+				replacementMDB = new SQLite::Database(g_replace_text_db_path.data());
+				ADD_HOOK(Plugin_sqlite3_step, "Plugin::sqlite3_step at %p\n");
+				ADD_HOOK(Plugin_sqlite3_reset, "Plugin::sqlite3_reset at %p\n");
+				ADD_HOOK(query_step, "Query::Step at %p\n");
+				ADD_HOOK(prepared_query_reset, "PreparedQuery::Reset at %p\n");
+				ADD_HOOK(prepared_query_bind_text, "PreparedQuery::BindText at %p\n");
+				ADD_HOOK(prepared_query_bind_int, "PreparedQuery::BindInt at %p\n");
+				ADD_HOOK(prepared_query_bind_long, "PreparedQuery::BindLong at %p\n");
+				ADD_HOOK(prepared_query_bind_double, "PreparedQuery::BindDouble at %p\n");
+				ADD_HOOK(MasterCharacterSystemText_CreateOrmByQueryResultWithCharacterId,
+					"MasterCharacterSystemText::_CreateOrmByQueryResultWithCharacterId at %p\n");
+			}
+			catch (exception& e)
+			{
+			}
+		}
 
 		// ADD_HOOK(load_scene_internal, "SceneManager::LoadSceneAsyncNameIndexInternal at %p\n");
 
@@ -2744,7 +3141,8 @@ namespace
 			ADD_HOOK(UIManager_UpdateCanvasScaler, "Gallop.UIManager::UpdateCanvasScaler at %p\n");
 		}
 
-		if (g_force_landscape) {
+		if (g_force_landscape)
+		{
 			Resolution_t r;
 			get_resolution_stub(&r);
 			float new_ratio = static_cast<float>(r.width) / r.height;
