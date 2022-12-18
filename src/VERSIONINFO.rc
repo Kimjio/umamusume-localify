@@ -1,0 +1,47 @@
+// Microsoft Visual C++ generated resource script.
+//
+#include "resource.h"
+/////////////////////////////////////////////////////////////////////////////
+//
+// Version
+//
+
+VS_VERSION_INFO VERSIONINFO
+ FILEVERSION 1,13,0,0
+ PRODUCTVERSION 1,13,0,0
+ FILEFLAGSMASK 0x3fL
+#ifdef _DEBUG
+ FILEFLAGS 0x1L
+#else
+ FILEFLAGS 0x0L
+#endif
+ FILEOS 0x4L
+ FILETYPE 0x2L
+ FILESUBTYPE 0x0L
+BEGIN
+    BLOCK "StringFileInfo"
+    BEGIN
+        BLOCK "041204b0"
+        BEGIN
+            VALUE "LegalCopyright", "Copyright © Ji O Kim\0"
+            VALUE "FileDescription", "우마무스메 현지화 패치\0"
+            VALUE "FileVersion", "1.13.0.0\0"
+            VALUE "InternalName", "umamusume-localify\0"
+            VALUE "ProductName", "Umamusume Localify\0"
+            VALUE "ProductVersion", "1.13.0\0"
+        END
+        BLOCK "000004b0"
+        BEGIN
+            VALUE "LegalCopyright", "Copyright © Ji O Kim\0"
+            VALUE "FileDescription", "Localization patch for Umamusume\0"
+            VALUE "FileVersion", "1.13.0.0\0"
+            VALUE "InternalName", "umamusume-localify\0"
+            VALUE "ProductName", "Umamusume Localify\0"
+            VALUE "ProductVersion", "1.13.0\0"
+        END
+    END
+    BLOCK "VarFileInfo"
+    BEGIN
+        VALUE "Translation", 0x0412, 1200, 0x0, 1200
+    END
+END

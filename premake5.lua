@@ -83,6 +83,7 @@ workspace "umamusume-localify"
 			"./src/**.c",
 			"./src/**.asm",
 			"./src/**.def",
+			"./src/**.rc",
 		}
 		
 		links {
