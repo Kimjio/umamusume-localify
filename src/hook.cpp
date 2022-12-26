@@ -402,7 +402,27 @@ namespace
 				auto stmt = text_queries.at(pStmt);
 				if (stmt)
 				{
-					stmt->executeStep();
+					if (stmt->getQuery().find("`race_jikkyo_message`;") != string::npos)
+					{
+						if (replacement_queries_can_next.find(pStmt) == replacement_queries_can_next.end())
+						{
+							replacement_queries_can_next.emplace(pStmt, true);
+						}
+						if (replacement_queries_can_next.at(pStmt))
+						{
+							try
+							{
+								stmt->executeStep();
+							}
+							catch (exception& e)
+							{
+							}
+						}
+					}
+					else
+					{
+						stmt->executeStep();
+					}
 				}
 			}
 			catch (exception& e)
@@ -611,7 +631,24 @@ namespace
 						text = stmt->getColumn(idx).getString();
 						if (!text.empty())
 						{
-							if (stmt->getQuery().find("character_system_text") != string::npos)
+							if (stmt->getQuery().find("`race_jikkyo_message`;") != string::npos)
+							{
+								int id = query_getint(_this, 0);
+								int id1 = stmt->getColumn(0).getInt();
+								if (stmt->hasRow())
+								{
+									if (id == id1)
+									{
+										replacement_queries_can_next.insert_or_assign(stmtPtr, true);
+										return il2cpp_string_new(text.data());
+									}
+									else
+									{
+										replacement_queries_can_next.insert_or_assign(stmtPtr, false);
+									}
+								}
+							}
+							else if (stmt->getQuery().find("character_system_text") != string::npos)
 							{
 								int cueId, cueId1;
 								if (stmt->getQuery().find("`voice_id`=?") != string::npos)
@@ -1365,6 +1402,11 @@ namespace
 				text_set_verticalOverflow(_this, 1);
 			}
 
+		}
+		if (uobject_get_name(_this)->start_char == L"Message"s)
+		{
+			text_set_horizontalOverflow(_this, 1);
+			text_set_verticalOverflow(_this, 1);
 		}
 		return reinterpret_cast<decltype(on_populate_hook)*>(on_populate_orig)(_this, toFill);
 	}
