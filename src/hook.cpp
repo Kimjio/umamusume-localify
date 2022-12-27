@@ -1430,6 +1430,21 @@ namespace
 		reinterpret_cast<decltype(textcommon_awake_hook)*>(textcommon_awake_orig)(_this);
 	}
 
+	void* textcommon_SetTextWithLineHeadWrap_orig = nullptr;
+	void textcommon_SetTextWithLineHeadWrap_hook(Il2CppObject* _this, Il2CppString* str, int maxCharacter) {
+		reinterpret_cast<decltype(textcommon_SetTextWithLineHeadWrap_hook)*>(textcommon_SetTextWithLineHeadWrap_orig)(_this, str, maxCharacter * 2);
+	}
+
+	void* textcommon_SetTextWithLineHeadWrapWithColorTag_orig = nullptr;
+	void textcommon_SetTextWithLineHeadWrapWithColorTag_hook(Il2CppObject* _this, Il2CppString* str, int maxCharacter) {
+		reinterpret_cast<decltype(textcommon_SetTextWithLineHeadWrapWithColorTag_hook)*>(textcommon_SetTextWithLineHeadWrapWithColorTag_orig)(_this, str, maxCharacter * 2);
+	}
+
+	void* textcommon_SetSystemTextWithLineHeadWrap_orig = nullptr;
+	void textcommon_SetSystemTextWithLineHeadWrap_hook(Il2CppObject* _this, Il2CppObject* systemText, int maxCharacter) {
+		reinterpret_cast<decltype(textcommon_SetSystemTextWithLineHeadWrap_hook)*>(textcommon_SetSystemTextWithLineHeadWrap_orig)(_this, systemText, maxCharacter * 2);
+	}
+
 	void* TextMeshProUguiCommon_Awake_orig = nullptr;
 	void TextMeshProUguiCommon_Awake_hook(Il2CppObject* _this)
 	{
@@ -2721,6 +2736,27 @@ namespace
 			"TextMeshProUguiCommon", "Awake", 0
 		);
 
+		auto textcommon_SetSystemTextWithLineHeadWrap_addr = reinterpret_cast<void (*)(void*, Il2CppObject*, int)>(
+			il2cpp_symbols::get_method_pointer(
+				"umamusume.dll", "Gallop",
+				"TextCommon", "SetSystemTextWithLineHeadWrap", 2
+			)
+			);
+
+		auto textcommon_SetTextWithLineHeadWrapWithColorTag_addr = reinterpret_cast<void (*)(void*, Il2CppString*, int)>(
+			il2cpp_symbols::get_method_pointer(
+				"umamusume.dll", "Gallop",
+				"TextCommon", "SetTextWithLineHeadWrapWithColorTag", 2
+			)
+			);
+
+		auto textcommon_SetTextWithLineHeadWrap_addr = reinterpret_cast<void (*)(void*, Il2CppString*, int)>(
+			il2cpp_symbols::get_method_pointer(
+				"umamusume.dll", "Gallop",
+				"TextCommon", "SetTextWithLineHeadWrap", 2
+			)
+			);
+
 		textcommon_get_TextId = reinterpret_cast<int (*)(void*)>(il2cpp_symbols::get_method_pointer(
 			"umamusume.dll", "Gallop",
 			"TextCommon", "get_TextId", 0
@@ -3120,6 +3156,10 @@ namespace
 		ADD_HOOK(populate_with_errors, "UnityEngine.TextGenerator::PopulateWithErrors at %p\n");
 
 		// ADD_HOOK(text_get_text, "UnityEngine.UI.Text::get_text at %p\n");
+
+		ADD_HOOK(textcommon_SetTextWithLineHeadWrap, "Gallop.TextCommon::SetTextWithLineHeadWrap at %p\n");
+		ADD_HOOK(textcommon_SetTextWithLineHeadWrapWithColorTag, "Gallop.TextCommon::SetTextWithLineHeadWrapWithColorTag at %p\n");
+		ADD_HOOK(textcommon_SetSystemTextWithLineHeadWrap, "Gallop.TextCommon::SetSystemTextWithLineHeadWrap at %p\n");
 
 		ADD_HOOK(localizeextension_text, "Gallop.LocalizeExtention.Text(TextId) at %p\n");
 		// Looks like they store all localized texts that used by code in a dict
