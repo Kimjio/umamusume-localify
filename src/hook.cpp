@@ -651,17 +651,26 @@ namespace
 							else if (stmt->getQuery().find("character_system_text") != string::npos)
 							{
 								int cueId, cueId1;
+								string cueSheet, cueSheet1;
 								if (stmt->getQuery().find("`voice_id`=?") != string::npos)
 								{
 									cueId = query_getint(_this, 2);
 									cueId1 = stmt->getColumn(2).getInt();
+									cueSheet = local::wide_u8(
+										reinterpret_cast<decltype(query_gettext_hook)*>(query_gettext_orig)(_this, 1)->start_char
+									);
+									cueSheet1 = stmt->getColumn(1).getString();
 								}
 								else
 								{
 									cueId = query_getint(_this, 3);
 									cueId1 = stmt->getColumn(3).getInt();
+									cueSheet = local::wide_u8(
+										reinterpret_cast<decltype(query_gettext_hook)*>(query_gettext_orig)(_this, 2)->start_char
+									);
+									cueSheet1 = stmt->getColumn(2).getString();
 								}
-								if (cueId == cueId1)
+								if (cueId == cueId1 && cueSheet == cueSheet1)
 								{
 									return il2cpp_string_new(text.data());
 								}
@@ -717,8 +726,12 @@ namespace
 						int voiceId1 = stmt->getColumn(0).getInt();
 						int cueId = query_getint(query, 3);
 						int cueId1 = stmt->getColumn(3).getInt();
+						string cueSheet = local::wide_u8(
+							reinterpret_cast<decltype(query_gettext_hook)*>(query_gettext_orig)(query, 2)->start_char
+						);
+						string cueSheet1 = stmt->getColumn(2).getString();
 
-						if (voiceId == voiceId1 && cueId == cueId1)
+						if (voiceId == voiceId1 && cueId == cueId1 && cueSheet == cueSheet1)
 						{
 							replacement_queries_can_next.insert_or_assign(stmtPtr, true);
 						}
