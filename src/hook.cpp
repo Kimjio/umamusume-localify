@@ -2262,7 +2262,58 @@ namespace
 		reinterpret_cast<decltype(BootSystem_Awake_hook)*>(BootSystem_Awake_orig)(_this);
 	}
 
+	struct MoviePlayerHandle {};
+
 	Il2CppObject* (*MoviePlayerBase_get_MovieInfo)(Il2CppObject* _this);
+	Il2CppObject* (*MovieManager_GetMovieInfo)(Il2CppObject* _this, MoviePlayerHandle playerHandle);
+
+	void* MovieManager_SetImageUvRect_orig = nullptr;
+
+	void MovieManager_SetImageUvRect_hook(Il2CppObject* _this, MoviePlayerHandle playerHandle, Rect_t uv)
+	{
+		auto movieInfo = MovieManager_GetMovieInfo(_this, playerHandle);
+		auto widthField = il2cpp_class_get_field_from_name(movieInfo->klass, "width");
+		auto heightField = il2cpp_class_get_field_from_name(movieInfo->klass, "height");
+		unsigned int width, height;
+		il2cpp_field_get_value(movieInfo, widthField, &width);
+		il2cpp_field_get_value(movieInfo, heightField, &height);
+		if (width < height)
+		{
+			Resolution_t r;
+			get_resolution_stub(&r);
+			if (roundf(1920 / (max(1.0f, r.height / 1080.f) * g_force_landscape_ui_scale)) == uv.height)
+			{
+				uv.height = r.width;
+			}
+			uv.width = r.height;
+		}
+
+		reinterpret_cast<decltype(MovieManager_SetImageUvRect_hook)*>(MovieManager_SetImageUvRect_orig)(_this, playerHandle, uv);
+	}
+
+	void* MovieManager_SetScreenSize_orig = nullptr;
+
+	void MovieManager_SetScreenSize_hook(Il2CppObject* _this, MoviePlayerHandle playerHandle, Vector2_t screenSize)
+	{
+		auto movieInfo = MovieManager_GetMovieInfo(_this, playerHandle);
+		auto widthField = il2cpp_class_get_field_from_name(movieInfo->klass, "width");
+		auto heightField = il2cpp_class_get_field_from_name(movieInfo->klass, "height");
+		unsigned int width, height;
+		il2cpp_field_get_value(movieInfo, widthField, &width);
+		il2cpp_field_get_value(movieInfo, heightField, &height);
+		if (width < height)
+		{
+			Resolution_t r;
+			get_resolution_stub(&r);
+			if (roundf(1920 / (max(1.0f, r.height / 1080.f) * g_force_landscape_ui_scale)) == screenSize.y)
+			{
+				screenSize.y = r.width;
+			}
+			screenSize.x = r.height;
+		}
+
+		reinterpret_cast<decltype(MovieManager_SetScreenSize_hook)*>(MovieManager_SetScreenSize_orig)(_this, playerHandle, screenSize);
+	}
 
 	void* MoviePlayerForUI_AdjustScreenSize_orig = nullptr;
 
@@ -2946,6 +2997,15 @@ namespace
 		MoviePlayerBase_get_MovieInfo = reinterpret_cast<Il2CppObject * (*)(Il2CppObject*)>(il2cpp_symbols::get_method_pointer(
 			"Cute.Cri.Assembly.dll", "Cute.Cri", "MoviePlayerBase", "get_MovieInfo", 0));
 
+		MovieManager_GetMovieInfo = reinterpret_cast<Il2CppObject * (*)(Il2CppObject*, MoviePlayerHandle)>(il2cpp_symbols::get_method_pointer(
+			"Cute.Cri.Assembly.dll", "Cute.Cri", "MovieManager", "GetMovieInfo", 1));
+
+		auto MovieManager_SetImageUvRect_addr = reinterpret_cast<void(*)(Il2CppObject*, MoviePlayerHandle, Rect_t)>(il2cpp_symbols::get_method_pointer(
+			"Cute.Cri.Assembly.dll", "Cute.Cri", "MovieManager", "SetImageUvRect", 2));
+
+		auto MovieManager_SetScreenSize_addr = il2cpp_symbols::get_method_pointer(
+			"Cute.Cri.Assembly.dll", "Cute.Cri", "MovieManager", "SetScreenSize", 2);
+
 		auto MoviePlayerForUI_AdjustScreenSize_addr = reinterpret_cast<void(*)(Il2CppObject*, Vector2_t, bool)>(il2cpp_symbols::get_method_pointer(
 			"Cute.Cri.Assembly.dll", "Cute.Cri", "MoviePlayerForUI", "AdjustScreenSize", 2));
 
@@ -3226,6 +3286,8 @@ namespace
 			ADD_HOOK(ChangeScreenOrientation, "ChangeScreenOrientation at %p\n");
 			ADD_HOOK(ChangeScreenOrientationPortraitAsync, "ChangeScreenOrientationPortraitAsync at %p\n");
 			ADD_HOOK(get_IsVertical, "get_IsVertical at %p\n");
+			ADD_HOOK(MovieManager_SetScreenSize, "MovieManager::SetScreenSize at %p\n");
+			ADD_HOOK(MovieManager_SetImageUvRect, "MovieManager::SetImageUvRect at %p\n");
 			ADD_HOOK(MoviePlayerForUI_AdjustScreenSize, "MoviePlayerForUI::AdjustScreenSize at %p\n");
 			ADD_HOOK(MoviePlayerForObj_AdjustScreenSize, "MoviePlayerForObj::AdjustScreenSize at %p\n");
 			auto enumerator = reinterpret_cast<Il2CppObject * (*)()>(il2cpp_symbols::get_method_pointer(
