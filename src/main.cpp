@@ -32,6 +32,7 @@ std::unordered_map<std::string, ReplaceAsset> g_replace_assets;
 std::string g_replace_assetbundle_file_path;
 std::string g_replace_text_db_path;
 bool g_character_system_text_caption = false;
+int g_cyspring_update_mode = -1;
 std::string text_id_dict;
 
 namespace
@@ -215,6 +216,17 @@ namespace
 			if (document.HasMember("characterSystemTextCaption"))
 			{
 				g_character_system_text_caption = document["characterSystemTextCaption"].GetBool();
+			}
+
+			if (document.HasMember("cySpringUpdateMode"))
+			{
+				g_cyspring_update_mode = document["cySpringUpdateMode"].GetInt();
+				std::vector<int> options = { 0, 1, 2, 3, -1 };
+				g_cyspring_update_mode = std::find(options.begin(), options.end(), g_cyspring_update_mode) - options.begin();
+			}
+			else if (g_max_fps > 30) 
+			{
+				g_cyspring_update_mode = 1;
 			}
 
 			// Looks like not working for now

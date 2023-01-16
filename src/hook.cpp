@@ -811,6 +811,19 @@ namespace
 			);
 	}
 
+	void* CySpringUpdater_set_SpringUpdateMode_orig = nullptr;
+	void CySpringUpdater_set_SpringUpdateMode_hook(Il2CppObject* _this, int value)
+	{
+		reinterpret_cast<decltype(CySpringUpdater_set_SpringUpdateMode_hook)*>(CySpringUpdater_set_SpringUpdateMode_orig)(_this, g_cyspring_update_mode);
+	}
+
+	void* CySpringUpdater_get_SpringUpdateMode_orig = nullptr;
+	int CySpringUpdater_get_SpringUpdateMode_hook(Il2CppObject* _this)
+	{
+		CySpringUpdater_set_SpringUpdateMode_hook(_this, g_cyspring_update_mode);
+		return reinterpret_cast<decltype(CySpringUpdater_get_SpringUpdateMode_hook)*>(CySpringUpdater_get_SpringUpdateMode_orig)(_this);
+	}
+
 	void* story_timeline_controller_play_orig;
 	void* story_timeline_controller_play_hook(Il2CppObject* _this)
 	{
@@ -1131,6 +1144,13 @@ namespace
 		set_scale_factor(_this, max(1.0f, r.width / 1920.f) * g_force_landscape ? g_force_landscape_ui_scale : g_ui_scale);
 
 		return reinterpret_cast<decltype(canvas_scaler_setres_hook)*>(canvas_scaler_setres_orig)(_this, res);
+	}
+
+	void* UIManager_LateUpdate_orig = nullptr;
+	void UIManager_LateUpdate_hook(Il2CppObject* _this)
+	{
+		reinterpret_cast<decltype(UIManager_LateUpdate_hook)*>(UIManager_LateUpdate_orig)(_this);
+		uiManager = _this;
 	}
 
 	Il2CppArraySize* (*UIManager_GetCanvasScalerList)(Il2CppObject* _this);
@@ -2754,6 +2774,16 @@ namespace
 			"AudioManager", "PlaySystemVoiceByElement", 5
 		);
 
+		auto CySpringUpdater_set_SpringUpdateMode_addr = il2cpp_symbols::get_method_pointer(
+			"umamusume.dll", "Gallop.Model.Component",
+			"CySpringUpdater", "set_SpringUpdateMode", 1
+		);
+
+		auto CySpringUpdater_get_SpringUpdateMode_addr = il2cpp_symbols::get_method_pointer(
+			"umamusume.dll", "Gallop.Model.Component",
+			"CySpringUpdater", "get_SpringUpdateMode", 0
+		);
+
 		auto set_fps_addr = il2cpp_resolve_icall("UnityEngine.Application::set_targetFrameRate(System.Int32)");
 
 		auto wndproc_addr = il2cpp_symbols::get_method_pointer(
@@ -2825,6 +2855,11 @@ namespace
 		auto gallop_get_screenwidth_addr = il2cpp_symbols::get_method_pointer(
 			"umamusume.dll", "Gallop",
 			"Screen", "get_Width", 0
+		);
+
+		auto UIManager_LateUpdate_addr = il2cpp_symbols::get_method_pointer(
+			"umamusume.dll", "Gallop",
+			"UIManager", "LateUpdate", 0
 		);
 
 		auto change_resize_ui_for_pc_addr = il2cpp_symbols::get_method_pointer(
@@ -3287,7 +3322,7 @@ namespace
 
 		ADD_HOOK(load_zekken_composite_resource, "Gallop.ModelLoader::LoadZekkenCompositeResource at %p\n");
 
-		// ADD_HOOK(wait_resize_ui, "Gallop.UIManager::WaitResizeUI at %p\n");
+		ADD_HOOK(UIManager_LateUpdate, "Gallop.UIManager::LateUpdate at %p\n");
 
 		// hook UnityEngine.TextGenerator::PopulateWithErrors to modify text
 		ADD_HOOK(populate_with_errors, "UnityEngine.TextGenerator::PopulateWithErrors at %p\n");
@@ -3339,6 +3374,11 @@ namespace
 
 		if (g_character_system_text_caption) {
 			ADD_HOOK(AudioManager_PlaySystemVoiceByElement, "AudioManager::PlaySystemVoiceByElement at %p\n");
+		}
+
+		if (g_cyspring_update_mode != -1) {
+			ADD_HOOK(CySpringUpdater_set_SpringUpdateMode, "CySpringUpdater::set_SpringUpdateMode at %p\n");
+			ADD_HOOK(CySpringUpdater_get_SpringUpdateMode, "CySpringUpdater::get_SpringUpdateMode at %p\n");
 		}
 
 		// ADD_HOOK(load_scene_internal, "SceneManager::LoadSceneAsyncNameIndexInternal at %p\n");
