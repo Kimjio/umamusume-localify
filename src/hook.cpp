@@ -2325,7 +2325,8 @@ namespace
 		unsigned int width, height;
 		il2cpp_field_get_value(movieInfo, widthField, &width);
 		il2cpp_field_get_value(movieInfo, heightField, &height);
-		if (width < height)
+		auto ratio = floorf(static_cast<float>(width) / height * 100) / 100;
+		if (width < height || ratio == 1.33f)
 		{
 			Resolution_t r;
 			get_resolution_stub(&r);
