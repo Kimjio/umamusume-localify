@@ -10,12 +10,12 @@ using namespace std;
 
 namespace
 {
-	std::string GotoTitleError =
+	string GotoTitleError =
 		"내부적으로 오류가 발생하여 홈으로 이동합니다.\n\n"
 		"경우에 따라서 <color=#ff911c><i>타이틀</i></color>로 돌아가거나, \n"
 		"게임 <color=#ff911c><i>다시 시작</i></color>이 필요할 수 있습니다.";
 
-	std::string GotoTitleErrorJa =
+	string GotoTitleErrorJa =
 		"内部的にエラーが発生し、ホームに移動します。\n\n"
 		"場合によっては、<color=#ff911c><i>タイトル</i></color>に戻るか、\n"
 		"ゲーム<color=#ff911c><i>再起動</i></color>が必要になる場合がありますあります。";
@@ -354,8 +354,8 @@ namespace
 		return round(orig_result);
 	}
 
-	std::unordered_map<void*, SQLite::Statement*> text_queries;
-	std::unordered_map<void*, bool> replacement_queries_can_next;
+	unordered_map<void*, SQLite::Statement*> text_queries;
+	unordered_map<void*, bool> replacement_queries_can_next;
 
 	SQLite::Database* replacementMDB;
 
@@ -364,12 +364,12 @@ namespace
 	{
 		reinterpret_cast<decltype(query_setup_hook)*>(query_setup_orig)(_this, conn, sql);
 
-		auto ssql = std::wstring(sql->start_char);
+		auto ssql = wstring(sql->start_char);
 
-		if (ssql.find(L"text_data") != std::string::npos ||
-			ssql.find(L"character_system_text") != std::string::npos ||
-			ssql.find(L"race_jikkyo_comment") != std::string::npos ||
-			ssql.find(L"race_jikkyo_message") != std::string::npos)
+		if (ssql.find(L"text_data") != string::npos ||
+			ssql.find(L"character_system_text") != string::npos ||
+			ssql.find(L"race_jikkyo_comment") != string::npos ||
+			ssql.find(L"race_jikkyo_message") != string::npos)
 		{
 			auto stmtField = il2cpp_class_get_field_from_name(_this->klass, "_stmt");
 			intptr_t* stmtPtr;
@@ -733,7 +733,7 @@ namespace
 			{
 			}
 		}
-		return  reinterpret_cast<decltype(MasterCharacterSystemText_CreateOrmByQueryResultWithCharacterId_hook)*>(
+		return reinterpret_cast<decltype(MasterCharacterSystemText_CreateOrmByQueryResultWithCharacterId_hook)*>(
 			MasterCharacterSystemText_CreateOrmByQueryResultWithCharacterId_orig
 			)(_this, query, characterId);
 	}
@@ -1403,11 +1403,6 @@ namespace
 			}
 
 		}
-		if (uobject_get_name(_this)->start_char == L"Message"s)
-		{
-			text_set_horizontalOverflow(_this, 1);
-			text_set_verticalOverflow(_this, 1);
-		}
 		return reinterpret_cast<decltype(on_populate_hook)*>(on_populate_orig)(_this, toFill);
 	}
 
@@ -1431,17 +1426,20 @@ namespace
 	}
 
 	void* textcommon_SetTextWithLineHeadWrap_orig = nullptr;
-	void textcommon_SetTextWithLineHeadWrap_hook(Il2CppObject* _this, Il2CppString* str, int maxCharacter) {
+	void textcommon_SetTextWithLineHeadWrap_hook(Il2CppObject* _this, Il2CppString* str, int maxCharacter)
+	{
 		reinterpret_cast<decltype(textcommon_SetTextWithLineHeadWrap_hook)*>(textcommon_SetTextWithLineHeadWrap_orig)(_this, str, maxCharacter * 2);
 	}
 
 	void* textcommon_SetTextWithLineHeadWrapWithColorTag_orig = nullptr;
-	void textcommon_SetTextWithLineHeadWrapWithColorTag_hook(Il2CppObject* _this, Il2CppString* str, int maxCharacter) {
+	void textcommon_SetTextWithLineHeadWrapWithColorTag_hook(Il2CppObject* _this, Il2CppString* str, int maxCharacter)
+	{
 		reinterpret_cast<decltype(textcommon_SetTextWithLineHeadWrapWithColorTag_hook)*>(textcommon_SetTextWithLineHeadWrapWithColorTag_orig)(_this, str, maxCharacter * 2);
 	}
 
 	void* textcommon_SetSystemTextWithLineHeadWrap_orig = nullptr;
-	void textcommon_SetSystemTextWithLineHeadWrap_hook(Il2CppObject* _this, Il2CppObject* systemText, int maxCharacter) {
+	void textcommon_SetSystemTextWithLineHeadWrap_hook(Il2CppObject* _this, Il2CppObject* systemText, int maxCharacter)
+	{
 		reinterpret_cast<decltype(textcommon_SetSystemTextWithLineHeadWrap_hook)*>(textcommon_SetSystemTextWithLineHeadWrap_orig)(_this, systemText, maxCharacter * 2);
 	}
 
@@ -3037,7 +3035,7 @@ namespace
 			auto assetbundlePath = local::u8_wide(g_font_assetbundle_path);
 			if (PathIsRelativeW(assetbundlePath.data()))
 			{
-				assetbundlePath.insert(0, ((wstring)std::filesystem::current_path().native()).append(L"/"));
+				assetbundlePath.insert(0, ((wstring)filesystem::current_path().native()).append(L"/"));
 			}
 			assets = load_from_file(il2cpp_string_new_utf16(assetbundlePath.data(), assetbundlePath.length()));
 
@@ -3057,7 +3055,7 @@ namespace
 			auto assetbundlePath = local::u8_wide(g_replace_assetbundle_file_path);
 			if (PathIsRelativeW(assetbundlePath.data()))
 			{
-				assetbundlePath.insert(0, ((wstring)std::filesystem::current_path().native()).append(L"/"));
+				assetbundlePath.insert(0, ((wstring)filesystem::current_path().native()).append(L"/"));
 			}
 			replaceAssets = load_from_file(il2cpp_string_new_utf16(assetbundlePath.data(), assetbundlePath.length()));
 
@@ -3083,9 +3081,9 @@ namespace
 
 		ADD_HOOK(GameSystem_FixedUpdate, "Gallop.GameSystem::FixedUpdate at %p\n");
 
-		ADD_HOOK(DialogCommon_Close, "Gallop.DialogCommon.Close() at %p\n");
+		// ADD_HOOK(DialogCommon_Close, "Gallop.DialogCommon.Close() at %p\n");
 
-		ADD_HOOK(GallopUtil_GotoTitleOnError, "Gallop.GallopUtil.GotoTitleOnError() at %p\n");
+		// ADD_HOOK(GallopUtil_GotoTitleOnError, "Gallop.GallopUtil.GotoTitleOnError() at %p\n");
 
 		ADD_HOOK(set_shadowResolution, "UnityEngine.QualitySettings.set_shadowResolution(ShadowResolution) at %p\n");
 
@@ -3174,20 +3172,6 @@ namespace
 		ADD_HOOK(get_modified_string, "GallopUtil_GetModifiedString at %p\n");
 
 		ADD_HOOK(update, "DG.Tweening.Core.TweenManager::Update at %p\n");
-
-		// ADD_HOOK(complete, "DG.Tweening.Core.TweenManager::Complete at %p\n");
-
-		// ADD_HOOK(get_start_frame, "Gallop.StoryTimelineBlockData::get_StartFrame at %p\n");
-
-		// ADD_HOOK(get_end_frame, "Gallop.StoryTimelineBlockData::get_EndFrame at %p\n");
-
-		// ADD_HOOK(get_end_frame1, "Gallop.StoryTimelineClipData::get_EndFrame at %p\n");
-
-		// ADD_HOOK(update_timeline_data, "Gallop.StoryTimelineBlockData::UpdateBlockData at %p\n");
-
-		// ADD_HOOK(get_fixed_end_frame, "Gallop.StoryTimelineClipData::get_FixedEndFrame at %p\n");
-
-		// ADD_HOOK(timeline_audioclip_ctor, "Gallop.StoryTimelineController::GetTimeScaleHighSpeed at %p\n");
 
 		ADD_HOOK(query_setup, "Query::_Setup at %p\n");
 		ADD_HOOK(query_gettext, "Query::GetString at %p\n");
