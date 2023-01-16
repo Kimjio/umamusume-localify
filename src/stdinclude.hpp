@@ -58,6 +58,7 @@ extern std::string g_custom_title_name;
 extern std::unordered_map<std::string, ReplaceAsset> g_replace_assets;
 extern std::string g_replace_assetbundle_file_path;
 extern std::string g_replace_text_db_path;
+extern bool g_character_system_text_caption;
 
 namespace {
 	// copy-pasted from https://stackoverflow.com/questions/3418231/replace-part-of-a-string-with-another-string

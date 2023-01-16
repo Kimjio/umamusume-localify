@@ -738,6 +738,79 @@ namespace
 			)(_this, query, characterId);
 	}
 
+	void* AudioManager_PlaySystemVoiceByElement_orig = nullptr;
+	AudioPlayback AudioManager_PlaySystemVoiceByElement_hook(
+		Il2CppObject* _this, Il2CppObject* elem, Il2CppObject* trans, int stopType, bool useVoiceGender, bool skipSaveUnlockState)
+	{
+		if (elem)
+		{
+			auto characterIdField = il2cpp_class_get_field_from_name(elem->klass, "CharacterId");
+			auto voiceIdField = il2cpp_class_get_field_from_name(elem->klass, "VoiceId");
+			auto textField = il2cpp_class_get_field_from_name(elem->klass, "Text");
+			auto cueSheetField = il2cpp_class_get_field_from_name(elem->klass, "CueSheet");
+			auto cueIdField = il2cpp_class_get_field_from_name(elem->klass, "CueId");
+
+			int characterId;
+			il2cpp_field_get_value(elem, characterIdField, &characterId);
+
+			int voiceId;
+			il2cpp_field_get_value(elem, voiceIdField, &voiceId);
+
+			Il2CppString* text;
+			il2cpp_field_get_value(elem, textField, &text);
+
+			Il2CppString* cueSheet;
+			il2cpp_field_get_value(elem, cueSheetField, &cueSheet);
+
+			int cueId;
+			il2cpp_field_get_value(elem, cueIdField, &cueId);
+
+			auto u8Text = local::wide_u8(text->start_char);
+			replaceAll(u8Text, "\n", " ");
+			if (uiManager &&
+				wstring(cueSheet->start_char).find(L"_home_") == string::npos &&
+				wstring(cueSheet->start_char).find(L"_tc_") == string::npos &&
+				wstring(cueSheet->start_char).find(L"_title_") == string::npos &&
+				wstring(cueSheet->start_char).find(L"_gacha_") == string::npos &&
+				voiceId != 95001 &&
+				characterId < 9000)
+			{
+				auto ShowNotification = reinterpret_cast<void (*)(Il2CppObject*, Il2CppString*)>(
+					il2cpp_class_get_method_from_name(uiManager->klass, "ShowNotification", 1)->methodPointer
+					);
+				auto LineHeadWrap = reinterpret_cast<Il2CppString * (*)(Il2CppString*, int)>(
+					il2cpp_symbols::get_method_pointer("umamusume.dll", "Gallop", "GallopUtil", "LineHeadWrap", 2)
+					);
+
+				auto notiField = il2cpp_class_get_field_from_name(uiManager->klass, "_notification");
+				Il2CppObject* notification;
+				il2cpp_field_get_value(uiManager, notiField, &notification);
+
+				auto timeField = il2cpp_class_get_field_from_name(notification->klass, "_displayTime");
+				float displayTime;
+				il2cpp_field_get_value(notification, timeField, &displayTime);
+
+				auto result = reinterpret_cast<decltype(AudioManager_PlaySystemVoiceByElement_hook)*>(AudioManager_PlaySystemVoiceByElement_orig)(
+					_this, elem, trans, stopType, useVoiceGender, skipSaveUnlockState
+					);
+
+				float length = reinterpret_cast<float(*)(Il2CppObject*, Il2CppString*, int)>(
+					il2cpp_class_get_method_from_name(_this->klass, "GetCueLength", 2)->methodPointer
+					)(_this, cueSheet, cueId);
+				il2cpp_field_set_value(notification, timeField, &length);
+
+				ShowNotification(uiManager, LineHeadWrap(il2cpp_string_new(u8Text.data()), 32));
+
+				il2cpp_field_set_value(notification, timeField, &displayTime);
+
+				return result;
+			}
+		}
+		return reinterpret_cast<decltype(AudioManager_PlaySystemVoiceByElement_hook)*>(AudioManager_PlaySystemVoiceByElement_orig)(
+			_this, elem, trans, stopType, useVoiceGender, skipSaveUnlockState
+			);
+	}
+
 	void* story_timeline_controller_play_orig;
 	void* story_timeline_controller_play_hook(Il2CppObject* _this)
 	{
@@ -2676,6 +2749,11 @@ namespace
 			"MasterCharacterSystemText", "_CreateOrmByQueryResultWithCharacterId", 2
 		);
 
+		auto AudioManager_PlaySystemVoiceByElement_addr = il2cpp_symbols::get_method_pointer(
+			"umamusume.dll", "Gallop",
+			"AudioManager", "PlaySystemVoiceByElement", 5
+		);
+
 		auto set_fps_addr = il2cpp_resolve_icall("UnityEngine.Application::set_targetFrameRate(System.Int32)");
 
 		auto wndproc_addr = il2cpp_symbols::get_method_pointer(
@@ -3257,6 +3335,10 @@ namespace
 			catch (exception& e)
 			{
 			}
+		}
+
+		if (g_character_system_text_caption) {
+			ADD_HOOK(AudioManager_PlaySystemVoiceByElement, "AudioManager::PlaySystemVoiceByElement at %p\n");
 		}
 
 		// ADD_HOOK(load_scene_internal, "SceneManager::LoadSceneAsyncNameIndexInternal at %p\n");

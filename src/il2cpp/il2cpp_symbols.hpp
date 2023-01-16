@@ -433,6 +433,16 @@ struct RaceLoaderManagerCourceContext
 	int CourseStartGateBaseId;
 };
 
+struct CriAtomExPlayback {
+	uint32_t id;
+};
+
+struct AudioPlayback {
+	CriAtomExPlayback criAtomExPlayback;
+	bool isError;
+	int soundGroup;
+};
+
 // function types
 typedef Il2CppString* (*il2cpp_string_new_utf16_t)(const wchar_t* str, unsigned int len);
 typedef Il2CppString* (*il2cpp_string_new_t)(const char* str);

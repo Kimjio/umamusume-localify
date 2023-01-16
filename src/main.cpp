@@ -31,6 +31,7 @@ std::string g_custom_title_name;
 std::unordered_map<std::string, ReplaceAsset> g_replace_assets;
 std::string g_replace_assetbundle_file_path;
 std::string g_replace_text_db_path;
+bool g_character_system_text_caption = false;
 std::string text_id_dict;
 
 namespace
@@ -171,6 +172,7 @@ namespace
 					g_force_landscape_ui_scale = 1;
 				}
 			}
+
 			if (document.HasMember("uiLoadingShowOrientationGuide"))
 			{
 				g_ui_loading_show_orientation_guide = document["uiLoadingShowOrientationGuide"].GetBool();
@@ -208,6 +210,11 @@ namespace
 			if (document.HasMember("replaceTextDBPath"))
 			{
 				g_replace_text_db_path = document["replaceTextDBPath"].GetString();
+			}
+
+			if (document.HasMember("characterSystemTextCaption"))
+			{
+				g_character_system_text_caption = document["characterSystemTextCaption"].GetBool();
 			}
 
 			// Looks like not working for now
