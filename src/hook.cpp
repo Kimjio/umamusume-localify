@@ -1353,6 +1353,28 @@ namespace
 				return TRUE;
 			}
 		}
+		if (g_cyspring_update_mode != -1)
+		{
+			bool altDown = (lParam & (static_cast<long long>(1) << 29)) != 0;
+			if (altDown)
+			{
+				switch (wParam)
+				{
+				case '1':
+					g_cyspring_update_mode = 0;
+					break;
+				case '2':
+					g_cyspring_update_mode = 1;
+					break;
+				case '3':
+					g_cyspring_update_mode = 2;
+					break;
+				case '4':
+					g_cyspring_update_mode = 3;
+					break;
+				}
+			}
+		}
 		if (g_unlock_size)
 		{
 
