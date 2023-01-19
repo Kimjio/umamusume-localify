@@ -334,26 +334,6 @@ namespace
 		return reinterpret_cast<decltype(update_hook)*>(update_orig)(_this, updateType, deltaTime * g_ui_animation_scale, independentTime * g_ui_animation_scale);
 	}
 
-	void* update_timeline_data_orig = nullptr;
-	void* update_timeline_data_hook(Il2CppObject* _this, int frameCount, float currentTime, bool isWaiting, bool isChangeBlock)
-	{
-		return reinterpret_cast<decltype(update_timeline_data_hook)*>(update_timeline_data_orig)(_this, round(currentTime * 144), currentTime, isWaiting, isChangeBlock);
-	}
-
-	void* get_fixed_start_frame_orig = nullptr;
-	int get_fixed_start_frame_hook(Il2CppObject* _this)
-	{
-		auto orig_result = reinterpret_cast<decltype(get_fixed_start_frame_hook)*>(get_fixed_start_frame_orig)(_this);
-		return orig_result;
-	}
-
-	void* get_fixed_end_frame_orig = nullptr;
-	int get_fixed_end_frame_hook(Il2CppObject* _this)
-	{
-		auto orig_result = reinterpret_cast<decltype(get_fixed_end_frame_hook)*>(get_fixed_end_frame_orig)(_this);
-		return round(orig_result);
-	}
-
 	unordered_map<void*, SQLite::Statement*> text_queries;
 	unordered_map<void*, bool> replacement_queries_can_next;
 
@@ -402,7 +382,8 @@ namespace
 				auto stmt = text_queries.at(pStmt);
 				if (stmt)
 				{
-					if (stmt->getQuery().find("`race_jikkyo_message`;") != string::npos)
+					if (stmt->getQuery().find("`race_jikkyo_message`;") != string::npos ||
+						stmt->getQuery().find("`race_jikkyo_comment`;") != string::npos)
 					{
 						if (replacement_queries_can_next.find(pStmt) == replacement_queries_can_next.end())
 						{
@@ -631,13 +612,16 @@ namespace
 						text = stmt->getColumn(idx).getString();
 						if (!text.empty())
 						{
-							if (stmt->getQuery().find("`race_jikkyo_message`;") != string::npos)
+							if (stmt->getQuery().find("`race_jikkyo_message`;") != string::npos ||
+								stmt->getQuery().find("`race_jikkyo_comment`;") != string::npos)
 							{
 								int id = query_getint(_this, 0);
 								int id1 = stmt->getColumn(0).getInt();
+								int groupId = query_getint(_this, 1);
+								int groupId1 = stmt->getColumn(1).getInt();
 								if (stmt->hasRow())
 								{
-									if (id == id1)
+									if (id == id1 && groupId == groupId1)
 									{
 										replacement_queries_can_next.insert_or_assign(stmtPtr, true);
 										return il2cpp_string_new(text.data());
