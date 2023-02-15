@@ -33,6 +33,7 @@ std::string g_replace_assetbundle_file_path;
 std::string g_replace_text_db_path;
 bool g_character_system_text_caption = false;
 int g_cyspring_update_mode = -1;
+bool g_hide_now_loading = false;
 std::string text_id_dict;
 
 namespace
@@ -227,6 +228,11 @@ namespace
 			else if (g_max_fps > 30) 
 			{
 				g_cyspring_update_mode = 1;
+			}
+
+			if (document.HasMember("hideNowLoading"))
+			{
+				g_hide_now_loading = document["hideNowLoading"].GetBool();
 			}
 
 			// Looks like not working for now

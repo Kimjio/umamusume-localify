@@ -66,6 +66,7 @@ extern bool g_character_system_text_caption;
  * SkipFramePostAlways 3
  */
 extern int g_cyspring_update_mode;
+extern bool g_hide_now_loading;
 
 namespace {
 	// copy-pasted from https://stackoverflow.com/questions/3418231/replace-part-of-a-string-with-another-string

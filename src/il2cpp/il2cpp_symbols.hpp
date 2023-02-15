@@ -10,11 +10,13 @@ typedef uint16_t Il2CppChar;
 
 struct Int32Object;
 
-struct Boolean {
+struct Boolean
+{
 	bool m_value;
 };
 
-struct Byte {
+struct Byte
+{
 	uint8_t m_value;
 };
 
@@ -433,15 +435,49 @@ struct RaceLoaderManagerCourceContext
 	int CourseStartGateBaseId;
 };
 
-struct CriAtomExPlayback {
+struct CriAtomExPlayback
+{
 	uint32_t id;
 };
 
-struct AudioPlayback {
+struct AudioPlayback
+{
 	CriAtomExPlayback criAtomExPlayback;
 	bool isError;
 	int soundGroup;
 };
+
+typedef struct Il2CppReflectionMethod Il2CppReflectionMethod;
+
+typedef void (*Il2CppMethodPointer)();
+
+typedef void* (*InvokerMethod)(Il2CppMethodPointer, const MethodInfo*, void*, void**);
+
+typedef struct Il2CppDelegate
+{
+	Il2CppObject object;
+	/* The compiled code of the target method */
+	Il2CppMethodPointer method_ptr;
+	/* The invoke code */
+	InvokerMethod invoke_impl;
+	Il2CppObject* target;
+	const MethodInfo* method;
+
+	void* delegate_trampoline;
+
+	intptr_t extraArg;
+
+	/*
+	 * If non-NULL, this points to a memory location which stores the address of
+	 * the compiled code of the method, or NULL if it is not yet compiled.
+	 */
+	uint8_t** method_code;
+	Il2CppReflectionMethod* method_info;
+	Il2CppReflectionMethod* original_method_info;
+	Il2CppObject* data;
+
+	bool method_is_virtual;
+} Il2CppDelegate;
 
 // function types
 typedef Il2CppString* (*il2cpp_string_new_utf16_t)(const wchar_t* str, unsigned int len);

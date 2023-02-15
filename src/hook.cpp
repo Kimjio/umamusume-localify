@@ -770,7 +770,8 @@ namespace
 				wstring(cueSheet->start_char).find(L"_title_") == string::npos &&
 				wstring(cueSheet->start_char).find(L"_gacha_") == string::npos &&
 				voiceId != 95001 &&
-				characterId < 9000)
+				(characterId < 9000 ||
+					voiceId == 70000))
 			{
 				auto ShowNotification = reinterpret_cast<void (*)(Il2CppObject*, Il2CppString*)>(
 					il2cpp_class_get_method_from_name(uiManager->klass, "ShowNotification", 1)->methodPointer
@@ -2334,8 +2335,7 @@ namespace
 
 	void* NowLoading_Show_orig = nullptr;
 
-	void NowLoading_Show_hook(Il2CppObject* _this, int type, Il2CppObject* onComplete,
-		Il2CppObject* overrideDuration, int easeType)
+	void NowLoading_Show_hook(Il2CppObject* _this, int type, Il2CppDelegate* onComplete, Il2CppObject* overrideDuration, int easeType)
 	{
 		// NowLoadingOrientation
 		if (type == 2 && (g_force_landscape || !g_ui_loading_show_orientation_guide))
@@ -2343,10 +2343,31 @@ namespace
 			// NowLoadingTips
 			type = 0;
 		}
-		reinterpret_cast<decltype(NowLoading_Show_hook)*>(NowLoading_Show_orig)(
-			_this,
-			type,
-			onComplete, overrideDuration, easeType);
+		if (!g_hide_now_loading)
+		{
+			reinterpret_cast<decltype(NowLoading_Show_hook)*>(NowLoading_Show_orig)(
+				_this,
+				type,
+				onComplete, overrideDuration, easeType);
+		}
+		if (onComplete && g_hide_now_loading)
+		{
+			reinterpret_cast<void (*)(Il2CppObject*)>(onComplete->method_ptr)(onComplete->target);
+		}
+	}
+
+	void* NowLoading_Hide_orig = nullptr;
+
+	void NowLoading_Hide_hook(Il2CppObject* thisObj, Il2CppDelegate* onComplete, Il2CppObject* overrideDuration, int easeType)
+	{
+		if (!g_hide_now_loading)
+		{
+			reinterpret_cast<decltype(NowLoading_Hide_hook)*>(NowLoading_Hide_orig)(thisObj, onComplete, overrideDuration, easeType);
+		}
+		if (onComplete && g_hide_now_loading)
+		{
+			reinterpret_cast<void (*)(Il2CppObject*)>(onComplete->method_ptr)(onComplete->target);
+		}
 	}
 
 	void* WaitDeviceOrientation_orig = nullptr;
@@ -2891,10 +2912,8 @@ namespace
 			"CanvasScaler", "set_referenceResolution", 1
 		);
 
-		auto UIManager_UpdateCanvasScaler_addr =
-			reinterpret_cast<void (*)(Il2CppObject*)>(
-				il2cpp_symbols::get_method_pointer(
-					"umamusume.dll", "Gallop", "UIManager", "UpdateCanvasScaler", 1));
+		auto UIManager_UpdateCanvasScaler_addr = il2cpp_symbols::get_method_pointer(
+			"umamusume.dll", "Gallop", "UIManager", "UpdateCanvasScaler", 1);
 
 		set_scale_factor = reinterpret_cast<void(*)(void*, float)>(
 			il2cpp_symbols::get_method_pointer(
@@ -2918,26 +2937,20 @@ namespace
 			"TextMeshProUguiCommon", "Awake", 0
 		);
 
-		auto textcommon_SetSystemTextWithLineHeadWrap_addr = reinterpret_cast<void (*)(void*, Il2CppObject*, int)>(
-			il2cpp_symbols::get_method_pointer(
-				"umamusume.dll", "Gallop",
-				"TextCommon", "SetSystemTextWithLineHeadWrap", 2
-			)
-			);
+		auto textcommon_SetSystemTextWithLineHeadWrap_addr = il2cpp_symbols::get_method_pointer(
+			"umamusume.dll", "Gallop",
+			"TextCommon", "SetSystemTextWithLineHeadWrap", 2
+		);
 
-		auto textcommon_SetTextWithLineHeadWrapWithColorTag_addr = reinterpret_cast<void (*)(void*, Il2CppString*, int)>(
-			il2cpp_symbols::get_method_pointer(
-				"umamusume.dll", "Gallop",
-				"TextCommon", "SetTextWithLineHeadWrapWithColorTag", 2
-			)
-			);
+		auto textcommon_SetTextWithLineHeadWrapWithColorTag_addr = il2cpp_symbols::get_method_pointer(
+			"umamusume.dll", "Gallop",
+			"TextCommon", "SetTextWithLineHeadWrapWithColorTag", 2
+		);
 
-		auto textcommon_SetTextWithLineHeadWrap_addr = reinterpret_cast<void (*)(void*, Il2CppString*, int)>(
-			il2cpp_symbols::get_method_pointer(
-				"umamusume.dll", "Gallop",
-				"TextCommon", "SetTextWithLineHeadWrap", 2
-			)
-			);
+		auto textcommon_SetTextWithLineHeadWrap_addr = il2cpp_symbols::get_method_pointer(
+			"umamusume.dll", "Gallop",
+			"TextCommon", "SetTextWithLineHeadWrap", 2
+		);
 
 		textcommon_get_TextId = reinterpret_cast<int (*)(void*)>(il2cpp_symbols::get_method_pointer(
 			"umamusume.dll", "Gallop",
@@ -3034,13 +3047,13 @@ namespace
 
 		auto set_resolution_addr = il2cpp_resolve_icall("UnityEngine.Screen::SetResolution(System.Int32,System.Int32,UnityEngine.FullScreenMode,System.Int32)");
 
-		auto an_text_fix_data_addr = reinterpret_cast<void (*)(Il2CppObject * _this)>(il2cpp_symbols::get_method_pointer("Plugins.dll", "AnimateToUnity", "AnText", "_FixData", 0));
+		auto an_text_fix_data_addr = il2cpp_symbols::get_method_pointer("Plugins.dll", "AnimateToUnity", "AnText", "_FixData", 0);
 
-		auto an_text_set_material_to_textmesh_addr = reinterpret_cast<void (*)(Il2CppObject * _this)>(il2cpp_symbols::get_method_pointer("Plugins.dll", "AnimateToUnity", "AnText", "_SetMaterialToTextMesh", 0));
+		auto an_text_set_material_to_textmesh_addr = il2cpp_symbols::get_method_pointer("Plugins.dll", "AnimateToUnity", "AnText", "_SetMaterialToTextMesh", 0);
 
-		auto load_zekken_composite_resource_addr = reinterpret_cast<void (*)(Il2CppObject * _this)>(il2cpp_symbols::get_method_pointer("umamusume.dll", "Gallop", "ModelLoader", "LoadZekkenCompositeResourceInternal", 0));
+		auto load_zekken_composite_resource_addr = il2cpp_symbols::get_method_pointer("umamusume.dll", "Gallop", "ModelLoader", "LoadZekkenCompositeResourceInternal", 0);
 
-		auto wait_resize_ui_addr = reinterpret_cast<void (*)(Il2CppObject * _this, bool isPortrait, bool isShowOrientationGuide)>(il2cpp_symbols::get_method_pointer("umamusume.dll", "Gallop", "UIManager", "WaitResizeUI", 2));
+		auto wait_resize_ui_addr = il2cpp_symbols::get_method_pointer("umamusume.dll", "Gallop", "UIManager", "WaitResizeUI", 2);
 
 		auto set_anti_aliasing_addr = il2cpp_resolve_icall("UnityEngine.QualitySettings::set_antiAliasing(System.Int32)");
 
@@ -3056,35 +3069,30 @@ namespace
 
 		auto Light_set_shadowResolution_addr = il2cpp_resolve_icall("UnityEngine.Light::set_shadowResolution(UnityEngine.Light,UnityEngine.Rendering.LightShadowResolution)");
 
-		auto apply_graphics_quality_addr = reinterpret_cast<void (*)(
-			Il2CppObject*, Il2CppObject*, bool)>(il2cpp_symbols::get_method_pointer(
-				"umamusume.dll",
-				"Gallop",
-				"GraphicSettings", "ApplyGraphicsQuality", 2));
+		auto apply_graphics_quality_addr = il2cpp_symbols::get_method_pointer(
+			"umamusume.dll",
+			"Gallop",
+			"GraphicSettings", "ApplyGraphicsQuality", 2);
 
-		auto GraphicSettings_GetVirtualResolution3D_addr = reinterpret_cast<Vector2Int_t(*)(
-			Il2CppObject*, bool)>(il2cpp_symbols::get_method_pointer(
-				"umamusume.dll",
-				"Gallop",
-				"GraphicSettings", "GetVirtualResolution3D", 1));
+		auto GraphicSettings_GetVirtualResolution3D_addr = il2cpp_symbols::get_method_pointer(
+			"umamusume.dll",
+			"Gallop",
+			"GraphicSettings", "GetVirtualResolution3D", 1);
 
-		auto ChangeScreenOrientation_addr = reinterpret_cast<void (*)(
-			ScreenOrientation, bool)>(il2cpp_symbols::get_method_pointer(
-				"umamusume.dll",
-				"Gallop",
-				"Screen", "ChangeScreenOrientation", 2));
+		auto ChangeScreenOrientation_addr = il2cpp_symbols::get_method_pointer(
+			"umamusume.dll",
+			"Gallop",
+			"Screen", "ChangeScreenOrientation", 2);
 
-		auto Screen_set_orientation_addr = reinterpret_cast<void (*)(
-			ScreenOrientation)>(il2cpp_symbols::get_method_pointer(
-				"UnityEngine.CoreModule.dll",
-				"UnityEngine",
-				"Screen", "set_orientation", 1));
+		auto Screen_set_orientation_addr = il2cpp_symbols::get_method_pointer(
+			"UnityEngine.CoreModule.dll",
+			"UnityEngine",
+			"Screen", "set_orientation", 1);
 
-		auto Screen_get_ScreenOrientation_addr = reinterpret_cast<void (*)(
-			ScreenOrientation)>(il2cpp_symbols::get_method_pointer(
-				"umamusume.dll",
-				"Gallop",
-				"Screen", "get_ScreenOrientation", 0));
+		auto Screen_get_ScreenOrientation_addr = il2cpp_symbols::get_method_pointer(
+			"umamusume.dll",
+			"Gallop",
+			"Screen", "get_ScreenOrientation", 0);
 
 		auto Screen_RequestOrientation_addr = il2cpp_resolve_icall("UnityEngine.Screen::RequestOrientation(UnityEngine.ScreenOrientation)");
 		/*reinterpret_cast<void (*)(
@@ -3093,24 +3101,25 @@ namespace
 				"UnityEngine",
 				"Screen", "set_orientation", 1));*/
 
-		auto DeviceOrientationGuide_Show_addr = reinterpret_cast<void (*)(bool,
-			int)>(il2cpp_symbols::get_method_pointer(
-				"umamusume.dll",
-				"Gallop", "DeviceOrientationGuide", "Show", 2));
-
-		auto NowLoading_Show_addr = reinterpret_cast<void (*)(int, Il2CppObject*,
-			Il2CppObject*, int)>(il2cpp_symbols::get_method_pointer(
-				"umamusume.dll",
-				"Gallop", "NowLoading", "Show", 4));
-
-		auto WaitDeviceOrientation_addr = reinterpret_cast<void (*)(
-			ScreenOrientation)>(il2cpp_symbols::get_method_pointer(
-				"umamusume.dll",
-				"Gallop", "Screen", "WaitDeviceOrientation", 1));
-
-		auto BootSystem_Awake_addr = reinterpret_cast<void (*)(Il2CppObject*)>(il2cpp_symbols::get_method_pointer(
+		auto DeviceOrientationGuide_Show_addr = il2cpp_symbols::get_method_pointer(
 			"umamusume.dll",
-			"Gallop", "BootSystem", "Awake", 0));
+			"Gallop", "DeviceOrientationGuide", "Show", 2);
+
+		auto NowLoading_Show_addr = il2cpp_symbols::get_method_pointer(
+			"umamusume.dll",
+			"Gallop", "NowLoading", "Show", 4);
+
+		auto NowLoading_Hide_addr = il2cpp_symbols::get_method_pointer(
+			"umamusume.dll",
+			"Gallop", "NowLoading", "Hide", 3);
+
+		auto WaitDeviceOrientation_addr = il2cpp_symbols::get_method_pointer(
+			"umamusume.dll",
+			"Gallop", "Screen", "WaitDeviceOrientation", 1);
+
+		auto BootSystem_Awake_addr = il2cpp_symbols::get_method_pointer(
+			"umamusume.dll",
+			"Gallop", "BootSystem", "Awake", 0);
 
 		auto UIManager_ChangeResizeUIForPC_addr = il2cpp_symbols::get_method_pointer(
 			"umamusume.dll", "Gallop", "UIManager", "ChangeResizeUIForPC", 2);
@@ -3121,11 +3130,11 @@ namespace
 		auto GetLimitSize_addr = il2cpp_symbols::get_method_pointer(
 			"umamusume.dll", "Gallop", "StandaloneWindowResize", "GetLimitSize", -1);
 
-		auto ChangeScreenOrientationPortraitAsync_addr = reinterpret_cast<Il2CppObject * (*)()>(il2cpp_symbols::get_method_pointer(
-			"umamusume.dll", "Gallop", "Screen", "ChangeScreenOrientationPortraitAsync", -1));
+		auto ChangeScreenOrientationPortraitAsync_addr = il2cpp_symbols::get_method_pointer(
+			"umamusume.dll", "Gallop", "Screen", "ChangeScreenOrientationPortraitAsync", -1);
 
-		auto get_IsVertical_addr = reinterpret_cast<Boolean(*)()>(il2cpp_symbols::get_method_pointer(
-			"umamusume.dll", "Gallop", "Screen", "get_IsVertical", -1));
+		auto get_IsVertical_addr = il2cpp_symbols::get_method_pointer(
+			"umamusume.dll", "Gallop", "Screen", "get_IsVertical", -1);
 
 		MoviePlayerBase_get_MovieInfo = reinterpret_cast<Il2CppObject * (*)(Il2CppObject*)>(il2cpp_symbols::get_method_pointer(
 			"Cute.Cri.Assembly.dll", "Cute.Cri", "MoviePlayerBase", "get_MovieInfo", 0));
@@ -3133,63 +3142,61 @@ namespace
 		MovieManager_GetMovieInfo = reinterpret_cast<Il2CppObject * (*)(Il2CppObject*, MoviePlayerHandle)>(il2cpp_symbols::get_method_pointer(
 			"Cute.Cri.Assembly.dll", "Cute.Cri", "MovieManager", "GetMovieInfo", 1));
 
-		auto MovieManager_SetImageUvRect_addr = reinterpret_cast<void(*)(Il2CppObject*, MoviePlayerHandle, Rect_t)>(il2cpp_symbols::get_method_pointer(
-			"Cute.Cri.Assembly.dll", "Cute.Cri", "MovieManager", "SetImageUvRect", 2));
+		auto MovieManager_SetImageUvRect_addr = il2cpp_symbols::get_method_pointer(
+			"Cute.Cri.Assembly.dll", "Cute.Cri", "MovieManager", "SetImageUvRect", 2);
 
 		auto MovieManager_SetScreenSize_addr = il2cpp_symbols::get_method_pointer(
 			"Cute.Cri.Assembly.dll", "Cute.Cri", "MovieManager", "SetScreenSize", 2);
 
-		auto MoviePlayerForUI_AdjustScreenSize_addr = reinterpret_cast<void(*)(Il2CppObject*, Vector2_t, bool)>(il2cpp_symbols::get_method_pointer(
-			"Cute.Cri.Assembly.dll", "Cute.Cri", "MoviePlayerForUI", "AdjustScreenSize", 2));
+		auto MoviePlayerForUI_AdjustScreenSize_addr = il2cpp_symbols::get_method_pointer(
+			"Cute.Cri.Assembly.dll", "Cute.Cri", "MoviePlayerForUI", "AdjustScreenSize", 2);
 
-		auto MoviePlayerForObj_AdjustScreenSize_addr = reinterpret_cast<void(*)(Il2CppObject*, Vector2_t, bool)>(il2cpp_symbols::get_method_pointer(
-			"Cute.Cri.Assembly.dll", "Cute.Cri", "MoviePlayerForObj", "AdjustScreenSize", 2));
+		auto MoviePlayerForObj_AdjustScreenSize_addr = il2cpp_symbols::get_method_pointer(
+			"Cute.Cri.Assembly.dll", "Cute.Cri", "MoviePlayerForObj", "AdjustScreenSize", 2);
 
 		load_from_file = reinterpret_cast<Il2CppObject * (*)(Il2CppString * path)>(il2cpp_symbols::get_method_pointer(
 			"UnityEngine.AssetBundleModule.dll", "UnityEngine", "AssetBundle",
 			"LoadFromFile", 1));
 
-		auto PathResolver_GetLocalPath_addr = reinterpret_cast<Il2CppObject * (*)(Il2CppString * path)>(il2cpp_symbols::get_method_pointer(
+		auto PathResolver_GetLocalPath_addr = il2cpp_symbols::get_method_pointer(
 			"_Cyan.dll", "Cyan.LocalFile", "PathResolver",
-			"GetLocalPath", 2));
+			"GetLocalPath", 2);
 
-		auto assetbundle_LoadFromFile_addr = reinterpret_cast<Il2CppObject * (*)(Il2CppString * path)>(il2cpp_symbols::get_method_pointer(
+		auto assetbundle_LoadFromFile_addr = il2cpp_symbols::get_method_pointer(
 			"UnityEngine.AssetBundleModule.dll", "UnityEngine", "AssetBundle",
-			"LoadFromFile", 1));
+			"LoadFromFile", 1);
 
-		auto AssetBundleRequest_GetResult_addr = reinterpret_cast<Il2CppObject * (*)(Il2CppString * path)>(il2cpp_symbols::get_method_pointer(
+		auto AssetBundleRequest_GetResult_addr = il2cpp_symbols::get_method_pointer(
 			"UnityEngine.AssetBundleModule.dll", "UnityEngine", "AssetBundleRequest",
-			"GetResult", 0));
+			"GetResult", 0);
 
-		auto assetbundle_load_asset_addr = reinterpret_cast<Il2CppObject * (*)(Il2CppObject * _this, Il2CppString * name, Il2CppObject * runtimeType)>(
-			il2cpp_resolve_icall("UnityEngine.AssetBundle::LoadAsset_Internal(System.String,System.Type)")
-			);
+		auto assetbundle_load_asset_addr = il2cpp_resolve_icall("UnityEngine.AssetBundle::LoadAsset_Internal(System.String,System.Type)");
 
-		auto assetbundle_unload_addr = reinterpret_cast<Il2CppObject * (*)(Il2CppString * path)>(il2cpp_symbols::get_method_pointer("UnityEngine.AssetBundleModule.dll", "UnityEngine", "AssetBundle", "Unload", 1));
+		auto assetbundle_unload_addr = il2cpp_symbols::get_method_pointer("UnityEngine.AssetBundleModule.dll", "UnityEngine", "AssetBundle", "Unload", 1);
 
-		auto resources_load_addr = reinterpret_cast<Il2CppObject * (*)(Il2CppString * path, Il2CppType*)>(il2cpp_symbols::get_method_pointer("UnityEngine.CoreModule.dll", "UnityEngine", "Resources", "Load", 2));
+		auto resources_load_addr = il2cpp_symbols::get_method_pointer("UnityEngine.CoreModule.dll", "UnityEngine", "Resources", "Load", 2);
 
-		auto Sprite_get_texture_addr = reinterpret_cast<Il2CppObject * (*)(Il2CppObject*)>(il2cpp_resolve_icall("UnityEngine.Sprite::get_texture(UnityEngine.Sprite)"));
+		auto Sprite_get_texture_addr = il2cpp_resolve_icall("UnityEngine.Sprite::get_texture(UnityEngine.Sprite)");
 
-		auto Renderer_get_material_addr = reinterpret_cast<Il2CppObject * (*)(Il2CppObject*)>(il2cpp_symbols::get_method_pointer("UnityEngine.CoreModule.dll", "UnityEngine", "Renderer", "get_material", 0));
+		auto Renderer_get_material_addr = il2cpp_symbols::get_method_pointer("UnityEngine.CoreModule.dll", "UnityEngine", "Renderer", "get_material", 0);
 
-		auto Renderer_get_materials_addr = reinterpret_cast<Il2CppObject * (*)(Il2CppObject*)>(il2cpp_symbols::get_method_pointer("UnityEngine.CoreModule.dll", "UnityEngine", "Renderer", "get_materials", 0));
+		auto Renderer_get_materials_addr = il2cpp_symbols::get_method_pointer("UnityEngine.CoreModule.dll", "UnityEngine", "Renderer", "get_materials", 0);
 
-		auto Renderer_get_sharedMaterial_addr = reinterpret_cast<Il2CppObject * (*)(Il2CppObject*)>(il2cpp_symbols::get_method_pointer("UnityEngine.CoreModule.dll", "UnityEngine", "Renderer", "get_sharedMaterial", 0));
+		auto Renderer_get_sharedMaterial_addr = il2cpp_symbols::get_method_pointer("UnityEngine.CoreModule.dll", "UnityEngine", "Renderer", "get_sharedMaterial", 0);
 
-		auto Renderer_get_sharedMaterials_addr = reinterpret_cast<Il2CppObject * (*)(Il2CppObject*)>(il2cpp_symbols::get_method_pointer("UnityEngine.CoreModule.dll", "UnityEngine", "Renderer", "get_sharedMaterials", 0));
+		auto Renderer_get_sharedMaterials_addr = il2cpp_symbols::get_method_pointer("UnityEngine.CoreModule.dll", "UnityEngine", "Renderer", "get_sharedMaterials", 0);
 
-		auto Renderer_set_material_addr = reinterpret_cast<Il2CppObject * (*)(Il2CppObject*)>(il2cpp_symbols::get_method_pointer("UnityEngine.CoreModule.dll", "UnityEngine", "Renderer", "set_material", 1));
+		auto Renderer_set_material_addr = il2cpp_symbols::get_method_pointer("UnityEngine.CoreModule.dll", "UnityEngine", "Renderer", "set_material", 1);
 
-		auto Renderer_set_materials_addr = reinterpret_cast<Il2CppObject * (*)(Il2CppObject*)>(il2cpp_symbols::get_method_pointer("UnityEngine.CoreModule.dll", "UnityEngine", "Renderer", "set_materials", 1));
+		auto Renderer_set_materials_addr = il2cpp_symbols::get_method_pointer("UnityEngine.CoreModule.dll", "UnityEngine", "Renderer", "set_materials", 1);
 
-		auto Renderer_set_sharedMaterial_addr = reinterpret_cast<Il2CppObject * (*)(Il2CppObject*)>(il2cpp_symbols::get_method_pointer("UnityEngine.CoreModule.dll", "UnityEngine", "Renderer", "set_sharedMaterial", 1));
+		auto Renderer_set_sharedMaterial_addr = il2cpp_symbols::get_method_pointer("UnityEngine.CoreModule.dll", "UnityEngine", "Renderer", "set_sharedMaterial", 1);
 
-		auto Renderer_set_sharedMaterials_addr = reinterpret_cast<Il2CppObject * (*)(Il2CppObject*)>(il2cpp_symbols::get_method_pointer("UnityEngine.CoreModule.dll", "UnityEngine", "Renderer", "set_sharedMaterials", 1));
+		auto Renderer_set_sharedMaterials_addr = il2cpp_symbols::get_method_pointer("UnityEngine.CoreModule.dll", "UnityEngine", "Renderer", "set_sharedMaterials", 1);
 
-		auto Material_get_mainTexture_addr = reinterpret_cast<Il2CppObject * (*)(Il2CppObject*)>(il2cpp_symbols::get_method_pointer("UnityEngine.CoreModule.dll", "UnityEngine", "Material", "get_mainTexture", 0));
+		auto Material_get_mainTexture_addr = il2cpp_symbols::get_method_pointer("UnityEngine.CoreModule.dll", "UnityEngine", "Material", "get_mainTexture", 0);
 
-		auto Material_set_mainTexture_addr = reinterpret_cast<Il2CppObject * (*)(Il2CppObject*)>(il2cpp_symbols::get_method_pointer("UnityEngine.CoreModule.dll", "UnityEngine", "Material", "set_mainTexture", 1));
+		auto Material_set_mainTexture_addr = il2cpp_symbols::get_method_pointer("UnityEngine.CoreModule.dll", "UnityEngine", "Material", "set_mainTexture", 1);
 
 		auto Material_SetTextureI4_addr = il2cpp_symbols::find_method("UnityEngine.CoreModule.dll", "UnityEngine", "Material", [](const MethodInfo* method)
 			{
@@ -3197,21 +3204,21 @@ namespace
 					method->parameters->parameter_type->type == IL2CPP_TYPE_I4;
 			});
 
-		auto CharaPropRendererAccessor_SetTexture_addr = reinterpret_cast<Il2CppObject * (*)(Il2CppObject*)>(il2cpp_symbols::get_method_pointer("umamusume.dll", "Gallop", "CharaPropRendererAccessor", "SetTexture", 1));
+		auto CharaPropRendererAccessor_SetTexture_addr = il2cpp_symbols::get_method_pointer("umamusume.dll", "Gallop", "CharaPropRendererAccessor", "SetTexture", 1);
 
-		auto FrameRateController_OverrideByNormalFrameRate_addr = reinterpret_cast<void (*)(Il2CppObject*, int)>(il2cpp_symbols::get_method_pointer("umamusume.dll", "Gallop", "FrameRateController", "OverrideByNormalFrameRate", 1));
+		auto FrameRateController_OverrideByNormalFrameRate_addr = il2cpp_symbols::get_method_pointer("umamusume.dll", "Gallop", "FrameRateController", "OverrideByNormalFrameRate", 1);
 
-		auto FrameRateController_OverrideByMaxFrameRate_addr = reinterpret_cast<void (*)(Il2CppObject*, int)>(il2cpp_symbols::get_method_pointer("umamusume.dll", "Gallop", "FrameRateController", "OverrideByMaxFrameRate", 1));
+		auto FrameRateController_OverrideByMaxFrameRate_addr = il2cpp_symbols::get_method_pointer("umamusume.dll", "Gallop", "FrameRateController", "OverrideByMaxFrameRate", 1);
 
-		auto FrameRateController_ResetOverride_addr = reinterpret_cast<void (*)(Il2CppObject*, int)>(il2cpp_symbols::get_method_pointer("umamusume.dll", "Gallop", "FrameRateController", "ResetOverride", 1));
+		auto FrameRateController_ResetOverride_addr = il2cpp_symbols::get_method_pointer("umamusume.dll", "Gallop", "FrameRateController", "ResetOverride", 1);
 
-		auto FrameRateController_ReflectionFrameRate_addr = reinterpret_cast<void (*)(Il2CppObject*, int)>(il2cpp_symbols::get_method_pointer("umamusume.dll", "Gallop", "FrameRateController", "ReflectionFrameRate", 0));
+		auto FrameRateController_ReflectionFrameRate_addr = il2cpp_symbols::get_method_pointer("umamusume.dll", "Gallop", "FrameRateController", "ReflectionFrameRate", 0);
 
-		auto BGManager_CalcBgScale_addr = reinterpret_cast<float (*)(Il2CppObject*, int, int, int, int)>(il2cpp_symbols::get_method_pointer("umamusume.dll", "Gallop", "BGManager", "CalcBgScale", 4));
+		auto BGManager_CalcBgScale_addr = il2cpp_symbols::get_method_pointer("umamusume.dll", "Gallop", "BGManager", "CalcBgScale", 4);
 
-		auto GallopUtil_GotoTitleOnError_addr = reinterpret_cast<void (*)(Il2CppString*)>(il2cpp_symbols::get_method_pointer("umamusume.dll", "Gallop", "GallopUtil", "GotoTitleOnError", 1));
+		auto GallopUtil_GotoTitleOnError_addr = il2cpp_symbols::get_method_pointer("umamusume.dll", "Gallop", "GallopUtil", "GotoTitleOnError", 1);
 
-		auto DialogCommon_Close_addr = reinterpret_cast<void (*)(Il2CppObject*)>(il2cpp_symbols::get_method_pointer("umamusume.dll", "Gallop", "DialogCommon", "Close", 0));
+		auto DialogCommon_Close_addr = il2cpp_symbols::get_method_pointer("umamusume.dll", "Gallop", "DialogCommon", "Close", 0);
 
 		auto StoryViewController_ctor_addr = il2cpp_symbols::get_method_pointer("umamusume.dll", "Gallop", "StoryViewController", ".ctor", 0);
 
@@ -3291,6 +3298,8 @@ namespace
 		ADD_HOOK(Light_set_shadowResolution, "UnityEngine.Light.set_shadowResolution(UnityEngine.Rendering.LightShadowResolution) at %p\n");
 
 		ADD_HOOK(NowLoading_Show, "Gallop.NowLoading::Show at %p\n");
+
+		ADD_HOOK(NowLoading_Hide, "Gallop.NowLoading::Hide at %p\n");
 
 		ADD_HOOK(PathResolver_GetLocalPath, "Cyan.Loader.PathResolver::GetLocalPath at %p\n");
 
