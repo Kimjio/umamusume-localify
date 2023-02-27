@@ -57,9 +57,17 @@ namespace
 			MH_DisableHook(LoadLibraryW);
 			MH_RemoveHook(LoadLibraryW);
 
-			if (!g_custom_title_name.empty())
+			auto hWnd = FindWindowW(L"UnityWndClass", L"umamusume");
+			if (hWnd)
 			{
-				SetWindowText(GetActiveWindow(), local::wide_acp(local::u8_wide(g_custom_title_name)).data());
+				if (!g_custom_title_name.empty())
+				{
+					SetWindowText(hWnd, local::wide_acp(local::u8_wide(g_custom_title_name)).data());
+				}
+				if (has_json_parse_error)
+				{
+					MessageBox(hWnd, json_parse_error_msg.data(), "Umamusume Localify", MB_OK | MB_ICONWARNING);
+				}
 			}
 
 			// use original function beacuse we have unhooked that

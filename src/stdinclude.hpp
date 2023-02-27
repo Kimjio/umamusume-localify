@@ -68,6 +68,9 @@ extern bool g_character_system_text_caption;
 extern int g_cyspring_update_mode;
 extern bool g_hide_now_loading;
 
+extern bool has_json_parse_error;
+extern std::string json_parse_error_msg;
+
 namespace {
 	// copy-pasted from https://stackoverflow.com/questions/3418231/replace-part-of-a-string-with-another-string
 	void replaceAll(std::string& str, const std::string& from, const std::string& to)
