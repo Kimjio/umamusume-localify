@@ -1,4 +1,5 @@
 #include <stdinclude.hpp>
+#include <rapidjson/error/en.h>
 
 extern bool init_hook();
 extern void uninit_hook();
@@ -35,6 +36,9 @@ bool g_character_system_text_caption = false;
 int g_cyspring_update_mode = -1;
 bool g_hide_now_loading = false;
 std::string text_id_dict;
+
+bool has_json_parse_error = false;
+std::string json_parse_error_msg;
 
 namespace
 {
@@ -255,6 +259,11 @@ namespace
 					dicts.emplace_back(dict);
 				}
 			}
+		} else {
+			has_json_parse_error = true; 
+			std::stringstream str_stream;
+			str_stream << "JSON parse error: " << GetParseError_En(document.GetParseError()) << " (" << document.GetErrorOffset() << ")";
+			json_parse_error_msg = str_stream.str();
 		}
 
 		config_stream.close();
