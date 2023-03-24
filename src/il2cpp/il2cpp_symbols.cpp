@@ -56,6 +56,8 @@ il2cpp_field_get_parent_t il2cpp_field_get_parent;
 il2cpp_field_get_offset_t il2cpp_field_get_offset;
 il2cpp_class_get_property_from_name_t il2cpp_class_get_property_from_name;
 il2cpp_runtime_object_init_t il2cpp_runtime_object_init;
+il2cpp_value_box_t il2cpp_value_box;
+il2cpp_object_unbox_t il2cpp_object_unbox;
 
 char* il2cpp_array_addr_with_size(void* array, int32_t size, uintptr_t idx)
 {
@@ -65,8 +67,6 @@ char* il2cpp_array_addr_with_size(void* array, int32_t size, uintptr_t idx)
 namespace il2cpp_symbols
 {
 #define RESOLVE_IMPORT(name) name = reinterpret_cast<name##_t>(GetProcAddress(game_module, #name))
-
-	void* il2cpp_domain = nullptr;
 
 	void init(HMODULE game_module)
 	{
@@ -126,6 +126,8 @@ namespace il2cpp_symbols
 		RESOLVE_IMPORT(il2cpp_field_get_offset);
 		RESOLVE_IMPORT(il2cpp_class_get_property_from_name);
 		RESOLVE_IMPORT(il2cpp_runtime_object_init);
+		RESOLVE_IMPORT(il2cpp_value_box);
+		RESOLVE_IMPORT(il2cpp_object_unbox);
 
 		il2cpp_domain = il2cpp_domain_get();
 	}

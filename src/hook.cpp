@@ -110,6 +110,119 @@ namespace
 		return il2cpp_type_get_object(il2cpp_class_get_type(il2cpp_symbols::get_class(assemblyName, namespaze, klassName)));
 	}
 
+	template<typename... T>
+	Il2CppDelegate* CreateDelegate(Il2CppObject* target, void (*fn)(Il2CppObject*, T...))
+	{
+		auto delegate = reinterpret_cast<MulticastDelegate*>(
+			il2cpp_object_new(il2cpp_symbols::get_class("mscorlib.dll", "System", "MulticastDelegate")));
+		delegate->delegates = il2cpp_array_new(il2cpp_symbols::get_class("mscorlib.dll", "System", "Delegate"), 1);
+		il2cpp_array_setref(delegate->delegates, 0, delegate);
+		delegate->method_ptr = reinterpret_cast<Il2CppMethodPointer>(fn);
+
+		auto methodInfo = reinterpret_cast<MethodInfo*>(il2cpp_object_new(
+			il2cpp_symbols::get_class("mscorlib.dll", "System.Reflection", "MethodInfo")));
+		methodInfo->methodPointer = reinterpret_cast<uintptr_t>(delegate->method_ptr);
+		methodInfo->klass = il2cpp_symbols::get_class("mscorlib.dll", "System.Reflection", "MethodInfo");
+		delegate->method = methodInfo;
+		delegate->target = target;
+		return delegate;
+	}
+
+	template<typename... T>
+	Il2CppDelegate* CreateUnityAction(Il2CppObject* target, void (*fn)(Il2CppObject*, T...))
+	{
+		auto delegate = reinterpret_cast<MulticastDelegate*>(
+			il2cpp_object_new(il2cpp_symbols::get_class("UnityEngine.CoreModule.dll", "UnityEngine.Events", "UnityAction")));
+		delegate->delegates = il2cpp_array_new(il2cpp_symbols::get_class("mscorlib.dll", "System", "Delegate"), 1);
+		il2cpp_array_setref(delegate->delegates, 0, delegate);
+		delegate->method_ptr = reinterpret_cast<Il2CppMethodPointer>(fn);
+
+		auto methodInfo = reinterpret_cast<MethodInfo*>(il2cpp_object_new(
+			il2cpp_symbols::get_class("mscorlib.dll", "System.Reflection", "MethodInfo")));
+		methodInfo->methodPointer = reinterpret_cast<uintptr_t>(delegate->method_ptr);
+		methodInfo->klass = il2cpp_symbols::get_class("mscorlib.dll", "System.Reflection", "MethodInfo");
+		delegate->method = methodInfo;
+		delegate->target = target;
+		return delegate;
+	}
+
+	Il2CppDelegate* GetButtonCommonOnClickDelegate(Il2CppObject* object)
+	{
+		if (!object)
+		{
+			return nullptr;
+		}
+		if (object->klass != il2cpp_symbols::get_class("umamusume.dll", "Gallop", "ButtonCommon"))
+		{
+			return nullptr;
+		}
+		auto onClickField = il2cpp_class_get_field_from_name(object->klass, "m_OnClick");
+		Il2CppObject* onClick;
+		il2cpp_field_get_value(object, onClickField, &onClick);
+		if (onClick)
+		{
+			auto callsField = il2cpp_class_get_field_from_name(onClick->klass, "m_Calls");
+			Il2CppObject* calls;
+			il2cpp_field_get_value(onClick, callsField, &calls);
+			if (calls)
+			{
+				auto runtimeCallsField = il2cpp_class_get_field_from_name(calls->klass,
+					"m_RuntimeCalls");
+				Il2CppObject* runtimeCalls;
+				il2cpp_field_get_value(calls, runtimeCallsField, &runtimeCalls);
+
+				if (runtimeCalls)
+				{
+					FieldInfo* itemsField = il2cpp_class_get_field_from_name(runtimeCalls->klass,
+						"_items");
+					Il2CppArraySize* arr;
+					il2cpp_field_get_value(runtimeCalls, itemsField, &arr);
+					if (arr)
+					{
+						for (int i = 0; i < arr->max_length; i++)
+						{
+							auto value = reinterpret_cast<Il2CppObject*>(arr->vector[i]);
+							if (value)
+							{
+								auto delegateField = il2cpp_class_get_field_from_name(value->klass,
+									"Delegate");
+								Il2CppDelegate* delegate;
+								il2cpp_field_get_value(value, delegateField, &delegate);
+								if (delegate)
+								{
+									// Unbox delegate
+									auto callbackField = il2cpp_class_get_field_from_name(
+										delegate->target->klass, "callback");
+									Il2CppDelegate* callback;
+									il2cpp_field_get_value(delegate->target, callbackField, &callback);
+
+									return callback;
+								}
+							}
+						}
+					}
+				}
+			}
+		}
+		return nullptr;
+	}
+
+	Il2CppObject* GetSingletonInstance(Il2CppClass* klass)
+	{
+		if (!klass || !klass->parent)
+		{
+			return nullptr;
+		}
+		if (string(klass->parent->name).find("Singleton`1") == string::npos)
+		{
+			return nullptr;
+		}
+		auto instanceField = il2cpp_class_get_field_from_name(klass, "_instance");
+		Il2CppObject* instance;
+		il2cpp_field_static_get_value(instanceField, &instance);
+		return instance;
+	}
+
 	Boolean GetBoolean(bool value)
 	{
 		return reinterpret_cast<Boolean(*)(Il2CppString * value)>(il2cpp_symbols::get_method_pointer(
@@ -2589,6 +2702,110 @@ namespace
 		return reinterpret_cast<decltype(CriMana_Player_SetFile_hook)*>(CriMana_Player_SetFile_orig)(_this, binder, moviePath, setMode);
 	}
 
+	void* PartsEpisodeList_SetupStoryExtraEpisodeList_orig = nullptr;
+
+	void PartsEpisodeList_SetupStoryExtraEpisodeList_hook(Il2CppObject* _this, Il2CppObject* extraSubCategory, Il2CppObject* partDataList, Il2CppObject* partData, Il2CppDelegate* onClick)
+	{
+		reinterpret_cast<decltype(PartsEpisodeList_SetupStoryExtraEpisodeList_hook)*>(PartsEpisodeList_SetupStoryExtraEpisodeList_orig)(_this, extraSubCategory, partDataList, partData, onClick);
+
+		int partDataId;
+
+		auto partDataIdField = il2cpp_class_get_field_from_name(partData->klass, "<Id>k__BackingField");
+		il2cpp_field_get_value(partData, partDataIdField, &partDataId);
+
+		auto voiceButtonField = il2cpp_class_get_field_from_name(_this->klass, "_voiceButton");
+		Il2CppObject* voiceButton;
+		il2cpp_field_get_value(_this, voiceButtonField, &voiceButton);
+
+		auto buttonField = il2cpp_class_get_field_from_name(voiceButton->klass, "_playVoiceButton");
+		Il2CppObject* button;
+		il2cpp_field_get_value(voiceButton, buttonField, &button);
+
+		if (button)
+		{
+			auto callback = GetButtonCommonOnClickDelegate(button);
+			if (callback)
+			{
+				auto newFn = *(
+					[](Il2CppObject* storyIdBox)
+					{
+
+						int storyId = *reinterpret_cast<int*>(il2cpp_object_unbox(storyIdBox));
+
+						auto masterDataManager = GetSingletonInstance(
+							il2cpp_symbols::get_class(
+								"umamusume.dll", "Gallop",
+								"MasterDataManager"));
+						auto masterBannerData = reinterpret_cast<Il2CppObject * (*)(
+							Il2CppObject*)>(il2cpp_class_get_method_from_name(
+								masterDataManager->klass,
+								"get_masterBannerData",
+								0)->methodPointer)(masterDataManager);
+
+						auto bannerList = reinterpret_cast<Il2CppObject * (*)(
+							Il2CppObject*,
+							int)>(il2cpp_class_get_method_from_name(
+								masterBannerData->klass,
+								"GetListWithGroupId",
+								1)->methodPointer)(masterBannerData,
+									7);
+
+						FieldInfo* itemsField = il2cpp_class_get_field_from_name(
+							bannerList->klass, "_items");
+						Il2CppArraySize* arr;
+						il2cpp_field_get_value(bannerList, itemsField,
+							&arr);
+
+						int announceId = -1;
+
+						for (int i = 0; i < arr->max_length; i++)
+						{
+							auto item = reinterpret_cast<Il2CppObject*>(arr->vector[i]);
+							if (item)
+							{
+								auto typeField = il2cpp_class_get_field_from_name(
+									item->klass, "Type");
+								int type;
+								il2cpp_field_get_value(item, typeField,
+									&type);
+								auto conditionValueField = il2cpp_class_get_field_from_name(
+									item->klass, "ConditionValue");
+								int conditionValue;
+								il2cpp_field_get_value(item,
+									conditionValueField,
+									&conditionValue);
+								if (type == 7 &&
+									conditionValue == storyId)
+								{
+									auto transitionField = il2cpp_class_get_field_from_name(
+										item->klass, "Transition");
+									il2cpp_field_get_value(item,
+										transitionField,
+										&announceId);
+									break;
+								}
+							}
+						}
+
+						if (announceId == -1 && storyId < 1005)
+						{
+							announceId = storyId - 1002;
+						}
+
+						auto action = CreateDelegate(storyIdBox, *([](Il2CppObject*) {}));
+
+						reinterpret_cast<void (*)(int,
+							Il2CppDelegate*,
+							Il2CppDelegate*)>(il2cpp_symbols::get_method_pointer(
+								"umamusume.dll", "Gallop",
+								"DialogAnnounceEvent", "Open", 3))(announceId, action, action);
+					});
+				reinterpret_cast<void (*)(Il2CppObject*, Il2CppDelegate*)>(il2cpp_class_get_method_from_name(button->klass, "SetOnClick", 1)->methodPointer)(button, 
+					CreateUnityAction(il2cpp_value_box(il2cpp_symbols::get_class("mscorlib.dll", "System", "Int32"), &partDataId), newFn));
+			}
+		}
+	}
+
 	void adjust_size()
 	{
 		thread([]()
@@ -2628,11 +2845,11 @@ namespace
 				if (g_static_entries_use_text_id_name)
 				{
 					string textIdName = GetTextIdNameById(i);
-					text_id_static_entries.emplace_back(make_pair(textIdName, str->start_char));
+					text_id_static_entries.emplace_back(textIdName, str->start_char);
 					if (local::get_localized_string(textIdName) == nullptr ||
 						local::wide_u8(local::get_localized_string(textIdName)->start_char) == local::wide_u8(str->start_char))
 					{
-						text_id_not_matched_entries.emplace_back(make_pair(textIdName, str->start_char));
+						text_id_not_matched_entries.emplace_back(textIdName, str->start_char);
 					}
 				}
 				else if (g_static_entries_use_hash)
@@ -3162,6 +3379,9 @@ namespace
 		auto MoviePlayerForObj_AdjustScreenSize_addr = il2cpp_symbols::get_method_pointer(
 			"Cute.Cri.Assembly.dll", "Cute.Cri", "MoviePlayerForObj", "AdjustScreenSize", 2);
 
+		auto PartsEpisodeList_SetupStoryExtraEpisodeList_addr = il2cpp_symbols::get_method_pointer(
+			"umamusume.dll", "Gallop", "PartsEpisodeList", "SetupStoryExtraEpisodeList", 4);
+
 		load_from_file = reinterpret_cast<Il2CppObject * (*)(Il2CppString * path)>(il2cpp_symbols::get_method_pointer(
 			"UnityEngine.AssetBundleModule.dll", "UnityEngine", "AssetBundle",
 			"LoadFromFile", 1));
@@ -3284,6 +3504,8 @@ namespace
 			}
 		}
 #pragma endregion
+
+		ADD_HOOK(PartsEpisodeList_SetupStoryExtraEpisodeList, "Gallop.PartsEpisodeList::SetupStoryExtraEpisodeList at %p\n");
 
 		ADD_HOOK(CriMana_Player_SetFile, "CriWare.CriMana.Player::SetFile at %p\n");
 

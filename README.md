@@ -1,6 +1,7 @@
 # umamusume-localify
 ## Uma Musume: Pretty Derby localify patch
 
+
 [한국어](README.ko-KR.md)
 [中国人](README.zh-Hans.md)
 
@@ -24,6 +25,9 @@
 
 ### Known issue
 - None
+
+# Build
+Platform Toolset: clang required
 
 # Resources
 - `static.json` upgrade tool - https://github.com/AirJerryWhite/i18upgrade
