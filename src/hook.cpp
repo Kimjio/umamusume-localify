@@ -2,6 +2,8 @@
 #include <set>
 #include <sstream>
 
+#include <regex>
+
 #include <SQLiteCpp/SQLiteCpp.h>
 
 #include "il2cpp_dump.h"
@@ -855,79 +857,145 @@ namespace
 			MasterCharacterSystemText_CreateOrmByQueryResultWithCharacterId_orig
 			)(_this, query, characterId);
 	}
+	uintptr_t currentPlayerHandle;
 
-	void* AudioManager_PlaySystemVoiceByElement_orig = nullptr;
-	AudioPlayback AudioManager_PlaySystemVoiceByElement_hook(
-		Il2CppObject* _this, Il2CppObject* elem, Il2CppObject* trans, int stopType, bool useVoiceGender, bool skipSaveUnlockState)
-	{
-		if (elem)
-		{
-			auto characterIdField = il2cpp_class_get_field_from_name(elem->klass, "CharacterId");
-			auto voiceIdField = il2cpp_class_get_field_from_name(elem->klass, "VoiceId");
-			auto textField = il2cpp_class_get_field_from_name(elem->klass, "Text");
-			auto cueSheetField = il2cpp_class_get_field_from_name(elem->klass, "CueSheet");
-			auto cueIdField = il2cpp_class_get_field_from_name(elem->klass, "CueId");
+	void ShowCaptionByNotification(Il2CppObject* audioManager, Il2CppObject* elem, uintptr_t playerHandle) {
+		auto characterIdField = il2cpp_class_get_field_from_name(elem->klass, "CharacterId");
+		auto voiceIdField = il2cpp_class_get_field_from_name(elem->klass, "VoiceId");
+		auto textField = il2cpp_class_get_field_from_name(elem->klass, "Text");
+		auto cueSheetField = il2cpp_class_get_field_from_name(elem->klass, "CueSheet");
+		auto cueIdField = il2cpp_class_get_field_from_name(elem->klass, "CueId");
 
-			int characterId;
-			il2cpp_field_get_value(elem, characterIdField, &characterId);
+		int characterId;
+		il2cpp_field_get_value(elem, characterIdField, &characterId);
 
-			int voiceId;
-			il2cpp_field_get_value(elem, voiceIdField, &voiceId);
+		int voiceId;
+		il2cpp_field_get_value(elem, voiceIdField, &voiceId);
 
-			Il2CppString* text;
-			il2cpp_field_get_value(elem, textField, &text);
+		Il2CppString* text;
+		il2cpp_field_get_value(elem, textField, &text);
 
-			Il2CppString* cueSheet;
-			il2cpp_field_get_value(elem, cueSheetField, &cueSheet);
+		Il2CppString* cueSheet;
+		il2cpp_field_get_value(elem, cueSheetField, &cueSheet);
 
-			int cueId;
-			il2cpp_field_get_value(elem, cueIdField, &cueId);
+		int cueId;
+		il2cpp_field_get_value(elem, cueIdField, &cueId);
 
-			auto u8Text = local::wide_u8(text->start_char);
-			replaceAll(u8Text, "\n", " ");
-			if (uiManager &&
-				wstring(cueSheet->start_char).find(L"_home_") == string::npos &&
-				wstring(cueSheet->start_char).find(L"_tc_") == string::npos &&
-				wstring(cueSheet->start_char).find(L"_title_") == string::npos &&
-				wstring(cueSheet->start_char).find(L"_gacha_") == string::npos &&
-				voiceId != 95001 &&
-				(characterId < 9000 ||
-					voiceId == 70000))
-			{
-				auto ShowNotification = reinterpret_cast<void (*)(Il2CppObject*, Il2CppString*)>(
-					il2cpp_class_get_method_from_name(uiManager->klass, "ShowNotification", 1)->methodPointer
-					);
-				auto LineHeadWrap = reinterpret_cast<Il2CppString * (*)(Il2CppString*, int)>(
-					il2cpp_symbols::get_method_pointer("umamusume.dll", "Gallop", "GallopUtil", "LineHeadWrap", 2)
-					);
+		auto u8Text = local::wide_u8(text->start_char);
+		replaceAll(u8Text, "\n", " ");
+		auto uiManager = GetSingletonInstance(
+			il2cpp_symbols::get_class("umamusume.dll", "Gallop", "UIManager"));
+		if (uiManager && wstring(cueSheet->start_char).find(L"_home_") == string::npos &&
+			wstring(cueSheet->start_char).find(L"_tc_") == string::npos &&
+			wstring(cueSheet->start_char).find(L"_title_") == string::npos &&
+			wstring(cueSheet->start_char).find(L"_gacha_") == string::npos && voiceId != 95001 &&
+			(characterId < 9000 || voiceId == 70000)) {
+			auto ShowNotification = reinterpret_cast<void (*)(Il2CppObject*, Il2CppString*)>(
+				il2cpp_class_get_method_from_name(uiManager->klass, "ShowNotification",
+					1)->methodPointer
+				);
+			auto LineHeadWrap = reinterpret_cast<Il2CppString * (*)(Il2CppString*, int)>(
+				il2cpp_symbols::get_method_pointer("umamusume.dll", "Gallop", "GallopUtil",
+					"LineHeadWrap", 2));
 
-				auto notiField = il2cpp_class_get_field_from_name(uiManager->klass, "_notification");
-				Il2CppObject* notification;
-				il2cpp_field_get_value(uiManager, notiField, &notification);
+			auto notiField = il2cpp_class_get_field_from_name(uiManager->klass, "_notification");
+			Il2CppObject* notification;
+			il2cpp_field_get_value(uiManager, notiField, &notification);
 
-				auto timeField = il2cpp_class_get_field_from_name(notification->klass, "_displayTime");
-				float displayTime;
-				il2cpp_field_get_value(notification, timeField, &displayTime);
+			auto timeField = il2cpp_class_get_field_from_name(notification->klass, "_displayTime");
+			float displayTime;
+			il2cpp_field_get_value(notification, timeField, &displayTime);
 
-				auto result = reinterpret_cast<decltype(AudioManager_PlaySystemVoiceByElement_hook)*>(AudioManager_PlaySystemVoiceByElement_orig)(
-					_this, elem, trans, stopType, useVoiceGender, skipSaveUnlockState
-					);
+			float length = reinterpret_cast<float (*)(Il2CppObject*, Il2CppString*, int)>(
+				il2cpp_class_get_method_from_name(audioManager->klass, "GetCueLength",
+					2)->methodPointer
+				)(audioManager, cueSheet, cueId);
+			il2cpp_field_set_value(notification, timeField, &length);
 
-				float length = reinterpret_cast<float(*)(Il2CppObject*, Il2CppString*, int)>(
-					il2cpp_class_get_method_from_name(_this->klass, "GetCueLength", 2)->methodPointer
-					)(_this, cueSheet, cueId);
-				il2cpp_field_set_value(notification, timeField, &length);
+			currentPlayerHandle = playerHandle;
+			ShowNotification(uiManager, LineHeadWrap(il2cpp_string_new(u8Text.data()), 32));
 
-				ShowNotification(uiManager, LineHeadWrap(il2cpp_string_new(u8Text.data()), 32));
+			il2cpp_field_set_value(notification, timeField, &displayTime);
+		}
+	}
 
-				il2cpp_field_set_value(notification, timeField, &displayTime);
+	void* AtomSourceEx_SetParameter_orig = nullptr;
+	void AtomSourceEx_SetParameter_hook(Il2CppObject* _this) {
+		reinterpret_cast<decltype(AtomSourceEx_SetParameter_hook)*>(AtomSourceEx_SetParameter_orig)(
+			_this);
 
-				return result;
+		FieldInfo* cueIdField = il2cpp_class_get_field_from_name(_this->klass,
+			"<CueId>k__BackingField");
+		int cueId;
+		il2cpp_field_get_value(_this, cueIdField, &cueId);
+
+		FieldInfo* cueSheetField = il2cpp_class_get_field_from_name(_this->klass, "_cueSheet");
+		Il2CppString* cueSheet;
+		il2cpp_field_get_value(_this, cueSheetField, &cueSheet);
+
+		const regex r(R"((\d{4})(?:\d{2}))");
+		smatch stringMatch;
+		const auto cueSheetU8 = local::wide_u8(cueSheet->start_char);
+		regex_search(cueSheetU8, stringMatch, r);
+		if (!stringMatch.empty()) {
+			Il2CppObject* textList = reinterpret_cast<Il2CppObject * (*)(int)>(
+				il2cpp_symbols::get_method_pointer("umamusume.dll", "Gallop",
+					"MasterCharacterSystemText", "GetByCharaId", 1))(
+						stoi(stringMatch[1].str()));
+			FieldInfo* itemsField = il2cpp_class_get_field_from_name(textList->klass, "_items");
+			Il2CppArraySize* textArr;
+			il2cpp_field_get_value(textList, itemsField, &textArr);
+
+			auto audioManager = GetSingletonInstance(
+				il2cpp_symbols::get_class("umamusume.dll", "Gallop", "AudioManager"));
+
+
+			for (int i = 0; i < textArr->max_length; i++) {
+				auto elem = reinterpret_cast<Il2CppObject*>(textArr->vector[i]);
+				if (elem) {
+					auto elemCueIdField = il2cpp_class_get_field_from_name(elem->klass, "CueId");
+					auto elemCueSheetField = il2cpp_class_get_field_from_name(elem->klass, "CueSheet");
+
+					Il2CppString* elemCueSheet;
+					il2cpp_field_get_value(elem, elemCueSheetField, &elemCueSheet);
+
+					int elemCueId;
+					il2cpp_field_get_value(elem, elemCueIdField, &elemCueId);
+
+					if (wstring(elemCueSheet->start_char) == wstring(cueSheet->start_char) &&
+						cueId == elemCueId) {
+						auto playerField = il2cpp_class_get_field_from_name(_this->klass,
+							"<player>k__BackingField");
+						Il2CppObject* player;
+						il2cpp_field_get_value(_this, playerField, &player);
+
+						auto handleField = il2cpp_class_get_field_from_name(player->klass, "handle");
+						uintptr_t handle;
+						il2cpp_field_get_value(player, handleField, &handle);
+
+						ShowCaptionByNotification(audioManager, elem, handle);
+						return;
+					}
+				}
 			}
 		}
-		return reinterpret_cast<decltype(AudioManager_PlaySystemVoiceByElement_hook)*>(AudioManager_PlaySystemVoiceByElement_orig)(
-			_this, elem, trans, stopType, useVoiceGender, skipSaveUnlockState
-			);
+	}
+
+	void* CriAtomExPlayer_criAtomExPlayer_Stop_orig = nullptr;
+	void CriAtomExPlayer_criAtomExPlayer_Stop_hook(uintptr_t playerHandle) {
+		reinterpret_cast<decltype(CriAtomExPlayer_criAtomExPlayer_Stop_hook)*>(CriAtomExPlayer_criAtomExPlayer_Stop_orig)(playerHandle);
+		if (playerHandle == currentPlayerHandle) {
+			currentPlayerHandle = 0;
+			auto uiManager = GetSingletonInstance(
+				il2cpp_symbols::get_class("umamusume.dll", "Gallop", "UIManager"));
+			if (uiManager) {
+				auto HideNotification = reinterpret_cast<void (*)(Il2CppObject*)>(
+					il2cpp_class_get_method_from_name(uiManager->klass, "HideNotification",
+						0)->methodPointer
+					);
+				HideNotification(uiManager);
+			}
+		}
 	}
 
 	void* CySpringUpdater_set_SpringUpdateMode_orig = nullptr;
@@ -1084,13 +1152,13 @@ namespace
 
 	Il2CppObject* (*display_get_main)();
 
-	int (*get_system_width)(Il2CppObject* thisObj);
+	int (*get_system_width)(Il2CppObject* _this);
 
-	int (*get_system_height)(Il2CppObject* thisObj);
+	int (*get_system_height)(Il2CppObject* _this);
 
-	int (*get_rendering_width)(Il2CppObject* thisObj);
+	int (*get_rendering_width)(Il2CppObject* _this);
 
-	int (*get_rendering_height)(Il2CppObject* thisObj);
+	int (*get_rendering_height)(Il2CppObject* _this);
 
 	int last_display_width = 0, last_display_height = 0;
 	int last_virt_window_width = 0, last_virt_window_height = 0;
@@ -2502,11 +2570,11 @@ namespace
 
 	void* NowLoading_Hide_orig = nullptr;
 
-	void NowLoading_Hide_hook(Il2CppObject* thisObj, Il2CppDelegate* onComplete, Il2CppObject* overrideDuration, int easeType)
+	void NowLoading_Hide_hook(Il2CppObject* _this, Il2CppDelegate* onComplete, Il2CppObject* overrideDuration, int easeType)
 	{
 		if (!g_hide_now_loading)
 		{
-			reinterpret_cast<decltype(NowLoading_Hide_hook)*>(NowLoading_Hide_orig)(thisObj, onComplete, overrideDuration, easeType);
+			reinterpret_cast<decltype(NowLoading_Hide_hook)*>(NowLoading_Hide_orig)(_this, onComplete, overrideDuration, easeType);
 		}
 		if (onComplete && g_hide_now_loading)
 		{
@@ -3057,10 +3125,11 @@ namespace
 			"MasterCharacterSystemText", "_CreateOrmByQueryResultWithCharacterId", 2
 		);
 
-		auto AudioManager_PlaySystemVoiceByElement_addr = il2cpp_symbols::get_method_pointer(
-			"umamusume.dll", "Gallop",
-			"AudioManager", "PlaySystemVoiceByElement", 5
-		);
+		auto CriAtomExPlayer_criAtomExPlayer_Stop_addr = il2cpp_symbols::get_method_pointer(
+			"CriMw.CriWare.Runtime.dll", "CriWare", "CriAtomExPlayer", "criAtomExPlayer_Stop", 1);
+
+		auto AtomSourceEx_SetParameter_addr = il2cpp_symbols::get_method_pointer(
+			"Cute.Cri.Assembly.dll", "Cute.Cri", "AtomSourceEx", "SetParameter", 0);
 
 		auto CySpringUpdater_set_SpringUpdateMode_addr = il2cpp_symbols::get_method_pointer(
 			"umamusume.dll", "Gallop.Model.Component",
@@ -3657,7 +3726,8 @@ namespace
 		}
 
 		if (g_character_system_text_caption) {
-			ADD_HOOK(AudioManager_PlaySystemVoiceByElement, "AudioManager::PlaySystemVoiceByElement at %p\n");
+			ADD_HOOK(CriAtomExPlayer_criAtomExPlayer_Stop, "CriWare.CriAtomExPlayer::criAtomExPlayer_Stop at %p\n");
+			ADD_HOOK(AtomSourceEx_SetParameter, "Cute.Cri.AtomSourceEx::SetParameter at %p\n");
 		}
 
 		if (g_cyspring_update_mode != -1) {
