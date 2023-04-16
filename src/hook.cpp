@@ -1677,6 +1677,17 @@ namespace
 		reinterpret_cast<decltype(textcommon_SetSystemTextWithLineHeadWrap_hook)*>(textcommon_SetSystemTextWithLineHeadWrap_orig)(_this, systemText, maxCharacter * 2);
 	}
 
+
+	void* TMP_Settings_get_instance_orig = nullptr;
+
+	Il2CppObject* TMP_Settings_get_instance_hook() {
+		auto tmpSettings = reinterpret_cast<decltype(TMP_Settings_get_instance_hook)*>(TMP_Settings_get_instance_orig)();
+		auto fontAssetField = il2cpp_class_get_field_from_name(tmpSettings->klass,
+			"m_defaultFontAsset");
+		il2cpp_field_set_value(tmpSettings, fontAssetField, GetCustomTMPFont());
+		return tmpSettings;
+	}
+
 	void* TextMeshProUguiCommon_Awake_orig = nullptr;
 	void TextMeshProUguiCommon_Awake_hook(Il2CppObject* _this)
 	{
@@ -1730,8 +1741,10 @@ namespace
 		SetFloat(customFontMaterial, il2cpp_string_new("_OutlineWidth"), origOutlineWidth);
 		SetColor(customFontMaterial, il2cpp_string_new("_OutlineColor"), origOutlineColor);
 
+		reinterpret_cast<void (*)(Il2CppObject*, int)>(il2cpp_class_get_method_from_name(_this->klass, "set_fontStyle", 1)->methodPointer)(_this, 1);
 		reinterpret_cast<void (*)(Il2CppObject*, Il2CppObject*)>(il2cpp_class_get_method_from_name(_this->klass, "set_font", 1)->methodPointer)(_this, customFont);
 		reinterpret_cast<void (*)(Il2CppObject*, bool)>(il2cpp_class_get_method_from_name(_this->klass, "set_enableWordWrapping", 1)->methodPointer)(_this, false);
+		reinterpret_cast<void (*)(Il2CppObject*, bool, bool)>(il2cpp_class_get_method_from_name(_this->klass, "ForceMeshUpdate", 2)->methodPointer)(_this, true, false);
 	}
 
 	void* load_zekken_composite_resource_orig = nullptr;
@@ -1999,7 +2012,10 @@ namespace
 		string u8Name = local::wide_u8(path->start_char);
 		if (u8Name == "ui/views/titleview"s)
 		{
-			if (find(replaceAssetNames.begin(), replaceAssetNames.end(), "assets/title/utx_obj_title_logo_umamusume.png") != replaceAssetNames.end())
+			if (find_if(replaceAssetNames.begin(), replaceAssetNames.end(), [](const string& item)
+				{
+					return item.find("utx_obj_title_logo_umamusume") != string::npos;
+				}) != replaceAssetNames.end())
 			{
 				auto gameObj = reinterpret_cast<decltype(resources_load_hook)*>(resources_load_orig)(path, type);
 				auto getComponent = reinterpret_cast<Il2CppObject * (*)(Il2CppObject*, Il2CppType*)>(il2cpp_class_get_method_from_name(gameObj->klass, "GetComponent", 1)->methodPointer);
@@ -2009,12 +2025,19 @@ namespace
 				Il2CppObject* imgCommon;
 				il2cpp_field_get_value(component, imgField, &imgCommon);
 				auto texture = reinterpret_cast<decltype(assetbundle_load_asset_hook)*>(assetbundle_load_asset_orig)(replaceAssets,
-					il2cpp_string_new("assets/title/utx_obj_title_logo_umamusume.png"),
+					il2cpp_string_new("utx_obj_title_logo_umamusume.png"),
 					(Il2CppType*)GetRuntimeType("UnityEngine.CoreModule.dll", "UnityEngine", "Texture2D"));
 				auto m_TextureField = il2cpp_class_get_field_from_name(imgCommon->klass->parent, "m_Texture");
 				il2cpp_field_set_value(imgCommon, m_TextureField, texture);
 				return gameObj;
 			}
+		}
+		if (u8Name == "TMP Settings"s)
+		{
+			auto object = reinterpret_cast<decltype(resources_load_hook)*>(resources_load_orig)(path, type);
+			auto fontAssetField = il2cpp_class_get_field_from_name(object->klass, "m_defaultFontAsset");
+			il2cpp_field_set_value(object, fontAssetField, GetCustomTMPFont());
+			return object;
 		}
 		return reinterpret_cast<decltype(resources_load_hook)*>(resources_load_orig)(path, type);
 
@@ -2800,7 +2823,7 @@ namespace
 								"umamusume.dll", "Gallop",
 								"DialogAnnounceEvent", "Open", 3))(announceId, action, action);
 					});
-				reinterpret_cast<void (*)(Il2CppObject*, Il2CppDelegate*)>(il2cpp_class_get_method_from_name(button->klass, "SetOnClick", 1)->methodPointer)(button, 
+				reinterpret_cast<void (*)(Il2CppObject*, Il2CppDelegate*)>(il2cpp_class_get_method_from_name(button->klass, "SetOnClick", 1)->methodPointer)(button,
 					CreateUnityAction(il2cpp_value_box(il2cpp_symbols::get_class("mscorlib.dll", "System", "Int32"), &partDataId), newFn));
 			}
 		}
@@ -3156,6 +3179,9 @@ namespace
 			"umamusume.dll", "Gallop",
 			"TextCommon", "Awake", 0
 		);
+
+		auto TMP_Settings_get_instance_addr = il2cpp_symbols::get_method_pointer(
+			"Unity.TextMeshPro.dll", "TMPro", "TMP_Settings", "get_instance", -1);
 
 		auto TextMeshProUguiCommon_Awake_addr = il2cpp_symbols::get_method_pointer(
 			"umamusume.dll", "Gallop",
@@ -3687,6 +3713,7 @@ namespace
 			ADD_HOOK(on_populate, "Gallop.TextCommon::OnPopulateMesh at %p\n");
 			ADD_HOOK(textcommon_awake, "Gallop.TextCommon::Awake at %p\n");
 			ADD_HOOK(TextMeshProUguiCommon_Awake, "Gallop.TextMeshProUguiCommon::Awake at %p\n");
+			ADD_HOOK(TMP_Settings_get_instance, "TMPro.TMP_Settings::get_instance at %p\n");
 		}
 
 		if (g_max_fps > -1)
