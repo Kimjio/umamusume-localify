@@ -2100,7 +2100,7 @@ namespace
 				return gameObj;
 			}
 		}
-		if (u8Name == "TMP Settings"s)
+		if (u8Name == "TMP Settings"s && g_replace_to_custom_font && assets)
 		{
 			auto object = reinterpret_cast<decltype(resources_load_hook)*>(resources_load_orig)(path, type);
 			auto fontAssetField = il2cpp_class_get_field_from_name(object->klass, "m_defaultFontAsset");
