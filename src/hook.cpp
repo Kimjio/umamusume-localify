@@ -2897,6 +2897,33 @@ namespace
 		}
 	}
 
+	void* DialogCircleItemDonate_Initialize_orig = nullptr;
+
+	void DialogCircleItemDonate_Initialize_hook(Il2CppObject* _this, Il2CppObject* dialog,
+		Il2CppObject* itemRequestInfo) {
+		reinterpret_cast<decltype(DialogCircleItemDonate_Initialize_hook)*>(DialogCircleItemDonate_Initialize_orig)(
+			_this, dialog, itemRequestInfo);
+		auto donateCountField = il2cpp_class_get_field_from_name(_this->klass, "_donateCount");
+		il2cpp_field_set_value(_this, donateCountField,
+			GetInt32Instance(reinterpret_cast<int (*)(Il2CppObject*)>(
+				il2cpp_class_get_method_from_name(
+					_this->klass, "CalcDonateItemMax",
+					0)->methodPointer
+				)(_this)));
+		reinterpret_cast<void (*)(Il2CppObject*)>(
+			il2cpp_class_get_method_from_name(_this->klass, "ValidateDonateItemCount",
+				0)->methodPointer
+			)(_this);
+		reinterpret_cast<void (*)(Il2CppObject*)>(
+			il2cpp_class_get_method_from_name(_this->klass, "ApplyDonateItemCountText",
+				0)->methodPointer
+			)(_this);
+		reinterpret_cast<void (*)(Il2CppObject*)>(
+			il2cpp_class_get_method_from_name(_this->klass, "OnClickPlusButton",
+				0)->methodPointer
+			)(_this);
+	}
+
 	void adjust_size()
 	{
 		thread([]()
@@ -3549,6 +3576,8 @@ namespace
 
 		auto CriMana_Player_SetFile_addr = il2cpp_symbols::get_method_pointer("CriMw.CriWare.Runtime.dll", "CriWare.CriMana", "Player", "SetFile", 3);
 
+		auto DialogCircleItemDonate_Initialize_addr = il2cpp_symbols::get_method_pointer("umamusume.dll", "Gallop", "DialogCircleItemDonate", "Initialize", 2);
+
 		auto load_scene_internal_addr = il2cpp_resolve_icall("UnityEngine.SceneManagement.SceneManager::LoadSceneAsyncNameIndexInternal_Injected(System.String,System.Int32,UnityEngine.SceneManagement.LoadSceneParameters&,System.bool)");
 
 #pragma endregion
@@ -3601,6 +3630,8 @@ namespace
 #pragma endregion
 
 		ADD_HOOK(PartsEpisodeList_SetupStoryExtraEpisodeList, "Gallop.PartsEpisodeList::SetupStoryExtraEpisodeList at %p\n");
+
+		ADD_HOOK(DialogCircleItemDonate_Initialize, "Gallop.DialogCircleItemDonate::Initialize at %p\n");
 
 		ADD_HOOK(CriMana_Player_SetFile, "CriWare.CriMana.Player::SetFile at %p\n");
 
