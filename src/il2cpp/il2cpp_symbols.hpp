@@ -447,6 +447,11 @@ struct AudioPlayback
 	int soundGroup;
 };
 
+struct Scene
+{
+	int handle;
+};
+
 typedef struct Il2CppReflectionMethod Il2CppReflectionMethod;
 
 typedef void (*Il2CppMethodPointer)();

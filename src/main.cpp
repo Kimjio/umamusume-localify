@@ -35,6 +35,7 @@ std::string g_replace_text_db_path;
 bool g_character_system_text_caption = false;
 int g_cyspring_update_mode = -1;
 bool g_hide_now_loading = false;
+bool g_discord_rich_presence = false;
 std::string text_id_dict;
 
 bool has_json_parse_error = false;
@@ -247,6 +248,11 @@ namespace
 				text_id_dict = document["textIdDict"].GetString();
 			}
 
+			if (document.HasMember("discordRichPresence"))
+			{
+				g_discord_rich_presence = document["discordRichPresence"].GetBool();
+			}
+
 			if (document.HasMember("dicts"))
 			{
 				auto& dicts_arr = document["dicts"];
@@ -259,7 +265,9 @@ namespace
 					dicts.emplace_back(dict);
 				}
 			}
-		} else {
+		}
+		else
+		{
 			has_json_parse_error = true; 
 			std::stringstream str_stream;
 			str_stream << "JSON parse error: " << GetParseError_En(document.GetParseError()) << " (" << document.GetErrorOffset() << ")";

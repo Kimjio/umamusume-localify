@@ -45,6 +45,7 @@ workspace "umamusume-localify"
 		"Release",
 	}
 
+	toolset "clang"
 	buildoptions "/std:c++latest"
 	systemversion "latest"
 	symbols "On"
@@ -71,40 +72,41 @@ workspace "umamusume-localify"
 	dependencies.projects()
 
 	project "umamusume-localify"
-		targetname "version"
+	targetname "version"
 
-		language "C++"
-		kind "SharedLib"
+	language "C++"
+	kind "SharedLib"
 
-		files {
-			"./src/**.hpp",
-			"./src/**.cpp",
-			"./src/**.h",
-			"./src/**.c",
-			"./src/**.asm",
-			"./src/**.def",
-			"./src/**.rc",
+	files {
+		"./src/**.hpp",
+		"./src/**.cpp",
+		"./src/**.h",
+		"./src/**.c",
+		"./src/**.asm",
+		"./src/**.def",
+		"./src/**.rc",
+	}
+
+	links {
+		"Shlwapi",
+		"./deps/discord_game_sdk/discord_game_sdk.dll.lib" 
+	}
+
+	includedirs {
+		"./src",
+		"%{prj.location}/src",
+	}
+
+	dependencies.imports()
+
+	filter "configurations:Release"
+		linkoptions "/SAFESEH:NO"
+		syslibdirs {
+			"./libs/Release",
 		}
-		
-		links {
-			"Shlwapi",
+
+	filter "configurations:Debug"
+		linkoptions "/SAFESEH:NO"
+		syslibdirs {
+			"./libs/Debug",
 		}
-
-		includedirs {
-			"./src",
-			"%{prj.location}/src",
-		}
-
-		dependencies.imports()
-
-		filter "configurations:Release"
-			linkoptions "/SAFESEH:NO"
-			syslibdirs {
-				"./libs/Release",
-			}
-
-		filter "configurations:Debug"
-			linkoptions "/SAFESEH:NO"
-			syslibdirs {
-				"./libs/Debug",
-			}

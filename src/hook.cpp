@@ -8,6 +8,9 @@
 
 #include "il2cpp_dump.h"
 
+#include "discord/core.h"
+#include "discord/activity_manager.h"
+
 using namespace std;
 
 namespace
@@ -113,6 +116,23 @@ namespace
 	}
 
 	template<typename... T>
+	Il2CppDelegate* CreateDelegateWithClass(Il2CppClass* klass, Il2CppObject* target, void (*fn)(Il2CppObject*, T...))
+	{
+		auto delegate = reinterpret_cast<MulticastDelegate*>(il2cpp_object_new(klass));
+		delegate->delegates = il2cpp_array_new(il2cpp_symbols::get_class("mscorlib.dll", "System", "Delegate"), 1);
+		il2cpp_array_setref(delegate->delegates, 0, delegate);
+		delegate->method_ptr = reinterpret_cast<Il2CppMethodPointer>(fn);
+
+		auto methodInfo = reinterpret_cast<MethodInfo*>(il2cpp_object_new(
+			il2cpp_symbols::get_class("mscorlib.dll", "System.Reflection", "MethodInfo")));
+		methodInfo->methodPointer = reinterpret_cast<uintptr_t>(delegate->method_ptr);
+		methodInfo->klass = il2cpp_symbols::get_class("mscorlib.dll", "System.Reflection", "MethodInfo");
+		delegate->method = methodInfo;
+		delegate->target = target;
+		return delegate;
+	}
+
+	template<typename... T>
 	Il2CppDelegate* CreateDelegate(Il2CppObject* target, void (*fn)(Il2CppObject*, T...))
 	{
 		auto delegate = reinterpret_cast<MulticastDelegate*>(
@@ -215,11 +235,11 @@ namespace
 		{
 			return nullptr;
 		}
-		if (string(klass->parent->name).find("Singleton`1") == string::npos)
+		auto instanceField = il2cpp_class_get_field_from_name(klass, "_instance");
+		if (!instanceField)
 		{
 			return nullptr;
 		}
-		auto instanceField = il2cpp_class_get_field_from_name(klass, "_instance");
 		Il2CppObject* instance;
 		il2cpp_field_static_get_value(instanceField, &instance);
 		return instance;
@@ -2997,6 +3017,801 @@ namespace
 		}
 	}
 
+	string GetViewName(string viewId)
+	{
+		string textId;
+		if (viewId == "Splash")
+		{
+
+		}
+		if (viewId == "Title")
+		{
+
+		}
+		if (viewId == "Download")
+		{
+
+		}
+		if (viewId == "DayChangeHub")
+		{
+
+		}
+		if (viewId == "SpecialLoginBonus")
+		{
+
+		}
+		if (viewId == "TutorialOpMovie")
+		{
+
+		}
+		if (viewId == "TutorialGachaTop")
+		{
+
+		}
+		if (viewId == "TutorialCutInPlay")
+		{
+
+		}
+		if (viewId == "Att")
+		{
+
+		}
+		if (viewId == "Announce")
+		{
+
+		}
+		if (viewId == "Home" ||
+			viewId == "HomeHub")
+		{
+			textId = "Home0036";
+		}
+		if (viewId == "Live")
+		{
+
+		}
+		if (viewId == "GachaMain")
+		{
+
+		}
+		if (viewId == "GachaResult")
+		{
+
+		}
+		if (viewId == "RaceMain")
+		{
+
+		}
+		if (viewId == "SingleModeStart")
+		{
+
+		}
+		if (viewId == "SingleModeMonthStart")
+		{
+
+		}
+		if (viewId == "SingleModeMain")
+		{
+
+		}
+		if (viewId == "SingleModePaddock")
+		{
+
+		}
+		if (viewId == "SingleModeRaceEntry")
+		{
+
+		}
+		if (viewId == "SingleModeConfirmComplete")
+		{
+
+		}
+		if (viewId == "SingleModeResult")
+		{
+
+		}
+		if (viewId == "SingleModeSkillLearning")
+		{
+
+		}
+		if (viewId == "SingleModeSuccessionCut")
+		{
+
+		}
+		if (viewId == "SingleModeSuccessionEvent")
+		{
+
+		}
+		if (viewId == "SingleModeScenarioTeamRaceTop")
+		{
+
+		}
+		if (viewId == "SingleModeScenarioTeamRaceDeck")
+		{
+
+		}
+		if (viewId == "SingleModeScenarioTeamRaceCharaSelect")
+		{
+
+		}
+		if (viewId == "SingleModeScenarioTeamRaceOpponentSelect")
+		{
+
+		}
+		if (viewId == "SingleModeScenarioTeamRaceRaceList")
+		{
+
+		}
+		if (viewId == "SingleModeScenarioTeamRacePaddock")
+		{
+
+		}
+		if (viewId == "SingleModeScenarioTeamRaceGrandResult")
+		{
+
+		}
+		if (viewId == "SingleModeScenarioFreeShop")
+		{
+
+		}
+		if (viewId == "SingleModeScenarioLiveSelect")
+		{
+
+		}
+		if (viewId == "SingleModeScenarioLiveTop")
+		{
+
+		}
+		if (viewId == "SingleModeScenarioVenusScenarioRaceTop")
+		{
+
+		}
+		if (viewId == "SingleModeScenarioVenusScenarioRacePaddock")
+		{
+
+		}
+		if (viewId == "Story")
+		{
+
+		}
+		if (viewId == "EpisodeMain")
+		{
+
+		}
+		if (viewId == "EpisodeMainCharacterSelect")
+		{
+
+		}
+		if (viewId == "EpisodeMainUnlockRaceCutin")
+		{
+
+		}
+		if (viewId == "EpisodeCharacter")
+		{
+
+		}
+		if (viewId == "MainStoryPaddock")
+		{
+
+		}
+		if (viewId == "EpisodeExtra")
+		{
+
+		}
+		if (viewId == "StoryMovie")
+		{
+
+		}
+		if (viewId == "TeamStadium")
+		{
+
+		}
+		if (viewId == "TeamStadiumDeckHub")
+		{
+
+		}
+		if (viewId == "TeamStadiumDeck")
+		{
+
+		}
+		if (viewId == "TeamStadiumCharacterSelect")
+		{
+
+		}
+		if (viewId == "TeamStadiumOpponentSelect")
+		{
+
+		}
+		if (viewId == "TeamStadiumDecide")
+		{
+
+		}
+		if (viewId == "TeamStadiumRaceList")
+		{
+
+		}
+		if (viewId == "TeamStadiumPaddock")
+		{
+
+		}
+		if (viewId == "TeamStadiumGrandResult")
+		{
+
+		}
+		if (viewId == "TeamStadiumRaceHub")
+		{
+
+		}
+		if (viewId == "OutGame")
+		{
+
+		}
+		if (viewId == "TrainedCharaList")
+		{
+
+		}
+		if (viewId == "Friend")
+		{
+
+		}
+		if (viewId == "CharacterNoteTop" ||
+			viewId == "CharacterNoteSelect" ||
+			viewId == "CharacterNoteMain" ||
+			viewId == "CharacterNoteHub")
+		{
+			textId = "Directory0001";
+		}
+		if (viewId == "CharacterCardLimitBreakCut")
+		{
+
+		}
+		if (viewId == "TipsComic")
+		{
+			textId = "Outgame0072";
+		}
+		if (viewId == "TipsChara")
+		{
+			textId = "Outgame0093";
+		}
+		if (viewId == "ProfileTop")
+		{
+
+		}
+		if (viewId == "Honor")
+		{
+
+		}
+		if (viewId == "Directory")
+		{
+
+		}
+		if (viewId == "Gallery")
+		{
+
+		}
+		if (viewId == "TalkGallery")
+		{
+
+		}
+		if (viewId == "DressChange")
+		{
+
+		}
+		if (viewId == "ProfileCard")
+		{
+
+		}
+		if (viewId == "ProfileCardHonor")
+		{
+
+		}
+		if (viewId == "PhotoLibrary")
+		{
+			textId = "Outgame213009";
+		}
+		if (viewId == "PhotoStudio" ||
+			viewId == "PhotoStudioPlayCut" ||
+			viewId == "PhotoStudioViewTop" ||
+			viewId == "PhotoStudioCharaViewer")
+		{
+			textId = "Outgame352001";
+		}
+		if (viewId == "Mission")
+		{
+
+		}
+		if (viewId == "CharacterCardHaveList")
+		{
+
+		}
+		if (viewId == "SupportCardList")
+		{
+
+		}
+		if (viewId == "SupportCardHaveList")
+		{
+
+		}
+		if (viewId == "SupportCardWaitingRoom")
+		{
+
+		}
+		if (viewId == "SupportCardDeckEdit")
+		{
+
+		}
+		if (viewId == "CharacterCardCatalog")
+		{
+
+		}
+		if (viewId == "CharacterPieceExchange")
+		{
+
+		}
+		if (viewId == "DailyRace")
+		{
+
+		}
+		if (viewId == "DailyRacePaddock")
+		{
+
+		}
+		if (viewId == "LegendRace")
+		{
+
+		}
+		if (viewId == "LegendRacePaddock")
+		{
+
+		}
+		if (viewId == "DailyLegendRaceTop")
+		{
+
+		}
+		if (viewId == "MenuItem")
+		{
+
+		}
+		if (viewId == "LiveTheater")
+		{
+
+		}
+		if (viewId == "MenuTrophyRoom")
+		{
+
+		}
+		if (viewId == "MenuShop")
+		{
+
+		}
+		if (viewId == "Circle")
+		{
+
+		}
+		if (viewId == "Champions")
+		{
+
+		}
+		if (viewId == "ChampionsLobby")
+		{
+
+		}
+		if (viewId == "ChampionsPaddock")
+		{
+
+		}
+		if (viewId == "CraneGame")
+		{
+
+		}
+		if (viewId == "RoomMatchHub")
+		{
+
+		}
+		if (viewId == "RoomMatchTop")
+		{
+
+		}
+		if (viewId == "RoomMatchLobby")
+		{
+
+		}
+		if (viewId == "RoomMatchCharacterSelect")
+		{
+
+		}
+		if (viewId == "RoomMatchHostEntry")
+		{
+
+		}
+		if (viewId == "RoomMatchGuestEntry")
+		{
+
+		}
+		if (viewId == "RoomMatchPaddock")
+		{
+
+		}
+		if (viewId == "RoomMatchCharacterEntry")
+		{
+
+		}
+		if (viewId == "RoomMatchRaceResult")
+		{
+
+		}
+		if (viewId == "RoomMatchDeckEdit")
+		{
+
+		}
+		if (viewId == "PracticeRaceHub")
+		{
+
+		}
+		if (viewId == "PracticeRaceTop")
+		{
+
+		}
+		if (viewId == "PracticeRaceSelectRace")
+		{
+
+		}
+		if (viewId == "PracticeRaceCharacterEntry")
+		{
+
+		}
+		if (viewId == "PracticeRaceCharacterSelect")
+		{
+
+		}
+		if (viewId == "PracticeRacePaddock")
+		{
+
+		}
+		if (viewId == "PracticeRaceResult")
+		{
+
+		}
+		if (viewId == "PracticeRaceDeckEdit")
+		{
+
+		}
+		if (viewId == "TrainingChallengeHub")
+		{
+
+		}
+		if (viewId == "TrainingChallengeTop")
+		{
+
+		}
+		if (viewId == "TrainingChallengeLeading")
+		{
+
+		}
+		if (viewId == "SupportCardRanking")
+		{
+
+		}
+		if (viewId == "StoryEventHub")
+		{
+
+		}
+		if (viewId == "StoryEventTop")
+		{
+
+		}
+		if (viewId == "StoryEventMission")
+		{
+
+		}
+		if (viewId == "RouletteDerby")
+		{
+
+		}
+		if (viewId == "ChallengeMatchHub")
+		{
+
+		}
+		if (viewId == "ChallengeMatchTop")
+		{
+
+		}
+		if (viewId == "ChallengeMatchCharaSelect")
+		{
+
+		}
+		if (viewId == "ChallengeMatchPaddock")
+		{
+
+		}
+		if (viewId == "TransferEvent")
+		{
+
+		}
+		if (viewId == "TeamBuildingHub")
+		{
+
+		}
+		if (viewId == "TeamBuildingTop")
+		{
+
+		}
+		if (viewId == "TeamBuildingOpponentSelect")
+		{
+
+		}
+		if (viewId == "TeamBuildingMyTeamInfo")
+		{
+
+		}
+		if (viewId == "TeamBuildingCaptainSelect")
+		{
+
+		}
+		if (viewId == "TeamBuildingScout")
+		{
+
+		}
+		if (viewId == "TeamBuildingVsCutin")
+		{
+
+		}
+		if (viewId == "TeamBuildingCollection")
+		{
+
+		}
+		if (viewId == "TeamBuildingFirstTransition")
+		{
+
+		}
+		if (viewId == "TeamBuildingPaddock")
+		{
+
+		}
+		if (viewId == "TeamBuildingScoutRanking")
+		{
+
+		}
+		if (viewId == "HeroesHub")
+		{
+
+		}
+		if (viewId == "HeroesOpening")
+		{
+
+		}
+		if (viewId == "HeroesTop")
+		{
+
+		}
+		if (viewId == "HeroesTeamEdit")
+		{
+
+		}
+		if (viewId == "HeroesTeamMemberSelect")
+		{
+
+		}
+		if (viewId == "HeroesGetSkillEvent")
+		{
+
+		}
+		if (viewId == "HeroesStage1MatchingResult")
+		{
+
+		}
+		if (viewId == "HeroesStage1RacingBase")
+		{
+
+		}
+		if (viewId == "HeroesStage1GrandResult")
+		{
+
+		}
+		if (viewId == "HeroesFinalRaceList")
+		{
+
+		}
+		if (viewId == "HeroesPaddock")
+		{
+
+		}
+		if (viewId == "FanRaid")
+		{
+
+		}
+		if (viewId == "CollectEventMapHub")
+		{
+
+		}
+		if (viewId == "CollectEventMap")
+		{
+
+		}
+		if (viewId == "CollectEventLoginBonusGallery")
+		{
+
+		}
+		if (viewId == "CollectRaidHub")
+		{
+
+		}
+		if (viewId == "CollectRaidTop")
+		{
+
+		}
+		if (viewId == "CollectRaidMission")
+		{
+
+		}
+		if (viewId == "FactorResearchHub")
+		{
+
+		}
+		if (viewId == "FactorResearchTop")
+		{
+
+		}
+		if (viewId == "FactorResearchCharaSelect")
+		{
+
+		}
+		if (viewId == "CampaignRaffle")
+		{
+
+		}
+		if (viewId == "CampaignsValentineSpStory")
+		{
+
+		}
+		if (viewId == "MapEvent")
+		{
+
+		}
+
+		if (!textId.empty())
+		{
+			return local::wide_u8(localizeextension_text_hook(GetTextIdByName(textId))->start_char).append(" ");
+		}
+
+		return "";
+	}
+
+	string GetSceneName(string sceneId)
+	{
+		string textId;
+		if (sceneId == "Title")
+		{
+
+		}
+		if (sceneId == "Home")
+		{
+			textId = "Home0036";
+		}
+		if (sceneId == "Race")
+		{
+			textId = "Outgame213036";
+		}
+		if (sceneId == "Live")
+		{
+			textId = "Common0035";
+		}
+		if (sceneId == "LiveTheater")
+		{
+			textId = "Home0037";
+		}
+		if (sceneId == "Story" || sceneId == "StoryMovie")
+		{
+			textId = "Home0066";
+		}
+		if (sceneId == "Gacha")
+		{
+			textId = "Gacha0004";
+		}
+		if (sceneId == "Episode")
+		{
+			textId = "Home0036";
+		}
+		if (sceneId == "SingleMode")
+		{
+			textId = "Outgame213036";
+		}
+		if (sceneId == "OutGame")
+		{
+			// TODO
+		}
+		if (sceneId == "Circle")
+		{
+			textId = "Circle0321";
+		}
+		if (sceneId == "DailyRace")
+		{
+			textId = "Race0043";
+		}
+		if (sceneId == "LegendRace")
+		{
+			textId = "Race0072";
+		}
+		if (sceneId == "TeamStadium")
+		{
+			textId = "Race0583";
+		}
+		if (sceneId == "CraneGame")
+		{
+
+		}
+		if (sceneId == "Champions" || sceneId == "ChampionsLobby")
+		{
+			textId = "Champions0034";
+		}
+		if (sceneId == "Tutorial")
+		{
+
+		}
+		if (sceneId == "StoryEvent")
+		{
+			textId = "StoryEvent0018";
+		}
+		if (sceneId == "ChallengeMatch")
+		{
+			textId = "ChallengeMatch408005";
+		}
+		if (sceneId == "RoomMatch")
+		{
+			textId = "RoomMatch0001";
+		}
+		if (sceneId == "PracticeRace")
+		{
+			textId = "PracticeRace400101";
+		}
+		if (sceneId == "TrainingChallenge")
+		{
+			textId = "TrainingChallenge4180100";
+		}
+		if (sceneId == "TeamBuilding")
+		{
+			textId = "TeamBuilding408033";
+		}
+		if (sceneId == "FanRaid")
+		{
+
+		}
+		if (sceneId == "CampaignRaffle")
+		{
+
+		}
+		if (sceneId == "CollectEventMap")
+		{
+			textId = "CollectEvent508000";
+		}
+		if (sceneId == "CollectRaid")
+		{
+			textId = "CollectEvent508000";
+	}
+		if (sceneId == "MapEvent")
+		{
+
+		}
+		if (sceneId == "FactorResearch")
+		{
+
+		}
+		if (sceneId == "Heroes")
+		{
+
+		}
+
+		if (!textId.empty())
+		{
+			return local::wide_u8(localizeextension_text_hook(GetTextIdByName(textId))->start_char).append(" ");
+		}
+
+		return sceneId;
+	}
+
+	discord::Core* discord;
+
+	uint64_t startTime;
+
 	void path_game_assembly()
 	{
 		if (!mh_inited)
@@ -3882,6 +4697,121 @@ namespace
 		if (g_anti_aliasing != -1)
 		{
 			ADD_HOOK(set_anti_aliasing, "UnityEngine.QualitySettings.set_antiAliasing(int) at %p\n");
+		}
+
+		if (g_discord_rich_presence)
+		{
+			discord::Core::Create(1080397170215223367, DiscordCreateFlags_Default, &discord);
+			startTime = chrono::duration_cast<chrono::milliseconds>(chrono::system_clock::now().time_since_epoch()).count();
+			if (discord)
+			{
+				thread t([]()
+					{
+						il2cpp_thread_attach(il2cpp_domain_get());
+						while (true) {
+							auto director = GetSingletonInstance(il2cpp_symbols::get_class("umamusume.dll", "Gallop.Live", "Director"));
+							if (director)
+							{
+								float currentTime = reinterpret_cast<float (*)(Il2CppObject*)>(il2cpp_class_get_method_from_name(director->klass, "get_LiveCurrentTime", 0)->methodPointer)(director);
+								float totalTime = reinterpret_cast<float (*)(Il2CppObject*)>(il2cpp_class_get_method_from_name(director->klass, "get_LiveTotalTime", 0)->methodPointer)(director);
+								string name;
+
+								auto titleField = il2cpp_class_get_field_from_name(director->klass, "TitleController");
+								Il2CppObject* title;
+								il2cpp_field_get_value(director, titleField, &title);
+								if (title)
+								{
+									auto textField = il2cpp_class_get_field_from_name(title->klass, "_titleText");
+									Il2CppObject* text;
+									il2cpp_field_get_value(title, textField, &text);
+									if (text)
+									{
+										name = local::wide_u8(text_get_text(text)->start_char);
+										if (name.empty())
+										{
+											name = "Live (unknown)";
+										}
+									}
+								}
+
+								auto songId = reinterpret_cast<int (*)(Il2CppObject*)>(il2cpp_class_get_method_from_name(director->klass, "GetPlaySongId", 0)->methodPointer)(director);
+
+								if (discord) {
+									discord::Activity activity{};
+									activity.SetDetails(name.data());
+									activity.GetAssets().SetLargeImage("jacket_"s.append(to_string(songId)).data());
+									activity.GetAssets().SetLargeText(name.data());
+									activity.GetAssets().SetSmallImage("umamusume");
+									activity.SetType(discord::ActivityType::Watching);
+									activity.GetTimestamps().SetEnd(
+										(chrono::duration_cast<chrono::milliseconds>(chrono::system_clock::now().time_since_epoch()).count() + (static_cast<int64_t>(totalTime) * 1000)) - (static_cast<int64_t>(currentTime) * 1000));
+									discord->ActivityManager().UpdateActivity(activity, [](discord::Result res) {});
+								}
+							}
+							else
+							{
+								auto sceneManager = GetSingletonInstance(il2cpp_symbols::get_class("umamusume.dll", "Gallop", "SceneManager"));
+								if (sceneManager)
+								{
+									auto viewId = reinterpret_cast<int (*)(Il2CppObject*)>(il2cpp_class_get_method_from_name(sceneManager->klass, "GetCurrentViewId", 0)->methodPointer)(sceneManager);
+									auto viewName = local::wide_u8(GetEnumName(GetRuntimeType("umamusume.dll", "Gallop", "SceneDefine/ViewId"), viewId)->start_char);
+									auto detail = GetViewName(viewName);
+									if (detail.empty())
+									{
+										// detail = GetSceneName()
+									}
+
+									if (discord && !detail.empty())
+									{
+										discord::Activity activity{};
+										activity.GetAssets().SetLargeImage("umamusume");
+										activity.SetDetails(detail.data());
+										activity.GetTimestamps().SetStart(startTime);
+										activity.SetType(discord::ActivityType::Playing);
+										discord->ActivityManager().UpdateActivity(activity, [](discord::Result res) {});
+									}
+								}
+							}
+							Sleep(100);
+							discord->RunCallbacks();
+						}
+					});
+				t.detach();
+			}
+
+			auto sceneManagerClass = il2cpp_symbols::get_class("UnityEngine.CoreModule.dll", "UnityEngine.SceneManagement", "SceneManager");
+
+			auto methodInfo = il2cpp_class_get_method_from_name(sceneManagerClass, "add_activeSceneChanged", 1);
+
+			auto action = CreateDelegateWithClass(il2cpp_class_from_type(methodInfo->parameters[0].parameter_type),
+				reinterpret_cast<Il2CppObject*>(il2cpp_object_new(il2cpp_symbols::get_class("mscorlib.dll", "System", "Object"))), *([](Il2CppObject* _this, Scene* scene, Scene* scene1)
+					{
+						if (scene1)
+						{
+							string sceneName = local::wide_u8(reinterpret_cast<Il2CppString * (*)(Scene*)>(il2cpp_symbols::get_method_pointer("UnityEngine.CoreModule.dll", "UnityEngine.SceneManagement", "Scene", "GetNameInternal", 1))(scene1)->start_char);
+
+							auto detail = GetSceneName(sceneName);
+
+							if (discord) {
+								discord::Activity activity{};
+								activity.GetAssets().SetLargeImage("umamusume");
+								activity.SetDetails(detail.data());
+								activity.GetTimestamps().SetStart(startTime);
+								if (sceneName == "Live"s)
+								{
+									activity.SetType(discord::ActivityType::Watching);
+								}
+								else
+								{
+									activity.SetType(discord::ActivityType::Playing);
+								}
+								discord->ActivityManager().UpdateActivity(activity, [](discord::Result res) {});
+							}
+						}
+					})
+			);
+
+			reinterpret_cast<void (*)(Il2CppDelegate*)>(methodInfo->methodPointer)(action);
 		}
 	}
 }

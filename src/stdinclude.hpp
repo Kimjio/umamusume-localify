@@ -67,6 +67,7 @@ extern bool g_character_system_text_caption;
  */
 extern int g_cyspring_update_mode;
 extern bool g_hide_now_loading;
+extern bool g_discord_rich_presence;
 
 extern bool has_json_parse_error;
 extern std::string json_parse_error_msg;
