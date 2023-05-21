@@ -17,7 +17,7 @@ float g_ui_scale = 1.0f;
 float g_ui_animation_scale = 1.0f;
 float g_aspect_ratio = 16.f / 9.f;
 float g_resolution_3d_scale = 1.0f;
-bool g_replace_to_builtin_font = true;
+bool g_replace_to_builtin_font = false;
 bool g_replace_to_custom_font = false;
 std::string g_font_assetbundle_path;
 std::string g_font_asset_name;
@@ -31,6 +31,7 @@ bool g_ui_loading_show_orientation_guide = true;
 std::string g_custom_title_name;
 std::unordered_map<std::string, ReplaceAsset> g_replace_assets;
 std::string g_replace_assetbundle_file_path;
+std::vector<std::string> g_replace_assetbundle_file_paths;
 std::string g_replace_text_db_path;
 bool g_character_system_text_caption = false;
 int g_cyspring_update_mode = -1;
@@ -55,7 +56,7 @@ namespace
 		SetConsoleTitle("Umamusume - Debug Console");
 
 		// set this to avoid turn japanese texts into question mark
-		SetConsoleOutputCP(65001);
+		SetConsoleOutputCP(CP_UTF8);
 		std::locale::global(std::locale(""));
 
 		wprintf(L"\u30a6\u30de\u5a18 Localify Patch Loaded! - By GEEKiDoS\n");
@@ -212,6 +213,17 @@ namespace
 			if (document.HasMember("replaceAssetBundleFilePath"))
 			{
 				g_replace_assetbundle_file_path = document["replaceAssetBundleFilePath"].GetString();
+			}
+
+			if (document.HasMember("replaceAssetBundleFilePaths") &&
+				document["replaceAssetBundleFilePaths"].IsArray())
+			{
+				auto array = document["replaceAssetBundleFilePaths"].GetArray();
+				for (auto it = array.Begin(); it != array.End(); it++)
+				{
+					auto value = it->GetString();
+					g_replace_assetbundle_file_paths.emplace_back(value);
+				}
 			}
 
 			if (document.HasMember("replaceTextDBPath"))

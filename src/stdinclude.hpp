@@ -57,6 +57,7 @@ extern bool g_ui_loading_show_orientation_guide;
 extern std::string g_custom_title_name;
 extern std::unordered_map<std::string, ReplaceAsset> g_replace_assets;
 extern std::string g_replace_assetbundle_file_path;
+extern std::vector<std::string> g_replace_assetbundle_file_paths;
 extern std::string g_replace_text_db_path;
 extern bool g_character_system_text_caption;
 /*
