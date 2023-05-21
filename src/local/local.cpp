@@ -77,32 +77,69 @@ namespace local
 		{
 			if (filesystem::exists(dict))
 			{
-				std::ifstream dict_stream{ dict };
-
-				if (!dict_stream.is_open())
-					continue;
-
-				printf("Reading %s...\n", dict.data());
-
-				rapidjson::IStreamWrapper wrapper{ dict_stream };
-				rapidjson::Document document;
-
-				document.ParseStream(wrapper);
-
-				for (auto iter = document.MemberBegin();
-					iter != document.MemberEnd(); ++iter)
+				if (filesystem::is_directory(dict))
 				{
-					auto key = std::stoull(iter->name.GetString());
-					auto value = iter->value.GetString();
+					cout << "Dict directory: " << dict << endl;
+					for (auto& file : std::filesystem::directory_iterator(dict))
+					{
+						const auto filePath = local::wide_u8(local::acp_wide(file.path().string()));
+						const auto fileName = local::wide_u8(local::acp_wide(file.path().filename().string()));
+						if (file.is_regular_file())
+						{
+							std::ifstream dict_stream{ filePath };
 
-					text_db.emplace(key, value);
+							if (!dict_stream.is_open())
+								continue;
+
+							cout << "Reading " << fileName << "..." << endl;
+
+							rapidjson::IStreamWrapper wrapper{ dict_stream };
+							rapidjson::Document document;
+
+							document.ParseStream(wrapper);
+
+							for (auto iter = document.MemberBegin();
+								iter != document.MemberEnd(); ++iter)
+							{
+								auto key = std::stoull(iter->name.GetString());
+								auto value = iter->value.GetString();
+
+								text_db.emplace(key, value);
+							}
+
+							dict_stream.close();
+						}
+					}
 				}
+				else
+				{
+					std::ifstream dict_stream{ dict };
 
-				dict_stream.close();
+					if (!dict_stream.is_open())
+						continue;
+
+					cout << "Reading " << dict << "..." << endl;
+
+					rapidjson::IStreamWrapper wrapper{ dict_stream };
+					rapidjson::Document document;
+
+					document.ParseStream(wrapper);
+
+					for (auto iter = document.MemberBegin();
+						iter != document.MemberEnd(); ++iter)
+					{
+						auto key = std::stoull(iter->name.GetString());
+						auto value = iter->value.GetString();
+
+						text_db.emplace(key, value);
+					}
+
+					dict_stream.close();
+				}
 			}
 		}
 
-		printf("loaded %llu localized entries.\n", text_db.size());
+		cout << "loaded " << text_db.size() << " localized entries." << endl;
 	}
 
 	void load_textId_textdb(const std::string& dict)
@@ -114,7 +151,7 @@ namespace local
 			if (!dict_stream.is_open())
 				return;
 
-			printf("Reading %s...\n", dict.data());
+			cout << "Reading " << dict << "..." << endl;
 
 			rapidjson::IStreamWrapper wrapper{ dict_stream };
 			rapidjson::Document document;
@@ -133,8 +170,8 @@ namespace local
 			dict_stream.close();
 		}
 
-		printf("loaded %llu TextId localized entries.\n", textId_text_db.size());
-	}
+		cout << "loaded " << textId_text_db.size() << " TextId localized entries." << endl;
+	} 
 
 	bool localify_text(size_t hash, string** result)
 	{
