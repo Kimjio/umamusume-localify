@@ -331,10 +331,14 @@ typedef struct Il2CppGenericContainer
 	int32_t genericParameterStart;
 } Il2CppGenericContainer;
 
+typedef void (*Il2CppMethodPointer)();
+
+typedef void* (*InvokerMethod)(Il2CppMethodPointer, const MethodInfo*, void*, void**);
+
 struct MethodInfo
 {
-	uintptr_t methodPointer;
-	uintptr_t invoker_method;
+	Il2CppMethodPointer methodPointer;
+	InvokerMethod invoker_method;
 	const char* name;
 	Il2CppClass* klass;
 	const Il2CppType* return_type;
@@ -454,10 +458,6 @@ struct Scene
 
 typedef struct Il2CppReflectionMethod Il2CppReflectionMethod;
 
-typedef void (*Il2CppMethodPointer)();
-
-typedef void* (*InvokerMethod)(Il2CppMethodPointer, const MethodInfo*, void*, void**);
-
 typedef struct Il2CppDelegate
 {
 	Il2CppObject object;
@@ -517,7 +517,7 @@ typedef const Il2CppType* (*il2cpp_field_get_type_t)(FieldInfo* field);
 typedef Il2CppObject* (*il2cpp_type_get_object_t)(const Il2CppType* type);
 typedef const char* (*il2cpp_image_get_name_t)(void* image);
 typedef size_t(*il2cpp_image_get_class_count_t)(void* image);
-typedef const Il2CppClass* (*il2cpp_image_get_class_t)(void* image, size_t index);
+typedef Il2CppClass* (*il2cpp_image_get_class_t)(void* image, size_t index);
 typedef bool (*il2cpp_type_is_byref_t)(const Il2CppType* type);
 typedef uint32_t(*il2cpp_method_get_flags_t)(const MethodInfo* mehod, uint32_t* iflags);
 typedef const Il2CppType* (*il2cpp_method_get_return_type_t)(const MethodInfo* method);
@@ -624,16 +624,26 @@ namespace il2cpp_symbols
 	inline void* il2cpp_domain = nullptr;
 
 	void init(HMODULE game_module);
-	uintptr_t get_method_pointer(const char* assemblyName, const char* namespaze,
-		const char* klassName, const char* name, int argsCount);
 
 	Il2CppClass* get_class(const char* assemblyName, const char* namespaze, const char* klassName);
 
-	MethodInfo* get_method(const char* assemblyName, const char* namespaze,
+	Il2CppMethodPointer get_method_pointer(const char* assemblyName, const char* namespaze,
 		const char* klassName, const char* name, int argsCount);
 
-	Il2CppClass* find_class(const char* assemblyName, const char* namespaze, std::function<bool(Il2CppClass*)> predict);
+	template<typename T>
+	T get_method_pointer(const char* assemblyName, const char* namespaze,
+		const char* klassName, const char* name, int argsCount) {
+		return reinterpret_cast<T>(get_method_pointer(assemblyName, namespaze, klassName, name,
+			argsCount));
+	}
 
-	uintptr_t find_method(const char* assemblyName, const char* namespaze,
-		const char* klassName, std::function<bool(const MethodInfo*)> predict);
+	const MethodInfo* get_method(const char* assemblyName, const char* namespaze,
+		const char* klassName, const char* name, int argsCount);
+
+	Il2CppClass* find_class(const char* assemblyName, const char* namespaze,
+		const std::function<bool(Il2CppClass*)>& predict);
+
+	Il2CppMethodPointer find_method(const char* assemblyName, const char* namespaze,
+		const char* klassName,
+		const std::function<bool(const MethodInfo*)>& predict);
 }

@@ -132,79 +132,86 @@ namespace il2cpp_symbols
 		il2cpp_domain = il2cpp_domain_get();
 	}
 
-	Il2CppClass* get_class(const char* assemblyName, const char* namespaze, const char* klassName)
-	{
-		auto assembly = il2cpp_domain_assembly_open(il2cpp_domain, assemblyName);
-		auto image = il2cpp_assembly_get_image(assembly);
-		return il2cpp_class_from_name(image, namespaze, klassName);
-	}
+    Il2CppClass* get_class(const char* assemblyName, const char* namespaze, const char* klassName) {
+        auto assembly = il2cpp_domain_assembly_open(il2cpp_domain, assemblyName);
+        if (assembly) {
+            auto image = il2cpp_assembly_get_image(assembly);
+            if (image) {
+                return il2cpp_class_from_name(image, namespaze, klassName);
+            }
+        }
+        return nullptr;
+    }
 
-	uintptr_t get_method_pointer(const char* assemblyName, const char* namespaze,
-		const char* klassName, const char* name, int argsCount)
-	{
-		auto assembly = il2cpp_domain_assembly_open(il2cpp_domain, assemblyName);
-		auto image = il2cpp_assembly_get_image(assembly);
-		auto klass = il2cpp_class_from_name(image, namespaze, klassName);
+    Il2CppMethodPointer get_method_pointer(const char* assemblyName, const char* namespaze,
+        const char* klassName, const char* name, int argsCount) {
+        auto assembly = il2cpp_domain_assembly_open(il2cpp_domain, assemblyName);
+        if (assembly) {
+            auto image = il2cpp_assembly_get_image(assembly);
+            if (image) {
+                auto klass = il2cpp_class_from_name(image, namespaze, klassName);
+                if (klass) {
+                    auto method = il2cpp_class_get_method_from_name(klass, name, argsCount);
+                    if (method) {
+                        return method->methodPointer;
+                    }
+                }
+            }
+        }
+        return nullptr;
+    }
 
-		if (klass)
-		{
-			auto methodInfo = il2cpp_class_get_method_from_name(klass, name, argsCount);
-			if (methodInfo)
-			{
-				return methodInfo->methodPointer;
-			}
-		}
-		return 0;
-	}
+    const MethodInfo* get_method(const char* assemblyName, const char* namespaze,
+        const char* klassName, const char* name, int argsCount) {
+        auto assembly = il2cpp_domain_assembly_open(il2cpp_domain, assemblyName);
+        if (assembly) {
+            auto image = il2cpp_assembly_get_image(assembly);
+            if (image) {
+                auto klass = il2cpp_class_from_name(image, namespaze, klassName);
+                if (klass) {
+                    return il2cpp_class_get_method_from_name(klass, name, argsCount);
+                }
+            }
+        }
+        return nullptr;
+    }
 
-	MethodInfo* get_method(const char* assemblyName, const char* namespaze,
-		const char* klassName, const char* name, int argsCount)
-	{
-		auto assembly = il2cpp_domain_assembly_open(il2cpp_domain, assemblyName);
-		auto image = il2cpp_assembly_get_image(assembly);
-		auto klass = il2cpp_class_from_name(image, namespaze, klassName);
+    Il2CppClass* find_class(const char* assemblyName, const char* namespaze,
+        const std::function<bool(Il2CppClass*)>& predict) {
+        auto assembly = il2cpp_domain_assembly_open(il2cpp_domain, assemblyName);
+        if (assembly) {
+            auto image = il2cpp_assembly_get_image(assembly);
+            if (image) {
+                auto classCount = il2cpp_image_get_class_count(image);
+                for (int i = 0; i < classCount; i++) {
+                    if (predict(il2cpp_image_get_class(image, i))) {
+                        return il2cpp_image_get_class(image, i);
+                    }
+                }
+            }
+        }
 
-		if (klass)
-		{
-			return il2cpp_class_get_method_from_name(klass, name, argsCount);
-		}
-		return nullptr;
-	}
+        return nullptr;
+    }
 
-	Il2CppClass* find_class(const char* assemblyName, const char* namespaze, std::function<bool(Il2CppClass*)> predict)
-	{
-		auto assembly = il2cpp_domain_assembly_open(il2cpp_domain, assemblyName);
-		auto image = il2cpp_assembly_get_image(assembly);
-		auto classCount = il2cpp_image_get_class_count(image);
+    Il2CppMethodPointer find_method(const char* assemblyName, const char* namespaze,
+        const char* klassName,
+        const std::function<bool(const MethodInfo*)>& predict) {
+        auto assembly = il2cpp_domain_assembly_open(il2cpp_domain, assemblyName);
+        if (assembly) {
+            auto image = il2cpp_assembly_get_image(assembly);
+            if (image) {
+                auto klass = il2cpp_class_from_name(image, namespaze, klassName);
+                if (klass) {
+                    void* iter = nullptr;
+                    while (const MethodInfo* method = il2cpp_class_get_methods(klass, &iter)) {
+                        if (predict(method))
+                            return method->methodPointer;
+                    }
+                }
+            }
+        }
 
-		for (int i = 0; i < classCount; i++)
-		{
-			if (predict((Il2CppClass*)il2cpp_image_get_class(image, i)))
-			{
-				return (Il2CppClass*)il2cpp_image_get_class(image, i);
-			}
-		}
-
-		return nullptr;
-	}
-
-	uintptr_t find_method(const char* assemblyName, const char* namespaze,
-		const char* klassName, std::function<bool(const MethodInfo*)> predict)
-	{
-		auto assembly = il2cpp_domain_assembly_open(il2cpp_domain, assemblyName);
-		auto image = il2cpp_assembly_get_image(assembly);
-		auto klass = il2cpp_class_from_name(image, namespaze, klassName);
-
-		if (klass)
-		{
-			void* iter = nullptr;
-			while (const MethodInfo* method = il2cpp_class_get_methods(klass, &iter))
-			{
-				if (predict(method))
-					return method->methodPointer;
-			}
-		}
-
-		return 0;
-	}
+        return nullptr;
+    }
 }

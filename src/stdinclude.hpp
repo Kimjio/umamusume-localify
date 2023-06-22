@@ -22,7 +22,10 @@
 #include <rapidjson/istreamwrapper.h>
 #include <rapidjson/stringbuffer.h>
 
+#include "game.hpp"
+
 #include "il2cpp/il2cpp_symbols.hpp"
+#include "il2cpp/il2cpp-api-functions.hpp"
 #include "local/local.hpp"
 #include "logger/logger.hpp"
 

@@ -27,6 +27,8 @@ namespace
 
 	void path_game_assembly();
 
+	void patch_after_criware();
+
 	bool mh_inited = false;
 
 	void dump_bytes(void* pos)
@@ -51,13 +53,38 @@ namespace
 		printf("\n\n");
 	}
 
+	void* il2cpp_init_orig = nullptr;
+	bool __stdcall il2cpp_init_hook(const char* domain_name)
+	{
+		cout << domain_name << endl;
+		const auto result = reinterpret_cast<decltype(il2cpp_init_hook)*>(il2cpp_init_orig)(domain_name);
+		path_game_assembly();
+		return result;
+	}
+
+	bool il2CppInit = false;
+
 	void* load_library_w_orig = nullptr;
 	HMODULE __stdcall load_library_w_hook(const wchar_t* path)
 	{
+		if (path == L"GameAssembly.dll"s)
+		{
+			il2CppInit = true;
+			const auto il2cpp = reinterpret_cast<decltype(LoadLibraryW)*>(load_library_w_orig)(path);
+			MH_CreateHook(GetProcAddress(il2cpp, "il2cpp_init"), il2cpp_init_hook, &il2cpp_init_orig);
+			MH_EnableHook(GetProcAddress(il2cpp, "il2cpp_init"));
+		}
+
+		if (path == L"libnative.dll"s && !il2CppInit)
+		{
+			LoadLibraryW(L"GameAssembly.dll");
+			il2cpp_init_hook("IL2CPP Root Domain");
+		}
+
 		// GameAssembly.dll code must be loaded and decrypted while loading criware library
 		if (path == L"cri_ware_unity.dll"s)
 		{
-			path_game_assembly();
+			patch_after_criware();
 
 			MH_DisableHook(LoadLibraryW);
 			MH_RemoveHook(LoadLibraryW);
@@ -125,7 +152,7 @@ namespace
 
 		auto methodInfo = reinterpret_cast<MethodInfo*>(il2cpp_object_new(
 			il2cpp_symbols::get_class("mscorlib.dll", "System.Reflection", "MethodInfo")));
-		methodInfo->methodPointer = reinterpret_cast<uintptr_t>(delegate->method_ptr);
+		methodInfo->methodPointer = delegate->method_ptr;
 		methodInfo->klass = il2cpp_symbols::get_class("mscorlib.dll", "System.Reflection", "MethodInfo");
 		delegate->method = methodInfo;
 		delegate->target = target;
@@ -143,7 +170,7 @@ namespace
 
 		auto methodInfo = reinterpret_cast<MethodInfo*>(il2cpp_object_new(
 			il2cpp_symbols::get_class("mscorlib.dll", "System.Reflection", "MethodInfo")));
-		methodInfo->methodPointer = reinterpret_cast<uintptr_t>(delegate->method_ptr);
+		methodInfo->methodPointer = delegate->method_ptr;
 		methodInfo->klass = il2cpp_symbols::get_class("mscorlib.dll", "System.Reflection", "MethodInfo");
 		delegate->method = methodInfo;
 		delegate->target = target;
@@ -161,7 +188,7 @@ namespace
 
 		auto methodInfo = reinterpret_cast<MethodInfo*>(il2cpp_object_new(
 			il2cpp_symbols::get_class("mscorlib.dll", "System.Reflection", "MethodInfo")));
-		methodInfo->methodPointer = reinterpret_cast<uintptr_t>(delegate->method_ptr);
+		methodInfo->methodPointer = delegate->method_ptr;
 		methodInfo->klass = il2cpp_symbols::get_class("mscorlib.dll", "System.Reflection", "MethodInfo");
 		delegate->method = methodInfo;
 		delegate->target = target;
@@ -2781,7 +2808,34 @@ namespace
 		get_resolution_stub(&r);
 		last_display_width = r.width;
 		last_display_height = r.height;
-		reinterpret_cast<decltype(BootSystem_Awake_hook)*>(BootSystem_Awake_orig)(_this);
+		if (Game::CurrentGameRegion == Game::Region::KOR)
+		{
+			reinterpret_cast<Il2CppObject* (*)()>(il2cpp_symbols::get_method_pointer("Cute.Core.Assembly.dll", "Cute.Core", "Perf/Time", "get_Instance", -1))();
+
+			auto ptr = il2cpp_symbols::find_method("UnityEngine.CoreModule.dll", "UnityEngine", "MonoBehaviour", [](const MethodInfo* method)
+				{
+					return method->name == "StartCoroutine"s && method->parameters[0].parameter_type->type == IL2CPP_TYPE_CLASS;
+				});
+
+			reinterpret_cast<Il2CppObject* (*)(Il2CppObject*, Il2CppObject*)>(ptr)(_this,
+				reinterpret_cast<Il2CppObject * (*)(Il2CppObject*)>(il2cpp_class_get_method_from_name(_this->klass, "BootCoroutine", 0)->methodPointer)(_this));
+		}
+		else
+		{
+			reinterpret_cast<decltype(BootSystem_Awake_hook)*>(BootSystem_Awake_orig)(_this);
+		}
+	}
+
+	void* UncheaterInit_OnApplicationPause_orig;
+
+	void UncheaterInit_OnApplicationPause_hook(Il2CppObject* _this, bool value)
+	{
+	}
+
+	void* SplashViewController_KakaoStart_orig;
+	void SplashViewController_KakaoStart_hook(Il2CppObject* _this)
+	{
+		// no-op
 	}
 
 	struct MoviePlayerHandle {};
@@ -3978,12 +4032,26 @@ namespace
 
 		auto il2cpp_module = GetModuleHandle("GameAssembly.dll");
 
+		cout << il2cpp_module << endl;
+
 		// load il2cpp exported functions
 		il2cpp_symbols::init(il2cpp_module);
+
+		cout << "il2cpp_symbols::init" << endl;
+
 
 		if (g_dump_il2cpp)
 		{
 			il2cpp_dump();
+		}
+
+		if (il2cpp_symbols::get_class("umamusume.dll", "", "KakaoManager"))
+		{
+			Game::CurrentGameRegion = Game::Region::KOR;
+		}
+		else
+		{
+			Game::CurrentGameRegion = Game::Region::JAP;
 		}
 
 #pragma region HOOK_MACRO
@@ -4147,16 +4215,6 @@ namespace
 			"StandaloneWindowResize", "WndProc", 4
 		);
 
-		auto get_virt_size_addr = il2cpp_symbols::get_method_pointer(
-			"umamusume.dll", "Gallop",
-			"StandaloneWindowResize", "getOptimizedWindowSizeVirt", 2
-		);
-
-		auto get_hori_size_addr = il2cpp_symbols::get_method_pointer(
-			"umamusume.dll", "Gallop",
-			"StandaloneWindowResize", "getOptimizedWindowSizeHori", 2
-		);
-
 		display_get_main = reinterpret_cast<Il2CppObject * (*)()>(il2cpp_symbols::get_method_pointer(
 			"UnityEngine.CoreModule.dll",
 			"UnityEngine",
@@ -4202,16 +4260,6 @@ namespace
 		auto story_race_textasset_load_addr = il2cpp_symbols::get_method_pointer("umamusume.dll", "Gallop", "StoryRaceTextAsset", "Load", 0);
 
 		auto get_modified_string_addr = il2cpp_symbols::get_method_pointer("umamusume.dll", "Gallop", "GallopUtil", "GetModifiedString", -1);
-
-		auto gallop_get_screenheight_addr = il2cpp_symbols::get_method_pointer(
-			"umamusume.dll", "Gallop",
-			"Screen", "get_Height", 0
-		);
-
-		auto gallop_get_screenwidth_addr = il2cpp_symbols::get_method_pointer(
-			"umamusume.dll", "Gallop",
-			"Screen", "get_Width", 0
-		);
 
 		auto UIManager_LateUpdate_addr = il2cpp_symbols::get_method_pointer(
 			"umamusume.dll", "Gallop",
@@ -4364,8 +4412,6 @@ namespace
 			"Screen", "SetResolution", 3
 		));
 
-		auto set_resolution_addr = il2cpp_resolve_icall("UnityEngine.Screen::SetResolution(System.Int32,System.Int32,UnityEngine.FullScreenMode,System.Int32)");
-
 		auto an_text_fix_data_addr = il2cpp_symbols::get_method_pointer("Plugins.dll", "AnimateToUnity", "AnText", "_FixData", 0);
 
 		auto an_text_set_material_to_textmesh_addr = il2cpp_symbols::get_method_pointer("Plugins.dll", "AnimateToUnity", "AnText", "_SetMaterialToTextMesh", 0);
@@ -4397,6 +4443,264 @@ namespace
 			"umamusume.dll",
 			"Gallop",
 			"GraphicSettings", "GetVirtualResolution3D", 1);
+		/*reinterpret_cast<void (*)(
+			ScreenOrientation)>(il2cpp_symbols::get_method_pointer(
+				"UnityEngine.CoreModule.dll",
+				"UnityEngine",
+				"Screen", "set_orientation", 1));*/
+
+		auto NowLoading_Show_addr = il2cpp_symbols::get_method_pointer(
+			"umamusume.dll",
+			"Gallop", "NowLoading", "Show", 4);
+
+		auto NowLoading_Hide_addr = il2cpp_symbols::get_method_pointer(
+			"umamusume.dll",
+			"Gallop", "NowLoading", "Hide", 3);
+
+		auto BootSystem_Awake_addr = il2cpp_symbols::get_method_pointer(
+			"umamusume.dll",
+			"Gallop", "BootSystem", "Awake", 0);
+
+		UIManager_GetCanvasScalerList = reinterpret_cast<Il2CppArraySize * (*)(Il2CppObject*)>(il2cpp_symbols::get_method_pointer(
+			"umamusume.dll", "Gallop", "UIManager", "GetCanvasScalerList", 0));
+
+		MoviePlayerBase_get_MovieInfo = reinterpret_cast<Il2CppObject * (*)(Il2CppObject*)>(il2cpp_symbols::get_method_pointer(
+			"Cute.Cri.Assembly.dll", "Cute.Cri", "MoviePlayerBase", "get_MovieInfo", 0));
+
+		MovieManager_GetMovieInfo = reinterpret_cast<Il2CppObject * (*)(Il2CppObject*, MoviePlayerHandle)>(il2cpp_symbols::get_method_pointer(
+			"Cute.Cri.Assembly.dll", "Cute.Cri", "MovieManager", "GetMovieInfo", 1));
+
+		auto PartsEpisodeList_SetupStoryExtraEpisodeList_addr = il2cpp_symbols::get_method_pointer(
+			"umamusume.dll", "Gallop", "PartsEpisodeList", "SetupStoryExtraEpisodeList", 4);
+
+		load_from_file = reinterpret_cast<Il2CppObject * (*)(Il2CppString * path)>(il2cpp_symbols::get_method_pointer(
+			"UnityEngine.AssetBundleModule.dll", "UnityEngine", "AssetBundle",
+			"LoadFromFile", 1));
+
+		auto PathResolver_GetLocalPath_addr = il2cpp_symbols::get_method_pointer(
+			"_Cyan.dll", "Cyan.LocalFile", "PathResolver",
+			"GetLocalPath", 2);
+
+		Shader_PropertyToID = reinterpret_cast<int (*)(Il2CppString*)>(il2cpp_symbols::get_method_pointer("UnityEngine.CoreModule.dll", "UnityEngine", "Shader", "PropertyToID", 1));
+
+		auto FrameRateController_OverrideByNormalFrameRate_addr = il2cpp_symbols::get_method_pointer("umamusume.dll", "Gallop", "FrameRateController", "OverrideByNormalFrameRate", 1);
+
+		auto FrameRateController_OverrideByMaxFrameRate_addr = il2cpp_symbols::get_method_pointer("umamusume.dll", "Gallop", "FrameRateController", "OverrideByMaxFrameRate", 1);
+
+		auto FrameRateController_ResetOverride_addr = il2cpp_symbols::get_method_pointer("umamusume.dll", "Gallop", "FrameRateController", "ResetOverride", 1);
+
+		auto FrameRateController_ReflectionFrameRate_addr = il2cpp_symbols::get_method_pointer("umamusume.dll", "Gallop", "FrameRateController", "ReflectionFrameRate", 0);
+
+		auto BGManager_CalcBgScale_addr = il2cpp_symbols::get_method_pointer("umamusume.dll", "Gallop", "BGManager", "CalcBgScale", 4);
+
+		auto GallopUtil_GotoTitleOnError_addr = il2cpp_symbols::get_method_pointer("umamusume.dll", "Gallop", "GallopUtil", "GotoTitleOnError", 1);
+
+		auto DialogCommon_Close_addr = il2cpp_symbols::get_method_pointer("umamusume.dll", "Gallop", "DialogCommon", "Close", 0);
+
+		auto StoryViewController_ctor_addr = il2cpp_symbols::get_method_pointer("umamusume.dll", "Gallop", "StoryViewController", ".ctor", 0);
+
+		auto GameSystem_FixedUpdate_addr = il2cpp_symbols::get_method_pointer("umamusume.dll", "Gallop", "GameSystem", "FixedUpdate", 0);
+
+		auto CriMana_Player_SetFile_addr = il2cpp_symbols::get_method_pointer("CriMw.CriWare.Runtime.dll", "CriWare.CriMana", "Player", "SetFile", 3);
+
+		auto DialogCircleItemDonate_Initialize_addr = il2cpp_symbols::get_method_pointer("umamusume.dll", "Gallop", "DialogCircleItemDonate", "Initialize", 2);
+
+		auto load_scene_internal_addr = il2cpp_resolve_icall("UnityEngine.SceneManagement.SceneManager::LoadSceneAsyncNameIndexInternal_Injected(System.String,System.Int32,UnityEngine.SceneManagement.LoadSceneParameters&,System.bool)");
+
+#pragma endregion
+
+		ADD_HOOK(PartsEpisodeList_SetupStoryExtraEpisodeList, "Gallop.PartsEpisodeList::SetupStoryExtraEpisodeList at %p\n");
+
+		ADD_HOOK(DialogCircleItemDonate_Initialize, "Gallop.DialogCircleItemDonate::Initialize at %p\n");
+
+		ADD_HOOK(CriMana_Player_SetFile, "CriWare.CriMana.Player::SetFile at %p\n");
+
+		ADD_HOOK(GameSystem_FixedUpdate, "Gallop.GameSystem::FixedUpdate at %p\n");
+
+		// ADD_HOOK(DialogCommon_Close, "Gallop.DialogCommon.Close() at %p\n");
+
+		// ADD_HOOK(GallopUtil_GotoTitleOnError, "Gallop.GallopUtil.GotoTitleOnError() at %p\n");
+
+		ADD_HOOK(set_shadowResolution, "UnityEngine.QualitySettings.set_shadowResolution(ShadowResolution) at %p\n");
+
+		ADD_HOOK(set_anisotropicFiltering, "UnityEngine.QualitySettings.set_anisotropicFiltering(UnityEngine.AnisotropicFiltering) at %p\n");
+
+		ADD_HOOK(set_shadows, "UnityEngine.QualitySettings.set_shadows(UnityEngine.ShadowQuality) at %p\n");
+
+		ADD_HOOK(set_softVegetation, "UnityEngine.QualitySettings.set_softVegetation(System.Boolean) at %p\n");
+
+		ADD_HOOK(set_realtimeReflectionProbes, "UnityEngine.QualitySettings.set_realtimeReflectionProbes(System.Boolean) at %p\n");
+
+		ADD_HOOK(Light_set_shadowResolution, "UnityEngine.Light.set_shadowResolution(UnityEngine.Rendering.LightShadowResolution) at %p\n");
+
+		ADD_HOOK(NowLoading_Show, "Gallop.NowLoading::Show at %p\n");
+
+		ADD_HOOK(NowLoading_Hide, "Gallop.NowLoading::Hide at %p\n");
+
+		ADD_HOOK(PathResolver_GetLocalPath, "Cyan.Loader.PathResolver::GetLocalPath at %p\n");
+
+		ADD_HOOK(get_preferred_width, "UnityEngine.TextGenerator::GetPreferredWidth at %p\n");
+
+		ADD_HOOK(an_text_fix_data, "AnimateToUnity.AnText::_FixData at %p\n");
+
+		ADD_HOOK(an_text_set_material_to_textmesh, "AnimateToUnity.AnText::_SetMaterialToTextMesh at %p\n");
+
+		ADD_HOOK(load_zekken_composite_resource, "Gallop.ModelLoader::LoadZekkenCompositeResource at %p\n");
+
+		ADD_HOOK(UIManager_LateUpdate, "Gallop.UIManager::LateUpdate at %p\n");
+
+		// hook UnityEngine.TextGenerator::PopulateWithErrors to modify text
+		ADD_HOOK(populate_with_errors, "UnityEngine.TextGenerator::PopulateWithErrors at %p\n");
+
+		// ADD_HOOK(text_get_text, "UnityEngine.UI.Text::get_text at %p\n");
+
+		ADD_HOOK(textcommon_SetTextWithLineHeadWrap, "Gallop.TextCommon::SetTextWithLineHeadWrap at %p\n");
+		ADD_HOOK(textcommon_SetTextWithLineHeadWrapWithColorTag, "Gallop.TextCommon::SetTextWithLineHeadWrapWithColorTag at %p\n");
+		ADD_HOOK(textcommon_SetSystemTextWithLineHeadWrap, "Gallop.TextCommon::SetSystemTextWithLineHeadWrap at %p\n");
+
+		ADD_HOOK(localizeextension_text, "Gallop.LocalizeExtention.Text(TextId) at %p\n");
+		// Looks like they store all localized texts that used by code in a dict
+		ADD_HOOK(localize_get, "Gallop.Localize.Get(TextId) at %p\n");
+
+		// ADD_HOOK(text_clip_data_ctor, "Gallop.StoryTimelineTextClipData::ctor at %p\n")
+
+		ADD_HOOK(story_timeline_controller_play, "StoryTimelineController::Play at %p\n");
+
+		ADD_HOOK(story_race_textasset_load, "StoryRaceTextAsset.Load at %p\n");
+
+		ADD_HOOK(get_modified_string, "GallopUtil_GetModifiedString at %p\n");
+
+		ADD_HOOK(update, "DG.Tweening.Core.TweenManager::Update at %p\n");
+
+		ADD_HOOK(query_setup, "Query::_Setup at %p\n");
+		ADD_HOOK(query_gettext, "Query::GetString at %p\n");
+		ADD_HOOK(query_dispose, "Query::Dispose at %p\n");
+
+		if (!g_replace_text_db_path.empty())
+		{
+			try
+			{
+				replacementMDB = new SQLite::Database(g_replace_text_db_path.data());
+				ADD_HOOK(Plugin_sqlite3_step, "Plugin::sqlite3_step at %p\n");
+				ADD_HOOK(Plugin_sqlite3_reset, "Plugin::sqlite3_reset at %p\n");
+				ADD_HOOK(query_step, "Query::Step at %p\n");
+				ADD_HOOK(prepared_query_reset, "PreparedQuery::Reset at %p\n");
+				ADD_HOOK(prepared_query_bind_text, "PreparedQuery::BindText at %p\n");
+				ADD_HOOK(prepared_query_bind_int, "PreparedQuery::BindInt at %p\n");
+				ADD_HOOK(prepared_query_bind_long, "PreparedQuery::BindLong at %p\n");
+				ADD_HOOK(prepared_query_bind_double, "PreparedQuery::BindDouble at %p\n");
+				ADD_HOOK(MasterCharacterSystemText_CreateOrmByQueryResultWithCharacterId,
+					"MasterCharacterSystemText::_CreateOrmByQueryResultWithCharacterId at %p\n");
+			}
+			catch (exception& e)
+			{
+			}
+		}
+
+		if (g_character_system_text_caption) {
+			ADD_HOOK(CriAtomExPlayer_criAtomExPlayer_Stop, "CriWare.CriAtomExPlayer::criAtomExPlayer_Stop at %p\n");
+			ADD_HOOK(AtomSourceEx_SetParameter, "Cute.Cri.AtomSourceEx::SetParameter at %p\n");
+		}
+
+		if (g_cyspring_update_mode != -1) {
+			ADD_HOOK(CySpringUpdater_set_SpringUpdateMode, "CySpringUpdater::set_SpringUpdateMode at %p\n");
+			ADD_HOOK(CySpringUpdater_get_SpringUpdateMode, "CySpringUpdater::get_SpringUpdateMode at %p\n");
+		}
+
+		// ADD_HOOK(load_scene_internal, "SceneManager::LoadSceneAsyncNameIndexInternal at %p\n");
+
+		ADD_HOOK(BootSystem_Awake, "Gallop.BootSystem::Awake at %p\n");
+
+		if (Game::CurrentGameRegion == Game::Region::KOR)
+		{
+			auto UncheaterInit_OnApplicationPause_addr = il2cpp_symbols::get_method_pointer(
+				"umamusume.dll",
+				"", "UncheaterInit", "OnApplicationPause", 1);
+
+			auto SplashViewController_KakaoStart_addr = il2cpp_symbols::get_method_pointer(
+				"umamusume.dll",
+				"Gallop", "SplashViewController", "KakaoStart", 0);
+
+			ADD_HOOK(UncheaterInit_OnApplicationPause, "UncheaterInit::OnApplicationPause at %p\n");
+			ADD_HOOK(SplashViewController_KakaoStart, "SplashViewController::KakaoStart at %p\n");
+		}
+
+		if (g_force_landscape || g_unlock_size)
+		{
+			ADD_HOOK(canvas_scaler_setres, "UnityEngine.UI.CanvasScaler::set_referenceResolution at %p\n");
+			ADD_HOOK(UIManager_UpdateCanvasScaler, "Gallop.UIManager::UpdateCanvasScaler at %p\n");
+		}
+
+		if (g_replace_to_builtin_font || g_replace_to_custom_font)
+		{
+			ADD_HOOK(on_populate, "Gallop.TextCommon::OnPopulateMesh at %p\n");
+			ADD_HOOK(textcommon_awake, "Gallop.TextCommon::Awake at %p\n");
+			ADD_HOOK(TextMeshProUguiCommon_Awake, "Gallop.TextMeshProUguiCommon::Awake at %p\n");
+			ADD_HOOK(TMP_Settings_get_instance, "TMPro.TMP_Settings::get_instance at %p\n");
+		}
+
+		if (g_max_fps > -1)
+		{
+			// break 30-40fps limit
+			ADD_HOOK(FrameRateController_OverrideByNormalFrameRate, "Gallop.FrameRateController::OverrideByNormalFrameRate at %p\n");
+			ADD_HOOK(FrameRateController_OverrideByMaxFrameRate, "Gallop.FrameRateController::OverrideByMaxFrameRate at %p\n");
+			ADD_HOOK(FrameRateController_ResetOverride, "Gallop.FrameRateController::ResetOverride at %p\n");
+			ADD_HOOK(FrameRateController_ReflectionFrameRate, "Gallop.FrameRateController::ReflectionFrameRate at %p\n");
+			ADD_HOOK(set_fps, "UnityEngine.Application.set_targetFrameRate at %p \n");
+		}
+
+		if (g_max_fps > -1 || g_unlock_size || g_force_landscape)
+		{
+			ADD_HOOK(wndproc, "Gallop.StandaloneWindowResize.WndProc at %p \n");
+		}
+
+		if (g_dump_entries)
+		{
+			dump_all_entries();
+		}
+
+		if (g_graphics_quality != -1)
+		{
+			ADD_HOOK(apply_graphics_quality, "Gallop.GraphicSettings.ApplyGraphicsQuality at %p\n");
+		}
+
+		if (g_force_landscape || g_unlock_size || g_resolution_3d_scale != 1.0f)
+		{
+			ADD_HOOK(BGManager_CalcBgScale, "Gallop.BGManager::CalcBgScale at %p\n");
+		}
+
+		if (g_resolution_3d_scale != 1.0f)
+		{
+			ADD_HOOK(GraphicSettings_GetVirtualResolution3D, "Gallop.GraphicSettings.GetVirtualResolution3D at %p\n");
+		}
+
+		if (g_anti_aliasing != -1)
+		{
+			ADD_HOOK(set_anti_aliasing, "UnityEngine.QualitySettings.set_antiAliasing(int) at %p\n");
+		}
+	}
+
+	void patch_after_criware()
+	{
+		auto get_virt_size_addr = il2cpp_symbols::get_method_pointer(
+			"umamusume.dll", "Gallop",
+			"StandaloneWindowResize", "getOptimizedWindowSizeVirt", 2
+		);
+
+		auto get_hori_size_addr = il2cpp_symbols::get_method_pointer(
+			"umamusume.dll", "Gallop",
+			"StandaloneWindowResize", "getOptimizedWindowSizeHori", 2
+		);
+
+		auto gallop_get_screenheight_addr = il2cpp_symbols::get_method_pointer(
+			"umamusume.dll", "Gallop",
+			"Screen", "get_Height", 0
+		);
+
+		auto gallop_get_screenwidth_addr = il2cpp_symbols::get_method_pointer(
+			"umamusume.dll", "Gallop",
+			"Screen", "get_Width", 0
+		);
 
 		auto ChangeScreenOrientation_addr = il2cpp_symbols::get_method_pointer(
 			"umamusume.dll",
@@ -4414,37 +4718,12 @@ namespace
 			"Screen", "get_ScreenOrientation", 0);
 
 		auto Screen_RequestOrientation_addr = il2cpp_resolve_icall("UnityEngine.Screen::RequestOrientation(UnityEngine.ScreenOrientation)");
-		/*reinterpret_cast<void (*)(
-			ScreenOrientation)>(il2cpp_symbols::get_method_pointer(
-				"UnityEngine.CoreModule.dll",
-				"UnityEngine",
-				"Screen", "set_orientation", 1));*/
 
-		auto DeviceOrientationGuide_Show_addr = il2cpp_symbols::get_method_pointer(
-			"umamusume.dll",
-			"Gallop", "DeviceOrientationGuide", "Show", 2);
-
-		auto NowLoading_Show_addr = il2cpp_symbols::get_method_pointer(
-			"umamusume.dll",
-			"Gallop", "NowLoading", "Show", 4);
-
-		auto NowLoading_Hide_addr = il2cpp_symbols::get_method_pointer(
-			"umamusume.dll",
-			"Gallop", "NowLoading", "Hide", 3);
+		auto set_resolution_addr = il2cpp_resolve_icall("UnityEngine.Screen::SetResolution(System.Int32,System.Int32,UnityEngine.FullScreenMode,System.Int32)");
 
 		auto WaitDeviceOrientation_addr = il2cpp_symbols::get_method_pointer(
 			"umamusume.dll",
 			"Gallop", "Screen", "WaitDeviceOrientation", 1);
-
-		auto BootSystem_Awake_addr = il2cpp_symbols::get_method_pointer(
-			"umamusume.dll",
-			"Gallop", "BootSystem", "Awake", 0);
-
-		auto UIManager_ChangeResizeUIForPC_addr = il2cpp_symbols::get_method_pointer(
-			"umamusume.dll", "Gallop", "UIManager", "ChangeResizeUIForPC", 2);
-
-		UIManager_GetCanvasScalerList = reinterpret_cast<Il2CppArraySize * (*)(Il2CppObject*)>(il2cpp_symbols::get_method_pointer(
-			"umamusume.dll", "Gallop", "UIManager", "GetCanvasScalerList", 0));
 
 		auto GetLimitSize_addr = il2cpp_symbols::get_method_pointer(
 			"umamusume.dll", "Gallop", "StandaloneWindowResize", "GetLimitSize", -1);
@@ -4455,11 +4734,12 @@ namespace
 		auto get_IsVertical_addr = il2cpp_symbols::get_method_pointer(
 			"umamusume.dll", "Gallop", "Screen", "get_IsVertical", -1);
 
-		MoviePlayerBase_get_MovieInfo = reinterpret_cast<Il2CppObject * (*)(Il2CppObject*)>(il2cpp_symbols::get_method_pointer(
-			"Cute.Cri.Assembly.dll", "Cute.Cri", "MoviePlayerBase", "get_MovieInfo", 0));
+		auto DeviceOrientationGuide_Show_addr = il2cpp_symbols::get_method_pointer(
+			"umamusume.dll",
+			"Gallop", "DeviceOrientationGuide", "Show", 2);
 
-		MovieManager_GetMovieInfo = reinterpret_cast<Il2CppObject * (*)(Il2CppObject*, MoviePlayerHandle)>(il2cpp_symbols::get_method_pointer(
-			"Cute.Cri.Assembly.dll", "Cute.Cri", "MovieManager", "GetMovieInfo", 1));
+		auto UIManager_ChangeResizeUIForPC_addr = il2cpp_symbols::get_method_pointer(
+			"umamusume.dll", "Gallop", "UIManager", "ChangeResizeUIForPC", 2);
 
 		auto MovieManager_SetImageUvRect_addr = il2cpp_symbols::get_method_pointer(
 			"Cute.Cri.Assembly.dll", "Cute.Cri", "MovieManager", "SetImageUvRect", 2);
@@ -4472,19 +4752,6 @@ namespace
 
 		auto MoviePlayerForObj_AdjustScreenSize_addr = il2cpp_symbols::get_method_pointer(
 			"Cute.Cri.Assembly.dll", "Cute.Cri", "MoviePlayerForObj", "AdjustScreenSize", 2);
-
-		auto PartsEpisodeList_SetupStoryExtraEpisodeList_addr = il2cpp_symbols::get_method_pointer(
-			"umamusume.dll", "Gallop", "PartsEpisodeList", "SetupStoryExtraEpisodeList", 4);
-
-		load_from_file = reinterpret_cast<Il2CppObject * (*)(Il2CppString * path)>(il2cpp_symbols::get_method_pointer(
-			"UnityEngine.AssetBundleModule.dll", "UnityEngine", "AssetBundle",
-			"LoadFromFile", 1));
-
-		auto PathResolver_GetLocalPath_addr = il2cpp_symbols::get_method_pointer(
-			"_Cyan.dll", "Cyan.LocalFile", "PathResolver",
-			"GetLocalPath", 2);
-
-		Shader_PropertyToID = reinterpret_cast<int (*)(Il2CppString*)>(il2cpp_symbols::get_method_pointer("UnityEngine.CoreModule.dll", "UnityEngine", "Shader", "PropertyToID", 1));
 
 		auto assetbundle_LoadFromFile_addr = il2cpp_resolve_icall("UnityEngine.AssetBundle::LoadFromFile_Internal(System.String,System.UInt32,System.UInt64)");
 
@@ -4536,31 +4803,6 @@ namespace
 
 		auto GameObject_GetComponentFastPath_addr = il2cpp_resolve_icall("UnityEngine.GameObject::GetComponentFastPath(System.Type,System.IntPtr)");
 
-		auto FrameRateController_OverrideByNormalFrameRate_addr = il2cpp_symbols::get_method_pointer("umamusume.dll", "Gallop", "FrameRateController", "OverrideByNormalFrameRate", 1);
-
-		auto FrameRateController_OverrideByMaxFrameRate_addr = il2cpp_symbols::get_method_pointer("umamusume.dll", "Gallop", "FrameRateController", "OverrideByMaxFrameRate", 1);
-
-		auto FrameRateController_ResetOverride_addr = il2cpp_symbols::get_method_pointer("umamusume.dll", "Gallop", "FrameRateController", "ResetOverride", 1);
-
-		auto FrameRateController_ReflectionFrameRate_addr = il2cpp_symbols::get_method_pointer("umamusume.dll", "Gallop", "FrameRateController", "ReflectionFrameRate", 0);
-
-		auto BGManager_CalcBgScale_addr = il2cpp_symbols::get_method_pointer("umamusume.dll", "Gallop", "BGManager", "CalcBgScale", 4);
-
-		auto GallopUtil_GotoTitleOnError_addr = il2cpp_symbols::get_method_pointer("umamusume.dll", "Gallop", "GallopUtil", "GotoTitleOnError", 1);
-
-		auto DialogCommon_Close_addr = il2cpp_symbols::get_method_pointer("umamusume.dll", "Gallop", "DialogCommon", "Close", 0);
-
-		auto StoryViewController_ctor_addr = il2cpp_symbols::get_method_pointer("umamusume.dll", "Gallop", "StoryViewController", ".ctor", 0);
-
-		auto GameSystem_FixedUpdate_addr = il2cpp_symbols::get_method_pointer("umamusume.dll", "Gallop", "GameSystem", "FixedUpdate", 0);
-
-		auto CriMana_Player_SetFile_addr = il2cpp_symbols::get_method_pointer("CriMw.CriWare.Runtime.dll", "CriWare.CriMana", "Player", "SetFile", 3);
-
-		auto DialogCircleItemDonate_Initialize_addr = il2cpp_symbols::get_method_pointer("umamusume.dll", "Gallop", "DialogCircleItemDonate", "Initialize", 2);
-
-		auto load_scene_internal_addr = il2cpp_resolve_icall("UnityEngine.SceneManagement.SceneManager::LoadSceneAsyncNameIndexInternal_Injected(System.String,System.Int32,UnityEngine.SceneManagement.LoadSceneParameters&,System.bool)");
-
-#pragma endregion
 #pragma region LOAD_ASSETBUNDLE
 		if (!fontAssets && !g_font_assetbundle_path.empty() && g_replace_to_custom_font)
 		{
@@ -4642,36 +4884,6 @@ namespace
 		}
 #pragma endregion
 
-		ADD_HOOK(PartsEpisodeList_SetupStoryExtraEpisodeList, "Gallop.PartsEpisodeList::SetupStoryExtraEpisodeList at %p\n");
-
-		ADD_HOOK(DialogCircleItemDonate_Initialize, "Gallop.DialogCircleItemDonate::Initialize at %p\n");
-
-		ADD_HOOK(CriMana_Player_SetFile, "CriWare.CriMana.Player::SetFile at %p\n");
-
-		ADD_HOOK(GameSystem_FixedUpdate, "Gallop.GameSystem::FixedUpdate at %p\n");
-
-		// ADD_HOOK(DialogCommon_Close, "Gallop.DialogCommon.Close() at %p\n");
-
-		// ADD_HOOK(GallopUtil_GotoTitleOnError, "Gallop.GallopUtil.GotoTitleOnError() at %p\n");
-
-		ADD_HOOK(set_shadowResolution, "UnityEngine.QualitySettings.set_shadowResolution(ShadowResolution) at %p\n");
-
-		ADD_HOOK(set_anisotropicFiltering, "UnityEngine.QualitySettings.set_anisotropicFiltering(UnityEngine.AnisotropicFiltering) at %p\n");
-
-		ADD_HOOK(set_shadows, "UnityEngine.QualitySettings.set_shadows(UnityEngine.ShadowQuality) at %p\n");
-
-		ADD_HOOK(set_softVegetation, "UnityEngine.QualitySettings.set_softVegetation(System.Boolean) at %p\n");
-
-		ADD_HOOK(set_realtimeReflectionProbes, "UnityEngine.QualitySettings.set_realtimeReflectionProbes(System.Boolean) at %p\n");
-
-		ADD_HOOK(Light_set_shadowResolution, "UnityEngine.Light.set_shadowResolution(UnityEngine.Rendering.LightShadowResolution) at %p\n");
-
-		ADD_HOOK(NowLoading_Show, "Gallop.NowLoading::Show at %p\n");
-
-		ADD_HOOK(NowLoading_Hide, "Gallop.NowLoading::Hide at %p\n");
-
-		ADD_HOOK(PathResolver_GetLocalPath, "Cyan.Loader.PathResolver::GetLocalPath at %p\n");
-
 		ADD_HOOK(AssetBundleRequest_GetResult, "UnityEngine.AssetBundleRequest::GetResult at %p\n");
 
 		ADD_HOOK(assetbundle_LoadFromFile, "UnityEngine.AssetBundle::LoadFromFile at %p\n");
@@ -4719,81 +4931,13 @@ namespace
 			ADD_HOOK(CharaPropRendererAccessor_SetTexture, "Gallop.CharaPropRendererAccessor::SetTexture at %p\n");
 		}
 
-		ADD_HOOK(get_preferred_width, "UnityEngine.TextGenerator::GetPreferredWidth at %p\n");
-
-		ADD_HOOK(an_text_fix_data, "AnimateToUnity.AnText::_FixData at %p\n");
-
-		ADD_HOOK(an_text_set_material_to_textmesh, "AnimateToUnity.AnText::_SetMaterialToTextMesh at %p\n");
-
-		ADD_HOOK(load_zekken_composite_resource, "Gallop.ModelLoader::LoadZekkenCompositeResource at %p\n");
-
-		ADD_HOOK(UIManager_LateUpdate, "Gallop.UIManager::LateUpdate at %p\n");
-
-		// hook UnityEngine.TextGenerator::PopulateWithErrors to modify text
-		ADD_HOOK(populate_with_errors, "UnityEngine.TextGenerator::PopulateWithErrors at %p\n");
-
-		// ADD_HOOK(text_get_text, "UnityEngine.UI.Text::get_text at %p\n");
-
-		ADD_HOOK(textcommon_SetTextWithLineHeadWrap, "Gallop.TextCommon::SetTextWithLineHeadWrap at %p\n");
-		ADD_HOOK(textcommon_SetTextWithLineHeadWrapWithColorTag, "Gallop.TextCommon::SetTextWithLineHeadWrapWithColorTag at %p\n");
-		ADD_HOOK(textcommon_SetSystemTextWithLineHeadWrap, "Gallop.TextCommon::SetSystemTextWithLineHeadWrap at %p\n");
-
-		ADD_HOOK(localizeextension_text, "Gallop.LocalizeExtention.Text(TextId) at %p\n");
-		// Looks like they store all localized texts that used by code in a dict
-		ADD_HOOK(localize_get, "Gallop.Localize.Get(TextId) at %p\n");
-
-		// ADD_HOOK(text_clip_data_ctor, "Gallop.StoryTimelineTextClipData::ctor at %p\n")
-
-		ADD_HOOK(story_timeline_controller_play, "StoryTimelineController::Play at %p\n");
-
-		ADD_HOOK(story_race_textasset_load, "StoryRaceTextAsset.Load at %p\n");
-
-		ADD_HOOK(get_modified_string, "GallopUtil_GetModifiedString at %p\n");
-
-		ADD_HOOK(update, "DG.Tweening.Core.TweenManager::Update at %p\n");
-
-		ADD_HOOK(query_setup, "Query::_Setup at %p\n");
-		ADD_HOOK(query_gettext, "Query::GetString at %p\n");
-		ADD_HOOK(query_dispose, "Query::Dispose at %p\n");
-
-		if (!g_replace_text_db_path.empty())
+		if (g_auto_fullscreen || g_force_landscape || g_unlock_size)
 		{
-			try
+			ADD_HOOK(set_resolution, "UnityEngine.Screen.SetResolution(int, int, bool) at %p\n");
+			if (g_auto_fullscreen || g_force_landscape)
 			{
-				replacementMDB = new SQLite::Database(g_replace_text_db_path.data());
-				ADD_HOOK(Plugin_sqlite3_step, "Plugin::sqlite3_step at %p\n");
-				ADD_HOOK(Plugin_sqlite3_reset, "Plugin::sqlite3_reset at %p\n");
-				ADD_HOOK(query_step, "Query::Step at %p\n");
-				ADD_HOOK(prepared_query_reset, "PreparedQuery::Reset at %p\n");
-				ADD_HOOK(prepared_query_bind_text, "PreparedQuery::BindText at %p\n");
-				ADD_HOOK(prepared_query_bind_int, "PreparedQuery::BindInt at %p\n");
-				ADD_HOOK(prepared_query_bind_long, "PreparedQuery::BindLong at %p\n");
-				ADD_HOOK(prepared_query_bind_double, "PreparedQuery::BindDouble at %p\n");
-				ADD_HOOK(MasterCharacterSystemText_CreateOrmByQueryResultWithCharacterId,
-					"MasterCharacterSystemText::_CreateOrmByQueryResultWithCharacterId at %p\n");
+				adjust_size();
 			}
-			catch (exception& e)
-			{
-			}
-		}
-
-		if (g_character_system_text_caption) {
-			ADD_HOOK(CriAtomExPlayer_criAtomExPlayer_Stop, "CriWare.CriAtomExPlayer::criAtomExPlayer_Stop at %p\n");
-			ADD_HOOK(AtomSourceEx_SetParameter, "Cute.Cri.AtomSourceEx::SetParameter at %p\n");
-		}
-
-		if (g_cyspring_update_mode != -1) {
-			ADD_HOOK(CySpringUpdater_set_SpringUpdateMode, "CySpringUpdater::set_SpringUpdateMode at %p\n");
-			ADD_HOOK(CySpringUpdater_get_SpringUpdateMode, "CySpringUpdater::get_SpringUpdateMode at %p\n");
-		}
-
-		// ADD_HOOK(load_scene_internal, "SceneManager::LoadSceneAsyncNameIndexInternal at %p\n");
-
-		if (g_force_landscape || g_unlock_size)
-		{
-			ADD_HOOK(BootSystem_Awake, "Gallop.BootSystem::Awake at %p\n");
-			ADD_HOOK(canvas_scaler_setres, "UnityEngine.UI.CanvasScaler::set_referenceResolution at %p\n");
-			ADD_HOOK(UIManager_UpdateCanvasScaler, "Gallop.UIManager::UpdateCanvasScaler at %p\n");
 		}
 
 		if (g_force_landscape)
@@ -4830,24 +4974,6 @@ namespace
 			move_next(enumerator);
 		}
 
-		if (g_replace_to_builtin_font || g_replace_to_custom_font)
-		{
-			ADD_HOOK(on_populate, "Gallop.TextCommon::OnPopulateMesh at %p\n");
-			ADD_HOOK(textcommon_awake, "Gallop.TextCommon::Awake at %p\n");
-			ADD_HOOK(TextMeshProUguiCommon_Awake, "Gallop.TextMeshProUguiCommon::Awake at %p\n");
-			ADD_HOOK(TMP_Settings_get_instance, "TMPro.TMP_Settings::get_instance at %p\n");
-		}
-
-		if (g_max_fps > -1)
-		{
-			// break 30-40fps limit
-			ADD_HOOK(FrameRateController_OverrideByNormalFrameRate, "Gallop.FrameRateController::OverrideByNormalFrameRate at %p\n");
-			ADD_HOOK(FrameRateController_OverrideByMaxFrameRate, "Gallop.FrameRateController::OverrideByMaxFrameRate at %p\n");
-			ADD_HOOK(FrameRateController_ResetOverride, "Gallop.FrameRateController::ResetOverride at %p\n");
-			ADD_HOOK(FrameRateController_ReflectionFrameRate, "Gallop.FrameRateController::ReflectionFrameRate at %p\n");
-			ADD_HOOK(set_fps, "UnityEngine.Application.set_targetFrameRate at %p \n");
-		}
-
 		if (g_unlock_size)
 		{
 			// break 1080p size limit
@@ -4864,45 +4990,6 @@ namespace
 			get_resolution_stub(&r);
 			last_display_width = r.width;
 			last_display_height = r.height;
-		}
-
-		if (g_max_fps > -1 || g_unlock_size || g_force_landscape)
-		{
-			ADD_HOOK(wndproc, "Gallop.StandaloneWindowResize.WndProc at %p \n");
-		}
-
-		if (g_auto_fullscreen || g_force_landscape || g_unlock_size)
-		{
-			ADD_HOOK(set_resolution, "UnityEngine.Screen.SetResolution(int, int, bool) at %p\n");
-			if (g_auto_fullscreen || g_force_landscape)
-			{
-				adjust_size();
-			}
-		}
-
-		if (g_dump_entries)
-		{
-			dump_all_entries();
-		}
-
-		if (g_graphics_quality != -1)
-		{
-			ADD_HOOK(apply_graphics_quality, "Gallop.GraphicSettings.ApplyGraphicsQuality at %p\n");
-		}
-
-		if (g_force_landscape || g_unlock_size || g_resolution_3d_scale != 1.0f)
-		{
-			ADD_HOOK(BGManager_CalcBgScale, "Gallop.BGManager::CalcBgScale at %p\n");
-		}
-
-		if (g_resolution_3d_scale != 1.0f)
-		{
-			ADD_HOOK(GraphicSettings_GetVirtualResolution3D, "Gallop.GraphicSettings.GetVirtualResolution3D at %p\n");
-		}
-
-		if (g_anti_aliasing != -1)
-		{
-			ADD_HOOK(set_anti_aliasing, "UnityEngine.QualitySettings.set_antiAliasing(int) at %p\n");
 		}
 
 		if (g_discord_rich_presence)
@@ -4989,38 +5076,42 @@ namespace
 
 			auto methodInfo = il2cpp_class_get_method_from_name(sceneManagerClass, "add_activeSceneChanged", 1);
 
-			auto action = CreateDelegateWithClass(il2cpp_class_from_type(methodInfo->parameters[0].parameter_type),
-				reinterpret_cast<Il2CppObject*>(il2cpp_object_new(il2cpp_symbols::get_class("mscorlib.dll", "System", "Object"))), *([](Il2CppObject* _this, Scene* scene, Scene* scene1)
-					{
-						if (scene1)
+			if (methodInfo)
+			{
+				auto action = CreateDelegateWithClass(il2cpp_class_from_type(methodInfo->parameters[0].parameter_type),
+					reinterpret_cast<Il2CppObject*>(il2cpp_object_new(il2cpp_symbols::get_class("mscorlib.dll", "System", "Object"))), *([](Il2CppObject* _this, Scene* scene, Scene* scene1)
 						{
-							string sceneName = local::wide_u8(reinterpret_cast<Il2CppString * (*)(Scene*)>(il2cpp_symbols::get_method_pointer("UnityEngine.CoreModule.dll", "UnityEngine.SceneManagement", "Scene", "GetNameInternal", 1))(scene1)->start_char);
+							if (scene1)
+							{
+								string sceneName = local::wide_u8(reinterpret_cast<Il2CppString * (*)(Scene*)>(il2cpp_symbols::get_method_pointer("UnityEngine.CoreModule.dll", "UnityEngine.SceneManagement", "Scene", "GetNameInternal", 1))(scene1)->start_char);
 
-							auto detail = GetSceneName(sceneName);
+								auto detail = GetSceneName(sceneName);
 
-							if (discord) {
-								discord::Activity activity{};
-								activity.GetAssets().SetLargeImage("umamusume");
-								activity.SetDetails(detail.data());
-								activity.GetTimestamps().SetStart(startTime);
-								if (sceneName == "Live"s)
-								{
-									activity.SetType(discord::ActivityType::Watching);
+								if (discord) {
+									discord::Activity activity{};
+									activity.GetAssets().SetLargeImage("umamusume");
+									activity.SetDetails(detail.data());
+									activity.GetTimestamps().SetStart(startTime);
+									if (sceneName == "Live"s)
+									{
+										activity.SetType(discord::ActivityType::Watching);
+									}
+									else
+									{
+										activity.SetType(discord::ActivityType::Playing);
+									}
+									discord->ActivityManager().UpdateActivity(activity, [](discord::Result res) {});
 								}
-								else
-								{
-									activity.SetType(discord::ActivityType::Playing);
-								}
-								discord->ActivityManager().UpdateActivity(activity, [](discord::Result res) {});
 							}
-						}
-					})
-			);
+						})
+				);
 
-			reinterpret_cast<void (*)(Il2CppDelegate*)>(methodInfo->methodPointer)(action);
+				reinterpret_cast<void (*)(Il2CppDelegate*)>(methodInfo->methodPointer)(action);
+			}
 		}
 	}
 }
+
 
 bool init_hook()
 {
