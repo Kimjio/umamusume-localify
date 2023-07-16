@@ -5509,7 +5509,7 @@ namespace
 									auto oldWndProcPtr2 = reinterpret_cast<WNDPROC>(SetWindowLongPtrW(hWnd, GWLP_WNDPROC, reinterpret_cast<LONG_PTR>(wndproc_hook)));
 									il2cpp_field_static_set_value(oldWndProcPtrField, &oldWndProcPtr2);
 
-									if (g_freeform_initial_width > 72 && g_freeform_initial_height > 72)
+									if (g_freeform_window && g_freeform_initial_width > 72 && g_freeform_initial_height > 72)
 									{
 										reinterpret_cast<decltype(set_resolution_hook)*>(set_resolution_orig)(g_freeform_initial_width, g_freeform_initial_height, 3, 0);
 									}
