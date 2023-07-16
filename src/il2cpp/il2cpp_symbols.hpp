@@ -364,6 +364,38 @@ struct MethodInfo
 	uint8_t is_marshaled_from_native : 1;
 };
 
+template<typename T>
+struct MethodInfo_t
+{
+	T methodPointer;
+	InvokerMethod invoker_method;
+	const char* name;
+	Il2CppClass* klass;
+	const Il2CppType* return_type;
+	const ParameterInfo* parameters;
+	union
+	{
+		uintptr_t rgctx_data;
+		uintptr_t methodDefinition;
+	};
+	union
+	{
+		uintptr_t genericMethod;
+		Il2CppGenericContainer* genericContainer;
+	};
+	uint32_t token;
+	uint16_t flags;
+	uint16_t iflags;
+	uint16_t slot;
+	uint8_t parameters_count;
+	uint8_t is_generic : 1;
+	uint8_t is_inflated : 1;
+	uint8_t wrapper_type : 1;
+	uint8_t is_marshaled_from_native : 1;
+};
+
+
+
 struct Il2CppObject
 {
 	union
@@ -399,6 +431,17 @@ typedef struct Il2CppArraySize
 	alignas(8)
 		void* vector[0];
 } Il2CppArraySize;
+
+
+template<typename T>
+struct Il2CppArraySize_t
+{
+	Il2CppObject obj;
+	void* bounds;
+	uintptr_t max_length;
+	alignas(8)
+	T vector[0];
+};
 
 static const size_t kIl2CppSizeOfArray = (offsetof(Il2CppArraySize, vector));
 
@@ -449,6 +492,56 @@ struct AudioPlayback
 	CriAtomExPlayback criAtomExPlayback;
 	bool isError;
 	int soundGroup;
+};
+
+struct Randomize3dConfig
+{
+};
+
+struct CuePos3dInfo
+{
+	float coneInsideAngle;
+	float coneOutsideAngle;
+	float minAttenuationDistance;
+	float maxAttenuationDistance;
+	float sourceRadius;
+	float interiorDistance;
+	float dopplerFactor;
+	Randomize3dConfig randomPos;
+	USHORT distanceAisacControl;
+	USHORT listenerBaseAngleAisacControl;
+	USHORT sourceBaseAngleAisacControl;
+	USHORT listenerBaseElevationAisacControl;
+	USHORT sourceBaseElevationAisacControl;
+	USHORT reserved[1];
+};
+
+struct GameVariableInfo
+{
+	char* name;
+	UINT id;
+	float gameValue;
+};
+
+struct CueInfo
+{
+	int id;
+	int type;
+	char* name;
+	char* userData;
+	size_t length;
+	USHORT categories[16];
+	short numLimits;
+	USHORT numBlocks;
+	USHORT numTracks;
+	USHORT numRelatedWaveForms;
+	char priority;
+	char headerVisibility;
+	char ignore_player_parameter;
+	char probability;
+	int panType;
+	CuePos3dInfo pos3dInfo;
+	GameVariableInfo gameVariableInfo;
 };
 
 struct Scene
@@ -640,10 +733,25 @@ namespace il2cpp_symbols
 	const MethodInfo* get_method(const char* assemblyName, const char* namespaze,
 		const char* klassName, const char* name, int argsCount);
 
+	template<typename T>
+	const MethodInfo_t<T>* get_method(const char* assemblyName, const char* namespaze,
+		const char* klassName, const char* name, int argsCount)
+	{
+		return reinterpret_cast<MethodInfo_t<T>*>(get_method(assemblyName, namespaze, klassName, name, argsCount));
+	}
+
 	Il2CppClass* find_class(const char* assemblyName, const char* namespaze,
 		const std::function<bool(Il2CppClass*)>& predict);
 
 	Il2CppMethodPointer find_method(const char* assemblyName, const char* namespaze,
 		const char* klassName,
 		const std::function<bool(const MethodInfo*)>& predict);
+
+	template<typename T>
+	T find_method(const char* assemblyName, const char* namespaze,
+		const char* klassName,
+		const std::function<bool(const MethodInfo*)>& predict)
+	{
+		return reinterpret_cast<T>(find_method(assemblyName, namespaze, klassName, predict));
+	}
 }

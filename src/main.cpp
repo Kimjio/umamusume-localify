@@ -14,6 +14,11 @@ bool g_enable_console = false;
 int g_max_fps = -1;
 bool g_unlock_size = false;
 float g_ui_scale = 1.0f;
+bool g_freeform_window = false;
+float g_freeform_ui_scale_portrait = 0.5f;
+float g_freeform_ui_scale_landscape = 0.5f;
+int g_freeform_initial_width = -1;
+int g_freeform_initial_height = -1;
 float g_ui_animation_scale = 1.0f;
 float g_aspect_ratio = 16.f / 9.f;
 float g_resolution_3d_scale = 1.0f;
@@ -25,8 +30,6 @@ std::string g_tmpro_font_asset_name;
 bool g_auto_fullscreen = true;
 int g_graphics_quality = -1;
 int g_anti_aliasing = -1;
-bool g_force_landscape = false;
-float g_force_landscape_ui_scale = 0.5;
 bool g_ui_loading_show_orientation_guide = true;
 std::string g_custom_title_name;
 std::unordered_map<std::string, ReplaceAsset> g_replace_assets;
@@ -38,6 +41,8 @@ int g_cyspring_update_mode = -1;
 bool g_hide_now_loading = false;
 bool g_discord_rich_presence = false;
 std::string text_id_dict;
+
+rapidjson::Document code_map;
 
 bool has_json_parse_error = false;
 std::string json_parse_error_msg;
@@ -113,6 +118,46 @@ namespace
 			{
 				g_ui_scale = document["uiScale"].GetFloat();
 			}
+			if (document.HasMember("freeFormWindow"))
+			{
+				g_freeform_window = document["freeFormWindow"].GetBool();
+				if (g_freeform_window)
+				{
+					g_unlock_size = true;
+				}
+			}
+			if (document.HasMember("freeFormUiScalePortrait"))
+			{
+				g_freeform_ui_scale_portrait = document["freeFormUiScalePortrait"].GetFloat();
+				if (g_freeform_ui_scale_portrait <= 0)
+				{
+					g_freeform_ui_scale_portrait = 0.5f;
+				}
+			}
+			if (document.HasMember("freeFormUiScaleLandscape"))
+			{
+				g_freeform_ui_scale_landscape = document["freeFormUiScaleLandscape"].GetFloat();
+				if (g_freeform_ui_scale_landscape <= 0)
+				{
+					g_freeform_ui_scale_landscape = 0.5f;
+				}
+			}
+			if (document.HasMember("freeFormInitialWidth"))
+			{
+				g_freeform_initial_width = document["freeFormInitialWidth"].GetInt();
+				if (g_freeform_initial_width <= 72)
+				{
+					g_freeform_initial_width = -1;
+				}
+			}
+			if (document.HasMember("freeFormInitialHeight"))
+			{
+				g_freeform_initial_height = document["freeFormInitialHeight"].GetInt();
+				if (g_freeform_initial_height <= 72)
+				{
+					g_freeform_initial_height = -1;
+				}
+			}
 			if (document.HasMember("uiAnimationScale"))
 			{
 				g_ui_animation_scale = document["uiAnimationScale"].GetFloat();
@@ -168,19 +213,6 @@ namespace
 				g_anti_aliasing = std::find(options.begin(), options.end(), g_anti_aliasing) - options.begin();
 			}
 
-			if (document.HasMember("forceLandscape"))
-			{
-				g_force_landscape = document["forceLandscape"].GetBool();
-			}
-			if (document.HasMember("forceLandscapeUiScale"))
-			{
-				g_force_landscape_ui_scale = document["forceLandscapeUiScale"].GetFloat();
-				if (g_force_landscape_ui_scale <= 0)
-				{
-					g_force_landscape_ui_scale = 1;
-				}
-			}
-
 			if (document.HasMember("uiLoadingShowOrientationGuide"))
 			{
 				g_ui_loading_show_orientation_guide = document["uiLoadingShowOrientationGuide"].GetBool();
@@ -200,11 +232,11 @@ namespace
 				}
 				if (std::filesystem::exists(replaceAssetsPath) && std::filesystem::is_directory(replaceAssetsPath))
 				{
-					for (auto &file : std::filesystem::directory_iterator(replaceAssetsPath))
+					for (auto& file : std::filesystem::directory_iterator(replaceAssetsPath))
 					{
 						if (file.is_regular_file())
 						{
-							g_replace_assets.emplace(local::wide_u8(local::acp_wide(file.path().filename().string())), ReplaceAsset{ local::wide_u8(local::acp_wide(file.path().string())), nullptr});
+							g_replace_assets.emplace(local::wide_u8(local::acp_wide(file.path().filename().string())), ReplaceAsset{ local::wide_u8(local::acp_wide(file.path().string())), nullptr });
 						}
 					}
 				}
@@ -242,7 +274,7 @@ namespace
 				std::vector<int> options = { 0, 1, 2, 3, -1 };
 				g_cyspring_update_mode = std::find(options.begin(), options.end(), g_cyspring_update_mode) - options.begin();
 			}
-			else if (g_max_fps > 30) 
+			else if (g_max_fps > 30)
 			{
 				g_cyspring_update_mode = 1;
 			}
@@ -258,6 +290,19 @@ namespace
 			if (document.HasMember("textIdDict"))
 			{
 				text_id_dict = document["textIdDict"].GetString();
+			}
+
+			if (document.HasMember("codeMapPath"))
+			{
+				auto path = document["codeMapPath"].GetString();
+
+				std::ifstream code_map_stream{ path };
+
+				if (config_stream.is_open())
+				{
+					rapidjson::IStreamWrapper wrapper{ code_map_stream };
+					code_map.ParseStream(wrapper);
+				}
 			}
 
 			if (document.HasMember("discordRichPresence"))
@@ -280,7 +325,7 @@ namespace
 		}
 		else
 		{
-			has_json_parse_error = true; 
+			has_json_parse_error = true;
 			std::stringstream str_stream;
 			str_stream << "JSON parse error: " << GetParseError_En(document.GetParseError()) << " (" << document.GetErrorOffset() << ")";
 			json_parse_error_msg = str_stream.str();
@@ -291,16 +336,22 @@ namespace
 	}
 }
 
+extern "C" __declspec(dllexport) int __stdcall UnityMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPWSTR lpCmdLine, int nShowCmd)
+{
+	auto player = LoadLibraryA("UnityPlayer.orig.dll");
+	return reinterpret_cast<decltype(UnityMain)*>(GetProcAddress(player, "UnityMain"))(hInstance, hPrevInstance, lpCmdLine, nShowCmd);
+}
+
 int __stdcall DllMain(HINSTANCE, DWORD reason, LPVOID)
 {
 	if (reason == DLL_PROCESS_ATTACH)
 	{
 		// the DMM Launcher set start path to system32 wtf????
-		std::string module_name;
+		string module_name;
 		module_name.resize(MAX_PATH);
 		module_name.resize(GetModuleFileName(nullptr, module_name.data(), MAX_PATH));
 
-		std::filesystem::path module_path(module_name);
+		filesystem::path module_path(module_name);
 
 		// check name
 		if (module_path.filename() != "umamusume.exe")
@@ -309,6 +360,15 @@ int __stdcall DllMain(HINSTANCE, DWORD reason, LPVOID)
 		std::filesystem::current_path(
 			module_path.parent_path()
 		);
+
+		if (filesystem::exists(module_path.parent_path().append(module_path.filename().replace_extension().string().append("_Data\\Plugins\\x86_64\\KakaoGameWin.dll"s).data())))
+		{
+			Game::CurrentGameRegion = Game::Region::KOR;
+		}
+		else
+		{
+			Game::CurrentGameRegion = Game::Region::JAP;
+		}
 
 		auto dicts = read_config();
 
@@ -319,7 +379,7 @@ int __stdcall DllMain(HINSTANCE, DWORD reason, LPVOID)
 			logger::init_logger();
 			local::load_textdb(&dicts);
 			if (!text_id_dict.empty())
-			{ 
+			{
 				local::load_textId_textdb(text_id_dict);
 			}
 			init_hook();
