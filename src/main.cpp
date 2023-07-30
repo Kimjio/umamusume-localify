@@ -13,12 +13,13 @@ bool g_enable_logger = false;
 bool g_enable_console = false;
 int g_max_fps = -1;
 bool g_unlock_size = false;
+bool g_unlock_size_use_system_resolution = false;
 float g_ui_scale = 1.0f;
 bool g_freeform_window = false;
 float g_freeform_ui_scale_portrait = 0.5f;
 float g_freeform_ui_scale_landscape = 0.5f;
-int g_freeform_initial_width = -1;
-int g_freeform_initial_height = -1;
+int g_initial_width = -1;
+int g_initial_height = -1;
 float g_ui_animation_scale = 1.0f;
 float g_aspect_ratio = 16.f / 9.f;
 float g_resolution_3d_scale = 1.0f;
@@ -37,6 +38,13 @@ std::string g_replace_assetbundle_file_path;
 std::vector<std::string> g_replace_assetbundle_file_paths;
 std::string g_replace_text_db_path;
 bool g_character_system_text_caption = false;
+int g_character_system_text_caption_font_size = 50;
+string g_character_system_text_caption_font_color = "White";
+string g_character_system_text_caption_outline_size = "L";
+string g_character_system_text_caption_outline_color = "Brown";
+float g_character_system_text_caption_background_alpha = 0;
+float g_character_system_text_caption_position_x = 0;
+float g_character_system_text_caption_position_y = -3;
 int g_cyspring_update_mode = -1;
 bool g_hide_now_loading = false;
 bool g_discord_rich_presence = false;
@@ -114,6 +122,10 @@ namespace
 			{
 				g_unlock_size = document["unlockSize"].GetBool();
 			}
+			if (document.HasMember("unlockSizeUseSystemResolution"))
+			{
+				g_unlock_size_use_system_resolution = document["unlockSizeUseSystemResolution"].GetBool();
+			}
 			if (document.HasMember("uiScale"))
 			{
 				g_ui_scale = document["uiScale"].GetFloat();
@@ -142,20 +154,20 @@ namespace
 					g_freeform_ui_scale_landscape = 0.5f;
 				}
 			}
-			if (document.HasMember("freeFormInitialWidth"))
+			if (document.HasMember("initialWidth"))
 			{
-				g_freeform_initial_width = document["freeFormInitialWidth"].GetInt();
-				if (g_freeform_initial_width <= 72)
+				g_initial_width = document["initialWidth"].GetInt();
+				if (g_initial_width <= 72)
 				{
-					g_freeform_initial_width = -1;
+					g_initial_width = -1;
 				}
 			}
-			if (document.HasMember("freeFormInitialHeight"))
+			if (document.HasMember("initialHeight"))
 			{
-				g_freeform_initial_height = document["freeFormInitialHeight"].GetInt();
-				if (g_freeform_initial_height <= 72)
+				g_initial_height = document["initialHeight"].GetInt();
+				if (g_initial_height <= 72)
 				{
-					g_freeform_initial_height = -1;
+					g_initial_height = -1;
 				}
 			}
 			if (document.HasMember("uiAnimationScale"))
@@ -266,6 +278,41 @@ namespace
 			if (document.HasMember("characterSystemTextCaption"))
 			{
 				g_character_system_text_caption = document["characterSystemTextCaption"].GetBool();
+			}
+
+			if (document.HasMember("characterSystemTextCaptionFontSize"))
+			{
+				g_character_system_text_caption_font_size = document["characterSystemTextCaptionFontSize"].GetInt();
+			}
+
+			if (document.HasMember("characterSystemTextCaptionFontColor"))
+			{
+				g_character_system_text_caption_font_color = document["characterSystemTextCaptionFontColor"].GetString();
+			}
+
+			if (document.HasMember("characterSystemTextCaptionOutlineSize"))
+			{
+				g_character_system_text_caption_outline_size = document["characterSystemTextCaptionOutlineSize"].GetString();
+			}
+
+			if (document.HasMember("characterSystemTextCaptionOutlineColor"))
+			{
+				g_character_system_text_caption_outline_color = document["characterSystemTextCaptionOutlineColor"].GetString();
+			}
+
+			if (document.HasMember("characterSystemTextCaptionBackgroundAlpha"))
+			{
+				g_character_system_text_caption_background_alpha = document["characterSystemTextCaptionBackgroundAlpha"].GetFloat();
+			}
+
+			if (document.HasMember("characterSystemTextCaptionPositionX"))
+			{
+				g_character_system_text_caption_position_x = document["characterSystemTextCaptionPositionX"].GetFloat();
+			}
+
+			if (document.HasMember("characterSystemTextCaptionPositionY"))
+			{
+				g_character_system_text_caption_position_y = document["characterSystemTextCaptionPositionY"].GetFloat();
 			}
 
 			if (document.HasMember("cySpringUpdateMode"))

@@ -103,10 +103,10 @@ public:
 struct Rect_t
 {
 public:
-	short x;
-	short y;
-	short width;
-	short height;
+	float x;
+	float y;
+	float width;
+	float height;
 };
 
 struct Resolution_t
@@ -604,6 +604,7 @@ typedef uint32_t(*il2cpp_class_get_type_token_t)(Il2CppClass* klass);
 typedef FieldInfo* (*il2cpp_class_get_field_from_name_t)(Il2CppClass* klass, const char* name);
 typedef void (*il2cpp_field_get_value_t)(Il2CppObject* obj, FieldInfo* field, void* value);
 typedef void (*il2cpp_field_set_value_t)(Il2CppObject* obj, FieldInfo* field, void* value);
+typedef void (*il2cpp_field_set_value_object_t)(Il2CppObject* obj, FieldInfo* field, Il2CppObject* value);
 typedef void (*il2cpp_field_static_get_value_t)(FieldInfo* field, void* value);
 typedef void (*il2cpp_field_static_set_value_t)(FieldInfo* field, void* value);
 typedef const Il2CppType* (*il2cpp_field_get_type_t)(FieldInfo* field);
@@ -640,6 +641,11 @@ typedef const PropertyInfo* (*il2cpp_class_get_property_from_name_t)(Il2CppClass
 typedef void (*il2cpp_runtime_object_init_t)(Il2CppObject* obj);
 typedef Il2CppObject* (*il2cpp_value_box_t)(Il2CppClass* klass, void* data);
 typedef void* (*il2cpp_object_unbox_t)(Il2CppObject* obj);
+typedef bool (*il2cpp_is_vm_thread_t)(void* thread);
+typedef void* (*il2cpp_thread_current_t)();
+typedef uint32_t(*il2cpp_gchandle_new_t)(Il2CppObject* obj, bool pinned);
+typedef Il2CppObject* (*il2cpp_gchandle_get_target_t)(uint32_t gchandle);
+typedef void (*il2cpp_gchandle_free_t)(uint32_t gchandle);
 
 // function defines
 extern il2cpp_string_new_utf16_t il2cpp_string_new_utf16;
@@ -664,6 +670,7 @@ extern il2cpp_class_get_type_token_t il2cpp_class_get_type_token;
 extern il2cpp_class_get_field_from_name_t il2cpp_class_get_field_from_name;
 extern il2cpp_field_get_value_t il2cpp_field_get_value;
 extern il2cpp_field_set_value_t il2cpp_field_set_value;
+extern il2cpp_field_set_value_object_t il2cpp_field_set_value_object;
 extern il2cpp_field_static_get_value_t il2cpp_field_static_get_value;
 extern il2cpp_field_static_set_value_t il2cpp_field_static_set_value;
 extern il2cpp_field_get_type_t il2cpp_field_get_type;
@@ -700,6 +707,11 @@ extern il2cpp_class_get_property_from_name_t il2cpp_class_get_property_from_name
 extern il2cpp_runtime_object_init_t il2cpp_runtime_object_init;
 extern il2cpp_value_box_t il2cpp_value_box;
 extern il2cpp_object_unbox_t il2cpp_object_unbox;
+extern il2cpp_is_vm_thread_t il2cpp_is_vm_thread;
+extern il2cpp_thread_current_t il2cpp_thread_current;
+extern il2cpp_gchandle_new_t il2cpp_gchandle_new;
+extern il2cpp_gchandle_get_target_t il2cpp_gchandle_get_target;
+extern il2cpp_gchandle_free_t il2cpp_gchandle_free;
 
 char* il2cpp_array_addr_with_size(void* arr, int32_t size, uintptr_t idx);
 

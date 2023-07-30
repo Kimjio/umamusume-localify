@@ -42,12 +42,13 @@ extern bool g_static_entries_use_hash;
 extern bool g_static_entries_use_text_id_name;
 extern int g_max_fps;
 extern bool g_unlock_size;
+extern bool g_unlock_size_use_system_resolution;
 extern float g_ui_scale;
 extern bool g_freeform_window;
 extern float g_freeform_ui_scale_portrait;
 extern float g_freeform_ui_scale_landscape;
-extern int g_freeform_initial_width;
-extern int g_freeform_initial_height;
+extern int g_initial_width;
+extern int g_initial_height;
 extern float g_ui_animation_scale;
 extern float g_aspect_ratio;
 extern float g_resolution_3d_scale;
@@ -66,6 +67,13 @@ extern std::string g_replace_assetbundle_file_path;
 extern std::vector<std::string> g_replace_assetbundle_file_paths;
 extern std::string g_replace_text_db_path;
 extern bool g_character_system_text_caption;
+extern int g_character_system_text_caption_font_size;
+extern string g_character_system_text_caption_font_color;
+extern string g_character_system_text_caption_outline_size;
+extern string g_character_system_text_caption_outline_color;
+extern float g_character_system_text_caption_background_alpha;
+extern float g_character_system_text_caption_position_x;
+extern float g_character_system_text_caption_position_y;
 /*
  * ModeNormal 0
  * Mode60FPS 1
