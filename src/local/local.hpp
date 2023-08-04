@@ -3,6 +3,7 @@
 namespace local
 {
 	std::string wide_u8(const std::wstring& str);
+	std::string u16_u8(const std::u16string& str);
 	std::wstring u8_wide(const std::string& str);
 	std::string wide_acp(const std::wstring& str);
 	std::wstring acp_wide(const std::string& str);

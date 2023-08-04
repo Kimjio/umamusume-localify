@@ -1,4 +1,5 @@
 #include <stdinclude.hpp>
+#include <codecvt>
 
 using namespace std;
 
@@ -21,6 +22,12 @@ namespace local
 		result.resize(len);
 
 		return result;
+	}
+
+	string u16_u8(const u16string& str)
+	{
+		std::wstring_convert<std::codecvt_utf8_utf16<char16_t>, char16_t> utf16conv;
+		return utf16conv.to_bytes(str);
 	}
 
 	wstring u8_wide(const string& str)

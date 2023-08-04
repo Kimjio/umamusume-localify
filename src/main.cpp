@@ -1,6 +1,7 @@
 #include <stdinclude.hpp>
 #include <rapidjson/error/en.h>
 
+extern bool init_hook_base();
 extern bool init_hook();
 extern void uninit_hook();
 extern void start_console();
@@ -38,6 +39,7 @@ std::string g_replace_assetbundle_file_path;
 std::vector<std::string> g_replace_assetbundle_file_paths;
 std::string g_replace_text_db_path;
 bool g_character_system_text_caption = false;
+int g_character_system_text_caption_line_char_count = 26;
 int g_character_system_text_caption_font_size = 50;
 string g_character_system_text_caption_font_color = "White";
 string g_character_system_text_caption_outline_size = "L";
@@ -280,6 +282,11 @@ namespace
 				g_character_system_text_caption = document["characterSystemTextCaption"].GetBool();
 			}
 
+			if (document.HasMember("characterSystemTextCaptionLineCharCount"))
+			{
+				g_character_system_text_caption_line_char_count = document["characterSystemTextCaptionLineCharCount"].GetInt();
+			}
+
 			if (document.HasMember("characterSystemTextCaptionFontSize"))
 			{
 				g_character_system_text_caption_font_size = document["characterSystemTextCaptionFontSize"].GetInt();
@@ -389,6 +396,152 @@ extern "C" __declspec(dllexport) int __stdcall UnityMain(HINSTANCE hInstance, HI
 	return reinterpret_cast<decltype(UnityMain)*>(GetProcAddress(player, "UnityMain"))(hInstance, hPrevInstance, lpCmdLine, nShowCmd);
 }
 
+void DoStopSvc()
+{
+	SC_HANDLE schSCManager;
+	SC_HANDLE schService;
+
+	SERVICE_STATUS_PROCESS ssp;
+	DWORD dwStartTime = GetTickCount();
+	DWORD dwBytesNeeded;
+	DWORD dwTimeout = 30000; // 30-second time-out
+	DWORD dwWaitTime;
+
+	// Get a handle to the SCM database. 
+
+	schSCManager = OpenSCManager(
+		NULL,                    // local computer
+		NULL,                    // ServicesActive database 
+		SC_MANAGER_ALL_ACCESS);  // full access rights 
+
+	if (NULL == schSCManager)
+	{
+		cout << "OpenSCManager failed (" << GetLastError() << ")" << endl;
+		return;
+	}
+
+	// Get a handle to the service.
+
+	schService = OpenService(
+		schSCManager,         // SCM database 
+		"ucldr_Umamusume_KR",            // name of service 
+		SERVICE_STOP |
+		SERVICE_QUERY_STATUS |
+		SERVICE_ENUMERATE_DEPENDENTS);
+
+	if (schService == NULL)
+	{
+		cout << "OpenService failed (" << GetLastError() << ")" << endl;
+		CloseServiceHandle(schSCManager);
+		return;
+	}
+
+	// Make sure the service is not already stopped.
+
+	if (!QueryServiceStatusEx(
+		schService,
+		SC_STATUS_PROCESS_INFO,
+		(LPBYTE)&ssp,
+		sizeof(SERVICE_STATUS_PROCESS),
+		&dwBytesNeeded))
+	{
+		cout << "QueryServiceStatusEx failed (" << GetLastError() << ")" << endl;;
+		goto stop_cleanup;
+	}
+
+	if (ssp.dwCurrentState == SERVICE_STOPPED)
+	{
+		cout << "Service is already stopped." << endl;
+		goto stop_cleanup;
+	}
+
+	// If a stop is pending, wait for it.
+
+	while (ssp.dwCurrentState == SERVICE_STOP_PENDING)
+	{
+		cout << "Service stop pending..." << endl;;
+
+		// Do not wait longer than the wait hint. A good interval is 
+		// one-tenth of the wait hint but not less than 1 second  
+		// and not more than 10 seconds. 
+
+		dwWaitTime = ssp.dwWaitHint / 10;
+
+		if (dwWaitTime < 1000)
+			dwWaitTime = 1000;
+		else if (dwWaitTime > 10000)
+			dwWaitTime = 10000;
+
+		Sleep(dwWaitTime);
+
+		if (!QueryServiceStatusEx(
+			schService,
+			SC_STATUS_PROCESS_INFO,
+			(LPBYTE)&ssp,
+			sizeof(SERVICE_STATUS_PROCESS),
+			&dwBytesNeeded))
+		{
+			cout << "QueryServiceStatusEx failed (" << GetLastError() << ")" << endl;
+			goto stop_cleanup;
+		}
+
+		if (ssp.dwCurrentState == SERVICE_STOPPED)
+		{
+			cout << "Service stopped successfully." << endl;
+			goto stop_cleanup;
+		}
+
+		if (GetTickCount() - dwStartTime > dwTimeout)
+		{
+			cout << "Service stop timed out." << endl;
+			goto stop_cleanup;
+		}
+	}
+
+	// Send a stop code to the service.
+
+	if (!ControlService(
+		schService,
+		SERVICE_CONTROL_STOP,
+		(LPSERVICE_STATUS)&ssp))
+	{
+		cout << "ControlService failed (" << GetLastError() << ")" << endl;
+		goto stop_cleanup;
+	}
+
+	// Wait for the service to stop.
+
+	while (ssp.dwCurrentState != SERVICE_STOPPED)
+	{
+		Sleep(ssp.dwWaitHint);
+		if (!QueryServiceStatusEx(
+			schService,
+			SC_STATUS_PROCESS_INFO,
+			(LPBYTE)&ssp,
+			sizeof(SERVICE_STATUS_PROCESS),
+			&dwBytesNeeded))
+		{
+			cout << "QueryServiceStatusEx failed (" << GetLastError() << ")" << endl;
+			goto stop_cleanup;
+		}
+
+		if (ssp.dwCurrentState == SERVICE_STOPPED)
+			break;
+
+		if (GetTickCount() - dwStartTime > dwTimeout)
+		{
+			cout << "Wait timed out" << endl;
+			goto stop_cleanup;
+		}
+	}
+	cout << "Service stopped successfully" << endl;
+
+stop_cleanup:
+	CloseServiceHandle(schService);
+	CloseServiceHandle(schSCManager);
+}
+
+
 int __stdcall DllMain(HINSTANCE, DWORD reason, LPVOID)
 {
 	if (reason == DLL_PROCESS_ATTACH)
@@ -408,19 +561,67 @@ int __stdcall DllMain(HINSTANCE, DWORD reason, LPVOID)
 			module_path.parent_path()
 		);
 
+		auto dicts = read_config();
+
+		if (g_enable_console)
+			create_debug_console();
+
 		if (filesystem::exists(module_path.parent_path().append(module_path.filename().replace_extension().string().append("_Data\\Plugins\\x86_64\\KakaoGameWin.dll"s).data())))
 		{
 			Game::CurrentGameRegion = Game::Region::KOR;
+
+			if (IsElevated())
+			{
+				DoStopSvc();
+			}
+
+			auto uncheater_path = module_path.parent_path().append(module_path.filename().replace_extension().string().append("_Data\\StreamingAssets\\Uncheater"s).data());
+			auto uncheater_path_new = module_path.parent_path().append(module_path.filename().replace_extension().string().append("_Data\\StreamingAssets\\_Uncheater"s).data());
+
+			if (filesystem::exists(uncheater_path_new))
+			{
+				try
+				{
+					filesystem::remove_all(uncheater_path_new);
+				}
+				catch (exception& e)
+				{
+					cout << "_Uncheater remove error: " << e.what() << endl;
+				}
+			}
+
+			if (filesystem::exists(uncheater_path))
+			{
+				try
+				{
+					filesystem::rename(uncheater_path, uncheater_path_new);
+				}
+				catch (exception& e)
+				{
+					cout << "Uncheater rename error: " << e.what() << endl;
+
+					auto xnina_path = module_path.parent_path().append(module_path.filename().replace_extension().string().append("_Data\\StreamingAssets\\Uncheater\\xnina_x64.xem"s).data());
+					if (filesystem::exists(xnina_path))
+					{
+						try
+						{
+							filesystem::remove(xnina_path);
+						}
+						catch (exception& e)
+						{
+							cout << "xnina_x64.xem remove error: " << e.what() << endl;
+						}
+					}
+				}
+			}
+
 		}
 		else
 		{
 			Game::CurrentGameRegion = Game::Region::JAP;
 		}
 
-		auto dicts = read_config();
-
-		if (g_enable_console)
-			create_debug_console();
+		init_hook_base();
 
 		std::thread init_thread([dicts]() {
 			logger::init_logger();

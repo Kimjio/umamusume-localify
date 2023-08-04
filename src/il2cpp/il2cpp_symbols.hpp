@@ -445,6 +445,15 @@ struct Il2CppArraySize_t
 
 static const size_t kIl2CppSizeOfArray = (offsetof(Il2CppArraySize, vector));
 
+template<typename K, typename V>
+struct Entry
+{
+	int hashCode;
+	int next;
+	K key;
+	V value;
+};
+
 struct CourseBaseObjectContext
 {
 	Il2CppObject* coursePrefab;
@@ -480,6 +489,11 @@ struct RaceLoaderManagerCourceContext
 	Il2CppArraySize* materialSubTexturePairs;
 	bool halfStartGate;
 	int CourseStartGateBaseId;
+};
+
+struct MoviePlayerHandle
+{
+	uint32_t id;
 };
 
 struct CriAtomExPlayback
@@ -639,6 +653,7 @@ typedef Il2CppClass* (*il2cpp_field_get_parent_t)(FieldInfo* field);
 typedef size_t (*il2cpp_field_get_offset_t)(FieldInfo* field);
 typedef const PropertyInfo* (*il2cpp_class_get_property_from_name_t)(Il2CppClass* klass, const char* name);
 typedef void (*il2cpp_runtime_object_init_t)(Il2CppObject* obj);
+typedef void (*il2cpp_runtime_object_init_exception_t)(Il2CppObject* obj, void** exc);
 typedef Il2CppObject* (*il2cpp_value_box_t)(Il2CppClass* klass, void* data);
 typedef void* (*il2cpp_object_unbox_t)(Il2CppObject* obj);
 typedef bool (*il2cpp_is_vm_thread_t)(void* thread);
@@ -705,6 +720,7 @@ extern il2cpp_field_get_parent_t il2cpp_field_get_parent;
 extern il2cpp_field_get_offset_t il2cpp_field_get_offset;
 extern il2cpp_class_get_property_from_name_t il2cpp_class_get_property_from_name;
 extern il2cpp_runtime_object_init_t il2cpp_runtime_object_init;
+extern il2cpp_runtime_object_init_exception_t il2cpp_runtime_object_init_exception;
 extern il2cpp_value_box_t il2cpp_value_box;
 extern il2cpp_object_unbox_t il2cpp_object_unbox;
 extern il2cpp_is_vm_thread_t il2cpp_is_vm_thread;

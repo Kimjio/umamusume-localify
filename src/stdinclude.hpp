@@ -4,6 +4,8 @@
 #include <shlobj.h>
 #include <Shlwapi.h>
 
+#include <TlHelp32.h>
+
 #include <cinttypes>
 
 #include <filesystem>
@@ -67,6 +69,7 @@ extern std::string g_replace_assetbundle_file_path;
 extern std::vector<std::string> g_replace_assetbundle_file_paths;
 extern std::string g_replace_text_db_path;
 extern bool g_character_system_text_caption;
+extern int g_character_system_text_caption_line_char_count;
 extern int g_character_system_text_caption_font_size;
 extern string g_character_system_text_caption_font_color;
 extern string g_character_system_text_caption_outline_size;
@@ -101,5 +104,44 @@ namespace {
 			str.replace(start_pos, from.length(), to);
 			start_pos += to.length(); // In case 'to' contains 'from', like replacing 'x' with 'yx'
 		}
+	}
+
+	BOOL IsElevated() {
+		BOOL fRet = FALSE;
+		HANDLE hToken = NULL;
+		if (OpenProcessToken(GetCurrentProcess(), TOKEN_QUERY, &hToken)) {
+			TOKEN_ELEVATION Elevation{};
+			DWORD cbSize = sizeof(TOKEN_ELEVATION);
+			if (GetTokenInformation(hToken, TokenElevation, &Elevation, sizeof(Elevation), &cbSize)) {
+				fRet = Elevation.TokenIsElevated;
+			}
+		}
+		if (hToken) {
+			CloseHandle(hToken);
+		}
+		return fRet;
+	}
+
+	void KillProcessByName(const char* filename)
+	{
+		HANDLE hSnapShot = CreateToolhelp32Snapshot(TH32CS_SNAPALL, NULL);
+		PROCESSENTRY32 pEntry;
+		pEntry.dwSize = sizeof(pEntry);
+		BOOL hRes = Process32First(hSnapShot, &pEntry);
+		while (hRes)
+		{
+			if (strcmp(pEntry.szExeFile, filename) == 0)
+			{
+				HANDLE hProcess = OpenProcess(PROCESS_TERMINATE, 0,
+					(DWORD)pEntry.th32ProcessID);
+				if (hProcess != NULL)
+				{
+					TerminateProcess(hProcess, 9);
+					CloseHandle(hProcess);
+				}
+			}
+			hRes = Process32Next(hSnapShot, &pEntry);
+		}
+		CloseHandle(hSnapShot);
 	}
 }

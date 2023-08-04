@@ -709,7 +709,7 @@ namespace
 		}
 		if (sceneId == "SingleMode")
 		{
-			textId = "Outgame213036";
+			textId = "Common0273";
 		}
 		if (sceneId == "OutGame")
 		{

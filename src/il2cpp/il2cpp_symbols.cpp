@@ -57,6 +57,7 @@ il2cpp_field_get_parent_t il2cpp_field_get_parent;
 il2cpp_field_get_offset_t il2cpp_field_get_offset;
 il2cpp_class_get_property_from_name_t il2cpp_class_get_property_from_name;
 il2cpp_runtime_object_init_t il2cpp_runtime_object_init;
+il2cpp_runtime_object_init_exception_t il2cpp_runtime_object_init_exception;
 il2cpp_value_box_t il2cpp_value_box;
 il2cpp_object_unbox_t il2cpp_object_unbox;
 il2cpp_is_vm_thread_t il2cpp_is_vm_thread;
@@ -133,6 +134,7 @@ namespace il2cpp_symbols
 		RESOLVE_IMPORT(il2cpp_field_get_offset);
 		RESOLVE_IMPORT(il2cpp_class_get_property_from_name);
 		RESOLVE_IMPORT(il2cpp_runtime_object_init);
+		RESOLVE_IMPORT(il2cpp_runtime_object_init_exception);
 		RESOLVE_IMPORT(il2cpp_value_box);
 		RESOLVE_IMPORT(il2cpp_object_unbox);
 		RESOLVE_IMPORT(il2cpp_is_vm_thread);
