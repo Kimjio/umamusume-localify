@@ -2184,48 +2184,70 @@ namespace
 
 				il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, bool)>(gameObject->klass, "SetActive", 1)->methodPointer(gameObject, true);
 
+				auto scaleMode = il2cpp_class_get_method_from_name_type<int (*)(Il2CppObject*)>(scaler->klass, "get_uiScaleMode", 0)->methodPointer(scaler);
+
 				if (g_freeform_window)
 				{
-					/*if (width < height)
+					if (scaleMode == 1)
 					{
-						float scale = min(g_freeform_ui_scale_portrait, max(1, height * ratio_vertical) * g_freeform_ui_scale_portrait);
-						il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, Vector2_t)>(scaler->klass, "set_referenceResolution", 1)->methodPointer(scaler, Vector2_t{ static_cast<float>(width / scale), static_cast<float>(height / scale) });
+						if (width < height)
+						{
+							float scale = min(g_freeform_ui_scale_portrait, max(1, height * ratio_vertical) * g_freeform_ui_scale_portrait);
+							il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, Vector2_t)>(scaler->klass, "set_referenceResolution", 1)->methodPointer(scaler, Vector2_t{ static_cast<float>(width / scale), static_cast<float>(height / scale) });
+						}
+						else
+						{
+							float scale = min(g_freeform_ui_scale_landscape, max(1, width / ratio_horizontal) * g_freeform_ui_scale_landscape);
+							il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, Vector2_t)>(scaler->klass, "set_referenceResolution", 1)->methodPointer(scaler, Vector2_t{ static_cast<float>(width / scale), static_cast<float>(height / scale) });
+						}
 					}
-					else
-					{
-						float scale = min(g_freeform_ui_scale_landscape, max(1, width / ratio_horizontal) * g_freeform_ui_scale_landscape);
-						il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, Vector2_t)>(scaler->klass, "set_referenceResolution", 1)->methodPointer(scaler, Vector2_t{ static_cast<float>(width / scale), static_cast<float>(height / scale) });
-					}*/
 
-					if (width < height)
+					if (scaleMode == 0)
 					{
-						float scale = min(g_freeform_ui_scale_portrait, max(1, height * ratio_vertical) * g_freeform_ui_scale_portrait);
-						il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, float)>(scaler->klass, "set_scaleFactor", 1)->methodPointer(scaler, scale);
-					}
-					else
-					{
-						float scale = min(g_freeform_ui_scale_landscape, max(1, width / ratio_horizontal) * g_freeform_ui_scale_landscape);
-						il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, float)>(scaler->klass, "set_scaleFactor", 1)->methodPointer(scaler, scale);
+						if (width < height)
+						{
+							float scale = min(g_freeform_ui_scale_portrait, max(1, height * ratio_vertical) * g_freeform_ui_scale_portrait);
+							il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, float)>(scaler->klass, "set_scaleFactor", 1)->methodPointer(scaler, scale);
+						}
+						else
+						{
+							float scale = min(g_freeform_ui_scale_landscape, max(1, width / ratio_horizontal) * g_freeform_ui_scale_landscape);
+							il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, float)>(scaler->klass, "set_scaleFactor", 1)->methodPointer(scaler, scale);
+						}
 					}
 				}
 				else
 				{
-					// set scale factor to make ui bigger on hi-res screen
-					if (width < height)
+					if (scaleMode == 1)
 					{
-						float scale = min(g_ui_scale, max(1, height * ratio_vertical) * g_ui_scale);
-						il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, float)>(scaler->klass, "set_scaleFactor", 1)->methodPointer(scaler, scale);
-						// il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, Vector2_t)>(scaler->klass, "set_referenceResolution", 1)->methodPointer(scaler, Vector2_t{ static_cast<float>(width / scale), static_cast<float>(height / scale) });
+						if (width < height)
+						{
+							float scale = min(g_ui_scale, max(1, height * ratio_vertical) * g_ui_scale);
+							il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, Vector2_t)>(scaler->klass, "set_referenceResolution", 1)->methodPointer(scaler, Vector2_t{ static_cast<float>(width / scale), static_cast<float>(height / scale) });
+						}
+						else
+						{
+							float scale = min(g_ui_scale, max(1, width / ratio_horizontal) * g_ui_scale);
+							il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, Vector2_t)>(scaler->klass, "set_referenceResolution", 1)->methodPointer(scaler, Vector2_t{ static_cast<float>(width / scale), static_cast<float>(height / scale) });
+						}
 					}
-					else
+					if (scaleMode == 0)
 					{
-						float scale = min(g_ui_scale, max(1, width / ratio_horizontal) * g_ui_scale);
-						il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, float)>(scaler->klass, "set_scaleFactor", 1)->methodPointer(scaler, scale);
-						// il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, Vector2_t)>(scaler->klass, "set_referenceResolution", 1)->methodPointer(scaler, Vector2_t{ static_cast<float>(width / scale), static_cast<float>(height / scale) });
+						// set scale factor to make ui bigger on hi-res screen
+						if (width < height)
+						{
+							float scale = min(g_ui_scale, max(1, height * ratio_vertical) * g_ui_scale);
+							il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, float)>(scaler->klass, "set_scaleFactor", 1)->methodPointer(scaler, scale);
+						}
+						else
+						{
+							float scale = min(g_ui_scale, max(1, width / ratio_horizontal) * g_ui_scale);
+							il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, float)>(scaler->klass, "set_scaleFactor", 1)->methodPointer(scaler, scale);
+						}
 					}
 				}
 
-				il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, int)>(scaler->klass, "set_uiScaleMode", 1)->methodPointer(scaler, 0);
+				// il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, int)>(scaler->klass, "set_uiScaleMode", 1)->methodPointer(scaler, 0);
 
 				// il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, int)>(scaler->klass, "set_screenMatchMode", 1)->methodPointer(scaler, 0);
 
@@ -3039,21 +3061,40 @@ namespace
 						il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, Vector2_t)>(canvasScaler->klass, "set_referenceResolution", 1)->methodPointer(canvasScaler, Vector2_t{ static_cast<float>(contentWidth / scale), static_cast<float>(contentHeight / scale) });
 					}*/
 
-					il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, int)>(canvasScaler->klass, "set_uiScaleMode", 1)->methodPointer(canvasScaler, 0);
+					// il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, int)>(canvasScaler->klass, "set_uiScaleMode", 1)->methodPointer(canvasScaler, 0);
 
 					// il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, int)>(canvasScaler->klass, "set_screenMatchMode", 1)->methodPointer(canvasScaler, 0);
 
 					il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, bool)>(gameObject->klass, "SetActive", 1)->methodPointer(gameObject, keepActive);
 
-					if (isPortrait)
+					auto scaleMode = il2cpp_class_get_method_from_name_type<int (*)(Il2CppObject*)>(canvasScaler->klass, "get_uiScaleMode", 0)->methodPointer(canvasScaler);
+
+					if (scaleMode == 1)
 					{
-						float scale = min(g_freeform_ui_scale_portrait, max(1, contentHeight * ratio_vertical) * g_freeform_ui_scale_portrait);
-						il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, float)>(canvasScaler->klass, "set_scaleFactor", 1)->methodPointer(canvasScaler, scale);
+						if (isPortrait)
+						{
+							float scale = min(g_freeform_ui_scale_portrait, max(1, contentHeight * ratio_vertical) * g_freeform_ui_scale_portrait);
+							il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, Vector2_t)>(canvasScaler->klass, "set_referenceResolution", 1)->methodPointer(canvasScaler, Vector2_t{ static_cast<float>(contentWidth / scale), static_cast<float>(contentHeight / scale) });
+						}
+						else
+						{
+							float scale = min(g_freeform_ui_scale_landscape, max(1, contentWidth / ratio_horizontal) * g_freeform_ui_scale_landscape);
+							il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, Vector2_t)>(canvasScaler->klass, "set_referenceResolution", 1)->methodPointer(canvasScaler, Vector2_t{ static_cast<float>(contentWidth / scale), static_cast<float>(contentHeight / scale) });
+						}
 					}
-					else
+
+					if (scaleMode == 0)
 					{
-						float scale = min(g_freeform_ui_scale_landscape, max(1, contentWidth / ratio_horizontal) * g_freeform_ui_scale_landscape);
-						il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, float)>(canvasScaler->klass, "set_scaleFactor", 1)->methodPointer(canvasScaler, scale);
+						if (isPortrait)
+						{
+							float scale = min(g_freeform_ui_scale_portrait, max(1, contentHeight * ratio_vertical) * g_freeform_ui_scale_portrait);
+							il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, float)>(canvasScaler->klass, "set_scaleFactor", 1)->methodPointer(canvasScaler, scale);
+						}
+						else
+						{
+							float scale = min(g_freeform_ui_scale_landscape, max(1, contentWidth / ratio_horizontal) * g_freeform_ui_scale_landscape);
+							il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, float)>(canvasScaler->klass, "set_scaleFactor", 1)->methodPointer(canvasScaler, scale);
+						}
 					}
 				}
 			}
@@ -3151,6 +3192,37 @@ namespace
 		if (director)
 		{
 			il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, int)>(director->klass, "SetupOrientation", 1)->methodPointer(director, isPortrait ? 2 : 1);
+
+			auto ChampionsTextControllerField = il2cpp_class_get_field_from_name_wrap(director->klass, "ChampionsTextController");
+			Il2CppObject* ChampionsTextController;
+			il2cpp_field_get_value(director, ChampionsTextControllerField, &ChampionsTextController);
+
+			if (ChampionsTextController)
+			{
+				auto _flashPlayerField = il2cpp_class_get_field_from_name_wrap(ChampionsTextController->klass, "_flashPlayer");
+				Il2CppObject* _flashPlayer;
+				il2cpp_field_get_value(ChampionsTextController, _flashPlayerField, &_flashPlayer);
+
+				auto root = il2cpp_class_get_method_from_name_type<Il2CppObject * (*)(Il2CppObject*)>(_flashPlayer->klass, "get_Root", 0)->methodPointer(_flashPlayer);
+
+				if (Game::CurrentGameRegion == Game::Region::KOR)
+				{
+					if (contentWidth < contentHeight)
+					{
+						float scale = min(g_freeform_ui_scale_portrait, max(1, contentHeight * ratio_vertical) * g_freeform_ui_scale_portrait);
+						il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, Vector2_t)>(root->klass, "SetScreenReferenceSize", 1)->methodPointer(root, Vector2_t{ ratio_16_9 * static_cast<float>(contentHeight / scale), static_cast<float>(contentHeight / scale) });
+					}
+					else
+					{
+						float scale = min(g_freeform_ui_scale_landscape, max(1, contentWidth / ratio_horizontal) * g_freeform_ui_scale_landscape);
+						il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, Vector2_t)>(root->klass, "SetScreenReferenceSize", 1)->methodPointer(root, Vector2_t{ ratio_16_9 * static_cast<float>(contentHeight / scale), static_cast<float>(contentHeight / scale) });
+					}
+				}
+				else
+				{
+					il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, Vector2_t)>(root->klass, "SetScreenReferenceSize", 1)->methodPointer(root, Vector2_t{ ratio_16_9 * static_cast<float>(contentHeight), static_cast<float>(contentHeight) });
+				}
+			}
 		}
 
 		if (tapEffectController)
@@ -5350,6 +5422,60 @@ namespace
 		if (wstring(uobject_get_name(cloned)->start_char).find(L"DialogOptionHome") != wstring::npos)
 		{
 			SetupOptionLayout();
+		}
+
+		if (wstring(uobject_get_name(cloned)->start_char).find(L"LiveChampionsTextController") != wstring::npos)
+		{
+			auto updateScreenReferenceSize = CreateDelegateWithClass(il2cpp_symbols::get_class("DOTween.dll", "DG.Tweening", "TweenCallback"), cloned, *([](Il2CppObject* _this)
+				{
+					auto director = GetSingletonInstance(il2cpp_symbols::get_class("umamusume.dll", "Gallop.Live", "Director"));
+					if (director)
+					{
+						auto ChampionsTextControllerField = il2cpp_class_get_field_from_name_wrap(director->klass, "ChampionsTextController");
+						Il2CppObject* ChampionsTextController;
+						il2cpp_field_get_value(director, ChampionsTextControllerField, &ChampionsTextController);
+
+						if (ChampionsTextController)
+						{
+							auto _flashPlayerField = il2cpp_class_get_field_from_name_wrap(ChampionsTextController->klass, "_flashPlayer");
+							Il2CppObject* _flashPlayer;
+							il2cpp_field_get_value(ChampionsTextController, _flashPlayerField, &_flashPlayer);
+
+							auto root = il2cpp_class_get_method_from_name_type<Il2CppObject * (*)(Il2CppObject*)>(_flashPlayer->klass, "get_Root", 0)->methodPointer(_flashPlayer);
+
+							int unityWidth = il2cpp_symbols::get_method_pointer<int (*)()>("UnityEngine.CoreModule.dll", "UnityEngine", "Screen", "get_width", -1)();
+
+							int unityHeight = il2cpp_symbols::get_method_pointer<int (*)()>("UnityEngine.CoreModule.dll", "UnityEngine", "Screen", "get_height", -1)();
+
+							if (Game::CurrentGameRegion == Game::Region::KOR)
+							{
+								auto _flashCanvasScalerField = il2cpp_class_get_field_from_name_wrap(ChampionsTextController->klass, "_flashCanvasScaler");
+								Il2CppObject* _flashCanvasScaler;
+								il2cpp_field_get_value(ChampionsTextController, _flashCanvasScalerField, &_flashCanvasScaler);
+
+								if (unityWidth < unityHeight)
+								{
+									float scale = min(g_freeform_ui_scale_portrait, max(1, unityHeight * ratio_vertical) * g_freeform_ui_scale_portrait);
+									il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, Vector2_t)>(_flashCanvasScaler->klass, "set_referenceResolution", 1)->methodPointer(_flashCanvasScaler, Vector2_t{ static_cast<float>(unityWidth / scale), static_cast<float>(unityHeight / scale) });
+									il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, Vector2_t)>(root->klass, "SetScreenReferenceSize", 1)->methodPointer(root, Vector2_t{ ratio_16_9 * static_cast<float>(unityHeight / scale), static_cast<float>(unityHeight / scale) });
+								}
+								else
+								{
+									float scale = min(g_freeform_ui_scale_landscape, max(1, unityWidth / ratio_horizontal) * g_freeform_ui_scale_landscape);
+									il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, Vector2_t)>(_flashCanvasScaler->klass, "set_referenceResolution", 1)->methodPointer(_flashCanvasScaler, Vector2_t{ static_cast<float>(unityWidth / scale), static_cast<float>(unityHeight / scale) });
+									il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, Vector2_t)>(root->klass, "SetScreenReferenceSize", 1)->methodPointer(root, Vector2_t{ ratio_16_9 * static_cast<float>(unityHeight / scale), static_cast<float>(unityHeight / scale) });
+								}
+							}
+							else
+							{
+								il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, Vector2_t)>(root->klass, "SetScreenReferenceSize", 1)->methodPointer(root, Vector2_t{ ratio_16_9 * static_cast<float>(unityHeight), static_cast<float>(unityHeight) });
+							}
+						}
+					}
+				}));
+
+			// Delay 50ms
+			il2cpp_symbols::get_method_pointer<Il2CppObject* (*)(float, Il2CppDelegate*, bool)>("DOTween.dll", "DG.Tweening", "DOVirtual", "DelayedCall", 3)(0.05, updateScreenReferenceSize, true);
 		}
 
 		return cloned;
