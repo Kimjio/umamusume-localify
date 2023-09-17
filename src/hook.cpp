@@ -713,6 +713,24 @@ namespace
 		return reinterpret_cast<decltype(LoadLibraryExW)*>(load_library_ex_w_orig)(lpLibFileName, hFile, dwFlags);
 	}
 
+	HWND GetHWND()
+	{
+		auto title = local::u8_wide(g_custom_title_name);
+		if (title.empty())
+		{
+			title = L"umamusume";
+		}
+
+		auto hWnd = FindWindowA("UnityWndClass", local::wide_acp(title).data());
+
+		if (!hWnd)
+		{
+			hWnd = FindWindowA("UnityWndClass", local::wide_acp(L"umamusume").data());
+		}
+
+		return hWnd;
+	}
+
 	void* load_library_w_orig = nullptr;
 	HMODULE WINAPI load_library_w_hook(LPCWSTR lpLibFileName)
 	{
@@ -747,7 +765,7 @@ namespace
 			{
 				if (!g_custom_title_name.empty())
 				{
-					SetWindowText(hWnd, local::wide_acp(local::u8_wide(g_custom_title_name)).data());
+					SetWindowTextA(hWnd, local::wide_acp(local::u8_wide(g_custom_title_name)).data());
 				}
 				if (has_json_parse_error)
 				{
@@ -1953,7 +1971,6 @@ namespace
 
 			return is_virt() ? w : h;
 		}
-
 
 		return il2cpp_symbols::get_method_pointer<int (*)()>("UnityEngine.CoreModule.dll", "UnityEngine", "Screen", "get_height", -1)();
 	}
@@ -3315,13 +3332,7 @@ namespace
 
 		if (g_freeform_window)
 		{
-			auto title = local::u8_wide(g_custom_title_name);
-			if (title.empty())
-			{
-				title = L"umamusume";
-			}
-
-			auto hWnd = FindWindowW(L"UnityWndClass", title.data());
+			auto hWnd = GetHWND();
 
 			long style = GetWindowLongW(hWnd, GWL_STYLE);
 			style |= WS_MAXIMIZEBOX;
@@ -4258,13 +4269,7 @@ namespace
 
 	void StandaloneWindowResize_DisableMaximizebox_hook()
 	{
-		auto title = local::u8_wide(g_custom_title_name);
-		if (title.empty())
-		{
-			title = L"umamusume";
-		}
-
-		auto hWnd = FindWindowW(L"UnityWndClass", title.data());
+		auto hWnd = GetHWND();
 
 		long style = GetWindowLongW(hWnd, GWL_STYLE);
 		style |= WS_MAXIMIZEBOX;
@@ -4282,15 +4287,9 @@ namespace
 
 	void StandaloneWindowResize_KeepAspectRatio_hook(float currentWidth, float currentHeight)
 	{
-		auto title = local::u8_wide(g_custom_title_name);
-		if (title.empty())
-		{
-			title = L"umamusume";
-		}
+		auto hWnd = GetHWND();
 
-		auto hWnd = FindWindowW(L"UnityWndClass", title.data());
-
-		long style = GetWindowLongW(FindWindowW(L"UnityWndClass", title.data()), GWL_STYLE);
+		long style = GetWindowLongW(hWnd, GWL_STYLE);
 		style |= WS_MAXIMIZEBOX;
 		SetWindowLongPtrW(hWnd, GWL_STYLE, style);
 	}
@@ -5808,15 +5807,9 @@ namespace
 		{
 			reinterpret_cast<decltype(Screen_RequestOrientation_hook)*>(Screen_RequestOrientation_orig)(ScreenOrientation::AutoRotation);
 
-			auto title = local::u8_wide(g_custom_title_name);
-			if (title.empty())
-			{
-				title = L"umamusume";
-			}
+			auto hWnd = GetHWND();
 
-			auto hWnd = FindWindowW(L"UnityWndClass", title.data());
-
-			long style = GetWindowLongW(FindWindowW(L"UnityWndClass", title.data()), GWL_STYLE);
+			long style = GetWindowLongW(hWnd, GWL_STYLE);
 			style |= WS_MAXIMIZEBOX;
 			SetWindowLongPtrW(hWnd, GWL_STYLE, style);
 		}
@@ -7727,22 +7720,13 @@ namespace
 			{
 				if (g_freeform_window)
 				{
-					auto title = local::u8_wide(g_custom_title_name);
-					if (title.empty())
-					{
-						title = L"umamusume";
-					}
-
-					auto hWnd = FindWindowW(L"UnityWndClass", title.data());
-
-					RECT windowRect;
-					GetWindowRect(hWnd, &windowRect);
+					auto hWnd = GetHWND();
 
 					RECT clientRect;
 					GetClientRect(hWnd, &clientRect);
 
-					last_display_width = windowRect.left;
-					last_display_height = clientRect.left;
+					last_display_width = clientRect.right - clientRect.left;
+					last_display_height = clientRect.bottom - clientRect.top;
 				}
 				else
 				{
@@ -7976,17 +7960,11 @@ namespace
 			auto action = CreateDelegateWithClass(il2cpp_class_from_type(activeSceneChangedField->type),
 				reinterpret_cast<Il2CppObject*>(il2cpp_object_new(il2cpp_symbols::get_class("mscorlib.dll", "System", "Object"))), *([](Il2CppObject* _this, Scene* scene, Scene* scene1)
 					{
-						auto title = local::u8_wide(g_custom_title_name);
-						if (title.empty())
-						{
-							title = L"umamusume";
-						}
-
-						auto hWnd = FindWindowW(L"UnityWndClass", title.data());
+						auto hWnd = GetHWND();
 
 						if (g_freeform_window)
 						{
-							long style = GetWindowLongW(FindWindowW(L"UnityWndClass", title.data()), GWL_STYLE);
+							long style = GetWindowLongW(hWnd, GWL_STYLE);
 							style |= WS_MAXIMIZEBOX;
 							SetWindowLongPtrW(hWnd, GWL_STYLE, style);
 						}
