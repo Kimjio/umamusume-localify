@@ -954,8 +954,8 @@ namespace
 		// auto pointerField = il2cpp_class_get_field_from_name_wrap(object->klass, "method_ptr");
 		// il2cpp_field_set_value(object, pointerField, fn);
 
-		auto targetField = il2cpp_class_get_field_from_name_wrap(object->klass, "m_target");
-		il2cpp_field_set_value(object, targetField, target);
+		// auto targetField = il2cpp_class_get_field_from_name_wrap(object->klass, "m_target");
+		// il2cpp_field_set_value(object, targetField, target);
 
 		return delegate;
 	}
@@ -984,8 +984,8 @@ namespace
 		// auto pointerField = il2cpp_class_get_field_from_name_wrap(object->klass, "method_ptr");
 		// il2cpp_field_set_value(object, pointerField, fn);
 
-		auto targetField = il2cpp_class_get_field_from_name_wrap(object->klass, "m_target");
-		il2cpp_field_set_value(object, targetField, target);
+		// auto targetField = il2cpp_class_get_field_from_name_wrap(object->klass, "m_target");
+		// il2cpp_field_set_value(object, targetField, target);
 
 		return delegate;
 	}
@@ -1014,8 +1014,8 @@ namespace
 		// auto pointerField = il2cpp_class_get_field_from_name_wrap(object->klass, "method_ptr");
 		// il2cpp_field_set_value(object, pointerField, fn);
 
-		auto targetField = il2cpp_class_get_field_from_name_wrap(object->klass, "m_target");
-		il2cpp_field_set_value(object, targetField, target);
+		// auto targetField = il2cpp_class_get_field_from_name_wrap(object->klass, "m_target");
+		// il2cpp_field_set_value(object, targetField, target);
 
 		return delegate;
 	}
@@ -5165,6 +5165,23 @@ namespace
 		}
 	}
 
+	bool GetOptionItemOnOffIsOn(const char* name)
+	{
+		auto optionItemOnOff = reinterpret_cast<Il2CppObject * (*)(Il2CppString*)>(il2cpp_resolve_icall("UnityEngine.GameObject::Find()"))(il2cpp_string_new(name));
+
+		if (optionItemOnOff)
+		{
+			auto getComponents = il2cpp_class_get_method_from_name_type<Il2CppArraySize_t<Il2CppObject*> *(*)(Il2CppObject*, Il2CppType*, bool, bool, bool, bool, Il2CppObject*)>(optionItemOnOff->klass, "GetComponentsInternal", 6)->methodPointer;
+			auto array2 = getComponents(optionItemOnOff, reinterpret_cast<Il2CppType*>(GetRuntimeType(
+				"umamusume.dll", "Gallop", "PartsOnOffToggleSwitch")), true, true, false, false, nullptr);
+
+			auto toggleSwitch = array2->vector[0];
+
+			return il2cpp_class_get_method_from_name_type<bool (*)(Il2CppObject*)>(toggleSwitch->klass, "get_IsOn", 0)->methodPointer(toggleSwitch);
+		}
+		return false;
+	}
+
 	Il2CppObject* GetOptionItemButton(const char* name, const char* title)
 	{
 		auto object = resources_load_hook(il2cpp_string_new("ui/parts/outgame/option/partsoptionitembutton"), GetRuntimeType("UnityEngine.CoreModule.dll", "UnityEngine", "GameObject"));
@@ -5288,13 +5305,29 @@ namespace
 	void AddToLayout(Il2CppObject* parentRectTransform, vector<Il2CppObject*> objects)
 	{
 		for (int i = objects.size() - 1; i >= 0; i--)
-		//for (int i = 0; i < objects.size(); i++)
+		// for (int i = 0; i < objects.size(); i++)
 		{
 			auto rectTransform = GetRectTransform(objects[i]);
-			il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, Il2CppObject*)>(rectTransform->klass, "SetParent", 1)->methodPointer(rectTransform, parentRectTransform);
+			il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, Il2CppObject*, bool)>(rectTransform->klass, "SetParent", 2)->methodPointer(rectTransform, parentRectTransform, false);
 			il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*)>(rectTransform->klass, "SetAsFirstSibling", 0)->methodPointer(rectTransform);
 		}
 	}
+
+	Il2CppObject* CreateGameObject()
+	{
+		auto gameObjectClass = il2cpp_symbols::get_class("UnityEngine.CoreModule.dll", "UnityEngine", "GameObject");
+		auto gameObject = il2cpp_object_new(gameObjectClass);
+		il2cpp_runtime_object_init(gameObject);
+
+		return gameObject;
+	}
+
+	Il2CppObject* AddComponent(Il2CppObject* gameObject, void* componentType)
+	{
+		return il2cpp_resolve_icall_type<Il2CppObject * (*)(Il2CppObject*, void*)>("UnityEngine.GameObject::Internal_AddComponentWithType()")(gameObject, componentType);
+	}
+
+	Il2CppObject* settingsDialog;
 
 	void OpenSettings()
 	{
@@ -5302,16 +5335,16 @@ namespace
 			il2cpp_symbols::get_class("umamusume.dll", "Gallop", "DialogCommon/Data"));
 		il2cpp_runtime_object_init(dialogData);
 
-		auto onLeft = CreateDelegate(dialogData, *([](Il2CppObject*)
+		auto onLeft = CreateDelegate(dialogData, *([](Il2CppObject*, Il2CppObject* dialog)
 			{
-				cout << "onLeft" << endl;
+				il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*)>(dialog->klass, "Close", 0)->methodPointer(dialog);
 			}));
 
-		auto onRight = CreateDelegate(dialogData, *([](Il2CppObject*)
+		auto onRight = CreateDelegate(dialogData, *([](Il2CppObject*, Il2CppObject* dialog)
 			{
 				settingsDialog = dialog;
 
-				cout << "character_system_text_caption " << boolalpha << GetOptionItemOnOffIsOn("character_system_text_caption") << noboolalpha << endl;
+				// cout << "character_system_text_caption " << boolalpha << GetOptionItemOnOffIsOn("character_system_text_caption") << noboolalpha << endl;
 
 				auto dialogData = il2cpp_object_new(
 					il2cpp_symbols::get_class("umamusume.dll", "Gallop", "DialogCommon/Data"));
@@ -5328,10 +5361,6 @@ namespace
 
 				auto onDestroy = CreateDelegate(dialog, *([](Il2CppObject*)
 					{
-						cout << "settingsDialog " << settingsDialog << endl;
-						cout << "settingsDialog " << settingsDialog->klass->name << endl;
-						cout << "settingsDialog " << il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*)>(settingsDialog->klass, "Close", 0) << endl;
-						cout << "settingsDialog " << il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*)>(settingsDialog->klass, "Close", 0)->methodPointer << endl;
 						il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*)>(settingsDialog->klass, "Close", 0)->methodPointer(settingsDialog);
 						settingsDialog = nullptr;
 					}));
@@ -5434,9 +5463,8 @@ namespace
 		il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, int)>(verticalLayoutGroup->klass, "set_childAlignment", 1)->methodPointer(verticalLayoutGroup, 1);
 		il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, bool)>(verticalLayoutGroup->klass, "set_childForceExpandWidth", 1)->methodPointer(verticalLayoutGroup, true);
 		il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, bool)>(verticalLayoutGroup->klass, "set_childControlWidth", 1)->methodPointer(verticalLayoutGroup, true);
+
 		auto padding = il2cpp_class_get_method_from_name_type<Il2CppObject * (*)(Il2CppObject*)>(verticalLayoutGroup->klass, "get_padding", 0)->methodPointer(verticalLayoutGroup);
-		// il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, int)>(padding->klass, "set_left", 1)->methodPointer(padding, 12);
-		// il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, int)>(padding->klass, "set_right", 1)->methodPointer(padding, 16);
 		il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, int)>(padding->klass, "set_top", 1)->methodPointer(padding, -20);
 		il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, int)>(padding->klass, "set_bottom", 1)->methodPointer(padding, 16);
 
@@ -5518,9 +5546,6 @@ namespace
 		SetOptionItemButtonAction("open_settings", *([](Il2CppObject*)
 			{
 				OpenSettings();
-				auto uiManager = GetSingletonInstance(il2cpp_symbols::get_class("umamusume.dll", "Gallop", "UIManager"));
-
-				il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, Il2CppString*)>(uiManager->klass, "ShowNotification", 1)->methodPointer(uiManager, localize_get_hook(GetTextIdByName("Home0072")));
 			}));
 	}
 
