@@ -77,6 +77,9 @@ extern string g_character_system_text_caption_outline_color;
 extern float g_character_system_text_caption_background_alpha;
 extern float g_character_system_text_caption_position_x;
 extern float g_character_system_text_caption_position_y;
+extern bool g_champions_live_show_text;
+extern int g_champions_live_resource_id;
+extern int g_champions_live_year;
 /*
  * ModeNormal 0
  * Mode60FPS 1

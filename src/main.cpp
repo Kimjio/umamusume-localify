@@ -47,6 +47,9 @@ string g_character_system_text_caption_outline_color = "Brown";
 float g_character_system_text_caption_background_alpha = 0;
 float g_character_system_text_caption_position_x = 0;
 float g_character_system_text_caption_position_y = -3;
+bool g_champions_live_show_text = false;
+int g_champions_live_resource_id = 1;
+int g_champions_live_year = 2023;
 int g_cyspring_update_mode = -1;
 bool g_hide_now_loading = false;
 bool g_discord_rich_presence = false;
@@ -320,6 +323,26 @@ namespace
 			if (document.HasMember("characterSystemTextCaptionPositionY"))
 			{
 				g_character_system_text_caption_position_y = document["characterSystemTextCaptionPositionY"].GetFloat();
+			}
+
+			if (document.HasMember("championsLiveShowText"))
+			{
+				g_champions_live_show_text = document["championsLiveShowText"].GetBool();
+			}
+
+			if (document.HasMember("championsLiveResourceId"))
+			{
+				g_champions_live_resource_id = document["championsLiveResourceId"].GetInt();
+
+				if (g_champions_live_resource_id < 1)
+				{
+					g_champions_live_resource_id = 1;
+				}
+			}
+
+			if (document.HasMember("championsLiveYear"))
+			{
+				g_champions_live_year = document["championsLiveYear"].GetInt();
 			}
 
 			if (document.HasMember("cySpringUpdateMode"))

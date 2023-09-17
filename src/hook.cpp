@@ -8377,6 +8377,60 @@ namespace
 									}).detach();
 							}
 
+							if (sceneName == "Live" && g_champions_live_show_text)
+							{
+								auto loadSettings = il2cpp_symbols::get_method_pointer<Il2CppObject * (*)()>("umamusume.dll", "Gallop.Live", "Director", "get_LoadSettings", -1)();
+								auto musicId = il2cpp_class_get_method_from_name_type<int (*)(Il2CppObject*)>(loadSettings->klass, "get_MusicId", 0)->methodPointer(loadSettings);
+
+								if (musicId == 1054)
+								{
+									auto raceInfo = il2cpp_class_get_method_from_name_type<Il2CppObject * (*)(Il2CppObject*)>(loadSettings->klass, "get_raceInfo", 0)->methodPointer(loadSettings);
+
+									auto resourceId = il2cpp_class_get_method_from_name_type<int (*)(Il2CppObject*)>(raceInfo->klass, "get_ChampionsMeetingResourceId", 0)->methodPointer(raceInfo);
+
+									if (resourceId == 0)
+									{
+										auto charaNameArray = il2cpp_array_new_type<Il2CppString*>(il2cpp_symbols::get_class("mscorlib.dll", "System", "String"), 9);
+										auto trainerNameArray = il2cpp_array_new_type<Il2CppString*>(il2cpp_symbols::get_class("mscorlib.dll", "System", "String"), 9);
+
+										il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, Il2CppArraySize_t<Il2CppString*>*)>(raceInfo->klass, "set_CharacterNameArray", 1)->methodPointer(raceInfo, charaNameArray);
+										il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, Il2CppArraySize_t<Il2CppString*>*)>(raceInfo->klass, "set_TrainerNameArray", 1)->methodPointer(raceInfo, trainerNameArray);
+
+										il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, Il2CppArraySize_t<Il2CppString*>*)>(raceInfo->klass, "set_CharacterNameArrayForChampionsText", 1)->methodPointer(raceInfo, nullptr);
+										il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, Il2CppArraySize_t<Il2CppString*>*)>(raceInfo->klass, "set_TrainerNameArrayForChampionsText", 1)->methodPointer(raceInfo, nullptr);
+
+										auto charaInfoList = il2cpp_class_get_method_from_name_type<Il2CppObject * (*)(Il2CppObject*)>(loadSettings->klass, "get_CharacterInfoList", 0)->methodPointer(loadSettings);
+
+										FieldInfo* itemsField = il2cpp_class_get_field_from_name_wrap(charaInfoList->klass, "_items");
+										Il2CppArraySize_t<Il2CppObject*>* charaInfoArr;
+										il2cpp_field_get_value(charaInfoList, itemsField, &charaInfoArr);
+
+										for (int i = 0; i < 9; i++)
+										{
+											auto info = charaInfoArr->vector[i];
+											auto charaId = il2cpp_class_get_method_from_name_type<int (*)(Il2CppObject*)>(info->klass, "get_CharaId", 0)->methodPointer(info);
+											auto mobId = il2cpp_class_get_method_from_name_type<int (*)(Il2CppObject*)>(info->klass, "get_MobId", 0)->methodPointer(info);
+
+											Il2CppString* charaName;
+											if (charaId == 1)
+											{
+												charaName = il2cpp_symbols::get_method_pointer<Il2CppString * (*)(int, int)>("umamusume.dll", "Gallop", "TextUtil", "GetMasterText", 2)(59, mobId);
+											}
+											else
+											{
+												charaName = il2cpp_symbols::get_method_pointer<Il2CppString * (*)(int, int)>("umamusume.dll", "Gallop", "TextUtil", "GetMasterText", 2)(6, charaId);
+											}
+
+											il2cpp_array_setref(charaNameArray, i, charaName);
+											il2cpp_array_setref(trainerNameArray, i, il2cpp_string_new(""));
+										}
+
+										il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, int)>(raceInfo->klass, "set_ChampionsMeetingResourceId", 1)->methodPointer(raceInfo, g_champions_live_resource_id);
+										il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, int)>(raceInfo->klass, "set_DateYear", 1)->methodPointer(raceInfo, g_champions_live_year);
+									}
+								}
+							}
+
 							if (g_discord_rich_presence && discord)
 							{
 								auto detail = GetSceneName(sceneName);
