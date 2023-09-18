@@ -1,4 +1,7 @@
 #include <stdinclude.hpp>
+
+#include <rapidjson/rapidjson.h>
+
 #include <array>
 
 #include <set>
@@ -22,6 +25,8 @@
 #include "discord/activity_manager.h"
 
 #include "libcef.h"
+
+#include "config.hpp"
 
 using namespace std;
 
@@ -831,7 +836,7 @@ namespace
 		{
 			return il2cpp_class_get_field_from_name(klass, name);
 		}
-		auto className = string(klass->namespaze).append(".").append(klass->name);
+		auto& className = string(klass->namespaze).append(".").append(klass->name);
 
 		if (code_map.HasMember("!common"))
 		{
@@ -5305,7 +5310,7 @@ namespace
 	void AddToLayout(Il2CppObject* parentRectTransform, vector<Il2CppObject*> objects)
 	{
 		for (int i = objects.size() - 1; i >= 0; i--)
-		// for (int i = 0; i < objects.size(); i++)
+			// for (int i = 0; i < objects.size(); i++)
 		{
 			auto rectTransform = GetRectTransform(objects[i]);
 			il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, Il2CppObject*, bool)>(rectTransform->klass, "SetParent", 2)->methodPointer(rectTransform, parentRectTransform, false);
@@ -5337,14 +5342,16 @@ namespace
 
 		auto onLeft = CreateDelegate(dialogData, *([](Il2CppObject*, Il2CppObject* dialog)
 			{
-				il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*)>(dialog->klass, "Close", 0)->methodPointer(dialog);
+				il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*)>(settingsDialog->klass, "Close", 0)->methodPointer(settingsDialog);
 			}));
 
 		auto onRight = CreateDelegate(dialogData, *([](Il2CppObject*, Il2CppObject* dialog)
 			{
-				settingsDialog = dialog;
+				auto& configDocument = config::config_document;
 
-				// cout << "character_system_text_caption " << boolalpha << GetOptionItemOnOffIsOn("character_system_text_caption") << noboolalpha << endl;
+				configDocument["characterSystemTextCaption"].SetBool(GetOptionItemOnOffIsOn("character_system_text_caption"));
+
+				config::write_config();
 
 				auto dialogData = il2cpp_object_new(
 					il2cpp_symbols::get_class("umamusume.dll", "Gallop", "DialogCommon/Data"));
@@ -5492,7 +5499,19 @@ namespace
 			}
 		);
 
-		SetOptionItemOnOffAction("character_system_text_caption", g_character_system_text_caption, *([](Il2CppObject*, bool isOn)
+		bool characterSystemTextCaption = false;
+
+		if (config::read_config())
+		{
+			auto& configDocument = config::config_document;
+		
+			if (configDocument.HasMember("characterSystemTextCaption"))
+			{
+				characterSystemTextCaption = configDocument["characterSystemTextCaption"].GetBool();
+			}
+		}
+
+		SetOptionItemOnOffAction("character_system_text_caption", characterSystemTextCaption, *([](Il2CppObject*, bool isOn)
 			{
 				// TODO
 			}));
@@ -5528,7 +5547,7 @@ namespace
 
 		il2cpp_field_set_value(dialogData, ContentsObjectField, gameObject);
 
-		il2cpp_symbols::get_method_pointer<Il2CppObject* (*)(Il2CppObject* data)>("umamusume.dll", "Gallop", "DialogManager", "PushDialog", 1)(dialogData);
+		settingsDialog = il2cpp_symbols::get_method_pointer<Il2CppObject* (*)(Il2CppObject* data)>("umamusume.dll", "Gallop", "DialogManager", "PushDialog", 1)(dialogData);
 	}
 
 	void InitOptionLayout(Il2CppObject* parentRectTransform)

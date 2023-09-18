@@ -379,6 +379,8 @@ namespace
 				{
 					rapidjson::IStreamWrapper wrapper{ code_map_stream };
 					code_map.ParseStream(wrapper);
+
+					code_map_stream.close();
 				}
 			}
 
@@ -598,8 +600,8 @@ int __stdcall DllMain(HINSTANCE, DWORD reason, LPVOID)
 				DoStopSvc();
 			}
 
-			auto uncheater_path = module_path.parent_path().append(module_path.filename().replace_extension().string().append("_Data\\StreamingAssets\\Uncheater"s).data());
-			auto uncheater_path_new = module_path.parent_path().append(module_path.filename().replace_extension().string().append("_Data\\StreamingAssets\\_Uncheater"s).data());
+			auto& uncheater_path = module_path.parent_path().append(module_path.filename().replace_extension().string().append("_Data\\StreamingAssets\\Uncheater"s).data());
+			auto& uncheater_path_new = module_path.parent_path().append(module_path.filename().replace_extension().string().append("_Data\\StreamingAssets\\_Uncheater"s).data());
 
 			if (filesystem::exists(uncheater_path_new))
 			{
@@ -623,7 +625,7 @@ int __stdcall DllMain(HINSTANCE, DWORD reason, LPVOID)
 				{
 					cout << "Uncheater rename error: " << e.what() << endl;
 
-					auto xnina_path = module_path.parent_path().append(module_path.filename().replace_extension().string().append("_Data\\StreamingAssets\\Uncheater\\xnina_x64.xem"s).data());
+					auto& xnina_path = module_path.parent_path().append(module_path.filename().replace_extension().string().append("_Data\\StreamingAssets\\Uncheater\\xnina_x64.xem"s).data());
 					if (filesystem::exists(xnina_path))
 					{
 						try
