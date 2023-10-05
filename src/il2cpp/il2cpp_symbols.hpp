@@ -394,8 +394,6 @@ struct MethodInfo_t
 	uint8_t is_marshaled_from_native : 1;
 };
 
-
-
 struct Il2CppObject
 {
 	union
@@ -405,6 +403,22 @@ struct Il2CppObject
 	};
 	void* monitor;
 };
+
+
+typedef struct Il2CppReflectionType
+{
+	Il2CppObject object;
+	const Il2CppType* type;
+} Il2CppReflectionType;
+
+// System.RuntimeType
+typedef struct Il2CppReflectionRuntimeType
+{
+	Il2CppReflectionType type;
+	Il2CppObject* type_info;
+	Il2CppObject* genericCache;
+	Il2CppObject* serializationCtor;
+} Il2CppReflectionRuntimeType;
 
 // not real Il2CppString class
 struct Il2CppString
@@ -440,7 +454,7 @@ struct Il2CppArraySize_t
 	void* bounds;
 	uintptr_t max_length;
 	alignas(8)
-	T vector[0];
+		T vector[0];
 };
 
 static const size_t kIl2CppSizeOfArray = (offsetof(Il2CppArraySize, vector));
@@ -650,7 +664,7 @@ typedef Il2CppClass* (*il2cpp_property_get_parent_t) (const PropertyInfo* prop);
 typedef int (*il2cpp_field_get_flags_t)(FieldInfo* field);
 typedef const char* (*il2cpp_field_get_name_t)(FieldInfo* field);
 typedef Il2CppClass* (*il2cpp_field_get_parent_t)(FieldInfo* field);
-typedef size_t (*il2cpp_field_get_offset_t)(FieldInfo* field);
+typedef size_t(*il2cpp_field_get_offset_t)(FieldInfo* field);
 typedef const PropertyInfo* (*il2cpp_class_get_property_from_name_t)(Il2CppClass* klass, const char* name);
 typedef void (*il2cpp_runtime_object_init_t)(Il2CppObject* obj);
 typedef void (*il2cpp_runtime_object_init_exception_t)(Il2CppObject* obj, void** exc);
@@ -661,6 +675,7 @@ typedef void* (*il2cpp_thread_current_t)();
 typedef uint32_t(*il2cpp_gchandle_new_t)(Il2CppObject* obj, bool pinned);
 typedef Il2CppObject* (*il2cpp_gchandle_get_target_t)(uint32_t gchandle);
 typedef void (*il2cpp_gchandle_free_t)(uint32_t gchandle);
+typedef void (*il2cpp_gc_wbarrier_set_field_t)(Il2CppObject* obj, void** targetAddress, void* object);
 
 // function defines
 extern il2cpp_string_new_utf16_t il2cpp_string_new_utf16;
@@ -728,6 +743,7 @@ extern il2cpp_thread_current_t il2cpp_thread_current;
 extern il2cpp_gchandle_new_t il2cpp_gchandle_new;
 extern il2cpp_gchandle_get_target_t il2cpp_gchandle_get_target;
 extern il2cpp_gchandle_free_t il2cpp_gchandle_free;
+extern il2cpp_gc_wbarrier_set_field_t il2cpp_gc_wbarrier_set_field;
 
 char* il2cpp_array_addr_with_size(void* arr, int32_t size, uintptr_t idx);
 

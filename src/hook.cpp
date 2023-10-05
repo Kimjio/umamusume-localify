@@ -940,18 +940,24 @@ namespace
 	Il2CppDelegate* CreateDelegateWithClass(Il2CppClass* klass, Il2CppObject* target, void (*fn)(Il2CppObject*, T...))
 	{
 		auto delegate = reinterpret_cast<MulticastDelegate*>(il2cpp_object_new(klass));
-		delegate->delegates = il2cpp_array_new(il2cpp_symbols::get_class("mscorlib.dll", "System", "Delegate"), 1);
-		il2cpp_array_setref(delegate->delegates, 0, delegate);
 		delegate->method_ptr = reinterpret_cast<Il2CppMethodPointer>(fn);
 
 		auto methodInfo = reinterpret_cast<MethodInfo*>(il2cpp_object_new(
 			il2cpp_symbols::get_class("mscorlib.dll", "System.Reflection", "MethodInfo")));
 		methodInfo->methodPointer = delegate->method_ptr;
 		methodInfo->klass = il2cpp_symbols::get_class("mscorlib.dll", "System.Reflection", "MethodInfo");
+		methodInfo->invoker_method = *([](Il2CppMethodPointer fn, const MethodInfo* method, void* obj, void** params)
+			{
+				return reinterpret_cast<void* (*)(void*, void**)>(fn)(obj, params);
+			});
 		delegate->method = methodInfo;
-		delegate->target = target;
 
 		auto object = reinterpret_cast<Il2CppObject*>(delegate);
+
+		// auto targetField = il2cpp_class_get_field_from_name_wrap(object->klass, "m_target");
+		// auto targetDest = reinterpret_cast<char*>(object) + targetField->offset;
+
+		il2cpp_gc_wbarrier_set_field(object, reinterpret_cast<void**>(&(delegate)->target), target);
 
 		// auto methodInfoField = il2cpp_class_get_field_from_name_wrap(object->klass, "method_info");
 		// il2cpp_field_set_value(object, methodInfoField, methodInfo);
@@ -970,18 +976,24 @@ namespace
 	{
 		auto delegate = reinterpret_cast<MulticastDelegate*>(
 			il2cpp_object_new(il2cpp_symbols::get_class("mscorlib.dll", "System", "MulticastDelegate")));
-		delegate->delegates = il2cpp_array_new(il2cpp_symbols::get_class("mscorlib.dll", "System", "Delegate"), 1);
-		il2cpp_array_setref(delegate->delegates, 0, delegate);
 		delegate->method_ptr = reinterpret_cast<Il2CppMethodPointer>(fn);
 
 		auto methodInfo = reinterpret_cast<MethodInfo*>(il2cpp_object_new(
 			il2cpp_symbols::get_class("mscorlib.dll", "System.Reflection", "MethodInfo")));
 		methodInfo->methodPointer = delegate->method_ptr;
 		methodInfo->klass = il2cpp_symbols::get_class("mscorlib.dll", "System.Reflection", "MethodInfo");
+		methodInfo->invoker_method = *([](Il2CppMethodPointer fn, const MethodInfo* method, void* obj, void** params)
+			{
+				return reinterpret_cast<void* (*)(void*, void**)>(fn)(obj, params);
+			});
 		delegate->method = methodInfo;
-		delegate->target = target;
 
 		auto object = reinterpret_cast<Il2CppObject*>(delegate);
+
+		// auto targetField = il2cpp_class_get_field_from_name_wrap(object->klass, "m_target");
+		// auto targetDest = reinterpret_cast<char*>(object) + targetField->offset;
+
+		il2cpp_gc_wbarrier_set_field(object, reinterpret_cast<void**>(&(delegate)->target), target);
 
 		// auto methodInfoField = il2cpp_class_get_field_from_name_wrap(object->klass, "method_info");
 		// il2cpp_field_set_value(object, methodInfoField, methodInfo);
@@ -1000,18 +1012,24 @@ namespace
 	{
 		auto delegate = reinterpret_cast<MulticastDelegate*>(
 			il2cpp_object_new(il2cpp_symbols::get_class("UnityEngine.CoreModule.dll", "UnityEngine.Events", "UnityAction")));
-		delegate->delegates = il2cpp_array_new(il2cpp_symbols::get_class("mscorlib.dll", "System", "Delegate"), 1);
-		il2cpp_array_setref(delegate->delegates, 0, delegate);
 		delegate->method_ptr = reinterpret_cast<Il2CppMethodPointer>(fn);
 
 		auto methodInfo = reinterpret_cast<MethodInfo*>(il2cpp_object_new(
 			il2cpp_symbols::get_class("mscorlib.dll", "System.Reflection", "MethodInfo")));
 		methodInfo->methodPointer = delegate->method_ptr;
 		methodInfo->klass = il2cpp_symbols::get_class("mscorlib.dll", "System.Reflection", "MethodInfo");
+		methodInfo->invoker_method = *([](Il2CppMethodPointer fn, const MethodInfo* method, void* obj, void** params)
+			{
+				return reinterpret_cast<void* (*)(void*, void**)>(fn)(obj, params);
+			});
 		delegate->method = methodInfo;
-		delegate->target = target;
 
 		auto object = reinterpret_cast<Il2CppObject*>(delegate);
+
+		// auto targetField = il2cpp_class_get_field_from_name_wrap(object->klass, "m_target");
+		// auto targetDest = reinterpret_cast<char*>(object) + targetField->offset;
+
+		il2cpp_gc_wbarrier_set_field(object, reinterpret_cast<void**>(&(delegate)->target), target);
 
 		// auto methodInfoField = il2cpp_class_get_field_from_name_wrap(object->klass, "method_info");
 		// il2cpp_field_set_value(object, methodInfoField, methodInfo);
@@ -5111,6 +5129,43 @@ namespace
 
 	Il2CppObject* resources_load_hook(Il2CppString* path, Il2CppObject* type);
 
+	Il2CppArraySize_t<Il2CppObject*>* GetRectTransformArray(Il2CppObject* object)
+	{
+		auto getComponents = il2cpp_class_get_method_from_name_type<Il2CppArraySize_t<Il2CppObject*> *(*)(Il2CppObject*, Il2CppType*, bool, bool, bool, bool, Il2CppObject*)>(object->klass, "GetComponentsInternal", 6)->methodPointer;
+		auto rectTransformArray = getComponents(object, reinterpret_cast<Il2CppType*>(GetRuntimeType(
+			"UnityEngine.CoreModule.dll", "UnityEngine", "RectTransform")), true, true, false, false, nullptr);
+
+		return rectTransformArray;
+	}
+
+	Il2CppObject* GetRectTransform(Il2CppObject* object)
+	{
+		auto getComponents = il2cpp_class_get_method_from_name_type<Il2CppArraySize_t<Il2CppObject*> *(*)(Il2CppObject*, Il2CppType*, bool, bool, bool, bool, Il2CppObject*)>(object->klass, "GetComponentsInternal", 6)->methodPointer;
+		auto rectTransformArray = getComponents(object, reinterpret_cast<Il2CppType*>(GetRuntimeType(
+			"UnityEngine.CoreModule.dll", "UnityEngine", "RectTransform")), true, true, false, false, nullptr);
+
+		if (rectTransformArray->max_length)
+		{
+			return rectTransformArray->vector[0];
+		}
+
+		return nullptr;
+	}
+
+	Il2CppObject* CreateGameObject()
+	{
+		auto gameObjectClass = il2cpp_symbols::get_class("UnityEngine.CoreModule.dll", "UnityEngine", "GameObject");
+		auto gameObject = il2cpp_object_new(gameObjectClass);
+		il2cpp_runtime_object_init(gameObject);
+
+		return gameObject;
+	}
+
+	Il2CppObject* AddComponent(Il2CppObject* gameObject, void* componentType)
+	{
+		return il2cpp_resolve_icall_type<Il2CppObject * (*)(Il2CppObject*, void*)>("UnityEngine.GameObject::Internal_AddComponentWithType()")(gameObject, componentType);
+	}
+
 	Il2CppObject* GetOptionItemTitle(const char* title)
 	{
 		auto object = resources_load_hook(il2cpp_string_new("ui/parts/outgame/option/partsoptionitemtitle"), GetRuntimeType("UnityEngine.CoreModule.dll", "UnityEngine", "GameObject"));
@@ -5293,18 +5348,290 @@ namespace
 		return optionItemSimple;
 	}
 
-	Il2CppObject* GetRectTransform(Il2CppObject* object)
+	Il2CppObject* GetOptionItem3ToggleVertical(const char* title)
 	{
-		auto getComponents = il2cpp_class_get_method_from_name_type<Il2CppArraySize_t<Il2CppObject*> *(*)(Il2CppObject*, Il2CppType*, bool, bool, bool, bool, Il2CppObject*)>(object->klass, "GetComponentsInternal", 6)->methodPointer;
-		auto rectTransformArray = getComponents(object, reinterpret_cast<Il2CppType*>(GetRuntimeType(
-			"UnityEngine.CoreModule.dll", "UnityEngine", "RectTransform")), true, true, false, false, nullptr);
+		auto object = resources_load_hook(il2cpp_string_new("ui/parts/outgame/option/partsoptionitem3togglevertical"), GetRuntimeType("UnityEngine.CoreModule.dll", "UnityEngine", "GameObject"));
 
-		if (rectTransformArray->max_length)
+		auto optionItem3ToggleVertical = il2cpp_symbols::get_method_pointer<Il2CppObject * (*)(Il2CppObject*)>("UnityEngine.CoreModule.dll", "UnityEngine", "Object", "Internal_CloneSingle", 1)(object);
+
+		auto getComponents = il2cpp_class_get_method_from_name_type<Il2CppArraySize_t<Il2CppObject*> *(*)(Il2CppObject*, Il2CppType*, bool, bool, bool, bool, Il2CppObject*)>(optionItem3ToggleVertical->klass, "GetComponentsInternal", 6)->methodPointer;
+		auto array = getComponents(optionItem3ToggleVertical, reinterpret_cast<Il2CppType*>(GetRuntimeType(
+			"umamusume.dll", "Gallop", "TextCommon")), true, true, false, false, nullptr);
+
+		for (int i = 0; i < array->max_length; i++)
 		{
-			return rectTransformArray->vector[0];
+			auto textCommon = array->vector[i];
+
+			if (textCommon)
+			{
+				text_set_text(textCommon, il2cpp_string_new(title));
+
+				auto textIdStrField = il2cpp_class_get_field_from_name_wrap(textCommon->klass, "m_textid_str");
+				il2cpp_field_set_value(textCommon, textIdStrField, nullptr);
+			}
 		}
 
-		return  nullptr;
+		return optionItem3ToggleVertical;
+	}
+
+	Il2CppObject* GetOptionItem3Toggle(const char* title)
+	{
+		auto object = resources_load_hook(il2cpp_string_new("ui/parts/outgame/option/partsoptionitem3toggle"), GetRuntimeType("UnityEngine.CoreModule.dll", "UnityEngine", "GameObject"));
+
+		auto optionItem3Toggle = il2cpp_symbols::get_method_pointer<Il2CppObject * (*)(Il2CppObject*)>("UnityEngine.CoreModule.dll", "UnityEngine", "Object", "Internal_CloneSingle", 1)(object);
+
+		auto getComponents = il2cpp_class_get_method_from_name_type<Il2CppArraySize_t<Il2CppObject*> *(*)(Il2CppObject*, Il2CppType*, bool, bool, bool, bool, Il2CppObject*)>(optionItem3Toggle->klass, "GetComponentsInternal", 6)->methodPointer;
+		auto array = getComponents(optionItem3Toggle, reinterpret_cast<Il2CppType*>(GetRuntimeType(
+			"umamusume.dll", "Gallop", "TextCommon")), true, true, false, false, nullptr);
+
+		for (int i = 0; i < array->max_length; i++)
+		{
+			auto textCommon = array->vector[i];
+
+			if (textCommon)
+			{
+				text_set_text(textCommon, il2cpp_string_new(title));
+
+				auto textIdStrField = il2cpp_class_get_field_from_name_wrap(textCommon->klass, "m_textid_str");
+				il2cpp_field_set_value(textCommon, textIdStrField, nullptr);
+			}
+		}
+
+		return optionItem3Toggle;
+	}
+
+	Il2CppObject* GetOptionItem2Toggle(const char* title)
+	{
+		auto object = resources_load_hook(il2cpp_string_new("ui/parts/outgame/option/partsoptionitem2toggle"), GetRuntimeType("UnityEngine.CoreModule.dll", "UnityEngine", "GameObject"));
+
+		auto optionItem2Toggle = il2cpp_symbols::get_method_pointer<Il2CppObject * (*)(Il2CppObject*)>("UnityEngine.CoreModule.dll", "UnityEngine", "Object", "Internal_CloneSingle", 1)(object);
+
+		auto getComponents = il2cpp_class_get_method_from_name_type<Il2CppArraySize_t<Il2CppObject*> *(*)(Il2CppObject*, Il2CppType*, bool, bool, bool, bool, Il2CppObject*)>(optionItem2Toggle->klass, "GetComponentsInternal", 6)->methodPointer;
+		auto array = getComponents(optionItem2Toggle, reinterpret_cast<Il2CppType*>(GetRuntimeType(
+			"umamusume.dll", "Gallop", "TextCommon")), true, true, false, false, nullptr);
+
+		for (int i = 0; i < array->max_length; i++)
+		{
+			auto textCommon = array->vector[i];
+
+			if (textCommon)
+			{
+				text_set_text(textCommon, il2cpp_string_new(title));
+
+				auto textIdStrField = il2cpp_class_get_field_from_name_wrap(textCommon->klass, "m_textid_str");
+				il2cpp_field_set_value(textCommon, textIdStrField, nullptr);
+			}
+		}
+
+		return optionItem2Toggle;
+	}
+
+	Il2CppObject* GetOptionSlider(const char* title)
+	{
+		auto object = resources_load_hook(il2cpp_string_new("ui/parts/outgame/option/optionsoundvolumeslider"), GetRuntimeType("UnityEngine.CoreModule.dll", "UnityEngine", "GameObject"));
+
+		auto optionSlider = il2cpp_symbols::get_method_pointer<Il2CppObject * (*)(Il2CppObject*)>("UnityEngine.CoreModule.dll", "UnityEngine", "Object", "Internal_CloneSingle", 1)(object);
+
+		auto getComponents = il2cpp_class_get_method_from_name_type<Il2CppArraySize_t<Il2CppObject*> *(*)(Il2CppObject*, Il2CppType*, bool, bool, bool, bool, Il2CppObject*)>(optionSlider->klass, "GetComponentsInternal", 6)->methodPointer;
+		auto array = getComponents(optionSlider, reinterpret_cast<Il2CppType*>(GetRuntimeType(
+			"umamusume.dll", "Gallop", "TextCommon")), true, true, false, false, nullptr);
+
+		auto textCommon = array->vector[0];
+
+		text_set_text(textCommon, il2cpp_string_new(title));
+
+		auto textIdStrField = il2cpp_class_get_field_from_name_wrap(textCommon->klass, "m_textid_str");
+		il2cpp_field_set_value(textCommon, textIdStrField, nullptr);
+
+		auto optionSoundVolumeSliderArray = getComponents(optionSlider, reinterpret_cast<Il2CppType*>(GetRuntimeType(
+			"umamusume.dll", "Gallop", "OptionSoundVolumeSlider")), true, true, false, false, nullptr);
+
+		auto optionSoundVolumeSlider = optionSoundVolumeSliderArray->vector[0];
+
+		il2cpp_symbols::get_method_pointer<void (*)(Il2CppObject*)>("UnityEngine.CoreModule.dll", "UnityEngine", "Object", "Destroy", 1)(optionSoundVolumeSlider);
+
+		auto sliderCommonArray = getComponents(optionSlider, reinterpret_cast<Il2CppType*>(GetRuntimeType(
+			"umamusume.dll", "Gallop", "SliderCommon")), true, true, false, false, nullptr);
+
+		/*auto sliderCommon = sliderCommonArray->vector[0];
+
+		auto onValueChanged = il2cpp_class_get_method_from_name_type<Il2CppObject * (*)(Il2CppObject*)>(sliderCommon->klass, "get_onValueChanged", 0)->methodPointer(sliderCommon);
+
+		auto AddCall = il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, Il2CppObject*)>(onValueChanged->klass, "AddCall", 1);
+
+		auto type = GetRuntimeType("UnityEngine.CoreModule.dll", "UnityEngine.Events", "InvokableCall`1");
+		auto typeArray = il2cpp_array_new(il2cpp_symbols::get_class("mscorlib.dll", "System", "Type"), 1);
+		il2cpp_array_setref(typeArray, 0, GetRuntimeType("mscorlib.dll", "System", "Single"));
+
+		auto runtimeType = il2cpp_class_get_method_from_name_type<Il2CppReflectionRuntimeType * (*)(Il2CppObject*, Il2CppArraySize*)>(type->klass, "MakeGenericType", 1)->methodPointer(type, typeArray);
+		auto newType = runtimeType->type.type;
+
+		auto valueChanged = CreateDelegateWithClass(il2cpp_class_from_type(AddCall->parameters->parameter_type), nullptr, *([](Il2CppObject*, float value)
+			{
+				cout << "Value " << value << endl;
+			}));
+
+		auto invokeableCall = il2cpp_object_new(il2cpp_class_from_type(newType));
+
+		auto delegateField = il2cpp_class_get_field_from_name_wrap(invokeableCall->klass, "Delegate");
+		il2cpp_field_set_value(invokeableCall, delegateField, valueChanged);
+
+		AddCall->methodPointer(onValueChanged, invokeableCall);*/
+
+		auto transformArray = GetRectTransformArray(optionSlider);
+
+		vector<Il2CppObject*> destroyTargets;
+
+		for (int i = 0; i < transformArray->max_length; i++)
+		{
+			auto transform = transformArray->vector[i];
+
+			if (transform)
+			{
+				if (uobject_get_name(transform)->start_char == L"ToggleMute"s ||
+					uobject_get_name(transform)->start_char == L"ImageIcon"s ||
+					uobject_get_name(transform)->start_char == L"Line"s ||
+					uobject_get_name(transform)->start_char == L"Num"s)
+				{
+					destroyTargets.emplace_back(transform);
+				}
+			}
+		}
+
+		for (int i = 0; i < destroyTargets.size(); i++)
+		{
+			auto transform = destroyTargets[i];
+			il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, Il2CppObject*, bool)>(transform->klass, "SetParent", 2)->methodPointer(transform, nullptr, false);
+			auto gameObject = il2cpp_class_get_method_from_name_type<Il2CppObject * (*)(Il2CppObject*)>(transform->klass, "get_gameObject", 0)->methodPointer(transform);
+			il2cpp_symbols::get_method_pointer<void (*)(Il2CppObject*)>("UnityEngine.CoreModule.dll", "UnityEngine", "Object", "Destroy", 1)(gameObject);
+		}
+
+		destroyTargets.clear();
+
+		transformArray = GetRectTransformArray(optionSlider);
+
+		for (int i = 0; i < transformArray->max_length; i++)
+		{
+			auto transform = transformArray->vector[i];
+
+			if (transform)
+			{
+				if (uobject_get_name(transform)->start_char == L"Slider"s)
+				{
+					il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, Vector2_t)>(transform->klass, "set_sizeDelta", 1)->methodPointer(transform, Vector2_t{ 560, 24 });
+					break;
+				}
+			}
+		}
+
+		auto gameObject = CreateGameObject();
+		auto rootTransform = AddComponent(gameObject, GetRuntimeType("UnityEngine.CoreModule.dll", "UnityEngine", "RectTransform"));
+
+		il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, Vector2_t)>(rootTransform->klass, "set_sizeDelta", 1)->methodPointer(rootTransform, Vector2_t{ 0, 680 });
+
+		il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, Vector2_t)>(rootTransform->klass, "set_anchorMax", 1)->methodPointer(rootTransform, Vector2_t{ 0, 0 });
+
+		il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, Vector2_t)>(rootTransform->klass, "set_anchorMin", 1)->methodPointer(rootTransform, Vector2_t{ 0, 0 });
+
+		il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, Vector2_t)>(rootTransform->klass, "set_pivot", 1)->methodPointer(rootTransform, Vector2_t{ 0.5, 1 });
+
+		il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, Vector2_t)>(rootTransform->klass, "set_anchoredPosition", 1)->methodPointer(rootTransform, Vector2_t{ 0, 0 });
+
+		auto verticalLayoutGroup = AddComponent(gameObject, GetRuntimeType("UnityEngine.UI.dll", "UnityEngine.UI", "VerticalLayoutGroup"));
+		il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, int)>(verticalLayoutGroup->klass, "set_childAlignment", 1)->methodPointer(verticalLayoutGroup, 1);
+		il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, bool)>(verticalLayoutGroup->klass, "set_childForceExpandWidth", 1)->methodPointer(verticalLayoutGroup, true);
+		il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, bool)>(verticalLayoutGroup->klass, "set_childControlWidth", 1)->methodPointer(verticalLayoutGroup, true);
+
+		auto padding = il2cpp_class_get_method_from_name_type<Il2CppObject * (*)(Il2CppObject*)>(verticalLayoutGroup->klass, "get_padding", 0)->methodPointer(verticalLayoutGroup);
+		il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, int)>(padding->klass, "set_left", 1)->methodPointer(padding, 54);
+
+		auto sliderTransform = GetRectTransform(optionSlider);
+
+		il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, Vector2_t)>(sliderTransform->klass, "set_sizeDelta", 1)->methodPointer(sliderTransform, Vector2_t{ 1000, 86 });
+		il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, Il2CppObject*, bool)>(sliderTransform->klass, "SetParent", 2)->methodPointer(sliderTransform, rootTransform, false);
+
+		return gameObject;
+	}
+
+	Il2CppObject* GetDropdown(const char* name)
+	{
+		auto object = resources_load_hook(il2cpp_string_new("ui/parts/base/dropdowncommon"), GetRuntimeType("UnityEngine.CoreModule.dll", "UnityEngine", "GameObject"));
+
+		auto dropdownGameObject = il2cpp_symbols::get_method_pointer<Il2CppObject * (*)(Il2CppObject*)>("UnityEngine.CoreModule.dll", "UnityEngine", "Object", "Internal_CloneSingle", 1)(object);
+
+		auto getComponents = il2cpp_class_get_method_from_name_type<Il2CppArraySize_t<Il2CppObject*> *(*)(Il2CppObject*, Il2CppType*, bool, bool, bool, bool, Il2CppObject*)>(dropdownGameObject->klass, "GetComponentsInternal", 6)->methodPointer;
+		auto array = getComponents(dropdownGameObject, reinterpret_cast<Il2CppType*>(GetRuntimeType(
+			"umamusume.dll", "Gallop", "DropDownCommon")), true, true, false, false, nullptr);
+
+		auto dropDownCommon = array->vector[0];
+
+		auto optionList = il2cpp_class_get_method_from_name_type<Il2CppObject * (*)(Il2CppObject*)>(dropDownCommon->klass, "get_options", 0)->methodPointer(dropDownCommon);
+
+		auto optionClass = il2cpp_symbols::get_class("UnityEngine.UI.dll", "UnityEngine.UI", "Dropdown/OptionData");
+
+		auto option1 = il2cpp_object_new(optionClass);
+		il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, Il2CppString*)>(option1->klass, "set_text", 1)->methodPointer(option1, il2cpp_string_new("Option 1"));
+
+		auto option2 = il2cpp_object_new(optionClass);
+		il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, Il2CppString*)>(option2->klass, "set_text", 1)->methodPointer(option2, il2cpp_string_new("Option 2"));
+
+		auto array1 = il2cpp_array_new(optionClass, 2);
+
+		il2cpp_array_setref(array1, 0, option1);
+		il2cpp_array_setref(array1, 1, option2);
+
+		auto itemField = il2cpp_class_get_field_from_name_wrap(optionList->klass, "_items");
+		il2cpp_field_set_value(optionList, itemField, array1);
+
+		auto sizeField = il2cpp_class_get_field_from_name_wrap(optionList->klass, "_size");
+		int size = 2;
+		il2cpp_field_set_value(optionList, sizeField, &size);
+
+
+		il2cpp_class_get_method_from_name_type<Il2CppObject* (*)(Il2CppObject*, Il2CppObject*)>(dropDownCommon->klass, "set_options", 1)->methodPointer(dropDownCommon, optionList);
+
+		auto transform = GetRectTransform(dropdownGameObject);
+
+		il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, Vector2_t)>(transform->klass, "set_sizeDelta", 1)->methodPointer(transform, Vector2_t{ 0, 0 });
+
+		il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, Vector2_t)>(transform->klass, "set_anchorMax", 1)->methodPointer(transform, Vector2_t{ 1, 1 });
+
+		il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, Vector2_t)>(transform->klass, "set_anchorMin", 1)->methodPointer(transform, Vector2_t{ 0, 0 });
+
+		il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, Vector2_t)>(transform->klass, "set_pivot", 1)->methodPointer(transform, Vector2_t{ 0.5, 0.5 });
+
+		il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, Vector2_t)>(transform->klass, "set_anchoredPosition", 1)->methodPointer(transform, Vector2_t{ 0, 0 });
+
+		il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, Vector3_t)>(transform->klass, "set_localPosition", 1)->methodPointer(transform, Vector3_t{ 0, 0, -10 });
+
+		return dropdownGameObject;
+	}
+
+	Il2CppObject* GetCheckbox(const char* name)
+	{
+		auto object = resources_load_hook(il2cpp_string_new("ui/parts/base/checkbox"), GetRuntimeType("UnityEngine.CoreModule.dll", "UnityEngine", "GameObject"));
+
+		auto checkbox = il2cpp_symbols::get_method_pointer<Il2CppObject * (*)(Il2CppObject*)>("UnityEngine.CoreModule.dll", "UnityEngine", "Object", "Internal_CloneSingle", 1)(object);
+
+		return checkbox;
+	}
+
+	Il2CppObject* GetCheckboxWithText(const char* name)
+	{
+		auto object = resources_load_hook(il2cpp_string_new("ui/parts/base/checkboxwithtext"), GetRuntimeType("UnityEngine.CoreModule.dll", "UnityEngine", "GameObject"));
+
+		auto checkboxWithText = il2cpp_symbols::get_method_pointer<Il2CppObject * (*)(Il2CppObject*)>("UnityEngine.CoreModule.dll", "UnityEngine", "Object", "Internal_CloneSingle", 1)(object);
+
+		return checkboxWithText;
+	}
+
+	Il2CppObject* GetRadioButtonWithText(const char* name)
+	{
+		auto object = resources_load_hook(il2cpp_string_new("ui/parts/base/radiobuttonwithtext"), GetRuntimeType("UnityEngine.CoreModule.dll", "UnityEngine", "GameObject"));
+
+		auto radioButtonWithText = il2cpp_symbols::get_method_pointer<Il2CppObject * (*)(Il2CppObject*)>("UnityEngine.CoreModule.dll", "UnityEngine", "Object", "Internal_CloneSingle", 1)(object);
+
+		return radioButtonWithText;
 	}
 
 	void AddToLayout(Il2CppObject* parentRectTransform, vector<Il2CppObject*> objects)
@@ -5316,20 +5643,6 @@ namespace
 			il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, Il2CppObject*, bool)>(rectTransform->klass, "SetParent", 2)->methodPointer(rectTransform, parentRectTransform, false);
 			il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*)>(rectTransform->klass, "SetAsFirstSibling", 0)->methodPointer(rectTransform);
 		}
-	}
-
-	Il2CppObject* CreateGameObject()
-	{
-		auto gameObjectClass = il2cpp_symbols::get_class("UnityEngine.CoreModule.dll", "UnityEngine", "GameObject");
-		auto gameObject = il2cpp_object_new(gameObjectClass);
-		il2cpp_runtime_object_init(gameObject);
-
-		return gameObject;
-	}
-
-	Il2CppObject* AddComponent(Il2CppObject* gameObject, void* componentType)
-	{
-		return il2cpp_resolve_icall_type<Il2CppObject * (*)(Il2CppObject*, void*)>("UnityEngine.GameObject::Internal_AddComponentWithType()")(gameObject, componentType);
 	}
 
 	Il2CppObject* settingsDialog;
@@ -5350,6 +5663,10 @@ namespace
 				auto& configDocument = config::config_document;
 
 				configDocument["characterSystemTextCaption"].SetBool(GetOptionItemOnOffIsOn("character_system_text_caption"));
+
+				configDocument["championsLiveShowText"].SetBool(GetOptionItemOnOffIsOn("champions_live_show_text"));
+
+				g_champions_live_show_text = configDocument["championsLiveShowText"].GetBool();
 
 				config::write_config();
 
@@ -5480,9 +5797,20 @@ namespace
 				GetOptionItemTitle("Localify Settings"),
 				GetOptionItemOnOff("character_system_text_caption", "Character System Text caption"),
 				GetOptionItemButton("show_caption", "Show caption"),
+				GetOptionItemOnOff("champions_live_show_text", "Champions Live Show Text"),
+				GetOptionItemButton("github", "GitHub"),
 				GetOptionItemAttention("<color=#ff911c>Attention with Color</color>\nAttention"),
 				GetOptionItemSimple("Simple"),
 				GetOptionItemOnOff("on_off", "On Off"),
+				// GetOptionItem3ToggleVertical("Text"),
+				GetOptionItem3Toggle("Text"),
+				GetOptionItem2Toggle("Text"),
+				GetOptionSlider("Text"),
+				/*GetDropdown("dropdown"),
+				GetCheckbox("checkbox"),
+				GetCheckboxWithText("checkbox_with_text"),
+				GetRadioButtonWithText("radiobutton_with_text"),
+				GetSlider("slider"),*/
 				GetOptionItemInfo("<color=#ff911c>Info with Color</color>\nInfo"),
 				GetOptionItemInfo("<color=#ff911c>Info with Color</color>\nInfo"),
 				GetOptionItemInfo("<color=#ff911c>Info with Color</color>\nInfo"),
@@ -5500,18 +5828,29 @@ namespace
 		);
 
 		bool characterSystemTextCaption = false;
+		bool championsLiveShowText = false;
 
 		if (config::read_config())
 		{
 			auto& configDocument = config::config_document;
-		
+
 			if (configDocument.HasMember("characterSystemTextCaption"))
 			{
 				characterSystemTextCaption = configDocument["characterSystemTextCaption"].GetBool();
 			}
+
+			if (configDocument.HasMember("championsLiveShowText"))
+			{
+				championsLiveShowText = configDocument["championsLiveShowText"].GetBool();
+			}
 		}
 
 		SetOptionItemOnOffAction("character_system_text_caption", characterSystemTextCaption, *([](Il2CppObject*, bool isOn)
+			{
+				// TODO
+			}));
+
+		SetOptionItemOnOffAction("champions_live_show_text", championsLiveShowText, *([](Il2CppObject*, bool isOn)
 			{
 				// TODO
 			}));
@@ -5536,6 +5875,40 @@ namespace
 				}
 			}));
 
+		SetOptionItemButtonAction("github", *([](Il2CppObject*)
+			{
+				auto dialogData = il2cpp_object_new(
+					il2cpp_symbols::get_class("umamusume.dll", "Gallop",
+						"DialogCommon/Data"));
+				il2cpp_runtime_object_init(dialogData);
+
+				dialogData = reinterpret_cast<Il2CppObject * (*)(Il2CppObject * thisObj,
+					Il2CppString * headerTextArg,
+					Il2CppString * message,
+					Il2CppDelegate * onRight,
+					unsigned long leftTextId,
+					unsigned long rightTextId,
+					Il2CppDelegate * onLeft,
+					int dialogFormType)>(
+						il2cpp_class_get_method_from_name(dialogData->klass,
+							"SetSimpleTwoButtonMessage",
+							7)->methodPointer
+						)(dialogData,
+							localizeextension_text_hook(GetTextIdByName("Common0009")),
+							localizeextension_text_hook(GetTextIdByName("Home0073")),
+							CreateDelegate(nullptr, *[](Il2CppObject*)
+								{
+									il2cpp_symbols::get_method_pointer<void (*)(Il2CppString*)>("UnityEngine.CoreModule.dll", "UnityEngine", "Application", "OpenURL", 1)(il2cpp_string_new("https://github.com/Kimjio/umamusume-localify"));
+								}),
+							GetTextIdByName("Common0004"),
+							GetTextIdByName("Common0003"),
+							nullptr,
+							2);
+
+				il2cpp_symbols::get_method_pointer<Il2CppObject* (*)(Il2CppObject*)>(
+					"umamusume.dll", "Gallop", "DialogManager", "PushDialog", 1)(dialogData);
+			}));
+
 		auto contentSizeFitter = AddComponent(contentGameObject, GetRuntimeType("umamusume.dll", "Gallop", "LayoutGroupContentSizeFitter"));
 
 		auto _layoutField = il2cpp_class_get_field_from_name_wrap(contentSizeFitter->klass, "_layout");
@@ -5547,7 +5920,7 @@ namespace
 
 		il2cpp_field_set_value(dialogData, ContentsObjectField, gameObject);
 
-		settingsDialog = il2cpp_symbols::get_method_pointer<Il2CppObject* (*)(Il2CppObject* data)>("umamusume.dll", "Gallop", "DialogManager", "PushDialog", 1)(dialogData);
+		settingsDialog = il2cpp_symbols::get_method_pointer<Il2CppObject * (*)(Il2CppObject * data)>("umamusume.dll", "Gallop", "DialogManager", "PushDialog", 1)(dialogData);
 	}
 
 	void InitOptionLayout(Il2CppObject* parentRectTransform)

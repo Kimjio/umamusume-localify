@@ -576,7 +576,7 @@ int __stdcall DllMain(HINSTANCE, DWORD reason, LPVOID)
 		module_name.resize(MAX_PATH);
 		module_name.resize(GetModuleFileName(nullptr, module_name.data(), MAX_PATH));
 
-		filesystem::path module_path(module_name);
+		filesystem::path module_path(local::wide_u8(local::acp_wide(module_name)));
 
 		// check name
 		if (module_path.filename() != "umamusume.exe")
@@ -600,8 +600,8 @@ int __stdcall DllMain(HINSTANCE, DWORD reason, LPVOID)
 				DoStopSvc();
 			}
 
-			auto& uncheater_path = module_path.parent_path().append(module_path.filename().replace_extension().string().append("_Data\\StreamingAssets\\Uncheater"s).data());
-			auto& uncheater_path_new = module_path.parent_path().append(module_path.filename().replace_extension().string().append("_Data\\StreamingAssets\\_Uncheater"s).data());
+			auto uncheater_path = filesystem::path(module_path.parent_path().append(module_path.filename().replace_extension().string().append("_Data\\StreamingAssets\\Uncheater"s).data()));
+			auto uncheater_path_new = filesystem::path(module_path.parent_path().append(module_path.filename().replace_extension().string().append("_Data\\StreamingAssets\\_Uncheater"s).data()));
 
 			if (filesystem::exists(uncheater_path_new))
 			{
@@ -625,7 +625,7 @@ int __stdcall DllMain(HINSTANCE, DWORD reason, LPVOID)
 				{
 					cout << "Uncheater rename error: " << e.what() << endl;
 
-					auto& xnina_path = module_path.parent_path().append(module_path.filename().replace_extension().string().append("_Data\\StreamingAssets\\Uncheater\\xnina_x64.xem"s).data());
+					auto xnina_path = filesystem::path(module_path.parent_path().append(module_path.filename().replace_extension().string().append("_Data\\StreamingAssets\\Uncheater\\xnina_x64.xem"s).data()));
 					if (filesystem::exists(xnina_path))
 					{
 						try

@@ -65,6 +65,7 @@ il2cpp_thread_current_t il2cpp_thread_current;
 il2cpp_gchandle_new_t il2cpp_gchandle_new;
 il2cpp_gchandle_get_target_t il2cpp_gchandle_get_target;
 il2cpp_gchandle_free_t il2cpp_gchandle_free;
+il2cpp_gc_wbarrier_set_field_t il2cpp_gc_wbarrier_set_field;
 
 char* il2cpp_array_addr_with_size(void* array, int32_t size, uintptr_t idx)
 {
@@ -142,6 +143,7 @@ namespace il2cpp_symbols
 		RESOLVE_IMPORT(il2cpp_gchandle_new);
 		RESOLVE_IMPORT(il2cpp_gchandle_get_target);
 		RESOLVE_IMPORT(il2cpp_gchandle_free);
+		RESOLVE_IMPORT(il2cpp_gc_wbarrier_set_field);
 
 		il2cpp_domain = il2cpp_domain_get();
 	}
