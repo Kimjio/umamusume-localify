@@ -2209,6 +2209,15 @@ namespace
 
 				auto scaleMode = il2cpp_class_get_method_from_name_type<int (*)(Il2CppObject*)>(scaler->klass, "get_uiScaleMode", 0)->methodPointer(scaler);
 
+				if (uobject_get_name(scaler)->start_char == L"SystemCanvas"s ||
+					uobject_get_name(scaler)->start_char == L"GameCanvas"s ||
+					uobject_get_name(scaler)->start_char == L"NoImageEffectGameCanvas"s)
+				{
+					il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, int)>(scaler->klass, "set_uiScaleMode", 1)->methodPointer(scaler, 0);
+
+					scaleMode = 0;
+				}
+
 				if (g_freeform_window)
 				{
 					if (scaleMode == 1)
@@ -2222,6 +2231,7 @@ namespace
 						{
 							float scale = min(g_freeform_ui_scale_landscape, max(1, width / ratio_horizontal) * g_freeform_ui_scale_landscape);
 							il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, Vector2_t)>(scaler->klass, "set_referenceResolution", 1)->methodPointer(scaler, Vector2_t{ static_cast<float>(width / scale), static_cast<float>(height / scale) });
+
 						}
 					}
 
@@ -2387,10 +2397,18 @@ namespace
 
 				if (obj)
 				{
-					auto buffer = il2cpp_class_get_method_from_name_type<Il2CppObject * (*)(Il2CppObject*)>(obj->klass, "get_FrameBuffer", 0)->methodPointer(obj);
-					if (buffer)
+					auto get_FrameBuffer = il2cpp_class_get_method_from_name_type<Il2CppObject * (*)(Il2CppObject*)>(obj->klass, "get_FrameBuffer", 0);
+					if (get_FrameBuffer)
 					{
-						il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*)>(buffer->klass, "RemakeRenderTexture", 0)->methodPointer(buffer);
+						auto buffer = get_FrameBuffer->methodPointer(obj);
+						if (buffer)
+						{
+							il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*)>(buffer->klass, "RemakeRenderTexture", 0)->methodPointer(buffer);
+						}
+					}
+					else
+					{
+						break;
 					}
 				}
 			}
@@ -3154,13 +3172,32 @@ namespace
 				il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*)>(uiManager->klass, "ReleaseRenderTexture", 0)->methodPointer(uiManager);
 			}
 
-			auto _uiCommandBufferField = il2cpp_class_get_field_from_name_wrap(uiManager->klass, "_uiCommandBuffer");
-			Il2CppObject* _uiCommandBuffer;
-			il2cpp_field_get_value(uiManager, _uiCommandBufferField, &_uiCommandBuffer);
+			auto _uiToFrameBufferRenderCameraDataField = il2cpp_class_get_field_from_name_wrap(uiManager->klass, "_uiToFrameBufferRenderCameraData");
+			if (_uiToFrameBufferRenderCameraDataField)
+			{
+				Il2CppObject* _uiToFrameBufferRenderCameraData;
+				il2cpp_field_get_value(uiManager, _uiToFrameBufferRenderCameraDataField, &_uiToFrameBufferRenderCameraData);
 
-			auto _blitToFrameMaterialField = il2cpp_class_get_field_from_name_wrap(uiManager->klass, "_blitToFrameMaterial");
-			Il2CppObject* _blitToFrameMaterial;
-			il2cpp_field_get_value(uiManager, _blitToFrameMaterialField, &_blitToFrameMaterial);
+				il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, Il2CppObject*)>(_uiToFrameBufferRenderCameraData->klass, "set_ScreenTexture", 1)->methodPointer(_uiToFrameBufferRenderCameraData, renderTexture);
+			}
+			else
+			{
+				// Deprecated behavior
+				auto _uiCommandBufferField = il2cpp_class_get_field_from_name_wrap(uiManager->klass, "_uiCommandBuffer");
+				Il2CppObject* _uiCommandBuffer;
+				il2cpp_field_get_value(uiManager, _uiCommandBufferField, &_uiCommandBuffer);
+
+				auto _blitToFrameMaterialField = il2cpp_class_get_field_from_name_wrap(uiManager->klass, "_blitToFrameMaterial");
+				Il2CppObject* _blitToFrameMaterial;
+				il2cpp_field_get_value(uiManager, _blitToFrameMaterialField, &_blitToFrameMaterial);
+
+				if (_uiCommandBuffer)
+				{
+					auto dest = il2cpp_symbols::get_method_pointer<Il2CppObject * (*)(Il2CppClass*, int)>("UnityEngine.CoreModule.dll", "UnityEngine.Rendering", "RenderTargetIdentifier", "op_Implicit", 1)(
+						il2cpp_symbols::get_class("UnityEngine.CoreModule.dll", "UnityEngine.Rendering", "RenderTargetIdentifier"), 1);
+					il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, Il2CppObject*, Il2CppObject*, Il2CppObject*)>(_uiCommandBuffer->klass, "Blit", 3)->methodPointer(_uiCommandBuffer, renderTexture, dest, _blitToFrameMaterial);
+				}
+			}
 
 			auto _uiCameraField = il2cpp_class_get_field_from_name_wrap(uiManager->klass, "_uiCamera");
 			Il2CppObject* _uiCamera;
@@ -3178,12 +3215,6 @@ namespace
 			Il2CppObject* _uiToFrameBufferBlitCamera;
 			il2cpp_field_get_value(uiManager, _uiToFrameBufferBlitCameraField, &_uiToFrameBufferBlitCamera);
 
-			if (_uiCommandBuffer)
-			{
-				auto dest = il2cpp_symbols::get_method_pointer<Il2CppObject * (*)(Il2CppClass*, int)>("UnityEngine.CoreModule.dll", "UnityEngine.Rendering", "RenderTargetIdentifier", "op_Implicit", 1)(
-					il2cpp_symbols::get_class("UnityEngine.CoreModule.dll", "UnityEngine.Rendering", "RenderTargetIdentifier"), 1);
-				il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, Il2CppObject*, Il2CppObject*, Il2CppObject*)>(_uiCommandBuffer->klass, "Blit", 3)->methodPointer(_uiCommandBuffer, renderTexture, dest, _blitToFrameMaterial);
-			}
 			if (_uiCamera)
 			{
 				il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, Il2CppObject*)>(_uiCamera->klass, "set_targetTexture", 1)->methodPointer(_uiCamera, renderTexture);
@@ -6487,7 +6518,7 @@ namespace
 
 	void* NowLoading_Show_orig = nullptr;
 
-	void NowLoading_Show_hook(Il2CppObject* _this, int type, Il2CppDelegate* onComplete, Il2CppObject* overrideDuration, int easeType)
+	void NowLoading_Show_hook(Il2CppObject* _this, int type, Il2CppDelegate* onComplete, Il2CppObject* overrideDuration, int easeType, Il2CppObject* customInEffect, Il2CppObject* customLoopEffect, Il2CppObject* customOutEffect)
 	{
 		// NowLoadingOrientation
 		if (type == 2 && (g_freeform_window || !g_ui_loading_show_orientation_guide))
@@ -6500,7 +6531,8 @@ namespace
 			reinterpret_cast<decltype(NowLoading_Show_hook)*>(NowLoading_Show_orig)(
 				_this,
 				type,
-				onComplete, overrideDuration, easeType);
+				onComplete, overrideDuration, easeType,
+				customInEffect, customLoopEffect, customOutEffect);
 		}
 		if (onComplete && g_hide_now_loading)
 		{
@@ -6510,11 +6542,11 @@ namespace
 
 	void* NowLoading_Hide_orig = nullptr;
 
-	void NowLoading_Hide_hook(Il2CppObject* _this, Il2CppDelegate* onComplete, Il2CppObject* overrideDuration, int easeType)
+	void NowLoading_Hide_hook(Il2CppObject* _this, Il2CppDelegate* onComplete, Il2CppObject* overrideDuration, int easeType, Il2CppDelegate* onUnloadCustomEffectResourcesComplete)
 	{
 		if (!g_hide_now_loading)
 		{
-			reinterpret_cast<decltype(NowLoading_Hide_hook)*>(NowLoading_Hide_orig)(_this, onComplete, overrideDuration, easeType);
+			reinterpret_cast<decltype(NowLoading_Hide_hook)*>(NowLoading_Hide_orig)(_this, onComplete, overrideDuration, easeType, onUnloadCustomEffectResourcesComplete);
 		}
 		if (onComplete && g_hide_now_loading)
 		{
@@ -7631,11 +7663,11 @@ namespace
 
 		auto NowLoading_Show_addr = il2cpp_symbols::get_method_pointer(
 			"umamusume.dll",
-			"Gallop", "NowLoading", "Show", 4);
+			"Gallop", "NowLoading", "Show", 7);
 
 		auto NowLoading_Hide_addr = il2cpp_symbols::get_method_pointer(
 			"umamusume.dll",
-			"Gallop", "NowLoading", "Hide", 3);
+			"Gallop", "NowLoading", "Hide", 4);
 
 		auto BootSystem_Awake_addr = il2cpp_symbols::get_method_pointer(
 			"umamusume.dll",
