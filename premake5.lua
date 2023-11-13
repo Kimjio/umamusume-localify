@@ -89,12 +89,18 @@ workspace "umamusume-localify"
 
 	links {
 		"Shlwapi",
-		"./deps/discord_game_sdk/discord_game_sdk.dll.lib" 
+		"WinHttp",
+		"./deps/discord_game_sdk/discord_game_sdk.dll.lib"
 	}
 
 	includedirs {
 		"./src",
 		"%{prj.location}/src",
+	}
+
+	nuget {
+		"Microsoft.Web.WebView2:1.0.2151.40",
+		"Microsoft.Windows.ImplementationLibrary:1.0.231028.1"
 	}
 
 	dependencies.imports()

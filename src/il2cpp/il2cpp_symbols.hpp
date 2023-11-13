@@ -368,7 +368,7 @@ template<typename T>
 struct MethodInfo_t
 {
 	T methodPointer;
-	InvokerMethod invoker_method;
+	void* (*invoker_method)(T, const MethodInfo_t<T>*, void*, void**);
 	const char* name;
 	Il2CppClass* klass;
 	const Il2CppType* return_type;

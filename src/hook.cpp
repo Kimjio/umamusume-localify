@@ -1,6 +1,7 @@
 #include <stdinclude.hpp>
 
 #include <rapidjson/rapidjson.h>
+#include <rapidjson/error/en.h>
 
 #include <array>
 
@@ -12,6 +13,14 @@
 #include <regex>
 
 #include <psapi.h>
+
+#include <winhttp.h>
+
+#include <wrl.h>
+#include <wil/com.h>
+
+#include <WebView2.h>
+#include <WebView2EnvironmentOptions.h>
 
 #include <SQLiteCpp/SQLiteCpp.h>
 
@@ -29,6 +38,8 @@
 #include "config.hpp"
 
 using namespace std;
+
+using namespace Microsoft::WRL;
 
 namespace
 {
@@ -146,8 +157,6 @@ namespace
 	{
 		const auto result = reinterpret_cast<decltype(il2cpp_init_hook)*>(il2cpp_init_orig)(domain_name);
 		il2cpp_symbols::init(GetModuleHandle("GameAssembly.dll"));
-
-		il2cpp_thread_attach(il2cpp_domain_get());
 
 		auto InitializeApplication = il2cpp_symbols::get_method_pointer("umamusume.dll", "Gallop", "GameSystem", "InitializeApplication", -1);
 		MH_CreateHook(InitializeApplication, InitializeApplication_hook, &InitializeApplication_orig);
@@ -628,7 +637,7 @@ namespace
 	cef_cookie_manager_t* cef_cookie_manager_get_global_manager_hook(
 		struct _cef_completion_callback_t* callback)
 	{
-		auto manager = reinterpret_cast<decltype(cef_cookie_manager_get_global_manager)>(cef_cookie_manager_get_global_manager_orig)(callback);
+		auto manager = reinterpret_cast<decltype(cef_cookie_manager_get_global_manager_hook)*>(cef_cookie_manager_get_global_manager_orig)(callback);
 
 		if (manager)
 		{
@@ -639,27 +648,6 @@ namespace
 		}
 
 		return manager;
-	}
-
-	void* cef_initialize_orig = nullptr;
-	int cef_initialize_hook(const cef_main_args_t* args,
-		/*const*/ struct _cef_settings_t* settings,
-		struct _cef_app_t* application,
-		void* windows_sandbox_info)
-	{
-		return reinterpret_cast<decltype(cef_initialize)>(cef_initialize_orig)(args, settings, application, windows_sandbox_info);
-	}
-
-	void* cef_browser_host_create_browser_orig = nullptr;
-	int cef_browser_host_create_browser_hook(
-		const cef_window_info_t* windowInfo,
-		struct _cef_client_t* client,
-		const cef_string_t* url,
-		const struct _cef_browser_settings_t* settings,
-		struct _cef_dictionary_value_t* extra_info,
-		struct _cef_request_context_t* request_context)
-	{
-		return reinterpret_cast<decltype(cef_browser_host_create_browser)>(cef_browser_host_create_browser_orig)(windowInfo, client, url, settings, extra_info, request_context);
 	}
 
 	void* load_library_ex_w_orig = nullptr;
@@ -677,40 +665,10 @@ namespace
 
 			auto cef = GetModuleHandleW(L"libcef.dll");
 
-			cef_initialize = reinterpret_cast<decltype(cef_initialize)>(GetProcAddress(cef, "cef_initialize"));
+			const auto cef_cookie_manager_get_global_manager_addr = reinterpret_cast<decltype(cef_cookie_manager_get_global_manager_hook)*>(GetProcAddress(cef, "cef_cookie_manager_get_global_manager"));
 
-			cef_string_wide_set = reinterpret_cast<decltype(cef_string_wide_set)>(GetProcAddress(cef, "cef_string_wide_set"));
-
-			cef_string_utf8_set = reinterpret_cast<decltype(cef_string_utf8_set)>(GetProcAddress(cef, "cef_string_utf8_set"));
-
-			cef_string_utf16_set = reinterpret_cast<decltype(cef_string_utf16_set)>(GetProcAddress(cef, "cef_string_utf16_set"));
-
-			cef_browser_host_create_browser = reinterpret_cast<decltype(cef_browser_host_create_browser)>(GetProcAddress(cef, "cef_browser_host_create_browser"));
-
-			cef_string_list_alloc = reinterpret_cast<decltype(cef_string_list_alloc)>(GetProcAddress(cef, "cef_string_list_alloc"));
-
-			cef_string_list_size = reinterpret_cast<decltype(cef_string_list_size)>(GetProcAddress(cef, "cef_string_list_size"));
-
-			cef_string_list_value = reinterpret_cast<decltype(cef_string_list_value)>(GetProcAddress(cef, "cef_string_list_value"));
-
-			cef_string_list_append = reinterpret_cast<decltype(cef_string_list_append)>(GetProcAddress(cef, "cef_string_list_append"));
-
-			cef_string_list_clear = reinterpret_cast<decltype(cef_string_list_clear)>(GetProcAddress(cef, "cef_string_list_clear"));
-
-			cef_string_list_free = reinterpret_cast<decltype(cef_string_list_free)>(GetProcAddress(cef, "cef_string_list_free"));
-
-			cef_string_list_copy = reinterpret_cast<decltype(cef_string_list_copy)>(GetProcAddress(cef, "cef_string_list_copy"));
-
-			cef_cookie_manager_get_global_manager = reinterpret_cast<decltype(cef_cookie_manager_get_global_manager)>(GetProcAddress(cef, "cef_cookie_manager_get_global_manager"));
-
-			MH_CreateHook(cef_initialize, cef_initialize_hook, &cef_initialize_orig);
-			MH_EnableHook(cef_initialize);
-
-			MH_CreateHook(cef_browser_host_create_browser, cef_browser_host_create_browser_hook, &cef_browser_host_create_browser_orig);
-			MH_EnableHook(cef_browser_host_create_browser);
-
-			MH_CreateHook(cef_cookie_manager_get_global_manager, cef_cookie_manager_get_global_manager_hook, &cef_cookie_manager_get_global_manager_orig);
-			MH_EnableHook(cef_cookie_manager_get_global_manager);
+			MH_CreateHook(cef_cookie_manager_get_global_manager_addr, cef_cookie_manager_get_global_manager_hook, &cef_cookie_manager_get_global_manager_orig);
+			MH_EnableHook(cef_cookie_manager_get_global_manager_addr);
 
 			return KakaoGame;
 		}
@@ -734,6 +692,16 @@ namespace
 		}
 
 		return hWnd;
+	}
+
+	HINSTANCE hInstance;
+
+	void* UnityMain_orig = nullptr;
+
+	int __stdcall UnityMain_hook(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPWSTR lpCmdLine, int nShowCmd)
+	{
+		::hInstance = hInstance;
+		return reinterpret_cast<decltype(UnityMain_hook)*>(UnityMain_orig)(hInstance, hPrevInstance, lpCmdLine, nShowCmd);
 	}
 
 	void* load_library_w_orig = nullptr;
@@ -7165,6 +7133,533 @@ namespace
 		reinterpret_cast<decltype(Input_get_mousePosition_Injected_hook)*>(Input_get_mousePosition_Injected_orig)(out);
 	}
 
+	string GetLoginURL()
+	{
+		DWORD dwSize = 0;
+		DWORD dwDownloaded = 0;
+		LPSTR pszOutBuffer;
+		BOOL  bResults = FALSE;
+		HINTERNET  hSession = NULL,
+			hConnect = NULL,
+			hRequest = NULL;
+
+		// Use WinHttpOpen to obtain a session handle.
+		hSession = WinHttpOpen(L"WinHTTP/1.0",
+			WINHTTP_ACCESS_TYPE_DEFAULT_PROXY,
+			WINHTTP_NO_PROXY_NAME,
+			WINHTTP_NO_PROXY_BYPASS, 0);
+
+		// Specify an HTTP server.
+		if (hSession)
+			hConnect = WinHttpConnect(hSession, L"apidgp-gameplayer.games.dmm.com",
+				INTERNET_DEFAULT_HTTPS_PORT, 0);
+
+		auto acceptType = L"application/json";
+
+		// Create an HTTP request handle.
+		if (hConnect)
+			hRequest = WinHttpOpenRequest(hConnect, L"GET", L"/v5/loginurl",
+				NULL, WINHTTP_NO_REFERER,
+				&acceptType,
+				WINHTTP_FLAG_SECURE);
+
+		// Send a request.
+		if (hRequest)
+			bResults = WinHttpSendRequest(hRequest,
+				WINHTTP_NO_ADDITIONAL_HEADERS, 0,
+				WINHTTP_NO_REQUEST_DATA, 0,
+				0, 0);
+
+		// End the request.
+		if (bResults)
+			bResults = WinHttpReceiveResponse(hRequest, NULL);
+
+		string jsonData;
+
+		// Keep checking for data until there is nothing left.
+		if (bResults)
+		{
+			do
+			{
+				// Check for available data.
+				dwSize = 0;
+				if (!WinHttpQueryDataAvailable(hRequest, &dwSize))
+				{
+					cout << "Error " << GetLastError() << " in WinHttpQueryDataAvailable." << endl;
+				}
+
+				// Allocate space for the buffer.
+				pszOutBuffer = new char[dwSize + 1];
+				if (!pszOutBuffer)
+				{
+					cout << "Out of memory" << endl;
+					dwSize = 0;
+				}
+				else
+				{
+					// Read the data.
+					ZeroMemory(pszOutBuffer, dwSize + 1);
+
+					if (!WinHttpReadData(hRequest, (LPVOID)pszOutBuffer,
+						dwSize, &dwDownloaded))
+					{
+						cout << "Error " << GetLastError() << " in WinHttpReadData." << endl;
+					}
+					else
+					{
+						if (strlen(pszOutBuffer) > 0)
+						{
+							jsonData = pszOutBuffer;
+						}
+					}
+
+					// Free the memory allocated to the buffer.
+					delete[] pszOutBuffer;
+				}
+			} while (dwSize > 0);
+		}
+
+
+		// Report any errors.
+		if (!bResults)
+		{
+			cout << "Error " << GetLastError() << " has occurred." << endl;
+		}
+
+		// Close any open handles.
+		if (hRequest) WinHttpCloseHandle(hRequest);
+		if (hConnect) WinHttpCloseHandle(hConnect);
+		if (hSession) WinHttpCloseHandle(hSession);
+
+		rapidjson::Document document;
+
+		document.Parse(jsonData.data());
+
+		if (document.HasParseError())
+		{
+			cout << "Response JSON parse error: " << GetParseError_En(document.GetParseError()) << " (" << document.GetErrorOffset() << ")" << endl;
+			return "";
+		}
+
+		if (document.HasMember("result_code") && document["result_code"].GetInt() == 100)
+		{
+			return string(document["data"].GetObjectA()["url"].GetString());
+		}
+
+		return "";
+	}
+
+	string GetGameArgs(wstring sessionId, wstring secureId)
+	{
+		DWORD dwSize = 0;
+		DWORD dwDownloaded = 0;
+		LPSTR pszOutBuffer;
+		BOOL  bResults = FALSE;
+		HINTERNET  hSession = NULL,
+			hConnect = NULL,
+			hRequest = NULL;
+
+		// Use WinHttpOpen to obtain a session handle.
+		hSession = WinHttpOpen(L"WinHTTP/1.0",
+			WINHTTP_ACCESS_TYPE_DEFAULT_PROXY,
+			WINHTTP_NO_PROXY_NAME,
+			WINHTTP_NO_PROXY_BYPASS, 0);
+
+		// Specify an HTTP server.
+		if (hSession)
+		{
+			hConnect = WinHttpConnect(hSession, L"apidgp-gameplayer.games.dmm.com",
+				INTERNET_DEFAULT_HTTPS_PORT, 0);
+		}
+		else
+		{
+			cout << "Connect create failed" << endl;
+		}
+
+		auto acceptType = L"application/json";
+
+		// Create an HTTP request handle.
+		if (hConnect)
+			hRequest = WinHttpOpenRequest(hConnect, L"POST", L"/v5/launch/cl",
+				NULL, WINHTTP_NO_REFERER,
+				WINHTTP_DEFAULT_ACCEPT_TYPES,
+				WINHTTP_FLAG_SECURE);
+
+		// Send a request.
+		if (hRequest)
+		{
+			WinHttpAddRequestHeaders(hRequest, L"Client-App: DMMGamePlayer5", static_cast<unsigned long>(-1), WINHTTP_ADDREQ_FLAG_ADD);
+			WinHttpAddRequestHeaders(hRequest, L"Client-version: 5.2.31", static_cast<unsigned long>(-1), WINHTTP_ADDREQ_FLAG_ADD);
+			WinHttpAddRequestHeaders(hRequest, L"Content-Type: application/json", static_cast<unsigned long>(-1), WINHTTP_ADDREQ_FLAG_ADD);
+
+			wstringstream sessionCookieStream;
+			sessionCookieStream << L"Cookie: login_session_id=" << sessionId << L";login_secure_id=" << secureId;
+
+			auto body = R"({"product_id":"umamusume","game_type":"GCL","launch_type":"LIB","game_os":"win","user_os":"win","mac_address":"null","hdd_serial":"null","motherboard":"null"})"s;
+
+			WinHttpAddRequestHeaders(hRequest, sessionCookieStream.str().data(), -1, WINHTTP_ADDREQ_FLAG_ADD);
+
+			bResults = WinHttpSendRequest(hRequest,
+				NULL, NULL,
+				reinterpret_cast<LPVOID>(const_cast<LPSTR>(body.data())), body.size(),
+				body.size(), NULL);
+		}
+		else
+		{
+			cout << "Request create failed" << endl;
+		}
+
+		// End the request.
+		if (bResults)
+			bResults = WinHttpReceiveResponse(hRequest, NULL);
+
+		string jsonData;
+
+		// Keep checking for data until there is nothing left.
+		if (bResults)
+		{
+			do
+			{
+				// Check for available data.
+				dwSize = 0;
+				if (!WinHttpQueryDataAvailable(hRequest, &dwSize))
+				{
+					cout << "Error " << GetLastError() << " in WinHttpQueryDataAvailable." << endl;
+				}
+
+				// Allocate space for the buffer.
+				pszOutBuffer = new char[dwSize + 1];
+				if (!pszOutBuffer)
+				{
+					cout << "Out of memory" << endl;
+					dwSize = 0;
+				}
+				else
+				{
+					// Read the data.
+					ZeroMemory(pszOutBuffer, dwSize + 1);
+
+					if (!WinHttpReadData(hRequest, (LPVOID)pszOutBuffer,
+						dwSize, &dwDownloaded))
+					{
+						cout << "Error " << GetLastError() << " in WinHttpReadData." << endl;
+					}
+					else
+					{
+						if (strlen(pszOutBuffer) > 0)
+						{
+							jsonData = pszOutBuffer;
+						}
+					}
+
+					// Free the memory allocated to the buffer.
+					delete[] pszOutBuffer;
+				}
+			} while (dwSize > 0);
+		}
+
+
+		// Report any errors.
+		if (!bResults)
+		{
+			cout << "Error " << GetLastError() << " has occurred." << endl;
+		}
+
+		// Close any open handles.
+		if (hRequest) WinHttpCloseHandle(hRequest);
+		if (hConnect) WinHttpCloseHandle(hConnect);
+		if (hSession) WinHttpCloseHandle(hSession);
+
+		rapidjson::Document document;
+
+		document.Parse(jsonData.data());
+
+		if (document.HasParseError())
+		{
+			cout << "Response JSON parse error: " << GetParseError_En(document.GetParseError()) << " (" << document.GetErrorOffset() << ")" << endl;
+			return "";
+		}
+
+		if (document.HasMember("result_code") && document["result_code"].GetInt() == 100)
+		{
+			return string(document["data"].GetObjectA()["execute_args"].GetString());
+		}
+
+		return "";
+	}
+
+	wil::com_ptr<ICoreWebView2Controller> webviewController;
+	wil::com_ptr<ICoreWebView2> webview;
+
+	bool isLoginWebViewOpen = false;
+
+	string viewerId;
+	string onetimeToken;
+
+	void* Certification_initDmmPlatformData_orig = nullptr;
+
+	void Certification_initDmmPlatformData_hook()
+	{
+		reinterpret_cast<decltype(Certification_initDmmPlatformData_hook)*>(Certification_initDmmPlatformData_orig)();
+
+		if (!viewerId.empty() && !onetimeToken.empty())
+		{
+			il2cpp_symbols::get_method_pointer<void (*)(Il2CppString*)>("umamusume.dll", "Gallop", "Certification", "set_dmmViewerId", 1)(il2cpp_string_new(viewerId.data()));
+			il2cpp_symbols::get_method_pointer<void (*)(Il2CppString*)>("umamusume.dll", "Gallop", "Certification", "set_dmmOnetimeToken", 1)(il2cpp_string_new(onetimeToken.data()));
+		}
+	}
+
+	LRESULT CALLBACK WebViewWndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
+	{
+		switch (message)
+		{
+		case WM_SIZE:
+			if (webviewController != nullptr) {
+				RECT bounds;
+				GetClientRect(hWnd, &bounds);
+				webviewController->put_Bounds(bounds);
+			};
+			break;
+		case WM_DESTROY:
+			isLoginWebViewOpen = false;
+			PostQuitMessage(0);
+			break;
+		default:
+			return DefWindowProc(hWnd, message, wParam, lParam);
+			break;
+		}
+
+		return NULL;
+	}
+
+	DWORD WINAPI WebViewThread(LPVOID)
+	{
+		IsGUIThread(TRUE);
+
+		WNDCLASSEX wcex = {};
+
+		wcex.cbSize = sizeof(WNDCLASSEX);
+		wcex.style = CS_HREDRAW | CS_VREDRAW;
+		wcex.lpfnWndProc = WebViewWndProc;
+		wcex.cbClsExtra = 0;
+		wcex.cbWndExtra = 0;
+		wcex.hInstance = hInstance;
+		wcex.hIcon = LoadIcon(hInstance, (LPCSTR)0x67);
+		wcex.hCursor = LoadCursor(NULL, IDC_ARROW);
+		wcex.hbrBackground = reinterpret_cast<HBRUSH>(COLOR_WINDOW + 1);
+		wcex.lpszMenuName = NULL;
+		wcex.lpszClassName = "WebViewWindow";
+		wcex.hIconSm = LoadIcon(wcex.hInstance, reinterpret_cast<LPCSTR>(0x67));
+
+		RegisterClassEx(&wcex);
+
+		SetThreadDpiAwarenessContext(DPI_AWARENESS_CONTEXT_PER_MONITOR_AWARE);
+
+		const auto hWnd = CreateWindowEx(NULL, "WebViewWindow", "Login DMM",
+			WS_OVERLAPPEDWINDOW ^ WS_MAXIMIZEBOX ^ WS_MINIMIZEBOX,
+			CW_USEDEFAULT, CW_USEDEFAULT,
+			900, 900,
+			nullptr, NULL, hInstance, NULL);
+
+		ShowWindow(hWnd, SW_SHOWDEFAULT);
+		UpdateWindow(hWnd);
+
+		auto envOptions = Make<CoreWebView2EnvironmentOptions>();
+#ifdef _DEBUG
+		envOptions->put_AdditionalBrowserArguments(L"--enable-logging --v=1");
+#endif
+
+		auto loginUrl = GetLoginURL();
+
+		CreateCoreWebView2EnvironmentWithOptions(nullptr, L"./WebView2", envOptions.Get(),
+			Callback<ICoreWebView2CreateCoreWebView2EnvironmentCompletedHandler>(
+				[hWnd, loginUrl](HRESULT result, ICoreWebView2Environment* env) -> HRESULT
+				{
+					env->CreateCoreWebView2Controller(hWnd, Callback<ICoreWebView2CreateCoreWebView2ControllerCompletedHandler>(
+						[env, hWnd, loginUrl](HRESULT result, ICoreWebView2Controller* controller) -> HRESULT
+						{
+							if (controller != nullptr)
+							{
+								webviewController = controller;
+								webviewController->get_CoreWebView2(&webview);
+							}
+							else
+							{
+								return S_OK;
+							}
+
+							ICoreWebView2Settings* settings;
+							webview->get_Settings(&settings);
+							settings->put_IsScriptEnabled(TRUE);
+							settings->put_AreDefaultScriptDialogsEnabled(TRUE);
+							settings->put_IsWebMessageEnabled(TRUE);
+
+							RECT bounds;
+							GetClientRect(hWnd, &bounds);
+
+							webviewController->put_Bounds(bounds);
+
+							webview->Navigate(local::u8_wide(loginUrl).data());
+
+#ifdef _DEBUG
+							webview->OpenDevToolsWindow();
+#endif
+
+							EventRegistrationToken token;
+							webview->add_NavigationStarting(Callback<ICoreWebView2NavigationStartingEventHandler>(
+								[hWnd](ICoreWebView2* webview, ICoreWebView2NavigationStartingEventArgs* args) -> HRESULT
+								{
+									LPWSTR uri;
+									args->get_Uri(&uri);
+									std::wstring source(uri);
+
+									if (source == L"dmmgameplayer://showLibrary")
+									{
+
+										ICoreWebView2_2* webView2;
+										webview->QueryInterface<ICoreWebView2_2>(&webView2);
+
+										ICoreWebView2CookieManager* cookieManager;
+										webView2->get_CookieManager(&cookieManager);
+
+										cookieManager->GetCookies(L"https://accounts.dmm.com", Callback<ICoreWebView2GetCookiesCompletedHandler>(
+											[hWnd](
+												HRESULT result,
+												ICoreWebView2CookieList* cookieList)
+											{
+												UINT count;
+												cookieList->get_Count(&count);
+
+
+												wstring sessionId;
+												wstring secureId;
+
+
+												for (int i = 0; i < count; i++)
+												{
+													ICoreWebView2Cookie* cookie;
+													cookieList->GetValueAtIndex(i, &cookie);
+
+													LPWSTR name;
+													cookie->get_Name(&name);
+
+													LPWSTR value;
+
+													if (name == L"login_session_id"s)
+													{
+														cookie->get_Value(&value);
+														sessionId = value;
+													}
+
+													if (name == L"login_secure_id"s)
+													{
+														cookie->get_Value(&value);
+														secureId = value;
+													}
+
+													if (!sessionId.empty() && !secureId.empty())
+													{
+														break;
+													}
+												}
+
+												auto gameArgs = GetGameArgs(sessionId, secureId);
+
+												stringstream gameArgsStream(gameArgs);
+												string segment;
+												vector<string> split;
+												while (getline(gameArgsStream, segment, ' '))
+												{
+													split.emplace_back(segment);
+												}
+
+												stringstream singleArgStream1(split[0]);
+												vector<string> split1;
+												while (getline(singleArgStream1, segment, '='))
+												{
+													split1.emplace_back(segment);
+												}
+
+												viewerId = string(split1.back());
+
+												split1.clear();
+
+												stringstream singleArgStream2(split[1]);
+												while (getline(singleArgStream2, segment, '='))
+												{
+													split1.emplace_back(segment);
+												}
+
+												onetimeToken = string(split1.back());
+
+												il2cpp_symbols::get_method_pointer<void (*)(Il2CppString*)>("umamusume.dll", "Gallop", "Certification", "set_dmmViewerId", 1)(il2cpp_string_new(viewerId.data()));
+												il2cpp_symbols::get_method_pointer<void (*)(Il2CppString*)>("umamusume.dll", "Gallop", "Certification", "set_dmmOnetimeToken", 1)(il2cpp_string_new(onetimeToken.data()));
+
+												webviewController->Close();
+												PostMessage(hWnd, WM_CLOSE, NULL, NULL);
+
+												isLoginWebViewOpen = false;
+
+												return S_OK;
+											}).Get());
+									}
+
+									if (source.substr(0, 5) != L"https")
+									{
+										args->put_Cancel(true);
+									}
+									return S_OK;
+								}).Get(), &token);
+
+
+							return S_OK;
+						}
+					).Get());
+					return S_OK;
+				}
+		).Get());
+
+
+		MSG msg;
+		while (GetMessage(&msg, nullptr, 0, 0) && isLoginWebViewOpen)
+		{
+			TranslateMessage(&msg);
+			DispatchMessage(&msg);
+		}
+
+		return msg.wParam;
+	}
+
+	void* TitleViewController_OnClickPushStart_orig = nullptr;
+
+	void TitleViewController_OnClickPushStart_hook(Il2CppObject* _this)
+	{
+		const auto dmmId = il2cpp_symbols::get_method_pointer<Il2CppString * (*)()>("umamusume.dll", "Gallop", "Certification", "get_dmmViewerId", -1)();
+		const auto dmmOnetimeToken = il2cpp_symbols::get_method_pointer<Il2CppString * (*)()>("umamusume.dll", "Gallop", "Certification", "get_dmmOnetimeToken", -1)();
+
+		if (dmmId && !wstring(dmmId->start_char).empty() &&
+			dmmOnetimeToken && !wstring(dmmOnetimeToken->start_char).empty())
+		{
+			reinterpret_cast<decltype(TitleViewController_OnClickPushStart_hook)*>(TitleViewController_OnClickPushStart_orig)(_this);
+		}
+		else
+		{
+			const auto AudioManager = GetSingletonInstance(il2cpp_symbols::get_class("umamusume.dll", "Gallop", "AudioManager"));
+
+			il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*)>(AudioManager->klass, "PlaySe_UIDecide", 0)->methodPointer(AudioManager);
+
+			if (!isLoginWebViewOpen)
+			{
+				isLoginWebViewOpen = true;
+
+				CoInitializeEx(nullptr, COINIT_APARTMENTTHREADED);
+
+				CreateThread(NULL, 0, reinterpret_cast<LPTHREAD_START_ROUTINE>(WebViewThread), NULL, NULL, NULL);
+			}
+
+		}
+	}
+
 	void adjust_size()
 	{
 		thread([]()
@@ -7725,9 +8220,17 @@ namespace
 
 		auto Input_get_mousePosition_Injected_addr = il2cpp_resolve_icall("UnityEngine.Input::get_mousePosition_Injected(UnityEngine.Vector3&)");
 
+		auto TitleViewController_OnClickPushStart_addr = il2cpp_symbols::get_method_pointer("umamusume.dll", "Gallop", "TitleViewController", "OnClickPushStart", 0);
+
+		auto Certification_initDmmPlatformData_addr = il2cpp_symbols::get_method_pointer("umamusume.dll", "Gallop", "Certification", "initDmmPlatformData", -1);
+
 		auto load_scene_internal_addr = il2cpp_resolve_icall("UnityEngine.SceneManagement.SceneManager::LoadSceneAsyncNameIndexInternal_Injected(System.String,System.Int32,UnityEngine.SceneManagement.LoadSceneParameters&,System.bool)");
 
 #pragma endregion
+
+		ADD_HOOK(Certification_initDmmPlatformData, "Gallop.Certification::initDmmPlatformData at %p\n");
+
+		ADD_HOOK(TitleViewController_OnClickPushStart, "Gallop.TitleViewController::OnClickPushStart at %p\n");
 
 		ADD_HOOK(Object_Internal_CloneSingleWithParent, "UnityEngine.Object::Internal_CloneSingleWithParent at %p\n");
 
@@ -7759,7 +8262,7 @@ namespace
 
 		ADD_HOOK(NowLoading_Hide, "Gallop.NowLoading::Hide at %p\n");
 
-		ADD_HOOK(PathResolver_GetLocalPath, "Cyan.Loader.PathResolver::GetLocalPath at %p\n");
+		// ADD_HOOK(PathResolver_GetLocalPath, "Cyan.Loader.PathResolver::GetLocalPath at %p\n");
 
 		ADD_HOOK(get_preferred_width, "UnityEngine.TextGenerator::GetPreferredWidth at %p\n");
 
@@ -8142,6 +8645,9 @@ namespace
 			{
 				assetbundlePath.insert(0, ((wstring)filesystem::current_path().native()).append(L"/"));
 			}
+
+			cout << "Loading asset: " << local::wide_u8(assetbundlePath) << endl;
+
 			fontAssets = load_from_file(il2cpp_string_new_utf16(assetbundlePath.data(), assetbundlePath.length()));
 
 			if (!fontAssets && filesystem::exists(assetbundlePath))
@@ -8152,7 +8658,7 @@ namespace
 
 		if (fontAssets)
 		{
-			cout << "Asset loaded: " << fontAssets << "\n";
+			cout << "Asset loaded: " << fontAssets << endl;
 		}
 
 		if (!g_replace_assetbundle_file_path.empty())
@@ -8163,6 +8669,8 @@ namespace
 				assetbundlePath.insert(0, ((wstring)filesystem::current_path().native()).append(L"/"));
 			}
 
+			cout << "Loading replacement AssetBundle: " << local::wide_u8(assetbundlePath) << endl;
+
 			auto assets = load_from_file(il2cpp_string_new_utf16(assetbundlePath.data(), assetbundlePath.length()));
 
 			if (!assets && filesystem::exists(assetbundlePath))
@@ -8171,7 +8679,7 @@ namespace
 			}
 			else
 			{
-				cout << "Replacement AssetBundle loaded: " << assets << "\n";
+				cout << "Replacement AssetBundle loaded: " << assets << endl;
 				replaceAssets.emplace_back(assets);
 			}
 		}
@@ -8186,6 +8694,8 @@ namespace
 				{
 					assetbundlePath.insert(0, ((wstring)filesystem::current_path().native()).append(L"/"));
 				}
+
+				cout << "Loading replacement AssetBundle: " << local::wide_u8(assetbundlePath) << endl;
 
 				auto assets = load_from_file(il2cpp_string_new_utf16(assetbundlePath.data(), assetbundlePath.length()));
 
@@ -9077,6 +9587,12 @@ bool init_hook_base()
 		MH_CreateHook(ExitProcess, ExitProcess_hook, &ExitProcess_orig);
 		MH_EnableHook(ExitProcess);
 	}
+
+	auto UnityPlayer = GetModuleHandle("UnityPlayer.dll");
+	auto UnityMain_addr = GetProcAddress(UnityPlayer, "UnityMain");
+
+	MH_CreateHook(UnityMain_addr, UnityMain_hook, &UnityMain_orig);
+	MH_EnableHook(UnityMain_addr);
 
 	return true;
 }
