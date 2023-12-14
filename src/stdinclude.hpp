@@ -62,6 +62,8 @@ extern std::string g_tmpro_font_asset_name;
 extern bool g_auto_fullscreen;
 extern int g_graphics_quality;
 extern int g_anti_aliasing;
+extern int g_anisotropic_filtering;
+extern int g_vsync_count;
 extern bool g_ui_loading_show_orientation_guide;
 extern std::string g_custom_title_name;
 extern std::unordered_map<std::string, ReplaceAsset> g_replace_assets;

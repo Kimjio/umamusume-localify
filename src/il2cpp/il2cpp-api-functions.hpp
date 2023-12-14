@@ -28,3 +28,8 @@ template<typename T>
 Il2CppArraySize_t<T>* il2cpp_array_new_type(Il2CppClass* klass, uintptr_t count) {
 	return reinterpret_cast<Il2CppArraySize_t<T>*>(il2cpp_array_new(klass, count));
 }
+
+template<typename T>
+T il2cpp_runtime_invoke_type(const MethodInfo* method, Il2CppObject* obj, void** params, Il2CppException** exc) {
+	return reinterpret_cast<T(*)(const MethodInfo * method, void* obj, void** params, Il2CppException * *exc)>(il2cpp_runtime_invoke)(method, obj, params, exc);
+}

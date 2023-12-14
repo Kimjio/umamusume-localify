@@ -46,13 +46,14 @@ workspace "umamusume-localify"
 	}
 
 	toolset "clang"
-	buildoptions "/std:c++latest"
 	systemversion "latest"
 	symbols "On"
 	staticruntime "On"
 	editandcontinue "Off"
 	warnings "Off"
 	characterset "ASCII"
+	cppdialect "C++20"
+	cdialect "C17"
 
 	flags {
 		"NoIncrementalLink",
@@ -90,6 +91,7 @@ workspace "umamusume-localify"
 	links {
 		"Shlwapi",
 		"WinHttp",
+		"ntdll",
 		"./deps/discord_game_sdk/discord_game_sdk.dll.lib"
 	}
 

@@ -1,5 +1,7 @@
 #include <stdinclude.hpp>
 
+#include <Shlobj.h>
+
 #include <rapidjson/rapidjson.h>
 #include <rapidjson/error/en.h>
 
@@ -81,6 +83,29 @@ namespace
 		printf("\n\n");
 	}
 
+	void Exit()
+	{
+		if (Game::CurrentGameRegion == Game::Region::KOR)
+		{
+			auto module_path = filesystem::current_path();
+			auto uncheater_path_new = module_path.string().append("\\umamusume_Data\\StreamingAssets\\_Uncheater"s).data();
+			auto uncheater_path = module_path.string().append("\\umamusume_Data\\StreamingAssets\\Uncheater"s).data();
+			if (filesystem::exists(uncheater_path_new))
+			{
+				try
+				{
+					filesystem::rename(uncheater_path_new, uncheater_path);
+				}
+				catch (exception& e)
+				{
+					cout << "Uncheater rename error: " << e.what() << endl;
+				}
+			}
+		}
+
+		TerminateProcess(GetCurrentProcess(), 0);
+	}
+
 	void* InitializeApplication_orig = nullptr;
 	void InitializeApplication_hook()
 	{
@@ -99,76 +124,58 @@ namespace
 
 	void Application_Quit_hook(int exitCode)
 	{
-		auto StackTrace = il2cpp_symbols::get_class("mscorlib.dll", "System.Diagnostics", "StackFrame");
-		auto trace = il2cpp_object_new(StackTrace);
-		il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, int, bool)>(trace->klass, ".ctor", 2)->methodPointer(trace, 0, false);
-
-		auto methodRef = il2cpp_class_get_method_from_name_type<Il2CppObject * (*)(Il2CppObject*)>(trace->klass, "GetMethod", 0)->methodPointer(trace);
-
-		auto method = il2cpp_method_get_from_reflection(methodRef);
-
-		if (string(method->klass->name).find("Uncheater") != string::npos ||
-			string(method->klass->name).find("Boot") != string::npos ||
-			string(method->name).find("Uncheater") != string::npos)
+		if (Game::CurrentGameRegion == Game::Region::KOR)
 		{
-			return;
+			auto StackTrace = il2cpp_symbols::get_class("mscorlib.dll", "System.Diagnostics", "StackFrame");
+			auto trace = il2cpp_object_new(StackTrace);
+			il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, int, bool)>(trace->klass, ".ctor", 2)->methodPointer(trace, 0, false);
+
+			auto methodRef = il2cpp_class_get_method_from_name_type<Il2CppObject * (*)(Il2CppObject*)>(trace->klass, "GetMethod", 0)->methodPointer(trace);
+
+			auto method = il2cpp_method_get_from_reflection(methodRef);
+
+			if (string(method->klass->name).find("Uncheater") != string::npos ||
+				string(method->klass->name).find("Boot") != string::npos ||
+				string(method->name).find("Uncheater") != string::npos)
+			{
+				return;
+			}
 		}
 
-		reinterpret_cast<decltype(Application_Quit_hook)*>(Application_Quit_orig)(exitCode);
+		Exit();
 	}
 
-	extern "C" NTSTATUS NtProtectVirtualMemory(
-		IN      HANDLE      ProcessHandle,
-		IN OUT  PVOID * BaseAddress,
-		IN OUT  PSIZE_T     NumberOfBytesToProtect,
-		IN      ULONG       NewAccessProtection,
-		OUT     PULONG      OldAccessProtection);
+	void PrintStackTrace();
 
-	void* VirtualProtect_orig = nullptr;
+	void* set_resolution_orig;
+	void set_resolution_hook(int width, int height, int fullscreenMode, int perferredRefreshRate);
 
-	BOOL
-		WINAPI
-		VirtualProtect_hook(
-			_In_  LPVOID lpAddress,
-			_In_  SIZE_T dwSize,
-			_In_  DWORD flNewProtect,
-			_Out_ PDWORD lpflOldProtect
-		)
+	void init_il2cpp(bool attachIl2CppThread = false)
 	{
-		if (flNewProtect == (PAGE_EXECUTE_READ | PAGE_GUARD))
-		{
-			return reinterpret_cast<decltype(VirtualProtect)*>(VirtualProtect_orig)(lpAddress, dwSize, PAGE_EXECUTE_READ | PAGE_GUARD, lpflOldProtect);
-		}
-
-		HANDLE realHandle;
-
-		DuplicateHandle(GetCurrentProcess(), GetCurrentProcess(), GetCurrentProcess(), &realHandle, 0, TRUE, DUPLICATE_SAME_ACCESS);
-
-		auto res = NtProtectVirtualMemory(realHandle, &lpAddress, &dwSize, flNewProtect, lpflOldProtect);
-		if (res != 0)
-		{
-			cout << "NtProtectVirtualMemory res: " << hex << res << dec << endl;
-		}
-		return res == 0;
-	}
-
-	void* il2cpp_init_orig = nullptr;
-	bool __stdcall il2cpp_init_hook(const char* domain_name)
-	{
-		const auto result = reinterpret_cast<decltype(il2cpp_init_hook)*>(il2cpp_init_orig)(domain_name);
 		il2cpp_symbols::init(GetModuleHandle("GameAssembly.dll"));
+
+		void* t = nullptr;
+
+		if (attachIl2CppThread)
+		{
+			t = il2cpp_thread_attach(il2cpp_domain_get());
+		}
 
 		auto InitializeApplication = il2cpp_symbols::get_method_pointer("umamusume.dll", "Gallop", "GameSystem", "InitializeApplication", -1);
 		MH_CreateHook(InitializeApplication, InitializeApplication_hook, &InitializeApplication_orig);
 		MH_EnableHook(InitializeApplication);
 
+		auto Application_Quit = il2cpp_resolve_icall("UnityEngine.Application::Quit(System.Int32)");
+		MH_CreateHook(Application_Quit, Application_Quit_hook, &Application_Quit_orig);
+		MH_EnableHook(Application_Quit);
+
 		if (Game::CurrentGameRegion == Game::Region::KOR)
 		{
-			KillProcessByName("ucldr_Umamusume_KR_loader_x64.exe");
+			auto set_resolution = il2cpp_resolve_icall("UnityEngine.Screen::SetResolution(System.Int32,System.Int32,UnityEngine.FullScreenMode,System.Int32)");
+			MH_CreateHook(set_resolution, set_resolution_hook, &set_resolution_orig);
+			MH_EnableHook(set_resolution);
 
-			auto Application_Quit = il2cpp_resolve_icall("UnityEngine.Application::Quit(System.Int32)");
-			MH_CreateHook(Application_Quit, Application_Quit_hook, &Application_Quit_orig);
-			MH_EnableHook(Application_Quit);
+			KillProcessByName("ucldr_Umamusume_KR_loader_x64.exe");
 
 			auto UncheaterInit_OnApplicationPause_addr = il2cpp_symbols::get_method_pointer(
 				"umamusume.dll",
@@ -179,6 +186,20 @@ namespace
 
 			path_game_assembly();
 		}
+
+		if (attachIl2CppThread)
+		{
+			il2cpp_thread_detach(t);
+		}
+	}
+
+	void* il2cpp_init_orig = nullptr;
+	bool __stdcall il2cpp_init_hook(const char* domain_name)
+	{
+		const auto result = reinterpret_cast<decltype(il2cpp_init_hook)*>(il2cpp_init_orig)(domain_name);
+
+		init_il2cpp();
+
 		return result;
 	}
 
@@ -684,14 +705,37 @@ namespace
 			title = L"umamusume";
 		}
 
-		auto hWnd = FindWindowA("UnityWndClass", local::wide_acp(title).data());
+		static HWND hWndFound;
+
+		EnumWindows(reinterpret_cast<WNDENUMPROC>(*([](HWND hWnd, LPARAM lParam)
+			{
+				TCHAR buf[MAX_CLASS_NAME];
+				GetClassName(hWnd, (LPTSTR)&buf, MAX_CLASS_NAME);
+
+				if (string(buf).find("UnityWndClass") != string::npos)
+				{
+					DWORD dwWndProcID = 0;
+					GetWindowThreadProcessId(hWnd, &dwWndProcID);
+
+					if (dwWndProcID == GetCurrentProcessId())
+					{
+						hWndFound = hWnd;
+						return FALSE;
+					}
+				}
+
+				return TRUE;
+			}
+		)), NULL);
+
+		/*auto hWnd = FindWindowA("UnityWndClass", local::wide_acp(title).data());
 
 		if (!hWnd)
 		{
 			hWnd = FindWindowA("UnityWndClass", local::wide_acp(L"umamusume").data());
-		}
+		}*/
 
-		return hWnd;
+		return hWndFound;
 	}
 
 	HINSTANCE hInstance;
@@ -716,14 +760,53 @@ namespace
 			return UmamusumeKr;
 		}
 
-		/*if (lpLibFileName == L"GameAssembly.dll"s)
+		if (lpLibFileName == L"GameAssembly.dll"s)
 		{
 			const auto il2cpp = reinterpret_cast<decltype(LoadLibraryW)*>(load_library_w_orig)(lpLibFileName);
+
+			/*std::ofstream out("./GameAssembly.decrypted.dll", std::ios_base::binary);
+			MODULEINFO info;
+			if (out && GetModuleInformation(GetCurrentProcess(), il2cpp, &info, sizeof(info)))
+			{
+				const auto header = static_cast<const IMAGE_DOS_HEADER*>(info.lpBaseOfDll);
+				const auto ntHeader = reinterpret_cast<const IMAGE_NT_HEADERS*>(
+					static_cast<const std::byte*>(info.lpBaseOfDll) + header->e_lfanew);
+				const auto sections = IMAGE_FIRST_SECTION(ntHeader);
+
+				out.write(static_cast<const char*>(info.lpBaseOfDll),
+					reinterpret_cast<const char*>(sections) +
+					ntHeader->FileHeader.NumberOfSections * sizeof(IMAGE_SECTION_HEADER) -
+					static_cast<const char*>(info.lpBaseOfDll));
+
+				for (std::size_t i = 0; i < ntHeader->FileHeader.NumberOfSections; ++i)
+				{
+					const auto& section = sections[i];
+
+					out.seekp(section.PointerToRawData);
+					out.write(static_cast<const char*>(info.lpBaseOfDll) + section.VirtualAddress,
+						section.SizeOfRawData);
+				}
+			}*/
+
 			const auto il2cpp_init_addr = GetProcAddress(il2cpp, "il2cpp_init");
+
 			MH_CreateHook(il2cpp_init_addr, il2cpp_init_hook, &il2cpp_init_orig);
-			MH_EnableHook(il2cpp_init_addr);
+			auto result = MH_EnableHook(il2cpp_init_addr);
+
+			if (result != MH_OK)
+			{
+				cout << "WARN: il2cpp_init Failed: " << MH_StatusToString(result) << " LastError: " << GetLastError() << endl << endl;
+				thread([]()
+					{
+						Sleep(100);
+
+						init_il2cpp(true);
+					}
+				).detach();
+			}
+
 			return il2cpp;
-		}*/
+		}
 
 		// GameAssembly.dll code must be loaded and decrypted while loading criware library
 		if (lpLibFileName == L"cri_ware_unity.dll"s)
@@ -3397,7 +3480,7 @@ namespace
 		}
 	}
 
-	void* set_resolution_orig;
+	// void* set_resolution_orig;
 	void set_resolution_hook(int width, int height, int fullscreenMode, int perferredRefreshRate)
 	{
 		if (width < 72)
@@ -3685,7 +3768,7 @@ namespace
 					CreateDelegate(dialogData, *[](Il2CppObject* data)
 						{
 							isExitOpened = false;
-							ExitProcess(0);
+							Exit();
 						}),
 					GetTextIdByName("Common0004"),
 					GetTextIdByName("Common0003"),
@@ -4338,7 +4421,7 @@ namespace
 		{
 			if (isExitOpened)
 			{
-				ExitProcess(0);
+				Exit();
 				return TRUE;
 			}
 
@@ -4644,6 +4727,12 @@ namespace
 		return text;
 	}
 
+	void* set_vSyncCount_orig = nullptr;
+	void set_vSyncCount_hook(int level)
+	{
+		reinterpret_cast<decltype(set_vSyncCount_hook)*>(set_vSyncCount_orig)(g_vsync_count);
+	}
+
 	void* set_anti_aliasing_orig = nullptr;
 	void set_anti_aliasing_hook(int level)
 	{
@@ -4659,7 +4748,7 @@ namespace
 	void* set_anisotropicFiltering_orig = nullptr;
 	void set_anisotropicFiltering_hook(int mode)
 	{
-		reinterpret_cast<decltype(set_anisotropicFiltering_hook)*>(set_anisotropicFiltering_orig)(2);
+		reinterpret_cast<decltype(set_anisotropicFiltering_hook)*>(set_anisotropicFiltering_orig)(g_anisotropic_filtering);
 	}
 
 	void* set_shadows_orig = nullptr;
@@ -4693,7 +4782,6 @@ namespace
 		if (g_graphics_quality >= 3)
 		{
 			set_shadowResolution_hook(3);
-			set_anisotropicFiltering_hook(2);
 			set_shadows_hook(2);
 			set_softVegetation_hook(true);
 			set_realtimeReflectionProbes_hook(true);
@@ -6074,14 +6162,14 @@ namespace
 
 					if (obj && obj->klass->name == "PartsOptionPageBasicSetting"s)
 					{
-						auto _notityObjListField = il2cpp_class_get_field_from_name_wrap(obj->klass, "_notityObjList");
+						/*auto _notityObjListField = il2cpp_class_get_field_from_name_wrap(obj->klass, "_notityObjList");
 						Il2CppObject* _notityObjList;
 						il2cpp_field_get_value(obj, _notityObjListField, &_notityObjList);
 
 						if (_notityObjList)
 						{
 							il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*)>(_notityObjList->klass, "Clear", 0)->methodPointer(_notityObjList);
-						}
+						}*/
 
 						/*auto _fpsObjListField = il2cpp_class_get_field_from_name_wrap(obj->klass, "_fpsObjList");
 						Il2CppObject* _fpsObjList;
@@ -7471,7 +7559,12 @@ namespace
 
 		auto loginUrl = GetLoginURL();
 
-		CreateCoreWebView2EnvironmentWithOptions(nullptr, L"./WebView2", envOptions.Get(),
+		PWSTR path;
+		SHGetKnownFolderPath(FOLDERID_LocalAppDataLow, 0, NULL, &path);
+
+		wstring combinedPath = wstring(path).append(L"\\DMMWebView2");
+
+		CreateCoreWebView2EnvironmentWithOptions(nullptr, combinedPath.data(), envOptions.Get(),
 			Callback<ICoreWebView2CreateCoreWebView2EnvironmentCompletedHandler>(
 				[hWnd, loginUrl](HRESULT result, ICoreWebView2Environment* env) -> HRESULT
 				{
@@ -8129,6 +8222,8 @@ namespace
 
 		auto set_anti_aliasing_addr = il2cpp_resolve_icall("UnityEngine.QualitySettings::set_antiAliasing(System.Int32)");
 
+		auto set_vSyncCount_addr = il2cpp_resolve_icall("UnityEngine.QualitySettings::set_vSyncCount()");
+
 		auto set_shadowResolution_addr = il2cpp_resolve_icall("UnityEngine.QualitySettings::set_shadowResolution(UnityEngine.ShadowResolution)");
 
 		auto set_anisotropicFiltering_addr = il2cpp_resolve_icall("UnityEngine.QualitySettings::set_anisotropicFiltering(UnityEngine.AnisotropicFiltering)");
@@ -8248,7 +8343,17 @@ namespace
 
 		ADD_HOOK(set_shadowResolution, "UnityEngine.QualitySettings.set_shadowResolution(ShadowResolution) at %p\n");
 
-		ADD_HOOK(set_anisotropicFiltering, "UnityEngine.QualitySettings.set_anisotropicFiltering(UnityEngine.AnisotropicFiltering) at %p\n");
+		if (g_anisotropic_filtering != -1)
+		{
+			ADD_HOOK(set_anisotropicFiltering, "UnityEngine.QualitySettings.set_anisotropicFiltering(UnityEngine.AnisotropicFiltering) at %p\n");
+			set_anisotropicFiltering_hook(g_anisotropic_filtering);
+		}
+
+		if (g_vsync_count != -1)
+		{
+			ADD_HOOK(set_vSyncCount, "UnityEngine.QualitySettings.set_vSyncCount() at %p\n");
+			set_vSyncCount_hook(g_vsync_count);
+		}
 
 		ADD_HOOK(set_shadows, "UnityEngine.QualitySettings.set_shadows(UnityEngine.ShadowQuality) at %p\n");
 
@@ -9176,6 +9281,23 @@ namespace
 
 							if (sceneName == "Title")
 							{
+								if (Game::CurrentGameRegion == Game::Region::KOR)
+								{
+									static bool initialResize = false;
+
+									if (!initialResize) {
+										initialResize = true;
+
+										auto hWnd = GetHWND();
+
+										RECT windowRect;
+										GetWindowRect(hWnd, &windowRect);
+										int windowWidth = windowRect.right - windowRect.left,
+											windowHeight = windowRect.bottom - windowRect.top;
+										resizeWindow(hWnd, windowWidth, windowHeight);
+									}
+								}
+
 								if (g_character_system_text_caption)
 								{
 									isRequiredInitNotification = true;
@@ -9445,11 +9567,6 @@ HookedNtCreateSection(
 
 	auto res = reinterpret_cast<decltype(HookedNtCreateSection)*>(OriginalNtCreateSection)(SectionHandle, DesiredAccess, ObjectAttributes, MaximumSize, SectionPageProtection, AllocationAttributes, FileHandle);
 
-	if (res != 0)
-	{
-		cout << "NtCreateSection: " << hex << res << dec << endl;
-	}
-
 	return res;
 }
 
@@ -9480,6 +9597,51 @@ HookedNtMapViewOfSection(
 
 	return reinterpret_cast<decltype(HookedNtMapViewOfSection)*>(OriginalNtMapViewOfSection)(SectionHandle, ProcessHandle, BaseAddress, ZeroBits,
 		CommitSize, SectionOffset, ViewSize, InheritDisposition, AllocationType, Win32Protect);
+}
+
+extern "C" NTSTATUS NtProtectVirtualMemory(
+	IN      HANDLE      ProcessHandle,
+	IN OUT  PVOID * BaseAddress,
+	IN OUT  PSIZE_T     NumberOfBytesToProtect,
+	IN      ULONG       NewAccessProtection,
+	OUT     PULONG      OldAccessProtection);
+
+void* VirtualProtect_orig = nullptr;
+
+BOOL
+WINAPI
+VirtualProtect_hook(
+	_In_  LPVOID lpAddress,
+	_In_  SIZE_T dwSize,
+	_In_  DWORD flNewProtect,
+	_Out_ PDWORD lpflOldProtect
+)
+{
+	if (flNewProtect == (PAGE_EXECUTE_READ | PAGE_GUARD))
+	{
+		dwSize = 1;
+	}
+
+	if (flNewProtect == PAGE_EXECUTE_READ)
+	{
+		flNewProtect = PAGE_EXECUTE_READWRITE;
+	}
+
+	if (flNewProtect == PAGE_READONLY)
+	{
+		flNewProtect = PAGE_READWRITE;
+	}
+
+	HANDLE realHandle;
+
+	DuplicateHandle(GetCurrentProcess(), GetCurrentProcess(), GetCurrentProcess(), &realHandle, 0, TRUE, DUPLICATE_SAME_ACCESS);
+
+	auto res = NtProtectVirtualMemory(realHandle, &lpAddress, &dwSize, flNewProtect, lpflOldProtect);
+	if (res != 0)
+	{
+		cout << "NtProtectVirtualMemory res: " << hex << res << dec << endl;
+	}
+	return res == 0;
 }
 
 void* MessageBoxW_orig = nullptr;
@@ -9533,36 +9695,6 @@ SetWindowLongPtrA_hook(
 	return reinterpret_cast<decltype(SetWindowLongPtrA)*>(SetWindowLongPtrA_orig)(hWnd, nIndex, dwNewLong);
 }
 
-void* ExitProcess_orig = nullptr;
-
-DECLSPEC_NORETURN
-VOID
-WINAPI
-ExitProcess_hook(
-	_In_ UINT uExitCode
-)
-{
-	if (Game::CurrentGameRegion == Game::Region::KOR)
-	{
-		auto module_path = filesystem::current_path();
-		auto uncheater_path_new = module_path.string().append("\\umamusume_Data\\StreamingAssets\\_Uncheater"s).data();
-		auto uncheater_path = module_path.string().append("\\umamusume_Data\\StreamingAssets\\Uncheater"s).data();
-		if (filesystem::exists(uncheater_path_new))
-		{
-			try
-			{
-				filesystem::rename(uncheater_path_new, uncheater_path);
-			}
-			catch (exception& e)
-			{
-				cout << "Uncheater rename error: " << e.what() << endl;
-			}
-		}
-	}
-
-	reinterpret_cast<decltype(ExitProcess)*>(ExitProcess_orig)(uExitCode);
-}
-
 bool init_hook_base()
 {
 	if (mh_inited)
@@ -9581,12 +9713,6 @@ bool init_hook_base()
 
 	MH_CreateHook(LoadLibraryW, load_library_w_hook, &load_library_w_orig);
 	MH_EnableHook(LoadLibraryW);
-
-	if (Game::CurrentGameRegion == Game::Region::KOR)
-	{
-		MH_CreateHook(ExitProcess, ExitProcess_hook, &ExitProcess_orig);
-		MH_EnableHook(ExitProcess);
-	}
 
 	auto UnityPlayer = GetModuleHandle("UnityPlayer.dll");
 	auto UnityMain_addr = GetProcAddress(UnityPlayer, "UnityMain");
@@ -9621,50 +9747,6 @@ bool init_hook()
 		MH_CreateHook(SetWindowLongPtrA, SetWindowLongPtrA_hook, &SetWindowLongPtrA_orig);
 		MH_EnableHook(SetWindowLongPtrA);
 	}
-
-	while (true)
-	{
-		auto il2cpp = GetModuleHandleW(L"GameAssembly.dll");
-
-		if (!il2cpp)
-		{
-			Sleep(1000);
-		}
-		else
-		{
-			/*std::ofstream out("./GameAssembly.decrypted.dll", std::ios_base::binary);
-			MODULEINFO info;
-			if (out && GetModuleInformation(GetCurrentProcess(), il2cpp, &info, sizeof(info)))
-			{
-				const auto header = static_cast<const IMAGE_DOS_HEADER*>(info.lpBaseOfDll);
-				const auto ntHeader = reinterpret_cast<const IMAGE_NT_HEADERS*>(
-					static_cast<const std::byte*>(info.lpBaseOfDll) + header->e_lfanew);
-				const auto sections = IMAGE_FIRST_SECTION(ntHeader);
-
-				out.write(static_cast<const char*>(info.lpBaseOfDll),
-					reinterpret_cast<const char*>(sections) +
-					ntHeader->FileHeader.NumberOfSections * sizeof(IMAGE_SECTION_HEADER) -
-					static_cast<const char*>(info.lpBaseOfDll));
-
-				for (std::size_t i = 0; i < ntHeader->FileHeader.NumberOfSections; ++i)
-				{
-					const auto& section = sections[i];
-
-					out.seekp(section.PointerToRawData);
-					out.write(static_cast<const char*>(info.lpBaseOfDll) + section.VirtualAddress,
-						section.SizeOfRawData);
-				}
-			}*/
-
-			const auto il2cpp_init_addr = GetProcAddress(il2cpp, "il2cpp_init");
-			MH_CreateHook(il2cpp_init_addr, il2cpp_init_hook, &il2cpp_init_orig);
-			MH_EnableHook(il2cpp_init_addr);
-
-			il2cpp_init_hook("IL2CPP Root Domain");
-			break;
-		}
-	}
-	// reinterpret_cast<decltype(il2cpp_init_hook)*>(il2cpp_init_orig)("IL2CPP Root Domain");
 
 	return true;
 }

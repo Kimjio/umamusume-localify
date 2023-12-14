@@ -404,7 +404,6 @@ struct Il2CppObject
 	void* monitor;
 };
 
-
 typedef struct Il2CppReflectionType
 {
 	Il2CppObject object;
@@ -458,6 +457,26 @@ struct Il2CppArraySize_t
 };
 
 static const size_t kIl2CppSizeOfArray = (offsetof(Il2CppArraySize, vector));
+
+typedef struct Il2CppException
+{
+	Il2CppObject object;
+	Il2CppString* className;
+	Il2CppString* message;
+	Il2CppObject* _data;
+	Il2CppException* inner_ex;
+	Il2CppString* _helpURL;
+	Il2CppArraySize* trace_ips;
+	Il2CppString* stack_trace;
+	Il2CppString* remote_stack_trace;
+	int remote_stack_index;
+	Il2CppObject* _dynamicMethods;
+	int32_t hresult;
+	Il2CppString* source;
+	Il2CppObject* safeSerializationManager;
+	Il2CppArraySize* captured_traces;
+	Il2CppArraySize* native_trace_ips;
+} Il2CppException;
 
 template<typename K, typename V>
 struct Entry
@@ -520,6 +539,11 @@ struct AudioPlayback
 	CriAtomExPlayback criAtomExPlayback;
 	bool isError;
 	int soundGroup;
+	bool is3dSound;
+	int atomSourceListIndex;
+	Il2CppString* cueSheetName;
+	Il2CppString* cueName;
+	int cueId;
 };
 
 struct Randomize3dConfig
@@ -676,6 +700,9 @@ typedef uint32_t(*il2cpp_gchandle_new_t)(Il2CppObject* obj, bool pinned);
 typedef Il2CppObject* (*il2cpp_gchandle_get_target_t)(uint32_t gchandle);
 typedef void (*il2cpp_gchandle_free_t)(uint32_t gchandle);
 typedef void (*il2cpp_gc_wbarrier_set_field_t)(Il2CppObject* obj, void** targetAddress, void* object);
+typedef void (*il2cpp_raise_exception_t)(Il2CppException*);
+typedef void (*il2cpp_unhandled_exception_t)(Il2CppException*);
+typedef Il2CppObject* (*il2cpp_runtime_invoke_t)(const MethodInfo* method, void* obj, void** params, Il2CppException** exc);
 
 // function defines
 extern il2cpp_string_new_utf16_t il2cpp_string_new_utf16;
@@ -744,6 +771,9 @@ extern il2cpp_gchandle_new_t il2cpp_gchandle_new;
 extern il2cpp_gchandle_get_target_t il2cpp_gchandle_get_target;
 extern il2cpp_gchandle_free_t il2cpp_gchandle_free;
 extern il2cpp_gc_wbarrier_set_field_t il2cpp_gc_wbarrier_set_field;
+extern il2cpp_raise_exception_t il2cpp_raise_exception;
+extern il2cpp_unhandled_exception_t il2cpp_unhandled_exception;
+extern il2cpp_runtime_invoke_t il2cpp_runtime_invoke;
 
 char* il2cpp_array_addr_with_size(void* arr, int32_t size, uintptr_t idx);
 

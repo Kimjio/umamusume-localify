@@ -32,6 +32,8 @@ std::string g_tmpro_font_asset_name;
 bool g_auto_fullscreen = true;
 int g_graphics_quality = -1;
 int g_anti_aliasing = -1;
+int g_anisotropic_filtering = -1;
+int g_vsync_count = -1;
 bool g_ui_loading_show_orientation_guide = true;
 std::string g_custom_title_name;
 std::unordered_map<std::string, ReplaceAsset> g_replace_assets;
@@ -99,42 +101,52 @@ namespace
 			{
 				g_enable_console = document["enableConsole"].GetBool();
 			}
+
 			if (document.HasMember("enableLogger"))
 			{
 				g_enable_logger = document["enableLogger"].GetBool();
 			}
+
 			if (document.HasMember("dumpStaticEntries"))
 			{
 				g_dump_entries = document["dumpStaticEntries"].GetBool();
 			}
+
 			if (document.HasMember("dumpIl2Cpp"))
 			{
 				g_dump_il2cpp = document["dumpIl2Cpp"].GetBool();
 			}
+
 			if (document.HasMember("staticEntriesUseHash"))
 			{
 				g_static_entries_use_hash = document["staticEntriesUseHash"].GetBool();
 			}
+
 			if (document.HasMember("staticEntriesUseTextIdName"))
 			{
 				g_static_entries_use_text_id_name = document["staticEntriesUseTextIdName"].GetBool();
 			}
+
 			if (document.HasMember("maxFps"))
 			{
 				g_max_fps = document["maxFps"].GetInt();
 			}
+
 			if (document.HasMember("unlockSize"))
 			{
 				g_unlock_size = document["unlockSize"].GetBool();
 			}
+
 			if (document.HasMember("unlockSizeUseSystemResolution"))
 			{
 				g_unlock_size_use_system_resolution = document["unlockSizeUseSystemResolution"].GetBool();
 			}
+
 			if (document.HasMember("uiScale"))
 			{
 				g_ui_scale = document["uiScale"].GetFloat();
 			}
+
 			if (document.HasMember("freeFormWindow"))
 			{
 				g_freeform_window = document["freeFormWindow"].GetBool();
@@ -143,6 +155,7 @@ namespace
 					g_unlock_size = true;
 				}
 			}
+
 			if (document.HasMember("freeFormUiScalePortrait"))
 			{
 				g_freeform_ui_scale_portrait = document["freeFormUiScalePortrait"].GetFloat();
@@ -151,6 +164,7 @@ namespace
 					g_freeform_ui_scale_portrait = 0.5f;
 				}
 			}
+
 			if (document.HasMember("freeFormUiScaleLandscape"))
 			{
 				g_freeform_ui_scale_landscape = document["freeFormUiScaleLandscape"].GetFloat();
@@ -159,6 +173,7 @@ namespace
 					g_freeform_ui_scale_landscape = 0.5f;
 				}
 			}
+
 			if (document.HasMember("initialWidth"))
 			{
 				g_initial_width = document["initialWidth"].GetInt();
@@ -167,6 +182,7 @@ namespace
 					g_initial_width = -1;
 				}
 			}
+
 			if (document.HasMember("initialHeight"))
 			{
 				g_initial_height = document["initialHeight"].GetInt();
@@ -175,42 +191,52 @@ namespace
 					g_initial_height = -1;
 				}
 			}
+
 			if (document.HasMember("uiAnimationScale"))
 			{
 				g_ui_animation_scale = document["uiAnimationScale"].GetFloat();
 			}
+
 			if (document.HasMember("resolution3dScale"))
 			{
 				g_resolution_3d_scale = document["resolution3dScale"].GetFloat();
 			}
+
 			if (document.HasMember("replaceFont"))
 			{
 				g_replace_to_builtin_font = document["replaceFont"].GetBool();
 			}
+
 			if (!document.HasMember("replaceFont") && document.HasMember("replaceToBuiltinFont"))
 			{
 				g_replace_to_builtin_font = document["replaceToBuiltinFont"].GetBool();
 			}
+
 			if (document.HasMember("replaceToCustomFont"))
 			{
 				g_replace_to_custom_font = document["replaceToCustomFont"].GetBool();
 			}
+
 			if (document.HasMember("fontAssetBundlePath"))
 			{
 				g_font_assetbundle_path = std::string(document["fontAssetBundlePath"].GetString());
 			}
+
 			if (document.HasMember("fontAssetName"))
 			{
 				g_font_asset_name = std::string(document["fontAssetName"].GetString());
 			}
+
 			if (document.HasMember("tmproFontAssetName"))
 			{
 				g_tmpro_font_asset_name = std::string(document["tmproFontAssetName"].GetString());
 			}
+
 			if (document.HasMember("autoFullscreen"))
 			{
 				g_auto_fullscreen = document["autoFullscreen"].GetBool();
 			}
+
 			if (document.HasMember("graphicsQuality"))
 			{
 				g_graphics_quality = document["graphicsQuality"].GetInt();
@@ -223,11 +249,26 @@ namespace
 					g_graphics_quality = 3;
 				}
 			}
+
 			if (document.HasMember("antiAliasing"))
 			{
 				g_anti_aliasing = document["antiAliasing"].GetInt();
 				std::vector<int> options = { 0, 2, 4, 8, -1 };
 				g_anti_aliasing = std::find(options.begin(), options.end(), g_anti_aliasing) - options.begin();
+			}
+
+			if (document.HasMember("anisotropicFiltering"))
+			{
+				g_anisotropic_filtering = document["anisotropicFiltering"].GetInt();
+				std::vector<int> options = { 0, 1, 2, -1 };
+				g_anisotropic_filtering = std::find(options.begin(), options.end(), g_anisotropic_filtering) - options.begin();
+			}
+
+			if (document.HasMember("vSyncCount"))
+			{
+				g_vsync_count = document["vSyncCount"].GetInt();
+				std::vector<int> options = { 0, 1, 2, 3, 4, -1 };
+				g_vsync_count = std::find(options.begin(), options.end(), g_vsync_count) - options.begin();
 			}
 
 			if (document.HasMember("uiLoadingShowOrientationGuide"))
@@ -240,20 +281,25 @@ namespace
 				g_custom_title_name = document["customTitleName"].GetString();
 			}
 
-			if (document.HasMember("replaceAssetsPath"))
+			if (document.HasMember("replaceAssetsPaths"))
 			{
-				auto replaceAssetsPath = local::u8_wide(document["replaceAssetsPath"].GetString());
-				if (PathIsRelativeW(replaceAssetsPath.data()))
+				auto array = document["replaceAssetsPaths"].GetArray();
+				for (auto it = array.Begin(); it != array.End(); it++)
 				{
-					replaceAssetsPath.insert(0, ((std::wstring)std::filesystem::current_path().native()).append(L"/"));
-				}
-				if (std::filesystem::exists(replaceAssetsPath) && std::filesystem::is_directory(replaceAssetsPath))
-				{
-					for (auto& file : std::filesystem::directory_iterator(replaceAssetsPath))
+					auto value = local::u8_wide(it->GetString());
+
+					if (PathIsRelativeW(value.data()))
 					{
-						if (file.is_regular_file())
+						value.insert(0, ((std::wstring)std::filesystem::current_path().native()).append(L"/"));
+					}
+					if (std::filesystem::exists(value) && std::filesystem::is_directory(value))
+					{
+						for (auto& file : std::filesystem::directory_iterator(value))
 						{
-							g_replace_assets.emplace(local::wide_u8(local::acp_wide(file.path().filename().string())), ReplaceAsset{ local::wide_u8(local::acp_wide(file.path().string())), nullptr });
+							if (file.is_regular_file())
+							{
+								g_replace_assets.emplace(local::wide_u8(local::acp_wide(file.path().filename().string())), ReplaceAsset{ local::wide_u8(local::acp_wide(file.path().string())), nullptr });
+							}
 						}
 					}
 				}
@@ -375,7 +421,7 @@ namespace
 
 				std::ifstream code_map_stream{ path };
 
-				if (config_stream.is_open())
+				if (code_map_stream.is_open())
 				{
 					rapidjson::IStreamWrapper wrapper{ code_map_stream };
 					code_map.ParseStream(wrapper);
