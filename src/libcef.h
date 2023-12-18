@@ -1251,6 +1251,8 @@ int (*cef_initialize)(const cef_main_args_t* args,
 	struct _cef_app_t* application,
 	void* windows_sandbox_info);
 
+void (*cef_shutdown)();
+
 ///
 /// Implement this structure to provide handler implementations.
 ///

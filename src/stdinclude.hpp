@@ -91,6 +91,7 @@ extern int g_champions_live_year;
 extern int g_cyspring_update_mode;
 extern bool g_hide_now_loading;
 extern bool g_discord_rich_presence;
+extern bool g_allow_delete_cookie;
 
 extern rapidjson::Document code_map;
 

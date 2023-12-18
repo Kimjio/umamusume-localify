@@ -39,6 +39,8 @@
 
 #include "config.hpp"
 
+#include "settings_text.hpp"
+
 using namespace std;
 
 using namespace Microsoft::WRL;
@@ -243,6 +245,12 @@ namespace
 
 		auto _displayTimeField = il2cpp_class_get_field_from_name_wrap(notification->klass, "_displayTime");
 		il2cpp_field_set_value(notification, _displayTimeField, &time);
+	}
+
+	void ShowUINotification(Il2CppString* text)
+	{
+		auto uiManager = GetSingletonInstance(il2cpp_symbols::get_class("umamusume.dll", "Gallop", "UIManager"));
+		il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, Il2CppString*)>(uiManager->klass, "ShowNotification", 1)->methodPointer(uiManager, text);
 	}
 
 	void ShowNotification(Il2CppString* text)
@@ -654,6 +662,8 @@ namespace
 		return TRUE;
 	}
 
+	cef_cookie_manager_t* cefCookieManager;
+
 	void* cef_cookie_manager_get_global_manager_orig = nullptr;
 	cef_cookie_manager_t* cef_cookie_manager_get_global_manager_hook(
 		struct _cef_completion_callback_t* callback)
@@ -662,6 +672,8 @@ namespace
 
 		if (manager)
 		{
+			cefCookieManager = manager;
+
 			auto addr = manager->delete_cookies;
 
 			MH_CreateHook(addr, delete_cookies_hook, &delete_cookies_orig);
@@ -686,7 +698,7 @@ namespace
 
 			auto cef = GetModuleHandleW(L"libcef.dll");
 
-			const auto cef_cookie_manager_get_global_manager_addr = reinterpret_cast<decltype(cef_cookie_manager_get_global_manager_hook)*>(GetProcAddress(cef, "cef_cookie_manager_get_global_manager"));
+			const auto cef_cookie_manager_get_global_manager_addr = reinterpret_cast<decltype(cef_cookie_manager_get_global_manager)>(GetProcAddress(cef, "cef_cookie_manager_get_global_manager"));
 
 			MH_CreateHook(cef_cookie_manager_get_global_manager_addr, cef_cookie_manager_get_global_manager_hook, &cef_cookie_manager_get_global_manager_orig);
 			MH_EnableHook(cef_cookie_manager_get_global_manager_addr);
@@ -987,6 +999,15 @@ namespace
 		return il2cpp_type_get_object(il2cpp_class_get_type(il2cpp_symbols::get_class(assemblyName, namespaze, klassName)));
 	}
 
+	template<typename... T, size_t... S>
+	InvokerMethod GetInvokerMethod(void (*fn)(Il2CppObject*, T...), index_sequence<S...>)
+	{
+		return *([](Il2CppMethodPointer fn, const MethodInfo* method, void* obj, void** params)
+			{
+				return reinterpret_cast<void* (*)(void*, ...)>(fn)(obj, params[S]...);
+			});
+	}
+
 	template<typename... T>
 	Il2CppDelegate* CreateDelegateWithClass(Il2CppClass* klass, Il2CppObject* target, void (*fn)(Il2CppObject*, T...))
 	{
@@ -997,10 +1018,7 @@ namespace
 			il2cpp_symbols::get_class("mscorlib.dll", "System.Reflection", "MethodInfo")));
 		methodInfo->methodPointer = delegate->method_ptr;
 		methodInfo->klass = il2cpp_symbols::get_class("mscorlib.dll", "System.Reflection", "MethodInfo");
-		methodInfo->invoker_method = *([](Il2CppMethodPointer fn, const MethodInfo* method, void* obj, void** params)
-			{
-				return reinterpret_cast<void* (*)(void*, void**)>(fn)(obj, params);
-			});
+		methodInfo->invoker_method = GetInvokerMethod(fn, index_sequence_for<T...>{});
 		delegate->method = methodInfo;
 
 		auto object = reinterpret_cast<Il2CppObject*>(delegate);
@@ -1033,10 +1051,7 @@ namespace
 			il2cpp_symbols::get_class("mscorlib.dll", "System.Reflection", "MethodInfo")));
 		methodInfo->methodPointer = delegate->method_ptr;
 		methodInfo->klass = il2cpp_symbols::get_class("mscorlib.dll", "System.Reflection", "MethodInfo");
-		methodInfo->invoker_method = *([](Il2CppMethodPointer fn, const MethodInfo* method, void* obj, void** params)
-			{
-				return reinterpret_cast<void* (*)(void*, void**)>(fn)(obj, params);
-			});
+		methodInfo->invoker_method = GetInvokerMethod(fn, index_sequence_for<T...>{});
 		delegate->method = methodInfo;
 
 		auto object = reinterpret_cast<Il2CppObject*>(delegate);
@@ -1069,10 +1084,7 @@ namespace
 			il2cpp_symbols::get_class("mscorlib.dll", "System.Reflection", "MethodInfo")));
 		methodInfo->methodPointer = delegate->method_ptr;
 		methodInfo->klass = il2cpp_symbols::get_class("mscorlib.dll", "System.Reflection", "MethodInfo");
-		methodInfo->invoker_method = *([](Il2CppMethodPointer fn, const MethodInfo* method, void* obj, void** params)
-			{
-				return reinterpret_cast<void* (*)(void*, void**)>(fn)(obj, params);
-			});
+		methodInfo->invoker_method = GetInvokerMethod(fn, index_sequence_for<T...>{});
 		delegate->method = methodInfo;
 
 		auto object = reinterpret_cast<Il2CppObject*>(delegate);
@@ -5288,6 +5300,7 @@ namespace
 		auto textCommon = array->vector[0];
 
 		text_set_text(textCommon, il2cpp_string_new(title));
+		text_set_verticalOverflow(textCommon, 1);
 
 		auto textIdStrField = il2cpp_class_get_field_from_name_wrap(textCommon->klass, "m_textid_str");
 		il2cpp_field_set_value(textCommon, textIdStrField, nullptr);
@@ -5540,6 +5553,7 @@ namespace
 		auto sliderCommonArray = getComponents(optionSlider, reinterpret_cast<Il2CppType*>(GetRuntimeType(
 			"umamusume.dll", "Gallop", "SliderCommon")), true, true, false, false, nullptr);
 
+		// onValueChanged is unstable
 		/*auto sliderCommon = sliderCommonArray->vector[0];
 
 		auto onValueChanged = il2cpp_class_get_method_from_name_type<Il2CppObject * (*)(Il2CppObject*)>(sliderCommon->klass, "get_onValueChanged", 0)->methodPointer(sliderCommon);
@@ -5734,6 +5748,22 @@ namespace
 
 	Il2CppObject* settingsDialog;
 
+	template<typename T>
+	void AddOrSet(rapidjson::Document& document, char* name, T value)
+	{
+		if (document.HasMember(name))
+		{
+			document[name].Set(value);
+		}
+		else
+		{
+			rapidjson::Value v;
+			v.Set(value);
+
+			document.AddMember(rapidjson::StringRef(name), v, document.GetAllocator());
+		}
+	}
+
 	void OpenSettings()
 	{
 		auto dialogData = il2cpp_object_new(
@@ -5749,9 +5779,11 @@ namespace
 			{
 				auto& configDocument = config::config_document;
 
-				configDocument["characterSystemTextCaption"].SetBool(GetOptionItemOnOffIsOn("character_system_text_caption"));
+				AddOrSet(configDocument, "characterSystemTextCaption", GetOptionItemOnOffIsOn("character_system_text_caption"));
 
-				configDocument["championsLiveShowText"].SetBool(GetOptionItemOnOffIsOn("champions_live_show_text"));
+				AddOrSet(configDocument, "championsLiveShowText", GetOptionItemOnOffIsOn("champions_live_show_text"));
+
+				AddOrSet(configDocument, "allowDeleteCookie", GetOptionItemOnOffIsOn("allow_delete_cookie"));
 
 				g_champions_live_show_text = configDocument["championsLiveShowText"].GetBool();
 
@@ -5790,7 +5822,7 @@ namespace
 			int dialogFormType)>(
 				il2cpp_class_get_method_from_name(dialogData->klass, "SetSimpleTwoButtonMessage",
 					7)->methodPointer
-				)(dialogData, il2cpp_string_new("Localify Settings"), nullptr, onRight, GetTextIdByName("Common0004"), GetTextIdByName("Common0261"), onLeft, 10);
+				)(dialogData, il2cpp_string_new(LocalifySettings::GetText("title")), nullptr, onRight, GetTextIdByName("Common0004"), GetTextIdByName("Common0261"), onLeft, 10);
 
 		auto DispStackTypeField = il2cpp_class_get_field_from_name_wrap(dialogData->klass, "DispStackType");
 		int DispStackType = 2;
@@ -5881,41 +5913,46 @@ namespace
 
 		AddToLayout(m_Content,
 			{
-				GetOptionItemTitle("Localify Settings"),
-				GetOptionItemOnOff("character_system_text_caption", "Character System Text caption"),
-				GetOptionItemButton("show_caption", "Show caption"),
-				GetOptionItemOnOff("champions_live_show_text", "Champions Live Show Text"),
+				GetOptionItemTitle(LocalifySettings::GetText("title")),
+				GetOptionItemOnOff("character_system_text_caption", LocalifySettings::GetText("character_system_text_caption")),
+				GetOptionItemButton("show_caption", LocalifySettings::GetText("show_caption")),
+				GetOptionItemAttention(LocalifySettings::GetText("applied_after_restart")),
+				GetOptionItemOnOff("champions_live_show_text", LocalifySettings::GetText("champions_live_show_text")),
+				Game::CurrentGameRegion == Game::Region::JAP ?
+					GetOptionItemButton("clear_webview_cache", LocalifySettings::GetText("clear_webview_cache")) :
+					GetOptionItemOnOff("allow_delete_cookie", LocalifySettings::GetText("allow_delete_cookie")),
 				GetOptionItemButton("github", "GitHub"),
-				GetOptionItemAttention("<color=#ff911c>Attention with Color</color>\nAttention"),
-				GetOptionItemSimple("Simple"),
-				GetOptionItemOnOff("on_off", "On Off"),
-				// GetOptionItem3ToggleVertical("Text"),
-				GetOptionItem3Toggle("Text"),
-				GetOptionItem2Toggle("Text"),
-				GetOptionSlider("Text"),
-				/*GetDropdown("dropdown"),
-				GetCheckbox("checkbox"),
-				GetCheckboxWithText("checkbox_with_text"),
-				GetRadioButtonWithText("radiobutton_with_text"),
-				GetSlider("slider"),*/
-				GetOptionItemInfo("<color=#ff911c>Info with Color</color>\nInfo"),
-				GetOptionItemInfo("<color=#ff911c>Info with Color</color>\nInfo"),
-				GetOptionItemInfo("<color=#ff911c>Info with Color</color>\nInfo"),
-				GetOptionItemInfo("<color=#ff911c>Info with Color</color>\nInfo"),
-				GetOptionItemInfo("<color=#ff911c>Info with Color</color>\nInfo"),
-				GetOptionItemInfo("<color=#ff911c>Info with Color</color>\nInfo"),
-				GetOptionItemInfo("<color=#ff911c>Info with Color</color>\nInfo"),
-				GetOptionItemInfo("<color=#ff911c>Info with Color</color>\nInfo"),
-				GetOptionItemInfo("<color=#ff911c>Info with Color</color>\nInfo"),
-				GetOptionItemInfo("<color=#ff911c>Info with Color</color>\nInfo"),
-				GetOptionItemInfo("<color=#ff911c>Info with Color</color>\nInfo"),
-				GetOptionItemInfo("<color=#ff911c>Info with Color</color>\nInfo"),
-				GetOptionItemInfo("<color=#ff911c>Info with Color</color>\nInfo"),
+			// GetOptionItemAttention("<color=#ff911c>Attention with Color</color>\nAttention"),
+			// GetOptionItemSimple("Simple"),
+			// GetOptionItemOnOff("on_off", "On Off"),
+			// GetOptionItem3ToggleVertical("Text"),
+			// GetOptionItem3Toggle("Text"),
+			// GetOptionItem2Toggle("Text"),
+			// GetOptionSlider("Text"),
+			/*GetDropdown("dropdown"),
+			GetCheckbox("checkbox"),
+			GetCheckboxWithText("checkbox_with_text"),
+			GetRadioButtonWithText("radiobutton_with_text"),
+			GetSlider("slider"),*/
+			/*GetOptionItemInfo("<color=#ff911c>Info with Color</color>\nInfo"),
+			GetOptionItemInfo("<color=#ff911c>Info with Color</color>\nInfo"),
+			GetOptionItemInfo("<color=#ff911c>Info with Color</color>\nInfo"),
+			GetOptionItemInfo("<color=#ff911c>Info with Color</color>\nInfo"),
+			GetOptionItemInfo("<color=#ff911c>Info with Color</color>\nInfo"),
+			GetOptionItemInfo("<color=#ff911c>Info with Color</color>\nInfo"),
+			GetOptionItemInfo("<color=#ff911c>Info with Color</color>\nInfo"),
+			GetOptionItemInfo("<color=#ff911c>Info with Color</color>\nInfo"),
+			GetOptionItemInfo("<color=#ff911c>Info with Color</color>\nInfo"),
+			GetOptionItemInfo("<color=#ff911c>Info with Color</color>\nInfo"),
+			GetOptionItemInfo("<color=#ff911c>Info with Color</color>\nInfo"),
+			GetOptionItemInfo("<color=#ff911c>Info with Color</color>\nInfo"),
+			GetOptionItemInfo("<color=#ff911c>Info with Color</color>\nInfo"),*/
 			}
 		);
 
 		bool characterSystemTextCaption = false;
 		bool championsLiveShowText = false;
+		bool allowDeleteCookie = false;
 
 		if (config::read_config())
 		{
@@ -5930,6 +5967,11 @@ namespace
 			{
 				championsLiveShowText = configDocument["championsLiveShowText"].GetBool();
 			}
+
+			if (configDocument.HasMember("allowDeleteCookie"))
+			{
+				allowDeleteCookie = configDocument["allowDeleteCookie"].GetBool();
+			}
 		}
 
 		SetOptionItemOnOffAction("character_system_text_caption", characterSystemTextCaption, *([](Il2CppObject*, bool isOn)
@@ -5942,15 +5984,21 @@ namespace
 				// TODO
 			}));
 
+		if (Game::CurrentGameRegion == Game::Region::KOR)
+		{
+			SetOptionItemOnOffAction("allow_delete_cookie", allowDeleteCookie, *([](Il2CppObject*, bool isOn)
+				{
+					// TODO
+				}));
+		}
+
 		SetOptionItemOnOffAction("on_off", false, *([](Il2CppObject*, bool isOn)
 			{
-				auto uiManager = GetSingletonInstance(il2cpp_symbols::get_class("umamusume.dll", "Gallop", "UIManager"));
-
 				stringstream text;
 
 				text << "Changed to " << (isOn ? "On" : "Off");
 
-				il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, Il2CppString*)>(uiManager->klass, "ShowNotification", 1)->methodPointer(uiManager, il2cpp_string_new(text.str().data()));
+				ShowUINotification(il2cpp_string_new(text.str().data()));
 			}));
 
 		SetOptionItemButtonAction("show_caption", *([](Il2CppObject*)
@@ -5958,7 +6006,11 @@ namespace
 				if (g_character_system_text_caption)
 				{
 					SetNotificationDisplayTime(1);
-					ShowNotification(il2cpp_string_new("Sample caption"));
+					ShowNotification(il2cpp_string_new(LocalifySettings::GetText("sample_caption")));
+				}
+				else
+				{
+					ShowUINotification(il2cpp_string_new(LocalifySettings::GetText("setting_disabled")));
 				}
 			}));
 
@@ -5996,6 +6048,56 @@ namespace
 					"umamusume.dll", "Gallop", "DialogManager", "PushDialog", 1)(dialogData);
 			}));
 
+		if (Game::CurrentGameRegion != Game::Region::KOR)
+		{
+			SetOptionItemButtonAction("clear_webview_cache", *([](Il2CppObject*)
+				{
+					auto dialogData = il2cpp_object_new(
+						il2cpp_symbols::get_class("umamusume.dll", "Gallop",
+							"DialogCommon/Data"));
+					il2cpp_runtime_object_init(dialogData);
+
+					dialogData = reinterpret_cast<Il2CppObject * (*)(Il2CppObject * thisObj,
+						Il2CppString * headerTextArg,
+						Il2CppString * message,
+						Il2CppDelegate * onRight,
+						unsigned long leftTextId,
+						unsigned long rightTextId,
+						Il2CppDelegate * onLeft,
+						int dialogFormType)>(
+							il2cpp_class_get_method_from_name(dialogData->klass,
+								"SetSimpleTwoButtonMessage",
+								7)->methodPointer
+							)(dialogData,
+								localizeextension_text_hook(GetTextIdByName("Race0652")),
+								il2cpp_string_new(LocalifySettings::GetText("clear_webview_cache_confirm")),
+								CreateDelegate(nullptr, *[](Il2CppObject*)
+									{
+										PWSTR path;
+										SHGetKnownFolderPath(FOLDERID_LocalAppDataLow, 0, NULL, &path);
+
+										wstring combinedPath = wstring(path).append(L"\\DMMWebView2");
+
+										try
+										{
+											filesystem::remove_all(combinedPath);
+											ShowUINotification(il2cpp_string_new(LocalifySettings::GetText("deleted")));
+										}
+										catch (exception& e)
+										{
+											cout << e.what() << endl;
+										}
+									}),
+								GetTextIdByName("Common0004"),
+								GetTextIdByName("Common0003"),
+								nullptr,
+								2);
+
+					il2cpp_symbols::get_method_pointer<Il2CppObject* (*)(Il2CppObject*)>(
+						"umamusume.dll", "Gallop", "DialogManager", "PushDialog", 1)(dialogData);
+				}));
+		}
+
 		auto contentSizeFitter = AddComponent(contentGameObject, GetRuntimeType("umamusume.dll", "Gallop", "LayoutGroupContentSizeFitter"));
 
 		auto _layoutField = il2cpp_class_get_field_from_name_wrap(contentSizeFitter->klass, "_layout");
@@ -6014,8 +6116,8 @@ namespace
 	{
 		AddToLayout(parentRectTransform,
 			{
-				GetOptionItemTitle("Localify Settings"),
-				GetOptionItemButton("open_settings", "Open Settings"),
+				GetOptionItemTitle(LocalifySettings::GetText("title")),
+				GetOptionItemButton("open_settings", LocalifySettings::GetText("open_settings")),
 			}
 		);
 	}
@@ -9708,8 +9810,11 @@ bool init_hook_base()
 	MH_CreateHook(MessageBoxW, MessageBoxW_hook, &MessageBoxW_orig);
 	MH_EnableHook(MessageBoxW);
 
-	MH_CreateHook(LoadLibraryExW, load_library_ex_w_hook, &load_library_ex_w_orig);
-	MH_EnableHook(LoadLibraryExW);
+	if (!g_allow_delete_cookie && Game::CurrentGameRegion == Game::Region::KOR)
+	{
+		MH_CreateHook(LoadLibraryExW, load_library_ex_w_hook, &load_library_ex_w_orig);
+		MH_EnableHook(LoadLibraryExW);
+	}
 
 	MH_CreateHook(LoadLibraryW, load_library_w_hook, &load_library_w_orig);
 	MH_EnableHook(LoadLibraryW);

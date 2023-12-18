@@ -55,6 +55,8 @@ int g_champions_live_year = 2023;
 int g_cyspring_update_mode = -1;
 bool g_hide_now_loading = false;
 bool g_discord_rich_presence = false;
+bool g_allow_delete_cookie = false;
+
 std::string text_id_dict;
 
 rapidjson::Document code_map;
@@ -433,6 +435,11 @@ namespace
 			if (document.HasMember("discordRichPresence"))
 			{
 				g_discord_rich_presence = document["discordRichPresence"].GetBool();
+			}
+
+			if (document.HasMember("allowDeleteCookie"))
+			{
+				g_allow_delete_cookie = document["allowDeleteCookie"].GetBool();
 			}
 
 			if (document.HasMember("dicts"))
