@@ -9057,7 +9057,10 @@ namespace
 
 		if (g_auto_fullscreen || g_unlock_size || g_freeform_window)
 		{
-			ADD_HOOK(set_resolution, "UnityEngine.Screen.SetResolution(int, int, bool) at %p\n");
+			if (!set_resolution_orig)
+			{
+				ADD_HOOK(set_resolution, "UnityEngine.Screen.SetResolution(int, int, FullScreenMode, int) at %p\n");
+			}
 			ADD_HOOK(UIManager_ChangeResizeUIForPC, "Gallop.UIManager::ChangeResizeUIForPC at %p\n");
 		}
 
