@@ -335,6 +335,8 @@ typedef void (*Il2CppMethodPointer)();
 
 typedef void* (*InvokerMethod)(Il2CppMethodPointer, const MethodInfo*, void*, void**);
 
+static const uint16_t kInvalidIl2CppMethodSlot = 65535;
+
 struct MethodInfo
 {
 	Il2CppMethodPointer methodPointer;
@@ -441,10 +443,8 @@ typedef struct Il2CppArraySize
 	Il2CppObject obj;
 	void* bounds;
 	uintptr_t max_length;
-	alignas(8)
-		void* vector[0];
+	alignas(8) void* vector[0];
 } Il2CppArraySize;
-
 
 template<typename T>
 struct Il2CppArraySize_t
@@ -452,8 +452,15 @@ struct Il2CppArraySize_t
 	Il2CppObject obj;
 	void* bounds;
 	uintptr_t max_length;
-	alignas(8)
-		T vector[0];
+	alignas(8) T vector[0];
+};
+
+template<typename T>
+struct ArraySegment
+{
+	Il2CppArraySize_t<T> array;
+	int count;
+	int offset;
 };
 
 static const size_t kIl2CppSizeOfArray = (offsetof(Il2CppArraySize, vector));
@@ -633,6 +640,14 @@ typedef struct MulticastDelegate : Il2CppDelegate {
 	Il2CppArraySize* delegates;
 } MulticastDelegate;
 
+typedef struct Il2CppReflectionMethod
+{
+	Il2CppObject object;
+	const MethodInfo* method;
+	Il2CppString* name;
+	Il2CppReflectionType* reftype;
+} Il2CppReflectionMethod;
+
 // function types
 typedef Il2CppString* (*il2cpp_string_new_utf16_t)(const wchar_t* str, unsigned int len);
 typedef Il2CppString* (*il2cpp_string_new_t)(const char* str);
@@ -675,6 +690,7 @@ typedef FieldInfo* (*il2cpp_class_get_fields_t)(Il2CppClass* klass, void** iter)
 typedef const char* (*il2cpp_method_get_name_t)(const MethodInfo* method);
 typedef uint32_t(*il2cpp_method_get_param_count_t)(const MethodInfo* method);
 typedef const char* (*il2cpp_method_get_param_name_t)(const MethodInfo* method, uint32_t index);
+typedef Il2CppReflectionMethod* (*il2cpp_method_get_object_t)(const MethodInfo* method, Il2CppClass* refclass);
 typedef Il2CppClass* (*il2cpp_class_get_parent_t)(Il2CppClass* klass);
 typedef Il2CppClass* (*il2cpp_class_get_interfaces_t)(Il2CppClass* klass, void** iter);
 typedef const char* (*il2cpp_class_get_namespace_t)(Il2CppClass* klass);
@@ -746,6 +762,7 @@ extern il2cpp_class_get_fields_t il2cpp_class_get_fields;
 extern il2cpp_method_get_name_t il2cpp_method_get_name;
 extern il2cpp_method_get_param_count_t il2cpp_method_get_param_count;
 extern il2cpp_method_get_param_name_t il2cpp_method_get_param_name;
+extern il2cpp_method_get_object_t il2cpp_method_get_object;
 extern il2cpp_class_get_parent_t il2cpp_class_get_parent;
 extern il2cpp_class_get_interfaces_t il2cpp_class_get_interfaces;
 extern il2cpp_class_get_namespace_t il2cpp_class_get_namespace;

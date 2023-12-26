@@ -41,6 +41,7 @@ il2cpp_class_get_fields_t il2cpp_class_get_fields;
 il2cpp_method_get_name_t il2cpp_method_get_name;
 il2cpp_method_get_param_count_t il2cpp_method_get_param_count;
 il2cpp_method_get_param_name_t il2cpp_method_get_param_name;
+il2cpp_method_get_object_t il2cpp_method_get_object;
 il2cpp_class_get_parent_t il2cpp_class_get_parent;
 il2cpp_class_get_interfaces_t il2cpp_class_get_interfaces;
 il2cpp_class_get_namespace_t il2cpp_class_get_namespace;
@@ -122,6 +123,7 @@ namespace il2cpp_symbols
 		RESOLVE_IMPORT(il2cpp_method_get_name);
 		RESOLVE_IMPORT(il2cpp_method_get_param_count);
 		RESOLVE_IMPORT(il2cpp_method_get_param_name);
+		RESOLVE_IMPORT(il2cpp_method_get_object);
 		RESOLVE_IMPORT(il2cpp_class_get_parent);
 		RESOLVE_IMPORT(il2cpp_class_get_interfaces);
 		RESOLVE_IMPORT(il2cpp_class_get_namespace);

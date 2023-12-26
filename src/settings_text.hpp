@@ -72,6 +72,21 @@ namespace LocalifySettings
 			return isKor ? "삭제했습니다" : "削除しました";
 		}
 
+		if (id == "cyspring_update_mode")
+		{
+			return isKor ? "CySpring 업데이트 모드" : "CySpringアップデートモード";
+		}
+
+		if (id == "graphics")
+		{
+			return isKor ? "그래픽" : "グラフィック";
+		}
+
+		if (id == "ui_animation_scale")
+		{
+			return isKor ? "UI 애니메이션 배율" : "UIアニメーションスケール";
+		}
+
 		return "";
 	}
 }

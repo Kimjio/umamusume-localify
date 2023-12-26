@@ -64,6 +64,8 @@ rapidjson::Document code_map;
 bool has_json_parse_error = false;
 std::string json_parse_error_msg;
 
+std::vector<std::string> external_dlls_path;
+
 namespace
 {
 	void create_debug_console()
@@ -283,7 +285,7 @@ namespace
 				g_custom_title_name = document["customTitleName"].GetString();
 			}
 
-			if (document.HasMember("replaceAssetsPaths"))
+			if (document.HasMember("replaceAssetsPaths") && document["replaceAssetsPaths"].IsArray())
 			{
 				auto array = document["replaceAssetsPaths"].GetArray();
 				for (auto it = array.Begin(); it != array.End(); it++)
@@ -442,16 +444,23 @@ namespace
 				g_allow_delete_cookie = document["allowDeleteCookie"].GetBool();
 			}
 
-			if (document.HasMember("dicts"))
+			if (document.HasMember("dicts") && document["dicts"].IsArray())
 			{
-				auto& dicts_arr = document["dicts"];
-				auto len = dicts_arr.Size();
-
-				for (size_t i = 0; i < len; ++i)
+				auto array = document["dicts"].GetArray();
+				for (auto it = array.Begin(); it != array.End(); it++)
 				{
-					auto dict = dicts_arr[i].GetString();
+					auto value = it->GetString();
+					dicts.emplace_back(value);
+				}
+			}
 
-					dicts.emplace_back(dict);
+			if (document.HasMember("externalDlls") && document["externalDlls"].IsArray())
+			{
+				auto array = document["externalDlls"].GetArray();
+				for (auto it = array.Begin(); it != array.End(); it++)
+				{
+					auto value = it->GetString();
+					external_dlls_path.emplace_back(value);
 				}
 			}
 		}
@@ -466,12 +475,6 @@ namespace
 		config_stream.close();
 		return dicts;
 	}
-}
-
-extern "C" __declspec(dllexport) int __stdcall UnityMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPWSTR lpCmdLine, int nShowCmd)
-{
-	auto player = LoadLibraryA("UnityPlayer.orig.dll");
-	return reinterpret_cast<decltype(UnityMain)*>(GetProcAddress(player, "UnityMain"))(hInstance, hPrevInstance, lpCmdLine, nShowCmd);
 }
 
 void DoStopSvc()
@@ -711,7 +714,9 @@ int __stdcall DllMain(HINSTANCE, DWORD reason, LPVOID)
 			init_hook();
 
 			if (g_enable_console)
+			{
 				start_console();
+			}
 			});
 		init_thread.detach();
 	}
