@@ -56,6 +56,7 @@ int g_cyspring_update_mode = -1;
 bool g_hide_now_loading = false;
 bool g_discord_rich_presence = false;
 bool g_allow_delete_cookie = false;
+bool g_localify_settings_force_korean = false;
 
 std::string text_id_dict;
 
@@ -442,6 +443,11 @@ namespace
 			if (document.HasMember("allowDeleteCookie"))
 			{
 				g_allow_delete_cookie = document["allowDeleteCookie"].GetBool();
+			}
+
+			if (document.HasMember("localifySettingsForceKorean"))
+			{
+				g_localify_settings_force_korean = document["localifySettingsForceKorean"].GetBool();
 			}
 
 			if (document.HasMember("dicts") && document["dicts"].IsArray())

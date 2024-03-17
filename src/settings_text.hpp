@@ -6,11 +6,13 @@
 
 using namespace std;
 
+extern bool g_localify_settings_force_korean;
+
 namespace LocalifySettings
 {
 	const char* GetText(string id)
 	{
-		bool isKor = Game::CurrentGameRegion == Game::Region::KOR;
+		bool isKor = Game::CurrentGameRegion == Game::Region::KOR || g_localify_settings_force_korean;
 
 		if (id == "title")
 		{
@@ -85,6 +87,11 @@ namespace LocalifySettings
 		if (id == "ui_animation_scale")
 		{
 			return isKor ? "UI 애니메이션 배율" : "UIアニメーションスケール";
+		}
+
+		if (id == "experiments")
+		{
+			return "Experiments";
 		}
 
 		return "";

@@ -31,6 +31,9 @@
 #include "local/local.hpp"
 #include "logger/logger.hpp"
 
+// Unity App icon
+constexpr auto IDI_APP_ICON = 103;
+
 struct ReplaceAsset {
 	std::string path;
 	Il2CppObject* asset;
@@ -92,6 +95,7 @@ extern int g_cyspring_update_mode;
 extern bool g_hide_now_loading;
 extern bool g_discord_rich_presence;
 extern bool g_allow_delete_cookie;
+extern bool g_localify_settings_force_korean;
 
 extern rapidjson::Document code_map;
 
