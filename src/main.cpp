@@ -57,6 +57,11 @@ bool g_hide_now_loading = false;
 bool g_discord_rich_presence = false;
 bool g_allow_delete_cookie = false;
 bool g_localify_settings_force_korean = false;
+bool g_dump_msgpack = false;
+bool g_dump_msgpack_request = false;
+bool g_unlock_live_chara = false;
+bool g_notification_tp = false;
+bool g_notification_rp = false;
 
 std::string text_id_dict;
 
@@ -259,21 +264,21 @@ namespace
 			{
 				g_anti_aliasing = document["antiAliasing"].GetInt();
 				std::vector<int> options = { 0, 2, 4, 8, -1 };
-				g_anti_aliasing = std::find(options.begin(), options.end(), g_anti_aliasing) - options.begin();
+				g_anti_aliasing = options[std::find(options.begin(), options.end(), g_anti_aliasing) - options.begin()];
 			}
 
 			if (document.HasMember("anisotropicFiltering"))
 			{
 				g_anisotropic_filtering = document["anisotropicFiltering"].GetInt();
 				std::vector<int> options = { 0, 1, 2, -1 };
-				g_anisotropic_filtering = std::find(options.begin(), options.end(), g_anisotropic_filtering) - options.begin();
+				g_anisotropic_filtering = options[std::find(options.begin(), options.end(), g_anisotropic_filtering) - options.begin()];
 			}
 
 			if (document.HasMember("vSyncCount"))
 			{
 				g_vsync_count = document["vSyncCount"].GetInt();
 				std::vector<int> options = { 0, 1, 2, 3, 4, -1 };
-				g_vsync_count = std::find(options.begin(), options.end(), g_vsync_count) - options.begin();
+				g_vsync_count = options[std::find(options.begin(), options.end(), g_vsync_count) - options.begin()];
 			}
 
 			if (document.HasMember("uiLoadingShowOrientationGuide"))
@@ -400,7 +405,7 @@ namespace
 			{
 				g_cyspring_update_mode = document["cySpringUpdateMode"].GetInt();
 				std::vector<int> options = { 0, 1, 2, 3, -1 };
-				g_cyspring_update_mode = std::find(options.begin(), options.end(), g_cyspring_update_mode) - options.begin();
+				g_cyspring_update_mode = options[std::find(options.begin(), options.end(), g_cyspring_update_mode) - options.begin()];
 			}
 			else if (g_max_fps > 30)
 			{
@@ -448,6 +453,31 @@ namespace
 			if (document.HasMember("localifySettingsForceKorean"))
 			{
 				g_localify_settings_force_korean = document["localifySettingsForceKorean"].GetBool();
+			}
+
+			if (document.HasMember("dumpMsgPack"))
+			{
+				g_dump_msgpack = document["dumpMsgPack"].GetBool();
+			}
+
+			if (document.HasMember("dumpMsgPackRequest"))
+			{
+				g_dump_msgpack_request = document["dumpMsgPackRequest"].GetBool();
+			}
+
+			if (document.HasMember("unlockLiveChara"))
+			{
+				g_unlock_live_chara = document["unlockLiveChara"].GetBool();
+			}
+
+			if (document.HasMember("notificationTp"))
+			{
+				g_notification_tp = document["notificationTp"].GetBool();
+			}
+
+			if (document.HasMember("notificationRp"))
+			{
+				g_notification_rp = document["notificationRp"].GetBool();
 			}
 
 			if (document.HasMember("dicts") && document["dicts"].IsArray())

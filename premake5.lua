@@ -31,6 +31,7 @@ end
 include "deps/minhook.lua"
 include "deps/rapidjson.lua"
 include "deps/SQLiteCpp.lua"
+include "deps/msgpack11.lua"
 
 workspace "umamusume-localify"
 	location "./build"
@@ -92,6 +93,7 @@ workspace "umamusume-localify"
 		"Shlwapi",
 		"WinHttp",
 		"ntdll",
+		"runtimeobject",
 		"./deps/discord_game_sdk/discord_game_sdk.dll.lib"
 	}
 
@@ -101,8 +103,8 @@ workspace "umamusume-localify"
 	}
 
 	nuget {
-		"Microsoft.Web.WebView2:1.0.2151.40",
-		"Microsoft.Windows.ImplementationLibrary:1.0.231028.1"
+		"Microsoft.Web.WebView2:1.0.2420.47",
+		"Microsoft.Windows.ImplementationLibrary:1.0.240122.1"
 	}
 
 	dependencies.imports()

@@ -2,13 +2,19 @@
 //
 #include "resource.h"
 /////////////////////////////////////////////////////////////////////////////
+// 한국어(대한민국) resources
+
+#if !defined(AFX_RESOURCE_DLL)
+#pragma code_page(65001)
+
+/////////////////////////////////////////////////////////////////////////////
 //
 // Version
 //
 
 VS_VERSION_INFO VERSIONINFO
- FILEVERSION 1,32,0,0
- PRODUCTVERSION 1,32,0,0
+ FILEVERSION 1,33,0,0
+ PRODUCTVERSION 1,33,0,0
  FILEFLAGSMASK 0x3fL
 #ifdef _DEBUG
  FILEFLAGS 0x1L
@@ -21,27 +27,68 @@ VS_VERSION_INFO VERSIONINFO
 BEGIN
     BLOCK "StringFileInfo"
     BEGIN
-        BLOCK "041204b0"
-        BEGIN
-            VALUE "LegalCopyright", "Copyright © Ji O Kim\0"
-            VALUE "FileDescription", "우마무스메 현지화 패치\0"
-            VALUE "FileVersion", "1.32.0.0\0"
-            VALUE "InternalName", "umamusume-localify\0"
-            VALUE "ProductName", "Umamusume Localify\0"
-            VALUE "ProductVersion", "1.32.0\0"
-        END
         BLOCK "000004b0"
         BEGIN
-            VALUE "LegalCopyright", "Copyright © Ji O Kim\0"
-            VALUE "FileDescription", "Localization patch for Umamusume\0"
-            VALUE "FileVersion", "1.32.0.0\0"
-            VALUE "InternalName", "umamusume-localify\0"
-            VALUE "ProductName", "Umamusume Localify\0"
-            VALUE "ProductVersion", "1.32.0\0"
+            VALUE "FileDescription", "Localization patch for Umamusume"
+            VALUE "FileVersion", "1.33.0.0"
+            VALUE "InternalName", "umamusume-localify"
+            VALUE "LegalCopyright", "Copyright ⓒ Ji O Kim"
+            VALUE "ProductName", "Umamusume Localify"
+            VALUE "ProductVersion", "1.33.0.0"
+        END
+        BLOCK "041204b0"
+        BEGIN
+            VALUE "FileDescription", "우마무스메 현지화 패치"
+            VALUE "FileVersion", "1.33.0.0"
+            VALUE "InternalName", "umamusume-localify"
+            VALUE "LegalCopyright", "Copyright ⓒ Ji O Kim"
+            VALUE "ProductName", "Umamusume Localify"
+            VALUE "ProductVersion", "1.33.0.0"
         END
     END
     BLOCK "VarFileInfo"
     BEGIN
-        VALUE "Translation", 0x0412, 1200, 0x0, 1200
+        VALUE "Translation", 0x412, 1200, 0x0, 1200
     END
 END
+
+
+#ifdef APSTUDIO_INVOKED
+/////////////////////////////////////////////////////////////////////////////
+//
+// TEXTINCLUDE
+//
+
+1 TEXTINCLUDE 
+BEGIN
+    "resource.h\0"
+END
+
+2 TEXTINCLUDE 
+BEGIN
+    "\0"
+END
+
+3 TEXTINCLUDE 
+BEGIN
+    "\r\n"
+    "\0"
+END
+
+#endif    // APSTUDIO_INVOKED
+
+#endif    // 한국어(대한민국) resources
+/////////////////////////////////////////////////////////////////////////////
+
+
+
+#ifndef APSTUDIO_INVOKED
+/////////////////////////////////////////////////////////////////////////////
+//
+// Generated from the TEXTINCLUDE 3 resource.
+//
+
+
+/////////////////////////////////////////////////////////////////////////////
+#endif    // not APSTUDIO_INVOKED
+

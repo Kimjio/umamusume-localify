@@ -7,3 +7,7 @@
 [submodule "deps/SQLiteCpp"]
 	path = deps/SQLiteCpp
 	url = https://github.com/SRombauts/SQLiteCpp.git
+[submodule "deps/msgpack11"]
+	path = deps/msgpack11
+	url = https://github.com/ar90n/msgpack11.git
+

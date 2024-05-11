@@ -9,6 +9,7 @@ using namespace std;
 namespace config
 {
 	rapidjson::Document config_document;
+    rapidjson::Document backup_document;
 
 	bool read_config()
 	{
@@ -24,6 +25,8 @@ namespace config
 		config_document.ParseStream(wrapper);
 		config_stream.close();
 
+		backup_document.CopyFrom(config_document, backup_document.GetAllocator(), true);
+
 		return !config_document.HasParseError();
 	}
 
@@ -37,5 +40,10 @@ namespace config
 		ofstream config_stream{ "config.json" };
 		config_stream << buffer.GetString() << endl;
 		config_stream.close();
+	}
+
+	void rollback_config()
+	{
+		config_document.CopyFrom(backup_document, config_document.GetAllocator(), true);
 	}
 }

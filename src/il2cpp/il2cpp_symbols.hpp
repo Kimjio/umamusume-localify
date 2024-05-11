@@ -1,5 +1,11 @@
 #pragma once
 
+#define NOMINMAX
+
+#include <Windows.h>
+
+#include <functional>
+
 #if _MSC_VER
 typedef wchar_t Il2CppChar;
 #elif __has_feature(cxx_unicode_literals)
@@ -485,6 +491,13 @@ typedef struct Il2CppException
 	Il2CppArraySize* native_trace_ips;
 } Il2CppException;
 
+template<typename T>
+struct Nullable
+{
+	T value;
+	bool has_value;
+};
+
 template<typename K, typename V>
 struct Entry
 {
@@ -652,6 +665,33 @@ struct OrderBlock
 {
 	int order;
 	Il2CppDelegate* callback;
+};
+
+struct ObscuredBool
+{
+	uint8_t currentCryptoKey;
+	int hiddenValue;
+	bool inited;
+	bool fakeValue;
+	bool fakeValueActive;
+};
+
+struct ObscuredInt
+{
+	int currentCryptoKey;
+	int hiddenValue;
+	bool inited;
+	int fakeValue;
+	bool fakeValueActive;
+};
+
+struct ObscuredString
+{
+	Il2CppString* currentCryptoKey;
+	Il2CppArraySize_t<int8_t>* hiddenValue;
+	bool inited;
+	Il2CppString* fakeValue;
+	bool fakeValueActive;
 };
 
 // function types

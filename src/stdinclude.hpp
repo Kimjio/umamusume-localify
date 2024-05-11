@@ -1,5 +1,7 @@
 #pragma once
 
+#define NOMINMAX
+
 #include <Windows.h>
 #include <shlobj.h>
 #include <Shlwapi.h>
@@ -96,6 +98,11 @@ extern bool g_hide_now_loading;
 extern bool g_discord_rich_presence;
 extern bool g_allow_delete_cookie;
 extern bool g_localify_settings_force_korean;
+extern bool g_dump_msgpack;
+extern bool g_dump_msgpack_request;
+extern bool g_unlock_live_chara;
+extern bool g_notification_tp;
+extern bool g_notification_rp;
 
 extern rapidjson::Document code_map;
 

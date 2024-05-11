@@ -1,4 +1,7 @@
 #pragma once
+
+#include <il2cpp/il2cpp_symbols.hpp>
+
 template<typename T>
 T il2cpp_resolve_icall_type(const char* name) {
 	return reinterpret_cast<T>(il2cpp_resolve_icall(name));
