@@ -1140,7 +1140,7 @@ namespace
 				MH_EnableHook(criAtomExPlayer_Pause_addr);
 			}
 
-			if (!g_replace_assetbundle_file_paths.empty())
+			if (!g_replace_assets.empty())
 			{
 				auto CriMana_SetFileNew_addr = GetProcAddress(criware, "CRIWARE8778888A");
 
@@ -11835,8 +11835,6 @@ namespace
 		}
 #pragma endregion
 
-		ADD_HOOK(AssetBundleRequest_GetResult, "UnityEngine.AssetBundleRequest::GetResult at %p\n");
-
 		ADD_HOOK(assetbundle_LoadFromFile, "UnityEngine.AssetBundle::LoadFromFile at %p\n");
 
 		ADD_HOOK(assetbundle_unload, "UnityEngine.AssetBundle::Unload at %p\n");
@@ -11845,6 +11843,8 @@ namespace
 
 		if (!replaceAssets.empty())
 		{
+			ADD_HOOK(AssetBundleRequest_GetResult, "UnityEngine.AssetBundleRequest::GetResult at %p\n");
+
 			ADD_HOOK(assetbundle_load_asset, "UnityEngine.AssetBundle::LoadAsset at %p\n");
 
 			ADD_HOOK(assetbundle_load_asset_async, "UnityEngine.AssetBundle::LoadAssetAsync at %p\n");

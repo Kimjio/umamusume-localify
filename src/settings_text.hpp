@@ -66,17 +66,17 @@ namespace LocalifySettings
 
 		if (id == "character_system_text_caption_font_color")
 		{
-			return isKor ? "폰트 색상" : "";
+			return isKor ? "폰트 색상" : "フォントの色";
 		}
 
 		if (id == "character_system_text_caption_outline_size")
 		{
-			return isKor ? "외곽선 크기" : "";
+			return isKor ? "외곽선 크기" : "アウトラインサイズ";
 		}
 
 		if (id == "character_system_text_caption_outline_color")
 		{
-			return isKor ? "외곽선 색상" : "";
+			return isKor ? "외곽선 색상" : "アウトラインの色";
 		}
 
 		if (id == "show_caption")
