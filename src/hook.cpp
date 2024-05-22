@@ -23,6 +23,7 @@
 #include <psapi.h>
 
 #include <winhttp.h>
+#include <wininet.h>
 
 #include <wrl.h>
 #include <wil/com.h>
@@ -253,7 +254,6 @@ namespace
 
 	FieldInfo* il2cpp_class_get_field_from_name_wrap(Il2CppClass* klass, const char* name);
 	Il2CppObject* GetSingletonInstance(Il2CppClass* klass);
-	void PrintStackTrace();
 
 	bool (*uobject_IsNativeObjectAlive)(Il2CppObject* uObject);
 
@@ -1000,9 +1000,72 @@ namespace
 		reinterpret_cast<decltype(UnityPluginLoad_hook)*>(UnityPluginLoad_orig)(unityInterfaces);
 	}
 
+	Il2CppObject* (*display_get_main)();
+
+	int (*get_system_width)(Il2CppObject* _this);
+
+	int (*get_system_height)(Il2CppObject* _this);
+
+	void* KGInterfaceBrokerRequest_orig = nullptr;
+	LPCWSTR KGInterfaceBrokerRequest_hook(const wchar_t* request)
+	{
+		auto text = local::wide_u8(request);
+
+#ifdef _DEBUG
+		replaceAll(text, "gameWeb", "googlePlay");
+#endif
+
+		if (text.find("Zinny://Support.setViewSize") != string::npos)
+		{
+			rapidjson::Document doc;
+			doc.Parse(text.data());
+
+			if (!doc.HasParseError())
+			{
+				auto params = doc.GetArray()[2].GetObjectA();
+
+				auto display = display_get_main();
+				auto systemHeight = get_system_height(display);
+
+				auto width = params["width"].GetInt();
+				auto height = params["height"].GetInt();
+
+				if (height > systemHeight)
+				{
+					params["width"].SetInt(static_cast<int>(roundf(width / (16.0f / 9.0f))));
+					params["height"].SetInt(width - 100);
+
+					rapidjson::StringBuffer buffer;
+					buffer.Clear();
+					rapidjson::Writer<rapidjson::StringBuffer> writer(buffer);
+					doc.Accept(writer);
+
+					text = buffer.GetString();
+				}
+			}
+		}
+
+		auto data = reinterpret_cast<decltype(KGInterfaceBrokerRequest_hook)*>(KGInterfaceBrokerRequest_orig)(local::u8_wide(text).data());
+		return data;
+	}
+
 	void* load_library_w_orig = nullptr;
 	HMODULE WINAPI load_library_w_hook(LPCWSTR lpLibFileName)
 	{
+		if (lpLibFileName == L"KakaoGameWin.dll"s)
+		{
+			auto KakaoGameWin = reinterpret_cast<decltype(LoadLibraryW)*>(load_library_w_orig)(lpLibFileName);
+
+			MH_DisableHook(LoadLibraryW);
+			MH_RemoveHook(LoadLibraryW);
+
+			const auto KGInterfaceBrokerRequest_addr = GetProcAddress(KakaoGameWin, "KGInterfaceBrokerRequest");
+			MH_CreateHook(KGInterfaceBrokerRequest_addr, KGInterfaceBrokerRequest_hook, &KGInterfaceBrokerRequest_orig);
+			MH_EnableHook(KGInterfaceBrokerRequest_addr);
+
+			return KakaoGameWin;
+		}
+
 		if (lpLibFileName == L"UmamusumeKr.dll"s)
 		{
 			const auto UmamusumeKr = reinterpret_cast<decltype(LoadLibraryW)*>(load_library_w_orig)(lpLibFileName);
@@ -1068,13 +1131,13 @@ namespace
 			return module;
 		}
 
-		// GameAssembly.dll code must be loaded and decrypted while loading criware library
-		if (lpLibFileName == L"cri_ware_unity.dll"s)
-		{
-			patch_after_criware();
+		static bool criwareInit = false;
 
-			MH_DisableHook(LoadLibraryW);
-			MH_RemoveHook(LoadLibraryW);
+		// GameAssembly.dll code must be loaded and decrypted while loading criware library
+		if (lpLibFileName == L"cri_ware_unity.dll"s && !criwareInit)
+		{
+			criwareInit = true;
+			patch_after_criware();
 
 			auto hWnd = FindWindowW(L"UnityWndClass", L"umamusume");
 			if (hWnd)
@@ -1090,7 +1153,13 @@ namespace
 			}
 
 			// use original function beacuse we have unhooked that
-			auto criware = LoadLibraryW(lpLibFileName);
+			auto criware = reinterpret_cast<decltype(LoadLibraryW)*>(load_library_w_orig)(lpLibFileName);
+
+			if (Game::CurrentGameRegion != Game::Region::KOR)
+			{
+				MH_DisableHook(LoadLibraryW);
+				MH_RemoveHook(LoadLibraryW);
+			}
 
 			auto UnityPluginLoad_addr = GetProcAddress(criware, "UnityPluginLoad");
 
@@ -2367,12 +2436,6 @@ namespace
 	}
 
 	bool (*is_virt)() = nullptr;
-
-	Il2CppObject* (*display_get_main)();
-
-	int (*get_system_width)(Il2CppObject* _this);
-
-	int (*get_system_height)(Il2CppObject* _this);
 
 	int (*get_rendering_width)(Il2CppObject* _this);
 
@@ -11438,6 +11501,9 @@ namespace
 							auto threadClass = il2cpp_symbols::get_class("umamusume.dll", "Gallop", "CySpringController/CySpringThread");
 
 							auto instanceField = il2cpp_class_get_field_from_name_wrap(threadClass, "_instance");
+
+							if (instanceField)
+							{
 							Il2CppObject* instance;
 
 							il2cpp_field_static_get_value(instanceField, &instance);
@@ -11458,6 +11524,7 @@ namespace
 									}
 								}
 							}
+						}
 						}
 					}).detach();
 			}
@@ -12363,6 +12430,33 @@ namespace
 
 				if (sceneName == "Title")
 				{
+					if (Game::CurrentGameRegion == Game::Region::KOR)
+					{
+						auto uncheater = GetSingletonInstanceByMethod(il2cpp_symbols::get_class("umamusume.dll", "", "UncheaterInit"));
+
+						if (uncheater)
+						{
+							auto flagField = il2cpp_class_get_field_from_name_wrap(uncheater->klass, "flag");
+							bool flag = true;
+							il2cpp_field_set_value(uncheater, flagField, &flag);
+
+							auto systemField = il2cpp_class_get_field_from_name_wrap(uncheater->klass, "uncheater");
+							Il2CppObject* system;
+							il2cpp_field_get_value(uncheater, systemField, &system);
+
+							if (system)
+							{
+								auto pUncSendCommandVa_Field = il2cpp_class_get_field_from_name_wrap(system->klass, "pUncSendCommandVa_");
+								auto fn = CreateDelegateStatic(*[](void*, uint32_t cmd, va_list va)
+									{
+										cout << cmd << endl;
+										return 0;
+									});
+								il2cpp_field_set_value(system, pUncSendCommandVa_Field, fn);
+							}
+						}
+					}
+
 					if (g_freeform_window && Game::CurrentGameRegion == Game::Region::KOR)
 					{
 						static bool initialResize = false;
@@ -12744,6 +12838,25 @@ MessageBoxW_hook(
 	return reinterpret_cast<decltype(MessageBoxW)*>(MessageBoxW_orig)(hWnd, lpText, lpCaption, uType);
 }
 
+void* MessageBoxA_orig = nullptr;
+
+int
+WINAPI
+MessageBoxA_hook(
+	_In_opt_ HWND hWnd,
+	_In_opt_ LPCSTR lpText,
+	_In_opt_ LPCSTR lpCaption,
+	_In_ UINT uType)
+{
+	if (string(lpCaption).starts_with("AppSign"))
+	{
+		lpText = "Wellbia AppSign이 의도치 않은 동작을 감지하여 프로그램이 종료됩니다.\n\n문제가 지속되는 경우 https://wellbia.com/ 에 방문하거나, support@wellbia.com 으로 문의하시기 바랍니다.";
+		lpCaption = "Warning";
+		uType = MB_ICONWARNING;
+	}
+	return reinterpret_cast<decltype(MessageBoxA)*>(MessageBoxA_orig)(hWnd, lpText, lpCaption, uType);
+}
+
 void* SetWindowLongPtrW_orig = nullptr;
 
 LONG_PTR
@@ -12776,6 +12889,146 @@ SetWindowLongPtrA_hook(
 	return reinterpret_cast<decltype(SetWindowLongPtrA)*>(SetWindowLongPtrA_orig)(hWnd, nIndex, dwNewLong);
 }
 
+void* HttpSendRequestW_orig = nullptr;
+BOOL WINAPI HttpSendRequestW_hook(
+	_In_ HINTERNET hRequest,
+	_In_reads_opt_(dwHeadersLength) LPCWSTR lpszHeaders,
+	_In_ DWORD dwHeadersLength,
+	_In_reads_bytes_opt_(dwOptionalLength) LPVOID lpOptional,
+	_In_ DWORD dwOptionalLength
+)
+{
+	if (dwOptionalLength)
+	{
+		auto data = reinterpret_cast<char*>(lpOptional);
+		rapidjson::Document doc;
+		doc.Parse(data, dwOptionalLength);
+
+		if (!doc.HasParseError())
+		{
+			if (doc.IsObject() && doc.HasMember("os"))
+			{
+				doc.GetObjectA()["os"].SetString(rapidjson::StringRef("android"));
+
+				rapidjson::StringBuffer buffer;
+				buffer.Clear();
+				rapidjson::Writer<rapidjson::StringBuffer> writer(buffer);
+				doc.Accept(writer);
+
+				auto text = buffer.GetString();
+				char* copy = new char[strlen(text) + 1];
+				strcpy(copy, text);
+
+				lpOptional = copy;
+				dwOptionalLength = strlen(copy);
+			}
+		}
+	}
+
+	return reinterpret_cast<decltype(HttpSendRequestW_hook)*>(HttpSendRequestW_orig)(hRequest, lpszHeaders, dwHeadersLength, lpOptional, dwOptionalLength);
+}
+
+void* InternetCrackUrlW_orig = nullptr;
+BOOL InternetCrackUrlW_hook(
+	_In_reads_(dwUrlLength) LPCWSTR lpszUrl,
+	_In_ DWORD dwUrlLength,
+	_In_ DWORD dwFlags,
+	_Inout_ LPURL_COMPONENTSW lpUrlComponents
+)
+{
+	auto text = local::wide_u8(lpszUrl);
+	replaceAll(text, "windows", "android");
+
+	auto newUrlW = local::u8_wide(text);
+	wchar_t* copy = new wchar_t[newUrlW.size() + 1];
+	wcscpy(copy, newUrlW.data());
+
+	lpszUrl = copy;
+
+	dwUrlLength = text.size();
+
+	return reinterpret_cast<decltype(InternetCrackUrlW_hook)*>(InternetCrackUrlW_orig)(lpszUrl, dwUrlLength, dwFlags, lpUrlComponents);
+}
+
+HANDLE currentFindHandle;
+
+int dllCount;
+
+void* FindNextFileW_orig = nullptr;
+BOOL
+WINAPI
+FindNextFileW_hook(
+	_In_ HANDLE hFindFile,
+	_Out_ LPWIN32_FIND_DATAW lpFindFileData
+)
+{
+	if (currentFindHandle == hFindFile && dllCount >= 23)
+	{
+		*lpFindFileData = WIN32_FIND_DATAW{};
+		SetLastError(ERROR_NO_MORE_FILES);
+		return FALSE;
+	}
+
+	auto result = reinterpret_cast<decltype(FindNextFileW_hook)*>(FindNextFileW_orig)(hFindFile, lpFindFileData);
+	if (currentFindHandle == hFindFile && lpFindFileData && lpFindFileData->cFileName)
+	{
+		if (result)
+		{
+			if (wstring(lpFindFileData->cFileName).ends_with(L".dll"))
+			{
+				dllCount++;
+			}
+		}
+	}
+	return result;
+}
+
+void* FindFirstFileExW_orig = nullptr;
+HANDLE
+WINAPI
+FindFirstFileExW_hook(
+	_In_ LPCWSTR lpFileName,
+	_In_ FINDEX_INFO_LEVELS fInfoLevelId,
+	_Out_writes_bytes_(sizeof(WIN32_FIND_DATAW)) LPVOID lpFindFileData,
+	_In_ FINDEX_SEARCH_OPS fSearchOp,
+	_Reserved_ LPVOID lpSearchFilter,
+	_In_ DWORD dwAdditionalFlags
+)
+{
+	if (wstring(lpFileName).find(L"\\dat\\") != wstring::npos)
+	{
+		// Skipping dat path due performance issue
+		SetLastError(ERROR_FILE_NOT_FOUND);
+		return INVALID_HANDLE_VALUE;
+	}
+
+	auto result = reinterpret_cast<decltype(FindFirstFileExW_hook)*>(FindFirstFileExW_orig)(lpFileName, fInfoLevelId, lpFindFileData,
+		fSearchOp, lpSearchFilter, dwAdditionalFlags);
+
+	if (wstring(lpFileName).find(L"*.dll") != wstring::npos)
+	{
+		currentFindHandle = result;
+
+		if (lpFindFileData && result != INVALID_HANDLE_VALUE)
+		{
+			if (wstring(reinterpret_cast<LPWIN32_FIND_DATAW>(lpFindFileData)->cFileName).ends_with(L".dll"))
+			{
+				dllCount++;
+			}
+
+			if (dllCount > 23)
+			{
+				CloseHandle(result);
+				lpFindFileData = nullptr;
+				SetLastError(ERROR_FILE_NOT_FOUND);
+				return INVALID_HANDLE_VALUE;
+			}
+		}
+	}
+
+	return result;
+}
+
 bool init_hook_base()
 {
 	if (mh_inited)
@@ -12788,6 +13041,26 @@ bool init_hook_base()
 
 	MH_CreateHook(MessageBoxW, MessageBoxW_hook, &MessageBoxW_orig);
 	MH_EnableHook(MessageBoxW);
+
+	MH_CreateHook(MessageBoxA, MessageBoxA_hook, &MessageBoxA_orig);
+	MH_EnableHook(MessageBoxA);
+
+	if (Game::CurrentGameRegion == Game::Region::KOR)
+	{
+#ifdef _DEBUG
+		MH_CreateHook(HttpSendRequestW, HttpSendRequestW_hook, &HttpSendRequestW_orig);
+		MH_EnableHook(HttpSendRequestW);
+
+		MH_CreateHook(InternetCrackUrlW, InternetCrackUrlW_hook, &InternetCrackUrlW_orig);
+		MH_EnableHook(InternetCrackUrlW);
+#endif
+
+		MH_CreateHook(FindFirstFileExW, FindFirstFileExW_hook, &FindFirstFileExW_orig);
+		MH_EnableHook(FindFirstFileExW);
+
+		MH_CreateHook(FindNextFileW, FindNextFileW_hook, &FindNextFileW_orig);
+		MH_EnableHook(FindNextFileW);
+	}
 
 	if (!g_allow_delete_cookie && Game::CurrentGameRegion == Game::Region::KOR)
 	{
