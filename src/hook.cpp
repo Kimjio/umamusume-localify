@@ -9811,12 +9811,30 @@ namespace
 						{
 							voiceButtonTarget = callback->target;
 
-							auto newFn = *(
-								[](Il2CppObject* _this)
+							auto newFn = *[](Il2CppObject* _this)
 								{
 									auto storyIdField = il2cpp_class_get_field_from_name_wrap(voiceButtonTarget->klass, "storyId");
 									int storyId;
 									il2cpp_field_get_value(voiceButtonTarget, storyIdField, &storyId);
+
+									FieldInfo* thisField = nullptr;
+									void* iter = nullptr;
+									while (FieldInfo* field = il2cpp_class_get_fields(voiceButtonTarget->klass, &iter)) {
+										if (string(field->name).find("this") != string::npos) {
+											thisField = field;
+										}
+									}
+									Il2CppObject* thisObj;
+									il2cpp_field_get_value(voiceButtonTarget, thisField, &thisObj);
+
+									reinterpret_cast<void (*)(Il2CppObject*)>(il2cpp_class_get_method_from_name(
+										thisObj->klass, "StopVoiceIfNeed", 0)->methodPointer)(thisObj);
+
+									auto onLeft = CreateDelegateStatic(*[](void*)
+										{
+											auto storyIdField = il2cpp_class_get_field_from_name_wrap(voiceButtonTarget->klass, "storyId");
+											int storyId;
+											il2cpp_field_get_value(voiceButtonTarget, storyIdField, &storyId);
 
 									auto masterDataManager = GetSingletonInstance(
 										il2cpp_symbols::get_class(
@@ -9885,6 +9903,93 @@ namespace
 											"umamusume.dll", "Gallop",
 											"DialogAnnounceEvent", "Open", 3)(announceId, action, action);
 								});
+
+									if (storyId < 1005)
+									{
+										auto onRight = CreateDelegateStatic(*[](void*)
+											{
+												auto storyIdField = il2cpp_class_get_field_from_name_wrap(voiceButtonTarget->klass, "storyId");
+												int storyId;
+												il2cpp_field_get_value(voiceButtonTarget, storyIdField, &storyId);
+
+												auto cueSheetNameField = il2cpp_class_get_field_from_name_wrap(voiceButtonTarget->klass, "cueSheetName");
+												Il2CppString* cueSheetName;
+												il2cpp_field_get_value(voiceButtonTarget, cueSheetNameField, &cueSheetName);
+
+												auto cueNameField = il2cpp_class_get_field_from_name_wrap(voiceButtonTarget->klass, "cueName");
+												Il2CppString* cueName;
+												il2cpp_field_get_value(voiceButtonTarget, cueNameField, &cueName);
+
+												string optionKey = string("kakaoUmaAnnounceEvent").append(to_string(storyId));
+
+												auto KakaoManager = il2cpp_symbols::get_class("umamusume.dll", "", "KakaoManager");
+												auto managerInstanceField = il2cpp_class_get_field_from_name_wrap(KakaoManager, "instance");
+
+												Il2CppObject* manager;
+												il2cpp_field_static_get_value(managerInstanceField, &manager);
+
+												auto url = il2cpp_class_get_method_from_name_type<Il2CppString * (*)(Il2CppObject*, Il2CppString*)>(
+													manager->klass, "GetKakaoOptionValue", 1)->methodPointer(manager, il2cpp_string_new(optionKey.data()));
+
+
+												il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, Il2CppString*, Il2CppDelegate*)>(manager->klass, "OnKakaoShowInAppWebView", 2)->methodPointer(manager, url, CreateDelegateStatic(*[]()
+													{
+														FieldInfo* thisField = nullptr;
+														void* iter = nullptr;
+														while (FieldInfo* field = il2cpp_class_get_fields(voiceButtonTarget->klass, &iter)) {
+															if (string(field->name).find("this") != string::npos) {
+																thisField = field;
+															}
+														}
+														Il2CppObject* thisObj;
+														il2cpp_field_get_value(voiceButtonTarget, thisField, &thisObj);
+
+														reinterpret_cast<void (*)(Il2CppObject*)>(il2cpp_class_get_method_from_name(
+															thisObj->klass, "StopVoiceIfNeed", 0)->methodPointer)(thisObj);
+													}));
+
+												FieldInfo* thisField;
+												void* iter = nullptr;
+												while (FieldInfo* field = il2cpp_class_get_fields(voiceButtonTarget->klass, &iter))
+												{
+													if (string(field->name).find("this") != string::npos)
+													{
+														thisField = field;
+													}
+												}
+
+												Il2CppObject* parentObj;
+												il2cpp_field_get_value(voiceButtonTarget, thisField, &parentObj);
+
+												il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, Il2CppString*, Il2CppString*)>(
+													parentObj->klass, "PlayAnnounceVoice", 2)->methodPointer(parentObj, cueSheetName, cueName);
+											});
+
+										auto dialogData = il2cpp_object_new(il2cpp_symbols::get_class("umamusume.dll", "Gallop", "DialogCommon/Data"));
+										il2cpp_runtime_object_init(dialogData);
+
+										dialogData =
+											il2cpp_class_get_method_from_name_type<Il2CppObject * (*)(Il2CppObject * thisObj,
+												Il2CppString * headerTextArg,
+												Il2CppString * message,
+												Il2CppDelegate * onRight,
+												unsigned long leftTextId,
+												unsigned long rightTextId,
+												Il2CppDelegate * onLeft,
+												int dialogFormType)>(dialogData->klass, "SetSimpleTwoButtonMessage", 7)->methodPointer
+												(dialogData,
+													localizeextension_text_hook(GetTextIdByName("StoryEvent0079")),
+													il2cpp_string_new("해당 스토리 이벤트는 개최 정보가 누락되어있습니다.\n\n웹 페이지를 보시겠습니까?"),
+													onRight, GetTextIdByName("Common0002"), GetTextIdByName("Common0001"),
+													onLeft, 2);
+
+										il2cpp_symbols::get_method_pointer<Il2CppObject* (*)(Il2CppObject* data)>("umamusume.dll", "Gallop", "DialogManager", "PushDialog", 1)(dialogData);
+									}
+									else
+									{
+										reinterpret_cast<void (*)(void*)>(onLeft->method_ptr)(nullptr);
+									}
+								};
 							il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, Il2CppDelegate*)>(button->klass, "SetOnClick", 1)->methodPointer(button,
 								CreateUnityAction(voiceButtonTarget, newFn));
 						}
