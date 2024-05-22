@@ -2920,6 +2920,17 @@ namespace
 						auto buffer = get_FrameBuffer->methodPointer(obj);
 						if (buffer)
 						{
+							auto _drawPassField = il2cpp_class_get_field_from_name_wrap(buffer->klass, "_drawPass");
+							uint64_t* _drawPass;
+							il2cpp_field_get_value(buffer, _drawPassField, &_drawPass);
+
+							if (!_drawPass)
+							{
+								uint64_t defPass = 0;
+								il2cpp_field_set_value(buffer, _drawPassField, &defPass);
+							}
+
+
 							il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*)>(buffer->klass, "RemakeRenderTexture", 0)->methodPointer(buffer);
 						}
 					}
