@@ -13,8 +13,8 @@
 //
 
 VS_VERSION_INFO VERSIONINFO
- FILEVERSION 1,33,1,0
- PRODUCTVERSION 1,33,1,0
+ FILEVERSION 1,34,0,0
+ PRODUCTVERSION 1,34,0,0
  FILEFLAGSMASK 0x3fL
 #ifdef _DEBUG
  FILEFLAGS 0x1L
@@ -30,20 +30,20 @@ BEGIN
         BLOCK "000004b0"
         BEGIN
             VALUE "FileDescription", "Localization patch for Umamusume"
-            VALUE "FileVersion", "1.33.1.0"
+            VALUE "FileVersion", "1.34.0.0"
             VALUE "InternalName", "umamusume-localify"
             VALUE "LegalCopyright", "Copyright ⓒ Ji O Kim"
             VALUE "ProductName", "Umamusume Localify"
-            VALUE "ProductVersion", "1.33.1.0"
+            VALUE "ProductVersion", "1.34.0.0"
         END
         BLOCK "041204b0"
         BEGIN
             VALUE "FileDescription", "우마무스메 현지화 패치"
-            VALUE "FileVersion", "1.33.1.0"
+            VALUE "FileVersion", "1.34.0.0"
             VALUE "InternalName", "umamusume-localify"
             VALUE "LegalCopyright", "Copyright ⓒ Ji O Kim"
             VALUE "ProductName", "Umamusume Localify"
-            VALUE "ProductVersion", "1.33.1.0"
+            VALUE "ProductVersion", "1.34.0.0"
         END
     END
     BLOCK "VarFileInfo"
