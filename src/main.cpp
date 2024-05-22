@@ -26,20 +26,20 @@ float g_aspect_ratio = 16.f / 9.f;
 float g_resolution_3d_scale = 1.0f;
 bool g_replace_to_builtin_font = false;
 bool g_replace_to_custom_font = false;
-std::string g_font_assetbundle_path;
-std::string g_font_asset_name;
-std::string g_tmpro_font_asset_name;
+string g_font_assetbundle_path;
+string g_font_asset_name;
+string g_tmpro_font_asset_name;
 bool g_auto_fullscreen = true;
 int g_graphics_quality = -1;
 int g_anti_aliasing = -1;
 int g_anisotropic_filtering = -1;
 int g_vsync_count = -1;
 bool g_ui_loading_show_orientation_guide = true;
-std::string g_custom_title_name;
-std::unordered_map<std::string, ReplaceAsset> g_replace_assets;
-std::string g_replace_assetbundle_file_path;
-std::vector<std::string> g_replace_assetbundle_file_paths;
-std::string g_replace_text_db_path;
+string g_custom_title_name;
+unordered_map<string, ReplaceAsset> g_replace_assets;
+string g_replace_assetbundle_file_path;
+vector<string> g_replace_assetbundle_file_paths;
+string g_replace_text_db_path;
 bool g_character_system_text_caption = false;
 int g_character_system_text_caption_line_char_count = 26;
 int g_character_system_text_caption_font_size = 50;
@@ -63,14 +63,14 @@ bool g_unlock_live_chara = false;
 bool g_notification_tp = false;
 bool g_notification_rp = false;
 
-std::string text_id_dict;
+string text_id_dict;
 
 rapidjson::Document code_map;
 
 bool has_json_parse_error = false;
-std::string json_parse_error_msg;
+string json_parse_error_msg;
 
-std::vector<std::string> external_dlls_path;
+vector<string> external_dlls_path;
 
 namespace
 {
@@ -87,15 +87,15 @@ namespace
 
 		// set this to avoid turn japanese texts into question mark
 		SetConsoleOutputCP(CP_UTF8);
-		std::locale::global(std::locale(""));
+		locale::global(locale(""));
 
 		wprintf(L"\u30a6\u30de\u5a18 Localify Patch Loaded! - By GEEKiDoS\n");
 	}
 
-	std::vector<std::string> read_config()
+	vector<string> read_config()
 	{
-		std::ifstream config_stream{ "config.json" };
-		std::vector<std::string> dicts{};
+		ifstream config_stream{ "config.json" };
+		vector<string> dicts{};
 
 		if (!config_stream.is_open())
 			return dicts;
@@ -229,17 +229,17 @@ namespace
 
 			if (document.HasMember("fontAssetBundlePath"))
 			{
-				g_font_assetbundle_path = std::string(document["fontAssetBundlePath"].GetString());
+				g_font_assetbundle_path = string(document["fontAssetBundlePath"].GetString());
 			}
 
 			if (document.HasMember("fontAssetName"))
 			{
-				g_font_asset_name = std::string(document["fontAssetName"].GetString());
+				g_font_asset_name = string(document["fontAssetName"].GetString());
 			}
 
 			if (document.HasMember("tmproFontAssetName"))
 			{
-				g_tmpro_font_asset_name = std::string(document["tmproFontAssetName"].GetString());
+				g_tmpro_font_asset_name = string(document["tmproFontAssetName"].GetString());
 			}
 
 			if (document.HasMember("autoFullscreen"))
@@ -263,22 +263,22 @@ namespace
 			if (document.HasMember("antiAliasing"))
 			{
 				g_anti_aliasing = document["antiAliasing"].GetInt();
-				std::vector<int> options = { 0, 2, 4, 8, -1 };
-				g_anti_aliasing = options[std::find(options.begin(), options.end(), g_anti_aliasing) - options.begin()];
+				vector<int> options = { 0, 2, 4, 8, -1 };
+				g_anti_aliasing = options[find(options.begin(), options.end(), g_anti_aliasing) - options.begin()];
 			}
 
 			if (document.HasMember("anisotropicFiltering"))
 			{
 				g_anisotropic_filtering = document["anisotropicFiltering"].GetInt();
-				std::vector<int> options = { 0, 1, 2, -1 };
-				g_anisotropic_filtering = options[std::find(options.begin(), options.end(), g_anisotropic_filtering) - options.begin()];
+				vector<int> options = { 0, 1, 2, -1 };
+				g_anisotropic_filtering = options[find(options.begin(), options.end(), g_anisotropic_filtering) - options.begin()];
 			}
 
 			if (document.HasMember("vSyncCount"))
 			{
 				g_vsync_count = document["vSyncCount"].GetInt();
-				std::vector<int> options = { 0, 1, 2, 3, 4, -1 };
-				g_vsync_count = options[std::find(options.begin(), options.end(), g_vsync_count) - options.begin()];
+				vector<int> options = { 0, 1, 2, 3, 4, -1 };
+				g_vsync_count = options[find(options.begin(), options.end(), g_vsync_count) - options.begin()];
 			}
 
 			if (document.HasMember("uiLoadingShowOrientationGuide"))
@@ -300,11 +300,11 @@ namespace
 
 					if (PathIsRelativeW(value.data()))
 					{
-						value.insert(0, ((std::wstring)std::filesystem::current_path().native()).append(L"/"));
+						value.insert(0, (static_cast<wstring>(filesystem::current_path().native())).append(L"/"));
 					}
-					if (std::filesystem::exists(value) && std::filesystem::is_directory(value))
+					if (filesystem::exists(value) && filesystem::is_directory(value))
 					{
-						for (auto& file : std::filesystem::directory_iterator(value))
+						for (auto& file : filesystem::directory_iterator(value))
 						{
 							if (file.is_regular_file())
 							{
@@ -326,7 +326,7 @@ namespace
 				auto array = document["replaceAssetBundleFilePaths"].GetArray();
 				for (auto it = array.Begin(); it != array.End(); it++)
 				{
-					auto value = it->GetString();
+					string value = it->GetString();
 					g_replace_assetbundle_file_paths.emplace_back(value);
 				}
 			}
@@ -404,8 +404,8 @@ namespace
 			if (document.HasMember("cySpringUpdateMode"))
 			{
 				g_cyspring_update_mode = document["cySpringUpdateMode"].GetInt();
-				std::vector<int> options = { 0, 1, 2, 3, -1 };
-				g_cyspring_update_mode = options[std::find(options.begin(), options.end(), g_cyspring_update_mode) - options.begin()];
+				vector<int> options = { 0, 1, 2, 3, -1 };
+				g_cyspring_update_mode = options[find(options.begin(), options.end(), g_cyspring_update_mode) - options.begin()];
 			}
 			else if (g_max_fps > 30)
 			{
@@ -429,7 +429,7 @@ namespace
 			{
 				auto path = document["codeMapPath"].GetString();
 
-				std::ifstream code_map_stream{ path };
+				ifstream code_map_stream{ path };
 
 				if (code_map_stream.is_open())
 				{
@@ -503,7 +503,7 @@ namespace
 		else
 		{
 			has_json_parse_error = true;
-			std::stringstream str_stream;
+			stringstream str_stream;
 			str_stream << "JSON parse error: " << GetParseError_En(document.GetParseError()) << " (" << document.GetErrorOffset() << ")";
 			json_parse_error_msg = str_stream.str();
 		}
@@ -663,18 +663,42 @@ int __stdcall DllMain(HINSTANCE, DWORD reason, LPVOID)
 {
 	if (reason == DLL_PROCESS_ATTACH)
 	{
-		// the DMM Launcher set start path to system32 wtf????
-		string module_name;
-		module_name.resize(MAX_PATH);
-		module_name.resize(GetModuleFileName(nullptr, module_name.data(), MAX_PATH));
+		set_terminate([]() -> void {
+			cerr << "terminate called after throwing an instance of ";
+			try
+			{
+				rethrow_exception(current_exception());
+			}
+			catch (const exception& ex)
+			{
+				cerr << typeid(ex).name() << endl;
+				cerr << "  what(): " << ex.what() << endl;
 
-		filesystem::path module_path(local::wide_u8(local::acp_wide(module_name)));
+				MessageBoxW(nullptr, local::u8_wide(ex.what()).data(), local::u8_wide(typeid(ex).name()).data(), MB_ICONWARNING);
+			}
+			catch (...)
+			{
+				cerr << typeid(current_exception()).name() << endl;
+				cerr << " ...something, not an exception, dunno what." << endl;
+
+				MessageBoxW(nullptr, L"Unknown error...", local::u8_wide(typeid(current_exception()).name()).data(), MB_ICONWARNING);
+			}
+			cerr << "errno: " << errno << ": " << strerror(errno) << endl;
+			abort();
+			});
+
+		// the DMM Launcher set start path to system32 wtf????
+		wstring module_name;
+		module_name.resize(MAX_PATH);
+		module_name.resize(GetModuleFileNameW(nullptr, module_name.data(), MAX_PATH));
+
+		filesystem::path module_path(module_name);
 
 		// check name
 		if (module_path.filename() != "umamusume.exe")
 			return 1;
 
-		std::filesystem::current_path(
+		filesystem::current_path(
 			module_path.parent_path()
 		);
 
@@ -683,7 +707,17 @@ int __stdcall DllMain(HINSTANCE, DWORD reason, LPVOID)
 		if (g_enable_console)
 			create_debug_console();
 
-		if (filesystem::exists(module_path.parent_path().append(module_path.filename().replace_extension().string().append("_Data\\Plugins\\x86_64\\KakaoGameWin.dll"s).data())))
+		ifstream appinfo(module_path.parent_path().append(module_path.filename().replace_extension().string().append("_Data\\app.info"s).data()));
+
+		string company;
+		getline(appinfo, company);
+
+		string product;
+		getline(appinfo, product);
+
+		appinfo.close();
+
+		if (company == "Cygames_KakaoGames")
 		{
 			Game::CurrentGameRegion = Game::Region::KOR;
 
@@ -738,9 +772,28 @@ int __stdcall DllMain(HINSTANCE, DWORD reason, LPVOID)
 			Game::CurrentGameRegion = Game::Region::JAP;
 		}
 
+		if (Game::CurrentGameRegion != Game::Region::JAP)
+		{
+			wstringstream subKeyStream;
+
+			subKeyStream << L"Software";
+			subKeyStream << L"\\" << local::u8_wide(company);
+			subKeyStream << L"\\" << local::u8_wide(product);
+
+			DWORD data{};
+			DWORD dataSize = sizeof(data);
+			RegGetValueW(HKEY_CURRENT_USER, subKeyStream.str().data(), L"AgreeOwnYourRisk", RRF_RT_REG_DWORD, nullptr, &data, &dataSize);
+
+			if (!data)
+			{
+				ExitProcess(1);
+				return 1;
+			}
+		}
+
 		init_hook_base();
 
-		std::thread init_thread([dicts]() {
+		thread init_thread([dicts]() {
 			logger::init_logger();
 			local::load_textdb(&dicts);
 			if (!text_id_dict.empty())
