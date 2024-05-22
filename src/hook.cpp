@@ -7873,7 +7873,7 @@ namespace
 
 				il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, Il2CppDelegate*)>(dialogData->klass, "AddDestroyCallback", 1)->methodPointer(dialogData, onDestroy);
 				il2cpp_symbols::get_method_pointer<Il2CppObject* (*)(Il2CppObject* data)>("umamusume.dll", "Gallop", "DialogManager", "PushDialog", 1)(dialogData);
-			});
+				});
 
 		dialogData = reinterpret_cast<Il2CppObject * (*)(Il2CppObject * thisObj,
 			Il2CppString * headerTextArg,
@@ -8587,7 +8587,7 @@ namespace
 		il2cpp_field_set_value(dialogData, ContentsObjectField, gameObject);
 
 		settingsDialog = il2cpp_symbols::get_method_pointer<Il2CppObject * (*)(Il2CppObject * data)>("umamusume.dll", "Gallop", "DialogManager", "PushDialog", 1)(dialogData);
-	}
+			}
 
 	void OpenLiveSettings()
 	{
@@ -9836,73 +9836,73 @@ namespace
 											int storyId;
 											il2cpp_field_get_value(voiceButtonTarget, storyIdField, &storyId);
 
-									auto masterDataManager = GetSingletonInstance(
-										il2cpp_symbols::get_class(
-											"umamusume.dll", "Gallop",
-											"MasterDataManager"));
-									auto masterBannerData = il2cpp_class_get_method_from_name_type<Il2CppObject * (*)(Il2CppObject*)>(
-										masterDataManager->klass,
-										"get_masterBannerData",
-										0)->methodPointer(masterDataManager);
+											auto masterDataManager = GetSingletonInstance(
+												il2cpp_symbols::get_class(
+													"umamusume.dll", "Gallop",
+													"MasterDataManager"));
+											auto masterBannerData = il2cpp_class_get_method_from_name_type<Il2CppObject * (*)(Il2CppObject*)>(
+												masterDataManager->klass,
+												"get_masterBannerData",
+												0)->methodPointer(masterDataManager);
 
-									auto bannerList = il2cpp_class_get_method_from_name_type<Il2CppObject * (*)(
-										Il2CppObject*,
-										int)>(
-											masterBannerData->klass,
-											"GetListWithGroupId",
-											1)->methodPointer(masterBannerData,
-												7);
+											auto bannerList = il2cpp_class_get_method_from_name_type<Il2CppObject * (*)(
+												Il2CppObject*,
+												int)>(
+													masterBannerData->klass,
+													"GetListWithGroupId",
+													1)->methodPointer(masterBannerData,
+														7);
 
-									FieldInfo* itemsField = il2cpp_class_get_field_from_name_wrap(
-										bannerList->klass, "_items");
-									Il2CppArraySize* arr;
-									il2cpp_field_get_value(bannerList, itemsField,
-										&arr);
+											FieldInfo* itemsField = il2cpp_class_get_field_from_name_wrap(
+												bannerList->klass, "_items");
+											Il2CppArraySize* arr;
+											il2cpp_field_get_value(bannerList, itemsField,
+												&arr);
 
-									int announceId = -1;
+											int announceId = -1;
 
-									for (int i = 0; i < arr->max_length; i++)
-									{
-										auto item = reinterpret_cast<Il2CppObject*>(arr->vector[i]);
-										if (item)
-										{
-											auto typeField = il2cpp_class_get_field_from_name_wrap(
-												item->klass, "Type");
-											int type;
-											il2cpp_field_get_value(item, typeField,
-												&type);
-											auto conditionValueField = il2cpp_class_get_field_from_name_wrap(
-												item->klass, "ConditionValue");
-											int conditionValue;
-											il2cpp_field_get_value(item,
-												conditionValueField,
-												&conditionValue);
-											if (type == 7 &&
-												conditionValue == storyId)
+											for (int i = 0; i < arr->max_length; i++)
 											{
-												auto transitionField = il2cpp_class_get_field_from_name_wrap(
-													item->klass, "Transition");
-												il2cpp_field_get_value(item,
-													transitionField,
-													&announceId);
-												break;
+												auto item = reinterpret_cast<Il2CppObject*>(arr->vector[i]);
+												if (item)
+												{
+													auto typeField = il2cpp_class_get_field_from_name_wrap(
+														item->klass, "Type");
+													int type;
+													il2cpp_field_get_value(item, typeField,
+														&type);
+													auto conditionValueField = il2cpp_class_get_field_from_name_wrap(
+														item->klass, "ConditionValue");
+													int conditionValue;
+													il2cpp_field_get_value(item,
+														conditionValueField,
+														&conditionValue);
+													if (type == 7 &&
+														conditionValue == storyId)
+													{
+														auto transitionField = il2cpp_class_get_field_from_name_wrap(
+															item->klass, "Transition");
+														il2cpp_field_get_value(item,
+															transitionField,
+															&announceId);
+														break;
+													}
+												}
 											}
-										}
-									}
 
-									if (announceId == -1 && storyId < 1005)
-									{
-										announceId = storyId - 1002;
-									}
+											if (announceId == -1 && storyId < 1005)
+											{
+												announceId = storyId - 1002;
+											}
 
-									auto action = CreateDelegateStatic(*[]() {});
+											auto action = CreateDelegateStatic(*[]() {});
 
-									il2cpp_symbols::get_method_pointer<void (*)(int,
-										Il2CppDelegate*,
-										Il2CppDelegate*)>(
-											"umamusume.dll", "Gallop",
-											"DialogAnnounceEvent", "Open", 3)(announceId, action, action);
-								});
+											il2cpp_symbols::get_method_pointer<void (*)(int,
+												Il2CppDelegate*,
+												Il2CppDelegate*)>(
+													"umamusume.dll", "Gallop",
+													"DialogAnnounceEvent", "Open", 3)(announceId, action, action);
+										});
 
 									if (storyId < 1005)
 									{
@@ -10374,6 +10374,20 @@ namespace
 		if (bResults)
 			bResults = WinHttpReceiveResponse(hRequest, NULL);
 
+
+		DWORD dwStatusCode = 0;
+
+		WinHttpQueryHeaders(hRequest,
+			WINHTTP_QUERY_STATUS_CODE | WINHTTP_QUERY_FLAG_NUMBER,
+			WINHTTP_HEADER_NAME_BY_INDEX,
+			&dwStatusCode, &dwSize, WINHTTP_NO_HEADER_INDEX);
+
+		if (dwStatusCode != HTTP_STATUS_OK && dwStatusCode > 0)
+		{
+			cout << "Error status " << dwStatusCode << endl;
+			return "";
+		}
+
 		string jsonData;
 
 		// Keep checking for data until there is nothing left.
@@ -10444,6 +10458,15 @@ namespace
 		if (document.HasMember("result_code") && document["result_code"].GetInt() == 100)
 		{
 			return string(document["data"].GetObjectA()["execute_args"].GetString());
+		}
+		else if (document.HasMember("error") && document["error"].IsString())
+		{
+			thread([](const char* error)
+				{
+					MessageBoxW(GetHWND(), local::u8_wide(error).data(), L"Login error", MB_ICONWARNING);
+				},
+				document["error"].GetString()
+			).detach();
 		}
 
 		return "";
@@ -10581,7 +10604,6 @@ namespace
 
 									if (source == L"dmmgameplayer://showLibrary")
 									{
-
 										ICoreWebView2_2* webView2;
 										webview->QueryInterface<ICoreWebView2_2>(&webView2);
 
@@ -10631,35 +10653,38 @@ namespace
 
 												auto gameArgs = GetGameArgs(sessionId, secureId);
 
-												stringstream gameArgsStream(gameArgs);
-												string segment;
-												vector<string> split;
-												while (getline(gameArgsStream, segment, ' '))
+												if (!gameArgs.empty())
 												{
-													split.emplace_back(segment);
+													stringstream gameArgsStream(gameArgs);
+													string segment;
+													vector<string> split;
+													while (getline(gameArgsStream, segment, ' '))
+													{
+														split.emplace_back(segment);
+													}
+
+													stringstream singleArgStream1(split[0]);
+													vector<string> split1;
+													while (getline(singleArgStream1, segment, '='))
+													{
+														split1.emplace_back(segment);
+													}
+
+													viewerId = string(split1.back());
+
+													split1.clear();
+
+													stringstream singleArgStream2(split[1]);
+													while (getline(singleArgStream2, segment, '='))
+													{
+														split1.emplace_back(segment);
+													}
+
+													onetimeToken = string(split1.back());
+
+													il2cpp_symbols::get_method_pointer<void (*)(Il2CppString*)>("umamusume.dll", "Gallop", "Certification", "set_dmmViewerId", 1)(il2cpp_string_new(viewerId.data()));
+													il2cpp_symbols::get_method_pointer<void (*)(Il2CppString*)>("umamusume.dll", "Gallop", "Certification", "set_dmmOnetimeToken", 1)(il2cpp_string_new(onetimeToken.data()));
 												}
-
-												stringstream singleArgStream1(split[0]);
-												vector<string> split1;
-												while (getline(singleArgStream1, segment, '='))
-												{
-													split1.emplace_back(segment);
-												}
-
-												viewerId = string(split1.back());
-
-												split1.clear();
-
-												stringstream singleArgStream2(split[1]);
-												while (getline(singleArgStream2, segment, '='))
-												{
-													split1.emplace_back(segment);
-												}
-
-												onetimeToken = string(split1.back());
-
-												il2cpp_symbols::get_method_pointer<void (*)(Il2CppString*)>("umamusume.dll", "Gallop", "Certification", "set_dmmViewerId", 1)(il2cpp_string_new(viewerId.data()));
-												il2cpp_symbols::get_method_pointer<void (*)(Il2CppString*)>("umamusume.dll", "Gallop", "Certification", "set_dmmOnetimeToken", 1)(il2cpp_string_new(onetimeToken.data()));
 
 												webviewController->Close();
 												PostMessage(hWnd, WM_CLOSE, NULL, NULL);
@@ -10768,8 +10793,8 @@ namespace
 
 				char* buf1 = reinterpret_cast<char*>(data) + kIl2CppSizeOfArray;
 				memcpy(buf1, modified.data(), modified.size());
-			}
 		}
+	}
 #endif
 
 		return reinterpret_cast<decltype(UploadHandlerRaw_Create_hook)*>(UploadHandlerRaw_Create_orig)(self, data);
@@ -10802,14 +10827,14 @@ namespace
 
 				char* buf1 = reinterpret_cast<char*>(data) + kIl2CppSizeOfArray;
 				memcpy(buf1, modified.data(), modified.size());
-			}
 		}
+	}
 #endif
 
 		MsgPackData::ReadResponse(buf, data->max_length);
 
 		return data;
-	}
+}
 
 	void* HttpHelper_CompressRequest_orig = nullptr;
 
@@ -10836,8 +10861,8 @@ namespace
 
 				char* buf1 = reinterpret_cast<char*>(data) + kIl2CppSizeOfArray;
 				memcpy(buf1, modified.data(), modified.size());
-			}
 		}
+	}
 #endif
 
 		return reinterpret_cast<decltype(HttpHelper_CompressRequest_hook)*>(HttpHelper_CompressRequest_orig)(data);
@@ -10870,8 +10895,8 @@ namespace
 
 				char* buf1 = reinterpret_cast<char*>(data) + kIl2CppSizeOfArray;
 				memcpy(buf1, modified.data(), modified.size());
-			}
 		}
+	}
 #endif
 
 		MsgPackData::ReadResponse(buf, data->max_length);
@@ -11620,27 +11645,26 @@ namespace
 
 							if (instanceField)
 							{
-							Il2CppObject* instance;
+								Il2CppObject* instance;
+								il2cpp_field_static_get_value(instanceField, &instance);
 
-							il2cpp_field_static_get_value(instanceField, &instance);
-
-							if (instance)
-							{
-								auto _taskQueueArrayField = il2cpp_class_get_field_from_name_wrap(instance->klass, "_taskQueueArray");
-								Il2CppArraySize* _taskQueueArray;
-
-								il2cpp_field_get_value(instance, _taskQueueArrayField, &_taskQueueArray);
-
-								for (int i = 0; i < _taskQueueArray->max_length; i++)
+								if (instance)
 								{
-									auto item = reinterpret_cast<Il2CppObject*>(_taskQueueArray->vector[i]);
-									if (item)
+									auto _taskQueueArrayField = il2cpp_class_get_field_from_name_wrap(instance->klass, "_taskQueueArray");
+									Il2CppArraySize* _taskQueueArray;
+
+									il2cpp_field_get_value(instance, _taskQueueArrayField, &_taskQueueArray);
+
+									for (int i = 0; i < _taskQueueArray->max_length; i++)
 									{
-										il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, int)>(item->klass, "set_UpdateMode", 1)->methodPointer(item, g_cyspring_update_mode);
+										auto item = reinterpret_cast<Il2CppObject*>(_taskQueueArray->vector[i]);
+										if (item)
+										{
+											il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, int)>(item->klass, "set_UpdateMode", 1)->methodPointer(item, g_cyspring_update_mode);
+										}
 									}
 								}
 							}
-						}
 						}
 					}).detach();
 			}
@@ -13176,7 +13200,7 @@ bool init_hook_base()
 
 		MH_CreateHook(FindNextFileW, FindNextFileW_hook, &FindNextFileW_orig);
 		MH_EnableHook(FindNextFileW);
-	}
+}
 
 	if (!g_allow_delete_cookie && Game::CurrentGameRegion == Game::Region::KOR)
 	{
