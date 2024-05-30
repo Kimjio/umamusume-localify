@@ -149,6 +149,8 @@ namespace
 	{
 	}
 
+	void PrintStackTrace();
+
 	void* Application_Quit_orig;
 
 	void Application_Quit_hook(int exitCode)
@@ -174,7 +176,15 @@ namespace
 		Exit();
 	}
 
-	void PrintStackTrace();
+	void* UpdateDispatcher_Initialize_orig = nullptr;
+	void UpdateDispatcher_Initialize_hook()
+	{
+		auto klass = il2cpp_symbols::get_class("Cute.Core.Assembly.dll", "Cute.Core", "UpdateDispatcher");
+		auto isQuitField = il2cpp_class_get_field_from_name(klass, "isQuit");
+		bool isQuit = false;
+
+		il2cpp_field_static_set_value(isQuitField, &isQuit);
+	}
 
 	void* set_resolution_orig;
 	void set_resolution_hook(int width, int height, int fullscreenMode, int perferredRefreshRate);
@@ -197,6 +207,10 @@ namespace
 		auto Application_Quit = il2cpp_resolve_icall("UnityEngine.Application::Quit(System.Int32)");
 		MH_CreateHook(Application_Quit, Application_Quit_hook, &Application_Quit_orig);
 		MH_EnableHook(Application_Quit);
+
+		auto UpdateDispatcher_Initialize_addr = il2cpp_symbols::get_method_pointer("Cute.Core.Assembly.dll", "Cute.Core", "UpdateDispatcher", "Initialize", -1);
+		MH_CreateHook(UpdateDispatcher_Initialize_addr, UpdateDispatcher_Initialize_hook, &UpdateDispatcher_Initialize_orig);
+		MH_EnableHook(UpdateDispatcher_Initialize_addr);
 
 		il2cpp_symbols::get_method_pointer<void (*)()>("UnityEngine.SubsystemsModule.dll", "UnityEngine", "SubsystemManager", ".cctor", -1)();
 		il2cpp_symbols::get_method_pointer<void (*)()>("UnityEngine.SubsystemsModule.dll", "UnityEngine.SubsystemsImplementation", "SubsystemDescriptorStore", ".cctor", -1)();
@@ -631,14 +645,14 @@ namespace
 			if (textList)
 			{
 				FieldInfo* itemsField = il2cpp_class_get_field_from_name_wrap(textList->klass, "_items");
-				Il2CppArraySize* textArr;
+				Il2CppArraySize_t<Il2CppObject*>* textArr;
 				il2cpp_field_get_value(textList, itemsField, &textArr);
 
 				if (textArr)
 				{
 					for (int i = 0; i < textArr->max_length; i++)
 					{
-						auto elem = reinterpret_cast<Il2CppObject*>(textArr->vector[i]);
+						auto elem = textArr->vector[i];
 						if (elem)
 						{
 							auto elemCueIdField = il2cpp_class_get_field_from_name_wrap(elem->klass, "CueId");
@@ -13090,9 +13104,14 @@ BOOL InternetCrackUrlW_hook(
 	return reinterpret_cast<decltype(InternetCrackUrlW_hook)*>(InternetCrackUrlW_orig)(lpszUrl, dwUrlLength, dwFlags, lpUrlComponents);
 }
 
+constexpr int MAX_DLL_COUNT = 23;
+constexpr int MAX_ROOT_FILE_COUNT = 8 + /* self (.) */1 + /* parent (..) */1;
+
 HANDLE currentFindHandle;
+HANDLE currentRootFindHandle;
 
 int dllCount;
+int rootFileCount;
 
 void* FindNextFileW_orig = nullptr;
 BOOL
@@ -13102,22 +13121,68 @@ FindNextFileW_hook(
 	_Out_ LPWIN32_FIND_DATAW lpFindFileData
 )
 {
-	if (currentFindHandle == hFindFile && dllCount >= 23)
+	if (currentFindHandle == hFindFile && dllCount >= MAX_DLL_COUNT)
 	{
-		*lpFindFileData = WIN32_FIND_DATAW{};
+		lpFindFileData = nullptr;
+		SetLastError(ERROR_NO_MORE_FILES);
+		return FALSE;
+	}
+
+	if (currentRootFindHandle == hFindFile && rootFileCount >= MAX_ROOT_FILE_COUNT)
+	{
+		lpFindFileData = nullptr;
 		SetLastError(ERROR_NO_MORE_FILES);
 		return FALSE;
 	}
 
 	auto result = reinterpret_cast<decltype(FindNextFileW_hook)*>(FindNextFileW_orig)(hFindFile, lpFindFileData);
-	if (currentFindHandle == hFindFile && lpFindFileData && lpFindFileData->cFileName)
+
+	if (currentRootFindHandle == hFindFile)
 	{
-		if (result)
+		if (lpFindFileData && lpFindFileData->cFileName)
+		{
+			rootFileCount++;
+
+			if (!result && rootFileCount <= MAX_ROOT_FILE_COUNT && GetLastError() == ERROR_NO_MORE_FILES)
+			{
+				SetLastError(ERROR_SUCCESS);
+				return TRUE;
+			}
+		}
+		else if (rootFileCount < MAX_ROOT_FILE_COUNT && GetLastError() == ERROR_NO_MORE_FILES)
+		{
+			if (lpFindFileData)
+			{
+				*lpFindFileData = WIN32_FIND_DATAW{};
+			}
+			SetLastError(ERROR_SUCCESS);
+			return TRUE;
+		}
+	}
+
+	if (currentFindHandle == hFindFile)
+	{
+		if (lpFindFileData && lpFindFileData->cFileName)
 		{
 			if (wstring(lpFindFileData->cFileName).ends_with(L".dll"))
 			{
 				dllCount++;
+
+				if (!result && dllCount <= MAX_DLL_COUNT && GetLastError() == ERROR_NO_MORE_FILES)
+				{
+					SetLastError(ERROR_SUCCESS);
+					return TRUE;
+				}
 			}
+		}
+		else if (dllCount < MAX_DLL_COUNT && GetLastError() == ERROR_NO_MORE_FILES)
+		{
+			if (lpFindFileData)
+			{
+				*lpFindFileData = WIN32_FIND_DATAW{};
+			}
+			SetLastError(ERROR_SUCCESS);
+			return TRUE;
 		}
 	}
 	return result;
@@ -13145,8 +13210,28 @@ FindFirstFileExW_hook(
 	auto result = reinterpret_cast<decltype(FindFirstFileExW_hook)*>(FindFirstFileExW_orig)(lpFileName, fInfoLevelId, lpFindFileData,
 		fSearchOp, lpSearchFilter, dwAdditionalFlags);
 
+	if (filesystem::current_path().native() + L"\\*.dll" == lpFileName)
+	{
+		// reset count
+		dllCount = 0;
+	}
+
+	if (filesystem::current_path().native() + L"\\*.*" == lpFileName)
+	{
+		currentRootFindHandle = result;
+		rootFileCount = 1;
+	}
+
 	if (wstring(lpFileName).find(L"*.dll") != wstring::npos)
 	{
+		if (dllCount >= MAX_DLL_COUNT)
+		{
+			CloseHandle(result);
+			lpFindFileData = nullptr;
+			SetLastError(ERROR_FILE_NOT_FOUND);
+			return INVALID_HANDLE_VALUE;
+		}
+
 		currentFindHandle = result;
 
 		if (lpFindFileData && result != INVALID_HANDLE_VALUE)
@@ -13156,7 +13241,7 @@ FindFirstFileExW_hook(
 				dllCount++;
 			}
 
-			if (dllCount > 23)
+			if (dllCount > MAX_DLL_COUNT)
 			{
 				CloseHandle(result);
 				lpFindFileData = nullptr;
@@ -13194,6 +13279,7 @@ bool init_hook_base()
 		MH_CreateHook(InternetCrackUrlW, InternetCrackUrlW_hook, &InternetCrackUrlW_orig);
 		MH_EnableHook(InternetCrackUrlW);
 #endif
+	}
 
 		MH_CreateHook(FindFirstFileExW, FindFirstFileExW_hook, &FindFirstFileExW_orig);
 		MH_EnableHook(FindFirstFileExW);

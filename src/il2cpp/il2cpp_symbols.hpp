@@ -649,6 +649,33 @@ typedef struct Il2CppDelegate
 	bool method_is_virtual;
 } Il2CppDelegate;
 
+template<typename T>
+struct Il2CppDelegate_t
+{
+	Il2CppObject object;
+	/* The compiled code of the target method */
+	T method_ptr;
+	/* The invoke code */
+	InvokerMethod invoke_impl;
+	Il2CppObject* target;
+	const MethodInfo* method;
+
+	void* delegate_trampoline;
+
+	intptr_t extraArg;
+
+	/*
+	 * If non-NULL, this points to a memory location which stores the address of
+	 * the compiled code of the method, or NULL if it is not yet compiled.
+	 */
+	uint8_t** method_code;
+	Il2CppReflectionMethod* method_info;
+	Il2CppReflectionMethod* original_method_info;
+	Il2CppObject* data;
+
+	bool method_is_virtual;
+};
+
 typedef struct MulticastDelegate : Il2CppDelegate {
 	Il2CppArraySize* delegates;
 } MulticastDelegate;
