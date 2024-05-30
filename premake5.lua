@@ -52,7 +52,7 @@ workspace "umamusume-localify"
 	staticruntime "On"
 	editandcontinue "Off"
 	warnings "Off"
-	characterset "ASCII"
+	characterset "Unicode"
 	cppdialect "C++20"
 	cdialect "C17"
 

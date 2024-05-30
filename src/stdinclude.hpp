@@ -141,15 +141,15 @@ namespace {
 		return fRet;
 	}
 
-	void KillProcessByName(const char* filename)
+	void KillProcessByName(const wchar_t* filename)
 	{
 		HANDLE hSnapShot = CreateToolhelp32Snapshot(TH32CS_SNAPALL, NULL);
 		PROCESSENTRY32 pEntry;
 		pEntry.dwSize = sizeof(pEntry);
-		BOOL hRes = Process32First(hSnapShot, &pEntry);
+		BOOL hRes = Process32FirstW(hSnapShot, &pEntry);
 		while (hRes)
 		{
-			if (strcmp(pEntry.szExeFile, filename) == 0)
+			if (wcscmp(pEntry.szExeFile, filename) == 0)
 			{
 				HANDLE hProcess = OpenProcess(PROCESS_TERMINATE, 0,
 					(DWORD)pEntry.th32ProcessID);

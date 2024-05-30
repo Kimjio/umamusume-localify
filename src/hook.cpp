@@ -191,7 +191,7 @@ namespace
 
 	void init_il2cpp(bool attachIl2CppThread = false)
 	{
-		il2cpp_symbols::init(GetModuleHandle("GameAssembly.dll"));
+		il2cpp_symbols::init(GetModuleHandleW(L"GameAssembly.dll"));
 
 		void* t = nullptr;
 
@@ -221,7 +221,7 @@ namespace
 			MH_CreateHook(set_resolution, set_resolution_hook, &set_resolution_orig);
 			MH_EnableHook(set_resolution);
 
-			KillProcessByName("ucldr_Umamusume_KR_loader_x64.exe");
+			KillProcessByName(L"ucldr_Umamusume_KR_loader_x64.exe");
 
 			auto UncheaterInit_OnApplicationPause_addr = il2cpp_symbols::get_method_pointer(
 				"umamusume.dll",
@@ -956,9 +956,9 @@ namespace
 		EnumWindows(reinterpret_cast<WNDENUMPROC>(*([](HWND hWnd, LPARAM lParam)
 			{
 				TCHAR buf[MAX_CLASS_NAME];
-				GetClassName(hWnd, (LPTSTR)&buf, MAX_CLASS_NAME);
+				GetClassNameW(hWnd, (LPTSTR)&buf, MAX_CLASS_NAME);
 
-				if (string(buf).find("UnityWndClass") != string::npos)
+				if (wstring(buf).find(L"UnityWndClass") != wstring::npos)
 				{
 					DWORD dwWndProcID = 0;
 					GetWindowThreadProcessId(hWnd, &dwWndProcID);
@@ -1036,7 +1036,7 @@ namespace
 
 			if (!doc.HasParseError())
 			{
-				auto params = doc.GetArray()[2].GetObjectA();
+				auto params = doc.GetArray()[2].GetObjectW();
 
 				auto display = display_get_main();
 				auto systemHeight = get_system_height(display);
@@ -1162,7 +1162,7 @@ namespace
 				}
 				if (has_json_parse_error)
 				{
-					MessageBox(hWnd, json_parse_error_msg.data(), "Umamusume Localify", MB_OK | MB_ICONWARNING);
+					MessageBoxW(hWnd, local::u8_wide(json_parse_error_msg).data(), L"Umamusume Localify", MB_OK | MB_ICONWARNING);
 				}
 			}
 
@@ -1272,7 +1272,7 @@ namespace
 
 		if (code_map.HasMember("!common"))
 		{
-			auto commonMap = code_map["!common"].GetObjectA();
+			auto commonMap = code_map["!common"].GetObjectW();
 			if (commonMap.HasMember(name))
 			{
 				auto field = il2cpp_class_get_field_from_name(klass, commonMap[name].GetString());
@@ -1288,7 +1288,7 @@ namespace
 			return il2cpp_class_get_field_from_name(klass, name);
 		}
 
-		auto classMap = code_map[className.data()].GetObjectA();
+		auto classMap = code_map[className.data()].GetObjectW();
 
 		if (classMap.HasMember(name))
 		{
@@ -1317,7 +1317,7 @@ namespace
 		if (classMap.HasMember("!extends"))
 		{
 			auto parentName = classMap["!extends"].GetString();
-			auto parentMap = code_map[parentName].GetObjectA();
+			auto parentMap = code_map[parentName].GetObjectW();
 			auto parentClass = klass->parent;
 
 			if (parentMap.HasMember((name + ".index"s).data()))
@@ -7887,7 +7887,7 @@ namespace
 
 				il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, Il2CppDelegate*)>(dialogData->klass, "AddDestroyCallback", 1)->methodPointer(dialogData, onDestroy);
 				il2cpp_symbols::get_method_pointer<Il2CppObject* (*)(Il2CppObject* data)>("umamusume.dll", "Gallop", "DialogManager", "PushDialog", 1)(dialogData);
-				});
+			});
 
 		dialogData = reinterpret_cast<Il2CppObject * (*)(Il2CppObject * thisObj,
 			Il2CppString * headerTextArg,
@@ -8601,7 +8601,7 @@ namespace
 		il2cpp_field_set_value(dialogData, ContentsObjectField, gameObject);
 
 		settingsDialog = il2cpp_symbols::get_method_pointer<Il2CppObject * (*)(Il2CppObject * data)>("umamusume.dll", "Gallop", "DialogManager", "PushDialog", 1)(dialogData);
-			}
+	}
 
 	void OpenLiveSettings()
 	{
@@ -10318,7 +10318,7 @@ namespace
 
 		if (document.HasMember("result_code") && document["result_code"].GetInt() == 100)
 		{
-			return string(document["data"].GetObjectA()["url"].GetString());
+			return string(document["data"].GetObjectW()["url"].GetString());
 		}
 
 		return "";
@@ -10471,7 +10471,7 @@ namespace
 
 		if (document.HasMember("result_code") && document["result_code"].GetInt() == 100)
 		{
-			return string(document["data"].GetObjectA()["execute_args"].GetString());
+			return string(document["data"].GetObjectW()["execute_args"].GetString());
 		}
 		else if (document.HasMember("error") && document["error"].IsString())
 		{
@@ -10542,18 +10542,18 @@ namespace
 		wcex.cbClsExtra = 0;
 		wcex.cbWndExtra = 0;
 		wcex.hInstance = hInstance;
-		wcex.hIcon = LoadIcon(hInstance, reinterpret_cast<LPCSTR>(IDI_APP_ICON));
+		wcex.hIcon = LoadIconW(hInstance, reinterpret_cast<LPWSTR>(IDI_APP_ICON));
 		wcex.hCursor = LoadCursor(NULL, IDC_ARROW);
 		wcex.hbrBackground = reinterpret_cast<HBRUSH>(COLOR_WINDOW + 1);
 		wcex.lpszMenuName = NULL;
-		wcex.lpszClassName = "WebViewWindow";
-		wcex.hIconSm = LoadIcon(wcex.hInstance, reinterpret_cast<LPCSTR>(IDI_APP_ICON));
+		wcex.lpszClassName = L"WebViewWindow";
+		wcex.hIconSm = LoadIconW(wcex.hInstance, reinterpret_cast<LPWSTR>(IDI_APP_ICON));
 
 		RegisterClassEx(&wcex);
 
 		SetThreadDpiAwarenessContext(DPI_AWARENESS_CONTEXT_PER_MONITOR_AWARE);
 
-		const auto hWnd = CreateWindowEx(NULL, "WebViewWindow", "Login DMM",
+		const auto hWnd = CreateWindowExW(NULL, L"WebViewWindow", L"Login DMM",
 			WS_OVERLAPPEDWINDOW ^ WS_MAXIMIZEBOX ^ WS_MINIMIZEBOX,
 			CW_USEDEFAULT, CW_USEDEFAULT,
 			900, 900,
@@ -10807,8 +10807,8 @@ namespace
 
 				char* buf1 = reinterpret_cast<char*>(data) + kIl2CppSizeOfArray;
 				memcpy(buf1, modified.data(), modified.size());
+			}
 		}
-	}
 #endif
 
 		return reinterpret_cast<decltype(UploadHandlerRaw_Create_hook)*>(UploadHandlerRaw_Create_orig)(self, data);
@@ -10841,14 +10841,14 @@ namespace
 
 				char* buf1 = reinterpret_cast<char*>(data) + kIl2CppSizeOfArray;
 				memcpy(buf1, modified.data(), modified.size());
+			}
 		}
-	}
 #endif
 
 		MsgPackData::ReadResponse(buf, data->max_length);
 
 		return data;
-}
+	}
 
 	void* HttpHelper_CompressRequest_orig = nullptr;
 
@@ -10875,8 +10875,8 @@ namespace
 
 				char* buf1 = reinterpret_cast<char*>(data) + kIl2CppSizeOfArray;
 				memcpy(buf1, modified.data(), modified.size());
+			}
 		}
-	}
 #endif
 
 		return reinterpret_cast<decltype(HttpHelper_CompressRequest_hook)*>(HttpHelper_CompressRequest_orig)(data);
@@ -10909,8 +10909,8 @@ namespace
 
 				char* buf1 = reinterpret_cast<char*>(data) + kIl2CppSizeOfArray;
 				memcpy(buf1, modified.data(), modified.size());
+			}
 		}
-	}
 #endif
 
 		MsgPackData::ReadResponse(buf, data->max_length);
@@ -11038,7 +11038,7 @@ namespace
 
 		printf("Trying to patch GameAssembly.dll...\n");
 
-		auto il2cpp_module = GetModuleHandle("GameAssembly.dll");
+		auto il2cpp_module = GetModuleHandleW(L"GameAssembly.dll");
 
 		// load il2cpp exported functions
 		il2cpp_symbols::init(il2cpp_module);
@@ -13062,7 +13062,7 @@ BOOL WINAPI HttpSendRequestW_hook(
 		{
 			if (doc.IsObject() && doc.HasMember("os"))
 			{
-				doc.GetObjectA()["os"].SetString(rapidjson::StringRef("android"));
+				doc.GetObjectW()["os"].SetString(rapidjson::StringRef("android"));
 
 				rapidjson::StringBuffer buffer;
 				buffer.Clear();
@@ -13253,7 +13253,6 @@ FindFirstFileExW_hook(
 
 	return result;
 }
-
 bool init_hook_base()
 {
 	if (mh_inited)
@@ -13281,12 +13280,11 @@ bool init_hook_base()
 #endif
 	}
 
-		MH_CreateHook(FindFirstFileExW, FindFirstFileExW_hook, &FindFirstFileExW_orig);
-		MH_EnableHook(FindFirstFileExW);
+	MH_CreateHook(FindFirstFileExW, FindFirstFileExW_hook, &FindFirstFileExW_orig);
+	MH_EnableHook(FindFirstFileExW);
 
-		MH_CreateHook(FindNextFileW, FindNextFileW_hook, &FindNextFileW_orig);
-		MH_EnableHook(FindNextFileW);
-}
+	MH_CreateHook(FindNextFileW, FindNextFileW_hook, &FindNextFileW_orig);
+	MH_EnableHook(FindNextFileW);
 
 	if (!g_allow_delete_cookie && Game::CurrentGameRegion == Game::Region::KOR)
 	{
@@ -13297,7 +13295,7 @@ bool init_hook_base()
 	MH_CreateHook(LoadLibraryW, load_library_w_hook, &load_library_w_orig);
 	MH_EnableHook(LoadLibraryW);
 
-	auto UnityPlayer = GetModuleHandle("UnityPlayer.dll");
+	auto UnityPlayer = GetModuleHandleW(L"UnityPlayer.dll");
 	auto UnityMain_addr = GetProcAddress(UnityPlayer, "UnityMain");
 
 	MH_CreateHook(UnityMain_addr, UnityMain_hook, &UnityMain_orig);

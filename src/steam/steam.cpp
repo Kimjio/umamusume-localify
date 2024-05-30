@@ -35,10 +35,10 @@ namespace
 		if (steam_path.empty()) 
 			return;
 
-		LoadLibrary((steam_path / "tier0_s64.dll").string().data());
-		LoadLibrary((steam_path / "vstdlib_s64.dll").string().data());
-		steam_overlay_module = LoadLibrary((steam_path / "gameoverlayrenderer64.dll").string().data());
-		steam_client_module = LoadLibrary((steam_path / "steamclient64.dll").string().data());
+		LoadLibraryA((steam_path / "tier0_s64.dll").string().data());
+		LoadLibraryA((steam_path / "vstdlib_s64.dll").string().data());
+		steam_overlay_module = LoadLibraryA((steam_path / "gameoverlayrenderer64.dll").string().data());
+		steam_client_module = LoadLibraryA((steam_path / "steamclient64.dll").string().data());
 
 		if (!steam_client_module)
 			return;
