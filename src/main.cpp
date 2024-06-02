@@ -663,30 +663,6 @@ int __stdcall DllMain(HINSTANCE, DWORD reason, LPVOID)
 {
 	if (reason == DLL_PROCESS_ATTACH)
 	{
-		set_terminate([]() -> void {
-			cerr << "terminate called after throwing an instance of ";
-			try
-			{
-				rethrow_exception(current_exception());
-			}
-			catch (const exception& ex)
-			{
-				cerr << typeid(ex).name() << endl;
-				cerr << "  what(): " << ex.what() << endl;
-
-				MessageBoxW(nullptr, local::u8_wide(ex.what()).data(), local::u8_wide(typeid(ex).name()).data(), MB_ICONWARNING);
-			}
-			catch (...)
-			{
-				cerr << typeid(current_exception()).name() << endl;
-				cerr << " ...something, not an exception, dunno what." << endl;
-
-				MessageBoxW(nullptr, L"Unknown error...", local::u8_wide(typeid(current_exception()).name()).data(), MB_ICONWARNING);
-			}
-			cerr << "errno: " << errno << ": " << strerror(errno) << endl;
-			abort();
-			});
-
 		// the DMM Launcher set start path to system32 wtf????
 		wstring module_name;
 		module_name.resize(MAX_PATH);
@@ -707,17 +683,17 @@ int __stdcall DllMain(HINSTANCE, DWORD reason, LPVOID)
 		if (g_enable_console)
 			create_debug_console();
 
-		ifstream appinfo(module_path.parent_path().append(module_path.filename().replace_extension().string().append("_Data\\app.info"s).data()));
+		wifstream appinfo(module_path.parent_path().append(module_path.filename().replace_extension().string().append("_Data\\app.info"s).data()));
 
-		string company;
+		wstring company;
 		getline(appinfo, company);
 
-		string product;
+		wstring product;
 		getline(appinfo, product);
 
 		appinfo.close();
 
-		if (company == "Cygames_KakaoGames")
+		if (company == L"Cygames_KakaoGames")
 		{
 			Game::CurrentGameRegion = Game::Region::KOR;
 
@@ -777,8 +753,8 @@ int __stdcall DllMain(HINSTANCE, DWORD reason, LPVOID)
 			wstringstream subKeyStream;
 
 			subKeyStream << L"Software";
-			subKeyStream << L"\\" << local::u8_wide(company);
-			subKeyStream << L"\\" << local::u8_wide(product);
+			subKeyStream << L"\\" << company;
+			subKeyStream << L"\\" << product;
 
 			DWORD data{};
 			DWORD dataSize = sizeof(data);

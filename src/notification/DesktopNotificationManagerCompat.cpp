@@ -80,9 +80,9 @@ namespace DesktopNotificationManagerCompat
 
 		auto path = GetAppDataFolderIconPath(aumid);
 
-		if (!filesystem::exists(filesystem::path(local::wide_u8(path)).parent_path()))
+		if (!filesystem::exists(filesystem::path(path).parent_path()))
 		{
-			filesystem::create_directories(filesystem::path(local::wide_u8(path)).parent_path());
+			filesystem::create_directories(filesystem::path(path).parent_path());
 		}
 
 		SaveIconToFile(hIcon, GetAppDataFolderIconPath(aumid).data(), 32);

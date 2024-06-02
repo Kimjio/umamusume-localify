@@ -11854,7 +11854,7 @@ namespace
 		auto amuid = wstring(il2cpp_resolve_icall_type<Il2CppString * (*)()>("UnityEngine.Application::get_companyName()")()->start_char) + L".Gallop";
 
 		DesktopNotificationManagerCompat::RegisterAumidAndComServer(amuid.data(), localize_get_hook(GetTextIdByName("Outgame0028"))->start_char);
-
+		
 		DesktopNotificationManagerCompat::RegisterActivator();
 
 		unique_ptr<DesktopNotificationHistoryCompat> history;
@@ -11977,7 +11977,7 @@ namespace
 				assetbundlePath.insert(0, ((wstring)filesystem::current_path().native()).append(L"/"));
 			}
 
-			cout << "Loading asset: " << local::wide_u8(assetbundlePath) << endl;
+			wcout << "Loading asset: " << assetbundlePath << endl;
 
 			fontAssets = load_from_file(il2cpp_string_new_utf16(assetbundlePath.data(), assetbundlePath.length()));
 
@@ -12000,7 +12000,7 @@ namespace
 				assetbundlePath.insert(0, ((wstring)filesystem::current_path().native()).append(L"/"));
 			}
 
-			cout << "Loading replacement AssetBundle: " << local::wide_u8(assetbundlePath) << endl;
+			wcout << L"Loading replacement AssetBundle: " << assetbundlePath << endl;
 
 			auto assets = load_from_file(il2cpp_string_new_utf16(assetbundlePath.data(), assetbundlePath.length()));
 
@@ -12026,7 +12026,7 @@ namespace
 					assetbundlePath.insert(0, ((wstring)filesystem::current_path().native()).append(L"/"));
 				}
 
-				cout << "Loading replacement AssetBundle: " << local::wide_u8(assetbundlePath) << endl;
+				wcout << "Loading replacement AssetBundle: " << assetbundlePath << endl;
 
 				auto assets = load_from_file(il2cpp_string_new_utf16(assetbundlePath.data(), assetbundlePath.length()));
 
