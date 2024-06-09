@@ -71,14 +71,16 @@ namespace MsgPackData
 
 		auto pngData = reinterpret_cast<Il2CppArraySize_t<uint8_t>*>(il2cpp_runtime_invoke(method, nullptr, params, &exception));
 
+		delete[] params;
+
 		if (exception)
 		{
-			il2cpp_raise_exception(exception);
+			wcout << "EncodeToPNG Error: " << exception->message << endl;
 			return;
 		}
 
 		auto wPath = GetIconPath(unitId);
-		auto path = local::wide_u8(wPath->start_char);
+		wstring path = wPath->start_char;
 		auto parentDir = filesystem::path(path).parent_path();
 
 		if (!filesystem::exists(parentDir))
@@ -86,7 +88,7 @@ namespace MsgPackData
 			filesystem::create_directories(parentDir);
 		}
 
-		il2cpp_symbols::get_method_pointer<void (*)(Il2CppString*, Il2CppArraySize_t<uint8_t>*)>("mscorlib.dll", "System.IO", "File", "WriteAllBytes", 2)(il2cpp_string_new(path.data()), pngData);
+		il2cpp_symbols::get_method_pointer<void (*)(Il2CppString*, Il2CppArraySize_t<uint8_t>*)>("mscorlib.dll", "System.IO", "File", "WriteAllBytes", 2)(il2cpp_string_new_utf16(path.data(), path.size()), pngData);
 	}
 
 	void RegisterTPScheduledToast()
@@ -105,7 +107,16 @@ namespace MsgPackData
 
 			auto loader = il2cpp_symbols::get_method_pointer<Il2CppObject * (*)()>("umamusume.dll", "Gallop", "AssetManager", "get_Loader", -1)();
 			auto asset = il2cpp_class_get_method_from_name_type<Il2CppObject * (*)(Il2CppObject*, Il2CppString*, bool)>(loader->klass, "LoadAssetHandle", 2)->methodPointer(loader, il2cpp_string_new(path.data()), false);
+			if (!asset)
+			{
+				return;
+			}
+
 			auto assetBundle = il2cpp_class_get_method_from_name_type<Il2CppObject * (*)(Il2CppObject*)>(asset->klass, "get_assetBundle", 0)->methodPointer(asset);
+			if (!assetBundle)
+			{
+				return;
+			}
 
 			auto texture2DType = reinterpret_cast<Il2CppType*>(::GetRuntimeType("UnityEngine.CoreModule.dll", "UnityEngine", "Texture2D"));
 			auto texture2D = reinterpret_cast<Il2CppObject * (*)(Il2CppObject*, Il2CppString*, const Il2CppType*)>(il2cpp_resolve_icall("UnityEngine.AssetBundle::LoadAsset_Internal(System.String,System.Type)"))(assetBundle, il2cpp_string_new(push_icon.data()), texture2DType);
@@ -145,7 +156,16 @@ namespace MsgPackData
 
 			auto loader = il2cpp_symbols::get_method_pointer<Il2CppObject * (*)()>("umamusume.dll", "Gallop", "AssetManager", "get_Loader", -1)();
 			auto asset = il2cpp_class_get_method_from_name_type<Il2CppObject * (*)(Il2CppObject*, Il2CppString*, bool)>(loader->klass, "LoadAssetHandle", 2)->methodPointer(loader, il2cpp_string_new(path.data()), false);
+			if (!asset)
+			{
+				return;
+			}
+
 			auto assetBundle = il2cpp_class_get_method_from_name_type<Il2CppObject * (*)(Il2CppObject*)>(asset->klass, "get_assetBundle", 0)->methodPointer(asset);
+			if (!assetBundle)
+			{
+				return;
+			}
 
 			auto texture2DType = reinterpret_cast<Il2CppType*>(::GetRuntimeType("UnityEngine.CoreModule.dll", "UnityEngine", "Texture2D"));
 			auto texture2D = reinterpret_cast<Il2CppObject * (*)(Il2CppObject*, Il2CppString*, const Il2CppType*)>(il2cpp_resolve_icall("UnityEngine.AssetBundle::LoadAsset_Internal(System.String,System.Type)"))(assetBundle, il2cpp_string_new(push_icon.data()), texture2DType);
