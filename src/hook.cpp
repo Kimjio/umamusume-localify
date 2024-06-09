@@ -34,11 +34,16 @@
 #include <WebView2.h>
 #include <WebView2EnvironmentOptions.h>
 
+#include <windows.ui.notifications.h>
+#include <winrt/Windows.Foundation.h>
+
 #include <SQLiteCpp/SQLiteCpp.h>
 
 #include "ntdll.h"
 
 #include "config/config.hpp"
+
+#include "notifier/notifier.hpp"
 
 #include "rich_presence.hpp"
 
@@ -61,9 +66,6 @@
 #include "masterdb/masterdb.hpp"
 
 #include "notification/DesktopNotificationManagerCompat.h"
-
-#include <windows.ui.notifications.h>
-#include <winrt/Windows.Foundation.h>
 
 using namespace std;
 
@@ -8107,7 +8109,7 @@ namespace
 			if (configDocument.HasMember(L"unlockLiveChara"))
 			{
 				unlockLiveChara = configDocument[L"unlockLiveChara"].GetBool();
-		}
+			}
 #endif
 			if (configDocument.HasMember(L"unlockSize"))
 			{
@@ -8143,7 +8145,7 @@ namespace
 			{
 				freeFormUiScaleLandscape = configDocument[L"freeFormUiScaleLandscape"].GetFloat();
 			}
-	}
+		}
 
 		vector<string> graphicsQualityOptions = GetGraphicsQualityOptions();
 
@@ -8612,7 +8614,7 @@ namespace
 		il2cpp_field_set_value(dialogData, ContentsObjectField, gameObject);
 
 		settingsDialog = il2cpp_symbols::get_method_pointer<Il2CppObject * (*)(Il2CppObject * data)>("umamusume.dll", "Gallop", "DialogManager", "PushDialog", 1)(dialogData);
-}
+	}
 
 	void OpenLiveSettings()
 	{
@@ -10797,7 +10799,12 @@ namespace
 
 	void* UploadHandlerRaw_Create_hook(Il2CppObject* self, Il2CppArraySize_t<int8_t>* data)
 	{
-		const char* buf = reinterpret_cast<const char*>(data) + kIl2CppSizeOfArray;
+		auto buf = reinterpret_cast<const char*>(data) + kIl2CppSizeOfArray;
+
+		if (config::msgpack_notifier && config::msgpack_notifier_request)
+		{
+			notifier::notify_request(string(buf, data->max_length));
+		}
 
 		if (config::dump_msgpack && config::dump_msgpack_request)
 		{
@@ -10819,7 +10826,7 @@ namespace
 				char* buf1 = reinterpret_cast<char*>(data) + kIl2CppSizeOfArray;
 				memcpy(buf1, modified.data(), modified.size());
 			}
-	}
+		}
 #endif
 
 		return reinterpret_cast<decltype(UploadHandlerRaw_Create_hook)*>(UploadHandlerRaw_Create_orig)(self, data);
@@ -10831,7 +10838,12 @@ namespace
 	{
 		auto data = reinterpret_cast<decltype(DownloadHandler_InternalGetByteArray_hook)*>(DownloadHandler_InternalGetByteArray_orig)(self);
 
-		const char* buf = reinterpret_cast<const char*>(data) + kIl2CppSizeOfArray;
+		auto buf = reinterpret_cast<const char*>(data) + kIl2CppSizeOfArray;
+
+		if (config::msgpack_notifier)
+		{
+			notifier::notify_response(string(buf, data->max_length));
+		}
 
 		if (config::dump_msgpack)
 		{
@@ -10853,7 +10865,7 @@ namespace
 				char* buf1 = reinterpret_cast<char*>(data) + kIl2CppSizeOfArray;
 				memcpy(buf1, modified.data(), modified.size());
 			}
-	}
+		}
 #endif
 
 		MsgPackData::ReadResponse(buf, data->max_length);
@@ -10865,7 +10877,12 @@ namespace
 
 	Il2CppArraySize_t<int8_t>* HttpHelper_CompressRequest_hook(Il2CppArraySize_t<int8_t>* data)
 	{
-		const char* buf = reinterpret_cast<const char*>(data) + kIl2CppSizeOfArray;
+		auto buf = reinterpret_cast<const char*>(data) + kIl2CppSizeOfArray;
+
+		if (config::msgpack_notifier && config::msgpack_notifier_request)
+		{
+			notifier::notify_request(string(buf, data->max_length));
+		}
 
 		if (config::dump_msgpack && config::dump_msgpack_request)
 		{
@@ -10887,7 +10904,7 @@ namespace
 				char* buf1 = reinterpret_cast<char*>(data) + kIl2CppSizeOfArray;
 				memcpy(buf1, modified.data(), modified.size());
 			}
-	}
+		}
 #endif
 
 		return reinterpret_cast<decltype(HttpHelper_CompressRequest_hook)*>(HttpHelper_CompressRequest_orig)(data);
@@ -10899,7 +10916,12 @@ namespace
 	{
 		auto data = reinterpret_cast<decltype(HttpHelper_DecompressResponse_hook)*>(HttpHelper_DecompressResponse_orig)(compressed);
 
-		const char* buf = reinterpret_cast<const char*>(data) + kIl2CppSizeOfArray;
+		auto buf = reinterpret_cast<const char*>(data) + kIl2CppSizeOfArray;
+
+		if (config::msgpack_notifier)
+		{
+			notifier::notify_response(string(buf, data->max_length));
+		}
 
 		if (config::dump_msgpack)
 		{
@@ -10921,7 +10943,7 @@ namespace
 				char* buf1 = reinterpret_cast<char*>(data) + kIl2CppSizeOfArray;
 				memcpy(buf1, modified.data(), modified.size());
 			}
-	}
+		}
 #endif
 
 		MsgPackData::ReadResponse(buf, data->max_length);
@@ -10935,7 +10957,7 @@ namespace
 	}
 
 	LRESULT CALLBACK CBTProc(int nCode, WPARAM wParam, LPARAM lParam);
-	HHOOK g_hCBTHook = SetWindowsHookEx(WH_CBT, CBTProc, nullptr, GetCurrentThreadId());
+	HHOOK hCBTHook = SetWindowsHookExW(WH_CBT, CBTProc, nullptr, GetCurrentThreadId());
 
 	LRESULT CALLBACK CBTProc(int nCode, WPARAM wParam, LPARAM lParam)
 	{
@@ -10948,7 +10970,7 @@ namespace
 			}
 		}
 
-		return CallNextHookEx(g_hCBTHook, nCode, wParam, lParam);
+		return CallNextHookEx(hCBTHook, nCode, wParam, lParam);
 	}
 
 	void adjust_size()
@@ -13292,7 +13314,7 @@ bool init_hook_base()
 		MH_CreateHook(InternetCrackUrlW, InternetCrackUrlW_hook, &InternetCrackUrlW_orig);
 		MH_EnableHook(InternetCrackUrlW);
 #endif
-}
+	}
 
 	MH_CreateHook(FindFirstFileExW, FindFirstFileExW_hook, &FindFirstFileExW_orig);
 	MH_EnableHook(FindFirstFileExW);
@@ -13316,7 +13338,7 @@ bool init_hook_base()
 	MH_EnableHook(UnityMain_addr);
 
 	return true;
-}
+	}
 
 bool init_hook()
 {

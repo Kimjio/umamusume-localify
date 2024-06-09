@@ -11,3 +11,6 @@
 	path = deps/msgpack11
 	url = https://github.com/ar90n/msgpack11.git
 
+[submodule "deps/cpp-httplib"]
+	path = deps/cpp-httplib
+	url = https://github.com/yhirose/cpp-httplib.git

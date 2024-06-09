@@ -28,6 +28,7 @@ function dependencies.projects()
 	end
 end
 
+include "deps/cpp-httplib.lua"
 include "deps/minhook.lua"
 include "deps/rapidjson.lua"
 include "deps/SQLiteCpp.lua"
