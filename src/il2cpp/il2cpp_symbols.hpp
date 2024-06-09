@@ -491,6 +491,14 @@ typedef struct Il2CppException
 	Il2CppArraySize* native_trace_ips;
 } Il2CppException;
 
+typedef struct Il2CppExceptionWrapper
+{
+	Il2CppException* ex;
+#ifdef __cplusplus
+	Il2CppExceptionWrapper(Il2CppException* ex) : ex(ex) {}
+#endif //__cplusplus
+} Il2CppExceptionWrapper;
+
 template<typename T>
 struct Nullable
 {
@@ -721,6 +729,23 @@ struct ObscuredString
 	bool fakeValueActive;
 };
 
+enum DialogCommonFormType
+{
+	SMALL_NO_BUTTON,
+	SMALL_ONE_BUTTON,
+	SMALL_TWO_BUTTON,
+	SMALL_THREE_BUTTON,
+	MIDDLE_NO_BUTTON,
+	MIDDLE_ONE_BUTTON,
+	MIDDLE_TWO_BUTTON,
+	MIDDLE_THREE_BUTTON,
+	BIG_NO_BUTTON,
+	BIG_ONE_BUTTON,
+	BIG_TWO_BUTTON,
+	BIG_THREE_BUTTON,
+	WITHOUT_FRAME
+};
+
 // function types
 typedef Il2CppString* (*il2cpp_string_new_utf16_t)(const wchar_t* str, unsigned int len);
 typedef Il2CppString* (*il2cpp_string_new_t)(const char* str);
@@ -901,7 +926,7 @@ namespace il2cpp_symbols
 	const MethodInfo_t<T>* get_method(const char* assemblyName, const char* namespaze,
 		const char* klassName, const char* name, int argsCount)
 	{
-		return reinterpret_cast<MethodInfo_t<T>*>(get_method(assemblyName, namespaze, klassName, name, argsCount));
+		return reinterpret_cast<const MethodInfo_t<T>*>(get_method(assemblyName, namespaze, klassName, name, argsCount));
 	}
 
 	Il2CppClass* find_class(const char* assemblyName, const char* namespaze,

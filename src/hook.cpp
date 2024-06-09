@@ -4287,15 +4287,156 @@ namespace
 				dialogData, true);
 	}
 
+	Il2CppObject* GetFrontDialog()
+	{
+		return il2cpp_symbols::get_method_pointer<Il2CppObject * (*)()>("umamusume.dll", "Gallop", "DialogManager", "GetForeFrontDialog", -1)();
+	}
+
+	bool PressDialogButton(WPARAM wParam)
+	{
+		if (!(wParam == VK_SPACE || wParam == VK_RETURN))
+		{
+			return false;
+		}
+
+		bool isExistDialog = il2cpp_symbols::get_method_pointer<bool (*)()>(
+			"umamusume.dll", "Gallop", "DialogManager", "get_IsExistDialog", -1)();
+
+		if (!isExistDialog)
+		{
+			return false;
+		}
+
+		auto dialog = GetFrontDialog();
+
+		if (!dialog)
+		{
+			return false;
+		}
+
+		auto _dataField = il2cpp_class_get_field_from_name_wrap(dialog->klass, "_data");
+		Il2CppObject* _data;
+		il2cpp_field_get_value(dialog, _dataField, &_data);
+
+		if (!_data)
+		{
+			return false;
+		}
+
+		auto FormTypeField = il2cpp_class_get_field_from_name_wrap(_data->klass, "FormType");
+
+		DialogCommonFormType type = WITHOUT_FRAME;
+		il2cpp_field_get_value(_data, FormTypeField, &type);
+
+		bool isOneButton = type == DialogCommonFormType::SMALL_ONE_BUTTON || type == DialogCommonFormType::MIDDLE_ONE_BUTTON || type == DialogCommonFormType::BIG_ONE_BUTTON;
+		bool isTwoButton = type == DialogCommonFormType::SMALL_TWO_BUTTON || type == DialogCommonFormType::MIDDLE_TWO_BUTTON || type == DialogCommonFormType::BIG_TWO_BUTTON;
+		bool isThreeButton = type == DialogCommonFormType::SMALL_THREE_BUTTON || type == DialogCommonFormType::MIDDLE_THREE_BUTTON || type == DialogCommonFormType::BIG_THREE_BUTTON;
+
+		auto _currentDialogObjField = il2cpp_class_get_field_from_name_wrap(dialog->klass, "_currentDialogObj");
+
+		if (!_currentDialogObjField)
+		{
+			return false;
+		}
+
+		Il2CppObject* _currentDialogObj;
+		il2cpp_field_get_value(dialog, _currentDialogObjField, &_currentDialogObj);
+
+		if (!_currentDialogObj)
+		{
+			return false;
+		}
+
+		// auto leftButton = il2cpp_class_get_method_from_name_type<Il2CppObject * (*)(Il2CppObject*)>(_currentDialogObj->klass, "get_LeftButton", 0)->methodPointer(_currentDialogObj);
+		auto centerButton = il2cpp_class_get_method_from_name_type<Il2CppObject * (*)(Il2CppObject*)>(_currentDialogObj->klass, "get_CenterButton", 0)->methodPointer(_currentDialogObj);
+		auto rightButton = il2cpp_class_get_method_from_name_type<Il2CppObject * (*)(Il2CppObject*)>(_currentDialogObj->klass, "get_RightButton", 0)->methodPointer(_currentDialogObj);
+
+		auto get_gameObject = il2cpp_symbols::get_method_pointer<Il2CppObject * (*)(Il2CppObject*)>("UnityEngine.CoreModule.dll", "UnityEngine", "Component", "get_gameObject", 0);
+		auto pointerClickHandler = il2cpp_symbols::get_method_pointer<Il2CppDelegate * (*)()>("UnityEngine.UI.dll", "UnityEngine.EventSystems", "ExecuteEvents", "get_pointerClickHandler", -1)();
+
+		auto ExecuteEvents_Execute_Method = il2cpp_symbols::get_method("UnityEngine.UI.dll", "UnityEngine.EventSystems", "ExecuteEvents", "Execute", 3);
+		auto methodInfo = il2cpp_method_get_object(ExecuteEvents_Execute_Method, nullptr);
+
+		auto typeArray = il2cpp_array_new(il2cpp_symbols::get_class("mscorlib.dll", "System", "Type"), 1);
+		il2cpp_array_setref(typeArray, 0, GetRuntimeType("UnityEngine.UI.dll", "UnityEngine.EventSystems", "IPointerClickHandler"));
+
+		auto runtimeType = il2cpp_class_get_method_from_name_type<Il2CppObject * (*)(Il2CppObject*, Il2CppArraySize*)>(methodInfo->object.klass, "MakeGenericMethod", 1)->methodPointer(&methodInfo->object, typeArray);
+		auto ExecuteEvents_Execute_Method_New = il2cpp_method_get_from_reflection(runtimeType);
+
+		auto eventSystem = il2cpp_symbols::get_method_pointer<Il2CppObject * (*)()>("UnityEngine.UI.dll", "UnityEngine.EventSystems", "EventSystem", "get_current", -1)();
+		auto eventData = il2cpp_object_new(il2cpp_symbols::get_class("UnityEngine.UI.dll", "UnityEngine.EventSystems", "PointerEventData"));
+		il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, Il2CppObject*)>(eventData->klass, ".ctor", 1)->methodPointer(eventData, eventSystem);
+
+		void** params = new void* [3];
+		params[1] = eventData;
+		params[2] = pointerClickHandler;
+
+		Il2CppException* exception;
+
+		if (isOneButton)
+		{
+			if (wParam == VK_RETURN)
+			{
+				params[0] = get_gameObject(centerButton);
+
+				il2cpp_runtime_invoke_type<bool>(ExecuteEvents_Execute_Method_New, nullptr, params, &exception);
+				delete[] params;
+				return true;
+			}
+		}
+
+		if (isTwoButton)
+		{
+			if (wParam == VK_RETURN)
+			{
+				params[0] = get_gameObject(rightButton);
+
+				il2cpp_runtime_invoke_type<bool>(ExecuteEvents_Execute_Method_New, nullptr, params, &exception);
+				delete[] params;
+				return true;
+			}
+		}
+
+		if (isThreeButton)
+		{
+			if (wParam == VK_RETURN)
+			{
+				params[0] = get_gameObject(rightButton);
+
+				il2cpp_runtime_invoke_type<bool>(ExecuteEvents_Execute_Method_New, nullptr, params, &exception);
+				delete[] params;
+				return true;
+			}
+
+			if (wParam == VK_SPACE)
+			{
+				params[0] = get_gameObject(centerButton);
+
+				il2cpp_runtime_invoke_type<bool>(ExecuteEvents_Execute_Method_New, nullptr, params, &exception);
+				delete[] params;
+				return true;
+			}
+		}
+
+		delete[] params;
+		return false;
+	}
+
 	bool isNumKeyDown = false;
 
-	void StepTrainingItem(WPARAM wParam)
+	bool StepTrainingItem(WPARAM wParam)
 	{
+		bool keydownNumber = 0 < (wParam - 48) && (wParam - 48) <= 9;
+		if (!(wParam == VK_LEFT || wParam == VK_RIGHT || wParam == VK_RETURN || keydownNumber))
+		{
+			return false;
+		}
+
 		auto sceneManager = GetSingletonInstance(il2cpp_symbols::get_class("umamusume.dll", "Gallop", "SceneManager"));
 
 		if (!sceneManager)
 		{
-			return;
+			return false;
 		}
 
 		auto GetCurrentViewController = il2cpp_symbols::find_method<Il2CppObject * (*)(Il2CppObject*)>("umamusume.dll", "Gallop", "SceneManager", [](const MethodInfo* info)
@@ -4312,7 +4453,7 @@ namespace
 
 				if (IsStoryActive)
 				{
-					return;
+					return false;
 				}
 
 				auto trainingController = il2cpp_class_get_method_from_name_type<Il2CppObject * (*)(Il2CppObject*)>(controller->klass, "get_TrainingController", 0)->methodPointer(controller);
@@ -4352,11 +4493,11 @@ namespace
 									il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, Il2CppObject*, Il2CppObject*)>(footer->klass, "OnClickItem", 2)->methodPointer(footer, selectedItem, selectedMenu);
 								}
 							}
-							else if ((0 < (wParam - 48) && (wParam - 48) <= 9))
+							else if (keydownNumber)
 							{
 								if (isNumKeyDown)
 								{
-									return;
+									return false;
 								}
 
 								int number = wParam - 48;
@@ -4387,7 +4528,7 @@ namespace
 
 										il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, Il2CppObject*, Il2CppObject*)>(footer->klass, "OnClickItem", 2)->methodPointer(footer, selectedItem, selectedMenu);
 									}
-									return;
+									return true;
 								}
 
 								il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, Il2CppObject*, Il2CppObject*, bool, bool)>(footer->klass, "Select", 4)->methodPointer(footer, footerItem, trainingMenu, false, false);
@@ -4436,14 +4577,15 @@ namespace
 				}
 			}
 		}
+
+		return true;
 	}
 
 	bool isPortraitBeforeFullscreen = false;
 
 	bool isWndProcInitRequired = true;
 
-	void* wndproc_orig = nullptr;
-	LRESULT wndproc_hook(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
+	LRESULT WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 	{
 		if (uMsg == WM_XBUTTONDOWN && GET_KEYSTATE_WPARAM(wParam) == MK_XBUTTON1)
 		{
@@ -4466,9 +4608,13 @@ namespace
 
 		if (uMsg == WM_KEYDOWN)
 		{
-			if (wParam == VK_LEFT || wParam == VK_RIGHT || wParam == VK_RETURN || (0 < (wParam - 48) && (wParam - 48) <= 9))
+			if (PressDialogButton(wParam))
 			{
-				StepTrainingItem(wParam);
+				return TRUE;
+			}
+
+			if (StepTrainingItem(wParam))
+			{
 				return TRUE;
 			}
 		}
@@ -10951,11 +11097,6 @@ namespace
 		return data;
 	}
 
-	Il2CppObject* GetFrontDialog()
-	{
-		return il2cpp_symbols::get_method_pointer<Il2CppObject * (*)()>("umamusume.dll", "Gallop", "DialogManager", "GetForeFrontDialog", -1)();
-	}
-
 	LRESULT CALLBACK CBTProc(int nCode, WPARAM wParam, LPARAM lParam);
 	HHOOK hCBTHook = SetWindowsHookExW(WH_CBT, CBTProc, nullptr, GetCurrentThreadId());
 
@@ -12681,7 +12822,7 @@ namespace
 							il2cpp_field_static_get_value(newWndProcPtrField, &newWndProcPtr);
 
 							reinterpret_cast<WNDPROC>(SetWindowLongPtrW(hWnd, GWLP_WNDPROC, reinterpret_cast<LONG_PTR>(oldWndProcPtr)));
-							auto oldWndProcPtr2 = reinterpret_cast<WNDPROC>(SetWindowLongPtrW(hWnd, GWLP_WNDPROC, reinterpret_cast<LONG_PTR>(wndproc_hook)));
+							auto oldWndProcPtr2 = reinterpret_cast<WNDPROC>(SetWindowLongPtrW(hWnd, GWLP_WNDPROC, reinterpret_cast<LONG_PTR>(WndProc)));
 							il2cpp_field_static_set_value(oldWndProcPtrField, &oldWndProcPtr2);
 
 							if ((config::unlock_size || config::freeform_window) && config::initial_width > 72 && config::initial_height > 72)
@@ -13338,7 +13479,7 @@ bool init_hook_base()
 	MH_EnableHook(UnityMain_addr);
 
 	return true;
-	}
+}
 
 bool init_hook()
 {
