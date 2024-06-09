@@ -1,15 +1,17 @@
 #include <stdinclude.hpp>
 #include <codecvt>
 
+#include "config/config.hpp"
+
 using namespace std;
 
 namespace local
 {
 	namespace
 	{
-		unordered_map<size_t, string> text_db;
-		unordered_map<string, string> textId_text_db;
-		std::vector<size_t> str_list;
+		unordered_map<size_t, wstring> text_db;
+		unordered_map<wstring, wstring> textId_text_db;
+		vector<size_t> str_list;
 	}
 
 	string wide_u8(const wstring& str)
@@ -26,7 +28,7 @@ namespace local
 
 	string u16_u8(const u16string& str)
 	{
-		std::wstring_convert<std::codecvt_utf8_utf16<char16_t>, char16_t> utf16conv;
+		wstring_convert<codecvt_utf8_utf16<char16_t>, char16_t> utf16conv;
 		return utf16conv.to_bytes(str);
 	}
 
@@ -66,49 +68,50 @@ namespace local
 		return result;
 	}
 
-	void reload_textdb(const vector<string>* dicts)
+	void reload_textdb(const vector<wstring>* dicts)
 	{
 		text_db.clear();
 		load_textdb(dicts);
 	}
 
-	void reload_textId_textdb(const std::string& dict)
+	void reload_textId_textdb(const wstring& dict)
 	{
 		textId_text_db.clear();
 		load_textId_textdb(dict);
 	}
 
-	void load_textdb(const vector<string>* dicts)
+	void load_textdb(const vector<wstring>* dicts)
 	{
-		for (auto dict : *dicts)
+		for (wstring dict : *dicts)
 		{
 			if (filesystem::exists(dict))
 			{
 				if (filesystem::is_directory(dict))
 				{
-					cout << "Dict directory: " << dict << endl;
-					for (auto& file : std::filesystem::directory_iterator(dict))
+					wcout << L"Dict directory: " << dict << endl;
+					for (auto& file : filesystem::directory_iterator(dict))
 					{
-						const auto filePath = local::wide_u8(local::acp_wide(file.path().string()));
-						const auto fileName = local::wide_u8(local::acp_wide(file.path().filename().string()));
+						const auto filePath = local::acp_wide(file.path().string());
+						const auto fileName = local::acp_wide(file.path().filename().string());
 						if (file.is_regular_file())
 						{
-							std::ifstream dict_stream{ filePath };
+							wifstream dict_stream{ filePath };
+							dict_stream.imbue(locale(""));
 
 							if (!dict_stream.is_open())
 								continue;
 
-							cout << "Reading " << fileName << "..." << endl;
+							wcout << L"Reading " << fileName << L"..." << endl;
 
-							rapidjson::IStreamWrapper wrapper{ dict_stream };
-							rapidjson::Document document;
+							rapidjson::WIStreamWrapper wrapper{ dict_stream };
+							WDocument document;
 
 							document.ParseStream(wrapper);
 
 							for (auto iter = document.MemberBegin();
 								iter != document.MemberEnd(); ++iter)
 							{
-								auto key = std::stoull(iter->name.GetString());
+								auto key = stoull(iter->name.GetString());
 								auto value = iter->value.GetString();
 
 								text_db.emplace(key, value);
@@ -120,22 +123,23 @@ namespace local
 				}
 				else
 				{
-					std::ifstream dict_stream{ dict };
+					wifstream dict_stream{ dict };
+					dict_stream.imbue(locale(""));
 
 					if (!dict_stream.is_open())
 						continue;
 
-					cout << "Reading " << dict << "..." << endl;
+					wcout << L"Reading " << dict << L"..." << endl;
 
-					rapidjson::IStreamWrapper wrapper{ dict_stream };
-					rapidjson::Document document;
+					rapidjson::WIStreamWrapper wrapper{ dict_stream };
+					WDocument document;
 
 					document.ParseStream(wrapper);
 
 					for (auto iter = document.MemberBegin();
 						iter != document.MemberEnd(); ++iter)
 					{
-						auto key = std::stoull(iter->name.GetString());
+						auto key = stoull(iter->name.GetString());
 						auto value = iter->value.GetString();
 
 						text_db.emplace(key, value);
@@ -149,19 +153,20 @@ namespace local
 		cout << "loaded " << text_db.size() << " localized entries." << endl;
 	}
 
-	void load_textId_textdb(const std::string& dict)
+	void load_textId_textdb(const wstring& dict)
 	{
 		if (filesystem::exists(dict.data()))
 		{
-			std::ifstream dict_stream{ dict };
+			wifstream dict_stream{ dict };
+			dict_stream.imbue(locale(""));
 
 			if (!dict_stream.is_open())
 				return;
 
-			cout << "Reading " << dict << "..." << endl;
+			wcout << L"Reading " << dict << L"..." << endl;
 
-			rapidjson::IStreamWrapper wrapper{ dict_stream };
-			rapidjson::Document document;
+			rapidjson::WIStreamWrapper wrapper{ dict_stream };
+			WDocument document;
 
 			document.ParseStream(wrapper);
 
@@ -180,7 +185,7 @@ namespace local
 		cout << "loaded " << textId_text_db.size() << " TextId localized entries." << endl;
 	} 
 
-	bool localify_text(size_t hash, string** result)
+	bool localify_text(size_t hash, wstring** result)
 	{
 		if (text_db.contains(hash))
 		{
@@ -191,7 +196,7 @@ namespace local
 		return false;
 	}
 
-	bool localify_text_by_textId_name(const string& textIdName, string** result)
+	bool localify_text_by_textId_name(const wstring& textIdName, wstring** result)
 	{
 		if (textId_text_db.contains(textIdName))
 		{
@@ -203,23 +208,23 @@ namespace local
 
 	Il2CppString* get_localized_string(size_t hash_or_id)
 	{
-		string* result;
+		wstring* result;
 
 		if (local::localify_text(hash_or_id, &result))
 		{
-			return il2cpp_string_new(result->data());
+			return il2cpp_string_new_utf16(result->data(), result->size());
 		}
 
 		return nullptr;
 	}
 
-	Il2CppString* get_localized_string(const string& textIdName)
+	Il2CppString* get_localized_string(const wstring& textIdName)
 	{
-		string* result;
+		wstring* result;
 
 		if (local::localify_text_by_textId_name(textIdName, &result))
 		{
-			return il2cpp_string_new(result->data());
+			return il2cpp_string_new_utf16(result->data(), result->size());
 		}
 
 		return nullptr;
@@ -227,16 +232,16 @@ namespace local
 
 	Il2CppString* get_localized_string(Il2CppString* str)
 	{
-		string* result;
+		wstring* result;
 
 		auto hash = std::hash<wstring>{}(str->start_char);
 
 		if (local::localify_text(hash, &result))
 		{
-			return il2cpp_string_new(result->data());
+			return il2cpp_string_new_utf16(result->data(), result->size());
 		}
 
-		if (g_enable_logger && !std::any_of(str_list.begin(), str_list.end(), [hash](size_t hash1) { return hash1 == hash; }))
+		if (config::enable_logger && !any_of(str_list.begin(), str_list.end(), [hash](size_t hash1) { return hash1 == hash; }))
 		{
 			str_list.emplace_back(hash);
 

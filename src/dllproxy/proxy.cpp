@@ -2,23 +2,23 @@
 
 extern "C"
 {
-	void* GetFileVersionInfoA_Original = NULL;
-	void* GetFileVersionInfoByHandle_Original = NULL;
-	void* GetFileVersionInfoExA_Original = NULL;
-	void* GetFileVersionInfoExW_Original = NULL;
-	void* GetFileVersionInfoSizeA_Original = NULL;
-	void* GetFileVersionInfoSizeExA_Original = NULL;
-	void* GetFileVersionInfoSizeExW_Original = NULL;
-	void* GetFileVersionInfoSizeW_Original = NULL;
-	void* GetFileVersionInfoW_Original = NULL;
-	void* VerFindFileA_Original = NULL;
-	void* VerFindFileW_Original = NULL;
-	void* VerInstallFileA_Original = NULL;
-	void* VerInstallFileW_Original = NULL;
-	void* VerLanguageNameA_Original = NULL;
-	void* VerLanguageNameW_Original = NULL;
-	void* VerQueryValueA_Original = NULL;
-	void* VerQueryValueW_Original = NULL;
+	void* GetFileVersionInfoA_Original = nullptr;
+	void* GetFileVersionInfoByHandle_Original = nullptr;
+	void* GetFileVersionInfoExA_Original = nullptr;
+	void* GetFileVersionInfoExW_Original = nullptr;
+	void* GetFileVersionInfoSizeA_Original = nullptr;
+	void* GetFileVersionInfoSizeExA_Original = nullptr;
+	void* GetFileVersionInfoSizeExW_Original = nullptr;
+	void* GetFileVersionInfoSizeW_Original = nullptr;
+	void* GetFileVersionInfoW_Original = nullptr;
+	void* VerFindFileA_Original = nullptr;
+	void* VerFindFileW_Original = nullptr;
+	void* VerInstallFileA_Original = nullptr;
+	void* VerInstallFileW_Original = nullptr;
+	void* VerLanguageNameA_Original = nullptr;
+	void* VerLanguageNameW_Original = nullptr;
+	void* VerQueryValueA_Original = nullptr;
+	void* VerQueryValueW_Original = nullptr;
 }
 
 using namespace std;
@@ -30,13 +30,13 @@ namespace
 	public:
 		version_init()
 		{
-			std::string dll_path;
+			wstring dll_path;
 			dll_path.resize(MAX_PATH);
-			dll_path.resize(GetSystemDirectoryA(dll_path.data(), MAX_PATH));
+			dll_path.resize(GetSystemDirectoryW(dll_path.data(), MAX_PATH));
 
-			dll_path += "\\" + "version.dll"s;
+			dll_path += LR"(\version.dll)"s;
 
-			auto original_dll = LoadLibraryA(dll_path.data());
+			auto original_dll = LoadLibraryW(dll_path.data());
 
 			GetFileVersionInfoA_Original = GetProcAddress(original_dll, "GetFileVersionInfoA");
 			GetFileVersionInfoByHandle_Original = GetProcAddress(original_dll, "GetFileVersionInfoByHandle");

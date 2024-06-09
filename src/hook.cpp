@@ -38,6 +38,8 @@
 
 #include "ntdll.h"
 
+#include "config/config.hpp"
+
 #include "rich_presence.hpp"
 
 #include "il2cpp/il2cpp-tabledefs.h"
@@ -48,8 +50,6 @@
 #include "discord/activity_manager.h"
 
 #include "libcef.h"
-
-#include "config.hpp"
 
 #include "settings_text.hpp"
 
@@ -74,13 +74,13 @@ using namespace ABI::Windows::Data::Xml::Dom;
 
 namespace
 {
-	string GotoTitleError =
-		"내부적으로 오류가 발생하여 홈으로 이동합니다.\n\n"
+	wstring GotoTitleError =
+		L"내부적으로 오류가 발생하여 홈으로 이동합니다.\n\n"
 		"경우에 따라서 <color=#ff911c><i>타이틀</i></color>로 돌아가거나, \n"
 		"게임 <color=#ff911c><i>다시 시작</i></color>이 필요할 수 있습니다.";
 
-	string GotoTitleErrorJa =
-		"内部的にエラーが発生し、ホームに移動します。\n\n"
+	wstring GotoTitleErrorJa =
+		L"内部的にエラーが発生し、ホームに移動します。\n\n"
 		"場合によっては、<color=#ff911c><i>タイトル</i></color>に戻るか、\n"
 		"ゲーム<color=#ff911c><i>再起動</i></color>が必要になる場合がありますあります。";
 
@@ -368,7 +368,7 @@ namespace
 	}
 
 	unsigned long GetEnumValue(Il2CppObject* runtimeEnum);
-	Il2CppObject* ParseEnum(Il2CppObject* runtimeType, const string& name);
+	Il2CppObject* ParseEnum(Il2CppObject* runtimeType, const wstring& name);
 
 	void SetNotificationFontSize(int size)
 	{
@@ -389,7 +389,7 @@ namespace
 		il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, int)>(_Label->klass, "set_fontSize", 1)->methodPointer(_Label, size);
 	}
 
-	void SetNotificationFontColor(string color)
+	void SetNotificationFontColor(wstring color)
 	{
 		if (!notification)
 		{
@@ -405,10 +405,10 @@ namespace
 		Il2CppObject* _Label;
 		il2cpp_field_get_value(notification, _LabelField, &_Label);
 
-		il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, int)>(_Label->klass, "set_FontColor", 1)->methodPointer(_Label, GetEnumValue(ParseEnum(GetRuntimeType("umamusume.dll", "Gallop", "FontColorType"), color.data())));
+		il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, int)>(_Label->klass, "set_FontColor", 1)->methodPointer(_Label, GetEnumValue(ParseEnum(GetRuntimeType("umamusume.dll", "Gallop", "FontColorType"), color)));
 	}
 
-	void SetNotificationOutlineSize(string size)
+	void SetNotificationOutlineSize(wstring size)
 	{
 		if (!notification)
 		{
@@ -424,11 +424,11 @@ namespace
 		Il2CppObject* _Label;
 		il2cpp_field_get_value(notification, _LabelField, &_Label);
 
-		il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, int)>(_Label->klass, "set_OutlineSize", 1)->methodPointer(_Label, GetEnumValue(ParseEnum(GetRuntimeType("umamusume.dll", "Gallop", "OutlineSizeType"), size.data())));
+		il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, int)>(_Label->klass, "set_OutlineSize", 1)->methodPointer(_Label, GetEnumValue(ParseEnum(GetRuntimeType("umamusume.dll", "Gallop", "OutlineSizeType"), size)));
 		il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*)>(_Label->klass, "UpdateOutline", 0)->methodPointer(_Label);
 	}
 
-	void SetNotificationOutlineColor(string color)
+	void SetNotificationOutlineColor(wstring color)
 	{
 		if (!notification)
 		{
@@ -444,7 +444,7 @@ namespace
 		Il2CppObject* _Label;
 		il2cpp_field_get_value(notification, _LabelField, &_Label);
 
-		il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, int)>(_Label->klass, "set_OutlineColor", 1)->methodPointer(_Label, GetEnumValue(ParseEnum(GetRuntimeType("umamusume.dll", "Gallop", "OutlineColorType"), color.data())));
+		il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, int)>(_Label->klass, "set_OutlineColor", 1)->methodPointer(_Label, GetEnumValue(ParseEnum(GetRuntimeType("umamusume.dll", "Gallop", "OutlineColorType"), color)));
 	}
 
 	void SetNotificationBackgroundAlpha(float alpha)
@@ -583,7 +583,7 @@ namespace
 
 			SetNotificationDisplayTime(length);
 
-			ShowNotification(LineHeadWrap(il2cpp_string_new(u8Text.data()), g_character_system_text_caption_line_char_count));
+			ShowNotification(LineHeadWrap(il2cpp_string_new(u8Text.data()), config::character_system_text_caption_line_char_count));
 		}
 	}
 
@@ -850,12 +850,12 @@ namespace
 		{
 			splited.emplace_back(segment);
 		}
-		auto& fileName = splited.back();
+		auto fileName = local::u8_wide(splited.back());
 
-		if (g_replace_assets.find(fileName) != g_replace_assets.end())
+		if (config::replace_assets.find(fileName) != config::replace_assets.end())
 		{
-			auto& replaceAsset = g_replace_assets.at(fileName);
-			reinterpret_cast<decltype(CriMana_SetFileNew_hook)*>(CriMana_SetFileNew_orig)(player_id, binder, replaceAsset.path.data());
+			auto& replaceAsset = config::replace_assets.at(fileName);
+			reinterpret_cast<decltype(CriMana_SetFileNew_hook)*>(CriMana_SetFileNew_orig)(player_id, binder, local::wide_u8(replaceAsset.path).data());
 			return;
 		}
 
@@ -874,12 +874,12 @@ namespace
 		{
 			splited.emplace_back(segment);
 		}
-		auto& fileName = splited.back();
+		auto fileName = local::u8_wide(splited.back());
 
-		if (g_replace_assets.find(fileName) != g_replace_assets.end())
+		if (config::replace_assets.find(fileName) != config::replace_assets.end())
 		{
-			auto& replaceAsset = g_replace_assets.at(fileName);
-			return reinterpret_cast<decltype(CriMana_SetFileAppend_hook)*>(CriMana_SetFileAppend_orig)(player_id, binder, replaceAsset.path.data(), repeat);
+			auto& replaceAsset = config::replace_assets.at(fileName);
+			return reinterpret_cast<decltype(CriMana_SetFileAppend_hook)*>(CriMana_SetFileAppend_orig)(player_id, binder, local::wide_u8(replaceAsset.path).data(), repeat);
 		}
 
 		return reinterpret_cast<decltype(CriMana_SetFileAppend_hook)*>(CriMana_SetFileAppend_orig)(player_id, binder, path, repeat);
@@ -945,7 +945,7 @@ namespace
 
 	HWND GetHWND()
 	{
-		auto title = local::u8_wide(g_custom_title_name);
+		auto title = config::custom_title_name;
 		if (title.empty())
 		{
 			title = L"umamusume";
@@ -972,7 +972,7 @@ namespace
 
 				return TRUE;
 			}
-		)), NULL);
+			)), NULL);
 
 		/*auto hWnd = FindWindowA("UnityWndClass", local::wide_acp(title).data());
 
@@ -1003,6 +1003,8 @@ namespace
 	void* UnityPluginLoad_orig = nullptr;
 	void UnityPluginLoad_hook(IUnityInterfaces* unityInterfaces)
 	{
+		reinterpret_cast<decltype(UnityPluginLoad_hook)*>(UnityPluginLoad_orig)(unityInterfaces);
+
 		::unityInterfaces = unityInterfaces;
 
 		Unity::OpenXR::InitLibrary(unityInterfaces);
@@ -1010,8 +1012,6 @@ namespace
 		Unity::OpenXR::DiagnosticReport::StartReport();
 		Unity::OpenXR::Init();
 		// Unity::OpenXR::Start();
-
-		reinterpret_cast<decltype(UnityPluginLoad_hook)*>(UnityPluginLoad_orig)(unityInterfaces);
 	}
 
 	Il2CppObject* (*display_get_main)();
@@ -1156,13 +1156,13 @@ namespace
 			auto hWnd = FindWindowW(L"UnityWndClass", L"umamusume");
 			if (hWnd)
 			{
-				if (!g_custom_title_name.empty())
+				if (!config::custom_title_name.empty())
 				{
-					SetWindowTextA(hWnd, local::wide_acp(local::u8_wide(g_custom_title_name)).data());
+					SetWindowTextW(hWnd, config::custom_title_name.data());
 				}
-				if (has_json_parse_error)
+				if (config::has_json_parse_error)
 				{
-					MessageBoxW(hWnd, local::u8_wide(json_parse_error_msg).data(), L"Umamusume Localify", MB_OK | MB_ICONWARNING);
+					MessageBoxW(hWnd, config::json_parse_error_msg.data(), L"Umamusume Localify", MB_OK | MB_ICONWARNING);
 				}
 			}
 
@@ -1180,7 +1180,7 @@ namespace
 			MH_CreateHook(UnityPluginLoad_addr, UnityPluginLoad_hook, &UnityPluginLoad_orig);
 			MH_EnableHook(UnityPluginLoad_addr);
 
-			if (g_character_system_text_caption)
+			if (config::character_system_text_caption)
 			{
 				auto criAtomExPlayer_SetCueId_addr = GetProcAddress(criware, "criAtomExPlayer_SetCueId");
 
@@ -1223,7 +1223,7 @@ namespace
 				MH_EnableHook(criAtomExPlayer_Pause_addr);
 			}
 
-			if (!g_replace_assets.empty())
+			if (!config::replace_assets.empty())
 			{
 				auto CriMana_SetFileNew_addr = GetProcAddress(criware, "CRIWARE8778888A");
 
@@ -1264,18 +1264,19 @@ namespace
 
 	FieldInfo* il2cpp_class_get_field_from_name_wrap(Il2CppClass* klass, const char* name)
 	{
-		if (code_map.IsNull() || code_map.HasParseError())
+		if (config::code_map.IsNull() || config::code_map.HasParseError())
 		{
 			return il2cpp_class_get_field_from_name(klass, name);
 		}
-		auto& className = string(klass->namespaze).append(".").append(klass->name);
+		auto className = local::u8_wide(string(klass->namespaze).append(".").append(klass->name));
+		auto nameW = local::u8_wide(name);
 
-		if (code_map.HasMember("!common"))
+		if (config::code_map.HasMember(L"!common"))
 		{
-			auto commonMap = code_map["!common"].GetObjectW();
-			if (commonMap.HasMember(name))
+			auto commonMap = config::code_map[L"!common"].GetObjectW();
+			if (commonMap.HasMember(nameW))
 			{
-				auto field = il2cpp_class_get_field_from_name(klass, commonMap[name].GetString());
+				auto field = il2cpp_class_get_field_from_name(klass, local::wide_u8(commonMap[nameW].GetString()).data());
 				if (field)
 				{
 					return field;
@@ -1283,27 +1284,27 @@ namespace
 			}
 		}
 
-		if (!code_map.HasMember(className.data()))
+		if (!config::code_map.HasMember(className.data()))
 		{
 			return il2cpp_class_get_field_from_name(klass, name);
 		}
 
-		auto classMap = code_map[className.data()].GetObjectW();
+		auto classMap = config::code_map[className.data()].GetObjectW();
 
-		if (classMap.HasMember(name))
+		if (classMap.HasMember(nameW))
 		{
-			auto field = il2cpp_class_get_field_from_name(klass, classMap[name].GetString());
+			auto field = il2cpp_class_get_field_from_name(klass, local::wide_u8(classMap[nameW].GetString()).data());
 			if (field)
 			{
 				return field;
 			}
 		}
 
-		if (classMap.HasMember((name + ".index"s).data()))
+		if (classMap.HasMember((nameW + L".index"s).data()))
 		{
 			void* iter = nullptr;
 			int i = 0;
-			int index = classMap[(name + ".index"s).data()].GetInt();
+			int index = classMap[(nameW + L".index"s).data()].GetInt();
 			while (FieldInfo* field = il2cpp_class_get_fields(klass, &iter))
 			{
 				if (index == i)
@@ -1314,17 +1315,17 @@ namespace
 			}
 		}
 
-		if (classMap.HasMember("!extends"))
+		if (classMap.HasMember(L"!extends"))
 		{
-			auto parentName = classMap["!extends"].GetString();
-			auto parentMap = code_map[parentName].GetObjectW();
+			auto parentName = classMap[L"!extends"].GetString();
+			auto parentMap = config::code_map[parentName].GetObjectW();
 			auto parentClass = klass->parent;
 
-			if (parentMap.HasMember((name + ".index"s).data()))
+			if (parentMap.HasMember((nameW + L".index"s).data()))
 			{
 				void* iter = nullptr;
 				int i = 0;
-				int index = parentMap[(name + ".index"s).data()].GetInt();
+				int index = parentMap[(nameW + L".index"s).data()].GetInt();
 				while (FieldInfo* field = il2cpp_class_get_fields(parentClass, &iter))
 				{
 					if (index == i)
@@ -1655,9 +1656,14 @@ namespace
 		return (Int32Object*)instance;
 	}
 
-	Il2CppObject* ParseEnum(Il2CppObject* runtimeType, const string& name)
+	Il2CppString* il2cpp_string_new16(const wchar_t* value)
 	{
-		return il2cpp_symbols::get_method_pointer<Il2CppObject * (*)(Il2CppObject*, Il2CppString*)>("mscorlib.dll", "System", "Enum", "Parse", 2)(runtimeType, il2cpp_string_new(name.data()));
+		return il2cpp_string_new_utf16(value, wcslen(value));
+	}
+
+	Il2CppObject* ParseEnum(Il2CppObject* runtimeType, const wstring& name)
+	{
+		return il2cpp_symbols::get_method_pointer<Il2CppObject * (*)(Il2CppObject*, Il2CppString*)>("mscorlib.dll", "System", "Enum", "Parse", 2)(runtimeType, il2cpp_string_new16(name.data()));
 	}
 
 	Il2CppString* GetEnumName(Il2CppObject* runtimeType, int id)
@@ -1670,22 +1676,22 @@ namespace
 		return il2cpp_symbols::get_method_pointer<unsigned long (*)(Il2CppObject*)>("mscorlib.dll", "System", "Enum", "ToUInt64", 1)(runtimeEnum);
 	}
 
-	unsigned long GetTextIdByName(const string& name)
+	unsigned long GetTextIdByName(const wstring& name)
 	{
 		return GetEnumValue(ParseEnum(GetRuntimeType("umamusume.dll", "Gallop", "TextId"), name));
 	}
 
-	string GetTextIdNameById(int id)
+	wstring GetTextIdNameById(int id)
 	{
-		return local::wide_u8(GetEnumName(GetRuntimeType("umamusume.dll", "Gallop", "TextId"), id)->start_char);
+		return GetEnumName(GetRuntimeType("umamusume.dll", "Gallop", "TextId"), id)->start_char;
 	}
 
 	Il2CppObject* GetCustomFont()
 	{
 		if (!fontAssets) return nullptr;
-		if (!g_font_asset_name.empty())
+		if (!config::font_asset_name.empty())
 		{
-			return load_asset(fontAssets, il2cpp_string_new(g_font_asset_name.data()), GetRuntimeType("UnityEngine.TextRenderingModule.dll", "UnityEngine", "Font"));
+			return load_asset(fontAssets, il2cpp_string_new16(config::font_asset_name.data()), GetRuntimeType("UnityEngine.TextRenderingModule.dll", "UnityEngine", "Font"));
 		}
 		return nullptr;
 	}
@@ -1708,9 +1714,9 @@ namespace
 	Il2CppObject* GetCustomTMPFont()
 	{
 		if (!fontAssets) return nullptr;
-		if (!g_tmpro_font_asset_name.empty())
+		if (!config::tmpro_font_asset_name.empty())
 		{
-			auto tmpFont = load_asset(fontAssets, il2cpp_string_new(g_tmpro_font_asset_name.data()), GetRuntimeType("Unity.TextMeshPro.dll", "TMPro", "TMP_FontAsset"));
+			auto tmpFont = load_asset(fontAssets, il2cpp_string_new16(config::tmpro_font_asset_name.data()), GetRuntimeType("Unity.TextMeshPro.dll", "TMPro", "TMP_FontAsset"));
 			return tmpFont ? tmpFont : GetCustomTMPFontFallback();
 		}
 		return GetCustomTMPFontFallback();
@@ -1766,9 +1772,9 @@ namespace
 	Il2CppString* localizeextension_text_hook(int id)
 	{
 		auto orig_result = reinterpret_cast<decltype(localizeextension_text_hook)*>(localizeextension_text_orig)(id);
-		auto result = g_static_entries_use_text_id_name ?
+		auto result = config::static_entries_use_text_id_name ?
 			local::get_localized_string(GetTextIdNameById(id)) :
-			g_static_entries_use_hash ?
+			config::static_entries_use_hash ?
 			local::get_localized_string(orig_result) : local::get_localized_string(id);
 
 		return result ? result : orig_result;
@@ -1802,9 +1808,9 @@ namespace
 	Il2CppString* localize_get_hook(int id)
 	{
 		auto orig_result = reinterpret_cast<decltype(localize_get_hook)*>(localize_get_orig)(id);
-		auto result = g_static_entries_use_text_id_name ?
+		auto result = config::static_entries_use_text_id_name ?
 			local::get_localized_string(GetTextIdNameById(id)) :
-			g_static_entries_use_hash ?
+			config::static_entries_use_hash ?
 			local::get_localized_string(orig_result) : local::get_localized_string(id);
 
 		return result ? result : orig_result;
@@ -1814,7 +1820,7 @@ namespace
 	void an_text_set_material_to_textmesh_hook(Il2CppObject* _this)
 	{
 		reinterpret_cast<decltype(an_text_set_material_to_textmesh_hook)*>(an_text_set_material_to_textmesh_orig)(_this);
-		if (!(fontAssets && g_replace_to_custom_font)) return;
+		if (!(fontAssets && config::replace_to_custom_font)) return;
 
 		FieldInfo* mainField = il2cpp_class_get_field_from_name_wrap(_this->klass, "_mainTextMesh");
 		FieldInfo* mainRenderer = il2cpp_class_get_field_from_name_wrap(_this->klass, "_mainTextMeshRenderer");
@@ -1897,7 +1903,7 @@ namespace
 	void* update_orig = nullptr;
 	void* update_hook(Il2CppObject* _this, void* updateType, float deltaTime, float independentTime)
 	{
-		return reinterpret_cast<decltype(update_hook)*>(update_orig)(_this, updateType, deltaTime * g_ui_animation_scale, independentTime * g_ui_animation_scale);
+		return reinterpret_cast<decltype(update_hook)*>(update_orig)(_this, updateType, deltaTime * config::ui_animation_scale, independentTime * config::ui_animation_scale);
 	}
 
 	unordered_map<void*, SQLite::Statement*> text_queries;
@@ -2302,13 +2308,13 @@ namespace
 	void* CySpringUpdater_set_SpringUpdateMode_orig = nullptr;
 	void CySpringUpdater_set_SpringUpdateMode_hook(Il2CppObject* _this, int value)
 	{
-		reinterpret_cast<decltype(CySpringUpdater_set_SpringUpdateMode_hook)*>(CySpringUpdater_set_SpringUpdateMode_orig)(_this, g_cyspring_update_mode);
+		reinterpret_cast<decltype(CySpringUpdater_set_SpringUpdateMode_hook)*>(CySpringUpdater_set_SpringUpdateMode_orig)(_this, config::cyspring_update_mode);
 	}
 
 	void* CySpringUpdater_get_SpringUpdateMode_orig = nullptr;
 	int CySpringUpdater_get_SpringUpdateMode_hook(Il2CppObject* _this)
 	{
-		CySpringUpdater_set_SpringUpdateMode_hook(_this, g_cyspring_update_mode);
+		CySpringUpdater_set_SpringUpdateMode_hook(_this, config::cyspring_update_mode);
 		return reinterpret_cast<decltype(CySpringUpdater_get_SpringUpdateMode_hook)*>(CySpringUpdater_get_SpringUpdateMode_orig)(_this);
 	}
 
@@ -2446,7 +2452,7 @@ namespace
 	void* set_fps_orig = nullptr;
 	void set_fps_hook(int value)
 	{
-		reinterpret_cast<decltype(set_fps_hook)*>(set_fps_orig)(useDefaultFPS ? value : g_max_fps);
+		reinterpret_cast<decltype(set_fps_hook)*>(set_fps_orig)(useDefaultFPS ? value : config::max_fps);
 	}
 
 	bool (*is_virt)() = nullptr;
@@ -2476,7 +2482,7 @@ namespace
 	{
 		get_resolution(r);
 
-		int width = min(r->height, r->width) * g_aspect_ratio;
+		int width = min(r->height, r->width) * config::aspect_ratio;
 		if (r->width > r->height)
 			r->width = width;
 		else
@@ -2488,11 +2494,11 @@ namespace
 	{
 		auto size = reinterpret_cast<decltype(get_virt_size_hook)*>(get_virt_size_orig)(pVec3, width, height);
 
-		height = width * g_aspect_ratio;
+		height = width * config::aspect_ratio;
 
 		size->x = width;
 		size->y = height;
-		size->z = g_aspect_ratio;
+		size->z = config::aspect_ratio;
 
 		return size;
 	}
@@ -2502,11 +2508,11 @@ namespace
 	{
 		auto size = reinterpret_cast<decltype(get_hori_size_hook)*>(get_hori_size_orig)(pVec3, width, height);
 
-		width = height * g_aspect_ratio;
+		width = height * config::aspect_ratio;
 
 		size->x = width;
 		size->y = height;
-		size->z = g_aspect_ratio;
+		size->z = config::aspect_ratio;
 
 		return size;
 	}
@@ -2514,7 +2520,7 @@ namespace
 	void* gallop_get_screenheight_orig;
 	int gallop_get_screenheight_hook()
 	{
-		if (!g_freeform_window)
+		if (!config::freeform_window)
 		{
 			int w = max(last_display_width, last_display_height), h = min(last_display_width, last_display_height);
 
@@ -2527,7 +2533,7 @@ namespace
 	void* gallop_get_screenwidth_orig;
 	int gallop_get_screenwidth_hook()
 	{
-		if (!g_freeform_window)
+		if (!config::freeform_window)
 		{
 			int w = max(last_display_width, last_display_height), h = min(last_display_width, last_display_height);
 
@@ -2548,16 +2554,16 @@ namespace
 		res.x = width;
 		res.y = height;
 
-		if (g_freeform_window)
+		if (config::freeform_window)
 		{
 			if (width < height)
 			{
-				float scale = min(g_freeform_ui_scale_portrait, max(1.0f, height * ratio_vertical) * g_freeform_ui_scale_portrait);
+				float scale = min(config::freeform_ui_scale_portrait, max(1.0f, height * ratio_vertical) * config::freeform_ui_scale_portrait);
 				set_scale_factor(_this, scale);
 			}
 			else
 			{
-				float scale = min(g_freeform_ui_scale_landscape, max(1.0f, width / ratio_horizontal) * g_freeform_ui_scale_landscape);
+				float scale = min(config::freeform_ui_scale_landscape, max(1.0f, width / ratio_horizontal) * config::freeform_ui_scale_landscape);
 				set_scale_factor(_this, scale);
 			}
 		}
@@ -2566,12 +2572,12 @@ namespace
 			// set scale factor to make ui bigger on hi-res screen
 			if (width < height)
 			{
-				float scale = min(g_ui_scale, max(1.0f, height * ratio_vertical) * g_ui_scale);
+				float scale = min(config::ui_scale, max(1.0f, height * ratio_vertical) * config::ui_scale);
 				set_scale_factor(_this, scale);
 			}
 			else
 			{
-				float scale = min(g_ui_scale, max(1.0f, width / ratio_horizontal) * g_ui_scale);
+				float scale = min(config::ui_scale, max(1.0f, width / ratio_horizontal) * config::ui_scale);
 				set_scale_factor(_this, scale);
 			}
 		}
@@ -2600,9 +2606,9 @@ namespace
 		float bgCanvasScalerBaseScale = il2cpp_class_get_method_from_name_type<float (*)(Il2CppObject*, int, int)>(_this->klass, "GetBgCanvasScalerBaseScale", 2)->methodPointer(_this, renderTextureWidth, renderTextureHeight);
 		if (is_virt())
 		{
-			return max((float)renderTextureHeight / (float)height, (float)height / (float)renderTextureHeight) * (g_freeform_window ? 2 : 1) / bgCanvasScalerBaseScale;
+			return max((float)renderTextureHeight / (float)height, (float)height / (float)renderTextureHeight) * (config::freeform_window ? 2 : 1) / bgCanvasScalerBaseScale;
 		}
-		return max((float)renderTextureWidth / (float)width, (float)width / (float)renderTextureWidth) * (g_freeform_window ? 2 : 1) / bgCanvasScalerBaseScale * ratio1;
+		return max((float)renderTextureWidth / (float)width, (float)width / (float)renderTextureWidth) * (config::freeform_window ? 2 : 1) / bgCanvasScalerBaseScale * ratio1;
 	}
 
 	void SetBGCanvasScalerSize()
@@ -2708,7 +2714,7 @@ namespace
 	void* UIManager_ChangeResizeUIForPC_orig = nullptr;
 	void UIManager_ChangeResizeUIForPC_hook(Il2CppObject* _this, int width, int height)
 	{
-		if (!g_unlock_size && !g_freeform_window)
+		if (!config::unlock_size && !config::freeform_window)
 		{
 			reinterpret_cast<decltype(UIManager_ChangeResizeUIForPC_hook)*>(UIManager_ChangeResizeUIForPC_orig)(_this, width, height);
 			return;
@@ -2749,18 +2755,18 @@ namespace
 					scaleMode = 0;
 				}
 
-				if (g_freeform_window)
+				if (config::freeform_window)
 				{
 					if (scaleMode == 1)
 					{
 						if (width < height)
 						{
-							float scale = min(g_freeform_ui_scale_portrait, max(1.0f, height * ratio_vertical) * g_freeform_ui_scale_portrait);
+							float scale = min(config::freeform_ui_scale_portrait, max(1.0f, height * ratio_vertical) * config::freeform_ui_scale_portrait);
 							il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, Vector2_t)>(scaler->klass, "set_referenceResolution", 1)->methodPointer(scaler, Vector2_t{ static_cast<float>(width / scale), static_cast<float>(height / scale) });
 						}
 						else
 						{
-							float scale = min(g_freeform_ui_scale_landscape, max(1.0f, width / ratio_horizontal) * g_freeform_ui_scale_landscape);
+							float scale = min(config::freeform_ui_scale_landscape, max(1.0f, width / ratio_horizontal) * config::freeform_ui_scale_landscape);
 							il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, Vector2_t)>(scaler->klass, "set_referenceResolution", 1)->methodPointer(scaler, Vector2_t{ static_cast<float>(width / scale), static_cast<float>(height / scale) });
 
 						}
@@ -2770,12 +2776,12 @@ namespace
 					{
 						if (width < height)
 						{
-							float scale = min(g_freeform_ui_scale_portrait, max(1.0f, height * ratio_vertical) * g_freeform_ui_scale_portrait);
+							float scale = min(config::freeform_ui_scale_portrait, max(1.0f, height * ratio_vertical) * config::freeform_ui_scale_portrait);
 							il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, float)>(scaler->klass, "set_scaleFactor", 1)->methodPointer(scaler, scale);
 						}
 						else
 						{
-							float scale = min(g_freeform_ui_scale_landscape, max(1.0f, width / ratio_horizontal) * g_freeform_ui_scale_landscape);
+							float scale = min(config::freeform_ui_scale_landscape, max(1.0f, width / ratio_horizontal) * config::freeform_ui_scale_landscape);
 							il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, float)>(scaler->klass, "set_scaleFactor", 1)->methodPointer(scaler, scale);
 						}
 					}
@@ -2786,12 +2792,12 @@ namespace
 					{
 						if (width < height)
 						{
-							float scale = min(g_ui_scale, max(1.0f, height * ratio_vertical) * g_ui_scale);
+							float scale = min(config::ui_scale, max(1.0f, height * ratio_vertical) * config::ui_scale);
 							il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, Vector2_t)>(scaler->klass, "set_referenceResolution", 1)->methodPointer(scaler, Vector2_t{ static_cast<float>(width / scale), static_cast<float>(height / scale) });
 						}
 						else
 						{
-							float scale = min(g_ui_scale, max(1.0f, width / ratio_horizontal) * g_ui_scale);
+							float scale = min(config::ui_scale, max(1.0f, width / ratio_horizontal) * config::ui_scale);
 							il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, Vector2_t)>(scaler->klass, "set_referenceResolution", 1)->methodPointer(scaler, Vector2_t{ static_cast<float>(width / scale), static_cast<float>(height / scale) });
 						}
 					}
@@ -2800,12 +2806,12 @@ namespace
 						// set scale factor to make ui bigger on hi-res screen
 						if (width < height)
 						{
-							float scale = min(g_ui_scale, max(1.0f, height * ratio_vertical) * g_ui_scale);
+							float scale = min(config::ui_scale, max(1.0f, height * ratio_vertical) * config::ui_scale);
 							il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, float)>(scaler->klass, "set_scaleFactor", 1)->methodPointer(scaler, scale);
 						}
 						else
 						{
-							float scale = min(g_ui_scale, max(1.0f, width / ratio_horizontal) * g_ui_scale);
+							float scale = min(config::ui_scale, max(1.0f, width / ratio_horizontal) * config::ui_scale);
 							il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, float)>(scaler->klass, "set_scaleFactor", 1)->methodPointer(scaler, scale);
 						}
 					}
@@ -2819,7 +2825,7 @@ namespace
 			}
 		}
 
-		if (g_unlock_size || g_freeform_window)
+		if (config::unlock_size || config::freeform_window)
 		{
 			SetBGCanvasScalerSize();
 		}
@@ -3638,12 +3644,12 @@ namespace
 
 					/*if (isPortrait)
 					{
-						float scale = min(g_freeform_ui_scale_portrait, max(1.0f, contentHeight * ratio_vertical) * g_freeform_ui_scale_portrait);
+						float scale = min(config::freeform_ui_scale_portrait, max(1.0f, contentHeight * ratio_vertical) * config::freeform_ui_scale_portrait);
 						il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, Vector2_t)>(canvasScaler->klass, "set_referenceResolution", 1)->methodPointer(canvasScaler, Vector2_t{ static_cast<float>(contentWidth / scale), static_cast<float>(contentHeight / scale) });
 					}
 					else
 					{
-						float scale = min(g_freeform_ui_scale_landscape, max(1.0f, contentWidth / ratio_horizontal) * g_freeform_ui_scale_landscape);
+						float scale = min(config::freeform_ui_scale_landscape, max(1.0f, contentWidth / ratio_horizontal) * config::freeform_ui_scale_landscape);
 						il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, Vector2_t)>(canvasScaler->klass, "set_referenceResolution", 1)->methodPointer(canvasScaler, Vector2_t{ static_cast<float>(contentWidth / scale), static_cast<float>(contentHeight / scale) });
 					}*/
 
@@ -3659,12 +3665,12 @@ namespace
 					{
 						if (isPortrait)
 						{
-							float scale = min(g_freeform_ui_scale_portrait, max(1.0f, contentHeight * ratio_vertical) * g_freeform_ui_scale_portrait);
+							float scale = min(config::freeform_ui_scale_portrait, max(1.0f, contentHeight * ratio_vertical) * config::freeform_ui_scale_portrait);
 							il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, Vector2_t)>(canvasScaler->klass, "set_referenceResolution", 1)->methodPointer(canvasScaler, Vector2_t{ static_cast<float>(contentWidth / scale), static_cast<float>(contentHeight / scale) });
 						}
 						else
 						{
-							float scale = min(g_freeform_ui_scale_landscape, max(1.0f, contentWidth / ratio_horizontal) * g_freeform_ui_scale_landscape);
+							float scale = min(config::freeform_ui_scale_landscape, max(1.0f, contentWidth / ratio_horizontal) * config::freeform_ui_scale_landscape);
 							il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, Vector2_t)>(canvasScaler->klass, "set_referenceResolution", 1)->methodPointer(canvasScaler, Vector2_t{ static_cast<float>(contentWidth / scale), static_cast<float>(contentHeight / scale) });
 						}
 					}
@@ -3673,12 +3679,12 @@ namespace
 					{
 						if (isPortrait)
 						{
-							float scale = min(g_freeform_ui_scale_portrait, max(1.0f, contentHeight * ratio_vertical) * g_freeform_ui_scale_portrait);
+							float scale = min(config::freeform_ui_scale_portrait, max(1.0f, contentHeight * ratio_vertical) * config::freeform_ui_scale_portrait);
 							il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, float)>(canvasScaler->klass, "set_scaleFactor", 1)->methodPointer(canvasScaler, scale);
 						}
 						else
 						{
-							float scale = min(g_freeform_ui_scale_landscape, max(1.0f, contentWidth / ratio_horizontal) * g_freeform_ui_scale_landscape);
+							float scale = min(config::freeform_ui_scale_landscape, max(1.0f, contentWidth / ratio_horizontal) * config::freeform_ui_scale_landscape);
 							il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, float)>(canvasScaler->klass, "set_scaleFactor", 1)->methodPointer(canvasScaler, scale);
 						}
 					}
@@ -3808,12 +3814,12 @@ namespace
 				{
 					if (contentWidth < contentHeight)
 					{
-						float scale = min(g_freeform_ui_scale_portrait, max(1.0f, contentHeight * ratio_vertical) * g_freeform_ui_scale_portrait);
+						float scale = min(config::freeform_ui_scale_portrait, max(1.0f, contentHeight * ratio_vertical) * config::freeform_ui_scale_portrait);
 						il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, Vector2_t)>(root->klass, "SetScreenReferenceSize", 1)->methodPointer(root, Vector2_t{ ratio_16_9 * static_cast<float>(contentHeight / scale), static_cast<float>(contentHeight / scale) });
 					}
 					else
 					{
-						float scale = min(g_freeform_ui_scale_landscape, max(1.0f, contentWidth / ratio_horizontal) * g_freeform_ui_scale_landscape);
+						float scale = min(config::freeform_ui_scale_landscape, max(1.0f, contentWidth / ratio_horizontal) * config::freeform_ui_scale_landscape);
 						il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, Vector2_t)>(root->klass, "SetScreenReferenceSize", 1)->methodPointer(root, Vector2_t{ ratio_16_9 * static_cast<float>(contentHeight / scale), static_cast<float>(contentHeight / scale) });
 					}
 				}
@@ -4001,7 +4007,7 @@ namespace
 			}
 		}
 
-		if (g_freeform_window)
+		if (config::freeform_window)
 		{
 			auto hWnd = GetHWND();
 
@@ -4017,9 +4023,9 @@ namespace
 			/*if (width < height)
 			{
 				auto display = display_get_main();
-				if (g_initial_width < g_initial_height)
+				if (config::initial_width < config::initial_height)
 				{
-					ratio_vertical = static_cast<float>(g_initial_width) / static_cast<float>(g_initial_height);
+					ratio_vertical = static_cast<float>(config::initial_width) / static_cast<float>(config::initial_height);
 					last_virt_window_height = get_system_width(display) - 400;
 					last_virt_window_width = last_virt_window_height * ratio_vertical;
 
@@ -4031,7 +4037,7 @@ namespace
 				}
 				else
 				{
-					ratio_vertical = static_cast<float>(g_initial_height) / static_cast<float>(g_initial_width);
+					ratio_vertical = static_cast<float>(config::initial_height) / static_cast<float>(config::initial_width);
 					last_virt_window_height = get_system_height(display) - 400;
 					last_virt_window_width = last_virt_window_height * ratio_vertical;
 
@@ -4055,7 +4061,7 @@ namespace
 
 		bool reqVirt = width < height;
 
-		bool unlockSize = g_unlock_size || g_freeform_window;
+		bool unlockSize = config::unlock_size || config::freeform_window;
 
 		if (is_virt() && fullScreenFl)
 		{
@@ -4095,7 +4101,7 @@ namespace
 
 		bool need_fullscreen = false;
 
-		if (g_auto_fullscreen)
+		if (config::auto_fullscreen)
 		{
 			auto ratio = static_cast<float>(r.width) / static_cast<float>(r.height);
 			ratio *= 1000;
@@ -4161,7 +4167,7 @@ namespace
 				if (last_virt_window_width > last_virt_window_height)
 				{
 					auto display = display_get_main();
-					if (g_initial_width < g_initial_height)
+					if (config::initial_width < config::initial_height)
 					{
 						last_virt_window_height = get_system_width(display) - 400;
 						last_virt_window_width = last_virt_window_height * ratio_vertical;
@@ -4198,7 +4204,7 @@ namespace
 				if (last_hriz_window_width < last_hriz_window_height)
 				{
 					auto display = display_get_main();
-					if (g_initial_width < g_initial_height)
+					if (config::initial_width < config::initial_height)
 					{
 						last_hriz_window_width = get_system_height(display) - 400;
 						last_hriz_window_height = last_hriz_window_width / ratio_horizontal;
@@ -4257,15 +4263,15 @@ namespace
 					"SetSimpleTwoButtonMessage",
 					7)->methodPointer
 				)(dialogData,
-					localizeextension_text_hook(GetTextIdByName("Title0040")),
-					localizeextension_text_hook(GetTextIdByName("Title0041")),
+					localizeextension_text_hook(GetTextIdByName(L"Title0040")),
+					localizeextension_text_hook(GetTextIdByName(L"Title0041")),
 					CreateDelegateStatic(*[]()
 						{
 							isExitOpened = false;
 							Exit();
 						}),
-					GetTextIdByName("Common0004"),
-					GetTextIdByName("Common0003"),
+					GetTextIdByName(L"Common0004"),
+					GetTextIdByName(L"Common0003"),
 					CreateDelegateStatic(*[]()
 						{
 							isExitOpened = false;
@@ -4478,7 +4484,7 @@ namespace
 		{
 
 			bool altDown = (lParam & (static_cast<long long>(1) << 29)) != 0;
-			if ((g_auto_fullscreen || g_unlock_size || g_freeform_window) &&
+			if ((config::auto_fullscreen || config::unlock_size || config::freeform_window) &&
 				wParam == VK_RETURN &&
 				altDown &&
 				!altEnterPressed)
@@ -4499,14 +4505,14 @@ namespace
 				system_ratio = roundf(system_ratio) / 1000;
 
 				if ((!is_virt() && rendering_ratio == system_ratio) ||
-					g_freeform_window)
+					config::freeform_window)
 				{
 					if (!fullScreenFlOverride)
 					{
 						fullScreenFlOverride = true;
 					}
 					fullScreenFl = !fullScreenFl;
-					if (g_unlock_size || g_freeform_window)
+					if (config::unlock_size || config::freeform_window)
 					{
 						if (!fullScreenFl)
 						{
@@ -4560,7 +4566,7 @@ namespace
 				return TRUE;
 
 			}
-			if (g_max_fps > -1 && wParam == 'F' && altDown)
+			if (config::max_fps > -1 && wParam == 'F' && altDown)
 			{
 				useDefaultFPS = !useDefaultFPS;
 				set_fps_hook(30);
@@ -4568,7 +4574,7 @@ namespace
 			}
 		}
 
-		if (g_cyspring_update_mode != -1)
+		if (config::cyspring_update_mode != -1)
 		{
 			bool altDown = (lParam & (static_cast<long long>(1) << 29)) != 0;
 			if (altDown)
@@ -4576,22 +4582,22 @@ namespace
 				switch (wParam)
 				{
 				case '1':
-					g_cyspring_update_mode = 0;
+					config::cyspring_update_mode = 0;
 					break;
 				case '2':
-					g_cyspring_update_mode = 1;
+					config::cyspring_update_mode = 1;
 					break;
 				case '3':
-					g_cyspring_update_mode = 2;
+					config::cyspring_update_mode = 2;
 					break;
 				case '4':
-					g_cyspring_update_mode = 3;
+					config::cyspring_update_mode = 3;
 					break;
 				}
 			}
 		}
 
-		if (uMsg == WM_SYSCOMMAND && !g_freeform_window)
+		if (uMsg == WM_SYSCOMMAND && !config::freeform_window)
 		{
 			if (wParam == SC_MAXIMIZE)
 			{
@@ -4601,7 +4607,7 @@ namespace
 		}
 
 
-		if (g_auto_fullscreen || g_unlock_size || g_freeform_window)
+		if (config::auto_fullscreen || config::unlock_size || config::freeform_window)
 		{
 			if (uMsg == WM_SYSKEYUP)
 			{
@@ -4678,7 +4684,7 @@ namespace
 			il2cpp_field_static_set_value(_isWindowDraggingField, &_isWindowSizeChanging);
 			il2cpp_field_static_set_value(_isWindowSizeChangingField, &_isWindowSizeChanging);
 
-			if (g_freeform_window)
+			if (config::freeform_window)
 			{
 				RECT windowRect;
 				GetWindowRect(hWnd, &windowRect);
@@ -4688,7 +4694,7 @@ namespace
 			}
 		}
 
-		if ((uMsg == WM_EXITSIZEMOVE || uMsg == WM_SIZE) && g_character_system_text_caption)
+		if ((uMsg == WM_EXITSIZEMOVE || uMsg == WM_SIZE) && config::character_system_text_caption)
 		{
 			auto callback = CreateDelegateWithClassStatic(il2cpp_symbols::get_class("DOTween.dll", "DG.Tweening", "TweenCallback"), *([](void*)
 				{
@@ -4701,14 +4707,14 @@ namespace
 					}
 					else
 					{
-						SetNotificationPosition(g_character_system_text_caption_position_x, g_character_system_text_caption_position_y);
+						SetNotificationPosition(config::character_system_text_caption_position_x, config::character_system_text_caption_position_y);
 					}
 				}));
 
 			il2cpp_symbols::get_method_pointer<Il2CppObject* (*)(float, Il2CppDelegate*, bool)>("DOTween.dll", "DG.Tweening", "DOVirtual", "DelayedCall", 3)(0.01, callback, true);
 		}
 
-		if (uMsg == WM_SIZE && g_freeform_window)
+		if (uMsg == WM_SIZE && config::freeform_window)
 		{
 			auto StandaloneWindowResize = il2cpp_symbols::get_class("umamusume.dll", "Gallop", "StandaloneWindowResize");
 
@@ -4744,7 +4750,7 @@ namespace
 			}
 		}
 
-		if (uMsg == WM_SIZING && g_freeform_window)
+		if (uMsg == WM_SIZING && config::freeform_window)
 		{
 			auto StandaloneWindowResize = il2cpp_symbols::get_class("umamusume.dll", "Gallop", "StandaloneWindowResize");
 			auto lastWidthField = il2cpp_class_get_field_from_name_wrap(StandaloneWindowResize, "windowLastWidth");
@@ -4824,7 +4830,7 @@ namespace
 			return TRUE;
 		}
 
-		if (uMsg == WM_SIZING && !g_freeform_window)
+		if (uMsg == WM_SIZING && !config::freeform_window)
 		{
 			RECT* rect = reinterpret_cast<RECT*>(lParam);
 
@@ -4929,7 +4935,7 @@ namespace
 			if (uiManager)
 			{
 				bool isVirt = width < height;
-				if (g_unlock_size)
+				if (config::unlock_size)
 				{
 					UIManager_ChangeResizeUIForPC_hook(uiManager, isVirt ? min(last_display_width, last_display_height) : max(last_display_width, last_display_height),
 						isVirt ? max(last_display_width, last_display_height) : min(last_display_width, last_display_height));
@@ -5088,17 +5094,17 @@ namespace
 	void* on_populate_orig = nullptr;
 	void on_populate_hook(Il2CppObject* _this, void* toFill)
 	{
-		if (g_replace_to_builtin_font && text_get_linespacing(_this) != 1.05f)
+		if (config::replace_to_builtin_font && text_get_linespacing(_this) != 1.05f)
 		{
 			text_set_style(_this, 1);
 			text_set_size(_this, text_get_size(_this) - 4);
 			text_set_linespacing(_this, 1.05f);
 		}
-		if (g_replace_to_custom_font)
+		if (config::replace_to_custom_font)
 		{
 			auto font = text_get_font(_this);
 			Il2CppString* name = uobject_get_name(font);
-			if (g_font_asset_name.find(local::wide_u8(name->start_char)) == string::npos)
+			if (config::font_asset_name.find(name->start_char) == string::npos)
 			{
 				text_set_font(_this, GetCustomFont());
 			}
@@ -5106,14 +5112,14 @@ namespace
 		auto textId = textcommon_get_TextId(_this);
 		if (textId)
 		{
-			if (GetTextIdByName("Common0121") == textId ||
-				GetTextIdByName("Common0186") == textId ||
-				GetTextIdByName("Outgame0028") == textId ||
-				GetTextIdByName("Outgame0231") == textId ||
-				GetTextIdByName("Outgame0393") == textId ||
-				GetTextIdByName("SingleMode0265") == textId ||
-				GetTextIdByName("Character0039") == textId ||
-				GetTextIdByName("Character0325") == textId)
+			if (GetTextIdByName(L"Common0121") == textId ||
+				GetTextIdByName(L"Common0186") == textId ||
+				GetTextIdByName(L"Outgame0028") == textId ||
+				GetTextIdByName(L"Outgame0231") == textId ||
+				GetTextIdByName(L"Outgame0393") == textId ||
+				GetTextIdByName(L"SingleMode0265") == textId ||
+				GetTextIdByName(L"Character0039") == textId ||
+				GetTextIdByName(L"Character0325") == textId)
 			{
 				text_set_horizontalOverflow(_this, 1);
 				text_set_verticalOverflow(_this, 1);
@@ -5126,11 +5132,11 @@ namespace
 	void* textcommon_awake_orig = nullptr;
 	void textcommon_awake_hook(Il2CppObject* _this)
 	{
-		if (g_replace_to_builtin_font)
+		if (config::replace_to_builtin_font)
 		{
 			text_assign_font(_this);
 		}
-		if (g_replace_to_custom_font)
+		if (config::replace_to_custom_font)
 		{
 			auto customFont = GetCustomFont();
 			if (customFont)
@@ -5234,7 +5240,7 @@ namespace
 	void* load_zekken_composite_resource_orig = nullptr;
 	void load_zekken_composite_resource_hook(Il2CppObject* _this)
 	{
-		if (fontAssets && g_replace_to_custom_font)
+		if (fontAssets && config::replace_to_custom_font)
 		{
 			auto font = GetCustomFont();
 			if (font)
@@ -5249,7 +5255,7 @@ namespace
 	void* wait_resize_ui_orig = nullptr;
 	Il2CppObject* wait_resize_ui_hook(Il2CppObject* _this, bool isPortrait, bool isShowOrientationGuide)
 	{
-		return reinterpret_cast<decltype(wait_resize_ui_hook)*>(wait_resize_ui_orig)(_this, isPortrait, g_ui_loading_show_orientation_guide ? false : isShowOrientationGuide);
+		return reinterpret_cast<decltype(wait_resize_ui_hook)*>(wait_resize_ui_orig)(_this, isPortrait, config::ui_loading_show_orientation_guide ? false : isShowOrientationGuide);
 	}
 
 	void* get_modified_string_orig = nullptr;
@@ -5267,19 +5273,19 @@ namespace
 	void* set_vSyncCount_orig = nullptr;
 	void set_vSyncCount_hook(int level)
 	{
-		reinterpret_cast<decltype(set_vSyncCount_hook)*>(set_vSyncCount_orig)(g_vsync_count);
+		reinterpret_cast<decltype(set_vSyncCount_hook)*>(set_vSyncCount_orig)(config::vsync_count);
 	}
 
 	void* set_anti_aliasing_orig = nullptr;
 	void set_anti_aliasing_hook(int level)
 	{
-		reinterpret_cast<decltype(set_anti_aliasing_hook)*>(set_anti_aliasing_orig)(g_anti_aliasing);
+		reinterpret_cast<decltype(set_anti_aliasing_hook)*>(set_anti_aliasing_orig)(config::anti_aliasing);
 	}
 
 	void* rendertexture_set_anti_aliasing_orig = nullptr;
 	void rendertexture_set_anti_aliasing_hook(Il2CppObject* _this, int level)
 	{
-		reinterpret_cast<decltype(rendertexture_set_anti_aliasing_hook)*>(rendertexture_set_anti_aliasing_orig)(_this, g_anti_aliasing);
+		reinterpret_cast<decltype(rendertexture_set_anti_aliasing_hook)*>(rendertexture_set_anti_aliasing_orig)(_this, config::anti_aliasing);
 	}
 
 	void* set_shadowResolution_orig = nullptr;
@@ -5291,7 +5297,7 @@ namespace
 	void* set_anisotropicFiltering_orig = nullptr;
 	void set_anisotropicFiltering_hook(int mode)
 	{
-		reinterpret_cast<decltype(set_anisotropicFiltering_hook)*>(set_anisotropicFiltering_orig)(g_anisotropic_filtering);
+		reinterpret_cast<decltype(set_anisotropicFiltering_hook)*>(set_anisotropicFiltering_orig)(config::anisotropic_filtering);
 	}
 
 	void* set_shadows_orig = nullptr;
@@ -5321,8 +5327,8 @@ namespace
 	void* apply_graphics_quality_orig = nullptr;
 	void apply_graphics_quality_hook(Il2CppObject* _this, int quality, bool force)
 	{
-		reinterpret_cast<decltype(apply_graphics_quality_hook)*>(apply_graphics_quality_orig)(_this, g_graphics_quality, true);
-		if (g_graphics_quality >= 3)
+		reinterpret_cast<decltype(apply_graphics_quality_hook)*>(apply_graphics_quality_orig)(_this, config::graphics_quality, true);
+		if (config::graphics_quality >= 3)
 		{
 			set_shadowResolution_hook(3);
 			set_shadows_hook(2);
@@ -5333,7 +5339,7 @@ namespace
 	void* GraphicSettings_GetVirtualResolution_orig = nullptr;
 	Vector2Int_t GraphicSettings_GetVirtualResolution_hook(Il2CppObject* _this)
 	{
-		if (g_freeform_window)
+		if (config::freeform_window)
 		{
 			int width = il2cpp_symbols::get_method_pointer<int (*)()>("UnityEngine.CoreModule.dll", "UnityEngine", "Screen", "get_width", -1)();
 			int height = il2cpp_symbols::get_method_pointer<int (*)()>("UnityEngine.CoreModule.dll", "UnityEngine", "Screen", "get_height", -1)();
@@ -5364,7 +5370,7 @@ namespace
 	void* GraphicSettings_GetVirtualResolution3D_orig = nullptr;
 	Vector2Int_t GraphicSettings_GetVirtualResolution3D_hook(Il2CppObject* _this, bool isForcedWideAspect)
 	{
-		if (g_freeform_window)
+		if (config::freeform_window)
 		{
 			int width = il2cpp_symbols::get_method_pointer<int (*)()>("UnityEngine.CoreModule.dll", "UnityEngine", "Screen", "get_width", -1)();
 			int height = il2cpp_symbols::get_method_pointer<int (*)()>("UnityEngine.CoreModule.dll", "UnityEngine", "Screen", "get_height", -1)();
@@ -5381,8 +5387,8 @@ namespace
 			il2cpp_field_static_get_value(NUMBER1920_Field, &number1920);
 			il2cpp_field_static_get_value(NUMBER1080_Field, &number1080);
 
-			number1920 *= g_resolution_3d_scale;
-			number1080 *= g_resolution_3d_scale;
+			number1920 *= config::resolution_3d_scale;
+			number1080 *= config::resolution_3d_scale;
 
 			if (width < height)
 			{
@@ -5393,7 +5399,7 @@ namespace
 		}
 
 		auto resolution = reinterpret_cast<decltype(GraphicSettings_GetVirtualResolution3D_hook)*>(GraphicSettings_GetVirtualResolution3D_orig)(_this, isForcedWideAspect);
-		if (g_unlock_size)
+		if (config::unlock_size)
 		{
 			Resolution_t res;
 			get_resolution(&res);
@@ -5408,19 +5414,18 @@ namespace
 				resolution.y = res.width;
 			}
 		}
-		resolution.x *= g_resolution_3d_scale;
-		resolution.y *= g_resolution_3d_scale;
+		resolution.x *= config::resolution_3d_scale;
+		resolution.y *= config::resolution_3d_scale;
 		return resolution;
 	}
 
 	void* PathResolver_GetLocalPath_orig = nullptr;
 	Il2CppString* PathResolver_GetLocalPath_hook(Il2CppObject* _this, int kind, Il2CppString* hname)
 	{
-		auto hnameU8 = local::wide_u8(hname->start_char);
-		if (g_replace_assets.find(hnameU8) != g_replace_assets.end())
+		if (config::replace_assets.find(hname->start_char) != config::replace_assets.end())
 		{
-			auto& replaceAsset = g_replace_assets.at(hnameU8);
-			return il2cpp_string_new(replaceAsset.path.data());
+			auto& replaceAsset = config::replace_assets.at(hname->start_char);
+			return il2cpp_string_new16(replaceAsset.path.data());
 		}
 		return reinterpret_cast<decltype(PathResolver_GetLocalPath_hook)*>(PathResolver_GetLocalPath_orig)(_this, kind, hname);
 	}
@@ -6037,10 +6042,13 @@ namespace
 		{
 			splited.emplace_back(segment);
 		}
-		if (g_replace_assets.find(splited.back()) != g_replace_assets.end())
+
+		auto name = local::u8_wide(splited.back());
+
+		if (config::replace_assets.find(name) != config::replace_assets.end())
 		{
-			auto& replaceAsset = g_replace_assets.at(splited.back());
-			auto assets = reinterpret_cast<decltype(assetbundle_LoadFromFile_hook)*>(assetbundle_LoadFromFile_orig)(il2cpp_string_new(replaceAsset.path.data()), crc, offset);
+			auto& replaceAsset = config::replace_assets.at(name);
+			auto assets = reinterpret_cast<decltype(assetbundle_LoadFromFile_hook)*>(assetbundle_LoadFromFile_orig)(il2cpp_string_new16(replaceAsset.path.data()), crc, offset);
 			replaceAsset.asset = assets;
 			return assets;
 		}
@@ -6158,7 +6166,7 @@ namespace
 	void assetbundle_unload_hook(Il2CppObject* _this, bool unloadAllLoadedObjects)
 	{
 		reinterpret_cast<decltype(assetbundle_unload_hook)*>(assetbundle_unload_orig)(_this, unloadAllLoadedObjects);
-		for (auto& pair : g_replace_assets)
+		for (auto& pair : config::replace_assets)
 		{
 			if (pair.second.asset == _this)
 			{
@@ -6253,40 +6261,40 @@ namespace
 		return nullptr;
 	}
 
-	void SetTextCommonText(Il2CppObject* textCommon, const char* text)
+	void SetTextCommonText(Il2CppObject* textCommon, const wchar_t* text)
 	{
-		text_set_text(textCommon, il2cpp_string_new(text));
+		text_set_text(textCommon, il2cpp_string_new16(text));
 
 		auto textIdStrField = il2cpp_class_get_field_from_name_wrap(textCommon->klass, "m_textid_str");
 		il2cpp_field_set_value(textCommon, textIdStrField, nullptr);
 	}
 
-	void SetTextCommonTextWithCustomTag(Il2CppObject* textCommon, const char* text)
+	void SetTextCommonTextWithCustomTag(Il2CppObject* textCommon, const wchar_t* text)
 	{
-		il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, Il2CppString*, float, int)>(textCommon->klass, "SetTextWithCustomTag", 3)->methodPointer(textCommon, il2cpp_string_new(text), 1, 0);
+		il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, Il2CppString*, float, int)>(textCommon->klass, "SetTextWithCustomTag", 3)->methodPointer(textCommon, il2cpp_string_new16(text), 1, 0);
 
 		auto textIdStrField = il2cpp_class_get_field_from_name_wrap(textCommon->klass, "m_textid_str");
 		il2cpp_field_set_value(textCommon, textIdStrField, nullptr);
 	}
 
-	void SetTextCommonFontColor(Il2CppObject* textCommon, const char* color)
+	void SetTextCommonFontColor(Il2CppObject* textCommon, const wchar_t* color)
 	{
 		il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, unsigned long)>(textCommon->klass, "set_FontColor", 1)->methodPointer(textCommon, GetEnumValue(ParseEnum(GetRuntimeType("umamusume.dll", "Gallop", "FontColorType"), color)));
 	}
 
-	void SetTextCommonOutlineSize(Il2CppObject* textCommon, const char* size)
+	void SetTextCommonOutlineSize(Il2CppObject* textCommon, const wchar_t* size)
 	{
 		il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, unsigned long)>(textCommon->klass, "set_OutlineSize", 1)->methodPointer(textCommon, GetEnumValue(ParseEnum(GetRuntimeType("umamusume.dll", "Gallop", "OutlineSizeType"), size)));
 		il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*)>(textCommon->klass, "UpdateOutline", 0)->methodPointer(textCommon);
 	}
 
-	void SetTextCommonOutlineColor(Il2CppObject* textCommon, const char* color)
+	void SetTextCommonOutlineColor(Il2CppObject* textCommon, const wchar_t* color)
 	{
 		il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, unsigned long)>(textCommon->klass, "set_OutlineColor", 1)->methodPointer(textCommon, GetEnumValue(ParseEnum(GetRuntimeType("umamusume.dll", "Gallop", "OutlineColorType"), color)));
 		il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*)>(textCommon->klass, "RebuildOutline", 0)->methodPointer(textCommon);
 	}
 
-	Il2CppObject* GetOptionItemTitle(const char* title)
+	Il2CppObject* GetOptionItemTitle(const wchar_t* title)
 	{
 		auto object = resources_load_hook(il2cpp_string_new("ui/parts/outgame/option/partsoptionitemtitle"), GetRuntimeType("UnityEngine.CoreModule.dll", "UnityEngine", "GameObject"));
 
@@ -6303,7 +6311,7 @@ namespace
 		return optionItemTitle;
 	}
 
-	Il2CppObject* GetOptionItemOnOff(const char* name, const char* title)
+	Il2CppObject* GetOptionItemOnOff(const char* name, const wchar_t* title)
 	{
 		auto object = resources_load_hook(il2cpp_string_new("ui/parts/outgame/option/partsoptionitemonoff"), GetRuntimeType("UnityEngine.CoreModule.dll", "UnityEngine", "GameObject"));
 
@@ -6323,7 +6331,7 @@ namespace
 		return optionItemOnOff;
 	}
 
-	Il2CppObject* GetOptionItemOnOffQualityRich(const char* name, const char* title)
+	Il2CppObject* GetOptionItemOnOffQualityRich(const char* name, const wchar_t* title)
 	{
 		auto object = resources_load_hook(il2cpp_string_new("ui/parts/outgame/option/partsoptioniteminfo_qualityrich"), GetRuntimeType("UnityEngine.CoreModule.dll", "UnityEngine", "GameObject"));
 
@@ -6377,7 +6385,7 @@ namespace
 		return false;
 	}
 
-	Il2CppObject* GetOptionItemButton(const char* name, const char* title)
+	Il2CppObject* GetOptionItemButton(const char* name, const wchar_t* title)
 	{
 		auto object = resources_load_hook(il2cpp_string_new("ui/parts/outgame/option/partsoptionitembutton"), GetRuntimeType("UnityEngine.CoreModule.dll", "UnityEngine", "GameObject"));
 
@@ -6420,7 +6428,7 @@ namespace
 		}
 	}
 
-	Il2CppObject* GetOptionItemAttention(const char* text)
+	Il2CppObject* GetOptionItemAttention(const wchar_t* text)
 	{
 		auto object = resources_load_hook(il2cpp_string_new("ui/parts/outgame/option/partsoptionitemattention"), GetRuntimeType("UnityEngine.CoreModule.dll", "UnityEngine", "GameObject"));
 
@@ -6437,7 +6445,7 @@ namespace
 		return optionItemAttention;
 	}
 
-	Il2CppObject* GetOptionItemInfo(const char* text)
+	Il2CppObject* GetOptionItemInfo(const wchar_t* text)
 	{
 		auto object = resources_load_hook(il2cpp_string_new("ui/parts/outgame/option/partsoptioniteminfo"), GetRuntimeType("UnityEngine.CoreModule.dll", "UnityEngine", "GameObject"));
 
@@ -6470,7 +6478,7 @@ namespace
 		return optionItemInfo;
 	}
 
-	Il2CppObject* GetOptionItemSimple(const char* title)
+	Il2CppObject* GetOptionItemSimple(const wchar_t* title)
 	{
 		auto object = resources_load_hook(il2cpp_string_new("ui/parts/outgame/option/partsoptionitemsimple"), GetRuntimeType("UnityEngine.CoreModule.dll", "UnityEngine", "GameObject"));
 
@@ -6487,7 +6495,7 @@ namespace
 		return optionItemSimple;
 	}
 
-	Il2CppObject* GetOptionItemSimpleWithButton(const char* name, const char* title, const char* text)
+	Il2CppObject* GetOptionItemSimpleWithButton(const char* name, const wchar_t* title, const wchar_t* text)
 	{
 		auto object = resources_load_hook(il2cpp_string_new("ui/parts/outgame/option/partsoptionitemsimple"), GetRuntimeType("UnityEngine.CoreModule.dll", "UnityEngine", "GameObject"));
 
@@ -6606,7 +6614,7 @@ namespace
 		return -1;
 	}
 
-	Il2CppObject* GetOptionItem3ToggleVertical(const char* name, const char* title, const char* oprion1, const char* oprion2, const char* oprion3, int selectedIndex)
+	Il2CppObject* GetOptionItem3ToggleVertical(const char* name, const wchar_t* title, const wchar_t* option1, const wchar_t* option2, const wchar_t* option3, int selectedIndex)
 	{
 		auto object = resources_load_hook(il2cpp_string_new("ui/parts/outgame/option/partsoptionitem3togglevertical"), GetRuntimeType("UnityEngine.CoreModule.dll", "UnityEngine", "GameObject"));
 
@@ -6619,9 +6627,9 @@ namespace
 			"umamusume.dll", "Gallop", "TextCommon")), true, true, false, false, nullptr);
 
 		SetTextCommonText(array->vector[0], title);
-		SetTextCommonText(array->vector[1], oprion1);
-		SetTextCommonText(array->vector[2], oprion2);
-		SetTextCommonText(array->vector[3], oprion3);
+		SetTextCommonText(array->vector[1], option1);
+		SetTextCommonText(array->vector[2], option2);
+		SetTextCommonText(array->vector[3], option3);
 
 		auto toggleGroupCommon = GetToggleGroupCommon(optionItem3ToggleVertical);
 		il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, int)>(toggleGroupCommon->klass, "SetToggleOnFromNumber", 1)->methodPointer(toggleGroupCommon, selectedIndex);
@@ -6629,7 +6637,7 @@ namespace
 		return optionItem3ToggleVertical;
 	}
 
-	Il2CppObject* GetOptionItem3Toggle(const char* name, const char* title, const char* oprion1, const char* oprion2, const char* oprion3, int selectedIndex)
+	Il2CppObject* GetOptionItem3Toggle(const char* name, const wchar_t* title, const wchar_t* option1, const wchar_t* option2, const wchar_t* option3, int selectedIndex)
 	{
 		auto object = resources_load_hook(il2cpp_string_new("ui/parts/outgame/option/partsoptionitem3toggle"), GetRuntimeType("UnityEngine.CoreModule.dll", "UnityEngine", "GameObject"));
 
@@ -6642,9 +6650,9 @@ namespace
 			"umamusume.dll", "Gallop", "TextCommon")), true, true, false, false, nullptr);
 
 		SetTextCommonText(array->vector[0], title);
-		SetTextCommonText(array->vector[1], oprion1);
-		SetTextCommonText(array->vector[2], oprion2);
-		SetTextCommonText(array->vector[3], oprion3);
+		SetTextCommonText(array->vector[1], option1);
+		SetTextCommonText(array->vector[2], option2);
+		SetTextCommonText(array->vector[3], option3);
 
 		auto toggleGroupCommon = GetToggleGroupCommon(optionItem3Toggle);
 		il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, int)>(toggleGroupCommon->klass, "SetToggleOnFromNumber", 1)->methodPointer(toggleGroupCommon, selectedIndex);
@@ -6652,7 +6660,7 @@ namespace
 		return optionItem3Toggle;
 	}
 
-	Il2CppObject* GetOptionItem2Toggle(const char* name, const char* title, const char* oprion1, const char* oprion2, int selectedIndex)
+	Il2CppObject* GetOptionItem2Toggle(const char* name, const wchar_t* title, const wchar_t* option1, const wchar_t* option2, int selectedIndex)
 	{
 		auto object = resources_load_hook(il2cpp_string_new("ui/parts/outgame/option/partsoptionitem2toggle"), GetRuntimeType("UnityEngine.CoreModule.dll", "UnityEngine", "GameObject"));
 
@@ -6665,8 +6673,8 @@ namespace
 			"umamusume.dll", "Gallop", "TextCommon")), true, true, false, false, nullptr);
 
 		SetTextCommonText(array->vector[0], title);
-		SetTextCommonText(array->vector[1], oprion1);
-		SetTextCommonText(array->vector[2], oprion2);
+		SetTextCommonText(array->vector[1], option1);
+		SetTextCommonText(array->vector[2], option2);
 
 		auto toggleGroupCommon = GetToggleGroupCommon(optionItem2Toggle);
 		il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, int)>(toggleGroupCommon->klass, "SetToggleOnFromNumber", 1)->methodPointer(toggleGroupCommon, selectedIndex);
@@ -6722,7 +6730,7 @@ namespace
 		return nullptr;
 	}
 
-	Il2CppObject* GetOptionSlider(const char* name, const char* title, float value = 0, float min = 0, float max = 10, bool wholeNumbers = true, void (*onChange)(Il2CppObject*) = nullptr)
+	Il2CppObject* GetOptionSlider(const char* name, const wchar_t* title, float value = 0, float min = 0, float max = 10, bool wholeNumbers = true, void (*onChange)(Il2CppObject*) = nullptr)
 	{
 		auto object = resources_load_hook(il2cpp_string_new("ui/parts/outgame/option/optionsoundvolumeslider"), GetRuntimeType("UnityEngine.CoreModule.dll", "UnityEngine", "GameObject"));
 
@@ -6945,7 +6953,7 @@ namespace
 		return checkboxWithText;
 	}
 
-	Il2CppObject* GetRadioButtonWithText(const char* name, const char* title)
+	Il2CppObject* GetRadioButtonWithText(const char* name, const wchar_t* title)
 	{
 		auto object = resources_load_hook(il2cpp_string_new("ui/parts/base/radiobuttonwithtext"), GetRuntimeType("UnityEngine.CoreModule.dll", "UnityEngine", "GameObject"));
 
@@ -6967,7 +6975,7 @@ namespace
 	Il2CppObject* settingsDialog;
 
 	template<typename T>
-	void AddOrSet(rapidjson::Document& document, char* name, T value)
+	void AddOrSet(WDocument& document, wchar_t* name, T value)
 	{
 		if (document.HasMember(name))
 		{
@@ -6975,17 +6983,17 @@ namespace
 		}
 		else
 		{
-			rapidjson::Value v;
+			WValue v;
 			v.Set(value);
 
 			document.AddMember(rapidjson::StringRef(name), v, document.GetAllocator());
 		}
 	}
 
-	void AddOrSetString(rapidjson::Document& document, char* name, char* value)
+	void AddOrSetString(WDocument& document, wchar_t* name, wchar_t* value)
 	{
-		char* copy = new char[strlen(value) + 1];
-		strcpy(copy, value);
+		wchar_t* copy = new wchar_t[wcslen(value) + 1];
+		wcscpy(copy, value);
 
 		if (document.HasMember(name))
 		{
@@ -6993,7 +7001,7 @@ namespace
 		}
 		else
 		{
-			rapidjson::Value v;
+			WValue v;
 			v.SetString(rapidjson::StringRef(copy));
 
 			document.AddMember(rapidjson::StringRef(name), v, document.GetAllocator());
@@ -7004,7 +7012,7 @@ namespace
 
 	function<void(int)> optionSelected;
 
-	void OpenSelectOption(const char* title, vector<string> options, int selectedIndex, function<void(int)> optionSelected)
+	void OpenSelectOption(const wchar_t* title, vector<string> options, int selectedIndex, function<void(int)> optionSelected)
 	{
 		::optionSelected = optionSelected;
 
@@ -7033,7 +7041,7 @@ namespace
 			int dialogFormType)>(
 				il2cpp_class_get_method_from_name(dialogData->klass, "SetSimpleTwoButtonMessage",
 					7)->methodPointer
-				)(dialogData, il2cpp_string_new(title), nullptr, onRight, GetTextIdByName("Common0004"), GetTextIdByName("Common0003"), onLeft, 10);
+				)(dialogData, il2cpp_string_new16(title), nullptr, onRight, GetTextIdByName(L"Common0004"), GetTextIdByName(L"Common0003"), onLeft, 10);
 
 		auto DispStackTypeField = il2cpp_class_get_field_from_name_wrap(dialogData->klass, "DispStackType");
 		int DispStackType = 2;
@@ -7131,7 +7139,7 @@ namespace
 
 		for (auto& pair : options)
 		{
-			toggles.emplace_back(GetRadioButtonWithText(("radio_"s + pair).data(), pair.data()));
+			toggles.emplace_back(GetRadioButtonWithText(("radio_"s + pair).data(), local::u8_wide(pair).data()));
 		}
 
 		AddToLayout(m_Content, toggles);
@@ -7155,7 +7163,7 @@ namespace
 		selectOptionDialog = il2cpp_symbols::get_method_pointer<Il2CppObject * (*)(Il2CppObject * data)>("umamusume.dll", "Gallop", "DialogManager", "PushDialog", 1)(dialogData);
 	}
 
-	void OpenSelectFontColorOption(const char* title, vector<string> options, int selectedIndex, function<void(int)> optionSelected)
+	void OpenSelectFontColorOption(const wchar_t* title, vector<string> options, int selectedIndex, function<void(int)> optionSelected)
 	{
 		::optionSelected = optionSelected;
 
@@ -7184,7 +7192,7 @@ namespace
 			int dialogFormType)>(
 				il2cpp_class_get_method_from_name(dialogData->klass, "SetSimpleTwoButtonMessage",
 					7)->methodPointer
-				)(dialogData, il2cpp_string_new(title), nullptr, onRight, GetTextIdByName("Common0004"), GetTextIdByName("Common0003"), onLeft, 10);
+				)(dialogData, il2cpp_string_new16(title), nullptr, onRight, GetTextIdByName(L"Common0004"), GetTextIdByName(L"Common0003"), onLeft, 10);
 
 		auto DispStackTypeField = il2cpp_class_get_field_from_name_wrap(dialogData->klass, "DispStackType");
 		int DispStackType = 2;
@@ -7282,8 +7290,9 @@ namespace
 
 		for (auto& color : options)
 		{
-			toggles.emplace_back(GetRadioButtonWithText(("radio_"s + color).data(), color.data()));
-			SetTextCommonFontColor(GetTextCommon(("radio_"s + color).data()), color.data());
+			auto colorW = local::u8_wide(color);
+			toggles.emplace_back(GetRadioButtonWithText(("radio_"s + color).data(), colorW.data()));
+			SetTextCommonFontColor(GetTextCommon(("radio_"s + color).data()), colorW.data());
 		}
 
 		AddToLayout(m_Content, toggles);
@@ -7308,7 +7317,7 @@ namespace
 		selectOptionDialog = il2cpp_symbols::get_method_pointer<Il2CppObject * (*)(Il2CppObject * data)>("umamusume.dll", "Gallop", "DialogManager", "PushDialog", 1)(dialogData);
 	}
 
-	void OpenSelectOutlineSizeOption(const char* title, vector<string> options, int selectedIndex, function<void(int)> optionSelected)
+	void OpenSelectOutlineSizeOption(const wchar_t* title, vector<string> options, int selectedIndex, function<void(int)> optionSelected)
 	{
 		::optionSelected = optionSelected;
 
@@ -7337,7 +7346,7 @@ namespace
 			int dialogFormType)>(
 				il2cpp_class_get_method_from_name(dialogData->klass, "SetSimpleTwoButtonMessage",
 					7)->methodPointer
-				)(dialogData, il2cpp_string_new(title), nullptr, onRight, GetTextIdByName("Common0004"), GetTextIdByName("Common0003"), onLeft, 10);
+				)(dialogData, il2cpp_string_new16(title), nullptr, onRight, GetTextIdByName(L"Common0004"), GetTextIdByName(L"Common0003"), onLeft, 10);
 
 		auto DispStackTypeField = il2cpp_class_get_field_from_name_wrap(dialogData->klass, "DispStackType");
 		int DispStackType = 2;
@@ -7435,10 +7444,11 @@ namespace
 
 		for (auto& size : options)
 		{
-			toggles.emplace_back(GetRadioButtonWithText(("radio_"s + size).data(), size.data()));
-			SetTextCommonFontColor(GetTextCommon(("radio_"s + size).data()), "White");
-			SetTextCommonOutlineSize(GetTextCommon(("radio_"s + size).data()), size.data());
-			SetTextCommonOutlineColor(GetTextCommon(("radio_"s + size).data()), "Brown");
+			auto sizeW = local::u8_wide(size);
+			toggles.emplace_back(GetRadioButtonWithText(("radio_"s + size).data(), sizeW.data()));
+			SetTextCommonFontColor(GetTextCommon(("radio_"s + size).data()), L"White");
+			SetTextCommonOutlineSize(GetTextCommon(("radio_"s + size).data()), sizeW.data());
+			SetTextCommonOutlineColor(GetTextCommon(("radio_"s + size).data()), L"Brown");
 		}
 
 		AddToLayout(m_Content, toggles);
@@ -7463,7 +7473,7 @@ namespace
 		selectOptionDialog = il2cpp_symbols::get_method_pointer<Il2CppObject * (*)(Il2CppObject * data)>("umamusume.dll", "Gallop", "DialogManager", "PushDialog", 1)(dialogData);
 	}
 
-	void OpenSelectOutlineColorOption(const char* title, vector<string> options, int selectedIndex, function<void(int)> optionSelected)
+	void OpenSelectOutlineColorOption(const wchar_t* title, vector<string> options, int selectedIndex, function<void(int)> optionSelected)
 	{
 		::optionSelected = optionSelected;
 
@@ -7492,7 +7502,7 @@ namespace
 			int dialogFormType)>(
 				il2cpp_class_get_method_from_name(dialogData->klass, "SetSimpleTwoButtonMessage",
 					7)->methodPointer
-				)(dialogData, il2cpp_string_new(title), nullptr, onRight, GetTextIdByName("Common0004"), GetTextIdByName("Common0003"), onLeft, 10);
+				)(dialogData, il2cpp_string_new16(title), nullptr, onRight, GetTextIdByName(L"Common0004"), GetTextIdByName(L"Common0003"), onLeft, 10);
 
 		auto DispStackTypeField = il2cpp_class_get_field_from_name_wrap(dialogData->klass, "DispStackType");
 		int DispStackType = 2;
@@ -7590,8 +7600,9 @@ namespace
 
 		for (auto& color : options)
 		{
-			toggles.emplace_back(GetRadioButtonWithText(("radio_"s + color).data(), color.data()));
-			SetTextCommonOutlineColor(GetTextCommon(("radio_"s + color).data()), color.data());
+			auto colorW = local::u8_wide(color);
+			toggles.emplace_back(GetRadioButtonWithText(("radio_"s + color).data(), colorW.data()));
+			SetTextCommonOutlineColor(GetTextCommon(("radio_"s + color).data()), colorW.data());
 		}
 
 		AddToLayout(m_Content, toggles);
@@ -7717,11 +7728,11 @@ namespace
 			{
 				il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*)>(settingsDialog->klass, "Close", 0)->methodPointer(settingsDialog);
 
-				SetNotificationBackgroundAlpha(g_character_system_text_caption_background_alpha);
-				SetNotificationPosition(g_character_system_text_caption_position_x, g_character_system_text_caption_position_y);
-				SetNotificationFontColor(g_character_system_text_caption_font_color);
-				SetNotificationOutlineSize(g_character_system_text_caption_outline_size);
-				SetNotificationOutlineColor(g_character_system_text_caption_outline_color);
+				SetNotificationBackgroundAlpha(config::character_system_text_caption_background_alpha);
+				SetNotificationPosition(config::character_system_text_caption_position_x, config::character_system_text_caption_position_y);
+				SetNotificationFontColor(config::character_system_text_caption_font_color);
+				SetNotificationOutlineSize(config::character_system_text_caption_outline_size);
+				SetNotificationOutlineColor(config::character_system_text_caption_outline_color);
 
 				config::rollback_config();
 			});
@@ -7730,80 +7741,80 @@ namespace
 			{
 				auto& configDocument = config::config_document;
 
-				AddOrSet(configDocument, "antiAliasing", vector<int>{ -1, 0, 2, 4, 8 }[GetOptionSliderValue("anti_aliasing")]);
+				AddOrSet(configDocument, L"antiAliasing", vector<int>{ -1, 0, 2, 4, 8 }[GetOptionSliderValue("anti_aliasing")]);
 
-				AddOrSet(configDocument, "characterSystemTextCaption", GetOptionItemOnOffIsOn("character_system_text_caption"));
+				AddOrSet(configDocument, L"characterSystemTextCaption", GetOptionItemOnOffIsOn("character_system_text_caption"));
 
-				AddOrSet(configDocument, "characterSystemTextCaptionPositionX", GetOptionSliderValue("character_system_text_caption_position_x") / 10);
+				AddOrSet(configDocument, L"characterSystemTextCaptionPositionX", GetOptionSliderValue("character_system_text_caption_position_x") / 10);
 
-				AddOrSet(configDocument, "characterSystemTextCaptionPositionY", GetOptionSliderValue("character_system_text_caption_position_y") / 10);
+				AddOrSet(configDocument, L"characterSystemTextCaptionPositionY", GetOptionSliderValue("character_system_text_caption_position_y") / 10);
 
-				AddOrSet(configDocument, "characterSystemTextCaptionBackgroundAlpha", GetOptionSliderValue("character_system_text_caption_background_alpha") / 100);
+				AddOrSet(configDocument, L"characterSystemTextCaptionBackgroundAlpha", GetOptionSliderValue("character_system_text_caption_background_alpha") / 100);
 
-				AddOrSet(configDocument, "championsLiveShowText", GetOptionItemOnOffIsOn("champions_live_show_text"));
+				AddOrSet(configDocument, L"championsLiveShowText", GetOptionItemOnOffIsOn("champions_live_show_text"));
 
-				AddOrSet(configDocument, "championsLiveYear", GetToggleGroupCommonValue("champions_live_year") + 2022);
+				AddOrSet(configDocument, L"championsLiveYear", GetToggleGroupCommonValue("champions_live_year") + 2022);
 
-				AddOrSet(configDocument, "allowDeleteCookie", GetOptionItemOnOffIsOn("allow_delete_cookie"));
+				AddOrSet(configDocument, L"allowDeleteCookie", GetOptionItemOnOffIsOn("allow_delete_cookie"));
 
-				AddOrSet(configDocument, "cySpringUpdateMode", static_cast<int>(GetOptionSliderValue("cyspring_update_mode")));
+				AddOrSet(configDocument, L"cySpringUpdateMode", static_cast<int>(GetOptionSliderValue("cyspring_update_mode")));
 
-				AddOrSet(configDocument, "uiAnimationScale", static_cast<int>(roundf(GetOptionSliderValue("ui_animation_scale") * 100)) / 100.0f);
+				AddOrSet(configDocument, L"uiAnimationScale", static_cast<int>(roundf(GetOptionSliderValue("ui_animation_scale") * 100)) / 100.0f);
 
-				AddOrSet(configDocument, "resolution3dScale", static_cast<int>(roundf(GetOptionSliderValue("resolution_3d_scale") * 100)) / 100.0f);
+				AddOrSet(configDocument, L"resolution3dScale", static_cast<int>(roundf(GetOptionSliderValue("resolution_3d_scale") * 100)) / 100.0f);
 
-				AddOrSet(configDocument, "notificationTp", GetOptionItemOnOffIsOn("notification_tp"));
+				AddOrSet(configDocument, L"notificationTp", GetOptionItemOnOffIsOn("notification_tp"));
 
-				AddOrSet(configDocument, "notificationRp", GetOptionItemOnOffIsOn("notification_rp"));
+				AddOrSet(configDocument, L"notificationRp", GetOptionItemOnOffIsOn("notification_rp"));
 
-				AddOrSet(configDocument, "dumpMsgPack", GetOptionItemOnOffIsOn("dump_msgpack"));
+				AddOrSet(configDocument, L"dumpMsgPack", GetOptionItemOnOffIsOn("dump_msgpack"));
 
-				AddOrSet(configDocument, "dumpMsgPackRequest", GetOptionItemOnOffIsOn("dump_msgpack_request"));
+				AddOrSet(configDocument, L"dumpMsgPackRequest", GetOptionItemOnOffIsOn("dump_msgpack_request"));
 
 #ifdef _DEBUG
-				AddOrSet(configDocument, "unlockLiveChara", GetOptionItemOnOffIsOn("unlock_live_chara"));
+				AddOrSet(configDocument, L"unlockLiveChara", GetOptionItemOnOffIsOn("unlock_live_chara"));
 #endif
-				AddOrSet(configDocument, "unlockSize", GetOptionItemOnOffIsOn("unlock_size"));
+				AddOrSet(configDocument, L"unlockSize", GetOptionItemOnOffIsOn("unlock_size"));
 
-				AddOrSet(configDocument, "unlockSizeUseSystemResolution", GetOptionItemOnOffIsOn("use_system_resolution"));
+				AddOrSet(configDocument, L"unlockSizeUseSystemResolution", GetOptionItemOnOffIsOn("use_system_resolution"));
 
-				AddOrSet(configDocument, "uiScale", static_cast<int>(roundf(GetOptionSliderValue("ui_scale") * 100)) / 100.0f);
+				AddOrSet(configDocument, L"uiScale", static_cast<int>(roundf(GetOptionSliderValue("ui_scale") * 100)) / 100.0f);
 
-				AddOrSet(configDocument, "autoFullscreen", GetOptionItemOnOffIsOn("auto_fullscreen"));
+				AddOrSet(configDocument, L"autoFullscreen", GetOptionItemOnOffIsOn("auto_fullscreen"));
 
-				AddOrSet(configDocument, "freeFormWindow", GetOptionItemOnOffIsOn("freeform_window"));
+				AddOrSet(configDocument, L"freeFormWindow", GetOptionItemOnOffIsOn("freeform_window"));
 
-				AddOrSet(configDocument, "freeFormUiScalePortrait", static_cast<int>(roundf(GetOptionSliderValue("ui_scale_portrait") * 100)) / 100.0f);
+				AddOrSet(configDocument, L"freeFormUiScalePortrait", static_cast<int>(roundf(GetOptionSliderValue("ui_scale_portrait") * 100)) / 100.0f);
 
-				AddOrSet(configDocument, "freeFormUiScaleLandscape", static_cast<int>(roundf(GetOptionSliderValue("ui_scale_landscape") * 100)) / 100.0f);
+				AddOrSet(configDocument, L"freeFormUiScaleLandscape", static_cast<int>(roundf(GetOptionSliderValue("ui_scale_landscape") * 100)) / 100.0f);
 
-				g_graphics_quality = configDocument["graphicsQuality"].GetInt();
+				config::graphics_quality = configDocument[L"graphicsQuality"].GetInt();
 
-				g_anti_aliasing = configDocument["antiAliasing"].GetInt();
+				config::anti_aliasing = configDocument[L"antiAliasing"].GetInt();
 
-				g_character_system_text_caption_background_alpha = configDocument["characterSystemTextCaptionBackgroundAlpha"].GetFloat();
+				config::character_system_text_caption_background_alpha = configDocument[L"characterSystemTextCaptionBackgroundAlpha"].GetFloat();
 
-				g_character_system_text_caption_position_x = configDocument["characterSystemTextCaptionPositionX"].GetFloat();
+				config::character_system_text_caption_position_x = configDocument[L"characterSystemTextCaptionPositionX"].GetFloat();
 
-				g_character_system_text_caption_position_y = configDocument["characterSystemTextCaptionPositionY"].GetFloat();
+				config::character_system_text_caption_position_y = configDocument[L"characterSystemTextCaptionPositionY"].GetFloat();
 
-				g_character_system_text_caption_font_color = configDocument["characterSystemTextCaptionFontColor"].GetString();
+				config::character_system_text_caption_font_color = configDocument[L"characterSystemTextCaptionFontColor"].GetString();
 
-				g_character_system_text_caption_outline_size = configDocument["characterSystemTextCaptionOutlineSize"].GetString();
+				config::character_system_text_caption_outline_size = configDocument[L"characterSystemTextCaptionOutlineSize"].GetString();
 
-				g_character_system_text_caption_outline_color = configDocument["characterSystemTextCaptionOutlineColor"].GetString();
+				config::character_system_text_caption_outline_color = configDocument[L"characterSystemTextCaptionOutlineColor"].GetString();
 
-				g_champions_live_show_text = configDocument["championsLiveShowText"].GetBool();
+				config::champions_live_show_text = configDocument[L"championsLiveShowText"].GetBool();
 
-				g_champions_live_year = configDocument["championsLiveYear"].GetInt();
+				config::champions_live_year = configDocument[L"championsLiveYear"].GetInt();
 
-				g_champions_live_resource_id = configDocument["championsLiveResourceId"].GetInt();
+				config::champions_live_resource_id = configDocument[L"championsLiveResourceId"].GetInt();
 
-				g_cyspring_update_mode = configDocument["cySpringUpdateMode"].GetInt();
+				config::cyspring_update_mode = configDocument[L"cySpringUpdateMode"].GetInt();
 
-				g_ui_animation_scale = configDocument["uiAnimationScale"].GetFloat();
+				config::ui_animation_scale = configDocument[L"uiAnimationScale"].GetFloat();
 
-				g_resolution_3d_scale = configDocument["resolution3dScale"].GetFloat();
+				config::resolution_3d_scale = configDocument[L"resolution3dScale"].GetFloat();
 
 				if (Game::CurrentGameRegion == Game::Region::KOR)
 				{
@@ -7813,11 +7824,11 @@ namespace
 					{
 						auto _resolutionScaleField = il2cpp_class_get_field_from_name_wrap(graphicSettings->klass, "_resolutionScale");
 
-						il2cpp_field_set_value(graphicSettings, _resolutionScaleField, &g_resolution_3d_scale);
+						il2cpp_field_set_value(graphicSettings, _resolutionScaleField, &config::resolution_3d_scale);
 
 						auto _resolutionScale2DField = il2cpp_class_get_field_from_name_wrap(graphicSettings->klass, "_resolutionScale2D");
 
-						il2cpp_field_set_value(graphicSettings, _resolutionScale2DField, &g_resolution_3d_scale);
+						il2cpp_field_set_value(graphicSettings, _resolutionScale2DField, &config::resolution_3d_scale);
 					}
 				}
 
@@ -7825,19 +7836,19 @@ namespace
 				il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*)>(nowLoading->klass, "DeleteMiniCharacter", 0)->methodPointer(nowLoading);
 				il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*)>(nowLoading->klass, "CreateMiniCharacter", 0)->methodPointer(nowLoading);
 
-				g_unlock_size_use_system_resolution = configDocument["unlockSizeUseSystemResolution"].GetBool();
+				config::unlock_size_use_system_resolution = configDocument[L"unlockSizeUseSystemResolution"].GetBool();
 
-				g_ui_scale = configDocument["uiScale"].GetFloat();
+				config::ui_scale = configDocument[L"uiScale"].GetFloat();
 
-				g_auto_fullscreen = configDocument["autoFullscreen"].GetBool();
+				config::auto_fullscreen = configDocument[L"autoFullscreen"].GetBool();
 
-				g_freeform_ui_scale_portrait = configDocument["freeFormUiScalePortrait"].GetFloat();
+				config::freeform_ui_scale_portrait = configDocument[L"freeFormUiScalePortrait"].GetFloat();
 
-				g_freeform_ui_scale_landscape = configDocument["freeFormUiScaleLandscape"].GetFloat();
+				config::freeform_ui_scale_landscape = configDocument[L"freeFormUiScaleLandscape"].GetFloat();
 
-				g_notification_tp = configDocument["notificationTp"].GetBool();
+				config::notification_tp = configDocument[L"notificationTp"].GetBool();
 
-				if (g_notification_tp)
+				if (config::notification_tp)
 				{
 					MsgPackData::RegisterTPScheduledToast();
 				}
@@ -7846,9 +7857,9 @@ namespace
 					DesktopNotificationManagerCompat::RemoveFromScheduleByTag(L"TP");
 				}
 
-				g_notification_rp = configDocument["notificationRp"].GetBool();
+				config::notification_rp = configDocument[L"notificationRp"].GetBool();
 
-				if (g_notification_rp)
+				if (config::notification_rp)
 				{
 					MsgPackData::RegisterRPScheduledToast();
 				}
@@ -7857,12 +7868,12 @@ namespace
 					DesktopNotificationManagerCompat::RemoveFromScheduleByTag(L"RP");
 				}
 
-				g_dump_msgpack = configDocument["dumpMsgPack"].GetBool();
+				config::dump_msgpack = configDocument[L"dumpMsgPack"].GetBool();
 
-				g_dump_msgpack_request = configDocument["dumpMsgPackRequest"].GetBool();
+				config::dump_msgpack_request = configDocument[L"dumpMsgPackRequest"].GetBool();
 
 #ifdef _DEBUG
-				g_unlock_live_chara = configDocument["unlockLiveChara"].GetBool();
+				config::unlock_live_chara = configDocument[L"unlockLiveChara"].GetBool();
 #endif
 				config::write_config();
 
@@ -7877,7 +7888,7 @@ namespace
 					ULONG closeTextId)>(
 						il2cpp_class_get_method_from_name(dialogData->klass, "SetSimpleOneButtonMessage",
 							4)->methodPointer
-						)(dialogData, GetTextIdByName("AccoutDataLink0061"), localize_get_hook(GetTextIdByName("Outgame0309")), nullptr, GetTextIdByName("Common0007"));
+						)(dialogData, GetTextIdByName(L"AccoutDataLink0061"), localize_get_hook(GetTextIdByName(L"Outgame0309")), nullptr, GetTextIdByName(L"Common0007"));
 
 				auto onDestroy = CreateDelegateStatic(*[]()
 					{
@@ -7899,7 +7910,7 @@ namespace
 			int dialogFormType)>(
 				il2cpp_class_get_method_from_name(dialogData->klass, "SetSimpleTwoButtonMessage",
 					7)->methodPointer
-				)(dialogData, il2cpp_string_new(LocalifySettings::GetText("title")), nullptr, onRight, GetTextIdByName("Common0004"), GetTextIdByName("Common0261"), onLeft, 10);
+				)(dialogData, il2cpp_string_new16(LocalifySettings::GetText("title")), nullptr, onRight, GetTextIdByName(L"Common0004"), GetTextIdByName(L"Common0261"), onLeft, 10);
 
 		auto DispStackTypeField = il2cpp_class_get_field_from_name_wrap(dialogData->klass, "DispStackType");
 		int DispStackType = 2;
@@ -8016,131 +8027,131 @@ namespace
 		{
 			auto& configDocument = config::config_document;
 
-			if (configDocument.HasMember("antiAliasing"))
+			if (configDocument.HasMember(L"antiAliasing"))
 			{
 				vector<int> options = { -1, 0, 2, 4, 8 };
-				antiAliasing = find(options.begin(), options.end(), configDocument["antiAliasing"].GetInt()) - options.begin();
+				antiAliasing = find(options.begin(), options.end(), configDocument[L"antiAliasing"].GetInt()) - options.begin();
 			}
 
-			if (configDocument.HasMember("characterSystemTextCaption"))
+			if (configDocument.HasMember(L"characterSystemTextCaption"))
 			{
-				characterSystemTextCaption = configDocument["characterSystemTextCaption"].GetBool();
+				characterSystemTextCaption = configDocument[L"characterSystemTextCaption"].GetBool();
 			}
 
-			if (configDocument.HasMember("championsLiveShowText"))
+			if (configDocument.HasMember(L"championsLiveShowText"))
 			{
-				championsLiveShowText = configDocument["championsLiveShowText"].GetBool();
+				championsLiveShowText = configDocument[L"championsLiveShowText"].GetBool();
 			}
 
-			if (configDocument.HasMember("championsLiveYear"))
+			if (configDocument.HasMember(L"championsLiveYear"))
 			{
-				championsLiveYear = configDocument["championsLiveYear"].GetInt();
+				championsLiveYear = configDocument[L"championsLiveYear"].GetInt();
 			}
 
-			if (configDocument.HasMember("characterSystemTextCaptionPositionX"))
+			if (configDocument.HasMember(L"characterSystemTextCaptionPositionX"))
 			{
-				characterSystemTextCaptionPositionX = configDocument["characterSystemTextCaptionPositionX"].GetFloat();
+				characterSystemTextCaptionPositionX = configDocument[L"characterSystemTextCaptionPositionX"].GetFloat();
 			}
 
-			if (configDocument.HasMember("characterSystemTextCaptionPositionY"))
+			if (configDocument.HasMember(L"characterSystemTextCaptionPositionY"))
 			{
-				characterSystemTextCaptionPositionY = configDocument["characterSystemTextCaptionPositionY"].GetFloat();
+				characterSystemTextCaptionPositionY = configDocument[L"characterSystemTextCaptionPositionY"].GetFloat();
 			}
 
-			if (configDocument.HasMember("characterSystemTextCaptionBackgroundAlpha"))
+			if (configDocument.HasMember(L"characterSystemTextCaptionBackgroundAlpha"))
 			{
-				characterSystemTextCaptionBackgroundAlpha = configDocument["characterSystemTextCaptionBackgroundAlpha"].GetFloat();
+				characterSystemTextCaptionBackgroundAlpha = configDocument[L"characterSystemTextCaptionBackgroundAlpha"].GetFloat();
 			}
 
-			if (configDocument.HasMember("allowDeleteCookie"))
+			if (configDocument.HasMember(L"allowDeleteCookie"))
 			{
-				allowDeleteCookie = configDocument["allowDeleteCookie"].GetBool();
+				allowDeleteCookie = configDocument[L"allowDeleteCookie"].GetBool();
 			}
 
-			if (configDocument.HasMember("cySpringUpdateMode"))
+			if (configDocument.HasMember(L"cySpringUpdateMode"))
 			{
-				cySpringUpdateMode = configDocument["cySpringUpdateMode"].GetInt();
+				cySpringUpdateMode = configDocument[L"cySpringUpdateMode"].GetInt();
 			}
 
-			if (configDocument.HasMember("resolution3dScale"))
+			if (configDocument.HasMember(L"resolution3dScale"))
 			{
-				resolution3dScale = configDocument["resolution3dScale"].GetFloat();
+				resolution3dScale = configDocument[L"resolution3dScale"].GetFloat();
 			}
 
-			if (configDocument.HasMember("uiAnimationScale"))
+			if (configDocument.HasMember(L"uiAnimationScale"))
 			{
-				uiAnimationScale = configDocument["uiAnimationScale"].GetFloat();
+				uiAnimationScale = configDocument[L"uiAnimationScale"].GetFloat();
 			}
 
-			if (configDocument.HasMember("notificationTp"))
+			if (configDocument.HasMember(L"notificationTp"))
 			{
-				notificationTp = configDocument["notificationTp"].GetBool();
+				notificationTp = configDocument[L"notificationTp"].GetBool();
 			}
 
-			if (configDocument.HasMember("notificationRp"))
+			if (configDocument.HasMember(L"notificationRp"))
 			{
-				notificationRp = configDocument["notificationRp"].GetBool();
+				notificationRp = configDocument[L"notificationRp"].GetBool();
 			}
 
-			if (configDocument.HasMember("dumpMsgPack"))
+			if (configDocument.HasMember(L"dumpMsgPack"))
 			{
-				dumpMsgPack = configDocument["dumpMsgPack"].GetBool();
+				dumpMsgPack = configDocument[L"dumpMsgPack"].GetBool();
 			}
 
-			if (configDocument.HasMember("dumpMsgPackRequest"))
+			if (configDocument.HasMember(L"dumpMsgPackRequest"))
 			{
-				dumpMsgPackRequest = configDocument["dumpMsgPackRequest"].GetBool();
+				dumpMsgPackRequest = configDocument[L"dumpMsgPackRequest"].GetBool();
 			}
 
 #ifdef _DEBUG
-			if (configDocument.HasMember("unlockLiveChara"))
+			if (configDocument.HasMember(L"unlockLiveChara"))
 			{
-				unlockLiveChara = configDocument["unlockLiveChara"].GetBool();
-			}
-#endif
-			if (configDocument.HasMember("unlockSize"))
-			{
-				unlockSize = configDocument["unlockSize"].GetBool();
-			}
-
-			if (configDocument.HasMember("unlockSizeUseSystemResolution"))
-			{
-				unlockSizeUseSystemResolution = configDocument["unlockSizeUseSystemResolution"].GetBool();
-			}
-
-			if (configDocument.HasMember("uiScale"))
-			{
-				uiScale = configDocument["uiScale"].GetFloat();
-			}
-
-			if (configDocument.HasMember("autoFullscreen"))
-			{
-				autoFullscreen = configDocument["autoFullscreen"].GetBool();
-			}
-
-			if (configDocument.HasMember("freeFormWindow"))
-			{
-				freeFormWindow = configDocument["freeFormWindow"].GetBool();
-			}
-
-			if (configDocument.HasMember("freeFormUiScalePortrait"))
-			{
-				freeFormUiScalePortrait = configDocument["freeFormUiScalePortrait"].GetFloat();
-			}
-
-			if (configDocument.HasMember("freeFormUiScaleLandscape"))
-			{
-				freeFormUiScaleLandscape = configDocument["freeFormUiScaleLandscape"].GetFloat();
-			}
+				unlockLiveChara = configDocument[L"unlockLiveChara"].GetBool();
 		}
+#endif
+			if (configDocument.HasMember(L"unlockSize"))
+			{
+				unlockSize = configDocument[L"unlockSize"].GetBool();
+			}
+
+			if (configDocument.HasMember(L"unlockSizeUseSystemResolution"))
+			{
+				unlockSizeUseSystemResolution = configDocument[L"unlockSizeUseSystemResolution"].GetBool();
+			}
+
+			if (configDocument.HasMember(L"uiScale"))
+			{
+				uiScale = configDocument[L"uiScale"].GetFloat();
+			}
+
+			if (configDocument.HasMember(L"autoFullscreen"))
+			{
+				autoFullscreen = configDocument[L"autoFullscreen"].GetBool();
+			}
+
+			if (configDocument.HasMember(L"freeFormWindow"))
+			{
+				freeFormWindow = configDocument[L"freeFormWindow"].GetBool();
+			}
+
+			if (configDocument.HasMember(L"freeFormUiScalePortrait"))
+			{
+				freeFormUiScalePortrait = configDocument[L"freeFormUiScalePortrait"].GetFloat();
+			}
+
+			if (configDocument.HasMember(L"freeFormUiScaleLandscape"))
+			{
+				freeFormUiScaleLandscape = configDocument[L"freeFormUiScaleLandscape"].GetFloat();
+			}
+	}
 
 		vector<string> graphicsQualityOptions = GetGraphicsQualityOptions();
 
 		AddToLayout(m_Content,
 			{
 				GetOptionItemTitle(LocalifySettings::GetText("graphics")),
-				GetOptionItemSimpleWithButton("graphics_quality", (LocalifySettings::GetText("graphics_quality") + ": "s + graphicsQualityOptions[config::config_document["graphicsQuality"].GetInt() + 1]).data(),
-					local::wide_u8(localize_get_hook(GetTextIdByName("Circle0206"))->start_char).data()),
+				GetOptionItemSimpleWithButton("graphics_quality", (LocalifySettings::GetText("graphics_quality") + L": "s + local::u8_wide(graphicsQualityOptions[config::config_document[L"graphicsQuality"].GetInt() + 1])).data(),
+					localize_get_hook(GetTextIdByName(L"Circle0206"))->start_char),
 				GetOptionSlider("anti_aliasing", LocalifySettings::GetText("anti_aliasing"), antiAliasing, 0, 4, true, *[](Il2CppObject* slider) {
 					auto numText = GetOptionSliderNumText(slider);
 					auto value = GetOptionSliderValue(slider);
@@ -8199,12 +8210,12 @@ namespace
 				GetOptionItemAttention(LocalifySettings::GetText("applied_after_restart")),
 				GetOptionSlider("ui_scale_portrait", LocalifySettings::GetText("ui_scale_portrait"), freeFormUiScalePortrait, 0.1, 2.0, false),
 				GetOptionSlider("ui_scale_landscape", LocalifySettings::GetText("ui_scale_landscape"), freeFormUiScaleLandscape, 0.1, 2.0, false),
-				GetOptionItemTitle(local::wide_u8(localize_get_hook(GetTextIdByName("Common0035"))->start_char).data()),
+				GetOptionItemTitle(localize_get_hook(GetTextIdByName(L"Common0035"))->start_char),
 				GetOptionItemOnOff("champions_live_show_text", LocalifySettings::GetText("champions_live_show_text")),
-				GetOptionItemSimpleWithButton("champions_live_resource_id", (LocalifySettings::GetText("champions_live_resource_id") + ": "s + MasterDB::GetChampionsResources()[config::config_document["championsLiveResourceId"].GetInt() - 1]).data(),
-					local::wide_u8(localize_get_hook(GetTextIdByName("Circle0206"))->start_char).data()),
-				GetOptionItem3Toggle("champions_live_year", LocalifySettings::GetText("champions_live_year"), "2022", "2023", "2024", championsLiveYear - 2022),
-				GetOptionItemSimple(""),
+				GetOptionItemSimpleWithButton("champions_live_resource_id", (LocalifySettings::GetText("champions_live_resource_id") + L": "s + local::u8_wide(MasterDB::GetChampionsResources()[config::config_document[L"championsLiveResourceId"].GetInt() - 1])).data(),
+					localize_get_hook(GetTextIdByName(L"Circle0206"))->start_char),
+				GetOptionItem3Toggle("champions_live_year", LocalifySettings::GetText("champions_live_year"), L"2022", L"2023", L"2024", championsLiveYear - 2022),
+				GetOptionItemSimple(L""),
 				GetOptionItemTitle(LocalifySettings::GetText("character_system_text_caption")),
 				GetOptionItemOnOff("character_system_text_caption", LocalifySettings::GetText("character_system_text_caption")),
 				GetOptionSlider("character_system_text_caption_position_x", LocalifySettings::GetText("character_system_text_caption_position_x"), characterSystemTextCaptionPositionX * 10, -100, 100, true, *[](Il2CppObject* slider) {
@@ -8216,7 +8227,7 @@ namespace
 
 					SetNotificationPosition(value, GetOptionSliderValue("character_system_text_caption_position_y") / 10);
 					SetNotificationDisplayTime(1);
-					ShowNotification(il2cpp_string_new(LocalifySettings::GetText("sample_caption")));
+					ShowNotification(il2cpp_string_new16(LocalifySettings::GetText("sample_caption")));
 				}),
 				GetOptionSlider("character_system_text_caption_position_y", LocalifySettings::GetText("character_system_text_caption_position_y"), characterSystemTextCaptionPositionY * 10, -100, 100, true, *[](Il2CppObject* slider) {
 					auto numText = GetOptionSliderNumText(slider);
@@ -8227,7 +8238,7 @@ namespace
 
 					SetNotificationPosition(GetOptionSliderValue("character_system_text_caption_position_x") / 10, value);
 					SetNotificationDisplayTime(1);
-					ShowNotification(il2cpp_string_new(LocalifySettings::GetText("sample_caption")));
+					ShowNotification(il2cpp_string_new16(LocalifySettings::GetText("sample_caption")));
 				}),
 				GetOptionSlider("character_system_text_caption_background_alpha", LocalifySettings::GetText("character_system_text_caption_background_alpha"), characterSystemTextCaptionBackgroundAlpha * 100, 0, 100, true, *[](Il2CppObject* slider) {
 					auto numText = GetOptionSliderNumText(slider);
@@ -8238,21 +8249,21 @@ namespace
 
 					SetNotificationBackgroundAlpha(value);
 					SetNotificationDisplayTime(1);
-					ShowNotification(il2cpp_string_new(LocalifySettings::GetText("sample_caption")));
+					ShowNotification(il2cpp_string_new16(LocalifySettings::GetText("sample_caption")));
 				}),
-				GetOptionItemSimpleWithButton("character_system_text_caption_font_color", (LocalifySettings::GetText("character_system_text_caption_font_color") + ": "s + config::config_document["characterSystemTextCaptionFontColor"].GetString()).data(),
-					local::wide_u8(localize_get_hook(GetTextIdByName("Circle0206"))->start_char).data()),
-				GetOptionItemSimpleWithButton("character_system_text_caption_outline_size", (LocalifySettings::GetText("character_system_text_caption_outline_size") + ": "s + config::config_document["characterSystemTextCaptionOutlineSize"].GetString()).data(),
-					local::wide_u8(localize_get_hook(GetTextIdByName("Circle0206"))->start_char).data()),
-				GetOptionItemSimpleWithButton("character_system_text_caption_outline_color", (LocalifySettings::GetText("character_system_text_caption_outline_color") + ": "s + config::config_document["characterSystemTextCaptionOutlineColor"].GetString()).data(),
-					local::wide_u8(localize_get_hook(GetTextIdByName("Circle0206"))->start_char).data()),
+				GetOptionItemSimpleWithButton("character_system_text_caption_font_color", (LocalifySettings::GetText("character_system_text_caption_font_color") + L": "s + config::config_document[L"characterSystemTextCaptionFontColor"].GetString()).data(),
+					localize_get_hook(GetTextIdByName(L"Circle0206"))->start_char),
+				GetOptionItemSimpleWithButton("character_system_text_caption_outline_size", (LocalifySettings::GetText("character_system_text_caption_outline_size") + L": "s + config::config_document[L"characterSystemTextCaptionOutlineSize"].GetString()).data(),
+					localize_get_hook(GetTextIdByName(L"Circle0206"))->start_char),
+				GetOptionItemSimpleWithButton("character_system_text_caption_outline_color", (LocalifySettings::GetText("character_system_text_caption_outline_color") + L": "s + config::config_document[L"characterSystemTextCaptionOutlineColor"].GetString()).data(),
+					localize_get_hook(GetTextIdByName(L"Circle0206"))->start_char),
 				GetOptionItemButton("show_caption", LocalifySettings::GetText("show_caption")),
 				GetOptionItemAttention(LocalifySettings::GetText("applied_after_restart")),
-				GetOptionItemTitle(local::wide_u8(localize_get_hook(GetTextIdByName("Outgame0293"))->start_char).data()),
-				GetOptionItemOnOff("notification_tp", local::wide_u8(localize_get_hook(GetTextIdByName("Outgame0294"))->start_char).data()),
-				GetOptionItemOnOff("notification_rp", local::wide_u8(localize_get_hook(GetTextIdByName("Outgame0437"))->start_char).data()),
+				GetOptionItemTitle(localize_get_hook(GetTextIdByName(L"Outgame0293"))->start_char),
+				GetOptionItemOnOff("notification_tp", localize_get_hook(GetTextIdByName(L"Outgame0294"))->start_char),
+				GetOptionItemOnOff("notification_rp", localize_get_hook(GetTextIdByName(L"Outgame0437"))->start_char),
 				GetOptionItemButton("show_notification", LocalifySettings::GetText("show_notification")),
-				GetOptionItemAttention(local::wide_u8(localize_get_hook(GetTextIdByName("Outgame0297"))->start_char).data()),
+				GetOptionItemAttention(localize_get_hook(GetTextIdByName(L"Outgame0297"))->start_char),
 				GetOptionItemTitle(LocalifySettings::GetText("title")),
 				Game::CurrentGameRegion == Game::Region::JAP ?
 					GetOptionItemButton("clear_webview_cache", LocalifySettings::GetText("clear_webview_cache")) :
@@ -8263,9 +8274,9 @@ namespace
 				GetOptionItemOnOff("unlock_live_chara", LocalifySettings::GetText("unlock_live_chara")),
 				GetOptionItemInfo(LocalifySettings::GetText("unlock_live_chara_info")),
 #endif
-				GetOptionItemButton("github", "GitHub"),
+				GetOptionItemButton("github", L"GitHub"),
 				GetOptionItemTitle(LocalifySettings::GetText("experiments")),
-				GetOptionItemButton("toggle_vr", "Toggle VR"),
+				GetOptionItemButton("toggle_vr", L"Toggle VR"),
 			// GetOptionItemSimple("Simple"),
 			// GetOptionItemOnOff("on_off", "On Off"),
 			// GetOptionItem3ToggleVertical("Text"),
@@ -8355,14 +8366,14 @@ namespace
 
 		SetOptionItemButtonAction("show_caption", *([](Il2CppObject*)
 			{
-				if (g_character_system_text_caption)
+				if (config::character_system_text_caption)
 				{
 					SetNotificationDisplayTime(1);
-					ShowNotification(il2cpp_string_new(LocalifySettings::GetText("sample_caption")));
+					ShowNotification(il2cpp_string_new16(LocalifySettings::GetText("sample_caption")));
 				}
 				else
 				{
-					ShowUINotification(il2cpp_string_new(LocalifySettings::GetText("setting_disabled")));
+					ShowUINotification(il2cpp_string_new16(LocalifySettings::GetText("setting_disabled")));
 				}
 			}));
 
@@ -8379,33 +8390,33 @@ namespace
 
 		SetOptionItemButtonAction("graphics_quality", *([](Il2CppObject*)
 			{
-				OpenSelectOption(LocalifySettings::GetText("graphics_quality"), GetGraphicsQualityOptions(), config::config_document["graphicsQuality"].GetInt() + 1, [](int value) {
-					AddOrSet(config::config_document, "graphicsQuality", value - 1);
+				OpenSelectOption(LocalifySettings::GetText("graphics_quality"), GetGraphicsQualityOptions(), config::config_document[L"graphicsQuality"].GetInt() + 1, [](int value) {
+					AddOrSet(config::config_document, L"graphicsQuality", value - 1);
 
 					auto textCommon = GetOptionItemSimpleWithButtonTextCommon("graphics_quality");
-					SetTextCommonText(textCommon, (LocalifySettings::GetText("graphics_quality") + ": "s + GetGraphicsQualityOptions()[config::config_document["graphicsQuality"].GetInt() + 1]).data());
+					SetTextCommonText(textCommon, (LocalifySettings::GetText("graphics_quality") + L": "s + local::u8_wide(GetGraphicsQualityOptions()[config::config_document[L"graphicsQuality"].GetInt() + 1])).data());
 					});
 			}));
 
 		SetOptionItemButtonAction("champions_live_resource_id", *([](Il2CppObject*)
 			{
-				OpenSelectOption(LocalifySettings::GetText("champions_live_resource_id"), MasterDB::GetChampionsResources(), config::config_document["championsLiveResourceId"].GetInt() - 1, [](int value) {
-					AddOrSet(config::config_document, "championsLiveResourceId", value + 1);
+				OpenSelectOption(LocalifySettings::GetText("champions_live_resource_id"), MasterDB::GetChampionsResources(), config::config_document[L"championsLiveResourceId"].GetInt() - 1, [](int value) {
+					AddOrSet(config::config_document, L"championsLiveResourceId", value + 1);
 
 					auto textCommon = GetOptionItemSimpleWithButtonTextCommon("champions_live_resource_id");
-					SetTextCommonText(textCommon, (LocalifySettings::GetText("champions_live_resource_id") + ": "s + MasterDB::GetChampionsResources()[config::config_document["championsLiveResourceId"].GetInt() - 1]).data());
+					SetTextCommonText(textCommon, (LocalifySettings::GetText("champions_live_resource_id") + L": "s + local::u8_wide(MasterDB::GetChampionsResources()[config::config_document[L"championsLiveResourceId"].GetInt() - 1])).data());
 					});
 			}));
 
 		auto fontColorTextCommon = GetOptionItemSimpleWithButtonTextCommon("character_system_text_caption_font_color");
-		SetTextCommonOutlineColor(fontColorTextCommon, "Brown");
+		SetTextCommonOutlineColor(fontColorTextCommon, L"Brown");
 		SetTextCommonFontColor(fontColorTextCommon,
-			config::config_document["characterSystemTextCaptionFontColor"].GetString());
+			config::config_document[L"characterSystemTextCaptionFontColor"].GetString());
 
 		SetOptionItemButtonAction("character_system_text_caption_font_color", *([](Il2CppObject*)
 			{
 				auto options = GetFontColorOptions();
-				auto value = config::config_document["characterSystemTextCaptionFontColor"].GetString();
+				auto value = local::wide_u8(config::config_document[L"characterSystemTextCaptionFontColor"].GetString());
 				auto found = find(options.begin(), options.end(), value);
 				int index = 0;
 
@@ -8416,26 +8427,26 @@ namespace
 
 				OpenSelectFontColorOption(LocalifySettings::GetText("character_system_text_caption_font_color"), options, index, [](int value) {
 					auto options = GetFontColorOptions();
-					string color = options[value];
-					AddOrSetString(config::config_document, "characterSystemTextCaptionFontColor", color.data());
+					wstring color = local::u8_wide(options[value]);
+					AddOrSetString(config::config_document, L"characterSystemTextCaptionFontColor", color.data());
 
 					auto textCommon = GetOptionItemSimpleWithButtonTextCommon("character_system_text_caption_font_color");
-					SetTextCommonText(textCommon, (LocalifySettings::GetText("character_system_text_caption_font_color") + ": "s + config::config_document["characterSystemTextCaptionFontColor"].GetString()).data());
+					SetTextCommonText(textCommon, (LocalifySettings::GetText("character_system_text_caption_font_color") + L": "s + config::config_document[L"characterSystemTextCaptionFontColor"].GetString()).data());
 					SetTextCommonFontColor(textCommon, color.data());
 					SetNotificationFontColor(color.data());
 					});
 			}));
 
 		auto outlineSizeTextCommon = GetOptionItemSimpleWithButtonTextCommon("character_system_text_caption_outline_size");
-		SetTextCommonFontColor(outlineSizeTextCommon, "White");
-		SetTextCommonOutlineColor(outlineSizeTextCommon, "Brown");
+		SetTextCommonFontColor(outlineSizeTextCommon, L"White");
+		SetTextCommonOutlineColor(outlineSizeTextCommon, L"Brown");
 		SetTextCommonOutlineSize(outlineSizeTextCommon,
-			config::config_document["characterSystemTextCaptionOutlineSize"].GetString());
+			config::config_document[L"characterSystemTextCaptionOutlineSize"].GetString());
 
 		SetOptionItemButtonAction("character_system_text_caption_outline_size", *([](Il2CppObject*)
 			{
 				auto options = GetOutlineSizeOptions();
-				auto value = config::config_document["characterSystemTextCaptionOutlineSize"].GetString();
+				auto value = local::wide_u8(config::config_document[L"characterSystemTextCaptionOutlineSize"].GetString());
 				auto found = find(options.begin(), options.end(), value);
 				int index = 0;
 
@@ -8446,11 +8457,11 @@ namespace
 
 				OpenSelectOutlineSizeOption(LocalifySettings::GetText("character_system_text_caption_outline_size"), options, index, [](int value) {
 					auto options = GetOutlineSizeOptions();
-					string color = options[value];
-					AddOrSetString(config::config_document, "characterSystemTextCaptionOutlineSize", color.data());
+					wstring color = local::u8_wide(options[value]);
+					AddOrSetString(config::config_document, L"characterSystemTextCaptionOutlineSize", color.data());
 
 					auto textCommon = GetOptionItemSimpleWithButtonTextCommon("character_system_text_caption_outline_size");
-					SetTextCommonText(textCommon, (LocalifySettings::GetText("character_system_text_caption_outline_size") + ": "s + config::config_document["characterSystemTextCaptionOutlineSize"].GetString()).data());
+					SetTextCommonText(textCommon, (LocalifySettings::GetText("character_system_text_caption_outline_size") + L": "s + config::config_document[L"characterSystemTextCaptionOutlineSize"].GetString()).data());
 					SetTextCommonOutlineSize(textCommon, color.data());
 					SetNotificationOutlineSize(color.data());
 					});
@@ -8458,12 +8469,12 @@ namespace
 
 		auto outlineColorTextCommon = GetOptionItemSimpleWithButtonTextCommon("character_system_text_caption_outline_color");
 		SetTextCommonOutlineColor(outlineColorTextCommon,
-			config::config_document["characterSystemTextCaptionOutlineColor"].GetString());
+			config::config_document[L"characterSystemTextCaptionOutlineColor"].GetString());
 
 		SetOptionItemButtonAction("character_system_text_caption_outline_color", *([](Il2CppObject*)
 			{
 				auto options = GetOutlineColorOptions();
-				auto value = config::config_document["characterSystemTextCaptionOutlineColor"].GetString();
+				auto value = local::wide_u8(config::config_document[L"characterSystemTextCaptionOutlineColor"].GetString());
 				auto found = find(options.begin(), options.end(), value);
 				int index = 0;
 
@@ -8474,11 +8485,11 @@ namespace
 
 				OpenSelectOutlineColorOption(LocalifySettings::GetText("character_system_text_caption_outline_color"), options, index, [](int value) {
 					auto options = GetOutlineColorOptions();
-					string color = options[value];
-					AddOrSetString(config::config_document, "characterSystemTextCaptionOutlineColor", color.data());
+					wstring color = local::u8_wide(options[value]);
+					AddOrSetString(config::config_document, L"characterSystemTextCaptionOutlineColor", color.data());
 
 					auto textCommon = GetOptionItemSimpleWithButtonTextCommon("character_system_text_caption_outline_color");
-					SetTextCommonText(textCommon, (LocalifySettings::GetText("character_system_text_caption_outline_color") + ": "s + config::config_document["characterSystemTextCaptionOutlineColor"].GetString()).data());
+					SetTextCommonText(textCommon, (LocalifySettings::GetText("character_system_text_caption_outline_color") + L": "s + config::config_document[L"characterSystemTextCaptionOutlineColor"].GetString()).data());
 					SetTextCommonOutlineColor(textCommon, color.data());
 					SetNotificationOutlineColor(color.data());
 					});
@@ -8524,14 +8535,14 @@ namespace
 							"SetSimpleTwoButtonMessage",
 							7)->methodPointer
 						)(dialogData,
-							localizeextension_text_hook(GetTextIdByName("Common0009")),
-							localizeextension_text_hook(GetTextIdByName("Home0073")),
+							localizeextension_text_hook(GetTextIdByName(L"Common0009")),
+							localizeextension_text_hook(GetTextIdByName(L"Home0073")),
 							CreateDelegateStatic(*[]()
 								{
 									il2cpp_symbols::get_method_pointer<void (*)(Il2CppString*)>("UnityEngine.CoreModule.dll", "UnityEngine", "Application", "OpenURL", 1)(il2cpp_string_new("https://github.com/Kimjio/umamusume-localify"));
 								}),
-							GetTextIdByName("Common0004"),
-							GetTextIdByName("Common0003"),
+							GetTextIdByName(L"Common0004"),
+							GetTextIdByName(L"Common0003"),
 							nullptr,
 							2);
 
@@ -8560,8 +8571,8 @@ namespace
 								"SetSimpleTwoButtonMessage",
 								7)->methodPointer
 							)(dialogData,
-								localizeextension_text_hook(GetTextIdByName("Race0652")),
-								il2cpp_string_new(LocalifySettings::GetText("clear_webview_cache_confirm")),
+								localizeextension_text_hook(GetTextIdByName(L"Race0652")),
+								il2cpp_string_new16(LocalifySettings::GetText("clear_webview_cache_confirm")),
 								CreateDelegateStatic(*[]()
 									{
 										PWSTR path;
@@ -8572,15 +8583,15 @@ namespace
 										try
 										{
 											filesystem::remove_all(combinedPath);
-											ShowUINotification(il2cpp_string_new(LocalifySettings::GetText("deleted")));
+											ShowUINotification(il2cpp_string_new16(LocalifySettings::GetText("deleted")));
 										}
 										catch (exception& e)
 										{
 											cout << e.what() << endl;
 										}
 									}),
-								GetTextIdByName("Common0004"),
-								GetTextIdByName("Common0003"),
+								GetTextIdByName(L"Common0004"),
+								GetTextIdByName(L"Common0003"),
 								nullptr,
 								2);
 
@@ -8601,7 +8612,7 @@ namespace
 		il2cpp_field_set_value(dialogData, ContentsObjectField, gameObject);
 
 		settingsDialog = il2cpp_symbols::get_method_pointer<Il2CppObject * (*)(Il2CppObject * data)>("umamusume.dll", "Gallop", "DialogManager", "PushDialog", 1)(dialogData);
-	}
+}
 
 	void OpenLiveSettings()
 	{
@@ -8620,15 +8631,15 @@ namespace
 			{
 				auto& configDocument = config::config_document;
 
-				AddOrSet(configDocument, "championsLiveShowText", GetOptionItemOnOffIsOn("champions_live_show_text"));
+				AddOrSet(configDocument, L"championsLiveShowText", GetOptionItemOnOffIsOn("champions_live_show_text"));
 
-				AddOrSet(configDocument, "championsLiveYear", GetToggleGroupCommonValue("champions_live_year") + 2022);
+				AddOrSet(configDocument, L"championsLiveYear", GetToggleGroupCommonValue("champions_live_year") + 2022);
 
-				g_champions_live_show_text = configDocument["championsLiveShowText"].GetBool();
+				config::champions_live_show_text = configDocument[L"championsLiveShowText"].GetBool();
 
-				g_champions_live_year = configDocument["championsLiveYear"].GetInt();
+				config::champions_live_year = configDocument[L"championsLiveYear"].GetInt();
 
-				g_champions_live_resource_id = configDocument["championsLiveResourceId"].GetInt();
+				config::champions_live_resource_id = configDocument[L"championsLiveResourceId"].GetInt();
 
 				config::write_config();
 
@@ -8643,7 +8654,7 @@ namespace
 					ULONG closeTextId)>(
 						il2cpp_class_get_method_from_name(dialogData->klass, "SetSimpleOneButtonMessage",
 							4)->methodPointer
-						)(dialogData, GetTextIdByName("AccoutDataLink0061"), localize_get_hook(GetTextIdByName("Outgame0309")), nullptr, GetTextIdByName("Common0007"));
+						)(dialogData, GetTextIdByName(L"AccoutDataLink0061"), localize_get_hook(GetTextIdByName(L"Outgame0309")), nullptr, GetTextIdByName(L"Common0007"));
 
 				auto onDestroy = CreateDelegateStatic(*[]()
 					{
@@ -8665,7 +8676,7 @@ namespace
 			int dialogFormType)>(
 				il2cpp_class_get_method_from_name(dialogData->klass, "SetSimpleTwoButtonMessage",
 					7)->methodPointer
-				)(dialogData, il2cpp_string_new(LocalifySettings::GetText("title")), nullptr, onRight, GetTextIdByName("Common0004"), GetTextIdByName("Common0261"), onLeft, 10);
+				)(dialogData, il2cpp_string_new16(LocalifySettings::GetText("title")), nullptr, onRight, GetTextIdByName(L"Common0004"), GetTextIdByName(L"Common0261"), onLeft, 10);
 
 		auto DispStackTypeField = il2cpp_class_get_field_from_name_wrap(dialogData->klass, "DispStackType");
 		int DispStackType = 2;
@@ -8761,27 +8772,27 @@ namespace
 		{
 			auto& configDocument = config::config_document;
 
-			if (configDocument.HasMember("championsLiveShowText"))
+			if (configDocument.HasMember(L"championsLiveShowText"))
 			{
-				championsLiveShowText = configDocument["championsLiveShowText"].GetBool();
+				championsLiveShowText = configDocument[L"championsLiveShowText"].GetBool();
 			}
 
-			if (configDocument.HasMember("championsLiveYear"))
+			if (configDocument.HasMember(L"championsLiveYear"))
 			{
-				championsLiveYear = configDocument["championsLiveYear"].GetInt();
+				championsLiveYear = configDocument[L"championsLiveYear"].GetInt();
 			}
 		}
 
 		AddToLayout(m_Content,
 			{
-				GetOptionItemTitle(local::wide_u8(localize_get_hook(GetTextIdByName("Common0035"))->start_char).data()),
+				GetOptionItemTitle(localize_get_hook(GetTextIdByName(L"Common0035"))->start_char),
 				GetOptionItemOnOff("champions_live_show_text", LocalifySettings::GetText("champions_live_show_text")),
-				GetOptionItemSimpleWithButton("champions_live_resource_id", (LocalifySettings::GetText("champions_live_resource_id") + ": "s + MasterDB::GetChampionsResources()[config::config_document["championsLiveResourceId"].GetInt() - 1]).data(),
-					local::wide_u8(localize_get_hook(GetTextIdByName("Circle0206"))->start_char).data()),
-				GetOptionItem3Toggle("champions_live_year", LocalifySettings::GetText("champions_live_year"), "2022", "2023", "2024", championsLiveYear - 2022),
-				GetOptionItemSimple(""),
+				GetOptionItemSimpleWithButton("champions_live_resource_id", (LocalifySettings::GetText("champions_live_resource_id") + L": "s + local::u8_wide(MasterDB::GetChampionsResources()[config::config_document[L"championsLiveResourceId"].GetInt() - 1])).data(),
+					localize_get_hook(GetTextIdByName(L"Circle0206"))->start_char),
+				GetOptionItem3Toggle("champions_live_year", LocalifySettings::GetText("champions_live_year"), L"2022", L"2023", L"2024", championsLiveYear - 2022),
+				GetOptionItemSimple(L""),
 			}
-		);
+			);
 
 		SetOptionItemOnOffAction("champions_live_show_text", championsLiveShowText, *([](Il2CppObject*, bool isOn)
 			{
@@ -8790,11 +8801,11 @@ namespace
 
 		SetOptionItemButtonAction("champions_live_resource_id", *([](Il2CppObject*)
 			{
-				OpenSelectOption(LocalifySettings::GetText("champions_live_resource_id"), MasterDB::GetChampionsResources(), config::config_document["championsLiveResourceId"].GetInt() - 1, [](int value) {
-					AddOrSet(config::config_document, "championsLiveResourceId", value + 1);
+				OpenSelectOption(LocalifySettings::GetText("champions_live_resource_id"), MasterDB::GetChampionsResources(), config::config_document[L"championsLiveResourceId"].GetInt() - 1, [](int value) {
+					AddOrSet(config::config_document, L"championsLiveResourceId", value + 1);
 
 					auto textCommon = GetOptionItemSimpleWithButtonTextCommon("champions_live_resource_id");
-					SetTextCommonText(textCommon, (LocalifySettings::GetText("champions_live_resource_id") + ": "s + MasterDB::GetChampionsResources()[config::config_document["championsLiveResourceId"].GetInt() - 1]).data());
+					SetTextCommonText(textCommon, (LocalifySettings::GetText("champions_live_resource_id") + L": "s + local::u8_wide(MasterDB::GetChampionsResources()[config::config_document[L"championsLiveResourceId"].GetInt() - 1])).data());
 					});
 			}));
 
@@ -8823,7 +8834,7 @@ namespace
 				GetOptionItemTitle(LocalifySettings::GetText("title")),
 				GetOptionItemButton("open_settings", LocalifySettings::GetText("open_settings")),
 			}
-		);
+			);
 	}
 
 	void SetupOptionLayout()
@@ -8942,13 +8953,13 @@ namespace
 
 								if (unityWidth < unityHeight)
 								{
-									float scale = min(g_freeform_ui_scale_portrait, max(1.0f, unityHeight * ratio_vertical) * g_freeform_ui_scale_portrait);
+									float scale = min(config::freeform_ui_scale_portrait, max(1.0f, unityHeight * ratio_vertical) * config::freeform_ui_scale_portrait);
 									il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, Vector2_t)>(_flashCanvasScaler->klass, "set_referenceResolution", 1)->methodPointer(_flashCanvasScaler, Vector2_t{ static_cast<float>(unityWidth / scale), static_cast<float>(unityHeight / scale) });
 									il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, Vector2_t)>(root->klass, "SetScreenReferenceSize", 1)->methodPointer(root, Vector2_t{ ratio_16_9 * static_cast<float>(unityHeight / scale), static_cast<float>(unityHeight / scale) });
 								}
 								else
 								{
-									float scale = min(g_freeform_ui_scale_landscape, max(1.0f, unityWidth / ratio_horizontal) * g_freeform_ui_scale_landscape);
+									float scale = min(config::freeform_ui_scale_landscape, max(1.0f, unityWidth / ratio_horizontal) * config::freeform_ui_scale_landscape);
 									il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, Vector2_t)>(_flashCanvasScaler->klass, "set_referenceResolution", 1)->methodPointer(_flashCanvasScaler, Vector2_t{ static_cast<float>(unityWidth / scale), static_cast<float>(unityHeight / scale) });
 									il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, Vector2_t)>(root->klass, "SetScreenReferenceSize", 1)->methodPointer(root, Vector2_t{ ratio_16_9 * static_cast<float>(unityHeight / scale), static_cast<float>(unityHeight / scale) });
 								}
@@ -8998,7 +9009,7 @@ namespace
 			}
 		}
 
-		if (u8Name == "TMP Settings"s && g_replace_to_custom_font && fontAssets)
+		if (u8Name == "TMP Settings"s && config::replace_to_custom_font && fontAssets)
 		{
 			auto object = reinterpret_cast<decltype(resources_load_hook)*>(resources_load_orig)(path, type);
 			auto fontAssetField = il2cpp_class_get_field_from_name_wrap(object->klass, "m_defaultFontAsset");
@@ -9432,7 +9443,7 @@ namespace
 
 	void Screen_set_orientation_hook(ScreenOrientation orientation)
 	{
-		if (!g_freeform_window)
+		if (!config::freeform_window)
 		{
 			reinterpret_cast<decltype(Screen_set_orientation_hook)*>(Screen_set_orientation_orig)(
 				orientation);
@@ -9443,7 +9454,7 @@ namespace
 
 	void Screen_RequestOrientation_hook(ScreenOrientation orientation)
 	{
-		if (g_freeform_window)
+		if (config::freeform_window)
 		{
 			reinterpret_cast<decltype(Screen_RequestOrientation_hook)*>(Screen_RequestOrientation_orig)(ScreenOrientation::AutoRotation);
 
@@ -9465,7 +9476,7 @@ namespace
 	void DeviceOrientationGuide_Show_hook(Il2CppObject* _this, bool isTargetOrientationPortrait,
 		int target)
 	{
-		if (!g_freeform_window)
+		if (!config::freeform_window)
 		{
 			reinterpret_cast<decltype(DeviceOrientationGuide_Show_hook)*>(DeviceOrientationGuide_Show_orig)(
 				_this, isTargetOrientationPortrait, target);
@@ -9477,12 +9488,12 @@ namespace
 	void NowLoading_Show_hook(Il2CppObject* _this, int type, Il2CppDelegate* onComplete, Il2CppObject* overrideDuration, int easeType, Il2CppObject* customInEffect, Il2CppObject* customLoopEffect, Il2CppObject* customOutEffect)
 	{
 		// NowLoadingOrientation
-		if (type == 2 && (g_freeform_window || !g_ui_loading_show_orientation_guide))
+		if (type == 2 && (config::freeform_window || !config::ui_loading_show_orientation_guide))
 		{
 			// NowLoadingTips
 			type = 0;
 		}
-		if (!g_hide_now_loading)
+		if (!config::hide_now_loading)
 		{
 			reinterpret_cast<decltype(NowLoading_Show_hook)*>(NowLoading_Show_orig)(
 				_this,
@@ -9490,7 +9501,7 @@ namespace
 				onComplete, overrideDuration, easeType,
 				customInEffect, customLoopEffect, customOutEffect);
 		}
-		if (onComplete && g_hide_now_loading)
+		if (onComplete && config::hide_now_loading)
 		{
 			reinterpret_cast<void (*)(Il2CppObject*)>(onComplete->method_ptr)(onComplete->target);
 		}
@@ -9500,11 +9511,11 @@ namespace
 
 	void NowLoading_Hide_hook(Il2CppObject* _this, Il2CppDelegate* onComplete, Il2CppObject* overrideDuration, int easeType, Il2CppDelegate* onUnloadCustomEffectResourcesComplete)
 	{
-		if (!g_hide_now_loading)
+		if (!config::hide_now_loading)
 		{
 			reinterpret_cast<decltype(NowLoading_Hide_hook)*>(NowLoading_Hide_orig)(_this, onComplete, overrideDuration, easeType, onUnloadCustomEffectResourcesComplete);
 		}
-		if (onComplete && g_hide_now_loading)
+		if (onComplete && config::hide_now_loading)
 		{
 			reinterpret_cast<void (*)(Il2CppObject*)>(onComplete->method_ptr)(onComplete->target);
 		}
@@ -9514,7 +9525,7 @@ namespace
 
 	void WaitDeviceOrientation_hook(ScreenOrientation targetOrientation)
 	{
-		if (!g_freeform_window)
+		if (!config::freeform_window)
 		{
 			reinterpret_cast<decltype(WaitDeviceOrientation_hook)*>(WaitDeviceOrientation_orig)(
 				targetOrientation);
@@ -9555,12 +9566,12 @@ namespace
 
 				if (defaultResolution.x < defaultResolution.y)
 				{
-					float scale = min(1, max(1.0f, defaultResolution.y / 1080) * g_freeform_ui_scale_portrait / (defaultResolution.y / 1080));
+					float scale = min(1, max(1.0f, defaultResolution.y / 1080) * config::freeform_ui_scale_portrait / (defaultResolution.y / 1080));
 					il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, float)>(canvasScaler->klass, "set_scaleFactor", 1)->methodPointer(canvasScaler, scale);
 				}
 				else
 				{
-					float scale = min(1, max(1.0f, defaultResolution.x / 1920) * g_freeform_ui_scale_landscape / (defaultResolution.x / 1920));
+					float scale = min(1, max(1.0f, defaultResolution.x / 1920) * config::freeform_ui_scale_landscape / (defaultResolution.x / 1920));
 					il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, float)>(canvasScaler->klass, "set_scaleFactor", 1)->methodPointer(canvasScaler, scale);
 				}
 			}
@@ -9576,7 +9587,7 @@ namespace
 		il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*)>(_this->klass, "AdjustSafeArea", 0)->methodPointer(_this);
 		il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*)>(_this->klass, "CreateRenderTextureFromScreen", 0)->methodPointer(_this);*/
 
-		if (!g_freeform_window)
+		if (!config::freeform_window)
 		{
 			auto StandaloneWindowResize = il2cpp_symbols::get_class("umamusume.dll", "Gallop", "StandaloneWindowResize");
 
@@ -9626,7 +9637,7 @@ namespace
 		{
 			int rWidth = il2cpp_symbols::get_method_pointer<int (*)()>("UnityEngine.CoreModule.dll", "UnityEngine", "Screen", "get_width", -1)();
 			int rHeight = il2cpp_symbols::get_method_pointer<int (*)()>("UnityEngine.CoreModule.dll", "UnityEngine", "Screen", "get_height", -1)();
-			if (roundf(ratio_horizontal * (max(1.0f, rHeight * ratio_vertical) * (g_freeform_window ? g_freeform_ui_scale_landscape : g_ui_scale))) == uv.height)
+			if (roundf(ratio_horizontal * (max(1.0f, rHeight * ratio_vertical) * (config::freeform_window ? config::freeform_ui_scale_landscape : config::ui_scale))) == uv.height)
 			{
 				uv.height = rWidth;
 			}
@@ -9655,7 +9666,7 @@ namespace
 		{
 			int rWidth = il2cpp_symbols::get_method_pointer<int (*)()>("UnityEngine.CoreModule.dll", "UnityEngine", "Screen", "get_width", -1)();
 			int rHeight = il2cpp_symbols::get_method_pointer<int (*)()>("UnityEngine.CoreModule.dll", "UnityEngine", "Screen", "get_height", -1)();
-			if (roundf(ratio_horizontal * (max(1.0f, rHeight * ratio_vertical) * (g_freeform_window ? g_freeform_ui_scale_landscape : g_ui_scale))) == screenSize.y)
+			if (roundf(ratio_horizontal * (max(1.0f, rHeight * ratio_vertical) * (config::freeform_window ? config::freeform_ui_scale_landscape : config::ui_scale))) == screenSize.y)
 			{
 				screenSize.y = rWidth;
 			}
@@ -9705,14 +9716,14 @@ namespace
 			rWidth = number1920;
 			rHeight = number1080;
 
-			if (roundf(ratio_horizontal * (max(1.0f, rHeight * ratio_vertical) * (g_freeform_window ? g_freeform_ui_scale_landscape : g_ui_scale))) == dispRectWH.y)
+			if (roundf(ratio_horizontal * (max(1.0f, rHeight * ratio_vertical) * (config::freeform_window ? config::freeform_ui_scale_landscape : config::ui_scale))) == dispRectWH.y)
 			{
 				dispRectWH.y = rWidth;
 				dispRectWH.x = rHeight;
 			}
 			else
 			{
-				float scale = min(g_freeform_ui_scale_landscape, max(1.0f, rWidth / ratio_horizontal) * g_freeform_ui_scale_landscape);
+				float scale = min(config::freeform_ui_scale_landscape, max(1.0f, rWidth / ratio_horizontal) * config::freeform_ui_scale_landscape);
 
 				if (roundf(dispRectWH.y * scale) != rHeight)
 				{
@@ -9777,14 +9788,14 @@ namespace
 	void GallopUtil_GotoTitleOnError_hook(Il2CppString* text)
 	{
 		// Bypass SoftwareReset
-		auto okText = GetTextIdByName("Common0009");
-		auto errorText = GetTextIdByName("Common0071");
+		auto okText = GetTextIdByName(L"Common0009");
+		auto errorText = GetTextIdByName(L"Common0071");
 
 		auto dialogData = il2cpp_object_new(il2cpp_symbols::get_class("umamusume.dll", "Gallop", "DialogCommon/Data"));
 		il2cpp_runtime_object_init(dialogData);
 		dialogData =
 			il2cpp_class_get_method_from_name_type<Il2CppObject * (*)(Il2CppObject * _this, unsigned long headerTextId, Il2CppString * message, Il2CppObject * onClickCenterButton, unsigned long closeTextId)>(dialogData->klass, "SetSimpleOneButtonMessage", 4)->methodPointer
-			(dialogData, errorText, local::get_localized_string(il2cpp_string_new(GotoTitleErrorJa.data())), nullptr, okText);
+			(dialogData, errorText, local::get_localized_string(il2cpp_string_new16(GotoTitleErrorJa.data())), nullptr, okText);
 		errorDialog = il2cpp_symbols::get_method_pointer<Il2CppObject * (*)(Il2CppObject * data, bool isEnableOutsideClick)>("umamusume.dll", "Gallop", "DialogManager", "PushSystemDialog", 2)(dialogData, true);
 	}
 
@@ -9992,9 +10003,9 @@ namespace
 												Il2CppDelegate * onLeft,
 												int dialogFormType)>(dialogData->klass, "SetSimpleTwoButtonMessage", 7)->methodPointer
 												(dialogData,
-													localizeextension_text_hook(GetTextIdByName("StoryEvent0079")),
+													localizeextension_text_hook(GetTextIdByName(L"StoryEvent0079")),
 													il2cpp_string_new("해당 스토리 이벤트는 개최 정보가 누락되어있습니다.\n\n웹 페이지를 보시겠습니까?"),
-													onRight, GetTextIdByName("Common0002"), GetTextIdByName("Common0001"),
+													onRight, GetTextIdByName(L"Common0002"), GetTextIdByName(L"Common0001"),
 													onLeft, 2);
 
 										il2cpp_symbols::get_method_pointer<Il2CppObject* (*)(Il2CppObject* data)>("umamusume.dll", "Gallop", "DialogManager", "PushDialog", 1)(dialogData);
@@ -10177,12 +10188,12 @@ namespace
 
 				if (defaultResolution.x < defaultResolution.y)
 				{
-					float scale = min(1.0f, max(1.0f, defaultResolution.y / 1080) * g_freeform_ui_scale_portrait / (defaultResolution.y / 1080));
+					float scale = min(1.0f, max(1.0f, defaultResolution.y / 1080) * config::freeform_ui_scale_portrait / (defaultResolution.y / 1080));
 					il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, float)>(canvasScaler->klass, "set_scaleFactor", 1)->methodPointer(canvasScaler, scale);
 				}
 				else
 				{
-					float scale = min(1.0f, max(1.0f, defaultResolution.x / 1920) * g_freeform_ui_scale_landscape / (defaultResolution.x / 1920));
+					float scale = min(1.0f, max(1.0f, defaultResolution.x / 1920) * config::freeform_ui_scale_landscape / (defaultResolution.x / 1920));
 					il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, float)>(canvasScaler->klass, "set_scaleFactor", 1)->methodPointer(canvasScaler, scale);
 				}
 			}
@@ -10722,7 +10733,7 @@ namespace
 					).Get());
 					return S_OK;
 				}
-		).Get());
+			).Get());
 
 
 		MSG msg;
@@ -10788,7 +10799,7 @@ namespace
 	{
 		const char* buf = reinterpret_cast<const char*>(data) + kIl2CppSizeOfArray;
 
-		if (g_dump_msgpack && g_dump_msgpack_request)
+		if (config::dump_msgpack && config::dump_msgpack_request)
 		{
 			string out_path =
 				"msgpack_dump/"s.append(to_string(current_time())).append("Q.msgpack");
@@ -10797,7 +10808,7 @@ namespace
 		}
 
 #ifdef _DEBUG
-		if (g_unlock_live_chara)
+		if (config::unlock_live_chara)
 		{
 			auto modified = MsgPackModify::ModifyRequest(buf, data->max_length);
 
@@ -10808,7 +10819,7 @@ namespace
 				char* buf1 = reinterpret_cast<char*>(data) + kIl2CppSizeOfArray;
 				memcpy(buf1, modified.data(), modified.size());
 			}
-		}
+	}
 #endif
 
 		return reinterpret_cast<decltype(UploadHandlerRaw_Create_hook)*>(UploadHandlerRaw_Create_orig)(self, data);
@@ -10822,7 +10833,7 @@ namespace
 
 		const char* buf = reinterpret_cast<const char*>(data) + kIl2CppSizeOfArray;
 
-		if (g_dump_msgpack)
+		if (config::dump_msgpack)
 		{
 			string out_path =
 				"msgpack_dump/"s.append(to_string(current_time())).append("R.msgpack");
@@ -10831,7 +10842,7 @@ namespace
 		}
 
 #ifdef _DEBUG
-		if (g_unlock_live_chara)
+		if (config::unlock_live_chara)
 		{
 			auto modified = MsgPackModify::ModifyResponse(buf, data->max_length);
 
@@ -10842,7 +10853,7 @@ namespace
 				char* buf1 = reinterpret_cast<char*>(data) + kIl2CppSizeOfArray;
 				memcpy(buf1, modified.data(), modified.size());
 			}
-		}
+	}
 #endif
 
 		MsgPackData::ReadResponse(buf, data->max_length);
@@ -10856,7 +10867,7 @@ namespace
 	{
 		const char* buf = reinterpret_cast<const char*>(data) + kIl2CppSizeOfArray;
 
-		if (g_dump_msgpack && g_dump_msgpack_request)
+		if (config::dump_msgpack && config::dump_msgpack_request)
 		{
 			string out_path =
 				"msgpack_dump/"s.append(to_string(current_time())).append("Q.msgpack");
@@ -10865,7 +10876,7 @@ namespace
 		}
 
 #ifdef _DEBUG
-		if (g_unlock_live_chara)
+		if (config::unlock_live_chara)
 		{
 			auto modified = MsgPackModify::ModifyRequest(buf, data->max_length);
 
@@ -10876,7 +10887,7 @@ namespace
 				char* buf1 = reinterpret_cast<char*>(data) + kIl2CppSizeOfArray;
 				memcpy(buf1, modified.data(), modified.size());
 			}
-		}
+	}
 #endif
 
 		return reinterpret_cast<decltype(HttpHelper_CompressRequest_hook)*>(HttpHelper_CompressRequest_orig)(data);
@@ -10890,7 +10901,7 @@ namespace
 
 		const char* buf = reinterpret_cast<const char*>(data) + kIl2CppSizeOfArray;
 
-		if (g_dump_msgpack)
+		if (config::dump_msgpack)
 		{
 			string out_path =
 				"msgpack_dump/"s.append(to_string(current_time())).append("R.msgpack");
@@ -10899,7 +10910,7 @@ namespace
 		}
 
 #ifdef _DEBUG
-		if (g_unlock_live_chara)
+		if (config::unlock_live_chara)
 		{
 			auto modified = MsgPackModify::ModifyResponse(buf, data->max_length);
 
@@ -10910,7 +10921,7 @@ namespace
 				char* buf1 = reinterpret_cast<char*>(data) + kIl2CppSizeOfArray;
 				memcpy(buf1, modified.data(), modified.size());
 			}
-		}
+	}
 #endif
 
 		MsgPackData::ReadResponse(buf, data->max_length);
@@ -10967,8 +10978,8 @@ namespace
 	void dump_all_entries()
 	{
 		vector<wstring> static_entries;
-		vector<pair<const string, const wstring>> text_id_static_entries;
-		vector<pair<const string, const wstring>> text_id_not_matched_entries;
+		vector<pair<const wstring, const wstring>> text_id_static_entries;
+		vector<pair<const wstring, const wstring>> text_id_not_matched_entries;
 		// 0 is None
 		for (int i = 1;; i++)
 		{
@@ -10976,17 +10987,17 @@ namespace
 
 			if (str && *str->start_char)
 			{
-				if (g_static_entries_use_text_id_name)
+				if (config::static_entries_use_text_id_name)
 				{
-					string textIdName = GetTextIdNameById(i);
+					wstring textIdName = GetTextIdNameById(i);
 					text_id_static_entries.emplace_back(textIdName, str->start_char);
 					if (local::get_localized_string(textIdName) == nullptr ||
-						local::wide_u8(local::get_localized_string(textIdName)->start_char) == local::wide_u8(str->start_char))
+						local::get_localized_string(textIdName)->start_char == str->start_char)
 					{
 						text_id_not_matched_entries.emplace_back(textIdName, str->start_char);
 					}
 				}
-				else if (g_static_entries_use_hash)
+				else if (config::static_entries_use_hash)
 				{
 					static_entries.emplace_back(str->start_char);
 				}
@@ -11003,11 +11014,11 @@ namespace
 					break;
 			}
 		}
-		if (g_static_entries_use_text_id_name)
+		if (config::static_entries_use_text_id_name)
 		{
 			logger::write_text_id_static_dict(text_id_static_entries, text_id_not_matched_entries);
 		}
-		else if (g_static_entries_use_hash)
+		else if (config::static_entries_use_hash)
 		{
 			logger::write_static_dict(static_entries);
 		}
@@ -11044,7 +11055,7 @@ namespace
 		il2cpp_symbols::init(il2cpp_module);
 
 
-		if (g_dump_il2cpp)
+		if (config::dump_il2cpp)
 		{
 			il2cpp_dump();
 		}
@@ -11542,7 +11553,7 @@ namespace
 		{
 			ADD_HOOK(DownloadHandler_InternalGetByteArray, "UnityEngine.Networking.DownloadHandler::InternalGetByteArray at %p\n");
 
-			if ((g_dump_msgpack && g_dump_msgpack_request) || g_unlock_live_chara)
+			if ((config::dump_msgpack && config::dump_msgpack_request) || config::unlock_live_chara)
 			{
 				ADD_HOOK(UploadHandlerRaw_Create, "UnityEngine.Networking.UploadHandlerRaw::Create at %p\n");
 			}
@@ -11551,22 +11562,22 @@ namespace
 		{
 			ADD_HOOK(HttpHelper_DecompressResponse, "Gallop.HttpHelper::DecompressResponse at %p\n");
 
-			if ((g_dump_msgpack && g_dump_msgpack_request) || g_unlock_live_chara)
+			if ((config::dump_msgpack && config::dump_msgpack_request) || config::unlock_live_chara)
 			{
 				ADD_HOOK(HttpHelper_CompressRequest, "Gallop.HttpHelper::CompressRequest at %p\n");
 			}
 		}
 
-		if (g_anisotropic_filtering != -1)
+		if (config::anisotropic_filtering != -1)
 		{
 			ADD_HOOK(set_anisotropicFiltering, "UnityEngine.QualitySettings.set_anisotropicFiltering(UnityEngine.AnisotropicFiltering) at %p\n");
-			set_anisotropicFiltering_hook(g_anisotropic_filtering);
+			set_anisotropicFiltering_hook(config::anisotropic_filtering);
 		}
 
-		if (g_vsync_count != -1)
+		if (config::vsync_count != -1)
 		{
 			ADD_HOOK(set_vSyncCount, "UnityEngine.QualitySettings.set_vSyncCount() at %p\n");
-			set_vSyncCount_hook(g_vsync_count);
+			set_vSyncCount_hook(config::vsync_count);
 		}
 
 		ADD_HOOK(set_shadows, "UnityEngine.QualitySettings.set_shadows(UnityEngine.ShadowQuality) at %p\n");
@@ -11618,11 +11629,11 @@ namespace
 		ADD_HOOK(query_gettext, "Query::GetString at %p\n");
 		ADD_HOOK(query_dispose, "Query::Dispose at %p\n");
 
-		if (!g_replace_text_db_path.empty())
+		if (!config::replace_text_db_path.empty())
 		{
 			try
 			{
-				MasterDB::InitReplacementMasterDB(g_replace_text_db_path.data());
+				MasterDB::InitReplacementMasterDB(local::wide_u8(config::replace_text_db_path.data()));
 				ADD_HOOK(Plugin_sqlite3_step, "Plugin::sqlite3_step at %p\n");
 				ADD_HOOK(Plugin_sqlite3_reset, "Plugin::sqlite3_reset at %p\n");
 				ADD_HOOK(query_step, "Query::Step at %p\n");
@@ -11639,7 +11650,7 @@ namespace
 			}
 		}
 
-		if (g_cyspring_update_mode != -1)
+		if (config::cyspring_update_mode != -1)
 		{
 			ADD_HOOK(CySpringUpdater_set_SpringUpdateMode, "CySpringUpdater::set_SpringUpdateMode at %p\n");
 			ADD_HOOK(CySpringUpdater_get_SpringUpdateMode, "CySpringUpdater::get_SpringUpdateMode at %p\n");
@@ -11674,7 +11685,7 @@ namespace
 										auto item = reinterpret_cast<Il2CppObject*>(_taskQueueArray->vector[i]);
 										if (item)
 										{
-											il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, int)>(item->klass, "set_UpdateMode", 1)->methodPointer(item, g_cyspring_update_mode);
+											il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, int)>(item->klass, "set_UpdateMode", 1)->methodPointer(item, config::cyspring_update_mode);
 										}
 									}
 								}
@@ -11702,13 +11713,13 @@ namespace
 					// ADD_HOOK(SplashViewController_KakaoStart, "SplashViewController::KakaoStart at %p\n");
 		}
 
-		if (g_unlock_size || g_freeform_window)
+		if (config::unlock_size || config::freeform_window)
 		{
 			ADD_HOOK(canvas_scaler_setres, "UnityEngine.UI.CanvasScaler::set_referenceResolution at %p\n");
 			// ADD_HOOK(UIManager_UpdateCanvasScaler, "Gallop.UIManager::UpdateCanvasScaler at %p\n");
 		}
 
-		if (g_replace_to_builtin_font || g_replace_to_custom_font)
+		if (config::replace_to_builtin_font || config::replace_to_custom_font)
 		{
 			ADD_HOOK(on_populate, "Gallop.TextCommon::OnPopulateMesh at %p\n");
 			ADD_HOOK(textcommon_awake, "Gallop.TextCommon::Awake at %p\n");
@@ -11716,7 +11727,7 @@ namespace
 			ADD_HOOK(TMP_Settings_get_instance, "TMPro.TMP_Settings::get_instance at %p\n");
 		}
 
-		if (g_max_fps > -1)
+		if (config::max_fps > -1)
 		{
 			// break 30-40fps limit
 			ADD_HOOK(FrameRateController_OverrideByNormalFrameRate, "Gallop.FrameRateController::OverrideByNormalFrameRate at %p\n");
@@ -11726,11 +11737,11 @@ namespace
 			ADD_HOOK(set_fps, "UnityEngine.Application.set_targetFrameRate at %p\n");
 		}
 
-		if (g_unlock_size || g_freeform_window)
+		if (config::unlock_size || config::freeform_window)
 		{
 			// ADD_HOOK(wndproc, "Gallop.StandaloneWindowResize::WndProc at %p\n");
 
-			if (g_freeform_window)
+			if (config::freeform_window)
 			{
 				ADD_HOOK(UIManager_GetCameraSizeByOrientation, "Gallop.UIManager::GetCameraSizeByOrientation at %p\n");
 				ADD_HOOK(UIManager_get_DefaultResolution, "Gallop.UIManager::get_DefaultResolution at %p\n");
@@ -11746,34 +11757,34 @@ namespace
 			ADD_HOOK(GallopFrameBuffer_ResizeRenderTexture, "Gallop.GallopFrameBuffer::ResizeRenderTexture at %p\n");
 		}
 
-		if (g_graphics_quality != -1)
+		if (config::graphics_quality != -1)
 		{
 			ADD_HOOK(apply_graphics_quality, "Gallop.GraphicSettings.ApplyGraphicsQuality at %p\n");
 		}
 
-		if (g_freeform_window || g_unlock_size || g_resolution_3d_scale != 1.0f)
+		if (config::freeform_window || config::unlock_size || config::resolution_3d_scale != 1.0f)
 		{
 			// ADD_HOOK(BGManager_CalcBgScale, "Gallop.BGManager::CalcBgScale at %p\n");
 		}
 
-		if (g_resolution_3d_scale != 1.0f || g_freeform_window)
+		if (config::resolution_3d_scale != 1.0f || config::freeform_window)
 		{
 			ADD_HOOK(GraphicSettings_GetVirtualResolution3D, "Gallop.GraphicSettings.GetVirtualResolution3D at %p\n");
 			ADD_HOOK(GraphicSettings_GetVirtualResolution, "Gallop.GraphicSettings.GetVirtualResolution at %p\n");
 		}
 
-		if (g_anti_aliasing != -1)
+		if (config::anti_aliasing != -1)
 		{
 			ADD_HOOK(set_anti_aliasing, "UnityEngine.QualitySettings.set_antiAliasing(int) at %p\n");
 			ADD_HOOK(rendertexture_set_anti_aliasing, "UnityEngine.RenderTexture.set_antiAliasing(int) at %p\n");
 		}
 
-		if (!external_dlls_path.empty())
+		if (!config::external_dlls_path.empty())
 		{
-			for (int i = 0; i < external_dlls_path.size(); i++)
+			for (int i = 0; i < config::external_dlls_path.size(); i++)
 			{
-				auto dll = LoadLibraryW(local::u8_wide(external_dlls_path[i]).data());
-				cout << "Loading " << external_dlls_path[i] << " : " << dll << endl;
+				auto dll = LoadLibraryW(config::external_dlls_path[i].data());
+				wcout << L"Loading " << config::external_dlls_path[i] << L" : " << dll << endl;
 			}
 		}
 	}
@@ -11817,20 +11828,20 @@ namespace
 		Il2CppObject* _Label;
 		il2cpp_field_get_value(notification, _LabelField, &_Label);
 
-		il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, int)>(_Label->klass, "set_fontSize", 1)->methodPointer(_Label, g_character_system_text_caption_font_size);
-		il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, int)>(_Label->klass, "set_FontColor", 1)->methodPointer(_Label, GetEnumValue(ParseEnum(GetRuntimeType("umamusume.dll", "Gallop", "FontColorType"), g_character_system_text_caption_font_color.data())));
-		il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, int)>(_Label->klass, "set_OutlineSize", 1)->methodPointer(_Label, GetEnumValue(ParseEnum(GetRuntimeType("umamusume.dll", "Gallop", "OutlineSizeType"), g_character_system_text_caption_outline_size.data())));
-		il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, int)>(_Label->klass, "set_OutlineColor", 1)->methodPointer(_Label, GetEnumValue(ParseEnum(GetRuntimeType("umamusume.dll", "Gallop", "OutlineColorType"), g_character_system_text_caption_outline_color.data())));
+		il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, int)>(_Label->klass, "set_fontSize", 1)->methodPointer(_Label, config::character_system_text_caption_font_size);
+		il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, int)>(_Label->klass, "set_FontColor", 1)->methodPointer(_Label, GetEnumValue(ParseEnum(GetRuntimeType("umamusume.dll", "Gallop", "FontColorType"), config::character_system_text_caption_font_color.data())));
+		il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, int)>(_Label->klass, "set_OutlineSize", 1)->methodPointer(_Label, GetEnumValue(ParseEnum(GetRuntimeType("umamusume.dll", "Gallop", "OutlineSizeType"), config::character_system_text_caption_outline_size.data())));
+		il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, int)>(_Label->klass, "set_OutlineColor", 1)->methodPointer(_Label, GetEnumValue(ParseEnum(GetRuntimeType("umamusume.dll", "Gallop", "OutlineColorType"), config::character_system_text_caption_outline_color.data())));
 
 		auto background = il2cpp_symbols::get_method_pointer<Il2CppObject * (*)(Il2CppObject*, Il2CppObject*, bool)>("UnityEngine.CoreModule.dll", "UnityEngine", "GameObject", "GetComponentInChildren", 2)(instantiated, GetRuntimeType("umamusume.dll", "Gallop", "ImageCommon"), true);
-		il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, float)>(background->klass, "SetAlpha", 1)->methodPointer(background, g_character_system_text_caption_background_alpha);
+		il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, float)>(background->klass, "SetAlpha", 1)->methodPointer(background, config::character_system_text_caption_background_alpha);
 
 		auto canvasGroupTransform = il2cpp_class_get_method_from_name_type<Il2CppObject * (*)(Il2CppObject*)>(canvasGroup->klass, "get_transform", 0)->methodPointer(canvasGroup);
 
 		auto position = il2cpp_class_get_method_from_name_type<Vector3_t(*)(Il2CppObject*)>(canvasGroupTransform->klass, "get_position", 0)->methodPointer(canvasGroupTransform);
 
-		position.x = g_character_system_text_caption_position_x;
-		position.y = g_character_system_text_caption_position_y;
+		position.x = config::character_system_text_caption_position_x;
+		position.y = config::character_system_text_caption_position_y;
 
 		il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, Vector3_t)>(canvasGroupTransform->klass, "set_position", 1)->methodPointer(canvasGroupTransform, position);
 
@@ -11853,8 +11864,8 @@ namespace
 	{
 		auto amuid = wstring(il2cpp_resolve_icall_type<Il2CppString * (*)()>("UnityEngine.Application::get_companyName()")()->start_char) + L".Gallop";
 
-		DesktopNotificationManagerCompat::RegisterAumidAndComServer(amuid.data(), localize_get_hook(GetTextIdByName("Outgame0028"))->start_char);
-		
+		DesktopNotificationManagerCompat::RegisterAumidAndComServer(amuid.data(), localize_get_hook(GetTextIdByName(L"Outgame0028"))->start_char);
+
 		DesktopNotificationManagerCompat::RegisterActivator();
 
 		unique_ptr<DesktopNotificationHistoryCompat> history;
@@ -11969,9 +11980,9 @@ namespace
 		auto GameObject_GetComponentFastPath_addr = il2cpp_resolve_icall("UnityEngine.GameObject::GetComponentFastPath(System.Type,System.IntPtr)");
 
 #pragma region LOAD_ASSETBUNDLE
-		if (!fontAssets && !g_font_assetbundle_path.empty() && g_replace_to_custom_font)
+		if (!fontAssets && !config::font_assetbundle_path.empty() && config::replace_to_custom_font)
 		{
-			auto assetbundlePath = local::u8_wide(g_font_assetbundle_path);
+			auto assetbundlePath = config::font_assetbundle_path;
 			if (PathIsRelativeW(assetbundlePath.data()))
 			{
 				assetbundlePath.insert(0, ((wstring)filesystem::current_path().native()).append(L"/"));
@@ -11992,9 +12003,9 @@ namespace
 			cout << "Asset loaded: " << fontAssets << endl;
 		}
 
-		if (!g_replace_assetbundle_file_path.empty())
+		if (!config::replace_assetbundle_file_path.empty())
 		{
-			auto assetbundlePath = local::u8_wide(g_replace_assetbundle_file_path);
+			auto assetbundlePath = config::replace_assetbundle_file_path;
 			if (PathIsRelativeW(assetbundlePath.data()))
 			{
 				assetbundlePath.insert(0, ((wstring)filesystem::current_path().native()).append(L"/"));
@@ -12015,12 +12026,12 @@ namespace
 			}
 		}
 
-		if (!g_replace_assetbundle_file_paths.empty())
+		if (!config::replace_assetbundle_file_paths.empty())
 		{
-			for (auto it = g_replace_assetbundle_file_paths.begin(); it != g_replace_assetbundle_file_paths.end(); it++)
+			for (auto it = config::replace_assetbundle_file_paths.begin(); it != config::replace_assetbundle_file_paths.end(); it++)
 			{
 
-				auto assetbundlePath = local::u8_wide(*it);
+				auto assetbundlePath = *it;
 				if (PathIsRelativeW(assetbundlePath.data()))
 				{
 					assetbundlePath.insert(0, ((wstring)filesystem::current_path().native()).append(L"/"));
@@ -12099,7 +12110,7 @@ namespace
 			ADD_HOOK(CharaPropRendererAccessor_SetTexture, "Gallop.CharaPropRendererAccessor::SetTexture at %p\n");
 		}
 
-		if (g_freeform_window)
+		if (config::freeform_window)
 		{
 			int width = il2cpp_symbols::get_method_pointer<int (*)()>("UnityEngine.CoreModule.dll", "UnityEngine", "Screen", "get_width", -1)();
 			int height = il2cpp_symbols::get_method_pointer<int (*)()>("UnityEngine.CoreModule.dll", "UnityEngine", "Screen", "get_height", -1)();
@@ -12169,13 +12180,13 @@ namespace
 			ADD_HOOK(MoviePlayerForUI_AdjustScreenSize, "MoviePlayerForUI::AdjustScreenSize at %p\n");
 		}
 
-		if (g_dump_entries)
+		if (config::dump_entries)
 		{
 			dump_all_entries();
 		}
 
 
-		if (g_auto_fullscreen || g_unlock_size || g_freeform_window)
+		if (config::auto_fullscreen || config::unlock_size || config::freeform_window)
 		{
 			if (!set_resolution_orig)
 			{
@@ -12184,7 +12195,7 @@ namespace
 			ADD_HOOK(UIManager_ChangeResizeUIForPC, "Gallop.UIManager::ChangeResizeUIForPC at %p\n");
 		}
 
-		if (g_unlock_size || g_freeform_window)
+		if (config::unlock_size || config::freeform_window)
 		{
 			// break 1080p size limit
 			ADD_HOOK(get_virt_size, "Gallop.StandaloneWindowResize.getOptimizedWindowSizeVirt at %p \n");
@@ -12197,49 +12208,49 @@ namespace
 			ADD_HOOK(GetLimitSize, "Gallop.StandaloneWindowResize::GetChangedSize at %p\n");
 
 			auto display = display_get_main();
-			if (g_initial_width > 72 && g_initial_height > 72)
+			if (config::initial_width > 72 && config::initial_height > 72)
 			{
 				auto StandaloneWindowResize = il2cpp_symbols::get_class("umamusume.dll", "Gallop", "StandaloneWindowResize");
 				il2cpp_class_get_method_from_name_type<void (*)(bool)>(StandaloneWindowResize, "set_IsPreventReShape", 1)->methodPointer(true);
 
-				auto ratio = static_cast<float>(g_initial_width) / static_cast<float>(g_initial_height);
+				auto ratio = static_cast<float>(config::initial_width) / static_cast<float>(config::initial_height);
 
-				if (g_initial_width < g_initial_height)
+				if (config::initial_width < config::initial_height)
 				{
-					ratio_vertical = static_cast<float>(g_initial_width) / static_cast<float>(g_initial_height);
-					ratio_horizontal = static_cast<float>(g_initial_height) / static_cast<float> (g_initial_width);
+					ratio_vertical = static_cast<float>(config::initial_width) / static_cast<float>(config::initial_height);
+					ratio_horizontal = static_cast<float>(config::initial_height) / static_cast<float> (config::initial_width);
 
-					if (g_unlock_size_use_system_resolution)
+					if (config::unlock_size_use_system_resolution)
 					{
 						last_display_width = static_cast<float>(get_system_width(display)) * ratio;
 						last_display_height = get_system_width(display);
 					}
 					else
 					{
-						last_display_width = g_initial_width;
-						last_display_height = g_initial_height;
+						last_display_width = config::initial_width;
+						last_display_height = config::initial_height;
 					}
 				}
 				else
 				{
-					ratio_vertical = static_cast<float>(g_initial_height) / static_cast<float>(g_initial_width);
-					ratio_horizontal = static_cast<float>(g_initial_width) / static_cast<float>(g_initial_height);
+					ratio_vertical = static_cast<float>(config::initial_height) / static_cast<float>(config::initial_width);
+					ratio_horizontal = static_cast<float>(config::initial_width) / static_cast<float>(config::initial_height);
 
-					if (g_unlock_size_use_system_resolution)
+					if (config::unlock_size_use_system_resolution)
 					{
 						last_display_width = get_system_width(display);
 						last_display_height = static_cast<float>(get_system_width(display)) * ratio;
 					}
 					else
 					{
-						last_display_width = g_initial_width;
-						last_display_height = g_initial_height;
+						last_display_width = config::initial_width;
+						last_display_height = config::initial_height;
 					}
 				}
 			}
 			else
 			{
-				if (g_freeform_window)
+				if (config::freeform_window)
 				{
 					auto hWnd = GetHWND();
 
@@ -12293,12 +12304,12 @@ namespace
 				}).detach();
 		}
 
-		if (g_auto_fullscreen || g_unlock_size || g_freeform_window)
+		if (config::auto_fullscreen || config::unlock_size || config::freeform_window)
 		{
-			if (g_initial_width > 72 && g_initial_height > 72)
+			if (config::initial_width > 72 && config::initial_height > 72)
 			{
 				auto display = display_get_main();
-				if (g_initial_width < g_initial_height)
+				if (config::initial_width < config::initial_height)
 				{
 					last_hriz_window_width = last_display_height - 400;
 					last_hriz_window_height = last_hriz_window_width / ratio_horizontal;
@@ -12341,7 +12352,7 @@ namespace
 			}
 			else
 			{
-				if (g_freeform_window)
+				if (config::freeform_window)
 				{
 					last_hriz_window_width = last_display_width;
 					last_hriz_window_height = last_display_height;
@@ -12358,7 +12369,7 @@ namespace
 			}
 
 
-			if (g_auto_fullscreen)
+			if (config::auto_fullscreen)
 			{
 				// adjust_size();
 			}
@@ -12376,7 +12387,7 @@ namespace
 
 		fullScreenFl = il2cpp_resolve_icall_type<bool (*)()>("UnityEngine.Screen::get_fullScreen()")();
 
-		if (g_discord_rich_presence)
+		if (config::discord_rich_presence)
 		{
 			discord::Core::Create(1080397170215223367, static_cast<uint64_t>(discord::CreateFlags::NoRequireDiscord), &discord);
 			if (discord)
@@ -12497,7 +12508,7 @@ namespace
 			{
 				auto hWnd = GetHWND();
 
-				if (g_freeform_window)
+				if (config::freeform_window)
 				{
 					long style = GetWindowLongW(hWnd, GWL_STYLE);
 					style |= WS_MAXIMIZEBOX;
@@ -12508,7 +12519,7 @@ namespace
 
 				auto uiManager = GetSingletonInstance(il2cpp_symbols::get_class("umamusume.dll", "Gallop", "UIManager"));
 
-				if (g_resolution_3d_scale != 1.0f && Game::CurrentGameRegion == Game::Region::KOR)
+				if (config::resolution_3d_scale != 1.0f && Game::CurrentGameRegion == Game::Region::KOR)
 				{
 					auto graphicSettings = GetSingletonInstance(il2cpp_symbols::get_class("umamusume.dll", "Gallop", "GraphicSettings"));
 
@@ -12516,20 +12527,20 @@ namespace
 					{
 						auto _resolutionScaleField = il2cpp_class_get_field_from_name_wrap(graphicSettings->klass, "_resolutionScale");
 
-						il2cpp_field_set_value(graphicSettings, _resolutionScaleField, &g_resolution_3d_scale);
+						il2cpp_field_set_value(graphicSettings, _resolutionScaleField, &config::resolution_3d_scale);
 
 						auto _resolutionScale2DField = il2cpp_class_get_field_from_name_wrap(graphicSettings->klass, "_resolutionScale2D");
 
-						il2cpp_field_set_value(graphicSettings, _resolutionScale2DField, &g_resolution_3d_scale);
+						il2cpp_field_set_value(graphicSettings, _resolutionScale2DField, &config::resolution_3d_scale);
 					}
 				}
 
-				if (g_graphics_quality > -1)
+				if (config::graphics_quality > -1)
 				{
 					auto graphicSettings = GetSingletonInstance(il2cpp_symbols::get_class("umamusume.dll", "Gallop", "GraphicSettings"));
 					if (graphicSettings)
 					{
-						apply_graphics_quality_hook(graphicSettings, g_graphics_quality, true);
+						apply_graphics_quality_hook(graphicSettings, config::graphics_quality, true);
 					}
 				}
 
@@ -12611,7 +12622,7 @@ namespace
 						}
 					}
 
-					if (g_freeform_window && Game::CurrentGameRegion == Game::Region::KOR)
+					if (config::freeform_window && Game::CurrentGameRegion == Game::Region::KOR)
 					{
 						static bool initialResize = false;
 
@@ -12628,12 +12639,12 @@ namespace
 						}
 					}
 
-					if (g_character_system_text_caption)
+					if (config::character_system_text_caption)
 					{
 						isRequiredInitNotification = true;
 					}
 
-					if (g_max_fps > -1 || g_unlock_size || g_freeform_window)
+					if (config::max_fps > -1 || config::unlock_size || config::freeform_window)
 					{
 						if (isWndProcInitRequired)
 						{
@@ -12651,9 +12662,9 @@ namespace
 							auto oldWndProcPtr2 = reinterpret_cast<WNDPROC>(SetWindowLongPtrW(hWnd, GWLP_WNDPROC, reinterpret_cast<LONG_PTR>(wndproc_hook)));
 							il2cpp_field_static_set_value(oldWndProcPtrField, &oldWndProcPtr2);
 
-							if ((g_unlock_size || g_freeform_window) && g_initial_width > 72 && g_initial_height > 72)
+							if ((config::unlock_size || config::freeform_window) && config::initial_width > 72 && config::initial_height > 72)
 							{
-								if (g_initial_width < g_initial_height)
+								if (config::initial_width < config::initial_height)
 								{
 									reinterpret_cast<decltype(set_resolution_hook)*>(set_resolution_orig)(last_virt_window_width, last_virt_window_height, 3, 0);
 								}
@@ -12688,7 +12699,7 @@ namespace
 						il2cpp_symbols::get_method_pointer<Il2CppObject* (*)(float, Il2CppDelegate*, bool)>("DOTween.dll", "DG.Tweening", "DOVirtual", "DelayedCall", 3)(0.05, updateVoiceButton, true);
 					}
 
-					if (g_freeform_window)
+					if (config::freeform_window)
 					{
 						int width = il2cpp_symbols::get_method_pointer<int (*)()>("UnityEngine.CoreModule.dll", "UnityEngine", "Screen", "get_width", -1)();
 						int height = il2cpp_symbols::get_method_pointer<int (*)()>("UnityEngine.CoreModule.dll", "UnityEngine", "Screen", "get_height", -1)();
@@ -12707,14 +12718,14 @@ namespace
 						il2cpp_symbols::get_method_pointer<Il2CppObject* (*)(float, Il2CppDelegate*, bool)>("DOTween.dll", "DG.Tweening", "DOVirtual", "DelayedCall", 3)(0.05, moviePlayerResize, true);
 					}
 
-					if (uiManager && (g_unlock_size || g_freeform_window))
+					if (uiManager && (config::unlock_size || config::freeform_window))
 					{
 						int width = il2cpp_symbols::get_method_pointer<int (*)()>("UnityEngine.CoreModule.dll", "UnityEngine", "Screen", "get_width", -1)();
 						int height = il2cpp_symbols::get_method_pointer<int (*)()>("UnityEngine.CoreModule.dll", "UnityEngine", "Screen", "get_height", -1)();
 
 						bool isVirt = width < height;
 
-						if (g_freeform_window)
+						if (config::freeform_window)
 						{
 							UIManager_ChangeResizeUIForPC_hook(uiManager, isVirt ? min(last_virt_window_width, last_virt_window_height) : max(last_hriz_window_width, last_hriz_window_height),
 								isVirt ? max(last_virt_window_width, last_virt_window_height) : min(last_hriz_window_width, last_hriz_window_height));
@@ -12729,7 +12740,7 @@ namespace
 
 				if (sceneName == "Home")
 				{
-					if (g_character_system_text_caption)
+					if (config::character_system_text_caption)
 					{
 						InitNotification();
 					}
@@ -12739,9 +12750,9 @@ namespace
 					if (!readDisclaimer)
 					{
 						il2cpp_symbols::get_method_pointer<Il2CppObject* (*)(Il2CppString*, Il2CppString*, Il2CppString*, uint64_t, Il2CppDelegate*, Il2CppDelegate*, bool, bool, Il2CppString*)>
-							("umamusume.dll", "Gallop", "DialogSimpleCheckNoWarning", "OpenMiddleOneButton", 9)(localize_get_hook(GetTextIdByName("Common0081")), il2cpp_string_new(
-								(LocalifySettings::GetText("initial_disclaimer_1") + local::wide_u8(localize_get_hook(GetTextIdByName("Common187002"))->start_char) + LocalifySettings::GetText("initial_disclaimer_2")).data()),
-								localize_get_hook(GetTextIdByName("Common187002")), GetTextIdByName("Common0007"),
+							("umamusume.dll", "Gallop", "DialogSimpleCheckNoWarning", "OpenMiddleOneButton", 9)(localize_get_hook(GetTextIdByName(L"Common0081")), il2cpp_string_new16(
+								(LocalifySettings::GetText("initial_disclaimer_1") + wstring(localize_get_hook(GetTextIdByName(L"Common187002"))->start_char) + LocalifySettings::GetText("initial_disclaimer_2")).data()),
+								localize_get_hook(GetTextIdByName(L"Common187002")), GetTextIdByName(L"Common0007"),
 								CreateDelegateStatic(*[](void*, Il2CppObject* dialog)
 									{
 										il2cpp_symbols::get_method_pointer<void (*)(Il2CppObject*)>("umamusume.dll", "Gallop", "DialogCommon", "Close", 0)(GetFrontDialog());
@@ -12750,7 +12761,7 @@ namespace
 									}), nullptr, false, true, nullptr);
 					}
 
-					if (g_unlock_live_chara)
+					if (config::unlock_live_chara)
 					{
 						auto charaList = MsgPackModify::GetCharaList();
 
@@ -12789,7 +12800,7 @@ namespace
 					}
 				}
 
-				if (sceneName == "Live" && g_champions_live_show_text)
+				if (sceneName == "Live" && config::champions_live_show_text)
 				{
 					auto loadSettings = il2cpp_symbols::get_method_pointer<Il2CppObject * (*)()>("umamusume.dll", "Gallop.Live", "Director", "get_LoadSettings", -1)();
 					auto musicId = il2cpp_class_get_method_from_name_type<int (*)(Il2CppObject*)>(loadSettings->klass, "get_MusicId", 0)->methodPointer(loadSettings);
@@ -12837,13 +12848,13 @@ namespace
 								il2cpp_array_setref(trainerNameArray, i, il2cpp_string_new(""));
 							}
 
-							il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, int)>(raceInfo->klass, "set_ChampionsMeetingResourceId", 1)->methodPointer(raceInfo, g_champions_live_resource_id);
-							il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, int)>(raceInfo->klass, "set_DateYear", 1)->methodPointer(raceInfo, g_champions_live_year);
+							il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, int)>(raceInfo->klass, "set_ChampionsMeetingResourceId", 1)->methodPointer(raceInfo, config::champions_live_resource_id);
+							il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, int)>(raceInfo->klass, "set_DateYear", 1)->methodPointer(raceInfo, config::champions_live_year);
 						}
 					}
 				}
 
-				if (g_discord_rich_presence && discord)
+				if (config::discord_rich_presence && discord)
 				{
 					auto detail = GetSceneName(sceneName);
 
@@ -13174,17 +13185,17 @@ FindNextFileW_hook(
 					return TRUE;
 				}
 			}
-		else if (dllCount < MAX_DLL_COUNT && GetLastError() == ERROR_NO_MORE_FILES)
-		{
+			else if (dllCount < MAX_DLL_COUNT && GetLastError() == ERROR_NO_MORE_FILES)
+			{
 				dllCount++;
 
 				// fake data
 				*lpFindFileData = WIN32_FIND_DATAW{ .cFileName = L"GameAssembly.dll" };
 
-			SetLastError(ERROR_SUCCESS);
-			return TRUE;
+				SetLastError(ERROR_SUCCESS);
+				return TRUE;
+			}
 		}
-	}
 	}
 
 	return result;
@@ -13281,7 +13292,7 @@ bool init_hook_base()
 		MH_CreateHook(InternetCrackUrlW, InternetCrackUrlW_hook, &InternetCrackUrlW_orig);
 		MH_EnableHook(InternetCrackUrlW);
 #endif
-	}
+}
 
 	MH_CreateHook(FindFirstFileExW, FindFirstFileExW_hook, &FindFirstFileExW_orig);
 	MH_EnableHook(FindFirstFileExW);
@@ -13289,7 +13300,7 @@ bool init_hook_base()
 	MH_CreateHook(FindNextFileW, FindNextFileW_hook, &FindNextFileW_orig);
 	MH_EnableHook(FindNextFileW);
 
-	if (!g_allow_delete_cookie && Game::CurrentGameRegion == Game::Region::KOR)
+	if (!config::allow_delete_cookie && Game::CurrentGameRegion == Game::Region::KOR)
 	{
 		MH_CreateHook(LoadLibraryExW, load_library_ex_w_hook, &load_library_ex_w_orig);
 		MH_EnableHook(LoadLibraryExW);
@@ -13322,9 +13333,9 @@ bool init_hook()
 	/*MH_CreateHook(VirtualProtect, VirtualProtect_hook, &VirtualProtect_orig);
 	MH_EnableHook(VirtualProtect);*/
 
-	fullScreenFl = g_auto_fullscreen && !g_freeform_window;
+	fullScreenFl = config::auto_fullscreen && !config::freeform_window;
 
-	if (g_freeform_window)
+	if (config::freeform_window)
 	{
 		MH_CreateHook(SetWindowLongPtrW, SetWindowLongPtrW_hook, &SetWindowLongPtrW_orig);
 		MH_EnableHook(SetWindowLongPtrW);

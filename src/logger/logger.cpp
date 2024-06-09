@@ -1,5 +1,7 @@
 #include <stdinclude.hpp>
 
+#include "config/config.hpp"
+
 using namespace std;
 
 namespace logger
@@ -19,7 +21,7 @@ namespace logger
 	void init_logger()
 	{
 		// only output if file exists so regular user will not see it.
-		if (g_enable_logger)
+		if (config::enable_logger)
 		{
 			enabled = true;
 			log_file.open("dump.txt", ios::app | ios::out);
@@ -64,7 +66,7 @@ namespace logger
 
 	void write_static_dict(const std::vector<std::wstring>& dict)
 	{
-		if (g_enable_logger)
+		if (config::enable_logger)
 		{
 			static_json.open("static.json", ios::out);
 			static_json << "{\n";
@@ -93,10 +95,10 @@ namespace logger
 
 	}
 
-	void write_text_id_static_dict(const vector<pair<const string, const wstring>>& dict,
-		const vector<pair<const string, const wstring>>& not_matched)
+	void write_text_id_static_dict(const vector<pair<const wstring, const wstring>>& dict,
+		const vector<pair<const wstring, const wstring>>& not_matched)
 	{
-		if (g_enable_logger)
+		if (config::enable_logger)
 		{
 			static_json.open("text_id_static.json", ios::out);
 			static_json << "{\n";
@@ -108,11 +110,11 @@ namespace logger
 					replaceAll(u8str, "\"", "\\\"");
 					if (next(pair) == dict.end())
 					{
-						static_json << "\"" << pair->first << "\": \"" << u8str << "\"\n";
+						static_json << "\"" << local::wide_u8(pair->first) << "\": \"" << u8str << "\"\n";
 					}
 					else
 					{
-						static_json << "\"" << pair->first << "\": \"" << u8str << "\",\n";
+						static_json << "\"" << local::wide_u8(pair->first) << "\": \"" << u8str << "\",\n";
 					}
 				}
 				static_json << "}\n";
@@ -132,11 +134,11 @@ namespace logger
 						replaceAll(u8str, "\"", "\\\"");
 						if (next(pair) == not_matched.end())
 						{
-							not_matched_json << "\"" << pair->first << "\": \"" << u8str << "\"\n";
+							not_matched_json << "\"" << local::wide_u8(pair->first) << "\": \"" << u8str << "\"\n";
 						}
 						else
 						{
-							not_matched_json << "\"" << pair->first << "\": \"" << u8str << "\",\n";
+							not_matched_json << "\"" << local::wide_u8(pair->first) << "\": \"" << u8str << "\",\n";
 						}
 					}
 					not_matched_json << "}\n";

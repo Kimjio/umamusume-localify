@@ -9,6 +9,8 @@
 #include <SQLiteCpp/SQLiteCpp.h>
 #include <msgpack11.hpp>
 
+#include "config/config.hpp"
+
 #include "il2cpp/il2cpp_symbols.hpp"
 #include "il2cpp/il2cpp-api-functions.hpp"
 #include "local/local.hpp"
@@ -23,9 +25,6 @@
 using namespace std;
 using namespace msgpack11;
 using namespace Microsoft::WRL;
-
-extern bool g_notification_tp;
-extern bool g_notification_rp;
 
 namespace MsgPackData
 {
@@ -113,12 +112,12 @@ namespace MsgPackData
 
 			DumpTexture2D(leader_chara_id, texture2D);
 
-			if (g_notification_tp)
+			if (config::notification_tp)
 			{
 				// unique_ptr<DesktopNotificationHistoryCompat> history;
 				// DesktopNotificationManagerCompat::get_History(&history);
 
-				if ((!MsgPackData::user_info.empty() || !MsgPackData::tp_info.empty()) && g_notification_tp)
+				if ((!MsgPackData::user_info.empty() || !MsgPackData::tp_info.empty()) && config::notification_tp)
 				{
 					DesktopNotificationManagerCompat::RemoveFromScheduleByTag(L"TP");
 					auto title = local::u8_wide(MasterDB::GetTextData(6, leader_chara_id));
@@ -153,12 +152,12 @@ namespace MsgPackData
 
 			DumpTexture2D(leader_chara_id, texture2D);
 
-			if (g_notification_rp)
+			if (config::notification_rp)
 			{
 				// unique_ptr<DesktopNotificationHistoryCompat> history;
 				// DesktopNotificationManagerCompat::get_History(&history);
 
-				if ((!MsgPackData::user_info.empty() || !MsgPackData::rp_info.empty()) && g_notification_rp)
+				if ((!MsgPackData::user_info.empty() || !MsgPackData::rp_info.empty()) && config::notification_rp)
 				{
 					DesktopNotificationManagerCompat::RemoveFromScheduleByTag(L"RP");
 					auto title = local::u8_wide(MasterDB::GetTextData(6, leader_chara_id));
@@ -230,20 +229,20 @@ namespace MsgPackData
 
 						DumpTexture2D(leader_chara_id, texture2D);
 
-						if (g_notification_tp || g_notification_rp)
+						if (config::notification_tp || config::notification_rp)
 						{
 							// unique_ptr<DesktopNotificationHistoryCompat> history;
 							// DesktopNotificationManagerCompat::get_History(&history);
 
 							auto title = local::u8_wide(MasterDB::GetTextData(6, leader_chara_id));
-							if ((data["user_info"].is_object() || data["tp_info"].is_object()) && g_notification_tp)
+							if ((data["user_info"].is_object() || data["tp_info"].is_object()) && config::notification_tp)
 							{
 								DesktopNotificationManagerCompat::RemoveFromScheduleByTag(L"TP");
 								auto content = local::u8_wide(MasterDB::GetTextData(184, leader_chara_id));
 								// history->RemoveGroupedTag(L"TP", L"Generic");
 								DesktopNotificationManagerCompat::AddScheduledToastNotification(title.data(), content.data(), L"TP", GetIconPath(leader_chara_id)->start_char, MsgPackData::tp_info["max_recovery_time"].int64_value() * 1000);
 							}
-							if ((data["user_info"].is_object() || data["rp_info"].is_object()) && g_notification_rp)
+							if ((data["user_info"].is_object() || data["rp_info"].is_object()) && config::notification_rp)
 							{
 								DesktopNotificationManagerCompat::RemoveFromScheduleByTag(L"RP");
 								auto content = local::u8_wide(MasterDB::GetTextData(185, leader_chara_id));
