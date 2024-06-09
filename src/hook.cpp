@@ -12930,7 +12930,7 @@ HookedNtMapViewOfSection(
 
 extern "C" NTSTATUS NtProtectVirtualMemory(
 	IN      HANDLE      ProcessHandle,
-	IN OUT  PVOID * BaseAddress,
+	IN OUT  PVOID* BaseAddress,
 	IN OUT  PSIZE_T     NumberOfBytesToProtect,
 	IN      ULONG       NewAccessProtection,
 	OUT     PULONG      OldAccessProtection);
@@ -13174,17 +13174,19 @@ FindNextFileW_hook(
 					return TRUE;
 				}
 			}
-		}
 		else if (dllCount < MAX_DLL_COUNT && GetLastError() == ERROR_NO_MORE_FILES)
 		{
-			if (lpFindFileData)
-			{
-				*lpFindFileData = WIN32_FIND_DATAW{};
-			}
+				dllCount++;
+
+				// fake data
+				*lpFindFileData = WIN32_FIND_DATAW{ .cFileName = L"GameAssembly.dll" };
+
 			SetLastError(ERROR_SUCCESS);
 			return TRUE;
 		}
 	}
+	}
+
 	return result;
 }
 
@@ -13253,6 +13255,7 @@ FindFirstFileExW_hook(
 
 	return result;
 }
+
 bool init_hook_base()
 {
 	if (mh_inited)
