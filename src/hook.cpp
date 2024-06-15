@@ -4292,6 +4292,78 @@ namespace
 		return il2cpp_symbols::get_method_pointer<Il2CppObject * (*)()>("umamusume.dll", "Gallop", "DialogManager", "GetForeFrontDialog", -1)();
 	}
 
+	void PressButton(Il2CppObject* button)
+	{
+		auto get_gameObject = il2cpp_symbols::get_method_pointer<Il2CppObject * (*)(Il2CppObject*)>("UnityEngine.CoreModule.dll", "UnityEngine", "Component", "get_gameObject", 0);
+		auto pointerDownHandler = il2cpp_symbols::get_method_pointer<Il2CppDelegate * (*)()>("UnityEngine.UI.dll", "UnityEngine.EventSystems", "ExecuteEvents", "get_pointerDownHandler", -1)();
+		auto pointerUpHandler = il2cpp_symbols::get_method_pointer<Il2CppDelegate * (*)()>("UnityEngine.UI.dll", "UnityEngine.EventSystems", "ExecuteEvents", "get_pointerUpHandler", -1)();
+		auto pointerClickHandler = il2cpp_symbols::get_method_pointer<Il2CppDelegate * (*)()>("UnityEngine.UI.dll", "UnityEngine.EventSystems", "ExecuteEvents", "get_pointerClickHandler", -1)();
+
+		auto ExecuteEvents_Execute_Method = il2cpp_symbols::get_method("UnityEngine.UI.dll", "UnityEngine.EventSystems", "ExecuteEvents", "Execute", 3);
+		auto methodInfo = il2cpp_method_get_object(ExecuteEvents_Execute_Method, nullptr);
+
+		auto eventSystem = il2cpp_symbols::get_method_pointer<Il2CppObject * (*)()>("UnityEngine.UI.dll", "UnityEngine.EventSystems", "EventSystem", "get_current", -1)();
+		auto eventData = il2cpp_object_new(il2cpp_symbols::get_class("UnityEngine.UI.dll", "UnityEngine.EventSystems", "PointerEventData"));
+		il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, Il2CppObject*)>(eventData->klass, ".ctor", 1)->methodPointer(eventData, eventSystem);
+
+		do
+		{
+			auto typeArray = il2cpp_array_new(il2cpp_symbols::get_class("mscorlib.dll", "System", "Type"), 1);
+			il2cpp_array_setref(typeArray, 0, GetRuntimeType("UnityEngine.UI.dll", "UnityEngine.EventSystems", "IPointerDownHandler"));
+
+			auto runtimeType = il2cpp_class_get_method_from_name_type<Il2CppObject * (*)(Il2CppObject*, Il2CppArraySize*)>(methodInfo->object.klass, "MakeGenericMethod", 1)->methodPointer(&methodInfo->object, typeArray);
+			auto ExecuteEvents_Execute_Method_New = il2cpp_method_get_from_reflection(runtimeType);
+
+			void** params = new void* [3];
+			params[0] = get_gameObject(button);
+			params[1] = eventData;
+			params[2] = pointerDownHandler;
+
+			Il2CppException* exception;
+
+			il2cpp_runtime_invoke_type<bool>(ExecuteEvents_Execute_Method_New, nullptr, params, &exception);
+			delete[] params;
+		} while (false);
+
+		do
+		{
+			auto typeArray = il2cpp_array_new(il2cpp_symbols::get_class("mscorlib.dll", "System", "Type"), 1);
+			il2cpp_array_setref(typeArray, 0, GetRuntimeType("UnityEngine.UI.dll", "UnityEngine.EventSystems", "IPointerUpHandler"));
+
+			auto runtimeType = il2cpp_class_get_method_from_name_type<Il2CppObject * (*)(Il2CppObject*, Il2CppArraySize*)>(methodInfo->object.klass, "MakeGenericMethod", 1)->methodPointer(&methodInfo->object, typeArray);
+			auto ExecuteEvents_Execute_Method_New = il2cpp_method_get_from_reflection(runtimeType);
+
+			void** params = new void* [3];
+			params[0] = get_gameObject(button);
+			params[1] = eventData;
+			params[2] = pointerUpHandler;
+
+			Il2CppException* exception;
+
+			il2cpp_runtime_invoke_type<bool>(ExecuteEvents_Execute_Method_New, nullptr, params, &exception);
+			delete[] params;
+		} while (false);
+
+		do
+		{
+			auto typeArray = il2cpp_array_new(il2cpp_symbols::get_class("mscorlib.dll", "System", "Type"), 1);
+			il2cpp_array_setref(typeArray, 0, GetRuntimeType("UnityEngine.UI.dll", "UnityEngine.EventSystems", "IPointerClickHandler"));
+
+			auto runtimeType = il2cpp_class_get_method_from_name_type<Il2CppObject * (*)(Il2CppObject*, Il2CppArraySize*)>(methodInfo->object.klass, "MakeGenericMethod", 1)->methodPointer(&methodInfo->object, typeArray);
+			auto ExecuteEvents_Execute_Method_New = il2cpp_method_get_from_reflection(runtimeType);
+
+			void** params = new void* [3];
+			params[0] = get_gameObject(button);
+			params[1] = eventData;
+			params[2] = pointerClickHandler;
+
+			Il2CppException* exception;
+
+			il2cpp_runtime_invoke_type<bool>(ExecuteEvents_Execute_Method_New, nullptr, params, &exception);
+			delete[] params;
+		} while (false);
+	}
+
 	bool PressDialogButton(WPARAM wParam)
 	{
 		if (!(wParam == VK_SPACE || wParam == VK_RETURN))
@@ -4351,48 +4423,20 @@ namespace
 		auto centerButton = il2cpp_class_get_method_from_name_type<Il2CppObject * (*)(Il2CppObject*)>(_currentDialogObj->klass, "get_CenterButton", 0)->methodPointer(_currentDialogObj);
 		auto rightButton = il2cpp_class_get_method_from_name_type<Il2CppObject * (*)(Il2CppObject*)>(_currentDialogObj->klass, "get_RightButton", 0)->methodPointer(_currentDialogObj);
 
-		auto get_gameObject = il2cpp_symbols::get_method_pointer<Il2CppObject * (*)(Il2CppObject*)>("UnityEngine.CoreModule.dll", "UnityEngine", "Component", "get_gameObject", 0);
-		auto pointerClickHandler = il2cpp_symbols::get_method_pointer<Il2CppDelegate * (*)()>("UnityEngine.UI.dll", "UnityEngine.EventSystems", "ExecuteEvents", "get_pointerClickHandler", -1)();
-
-		auto ExecuteEvents_Execute_Method = il2cpp_symbols::get_method("UnityEngine.UI.dll", "UnityEngine.EventSystems", "ExecuteEvents", "Execute", 3);
-		auto methodInfo = il2cpp_method_get_object(ExecuteEvents_Execute_Method, nullptr);
-
-		auto typeArray = il2cpp_array_new(il2cpp_symbols::get_class("mscorlib.dll", "System", "Type"), 1);
-		il2cpp_array_setref(typeArray, 0, GetRuntimeType("UnityEngine.UI.dll", "UnityEngine.EventSystems", "IPointerClickHandler"));
-
-		auto runtimeType = il2cpp_class_get_method_from_name_type<Il2CppObject * (*)(Il2CppObject*, Il2CppArraySize*)>(methodInfo->object.klass, "MakeGenericMethod", 1)->methodPointer(&methodInfo->object, typeArray);
-		auto ExecuteEvents_Execute_Method_New = il2cpp_method_get_from_reflection(runtimeType);
-
-		auto eventSystem = il2cpp_symbols::get_method_pointer<Il2CppObject * (*)()>("UnityEngine.UI.dll", "UnityEngine.EventSystems", "EventSystem", "get_current", -1)();
-		auto eventData = il2cpp_object_new(il2cpp_symbols::get_class("UnityEngine.UI.dll", "UnityEngine.EventSystems", "PointerEventData"));
-		il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, Il2CppObject*)>(eventData->klass, ".ctor", 1)->methodPointer(eventData, eventSystem);
-
-		void** params = new void* [3];
-		params[1] = eventData;
-		params[2] = pointerClickHandler;
-
-		Il2CppException* exception;
-
 		if (isOneButton)
 		{
-			if (wParam == VK_RETURN)
+			if (wParam == VK_RETURN || wParam == VK_SPACE)
 			{
-				params[0] = get_gameObject(centerButton);
-
-				il2cpp_runtime_invoke_type<bool>(ExecuteEvents_Execute_Method_New, nullptr, params, &exception);
-				delete[] params;
+				PressButton(centerButton);
 				return true;
 			}
 		}
 
 		if (isTwoButton)
 		{
-			if (wParam == VK_RETURN)
+			if (wParam == VK_RETURN || wParam == VK_SPACE)
 			{
-				params[0] = get_gameObject(rightButton);
-
-				il2cpp_runtime_invoke_type<bool>(ExecuteEvents_Execute_Method_New, nullptr, params, &exception);
-				delete[] params;
+				PressButton(rightButton);
 				return true;
 			}
 		}
@@ -4401,28 +4445,497 @@ namespace
 		{
 			if (wParam == VK_RETURN)
 			{
-				params[0] = get_gameObject(rightButton);
-
-				il2cpp_runtime_invoke_type<bool>(ExecuteEvents_Execute_Method_New, nullptr, params, &exception);
-				delete[] params;
+				PressButton(rightButton);
 				return true;
 			}
 
 			if (wParam == VK_SPACE)
 			{
-				params[0] = get_gameObject(centerButton);
-
-				il2cpp_runtime_invoke_type<bool>(ExecuteEvents_Execute_Method_New, nullptr, params, &exception);
-				delete[] params;
+				PressButton(centerButton);
 				return true;
 			}
 		}
 
-		delete[] params;
+		return false;
+	}
+
+	bool PressSingleModeButton(WPARAM wParam)
+	{
+		if (!(wParam == 'Q' || wParam == 'W' || wParam == 'E' ||
+			wParam == 'A' || wParam == 'S' || wParam == 'D' || wParam == 'F'))
+		{
+			return false;
+		}
+
+		if (GetFrontDialog())
+		{
+			return false;
+		}
+
+		auto sceneManager = GetSingletonInstance(il2cpp_symbols::get_class("umamusume.dll", "Gallop", "SceneManager"));
+
+		if (!sceneManager)
+		{
+			return false;
+		}
+
+		auto GetCurrentViewController = il2cpp_symbols::find_method<Il2CppObject * (*)(Il2CppObject*)>("umamusume.dll", "Gallop", "SceneManager", [](const MethodInfo* info)
+			{
+				return info->name == "GetCurrentViewController"s && info->methodPointer;
+			});
+		auto controller = GetCurrentViewController(sceneManager);
+
+		if (controller)
+		{
+			if (controller->klass->name == "SingleModeMainViewController"s)
+			{
+				auto IsStoryActive = il2cpp_class_get_method_from_name_type<bool (*)(Il2CppObject*)>(controller->klass, "get_IsStoryActive", 0)->methodPointer(controller);
+
+				if (IsStoryActive)
+				{
+					return false;
+				}
+
+				auto view = il2cpp_class_get_method_from_name_type<Il2CppObject * (*)(Il2CppObject*)>(controller->klass, "GetViewBase", 0)->methodPointer(controller);
+				if (view)
+				{
+					auto stablesPanel = il2cpp_class_get_method_from_name_type<Il2CppObject * (*)(Il2CppObject*)>(view->klass, "get_StablesPanel", 0)->methodPointer(view);
+					if (stablesPanel)
+					{
+		auto get_gameObject = il2cpp_symbols::get_method_pointer<Il2CppObject * (*)(Il2CppObject*)>("UnityEngine.CoreModule.dll", "UnityEngine", "Component", "get_gameObject", 0);
+						auto get_activeSelf = il2cpp_symbols::get_method_pointer<bool (*)(Il2CppObject*)>("UnityEngine.CoreModule.dll", "UnityEngine", "GameObject", "get_activeSelf", 0);
+
+						auto panelIsActive = get_activeSelf(get_gameObject(stablesPanel));
+
+						if (!panelIsActive)
+						{
+							return false;
+						}
+
+						auto _nextMonthButtonField = il2cpp_class_get_field_from_name_wrap(stablesPanel->klass, "_nextMonthButton");
+						Il2CppObject* _nextMonthButton;
+						il2cpp_field_get_value(stablesPanel, _nextMonthButtonField, &_nextMonthButton);
+
+						auto _skillGetButtonField = il2cpp_class_get_field_from_name_wrap(stablesPanel->klass, "_skillGetButton");
+						Il2CppObject* _skillGetButton;
+						il2cpp_field_get_value(stablesPanel, _skillGetButtonField, &_skillGetButton);
+
+						auto _outingSummerButtonField = il2cpp_class_get_field_from_name_wrap(stablesPanel->klass, "_outingSummerButton");
+						Il2CppObject* _outingSummerButton;
+						il2cpp_field_get_value(stablesPanel, _outingSummerButtonField, &_outingSummerButton);
+
+						auto _trainingButtonField = il2cpp_class_get_field_from_name_wrap(stablesPanel->klass, "_trainingButton");
+						Il2CppObject* _trainingButton;
+						il2cpp_field_get_value(stablesPanel, _trainingButtonField, &_trainingButton);
+
+						auto _outingButtonField = il2cpp_class_get_field_from_name_wrap(stablesPanel->klass, "_outingButton");
+						Il2CppObject* _outingButton;
+						il2cpp_field_get_value(stablesPanel, _outingButtonField, &_outingButton);
+
+						Il2CppObject* outingButton = nullptr;
+						if (_outingButton)
+						{
+							outingButton = il2cpp_class_get_method_from_name_type<Il2CppObject * (*)(Il2CppObject*)>(_outingButton->klass, "get_Button", 0)->methodPointer(_outingButton);
+						}
+
+						auto _hospitalButtonField = il2cpp_class_get_field_from_name_wrap(stablesPanel->klass, "_hospitalButton");
+						Il2CppObject* _hospitalButton;
+						il2cpp_field_get_value(stablesPanel, _hospitalButtonField, &_hospitalButton);
+
+						Il2CppObject* hospitalButton = nullptr;
+						if (_hospitalButton)
+						{
+							hospitalButton = il2cpp_class_get_method_from_name_type<Il2CppObject * (*)(Il2CppObject*)>(_hospitalButton->klass, "get_Button", 0)->methodPointer(_hospitalButton);
+						}
+
+						auto _raceRegistButtonField = il2cpp_class_get_field_from_name_wrap(stablesPanel->klass, "_raceRegistButton");
+						Il2CppObject* _raceRegistButton;
+						il2cpp_field_get_value(stablesPanel, _raceRegistButtonField, &_raceRegistButton);
+
+						Il2CppObject* raceRegistButton = nullptr;
+						if (_raceRegistButton)
+						{
+							raceRegistButton = il2cpp_class_get_method_from_name_type<Il2CppObject * (*)(Il2CppObject*)>(_raceRegistButton->klass, "get_Button", 0)->methodPointer(_raceRegistButton);
+						}
+
+						auto _targetRaceSkillGetButtonField = il2cpp_class_get_field_from_name_wrap(stablesPanel->klass, "_targetRaceSkillGetButton");
+						Il2CppObject* _targetRaceSkillGetButton;
+						il2cpp_field_get_value(stablesPanel, _targetRaceSkillGetButtonField, &_targetRaceSkillGetButton);
+
+						Il2CppObject* targetRaceSkillGetButton = nullptr;
+						if (_targetRaceSkillGetButton)
+						{
+							targetRaceSkillGetButton = il2cpp_class_get_method_from_name_type<Il2CppObject * (*)(Il2CppObject*)>(_targetRaceSkillGetButton->klass, "get_Button", 0)->methodPointer(_targetRaceSkillGetButton);
+						}
+
+						auto _targetRaceRegistButtonField = il2cpp_class_get_field_from_name_wrap(stablesPanel->klass, "_targetRaceRegistButton");
+						Il2CppObject* _targetRaceRegistButton;
+						il2cpp_field_get_value(stablesPanel, _targetRaceRegistButtonField, &_targetRaceRegistButton);
+
+						auto _addonScenarioButtonField = il2cpp_class_get_field_from_name_wrap(stablesPanel->klass, "_addonScenarioButton");
+						Il2CppObject* _addonScenarioButton;
+						il2cpp_field_get_value(stablesPanel, _addonScenarioButtonField, &_addonScenarioButton);
+
+						Il2CppObject* addonScenarioButton = nullptr;
+						if (_addonScenarioButton)
+						{
+							addonScenarioButton = il2cpp_class_get_method_from_name_type<Il2CppObject * (*)(Il2CppObject*)>(_addonScenarioButton->klass, "get_Button", 0)->methodPointer(_addonScenarioButton);
+						}
+
+						auto model = il2cpp_class_get_method_from_name_type<Il2CppObject * (*)(Il2CppObject*)>(stablesPanel->klass, "get_Model", 0)->methodPointer(stablesPanel);
+						auto isOnlyRaceEntry = il2cpp_class_get_method_from_name_type<bool (*)(Il2CppObject*)>(model->klass, "get_IsOnlyRaceEntry", 0)->methodPointer(model);
+
+						if (isOnlyRaceEntry)
+						{
+							if (wParam == 'Q')
+							{
+								PressButton(targetRaceSkillGetButton);
+								return true;
+							}
+
+							if (wParam == 'W')
+							{
+								PressButton(_targetRaceRegistButton);
+								return true;
+							}
+
+							if (wParam == 'E' && addonScenarioButton)
+							{
+								PressButton(addonScenarioButton);
+								return true;
+							}
+						}
+						else
+						{
+							if (wParam == 'Q')
+							{
+								PressButton(_nextMonthButton);
+								return true;
+							}
+
+							if (wParam == 'W')
+							{
+								PressButton(_trainingButton);
+								return true;
+							}
+
+							if (wParam == 'E')
+							{
+								PressButton(_skillGetButton);
+								return true;
+							}
+
+							if (wParam == 'A')
+							{
+								PressButton(hospitalButton);
+								return true;
+							}
+
+							if (wParam == 'S')
+							{
+								auto isActive = get_activeSelf(get_gameObject(outingButton));
+
+								if (isActive)
+		{
+									PressButton(outingButton);
+								}
+								else
+			{
+									PressButton(_outingSummerButton);
+								}
+								return true;
+							}
+
+							if (wParam == 'D' && addonScenarioButton)
+							{
+								PressButton(addonScenarioButton);
+				return true;
+			}
+
+							if (wParam == 'F')
+							{
+								PressButton(raceRegistButton);
+								return true;
+		}
+						}
+					}
+				}
+			}
+		}
+
+		return false;
+	}
+
+	bool PressSingleModeRaceEntry(WPARAM wParam)
+		{
+		if (!(wParam == VK_RETURN || wParam == VK_SPACE || wParam == VK_LEFT || wParam == VK_RIGHT || wParam == VK_UP || wParam == VK_DOWN))
+			{
+			return false;
+		}
+
+		if (GetFrontDialog())
+		{
+			return false;
+		}
+
+		auto sceneManager = GetSingletonInstance(il2cpp_symbols::get_class("umamusume.dll", "Gallop", "SceneManager"));
+
+		if (!sceneManager)
+		{
+			return false;
+		}
+
+		auto GetCurrentViewController = il2cpp_symbols::find_method<Il2CppObject * (*)(Il2CppObject*)>("umamusume.dll", "Gallop", "SceneManager", [](const MethodInfo* info)
+			{
+				return info->name == "GetCurrentViewController"s && info->methodPointer;
+			});
+		auto controller = GetCurrentViewController(sceneManager);
+
+		if (controller)
+		{
+			if (controller->klass->name == "SingleModeRaceEntryViewController"s)
+			{
+				auto view = il2cpp_class_get_method_from_name_type<Il2CppObject * (*)(Il2CppObject*)>(controller->klass, "GetViewBase", 0)->methodPointer(controller);
+				if (view)
+				{
+					auto get_gameObject = il2cpp_symbols::get_method_pointer<Il2CppObject * (*)(Il2CppObject*)>("UnityEngine.CoreModule.dll", "UnityEngine", "Component", "get_gameObject", 0);
+					auto get_activeSelf = il2cpp_symbols::get_method_pointer<bool (*)(Il2CppObject*)>("UnityEngine.CoreModule.dll", "UnityEngine", "GameObject", "get_activeSelf", 0);
+
+					if (wParam == VK_RETURN || wParam == VK_SPACE)
+					{
+						auto entryButton = il2cpp_class_get_method_from_name_type<Il2CppObject * (*)(Il2CppObject*)>(view->klass, "get_EntryButton", 0)->methodPointer(view);
+						auto entryIsActive = get_activeSelf(get_gameObject(entryButton));
+
+						auto reserveButton = il2cpp_class_get_method_from_name_type<Il2CppObject * (*)(Il2CppObject*)>(view->klass, "get_ReserveButton", 0)->methodPointer(view);
+						auto reserveIsActive = get_activeSelf(get_gameObject(reserveButton));
+
+						auto cancelReserveButton = il2cpp_class_get_method_from_name_type<Il2CppObject * (*)(Il2CppObject*)>(view->klass, "get_CancelReserveButton", 0)->methodPointer(view);
+						auto cancelReserveIsActive = get_activeSelf(get_gameObject(cancelReserveButton));
+
+						if (entryIsActive)
+						{
+							PressButton(entryButton);
+				return true;
+			}
+
+						if (reserveIsActive)
+						{
+							PressButton(reserveButton);
+							return true;
+		}
+
+						if (cancelReserveIsActive)
+		{
+							PressButton(cancelReserveButton);
+							return true;
+						}
+					}
+
+					bool shiftKeyDown = GetKeyState(VK_SHIFT) < 0;
+
+					if (wParam == VK_LEFT || wParam == VK_RIGHT)
+			{
+						auto leftArrowButton = il2cpp_class_get_method_from_name_type<Il2CppObject * (*)(Il2CppObject*)>(view->klass, "get_LeftArrowButton", 0)->methodPointer(view);
+
+						auto leftSkipArrowButton = il2cpp_class_get_method_from_name_type<Il2CppObject * (*)(Il2CppObject*)>(view->klass, "get_LeftSkipArrowButton", 0)->methodPointer(view);
+
+						auto rightArrowButton = il2cpp_class_get_method_from_name_type<Il2CppObject * (*)(Il2CppObject*)>(view->klass, "get_RightArrowButton", 0)->methodPointer(view);
+
+						auto rightSkipArrowButton = il2cpp_class_get_method_from_name_type<Il2CppObject * (*)(Il2CppObject*)>(view->klass, "get_RightSkipArrowButton", 0)->methodPointer(view);
+
+						if (wParam == VK_LEFT)
+						{
+							if (shiftKeyDown)
+							{
+								PressButton(leftSkipArrowButton);
+							}
+							else
+							{
+								PressButton(leftArrowButton);
+							}
+
+				return true;
+			}
+
+						if (wParam == VK_RIGHT)
+			{
+							if (shiftKeyDown)
+							{
+								PressButton(rightSkipArrowButton);
+							}
+							else
+							{
+								PressButton(rightArrowButton);
+							}
+
+				return true;
+			}
+		}
+				}
+
+				if (wParam == VK_UP || wParam == VK_DOWN)
+				{
+					auto _itemListField = il2cpp_class_get_field_from_name_wrap(controller->klass, "_itemList");
+					Il2CppObject* _itemList;
+					il2cpp_field_get_value(controller, _itemListField, &_itemList);
+
+					if (_itemList)
+					{
+						FieldInfo* itemsField = il2cpp_class_get_field_from_name_wrap(_itemList->klass, "_items");
+						Il2CppArraySize_t<Il2CppObject*>* arr;
+						il2cpp_field_get_value(_itemList, itemsField, &arr);
+					}
+				}
+			}
+		}
+
+		return false;
+	}
+
+	bool PressSingleModePaddock(WPARAM wParam)
+	{
+		if (!(wParam == VK_RETURN || wParam == VK_SPACE))
+		{
+			return false;
+		}
+
+		if (GetFrontDialog())
+		{
+			return false;
+		}
+
+		auto sceneManager = GetSingletonInstance(il2cpp_symbols::get_class("umamusume.dll", "Gallop", "SceneManager"));
+
+		if (!sceneManager)
+		{
+			return false;
+		}
+
+		auto GetCurrentViewController = il2cpp_symbols::find_method<Il2CppObject * (*)(Il2CppObject*)>("umamusume.dll", "Gallop", "SceneManager", [](const MethodInfo* info)
+			{
+				return info->name == "GetCurrentViewController"s && info->methodPointer;
+			});
+		auto controller = GetCurrentViewController(sceneManager);
+
+		if (controller)
+		{
+			if (controller->klass->name == "SingleModePaddockViewController"s)
+			{
+				auto view = il2cpp_class_get_method_from_name_type<Il2CppObject * (*)(Il2CppObject*)>(controller->klass, "GetViewBase", 0)->methodPointer(controller);
+				if (view)
+				{
+					auto holder = il2cpp_class_get_method_from_name_type<Il2CppObject * (*)(Il2CppObject*)>(view->klass, "get_PaddockContentsHolder", 0)->methodPointer(view);
+
+					if (holder)
+					{
+						auto get_gameObject = il2cpp_symbols::get_method_pointer<Il2CppObject * (*)(Il2CppObject*)>("UnityEngine.CoreModule.dll", "UnityEngine", "Component", "get_gameObject", 0);
+						auto get_activeSelf = il2cpp_symbols::get_method_pointer<bool (*)(Il2CppObject*)>("UnityEngine.CoreModule.dll", "UnityEngine", "GameObject", "get_activeSelf", 0);
+
+						auto raceStartButtonCenter = il2cpp_class_get_method_from_name_type<Il2CppObject * (*)(Il2CppObject*)>(holder->klass, "get_RaceStartButtonCenter", 0)->methodPointer(holder);
+						auto raceStartButtonCenterIsActive = get_activeSelf(get_gameObject(raceStartButtonCenter));
+
+						auto raceSkipButton = il2cpp_class_get_method_from_name_type<Il2CppObject * (*)(Il2CppObject*)>(holder->klass, "get_RaceSkipButton", 0)->methodPointer(holder);
+
+						auto raceStartButtonRight = il2cpp_class_get_method_from_name_type<Il2CppObject * (*)(Il2CppObject*)>(holder->klass, "get_RaceStartButtonRight", 0)->methodPointer(holder);
+
+						if (raceStartButtonCenterIsActive)
+						{
+							PressButton(raceStartButtonCenter);
+							return true;
+						}
+						else if (wParam == VK_SPACE)
+						{
+							PressButton(raceSkipButton);
+							return true;
+						}
+						else if (wParam == VK_RETURN)
+						{
+							PressButton(raceStartButtonRight);
+							return true;
+						}
+					}
+				}
+			}
+		}
+
 		return false;
 	}
 
 	bool isNumKeyDown = false;
+
+	bool PressSingleModeLiveSelect(WPARAM wParam)
+	{
+		bool keydownNumber = 0 < (wParam - 48) && (wParam - 48) <= 3;
+		if (!keydownNumber)
+		{
+			return false;
+		}
+
+		if (isNumKeyDown)
+		{
+			return false;
+		}
+
+		if (GetFrontDialog())
+		{
+			return false;
+		}
+
+		auto sceneManager = GetSingletonInstance(il2cpp_symbols::get_class("umamusume.dll", "Gallop", "SceneManager"));
+
+		if (!sceneManager)
+		{
+			return false;
+		}
+
+		auto GetCurrentViewController = il2cpp_symbols::find_method<Il2CppObject * (*)(Il2CppObject*)>("umamusume.dll", "Gallop", "SceneManager", [](const MethodInfo* info)
+			{
+				return info->name == "GetCurrentViewController"s && info->methodPointer;
+			});
+		auto controller = GetCurrentViewController(sceneManager);
+
+		if (controller)
+		{
+			if (controller->klass->name == "SingleModeScenarioLiveSelectViewController"s)
+			{
+				isNumKeyDown = true;
+
+				int choiceIndex = (wParam - 48) - 1;
+
+				auto view = il2cpp_class_get_method_from_name_type<Il2CppObject * (*)(Il2CppObject*)>(controller->klass, "GetViewBase", 0)->methodPointer(controller);
+				if (view)
+				{
+					auto treeList = il2cpp_class_get_method_from_name_type<Il2CppObject * (*)(Il2CppObject*)>(view->klass, "get_TreeList", 0)->methodPointer(view);
+					if (treeList)
+					{
+						auto _treeArrayField = il2cpp_class_get_field_from_name_wrap(treeList->klass, "_treeArray");
+						Il2CppArraySize_t<Il2CppObject*>* _treeArray;
+						il2cpp_field_get_value(treeList, _treeArrayField, &_treeArray);
+
+						if (_treeArray)
+						{
+							auto treeItem = _treeArray->vector[choiceIndex];
+							if (treeItem)
+							{
+								auto _buttonField = il2cpp_class_get_field_from_name_wrap(treeItem->klass, "_button");
+								Il2CppObject* _button;
+
+								il2cpp_field_get_value(treeItem, _buttonField, &_button);
+
+								if (_button)
+								{
+									PressButton(_button);
+									return true;
+								}
+							}
+						}
+					}
+				}
+			}
+		}
+
+		return false;
+	}
 
 	bool StepTrainingItem(WPARAM wParam)
 	{
@@ -4456,11 +4969,11 @@ namespace
 					return false;
 				}
 
-				auto trainingController = il2cpp_class_get_method_from_name_type<Il2CppObject * (*)(Il2CppObject*)>(controller->klass, "get_TrainingController", 0)->methodPointer(controller);
-				if (il2cpp_class_get_method_from_name_type<bool (*)(Il2CppObject*)>(trainingController->klass, "get_IsInTraining", 0)->methodPointer(trainingController))
-				{
 					auto view = il2cpp_class_get_method_from_name_type<Il2CppObject * (*)(Il2CppObject*)>(controller->klass, "GetViewBase", 0)->methodPointer(controller);
 					if (view)
+					{
+					auto trainingController = il2cpp_class_get_method_from_name_type<Il2CppObject * (*)(Il2CppObject*)>(controller->klass, "get_TrainingController", 0)->methodPointer(controller);
+					if (il2cpp_class_get_method_from_name_type<bool (*)(Il2CppObject*)>(trainingController->klass, "get_IsInTraining", 0)->methodPointer(trainingController))
 					{
 						auto footer = il2cpp_class_get_method_from_name_type<Il2CppObject * (*)(Il2CppObject*)>(view->klass, "get_TrainingFooter", 0)->methodPointer(view);
 						if (footer)
@@ -4491,6 +5004,7 @@ namespace
 									il2cpp_field_set_value(footer, _onClickEnableField, &_onClickEnable);
 
 									il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, Il2CppObject*, Il2CppObject*)>(footer->klass, "OnClickItem", 2)->methodPointer(footer, selectedItem, selectedMenu);
+									return true;
 								}
 							}
 							else if (keydownNumber)
@@ -4532,6 +5046,7 @@ namespace
 								}
 
 								il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, Il2CppObject*, Il2CppObject*, bool, bool)>(footer->klass, "Select", 4)->methodPointer(footer, footerItem, trainingMenu, false, false);
+								return true;
 							}
 							else
 							{
@@ -4571,6 +5086,7 @@ namespace
 								il2cpp_field_set_value(footer, _preSelectedMenuField, trainingMenu);
 
 								il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, Il2CppObject*, Il2CppObject*, bool, bool)>(footer->klass, "Select", 4)->methodPointer(footer, footerItem, trainingMenu, false, false);
+								return true;
 							}
 						}
 					}
@@ -4578,7 +5094,147 @@ namespace
 			}
 		}
 
-		return true;
+		return false;
+	}
+
+	bool SelectStoryChoice(WPARAM wParam)
+	{
+		bool keydownNumber = 0 < (wParam - 48) && (wParam - 48) <= 9;
+		if (!keydownNumber)
+		{
+			return false;
+		}
+
+		if (isNumKeyDown)
+		{
+			return false;
+		}
+
+		auto choiceController = GetSingletonInstanceByMethod(il2cpp_symbols::get_class("umamusume.dll", "Gallop", "StoryChoiceController"));
+		if (!choiceController)
+		{
+			return false;
+		}
+
+		bool isWaitSelect = il2cpp_class_get_method_from_name_type<bool (*)(Il2CppObject*)>(choiceController->klass, "get_IsWaitSelect", 0)->methodPointer(choiceController);
+		if (!isWaitSelect)
+		{
+			return false;
+		}
+
+		isNumKeyDown = true;
+
+		int choiceIndex = (wParam - 48) - 1;
+
+		int maxCount = il2cpp_class_get_method_from_name_type<int (*)(Il2CppObject*)>(choiceController->klass, "get_MaxCount", 0)->methodPointer(choiceController);
+		if (choiceIndex > maxCount - 1)
+		{
+			return false;
+		}
+
+		auto _choiceButtonListField = il2cpp_class_get_field_from_name_wrap(choiceController->klass, "_choiceButtonList");
+		Il2CppObject* _choiceButtonList;
+
+		il2cpp_field_get_value(choiceController, _choiceButtonListField, &_choiceButtonList);
+
+		if (!_choiceButtonList)
+		{
+			return false;
+		}
+
+		auto choiceButton = il2cpp_class_get_method_from_name_type<Il2CppObject * (*)(Il2CppObject*, int)>(_choiceButtonList->klass, "get_Item", 1)->methodPointer(_choiceButtonList, choiceIndex);
+		auto _buttonField = il2cpp_class_get_field_from_name_wrap(choiceButton->klass, "_button");
+		Il2CppObject* _button;
+
+		il2cpp_field_get_value(choiceButton, _buttonField, &_button);
+
+		if (_button)
+		{
+			PressButton(_button);
+			return true;
+		}
+
+		return false;
+	}
+
+	bool SelectRaceStoryChoice(WPARAM wParam)
+	{
+		bool keydownNumber = 0 < (wParam - 48) && (wParam - 48) <= 9;
+		if (!keydownNumber)
+		{
+			return false;
+		}
+
+		if (isNumKeyDown)
+		{
+			return false;
+		}
+
+		auto storyReplay = GetSingletonInstance(il2cpp_symbols::get_class("umamusume.dll", "Gallop", "RaceManagerStoryReplay"));
+		if (!storyReplay)
+		{
+			return false;
+		}
+
+		isNumKeyDown = true;
+
+		int choiceIndex = (wParam - 48) - 1;
+
+		auto _choiceControllerField = il2cpp_class_get_field_from_name_wrap(storyReplay->klass, "_choiceController");
+		Il2CppObject* _choiceController;
+		il2cpp_field_get_value(storyReplay, _choiceControllerField, &_choiceController);
+
+		if (!_choiceController)
+		{
+			return false;
+		}
+
+		auto _dialogTypeField = il2cpp_class_get_field_from_name_wrap(_choiceController->klass, "_dialogType");
+		int _dialogType;
+		il2cpp_field_get_value(_choiceController, _dialogTypeField, &_dialogType);
+
+		if (_dialogType == 0)
+		{
+			return false;
+		}
+
+		auto _choicesArrayField = il2cpp_class_get_field_from_name_wrap(_choiceController->klass, "_choicesArray");
+		Il2CppArraySize_t<Il2CppObject*>* _choicesArray;
+		il2cpp_field_get_value(_choiceController, _choicesArrayField, &_choicesArray);
+
+		if (!_choicesArray)
+		{
+			return false;
+		}
+
+		if (choiceIndex > _choicesArray->max_length - 1)
+		{
+			return false;
+		}
+
+		auto choiceParam = _choicesArray->vector[choiceIndex];
+		auto ButtonField = il2cpp_class_get_field_from_name_wrap(choiceParam->klass, "Button");
+		Il2CppObject* Button;
+
+		il2cpp_field_get_value(choiceParam, ButtonField, &Button);
+
+		if (!Button)
+		{
+			return false;
+		}
+
+		auto _buttonField = il2cpp_class_get_field_from_name_wrap(Button->klass, "_button");
+		Il2CppObject* _button;
+
+		il2cpp_field_get_value(Button, _buttonField, &_button);
+
+		if (_button)
+		{
+			PressButton(_button);
+			return true;
+		}
+
+		return false;
 	}
 
 	bool isPortraitBeforeFullscreen = false;
@@ -4613,7 +5269,37 @@ namespace
 				return TRUE;
 			}
 
+			if (PressSingleModeButton(wParam))
+			{
+				return TRUE;
+			}
+
+			if (PressSingleModeRaceEntry(wParam))
+			{
+				return TRUE;
+			}
+
+			if (PressSingleModePaddock(wParam))
+			{
+				return TRUE;
+			}
+
+			if (PressSingleModeLiveSelect(wParam))
+			{
+				return TRUE;
+			}
+
 			if (StepTrainingItem(wParam))
+			{
+				return TRUE;
+			}
+
+			if (SelectStoryChoice(wParam))
+			{
+				return TRUE;
+			}
+
+			if (SelectRaceStoryChoice(wParam))
 			{
 				return TRUE;
 			}
@@ -4621,7 +5307,7 @@ namespace
 
 		if (uMsg == WM_KEYUP)
 		{
-			if ((0 < (wParam - 48) && (wParam - 48) <= 5))
+			if ((0 < (wParam - 48) && (wParam - 48) <= 9))
 			{
 				isNumKeyDown = false;
 				return TRUE;
@@ -11017,7 +11703,7 @@ namespace
 		MsgPackData::ReadResponse(buf, data->max_length);
 
 		return data;
-	}
+		}
 
 	void* HttpHelper_CompressRequest_orig = nullptr;
 
@@ -11095,7 +11781,7 @@ namespace
 		MsgPackData::ReadResponse(buf, data->max_length);
 
 		return data;
-	}
+		}
 
 	LRESULT CALLBACK CBTProc(int nCode, WPARAM wParam, LPARAM lParam);
 	HHOOK hCBTHook = SetWindowsHookExW(WH_CBT, CBTProc, nullptr, GetCurrentThreadId());
@@ -12805,6 +13491,7 @@ namespace
 					if (config::character_system_text_caption)
 					{
 						isRequiredInitNotification = true;
+						notification = nullptr;
 					}
 
 					if (config::max_fps > -1 || config::unlock_size || config::freeform_window)
@@ -13039,7 +13726,7 @@ namespace
 		);
 		il2cpp_field_static_set_value(activeSceneChangedField, action);
 	}
-}
+	}
 
 void* OriginalNtCreateSection = nullptr;
 
@@ -13479,7 +14166,7 @@ bool init_hook_base()
 	MH_EnableHook(UnityMain_addr);
 
 	return true;
-}
+	}
 
 bool init_hook()
 {
