@@ -21,8 +21,6 @@
 #include <regex>
 
 #include <psapi.h>
-
-#include <winhttp.h>
 #include <wininet.h>
 
 #include <wrl.h>
@@ -974,7 +972,7 @@ namespace
 
 				return TRUE;
 			}
-			)), NULL);
+		)), NULL);
 
 		/*auto hWnd = FindWindowA("UnityWndClass", local::wide_acp(title).data());
 
@@ -4502,7 +4500,7 @@ namespace
 					auto stablesPanel = il2cpp_class_get_method_from_name_type<Il2CppObject * (*)(Il2CppObject*)>(view->klass, "get_StablesPanel", 0)->methodPointer(view);
 					if (stablesPanel)
 					{
-		auto get_gameObject = il2cpp_symbols::get_method_pointer<Il2CppObject * (*)(Il2CppObject*)>("UnityEngine.CoreModule.dll", "UnityEngine", "Component", "get_gameObject", 0);
+						auto get_gameObject = il2cpp_symbols::get_method_pointer<Il2CppObject * (*)(Il2CppObject*)>("UnityEngine.CoreModule.dll", "UnityEngine", "Component", "get_gameObject", 0);
 						auto get_activeSelf = il2cpp_symbols::get_method_pointer<bool (*)(Il2CppObject*)>("UnityEngine.CoreModule.dll", "UnityEngine", "GameObject", "get_activeSelf", 0);
 
 						auto panelIsActive = get_activeSelf(get_gameObject(stablesPanel));
@@ -4636,11 +4634,11 @@ namespace
 								auto isActive = get_activeSelf(get_gameObject(outingButton));
 
 								if (isActive)
-		{
+								{
 									PressButton(outingButton);
 								}
 								else
-			{
+								{
 									PressButton(_outingSummerButton);
 								}
 								return true;
@@ -4649,14 +4647,14 @@ namespace
 							if (wParam == 'D' && addonScenarioButton)
 							{
 								PressButton(addonScenarioButton);
-				return true;
-			}
+								return true;
+							}
 
 							if (wParam == 'F')
 							{
 								PressButton(raceRegistButton);
 								return true;
-		}
+							}
 						}
 					}
 				}
@@ -4667,9 +4665,9 @@ namespace
 	}
 
 	bool PressSingleModeRaceEntry(WPARAM wParam)
-		{
+	{
 		if (!(wParam == VK_RETURN || wParam == VK_SPACE || wParam == VK_LEFT || wParam == VK_RIGHT || wParam == VK_UP || wParam == VK_DOWN))
-			{
+		{
 			return false;
 		}
 
@@ -4715,17 +4713,17 @@ namespace
 						if (entryIsActive)
 						{
 							PressButton(entryButton);
-				return true;
-			}
+							return true;
+						}
 
 						if (reserveIsActive)
 						{
 							PressButton(reserveButton);
 							return true;
-		}
+						}
 
 						if (cancelReserveIsActive)
-		{
+						{
 							PressButton(cancelReserveButton);
 							return true;
 						}
@@ -4734,7 +4732,7 @@ namespace
 					bool shiftKeyDown = GetKeyState(VK_SHIFT) < 0;
 
 					if (wParam == VK_LEFT || wParam == VK_RIGHT)
-			{
+					{
 						auto leftArrowButton = il2cpp_class_get_method_from_name_type<Il2CppObject * (*)(Il2CppObject*)>(view->klass, "get_LeftArrowButton", 0)->methodPointer(view);
 
 						auto leftSkipArrowButton = il2cpp_class_get_method_from_name_type<Il2CppObject * (*)(Il2CppObject*)>(view->klass, "get_LeftSkipArrowButton", 0)->methodPointer(view);
@@ -4754,11 +4752,11 @@ namespace
 								PressButton(leftArrowButton);
 							}
 
-				return true;
-			}
+							return true;
+						}
 
 						if (wParam == VK_RIGHT)
-			{
+						{
 							if (shiftKeyDown)
 							{
 								PressButton(rightSkipArrowButton);
@@ -4768,9 +4766,9 @@ namespace
 								PressButton(rightArrowButton);
 							}
 
-				return true;
-			}
-		}
+							return true;
+						}
+					}
 				}
 
 				if (wParam == VK_UP || wParam == VK_DOWN)
@@ -4969,9 +4967,9 @@ namespace
 					return false;
 				}
 
-					auto view = il2cpp_class_get_method_from_name_type<Il2CppObject * (*)(Il2CppObject*)>(controller->klass, "GetViewBase", 0)->methodPointer(controller);
-					if (view)
-					{
+				auto view = il2cpp_class_get_method_from_name_type<Il2CppObject * (*)(Il2CppObject*)>(controller->klass, "GetViewBase", 0)->methodPointer(controller);
+				if (view)
+				{
 					auto trainingController = il2cpp_class_get_method_from_name_type<Il2CppObject * (*)(Il2CppObject*)>(controller->klass, "get_TrainingController", 0)->methodPointer(controller);
 					if (il2cpp_class_get_method_from_name_type<bool (*)(Il2CppObject*)>(trainingController->klass, "get_IsInTraining", 0)->methodPointer(trainingController))
 					{
@@ -9626,7 +9624,7 @@ namespace
 				GetOptionItem3Toggle("champions_live_year", LocalifySettings::GetText("champions_live_year"), L"2022", L"2023", L"2024", championsLiveYear - 2022),
 				GetOptionItemSimple(L""),
 			}
-			);
+		);
 
 		SetOptionItemOnOffAction("champions_live_show_text", championsLiveShowText, *([](Il2CppObject*, bool isOn)
 			{
@@ -9668,7 +9666,7 @@ namespace
 				GetOptionItemTitle(LocalifySettings::GetText("title")),
 				GetOptionItemButton("open_settings", LocalifySettings::GetText("open_settings")),
 			}
-			);
+		);
 	}
 
 	void SetupOptionLayout()
@@ -11055,105 +11053,47 @@ namespace
 
 	string GetLoginURL()
 	{
+		auto hInternet = InternetOpenW(L"DMMGamePlayer5/5.2.47", INTERNET_OPEN_TYPE_PRECONFIG, nullptr, nullptr, 0);
+
+		auto hConnect = InternetConnectW(hInternet, L"apidgp-gameplayer.games.dmm.com", INTERNET_DEFAULT_HTTPS_PORT, nullptr, nullptr, INTERNET_SERVICE_HTTP, 0, NULL);
+
+		LPCWSTR types[] = { L"application/json", NULL };
+		auto hReq = HttpOpenRequestW(hConnect, L"GET", L"/v5/loginurl", nullptr, nullptr, types, INTERNET_FLAG_SECURE | INTERNET_FLAG_NO_COOKIES, NULL);
+
+		auto res = HttpSendRequestW(hReq, nullptr, 0, nullptr, 0);
+
+		if (!res)
+		{
+			return "";
+		}
+
 		DWORD dwSize = 0;
-		DWORD dwDownloaded = 0;
-		LPSTR pszOutBuffer;
-		BOOL  bResults = FALSE;
-		HINTERNET  hSession = NULL,
-			hConnect = NULL,
-			hRequest = NULL;
+		DWORD dwSizeLen = sizeof(DWORD);
 
-		// Use WinHttpOpen to obtain a session handle.
-		hSession = WinHttpOpen(L"WinHTTP/1.0",
-			WINHTTP_ACCESS_TYPE_DEFAULT_PROXY,
-			WINHTTP_NO_PROXY_NAME,
-			WINHTTP_NO_PROXY_BYPASS, 0);
+		HttpQueryInfoW(hReq, HTTP_QUERY_CONTENT_LENGTH | HTTP_QUERY_FLAG_NUMBER, &dwSize, &dwSizeLen, 0);
 
-		// Specify an HTTP server.
-		if (hSession)
-			hConnect = WinHttpConnect(hSession, L"apidgp-gameplayer.games.dmm.com",
-				INTERNET_DEFAULT_HTTPS_PORT, 0);
+		char* buffer = new char[dwSize + 1];
 
-		auto acceptType = L"application/json";
+		DWORD dwBytesRead;
+		BOOL bRead = InternetReadFile(hReq, buffer, dwSize + 1, &dwBytesRead);
 
-		// Create an HTTP request handle.
-		if (hConnect)
-			hRequest = WinHttpOpenRequest(hConnect, L"GET", L"/v5/loginurl",
-				NULL, WINHTTP_NO_REFERER,
-				&acceptType,
-				WINHTTP_FLAG_SECURE);
-
-		// Send a request.
-		if (hRequest)
-			bResults = WinHttpSendRequest(hRequest,
-				WINHTTP_NO_ADDITIONAL_HEADERS, 0,
-				WINHTTP_NO_REQUEST_DATA, 0,
-				0, 0);
-
-		// End the request.
-		if (bResults)
-			bResults = WinHttpReceiveResponse(hRequest, NULL);
-
-		string jsonData;
-
-		// Keep checking for data until there is nothing left.
-		if (bResults)
+		if (!bRead)
 		{
-			do
-			{
-				// Check for available data.
-				dwSize = 0;
-				if (!WinHttpQueryDataAvailable(hRequest, &dwSize))
-				{
-					cout << "Error " << GetLastError() << " in WinHttpQueryDataAvailable." << endl;
-				}
-
-				// Allocate space for the buffer.
-				pszOutBuffer = new char[dwSize + 1];
-				if (!pszOutBuffer)
-				{
-					cout << "Out of memory" << endl;
-					dwSize = 0;
-				}
-				else
-				{
-					// Read the data.
-					ZeroMemory(pszOutBuffer, dwSize + 1);
-
-					if (!WinHttpReadData(hRequest, (LPVOID)pszOutBuffer,
-						dwSize, &dwDownloaded))
-					{
-						cout << "Error " << GetLastError() << " in WinHttpReadData." << endl;
-					}
-					else
-					{
-						if (strlen(pszOutBuffer) > 0)
-						{
-							jsonData = pszOutBuffer;
-						}
-					}
-
-					// Free the memory allocated to the buffer.
-					delete[] pszOutBuffer;
-				}
-			} while (dwSize > 0);
+			return "";
+		}
+		else
+		{
+			buffer[dwBytesRead] = 0;
 		}
 
-
-		// Report any errors.
-		if (!bResults)
-		{
-			cout << "Error " << GetLastError() << " has occurred." << endl;
-		}
-
-		// Close any open handles.
-		if (hRequest) WinHttpCloseHandle(hRequest);
-		if (hConnect) WinHttpCloseHandle(hConnect);
-		if (hSession) WinHttpCloseHandle(hSession);
+		InternetCloseHandle(hReq);
+		InternetCloseHandle(hConnect);
+		InternetCloseHandle(hInternet);
 
 		rapidjson::Document document;
 
-		document.Parse(jsonData.data());
+		document.Parse(buffer);
+		delete[] buffer;
 
 		if (document.HasParseError())
 		{
@@ -11171,142 +11111,53 @@ namespace
 
 	string GetGameArgs(wstring sessionId, wstring secureId)
 	{
-		DWORD dwSize = 0;
-		DWORD dwDownloaded = 0;
-		LPSTR pszOutBuffer;
-		BOOL  bResults = FALSE;
-		HINTERNET  hSession = NULL,
-			hConnect = NULL,
-			hRequest = NULL;
+		auto hInternet = InternetOpenW(L"DMMGamePlayer5/5.2.47", INTERNET_OPEN_TYPE_PRECONFIG, nullptr, nullptr, 0);
 
-		// Use WinHttpOpen to obtain a session handle.
-		hSession = WinHttpOpen(L"WinHTTP/1.0",
-			WINHTTP_ACCESS_TYPE_DEFAULT_PROXY,
-			WINHTTP_NO_PROXY_NAME,
-			WINHTTP_NO_PROXY_BYPASS, 0);
+		auto hConnect = InternetConnectW(hInternet, L"apidgp-gameplayer.games.dmm.com", INTERNET_DEFAULT_HTTPS_PORT, nullptr, nullptr, INTERNET_SERVICE_HTTP, 0, NULL);
 
-		// Specify an HTTP server.
-		if (hSession)
+		LPCWSTR types[] = { L"application/json", NULL };
+		auto hReq = HttpOpenRequestW(hConnect, L"POST", L"/v5/launch/cl", nullptr, nullptr, types, INTERNET_FLAG_SECURE | INTERNET_FLAG_NO_COOKIES, NULL);
+
+		wstringstream headerStream;
+		headerStream << L"Client-App: DMMGamePlayer5" << endl
+			<< L"Client-version: 5.2.47" << endl
+			<< L"Cookie: login_session_id=" << sessionId << L";login_secure_id=" << secureId << endl;
+
+		auto body = R"({"product_id":"umamusume","game_type":"GCL","launch_type":"LIB","game_os":"win","user_os":"win","mac_address":"null","hdd_serial":"null","motherboard":"null"})"s;
+		auto res = HttpSendRequestW(hReq, headerStream.str().data(), 0, body.data(), body.size());
+
+		if (!res)
 		{
-			hConnect = WinHttpConnect(hSession, L"apidgp-gameplayer.games.dmm.com",
-				INTERNET_DEFAULT_HTTPS_PORT, 0);
-		}
-		else
-		{
-			cout << "Connect create failed" << endl;
-		}
-
-		auto acceptType = L"application/json";
-
-		// Create an HTTP request handle.
-		if (hConnect)
-			hRequest = WinHttpOpenRequest(hConnect, L"POST", L"/v5/launch/cl",
-				NULL, WINHTTP_NO_REFERER,
-				WINHTTP_DEFAULT_ACCEPT_TYPES,
-				WINHTTP_FLAG_SECURE);
-
-		// Send a request.
-		if (hRequest)
-		{
-			WinHttpAddRequestHeaders(hRequest, L"Client-App: DMMGamePlayer5", static_cast<unsigned long>(-1), WINHTTP_ADDREQ_FLAG_ADD);
-			WinHttpAddRequestHeaders(hRequest, L"Client-version: 5.2.31", static_cast<unsigned long>(-1), WINHTTP_ADDREQ_FLAG_ADD);
-			WinHttpAddRequestHeaders(hRequest, L"Content-Type: application/json", static_cast<unsigned long>(-1), WINHTTP_ADDREQ_FLAG_ADD);
-
-			wstringstream sessionCookieStream;
-			sessionCookieStream << L"Cookie: login_session_id=" << sessionId << L";login_secure_id=" << secureId;
-
-			auto body = R"({"product_id":"umamusume","game_type":"GCL","launch_type":"LIB","game_os":"win","user_os":"win","mac_address":"null","hdd_serial":"null","motherboard":"null"})"s;
-
-			WinHttpAddRequestHeaders(hRequest, sessionCookieStream.str().data(), -1, WINHTTP_ADDREQ_FLAG_ADD);
-
-			bResults = WinHttpSendRequest(hRequest,
-				NULL, NULL,
-				reinterpret_cast<LPVOID>(const_cast<LPSTR>(body.data())), body.size(),
-				body.size(), NULL);
-		}
-		else
-		{
-			cout << "Request create failed" << endl;
-		}
-
-		// End the request.
-		if (bResults)
-			bResults = WinHttpReceiveResponse(hRequest, NULL);
-
-
-		DWORD dwStatusCode = 0;
-
-		WinHttpQueryHeaders(hRequest,
-			WINHTTP_QUERY_STATUS_CODE | WINHTTP_QUERY_FLAG_NUMBER,
-			WINHTTP_HEADER_NAME_BY_INDEX,
-			&dwStatusCode, &dwSize, WINHTTP_NO_HEADER_INDEX);
-
-		if (dwStatusCode != HTTP_STATUS_OK && dwStatusCode > 0)
-		{
-			cout << "Error status " << dwStatusCode << endl;
 			return "";
 		}
 
-		string jsonData;
+		DWORD dwSize = 0;
+		DWORD dwSizeLen = sizeof(DWORD);
 
-		// Keep checking for data until there is nothing left.
-		if (bResults)
+		HttpQueryInfoW(hReq, HTTP_QUERY_CONTENT_LENGTH | HTTP_QUERY_FLAG_NUMBER, &dwSize, &dwSizeLen, 0);
+
+		char* buffer = new char[dwSize + 1];
+
+		DWORD dwBytesRead;
+		BOOL bRead = InternetReadFile(hReq, buffer, dwSize + 1, &dwBytesRead);
+
+		if (!bRead)
 		{
-			do
-			{
-				// Check for available data.
-				dwSize = 0;
-				if (!WinHttpQueryDataAvailable(hRequest, &dwSize))
-				{
-					cout << "Error " << GetLastError() << " in WinHttpQueryDataAvailable." << endl;
-				}
-
-				// Allocate space for the buffer.
-				pszOutBuffer = new char[dwSize + 1];
-				if (!pszOutBuffer)
-				{
-					cout << "Out of memory" << endl;
-					dwSize = 0;
-				}
-				else
-				{
-					// Read the data.
-					ZeroMemory(pszOutBuffer, dwSize + 1);
-
-					if (!WinHttpReadData(hRequest, (LPVOID)pszOutBuffer,
-						dwSize, &dwDownloaded))
-					{
-						cout << "Error " << GetLastError() << " in WinHttpReadData." << endl;
-					}
-					else
-					{
-						if (strlen(pszOutBuffer) > 0)
-						{
-							jsonData = pszOutBuffer;
-						}
-					}
-
-					// Free the memory allocated to the buffer.
-					delete[] pszOutBuffer;
-				}
-			} while (dwSize > 0);
+			return "";
+		}
+		else
+		{
+			buffer[dwBytesRead] = 0;
 		}
 
-
-		// Report any errors.
-		if (!bResults)
-		{
-			cout << "Error " << GetLastError() << " has occurred." << endl;
-		}
-
-		// Close any open handles.
-		if (hRequest) WinHttpCloseHandle(hRequest);
-		if (hConnect) WinHttpCloseHandle(hConnect);
-		if (hSession) WinHttpCloseHandle(hSession);
+		InternetCloseHandle(hReq);
+		InternetCloseHandle(hConnect);
+		InternetCloseHandle(hInternet);
 
 		rapidjson::Document document;
 
-		document.Parse(jsonData.data());
+		document.Parse(buffer);
+		delete[] buffer;
 
 		if (document.HasParseError())
 		{
@@ -11567,7 +11418,7 @@ namespace
 					).Get());
 					return S_OK;
 				}
-			).Get());
+		).Get());
 
 
 		MSG msg;
@@ -11703,7 +11554,7 @@ namespace
 		MsgPackData::ReadResponse(buf, data->max_length);
 
 		return data;
-		}
+	}
 
 	void* HttpHelper_CompressRequest_orig = nullptr;
 
@@ -11781,7 +11632,7 @@ namespace
 		MsgPackData::ReadResponse(buf, data->max_length);
 
 		return data;
-		}
+	}
 
 	LRESULT CALLBACK CBTProc(int nCode, WPARAM wParam, LPARAM lParam);
 	HHOOK hCBTHook = SetWindowsHookExW(WH_CBT, CBTProc, nullptr, GetCurrentThreadId());
@@ -13726,7 +13577,7 @@ namespace
 		);
 		il2cpp_field_static_set_value(activeSceneChangedField, action);
 	}
-	}
+}
 
 void* OriginalNtCreateSection = nullptr;
 
@@ -13791,7 +13642,7 @@ HookedNtMapViewOfSection(
 
 extern "C" NTSTATUS NtProtectVirtualMemory(
 	IN      HANDLE      ProcessHandle,
-	IN OUT  PVOID* BaseAddress,
+	IN OUT  PVOID * BaseAddress,
 	IN OUT  PSIZE_T     NumberOfBytesToProtect,
 	IN      ULONG       NewAccessProtection,
 	OUT     PULONG      OldAccessProtection);
@@ -14166,7 +14017,7 @@ bool init_hook_base()
 	MH_EnableHook(UnityMain_addr);
 
 	return true;
-	}
+}
 
 bool init_hook()
 {
