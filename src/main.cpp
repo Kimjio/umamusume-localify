@@ -31,7 +31,7 @@ namespace
 
 		// set this to avoid turn japanese texts into question mark
 		SetConsoleOutputCP(CP_UTF8);
-		locale::global(locale(""));
+		locale::global(locale(".UTF-8"));
 
 		wcout << L"\u30a6\u30de\u5a18 Localify Patch Loaded! - By GEEKiDoS/Kimjio" << endl;
 	}
@@ -211,7 +211,6 @@ BOOL WINAPI DllMain(HINSTANCE, DWORD reason, LPVOID)
 		}
 
 		wifstream appinfo(module_path.parent_path().append(module_path.filename().replace_extension().string().append("_Data\\app.info"s).data()));
-		appinfo.imbue(locale(""));
 
 		wstring company;
 		getline(appinfo, company);

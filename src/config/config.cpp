@@ -88,7 +88,6 @@ namespace config
 	void read_config_init()
 	{
 		wifstream config_stream{ "config.json" };
-		config_stream.imbue(locale(""));
 
 		if (!config_stream.is_open())
 		{
@@ -426,7 +425,6 @@ namespace config
 				auto path = document[L"codeMapPath"].GetString();
 
 				wifstream code_map_stream{ path };
-				code_map_stream.imbue(locale(""));
 
 				if (code_map_stream.is_open())
 				{
@@ -534,7 +532,6 @@ namespace config
 	bool read_config()
 	{
 		wifstream config_stream{ "config.json" };
-		config_stream.imbue(locale(""));
 
 		if (!config_stream.is_open())
 		{

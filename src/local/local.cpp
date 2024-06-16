@@ -91,12 +91,11 @@ namespace local
 					wcout << L"Dict directory: " << dict << endl;
 					for (auto& file : filesystem::directory_iterator(dict))
 					{
-						const auto filePath = local::acp_wide(file.path().string());
-						const auto fileName = local::acp_wide(file.path().filename().string());
+						const auto filePath = file.path().wstring();
+						const auto fileName = file.path().filename().wstring();
 						if (file.is_regular_file())
 						{
 							wifstream dict_stream{ filePath };
-							dict_stream.imbue(locale(""));
 
 							if (!dict_stream.is_open())
 								continue;
@@ -124,7 +123,6 @@ namespace local
 				else
 				{
 					wifstream dict_stream{ dict };
-					dict_stream.imbue(locale(""));
 
 					if (!dict_stream.is_open())
 						continue;
@@ -158,7 +156,6 @@ namespace local
 		if (filesystem::exists(dict.data()))
 		{
 			wifstream dict_stream{ dict };
-			dict_stream.imbue(locale(""));
 
 			if (!dict_stream.is_open())
 				return;
