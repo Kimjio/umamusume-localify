@@ -211,6 +211,7 @@ BOOL WINAPI DllMain(HINSTANCE, DWORD reason, LPVOID)
 		}
 
 		wifstream appinfo(module_path.parent_path().append(module_path.filename().replace_extension().string().append("_Data\\app.info"s).data()));
+		appinfo.imbue(locale(".UTF-8"));
 
 		wstring company;
 		getline(appinfo, company);

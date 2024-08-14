@@ -96,6 +96,7 @@ namespace local
 						if (file.is_regular_file())
 						{
 							wifstream dict_stream{ filePath };
+							dict_stream.imbue(locale(".UTF-8"));
 
 							if (!dict_stream.is_open())
 								continue;
@@ -123,6 +124,7 @@ namespace local
 				else
 				{
 					wifstream dict_stream{ dict };
+					dict_stream.imbue(locale(".UTF-8"));
 
 					if (!dict_stream.is_open())
 						continue;
@@ -156,6 +158,7 @@ namespace local
 		if (filesystem::exists(dict.data()))
 		{
 			wifstream dict_stream{ dict };
+			dict_stream.imbue(locale(".UTF-8"));
 
 			if (!dict_stream.is_open())
 				return;
@@ -231,7 +234,7 @@ namespace local
 	{
 		wstring* result;
 
-		auto hash = std::hash<wstring>{}(str->start_char);
+		auto hash = std::hash<wstring>{}(str->chars);
 
 		if (local::localify_text(hash, &result))
 		{
@@ -242,7 +245,7 @@ namespace local
 		{
 			str_list.emplace_back(hash);
 
-			logger::write_entry(hash, str->start_char);
+			logger::write_entry(hash, str->chars);
 		}
 
 		return str;

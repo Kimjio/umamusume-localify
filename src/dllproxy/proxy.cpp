@@ -36,7 +36,17 @@ namespace
 
 			dll_path += LR"(\version.dll)"s;
 
-			auto original_dll = LoadLibraryW(dll_path.data());
+			try
+			{
+				filesystem::copy_file(dll_path, L"version.win.dll", filesystem::copy_options::update_existing | filesystem::copy_options::create_symlinks);
+			}
+			catch (exception&)
+			{
+			}
+
+			// Loading version.dll from another path is prohibited.
+			//auto original_dll = LoadLibraryW(dll_path.data());
+			auto original_dll = LoadLibraryW(L"version.win.dll");
 
 			GetFileVersionInfoA_Original = GetProcAddress(original_dll, "GetFileVersionInfoA");
 			GetFileVersionInfoByHandle_Original = GetProcAddress(original_dll, "GetFileVersionInfoByHandle");
@@ -58,5 +68,5 @@ namespace
 		};
 	};
 
-	version_init init {};
+	version_init init{};
 }

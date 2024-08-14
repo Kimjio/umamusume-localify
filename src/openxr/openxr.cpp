@@ -334,8 +334,8 @@ namespace Unity
 	template<typename... T, typename R>
 	Il2CppDelegate* CreateUnityActionStatic(R(*fn)(void*, T...))
 	{
-		auto delegate = reinterpret_cast<MulticastDelegate*>(
-			il2cpp_object_new(il2cpp_symbols::get_class("UnityEngine.CoreModule.dll", "UnityEngine.Events", "UnityAction")));
+		const auto delegateClass = il2cpp_symbols::get_class("UnityEngine.CoreModule.dll", "UnityEngine.Events", "UnityAction");
+		auto delegate = reinterpret_cast<Il2CppDelegate*>(il2cpp_object_new(delegateClass));
 		delegate->method_ptr = reinterpret_cast<Il2CppMethodPointer>(fn);
 
 		const auto methodInfo = new MethodInfo{};
@@ -348,6 +348,7 @@ namespace Unity
 		methodInfo->parameters_count = sizeof...(T);
 
 		delegate->method = reinterpret_cast<const MethodInfo*>(il2cpp_method_get_object(methodInfo, methodInfo->klass));
+		// delegate->invoke_impl = il2cpp_class_get_method_from_name(delegateClass, "Invoke", IgnoreNumberOfArguments)->invoker_method;
 
 		return delegate;
 	}
@@ -360,7 +361,7 @@ namespace Unity
 
 	void OpenXR::InitLibrary(IUnityInterfaces* interfaces)
 	{
-		auto productName = il2cpp_resolve_icall_type<Il2CppString * (*)()>("UnityEngine.Application::get_productName")()->start_char;
+		auto productName = il2cpp_resolve_icall_type<Il2CppString * (*)()>("UnityEngine.Application::get_productName")()->chars;
 		module = LoadLibraryW((productName + L"_Data\\Plugins\\x86_64\\UnityOpenXR.dll"s).data());
 
 		if (module)
@@ -405,19 +406,19 @@ namespace Unity
 			return;
 		}
 
-		auto productName = local::wide_u8(il2cpp_resolve_icall_type<Il2CppString * (*)()>("UnityEngine.Application::get_productName")()->start_char);
+		auto productName = local::wide_u8(il2cpp_resolve_icall_type<Il2CppString * (*)()>("UnityEngine.Application::get_productName")()->chars);
 
 		auto version = local::wide_u8(il2cpp_symbols::get_method_pointer<Il2CppString * (*)()>(
 			"UnityEngine.CoreModule.dll", "UnityEngine",
-			"Application", "get_version", -1)()->start_char);
+			"Application", "get_version", IgnoreNumberOfArguments)()->chars);
 
 		auto unityVersion = local::wide_u8(il2cpp_symbols::get_method_pointer<Il2CppString * (*)()>(
 			"UnityEngine.CoreModule.dll", "UnityEngine",
-			"Application", "get_unityVersion", -1)()->start_char);
+			"Application", "get_unityVersion", IgnoreNumberOfArguments)()->chars);
 
 		cout << productName << " " << version << " " << unityVersion << endl;
 
-		auto MD5 = il2cpp_symbols::get_method_pointer<Il2CppObject * (*)()>("mscorlib.dll", "System.Security.Cryptography", "MD5", "Create", -1)();
+		auto MD5 = il2cpp_symbols::get_method_pointer<Il2CppObject * (*)()>("mscorlib.dll", "System.Security.Cryptography", "MD5", "Create", IgnoreNumberOfArguments)();
 
 		auto versionByteArray = il2cpp_array_new_type<int8_t>(il2cpp_symbols::get_class("mscorlib.dll", "System", "Byte"), version.size());
 
@@ -476,12 +477,12 @@ namespace Unity
 
 					wcout << id << endl;
 
-					if (wstring(id->start_char).find(L"Display"))
+					if (wstring(id->chars).find(L"Display"))
 					{
 						xrDisplaySubsystem = subsystem;
 					}
 
-					if (wstring(id->start_char).find(L"Input"))
+					if (wstring(id->chars).find(L"Input"))
 					{
 						xrInputSubsystem = subsystem;
 					}

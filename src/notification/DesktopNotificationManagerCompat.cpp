@@ -333,17 +333,29 @@ namespace DesktopNotificationManagerCompat
 			sizeof(data)));
 	}
 
-	HRESULT ShowToastNotification(const wchar_t* title, const wchar_t* content, const wchar_t* iconPath)
+	HRESULT ShowToastNotification(const wchar_t* title, const wchar_t* content, const wchar_t* iconPath, bool suppressPopup)
 	{
 		RETURN_IF_FAILED(EnsureRegistered());
 
 		ComPtr<IXmlDocument> doc;
-		RETURN_IF_FAILED(CreateXmlDocumentFromString(
-			(LR"(<toast><visual><binding template='ToastGeneric'>
-            <image placement='appLogoOverride' src=')"s + L"file://" + iconPath + LR"('/>
-            <text>)" + title + LR"(</text>
-            <text>)" + content + LR"(</text>
-        </binding></visual></toast>)").data(), &doc));
+
+		if (!iconPath)
+		{
+			RETURN_IF_FAILED(CreateXmlDocumentFromString(
+				(LR"(<toast><visual><binding template='ToastGeneric'>
+				<text>)"s + title + LR"(</text>
+				<text>)" + content + LR"(</text>
+			</binding></visual></toast>)").data(), &doc));
+		}
+		else
+		{
+			RETURN_IF_FAILED(CreateXmlDocumentFromString(
+				(LR"(<toast><visual><binding template='ToastGeneric'>
+				<image placement='appLogoOverride' src=')"s + L"file://" + iconPath + LR"('/>
+				<text>)" + title + LR"(</text>
+				<text>)" + content + LR"(</text>
+			</binding></visual></toast>)").data(), &doc));
+		}
 
 		// Create the notifier
 		// Desktop apps must use the compat method to create the notifier.
@@ -363,6 +375,7 @@ namespace DesktopNotificationManagerCompat
 
 		toast2.Get()->put_Group(HStringReference(L"Generic").Get());
 		toast2.Get()->put_Tag(HStringReference(L"Preview").Get());
+		toast2.Get()->put_SuppressPopup(suppressPopup);
 
 		return notifier->Show(toast.Get());
 	}
@@ -435,7 +448,7 @@ namespace DesktopNotificationManagerCompat
 
 			auto tag1 = WindowsGetStringRawBuffer(hTag, nullptr);
 
-			if (tag1 == tag)
+			if (tag1 == wstring(tag))
 			{
 				RETURN_IF_FAILED(notifier.Get()->RemoveFromSchedule(toast));
 			}

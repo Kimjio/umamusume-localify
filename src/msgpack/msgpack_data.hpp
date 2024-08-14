@@ -48,7 +48,7 @@ namespace MsgPackData
 
 		il2cpp_symbols::get_method_pointer<void (*)(Il2CppObject*, Il2CppObject*)>("UnityEngine.CoreModule.dll", "UnityEngine", "Graphics", "Blit", 2)(texture, renderTexture);
 
-		auto previous = il2cpp_symbols::get_method_pointer<Il2CppObject * (*)()>("UnityEngine.CoreModule.dll", "UnityEngine", "RenderTexture", "get_active", -1)();
+		auto previous = il2cpp_symbols::get_method_pointer<Il2CppObject * (*)()>("UnityEngine.CoreModule.dll", "UnityEngine", "RenderTexture", "get_active", IgnoreNumberOfArguments)();
 
 		il2cpp_symbols::get_method_pointer<void (*)(Il2CppObject*)>("UnityEngine.CoreModule.dll", "UnityEngine", "RenderTexture", "set_active", 1)(renderTexture);
 
@@ -80,7 +80,7 @@ namespace MsgPackData
 		}
 
 		auto wPath = GetIconPath(unitId);
-		wstring path = wPath->start_char;
+		wstring path = wPath->chars;
 		auto parentDir = filesystem::path(path).parent_path();
 
 		if (!filesystem::exists(parentDir))
@@ -105,7 +105,7 @@ namespace MsgPackData
 			auto push_icon = "push_icon_"s + to_string(leader_chara_id) + "_" + new_str;
 			auto path = "chara/chr"s + to_string(leader_chara_id) + "/" + push_icon;
 
-			auto loader = il2cpp_symbols::get_method_pointer<Il2CppObject * (*)()>("umamusume.dll", "Gallop", "AssetManager", "get_Loader", -1)();
+			auto loader = il2cpp_symbols::get_method_pointer<Il2CppObject * (*)()>("umamusume.dll", "Gallop", "AssetManager", "get_Loader", IgnoreNumberOfArguments)();
 			auto asset = il2cpp_class_get_method_from_name_type<Il2CppObject * (*)(Il2CppObject*, Il2CppString*, bool)>(loader->klass, "LoadAssetHandle", 2)->methodPointer(loader, il2cpp_string_new(path.data()), false);
 			if (!asset)
 			{
@@ -134,7 +134,7 @@ namespace MsgPackData
 					auto title = local::u8_wide(MasterDB::GetTextData(6, leader_chara_id));
 					auto content = local::u8_wide(MasterDB::GetTextData(184, leader_chara_id));
 					// history->RemoveGroupedTag(L"TP", L"Generic");
-					DesktopNotificationManagerCompat::AddScheduledToastNotification(title.data(), content.data(), L"TP", GetIconPath(leader_chara_id)->start_char, MsgPackData::tp_info["max_recovery_time"].int64_value() * 1000);
+					DesktopNotificationManagerCompat::AddScheduledToastNotification(title.data(), content.data(), L"TP", GetIconPath(leader_chara_id)->chars, MsgPackData::tp_info["max_recovery_time"].int64_value() * 1000);
 				}
 			}
 		}
@@ -154,7 +154,7 @@ namespace MsgPackData
 			auto push_icon = "push_icon_"s + to_string(leader_chara_id) + "_" + new_str;
 			auto path = "chara/chr"s + to_string(leader_chara_id) + "/" + push_icon;
 
-			auto loader = il2cpp_symbols::get_method_pointer<Il2CppObject * (*)()>("umamusume.dll", "Gallop", "AssetManager", "get_Loader", -1)();
+			auto loader = il2cpp_symbols::get_method_pointer<Il2CppObject * (*)()>("umamusume.dll", "Gallop", "AssetManager", "get_Loader", IgnoreNumberOfArguments)();
 			auto asset = il2cpp_class_get_method_from_name_type<Il2CppObject * (*)(Il2CppObject*, Il2CppString*, bool)>(loader->klass, "LoadAssetHandle", 2)->methodPointer(loader, il2cpp_string_new(path.data()), false);
 			if (!asset)
 			{
@@ -183,8 +183,22 @@ namespace MsgPackData
 					auto title = local::u8_wide(MasterDB::GetTextData(6, leader_chara_id));
 					auto content = local::u8_wide(MasterDB::GetTextData(185, leader_chara_id));
 					// history->RemoveGroupedTag(L"TP", L"Generic");
-					DesktopNotificationManagerCompat::AddScheduledToastNotification(title.data(), content.data(), L"RP", GetIconPath(leader_chara_id)->start_char, MsgPackData::rp_info["max_recovery_time"].int64_value() * 1000);
+					DesktopNotificationManagerCompat::AddScheduledToastNotification(title.data(), content.data(), L"RP", GetIconPath(leader_chara_id)->chars, MsgPackData::rp_info["max_recovery_time"].int64_value() * 1000);
 				}
+			}
+		}
+	}
+
+	void ReadRequest(const char* data, size_t size)
+	{
+		string error;
+		auto parsed = MsgPack::parse(data, size, error);
+
+		if (error.empty())
+		{
+			if (parsed.is_object())
+			{
+				MsgPack::object object = parsed.object_items();
 			}
 		}
 	}
@@ -234,7 +248,7 @@ namespace MsgPackData
 						auto push_icon = "push_icon_"s + to_string(leader_chara_id) + "_" + new_str;
 						auto path = "chara/chr"s + to_string(leader_chara_id) + "/" + push_icon;
 
-						auto loader = il2cpp_symbols::get_method_pointer<Il2CppObject * (*)()>("umamusume.dll", "Gallop", "AssetManager", "get_Loader", -1)();
+						auto loader = il2cpp_symbols::get_method_pointer<Il2CppObject * (*)()>("umamusume.dll", "Gallop", "AssetManager", "get_Loader", IgnoreNumberOfArguments)();
 						auto asset = il2cpp_class_get_method_from_name_type<Il2CppObject * (*)(Il2CppObject*, Il2CppString*, bool)>(loader->klass, "LoadAssetHandle", 2)->methodPointer(loader, il2cpp_string_new(path.data()), false);
 
 						if (!asset)
@@ -260,14 +274,14 @@ namespace MsgPackData
 								DesktopNotificationManagerCompat::RemoveFromScheduleByTag(L"TP");
 								auto content = local::u8_wide(MasterDB::GetTextData(184, leader_chara_id));
 								// history->RemoveGroupedTag(L"TP", L"Generic");
-								DesktopNotificationManagerCompat::AddScheduledToastNotification(title.data(), content.data(), L"TP", GetIconPath(leader_chara_id)->start_char, MsgPackData::tp_info["max_recovery_time"].int64_value() * 1000);
+								DesktopNotificationManagerCompat::AddScheduledToastNotification(title.data(), content.data(), L"TP", GetIconPath(leader_chara_id)->chars, MsgPackData::tp_info["max_recovery_time"].int64_value() * 1000);
 							}
 							if ((data["user_info"].is_object() || data["rp_info"].is_object()) && config::notification_rp)
 							{
 								DesktopNotificationManagerCompat::RemoveFromScheduleByTag(L"RP");
 								auto content = local::u8_wide(MasterDB::GetTextData(185, leader_chara_id));
 								// history->RemoveGroupedTag(L"RP", L"Generic");
-								DesktopNotificationManagerCompat::AddScheduledToastNotification(title.data(), content.data(), L"RP", GetIconPath(leader_chara_id)->start_char, MsgPackData::rp_info["max_recovery_time"].int64_value() * 1000);
+								DesktopNotificationManagerCompat::AddScheduledToastNotification(title.data(), content.data(), L"RP", GetIconPath(leader_chara_id)->chars, MsgPackData::rp_info["max_recovery_time"].int64_value() * 1000);
 							}
 						}
 					}

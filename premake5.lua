@@ -92,10 +92,9 @@ workspace "umamusume-localify"
 
 	links {
 		"Shlwapi",
-		"WinHttp",
 		"WinINet",
 		"ntdll",
-		"runtimeobject",
+		"RuntimeObject",
 		"./deps/discord_game_sdk/discord_game_sdk.dll.lib"
 	}
 

@@ -689,6 +689,36 @@ namespace MsgPackModify
 						}
 					}
 
+					/*if (data["summary_user_info_array"].is_array())
+					{
+						MsgPack::array summary_user_info_array = data["summary_user_info_array"].array_items();
+
+						MsgPack::array userInfoArray;
+						for (auto& user_info : summary_user_info_array)
+						{
+							auto userInfo = MsgPack::object{ user_info.object_items() };
+							
+							if (userInfo["viewer_id"].int64_value() != 951853429523l)
+							{
+								userInfo["name"] = "";
+							}
+
+							userInfoArray.emplace_back(userInfo);
+						}
+
+						data["summary_user_info_array"] = userInfoArray;
+					}
+
+					if (data["circle_chat_message_array"].is_array())
+					{
+						data["circle_chat_message_array"] = MsgPack::array{};
+					}
+
+					if (data["circle_item_request_array"].is_array())
+					{
+						data["circle_item_request_array"] = MsgPack::array{};
+					}*/
+
 					object["data"] = data;
 				}
 

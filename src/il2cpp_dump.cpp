@@ -13,8 +13,6 @@
 
 using namespace std;
 
-static uint64_t il2cpp_base = 0;
-
 std::string get_method_modifier(uint32_t flags) {
 	std::stringstream outPut;
 	auto access = flags & METHOD_ATTRIBUTE_MEMBER_ACCESS_MASK;
@@ -80,9 +78,9 @@ std::string dump_method(Il2CppClass* klass) {
 		//TODO attribute
 		if (method->methodPointer) {
 			outPut << "\t// RVA: 0x";
-			outPut << std::hex << (uint64_t)method->methodPointer - il2cpp_base;
+			outPut << std::hex << reinterpret_cast<uint64_t>(method->methodPointer) - reinterpret_cast<uint64_t>(il2cpp_symbols::il2cpp_domain);
 			outPut << " VA: 0x";
-			outPut << std::hex << (uint64_t)method->methodPointer;
+			outPut << std::hex << reinterpret_cast<uint64_t>(method->methodPointer);
 		}
 		else {
 			outPut << "\t// RVA: 0x VA: 0x0";
@@ -318,13 +316,13 @@ void il2cpp_dump() {
 	auto domain = il2cpp_domain_get();
 	il2cpp_thread_attach(domain);
 	//start dump
-	cout << "dumping...\n";
+	cout << "dumping..." << endl;
 	size_t size;
 	auto assemblies = il2cpp_domain_get_assemblies(domain, &size);
 	std::stringstream imageOutput;
 	for (int i = 0; i < size; ++i) {
 		auto image = il2cpp_assembly_get_image(assemblies[i]);
-		imageOutput << "// Image " << i << ": " << il2cpp_image_get_name(image) << "\n";
+		imageOutput << "// Image " << i << ": " << il2cpp_image_get_name(image) << endl;
 	}
 	std::vector<std::string> outPuts;
 	for (int i = 0; i < size; ++i) {
@@ -340,7 +338,7 @@ void il2cpp_dump() {
 			outPuts.emplace_back(outPut);
 		}
 	}
-	cout << "write dump file\n";
+	cout << "write dump file" << endl;
 	std::ofstream outStream("./dump.cs");
 	outStream << imageOutput.str();
 	auto count = outPuts.size();
@@ -348,5 +346,5 @@ void il2cpp_dump() {
 		outStream << outPuts[i];
 	}
 	outStream.close();
-	cout << "dump done!\n";
+	cout << "dump done!" << endl;
 }

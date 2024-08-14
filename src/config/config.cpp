@@ -88,6 +88,7 @@ namespace config
 	void read_config_init()
 	{
 		wifstream config_stream{ "config.json" };
+		config_stream.imbue(locale(".UTF-8"));
 
 		if (!config_stream.is_open())
 		{
@@ -102,149 +103,85 @@ namespace config
 
 		if (!document.HasParseError())
 		{
-			if (document.HasMember(L"enableConsole"))
-			{
-				enable_console = document[L"enableConsole"].GetBool();
-			}
+#define GetValue(_name_, _type_, _value_, ...)\
+if (document.HasMember(L##_name_) && document[L##_name_].Is##_type_())\
+{\
+	_value_ = document[L##_name_].Get##_type_();\
+	__VA_ARGS__\
+}
 
-			if (document.HasMember(L"enableLogger"))
-			{
-				enable_logger = document[L"enableLogger"].GetBool();
-			}
+			GetValue("enableConsole", Bool, enable_console);
 
-			if (document.HasMember(L"dumpStaticEntries"))
-			{
-				dump_entries = document[L"dumpStaticEntries"].GetBool();
-			}
+			GetValue("enableLogger", Bool, enable_logger);
 
-			if (document.HasMember(L"dumpIl2Cpp"))
-			{
-				dump_il2cpp = document[L"dumpIl2Cpp"].GetBool();
-			}
+			GetValue("dumpStaticEntries", Bool, dump_entries);
 
-			if (document.HasMember(L"staticEntriesUseHash"))
-			{
-				static_entries_use_hash = document[L"staticEntriesUseHash"].GetBool();
-			}
+			GetValue("dumpIl2Cpp", Bool, dump_il2cpp);
 
-			if (document.HasMember(L"staticEntriesUseTextIdName"))
-			{
-				static_entries_use_text_id_name = document[L"staticEntriesUseTextIdName"].GetBool();
-			}
+			GetValue("staticEntriesUseHash", Bool, static_entries_use_hash);
 
-			if (document.HasMember(L"maxFps"))
-			{
-				max_fps = document[L"maxFps"].GetInt();
-			}
+			GetValue("staticEntriesUseTextIdName", Bool, static_entries_use_text_id_name);
 
-			if (document.HasMember(L"unlockSize"))
-			{
-				unlock_size = document[L"unlockSize"].GetBool();
-			}
+			GetValue("maxFps", Int, max_fps);
 
-			if (document.HasMember(L"unlockSizeUseSystemResolution"))
-			{
-				unlock_size_use_system_resolution = document[L"unlockSizeUseSystemResolution"].GetBool();
-			}
+			GetValue("unlockSize", Bool, unlock_size);
 
-			if (document.HasMember(L"uiScale"))
-			{
-				ui_scale = document[L"uiScale"].GetFloat();
-			}
+			GetValue("unlockSizeUseSystemResolution", Bool, unlock_size_use_system_resolution);
 
-			if (document.HasMember(L"freeFormWindow"))
-			{
-				freeform_window = document[L"freeFormWindow"].GetBool();
+			GetValue("uiScale", Float, ui_scale);
+
+			GetValue("freeFormWindow", Bool, freeform_window,
 				if (freeform_window)
 				{
 					unlock_size = true;
 				}
-			}
+				);
 
-			if (document.HasMember(L"freeFormUiScalePortrait"))
-			{
-				freeform_ui_scale_portrait = document[L"freeFormUiScalePortrait"].GetFloat();
+			GetValue("freeFormUiScalePortrait", Float, freeform_ui_scale_portrait,
 				if (freeform_ui_scale_portrait <= 0)
 				{
 					freeform_ui_scale_portrait = 0.5f;
 				}
-			}
+				);
 
-			if (document.HasMember(L"freeFormUiScaleLandscape"))
-			{
-				freeform_ui_scale_landscape = document[L"freeFormUiScaleLandscape"].GetFloat();
+			GetValue("freeFormUiScaleLandscape", Float, freeform_ui_scale_landscape,
 				if (freeform_ui_scale_landscape <= 0)
 				{
 					freeform_ui_scale_landscape = 0.5f;
 				}
-			}
+				);
 
-			if (document.HasMember(L"initialWidth"))
-			{
-				initial_width = document[L"initialWidth"].GetInt();
+			GetValue("initialWidth", Int, initial_width,
 				if (initial_width <= 72)
 				{
 					initial_width = -1;
 				}
-			}
+				);
 
-			if (document.HasMember(L"initialHeight"))
-			{
-				initial_height = document[L"initialHeight"].GetInt();
+			GetValue("initialHeight", Int, initial_height,
 				if (initial_height <= 72)
 				{
 					initial_height = -1;
 				}
-			}
+				);
 
-			if (document.HasMember(L"uiAnimationScale"))
-			{
-				ui_animation_scale = document[L"uiAnimationScale"].GetFloat();
-			}
+			GetValue("uiAnimationScale", Float, resolution_3d_scale);
 
-			if (document.HasMember(L"resolution3dScale"))
-			{
-				resolution_3d_scale = document[L"resolution3dScale"].GetFloat();
-			}
+			GetValue("resolution3dScale", Float, resolution_3d_scale);
 
-			if (document.HasMember(L"replaceFont"))
-			{
-				replace_to_builtin_font = document[L"replaceFont"].GetBool();
-			}
+			GetValue("replaceToBuiltinFont", Bool, replace_to_builtin_font);
 
-			if (!document.HasMember(L"replaceFont") && document.HasMember(L"replaceToBuiltinFont"))
-			{
-				replace_to_builtin_font = document[L"replaceToBuiltinFont"].GetBool();
-			}
+			GetValue("replaceToCustomFont", Bool, replace_to_custom_font);
 
-			if (document.HasMember(L"replaceToCustomFont"))
-			{
-				replace_to_custom_font = document[L"replaceToCustomFont"].GetBool();
-			}
+			GetValue("fontAssetBundlePath", String, font_assetbundle_path);
 
-			if (document.HasMember(L"fontAssetBundlePath"))
-			{
-				font_assetbundle_path = wstring(document[L"fontAssetBundlePath"].GetString());
-			}
+			GetValue("fontAssetName", String, font_asset_name);
 
-			if (document.HasMember(L"fontAssetName"))
-			{
-				font_asset_name = wstring(document[L"fontAssetName"].GetString());
-			}
+			GetValue("tmproFontAssetName", String, tmpro_font_asset_name);
 
-			if (document.HasMember(L"tmproFontAssetName"))
-			{
-				tmpro_font_asset_name = wstring(document[L"tmproFontAssetName"].GetString());
-			}
+			GetValue("autoFullscreen", Bool, auto_fullscreen);
 
-			if (document.HasMember(L"autoFullscreen"))
-			{
-				auto_fullscreen = document[L"autoFullscreen"].GetBool();
-			}
-
-			if (document.HasMember(L"graphicsQuality"))
-			{
-				graphics_quality = document[L"graphicsQuality"].GetInt();
+			GetValue("graphicsQuality", Int, graphics_quality,
 				if (graphics_quality < -1)
 				{
 					graphics_quality = -1;
@@ -253,178 +190,115 @@ namespace config
 				{
 					graphics_quality = 3;
 				}
-			}
+				);
 
-			if (document.HasMember(L"antiAliasing"))
-			{
-				anti_aliasing = document[L"antiAliasing"].GetInt();
+			GetValue("antiAliasing", Int, anti_aliasing,
 				vector<int> options = { 0, 2, 4, 8, -1 };
 				anti_aliasing = options[find(options.begin(), options.end(), anti_aliasing) - options.begin()];
-			}
+				);
 
-			if (document.HasMember(L"anisotropicFiltering"))
-			{
-				anisotropic_filtering = document[L"anisotropicFiltering"].GetInt();
+			GetValue("anisotropicFiltering", Int, anisotropic_filtering,
 				vector<int> options = { 0, 1, 2, -1 };
 				anisotropic_filtering = options[find(options.begin(), options.end(), anisotropic_filtering) - options.begin()];
-			}
+				);
 
-			if (document.HasMember(L"vSyncCount"))
-			{
-				vsync_count = document[L"vSyncCount"].GetInt();
+			GetValue("vSyncCount", Int, vsync_count,
 				vector<int> options = { 0, 1, 2, 3, 4, -1 };
 				vsync_count = options[find(options.begin(), options.end(), vsync_count) - options.begin()];
-			}
+				);
 
-			if (document.HasMember(L"uiLoadingShowOrientationGuide"))
-			{
-				ui_loading_show_orientation_guide = document[L"uiLoadingShowOrientationGuide"].GetBool();
-			}
+			GetValue("uiLoadingShowOrientationGuide", Bool, ui_loading_show_orientation_guide);
 
-			if (document.HasMember(L"customTitleName"))
-			{
-				custom_title_name = document[L"customTitleName"].GetString();
-			}
+			GetValue("customTitleName", String, custom_title_name);
 
-			if (document.HasMember(L"replaceAssetsPaths") && document[L"replaceAssetsPaths"].IsArray())
-			{
-				auto array = document[L"replaceAssetsPaths"].GetArray();
+			GetValue("replaceAssetsPaths", Array, auto array,
 				for (auto it = array.Begin(); it != array.End(); it++)
 				{
-					wstring value = it->GetString();
+					if (it->IsString())
+					{
+						wstring value = it->GetString();
 
-					if (PathIsRelativeW(value.data()))
-					{
-						value.insert(0, (static_cast<wstring>(filesystem::current_path().native())).append(L"/"));
-					}
-					if (filesystem::exists(value) && filesystem::is_directory(value))
-					{
-						for (auto& file : filesystem::directory_iterator(value))
+						if (PathIsRelativeW(value.data()))
 						{
-							if (file.is_regular_file())
+							value.insert(0, filesystem::current_path().wstring().append(L"/"));
+						}
+						if (filesystem::exists(value) && filesystem::is_directory(value))
+						{
+							for (auto& file : filesystem::directory_iterator(value))
 							{
-								replace_assets.emplace(file.path().filename().wstring(), ReplaceAsset{ file.path().wstring(), nullptr });
+								if (file.is_regular_file())
+								{
+									replace_assets.emplace(file.path().filename().wstring(), ReplaceAsset{ file.path().wstring(), nullptr });
+								}
 							}
 						}
 					}
 				}
-			}
+				);
 
-			if (document.HasMember(L"replaceAssetBundleFilePath"))
-			{
-				replace_assetbundle_file_path = document[L"replaceAssetBundleFilePath"].GetString();
-			}
+			GetValue("replaceAssetBundleFilePath", String, replace_assetbundle_file_path);
 
-			if (document.HasMember(L"replaceAssetBundleFilePaths") &&
-				document[L"replaceAssetBundleFilePaths"].IsArray())
-			{
-				auto array = document[L"replaceAssetBundleFilePaths"].GetArray();
+			GetValue("replaceAssetBundleFilePaths", Array, auto array,
 				for (auto it = array.Begin(); it != array.End(); it++)
 				{
-					wstring value = it->GetString();
-					replace_assetbundle_file_paths.emplace_back(value);
+					if (it->IsString())
+					{
+						wstring value = it->GetString();
+						replace_assetbundle_file_paths.emplace_back(value);
+					}
 				}
-			}
+				);
 
-			if (document.HasMember(L"replaceTextDBPath"))
-			{
-				replace_text_db_path = document[L"replaceTextDBPath"].GetString();
-			}
+			GetValue("replaceTextDBPath", String, replace_text_db_path);
 
-			if (document.HasMember(L"characterSystemTextCaption"))
-			{
-				character_system_text_caption = document[L"characterSystemTextCaption"].GetBool();
-			}
+			GetValue("characterSystemTextCaption", Bool, character_system_text_caption);
 
-			if (document.HasMember(L"characterSystemTextCaptionLineCharCount"))
-			{
-				character_system_text_caption_line_char_count = document[L"characterSystemTextCaptionLineCharCount"].GetInt();
-			}
+			GetValue("characterSystemTextCaptionLineCharCount", Int, character_system_text_caption_line_char_count);
 
-			if (document.HasMember(L"characterSystemTextCaptionFontSize"))
-			{
-				character_system_text_caption_font_size = document[L"characterSystemTextCaptionFontSize"].GetInt();
-			}
+			GetValue("characterSystemTextCaptionFontSize", Int, character_system_text_caption_font_size);
 
-			if (document.HasMember(L"characterSystemTextCaptionFontColor"))
-			{
-				character_system_text_caption_font_color = document[L"characterSystemTextCaptionFontColor"].GetString();
-			}
+			GetValue("characterSystemTextCaptionFontColor", String, character_system_text_caption_font_color);
 
-			if (document.HasMember(L"characterSystemTextCaptionOutlineSize"))
-			{
-				character_system_text_caption_outline_size = document[L"characterSystemTextCaptionOutlineSize"].GetString();
-			}
+			GetValue("characterSystemTextCaptionOutlineSize", String, character_system_text_caption_outline_size);
 
-			if (document.HasMember(L"characterSystemTextCaptionOutlineColor"))
-			{
-				character_system_text_caption_outline_color = document[L"characterSystemTextCaptionOutlineColor"].GetString();
-			}
+			GetValue("characterSystemTextCaptionOutlineColor", String, character_system_text_caption_outline_color);
 
-			if (document.HasMember(L"characterSystemTextCaptionBackgroundAlpha"))
-			{
-				character_system_text_caption_background_alpha = document[L"characterSystemTextCaptionBackgroundAlpha"].GetFloat();
-			}
+			GetValue("characterSystemTextCaptionBackgroundAlpha", Float, character_system_text_caption_background_alpha);
 
-			if (document.HasMember(L"characterSystemTextCaptionPositionX"))
-			{
-				character_system_text_caption_position_x = document[L"characterSystemTextCaptionPositionX"].GetFloat();
-			}
+			GetValue("characterSystemTextCaptionPositionX", Float, character_system_text_caption_position_x);
 
-			if (document.HasMember(L"characterSystemTextCaptionPositionY"))
-			{
-				character_system_text_caption_position_y = document[L"characterSystemTextCaptionPositionY"].GetFloat();
-			}
+			GetValue("characterSystemTextCaptionPositionY", Float, character_system_text_caption_position_y);
 
-			if (document.HasMember(L"championsLiveShowText"))
-			{
-				champions_live_show_text = document[L"championsLiveShowText"].GetBool();
-			}
+			GetValue("championsLiveShowText", Bool, champions_live_show_text);
 
-			if (document.HasMember(L"championsLiveResourceId"))
-			{
-				champions_live_resource_id = document[L"championsLiveResourceId"].GetInt();
-
+			GetValue("championsLiveResourceId", Int, champions_live_resource_id,
 				if (champions_live_resource_id < 1)
 				{
 					champions_live_resource_id = 1;
 				}
-			}
+				);
 
-			if (document.HasMember(L"championsLiveYear"))
-			{
-				champions_live_year = document[L"championsLiveYear"].GetInt();
-			}
+			GetValue("championsLiveYear", Int, champions_live_year);
 
-			if (document.HasMember(L"cySpringUpdateMode"))
-			{
-				cyspring_update_mode = document[L"cySpringUpdateMode"].GetInt();
+			GetValue("cySpringUpdateMode", Int, cyspring_update_mode,
 				vector<int> options = { 0, 1, 2, 3, -1 };
 				cyspring_update_mode = options[find(options.begin(), options.end(), cyspring_update_mode) - options.begin()];
-			}
+				)
 			else if (max_fps > 30)
 			{
 				cyspring_update_mode = 1;
 			}
 
-			if (document.HasMember(L"hideNowLoading"))
-			{
-				hide_now_loading = document[L"hideNowLoading"].GetBool();
-			}
+			GetValue("hideNowLoading", Bool, hide_now_loading);
 
 			// Looks like not working for now
 			// aspect_ratio = document[L"customAspectRatio"].GetFloat();
 
-			if (document.HasMember(L"textIdDict"))
-			{
-				text_id_dict = document[L"textIdDict"].GetString();
-			}
+			GetValue("textIdDict", String, text_id_dict);
 
-			if (document.HasMember(L"codeMapPath"))
-			{
-				auto path = document[L"codeMapPath"].GetString();
-
+			GetValue("codeMapPath", String, auto path,
 				wifstream code_map_stream{ path };
+				code_map_stream.imbue(locale(".UTF-8"));
 
 				if (code_map_stream.is_open())
 				{
@@ -433,92 +307,57 @@ namespace config
 
 					code_map_stream.close();
 				}
-			}
+				);
 
-			if (document.HasMember(L"discordRichPresence"))
-			{
-				discord_rich_presence = document[L"discordRichPresence"].GetBool();
-			}
+			GetValue("discordRichPresence", Bool, discord_rich_presence);
 
-			if (document.HasMember(L"allowDeleteCookie"))
-			{
-				allow_delete_cookie = document[L"allowDeleteCookie"].GetBool();
-			}
+			GetValue("allowDeleteCookie", Bool, allow_delete_cookie);
 
-			if (document.HasMember(L"localifySettingsForceKorean"))
-			{
-				localify_settings_force_korean = document[L"localifySettingsForceKorean"].GetBool();
-			}
+			GetValue("localifySettingsForceKorean", Bool, localify_settings_force_korean);
 
-			if (document.HasMember(L"dumpMsgPack"))
-			{
-				dump_msgpack = document[L"dumpMsgPack"].GetBool();
-			}
+			GetValue("dumpMsgPack", Bool, dump_msgpack);
 
-			if (document.HasMember(L"dumpMsgPackRequest"))
-			{
-				dump_msgpack_request = document[L"dumpMsgPackRequest"].GetBool();
-			}
+			GetValue("dumpMsgPackRequest", Bool, dump_msgpack_request);
 
-			if (document.HasMember(L"unlockLiveChara"))
-			{
-				unlock_live_chara = document[L"unlockLiveChara"].GetBool();
-			}
+#ifdef _DEBUG
+			GetValue("unlockLiveChara", Bool, unlock_live_chara);
+#endif
 
-			if (document.HasMember(L"notificationTp"))
-			{
-				notification_tp = document[L"notificationTp"].GetBool();
-			}
+			GetValue("notificationTp", Bool, notification_tp);
 
-			if (document.HasMember(L"notificationRp"))
-			{
-				notification_rp = document[L"notificationRp"].GetBool();
-			}
+			GetValue("notificationRp", Bool, notification_rp);
 
-			if (document.HasMember(L"msgpackNotifier"))
-			{
-				msgpack_notifier = document[L"msgpackNotifier"].GetBool();
-			}
+			GetValue("msgpackNotifier", Bool, msgpack_notifier);
 
-			if (document.HasMember(L"msgpackNotifierRequest"))
-			{
-				msgpack_notifier_request = document[L"msgpackNotifierRequest"].GetBool();
-			}
+			GetValue("msgpackNotifierRequest", Bool, msgpack_notifier_request);
 
-			if (document.HasMember(L"msgpackNotifierHost"))
-			{
-				msgpack_notifier_host = document[L"msgpackNotifierHost"].GetString();
-			}
+			GetValue("msgpackNotifierHost", String, msgpack_notifier_host);
 
-			if (document.HasMember(L"msgpackNotifierConnectionTimeoutMs"))
-			{
-				msgpack_notifier_connection_timeout_ms = document[L"msgpackNotifierConnectionTimeoutMs"].GetInt();
-			}
+			GetValue("msgpackNotifierConnectionTimeoutMs", Int, msgpack_notifier_connection_timeout_ms);
 
-			if (document.HasMember(L"msgpackNotifierPrintError"))
-			{
-				msgpack_notifier_print_error = document[L"msgpackNotifierPrintError"].GetBool();
-			}
+			GetValue("msgpackNotifierPrintError", Bool, msgpack_notifier_print_error);
 
-			if (document.HasMember(L"dicts") && document[L"dicts"].IsArray())
-			{
-				auto array = document[L"dicts"].GetArray();
+			GetValue("dicts", Array, auto array,
 				for (auto it = array.Begin(); it != array.End(); it++)
 				{
-					auto value = it->GetString();
-					dicts.emplace_back(value);
+					if (it->IsString())
+					{
+						auto value = it->GetString();
+						dicts.emplace_back(value);
+					}
 				}
-			}
+				);
 
-			if (document.HasMember(L"externalDlls") && document[L"externalDlls"].IsArray())
-			{
-				auto array = document[L"externalDlls"].GetArray();
+			GetValue("externalDlls", Array, auto array,
 				for (auto it = array.Begin(); it != array.End(); it++)
 				{
-					auto value = it->GetString();
-					external_dlls_path.emplace_back(value);
+					if (it->IsString())
+					{
+						auto value = it->GetString();
+						external_dlls_path.emplace_back(value);
+					}
 				}
-			}
+				);
 		}
 		else
 		{
@@ -532,6 +371,7 @@ namespace config
 	bool read_config()
 	{
 		wifstream config_stream{ "config.json" };
+		config_stream.imbue(locale(".UTF-8"));
 
 		if (!config_stream.is_open())
 		{

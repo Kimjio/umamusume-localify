@@ -15,7 +15,7 @@ namespace MasterDB
 
 	void InitMasterDB()
 	{
-		auto path = local::wide_u8(il2cpp_symbols::get_method_pointer<Il2CppString * (*)()>("Cute.Core.Assembly.dll", "Cute.Core", "Device", "GetPersistentDataPath", -1)()->start_char);
+		auto path = local::wide_u8(il2cpp_symbols::get_method_pointer<Il2CppString * (*)()>("Cute.Core.Assembly.dll", "Cute.Core", "Device", "GetPersistentDataPath", IgnoreNumberOfArguments)()->chars);
 		auto metaDBPath = path + R"(\meta)";
 		masterDBPath = path + R"(\master\master.mdb)";
 

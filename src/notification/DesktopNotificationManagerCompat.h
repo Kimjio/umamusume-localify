@@ -68,7 +68,7 @@ namespace DesktopNotificationManagerCompat
     /// </summary>
     HRESULT CreateScheduledToastNotification(ABI::Windows::Data::Xml::Dom::IXmlDocument* content, DateTime deliveryTime, ABI::IScheduledToastNotification** notification);
 
-    HRESULT ShowToastNotification(const wchar_t* title, const wchar_t* content, const wchar_t* iconPath);
+    HRESULT ShowToastNotification(const wchar_t* title, const wchar_t* content, const wchar_t* iconPath, bool suppressPopup = false);
 
     HRESULT AddScheduledToastNotification(const wchar_t* title, const wchar_t* content, const wchar_t* tag, const wchar_t* iconPath, int64_t epoch);
 

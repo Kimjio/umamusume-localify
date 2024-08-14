@@ -23,8 +23,8 @@ T il2cpp_value_box_type(Il2CppClass* klass, void* data) {
 }
 
 template<typename T>
-MethodInfo_t<T>* il2cpp_class_get_method_from_name_type(Il2CppClass* klass, const char* name, int argsCount) {
-	return reinterpret_cast<MethodInfo_t<T>*>(il2cpp_class_get_method_from_name(klass, name, argsCount));
+const MethodInfo_t<T>* il2cpp_class_get_method_from_name_type(Il2CppClass* klass, const char* name, int argsCount) {
+	return reinterpret_cast<const MethodInfo_t<T>*>(il2cpp_class_get_method_from_name(klass, name, argsCount));
 }
 
 template<typename T>

@@ -666,7 +666,7 @@ namespace
 
 		if (!textId.empty())
 		{
-			return local::wide_u8(localizeextension_text_hook(GetTextIdByName(textId))->start_char).append(" ");
+			return local::wide_u8(localizeextension_text_hook(GetTextIdByName(textId))->chars).append(" ");
 		}
 
 		return "";
@@ -798,7 +798,7 @@ namespace
 
 		if (!textId.empty())
 		{
-			return local::wide_u8(localizeextension_text_hook(GetTextIdByName(textId))->start_char).append(" ");
+			return local::wide_u8(localizeextension_text_hook(GetTextIdByName(textId))->chars).append(" ");
 		}
 
 		return sceneId;
