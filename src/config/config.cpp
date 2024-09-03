@@ -50,6 +50,7 @@ namespace config
 	bool champions_live_show_text = false;
 	int champions_live_resource_id = 1;
 	int champions_live_year = 2023;
+	bool live_slider_always_show = false;
 	/*
 	 * ModeNormal 0
 	 * Mode60FPS 1
@@ -74,7 +75,7 @@ namespace config
 
 	wstring text_id_dict;
 
-	WDocument code_map;
+	rapidjson::Document code_map;
 
 	bool has_json_parse_error = false;
 	wstring json_parse_error_msg;
@@ -84,6 +85,13 @@ namespace config
 
 	WDocument config_document;
 	WDocument backup_document;
+
+	namespace runtime
+	{
+		bool useDefaultFPS = false;
+		float ratioVertical = 0.5625f;
+		float ratioHorizontal = 1.7777778f;
+	}
 
 	void read_config_init()
 	{
@@ -269,6 +277,8 @@ if (document.HasMember(L##_name_) && document[L##_name_].Is##_type_())\
 
 			GetValue("characterSystemTextCaptionPositionY", Float, character_system_text_caption_position_y);
 
+			GetValue("liveSliderAlwaysShow", Bool, live_slider_always_show);
+
 			GetValue("championsLiveShowText", Bool, champions_live_show_text);
 
 			GetValue("championsLiveResourceId", Int, champions_live_resource_id,
@@ -297,12 +307,11 @@ if (document.HasMember(L##_name_) && document[L##_name_].Is##_type_())\
 			GetValue("textIdDict", String, text_id_dict);
 
 			GetValue("codeMapPath", String, auto path,
-				wifstream code_map_stream{ path };
-				code_map_stream.imbue(locale(".UTF-8"));
+				ifstream code_map_stream{ path };
 
 				if (code_map_stream.is_open())
 				{
-					rapidjson::WIStreamWrapper wrapper{ code_map_stream };
+					rapidjson::IStreamWrapper wrapper{ code_map_stream };
 					code_map.ParseStream(wrapper);
 
 					code_map_stream.close();

@@ -16,6 +16,8 @@
 #include <set>
 #include <sstream>
 
+#include <format>
+
 #include <Tlhelp32.h>
 
 #include <regex>
@@ -69,6 +71,48 @@
 
 #include "smtc/SystemMediaTransportControlsManager.hpp"
 
+#include "scripts/mscorlib/System/Boolean.hpp"
+#include "scripts/mscorlib/System/Enum.hpp"
+#include "scripts/mscorlib/System/Int32.hpp"
+#include "scripts/mscorlib/System/Collections/Generic/Dictionary.hpp"
+
+#include "scripts/CriMw.CriWare.Runtime/CriWare/CriAtomEx.hpp"
+#include "scripts/CriMw.CriWare.Runtime/CriWare/CriAtomExPlayback.hpp"
+
+#include "scripts/Cute.Cri.Assembly/Cute/Cri/AudioPlayback.hpp"
+#include "scripts/Cute.Cri.Assembly/Cute/Cri/MoviePlayerHandle.hpp"
+
+#include "scripts/UnityEngine.CoreModule/UnityEngine/Application.hpp"
+#include "scripts/UnityEngine.CoreModule/UnityEngine/Object.hpp"
+#include "scripts/UnityEngine.CoreModule/UnityEngine/GameObject.hpp"
+#include "scripts/UnityEngine.CoreModule/UnityEngine/RectTransform.hpp"
+#include "scripts/UnityEngine.CoreModule/UnityEngine/Vector2.hpp"
+#include "scripts/UnityEngine.CoreModule/UnityEngine/Vector3.hpp"
+#include "scripts/UnityEngine.CoreModule/UnityEngine/Vector2Int.hpp"
+#include "scripts/UnityEngine.CoreModule/UnityEngine/Rect.hpp"
+#include "scripts/UnityEngine.CoreModule/UnityEngine/Resolution.hpp"
+#include "scripts/UnityEngine.CoreModule/UnityEngine/Screen.hpp"
+#include "scripts/UnityEngine.CoreModule/UnityEngine/ScreenOrientation.hpp"
+#include "scripts/UnityEngine.CoreModule/UnityEngine/SceneManagement/Scene.hpp"
+#include "scripts/UnityEngine.TextRenderingModule/UnityEngine/TextGenerationSettings.hpp"
+
+#include "scripts/umamusume/Gallop/DialogCommonBase.hpp"
+#include "scripts/umamusume/Gallop/UIManager.hpp"
+#include "scripts/umamusume/Gallop/LiveViewController.hpp"
+#include "scripts/umamusume/Gallop/RaceCameraManager.hpp"
+#include "scripts/umamusume/Gallop/LowResolutionCameraUtil.hpp"
+#ifdef _MSC_VER
+#include "scripts/umamusume/Gallop/StandaloneWindowResize.hpp"
+#endif
+
+#include "scripts/Plugins/CodeStage/AntiCheat/ObscuredTypes/ObscuredBool.hpp"
+#include "scripts/Plugins/CodeStage/AntiCheat/ObscuredTypes/ObscuredInt.hpp"
+#include "scripts/Plugins/CodeStage/AntiCheat/ObscuredTypes/ObscuredLong.hpp"
+
+#include "string_utils.hpp"
+
+#include "dllproxy/proxy.hpp"
+
 using namespace std;
 
 using namespace Microsoft::WRL;
@@ -116,29 +160,6 @@ namespace
 		printf("\n\n");
 	}
 
-	void Exit()
-	{
-		if (Game::CurrentGameRegion == Game::Region::KOR)
-		{
-			auto module_path = filesystem::current_path();
-			auto uncheater_path_new = module_path.string().append("\\umamusume_Data\\StreamingAssets\\_Uncheater"s).data();
-			auto uncheater_path = module_path.string().append("\\umamusume_Data\\StreamingAssets\\Uncheater"s).data();
-			if (filesystem::exists(uncheater_path_new))
-			{
-				try
-				{
-					filesystem::rename(uncheater_path_new, uncheater_path);
-				}
-				catch (exception& e)
-				{
-					cout << "Uncheater rename error: " << e.what() << endl;
-				}
-			}
-		}
-
-		TerminateProcess(GetCurrentProcess(), 0);
-	}
-
 	void* InitializeApplication_orig = nullptr;
 	void InitializeApplication_hook()
 	{
@@ -154,31 +175,6 @@ namespace
 	}
 
 	void PrintStackTrace();
-
-	void* Application_Quit_orig;
-
-	void Application_Quit_hook(int exitCode)
-	{
-		if (Game::CurrentGameRegion == Game::Region::KOR)
-		{
-			auto StackTrace = il2cpp_symbols::get_class("mscorlib.dll", "System.Diagnostics", "StackFrame");
-			auto trace = il2cpp_object_new(StackTrace);
-			il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, int, bool)>(trace->klass, ".ctor", 2)->methodPointer(trace, 0, false);
-
-			auto methodRef = il2cpp_class_get_method_from_name_type<Il2CppReflectionMethod * (*)(Il2CppObject*)>(trace->klass, "GetMethod", 0)->methodPointer(trace);
-
-			auto method = il2cpp_method_get_from_reflection(methodRef);
-
-			if (string(method->klass->name).find("Uncheater") != string::npos ||
-				string(method->klass->name).find("Boot") != string::npos ||
-				string(method->name).find("Uncheater") != string::npos)
-			{
-				return;
-			}
-		}
-
-		Exit();
-	}
 
 	void* UpdateDispatcher_Initialize_orig = nullptr;
 	void UpdateDispatcher_Initialize_hook()
@@ -196,6 +192,7 @@ namespace
 	void init_il2cpp(bool attachIl2CppThread = false)
 	{
 		il2cpp_symbols::init_defaults();
+		il2cpp_symbols::call_init_callbacks();
 
 		Il2CppThread* t = nullptr;
 
@@ -207,10 +204,6 @@ namespace
 		auto InitializeApplication = il2cpp_symbols::get_method_pointer("umamusume.dll", "Gallop", "GameSystem", "InitializeApplication", IgnoreNumberOfArguments);
 		MH_CreateHook(InitializeApplication, InitializeApplication_hook, &InitializeApplication_orig);
 		MH_EnableHook(InitializeApplication);
-
-		auto Application_Quit = il2cpp_resolve_icall("UnityEngine.Application::Quit(System.Int32)");
-		MH_CreateHook(Application_Quit, Application_Quit_hook, &Application_Quit_orig);
-		MH_EnableHook(Application_Quit);
 
 		auto UpdateDispatcher_Initialize_addr = il2cpp_symbols::get_method_pointer("Cute.Core.Assembly.dll", "Cute.Core", "UpdateDispatcher", "Initialize", IgnoreNumberOfArguments);
 		MH_CreateHook(UpdateDispatcher_Initialize_addr, UpdateDispatcher_Initialize_hook, &UpdateDispatcher_Initialize_orig);
@@ -270,7 +263,6 @@ namespace
 
 	bool isRequiredInitNotification = true;
 
-	FieldInfo* il2cpp_class_get_field_from_name_wrap(Il2CppClass* klass, const char* name);
 	Il2CppObject* GetSingletonInstance(Il2CppClass* klass);
 
 	bool (*uobject_IsNativeObjectAlive)(Il2CppObject* uObject);
@@ -296,8 +288,7 @@ namespace
 
 	void ShowUINotification(Il2CppString* text)
 	{
-		auto uiManager = GetSingletonInstance(il2cpp_symbols::get_class("umamusume.dll", "Gallop", "UIManager"));
-		il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, Il2CppString*)>(uiManager->klass, "ShowNotification", 1)->methodPointer(uiManager, text);
+		Gallop::UIManager::Instance().ShowNotification(text);
 	}
 
 	void ShowNotification(Il2CppString* text)
@@ -486,12 +477,12 @@ namespace
 
 		auto canvasGroupTransform = il2cpp_class_get_method_from_name_type<Il2CppObject * (*)(Il2CppObject*)>(canvasGroup->klass, "get_transform", 0)->methodPointer(canvasGroup);
 
-		auto position = il2cpp_class_get_method_from_name_type<Vector3_t(*)(Il2CppObject*)>(canvasGroupTransform->klass, "get_position", 0)->methodPointer(canvasGroupTransform);
+		auto position = il2cpp_class_get_method_from_name_type<UnityEngine::Vector3(*)(Il2CppObject*)>(canvasGroupTransform->klass, "get_position", 0)->methodPointer(canvasGroupTransform);
 
 		position.x = x;
 		position.y = y;
 
-		il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, Vector3_t)>(canvasGroupTransform->klass, "set_position", 1)->methodPointer(canvasGroupTransform, position);
+		il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, UnityEngine::Vector3)>(canvasGroupTransform->klass, "set_position", 1)->methodPointer(canvasGroupTransform, position);
 	}
 
 	void ShowCaptionByNotification(Il2CppObject* audioManager, Il2CppObject* elem)
@@ -536,9 +527,9 @@ namespace
 			return;
 		}
 
-		auto u8Text = local::wide_u8(text->chars);
-		replaceAll(u8Text, "\n\n", " ");
-		replaceAll(u8Text, "\n", " ");
+		auto wText = wstring(text->chars);
+		replaceAll(wText, L"\n\n", L" ");
+		replaceAll(wText, L"\n", L" ");
 		if (notification && wstring(cueSheet->chars).find(L"_home_") == string::npos &&
 			wstring(cueSheet->chars).find(L"_tc_") == string::npos &&
 			wstring(cueSheet->chars).find(L"_title_") == string::npos &&
@@ -587,7 +578,7 @@ namespace
 
 			SetNotificationDisplayTime(length);
 
-			ShowNotification(LineHeadWrap(il2cpp_string_new(u8Text.data()), config::character_system_text_caption_line_char_count));
+			ShowNotification(LineHeadWrap(il2cpp_string_new16(wText.data()), config::character_system_text_caption_line_char_count));
 		}
 	}
 
@@ -617,7 +608,7 @@ namespace
 	}
 
 	void* criAtomExAcb_GetCueInfoById_orig = nullptr;
-	bool criAtomExAcb_GetCueInfoById_hook(void* acb_hn, int id, CueInfo* info)
+	bool criAtomExAcb_GetCueInfoById_hook(void* acb_hn, int id, CriWare::CriAtomEx::CueInfo* info)
 	{
 		auto result = reinterpret_cast<decltype(criAtomExAcb_GetCueInfoById_hook)*>(criAtomExAcb_GetCueInfoById_orig)(acb_hn, id, info);
 
@@ -628,7 +619,7 @@ namespace
 		const regex r(R"(_(?:9)*(\d{4})(?:\d{2})*_(\d{4})*_*(\d{2})*(?:\d{2})*$)");
 		smatch stringMatch;
 		const auto cueSheet = string(info->name);
-		const auto cueSheet16 = local::u8_wide(cueSheet);
+		const auto cueSheet16 = u8_wide(cueSheet);
 		regex_search(cueSheet, stringMatch, r);
 		if (!stringMatch.empty())
 		{
@@ -683,7 +674,7 @@ namespace
 	}
 
 	void* criAtomExAcb_GetCueInfoByName_orig = nullptr;
-	bool criAtomExAcb_GetCueInfoByName_hook(void* acb_hn, char* name, CueInfo* info)
+	bool criAtomExAcb_GetCueInfoByName_hook(void* acb_hn, char* name, CriWare::CriAtomEx::CueInfo* info)
 	{
 		auto result = reinterpret_cast<decltype(criAtomExAcb_GetCueInfoByName_hook)*>(criAtomExAcb_GetCueInfoByName_orig)(acb_hn, name, info);
 
@@ -695,7 +686,7 @@ namespace
 		const regex r(R"((\d{4})(?:\d{2})*_(\d{4})*_*(\d{2})*(?:\d{2})*$)");
 		smatch stringMatch;
 		const auto cueSheet = string(info->name);
-		const auto cueSheet16 = local::u8_wide(cueSheet);
+		const auto cueSheet16 = u8_wide(cueSheet);
 		regex_search(cueSheet, stringMatch, r);
 		if (!stringMatch.empty())
 		{
@@ -854,12 +845,12 @@ namespace
 		{
 			splited.emplace_back(segment);
 		}
-		auto fileName = local::u8_wide(splited.back());
+		auto fileName = u8_wide(splited.back());
 
 		if (config::replace_assets.find(fileName) != config::replace_assets.end())
 		{
 			auto& replaceAsset = config::replace_assets.at(fileName);
-			reinterpret_cast<decltype(CriMana_SetFileNew_hook)*>(CriMana_SetFileNew_orig)(player_id, binder, local::wide_u8(replaceAsset.path).data());
+			reinterpret_cast<decltype(CriMana_SetFileNew_hook)*>(CriMana_SetFileNew_orig)(player_id, binder, wide_u8(replaceAsset.path).data());
 			return;
 		}
 
@@ -878,12 +869,12 @@ namespace
 		{
 			splited.emplace_back(segment);
 		}
-		auto fileName = local::u8_wide(splited.back());
+		auto fileName = u8_wide(splited.back());
 
 		if (config::replace_assets.find(fileName) != config::replace_assets.end())
 		{
 			auto& replaceAsset = config::replace_assets.at(fileName);
-			return reinterpret_cast<decltype(CriMana_SetFileAppend_hook)*>(CriMana_SetFileAppend_orig)(player_id, binder, local::wide_u8(replaceAsset.path).data(), repeat);
+			return reinterpret_cast<decltype(CriMana_SetFileAppend_hook)*>(CriMana_SetFileAppend_orig)(player_id, binder, wide_u8(replaceAsset.path).data(), repeat);
 		}
 
 		return reinterpret_cast<decltype(CriMana_SetFileAppend_hook)*>(CriMana_SetFileAppend_orig)(player_id, binder, path, repeat);
@@ -978,13 +969,6 @@ namespace
 			}
 			)), NULL);
 
-		/*auto hWnd = FindWindowA("UnityWndClass", local::wide_acp(title).data());
-
-		if (!hWnd)
-		{
-			hWnd = FindWindowA("UnityWndClass", local::wide_acp(L"umamusume").data());
-		}*/
-
 		return hWndFound;
 	}
 
@@ -1036,7 +1020,7 @@ namespace
 	void* KGInterfaceBrokerRequest_orig = nullptr;
 	LPCWSTR KGInterfaceBrokerRequest_hook(const wchar_t* request)
 	{
-		auto text = local::wide_u8(request);
+		auto text = wide_u8(request);
 
 #ifdef _DEBUG
 		replaceAll(text, "gameWeb", "googlePlay");
@@ -1072,7 +1056,7 @@ namespace
 			}
 		}
 
-		auto data = reinterpret_cast<decltype(KGInterfaceBrokerRequest_hook)*>(KGInterfaceBrokerRequest_orig)(local::u8_wide(text).data());
+		auto data = reinterpret_cast<decltype(KGInterfaceBrokerRequest_hook)*>(KGInterfaceBrokerRequest_orig)(u8_wide(text).data());
 		return data;
 	}
 
@@ -1277,101 +1261,17 @@ namespace
 		return reinterpret_cast<decltype(LoadLibraryW)*>(load_library_w_orig)(lpLibFileName);
 	}
 
-	FieldInfo* il2cpp_class_get_field_from_name_wrap(Il2CppClass* klass, const char* name)
-	{
-		if (config::code_map.IsNull() || config::code_map.HasParseError())
-		{
-			return il2cpp_class_get_field_from_name(klass, name);
-		}
-		auto className = local::u8_wide(string(klass->namespaze).append(".").append(klass->name));
-		auto nameW = local::u8_wide(name);
-
-		if (config::code_map.HasMember(L"!common"))
-		{
-			auto commonMap = config::code_map[L"!common"].GetObjectW();
-			if (commonMap.HasMember(nameW))
-			{
-				auto field = il2cpp_class_get_field_from_name(klass, local::wide_u8(commonMap[nameW].GetString()).data());
-				if (field)
-				{
-					return field;
-				}
-			}
-		}
-
-		if (!config::code_map.HasMember(className.data()))
-		{
-			return il2cpp_class_get_field_from_name(klass, name);
-		}
-
-		auto classMap = config::code_map[className.data()].GetObjectW();
-
-		if (classMap.HasMember(nameW))
-		{
-			auto field = il2cpp_class_get_field_from_name(klass, local::wide_u8(classMap[nameW].GetString()).data());
-			if (field)
-			{
-				return field;
-			}
-		}
-
-		if (classMap.HasMember((nameW + L".index"s).data()))
-		{
-			void* iter = nullptr;
-			int i = 0;
-			int index = classMap[(nameW + L".index"s).data()].GetInt();
-			while (FieldInfo* field = il2cpp_class_get_fields(klass, &iter))
-			{
-				if (index == i)
-				{
-					return field;
-				}
-				i++;
-			}
-		}
-
-		if (classMap.HasMember(L"!extends"))
-		{
-			auto parentName = classMap[L"!extends"].GetString();
-			auto parentMap = config::code_map[parentName].GetObjectW();
-			auto parentClass = klass->parent;
-
-			if (parentMap.HasMember((nameW + L".index"s).data()))
-			{
-				void* iter = nullptr;
-				int i = 0;
-				int index = parentMap[(nameW + L".index"s).data()].GetInt();
-				while (FieldInfo* field = il2cpp_class_get_fields(parentClass, &iter))
-				{
-					if (index == i)
-					{
-						return field;
-					}
-					i++;
-				}
-			}
-		}
-
-		return il2cpp_class_get_field_from_name(klass, name);;
-	}
-
 	Il2CppObject* fontAssets = nullptr;
 
 	vector<Il2CppObject*> replaceAssets;
 
-	vector<string> replaceAssetNames;
+	vector<wstring> replaceAssetNames;
 
 	Il2CppObject* (*load_from_file)(Il2CppString* path);
 
 	Il2CppObject* (*load_asset)(Il2CppObject* _this, Il2CppString* name, Il2CppObject* runtimeType);
 
-	Il2CppArraySize* (*get_all_asset_names)(Il2CppObject* _this);
-
-	Il2CppString* (*uobject_get_name)(Il2CppObject* uObject);
-
-	Il2CppString* (*uobject_set_name)(Il2CppObject* uObject, Il2CppString* name);
-
-	Il2CppString* (*get_unityVersion)();
+	Il2CppArraySize_t<Il2CppString*>* (*get_all_asset_names)(Il2CppObject* _this);
 
 	void PrintStackTrace()
 	{
@@ -1729,7 +1629,6 @@ namespace
 		return instance;
 	}
 
-
 	Il2CppObject* GetSingletonInstanceByMethod(Il2CppClass* klass)
 	{
 		if (!klass || !klass->parent)
@@ -1744,26 +1643,9 @@ namespace
 		return nullptr;
 	}
 
-	Boolean GetBoolean(bool value)
-	{
-		return il2cpp_symbols::get_method_pointer<Boolean(*)(Il2CppString * value)>(
-			"mscorlib.dll", "System", "Boolean", "Parse", 1)(
-				il2cpp_string_new(value ? "true" : "false"));
-	}
-
 	Il2CppObject* GetInt32Instance(int value)
 	{
-		auto int32Class = il2cpp_symbols::get_class("mscorlib.dll", "System", "Int32");
-		auto instance = il2cpp_object_new(int32Class);
-		il2cpp_runtime_object_init(instance);
-		auto m_value = il2cpp_class_get_field_from_name_wrap(int32Class, "m_value");
-		il2cpp_field_set_value(instance, m_value, &value);
-		return instance;
-	}
-
-	Il2CppString* il2cpp_string_new16(const wchar_t* value)
-	{
-		return il2cpp_string_new_utf16(value, wcslen(value));
+		return il2cpp_value_box(il2cpp_defaults.int32_class, &value);
 	}
 
 	Il2CppObject* ParseEnum(Il2CppObject* runtimeType, const wstring& name)
@@ -1861,12 +1743,12 @@ namespace
 
 	string GetUnityVersion()
 	{
-		string version(local::wide_u8(get_unityVersion()->chars));
+		string version(wide_u8(UnityEngine::Application::unityVersion()->chars));
 		return version;
 	}
 
 	void* populate_with_errors_orig = nullptr;
-	bool populate_with_errors_hook(Il2CppObject* _this, Il2CppString* str, TextGenerationSettings_t* settings, void* context)
+	bool populate_with_errors_hook(Il2CppObject* _this, Il2CppString* str, UnityEngine::TextGenerationSettings* settings, void* context)
 	{
 		return reinterpret_cast<decltype(populate_with_errors_hook)*>(populate_with_errors_orig) (
 			_this, local::get_localized_string(str), settings, context
@@ -1902,7 +1784,7 @@ namespace
 	}
 
 	void* get_preferred_width_orig = nullptr;
-	float get_preferred_width_hook(void* _this, Il2CppString* str, TextGenerationSettings_t* settings)
+	float get_preferred_width_hook(void* _this, Il2CppString* str, UnityEngine::TextGenerationSettings* settings)
 	{
 		return reinterpret_cast<decltype(get_preferred_width_hook)*>(get_preferred_width_orig) (
 			_this, local::get_localized_string(str), settings
@@ -2033,7 +1915,7 @@ namespace
 			{
 				if (MasterDB::replacementMasterDB)
 				{
-					text_queries.emplace(stmtPtr, new SQLite::Statement(*MasterDB::replacementMasterDB, local::wide_u8(ssql)));
+					text_queries.emplace(stmtPtr, new SQLite::Statement(*MasterDB::replacementMasterDB, wide_u8(ssql)));
 				}
 				else
 				{
@@ -2173,7 +2055,7 @@ namespace
 				auto stmt = text_queries.at(stmtPtr);
 				if (stmt)
 				{
-					stmt->bind(idx, local::wide_u8(text->chars));
+					stmt->bind(idx, wide_u8(text->chars));
 				}
 			}
 			catch (exception& e)
@@ -2315,7 +2197,7 @@ namespace
 								{
 									cueId = query_getint(_this, 2);
 									cueId1 = stmt->getColumn(2).getInt();
-									cueSheet = local::wide_u8(
+									cueSheet = wide_u8(
 										reinterpret_cast<decltype(query_gettext_hook)*>(query_gettext_orig)(_this, 1)->chars
 									);
 									cueSheet1 = stmt->getColumn(1).getString();
@@ -2324,7 +2206,7 @@ namespace
 								{
 									cueId = query_getint(_this, 3);
 									cueId1 = stmt->getColumn(3).getInt();
-									cueSheet = local::wide_u8(
+									cueSheet = wide_u8(
 										reinterpret_cast<decltype(query_gettext_hook)*>(query_gettext_orig)(_this, 2)->chars
 									);
 									cueSheet1 = stmt->getColumn(2).getString();
@@ -2385,7 +2267,7 @@ namespace
 						int voiceId1 = stmt->getColumn(0).getInt();
 						int cueId = query_getint(query, 3);
 						int cueId1 = stmt->getColumn(3).getInt();
-						string cueSheet = local::wide_u8(
+						string cueSheet = wide_u8(
 							reinterpret_cast<decltype(query_gettext_hook)*>(query_gettext_orig)(query, 2)->chars
 						);
 						string cueSheet1 = stmt->getColumn(2).getString();
@@ -2554,23 +2436,12 @@ namespace
 
 	bool useDefaultFPS = false;
 
-	void* set_fps_orig = nullptr;
-	void set_fps_hook(int value)
-	{
-		reinterpret_cast<decltype(set_fps_hook)*>(set_fps_orig)(useDefaultFPS ? value : config::max_fps);
-	}
-
-	bool (*is_virt)() = nullptr;
-
 	int (*get_rendering_width)(Il2CppObject* _this);
 
 	int (*get_rendering_height)(Il2CppObject* _this);
 
-	const float ratio_16_9 = 1.778f;
-	const float ratio_9_16 = 0.563f;
-
-	float ratio_vertical = 0.5625f;
-	float ratio_horizontal = 1.7777778f;
+	constexpr float ratio_16_9 = 1.778f;
+	constexpr float ratio_9_16 = 0.563f;
 
 	int last_display_width = 0, last_display_height = 0;
 	int last_virt_window_width = 0, last_virt_window_height = 0;
@@ -2579,11 +2450,11 @@ namespace
 	bool fullScreenFl = false;
 	bool fullScreenFlOverride = false;
 
-	void (*get_resolution)(Resolution_t* buffer);
+	void (*get_resolution)(UnityEngine::Resolution* buffer);
 
 	void (*set_resolution)(int width, int height, bool fullscreen);
 
-	void get_resolution_stub(Resolution_t* r)
+	void get_resolution_stub(UnityEngine::Resolution* r)
 	{
 		get_resolution(r);
 
@@ -2594,34 +2465,6 @@ namespace
 			r->height = width;
 	}
 
-	void* get_virt_size_orig = nullptr;
-	Vector3_t* get_virt_size_hook(Vector3_t* pVec3, int width, int height)
-	{
-		auto size = reinterpret_cast<decltype(get_virt_size_hook)*>(get_virt_size_orig)(pVec3, width, height);
-
-		height = width * config::aspect_ratio;
-
-		size->x = width;
-		size->y = height;
-		size->z = config::aspect_ratio;
-
-		return size;
-	}
-
-	void* get_hori_size_orig = nullptr;
-	Vector3_t* get_hori_size_hook(Vector3_t* pVec3, int width, int height)
-	{
-		auto size = reinterpret_cast<decltype(get_hori_size_hook)*>(get_hori_size_orig)(pVec3, width, height);
-
-		width = height * config::aspect_ratio;
-
-		size->x = width;
-		size->y = height;
-		size->z = config::aspect_ratio;
-
-		return size;
-	}
-
 	void* gallop_get_screenheight_orig;
 	int gallop_get_screenheight_hook()
 	{
@@ -2629,10 +2472,10 @@ namespace
 		{
 			int w = max(last_display_width, last_display_height), h = min(last_display_width, last_display_height);
 
-			return is_virt() ? w : h;
+			return Gallop::StandaloneWindowResize::IsVirt() ? w : h;
 		}
 
-		return il2cpp_symbols::get_method_pointer<int (*)()>("UnityEngine.CoreModule.dll", "UnityEngine", "Screen", "get_height", IgnoreNumberOfArguments)();
+		return UnityEngine::Screen::height();
 	}
 
 	void* gallop_get_screenwidth_orig;
@@ -2642,19 +2485,19 @@ namespace
 		{
 			int w = max(last_display_width, last_display_height), h = min(last_display_width, last_display_height);
 
-			return is_virt() ? h : w;
+			return Gallop::StandaloneWindowResize::IsVirt() ? h : w;
 		}
 
-		return il2cpp_symbols::get_method_pointer<int (*)()>("UnityEngine.CoreModule.dll", "UnityEngine", "Screen", "get_width", IgnoreNumberOfArguments)();
+		return UnityEngine::Screen::width();
 	}
 
 	void (*set_scale_factor)(void*, float);
 
 	void* canvas_scaler_setres_orig;
-	void canvas_scaler_setres_hook(Il2CppObject* _this, Vector2_t res)
+	void canvas_scaler_setres_hook(Il2CppObject* _this, UnityEngine::Vector2 res)
 	{
-		int width = il2cpp_symbols::get_method_pointer<int (*)()>("UnityEngine.CoreModule.dll", "UnityEngine", "Screen", "get_width", IgnoreNumberOfArguments)();
-		int height = il2cpp_symbols::get_method_pointer<int (*)()>("UnityEngine.CoreModule.dll", "UnityEngine", "Screen", "get_height", IgnoreNumberOfArguments)();
+		int width = UnityEngine::Screen::width();
+		int height = UnityEngine::Screen::height();
 
 		res.x = width;
 		res.y = height;
@@ -2663,12 +2506,12 @@ namespace
 		{
 			if (width < height)
 			{
-				float scale = min(config::freeform_ui_scale_portrait, max(1.0f, height * ratio_vertical) * config::freeform_ui_scale_portrait);
+				float scale = min(config::freeform_ui_scale_portrait, max(1.0f, height * config::runtime::ratioVertical) * config::freeform_ui_scale_portrait);
 				set_scale_factor(_this, scale);
 			}
 			else
 			{
-				float scale = min(config::freeform_ui_scale_landscape, max(1.0f, width / ratio_horizontal) * config::freeform_ui_scale_landscape);
+				float scale = min(config::freeform_ui_scale_landscape, max(1.0f, width / config::runtime::ratioHorizontal) * config::freeform_ui_scale_landscape);
 				set_scale_factor(_this, scale);
 			}
 		}
@@ -2677,12 +2520,12 @@ namespace
 			// set scale factor to make ui bigger on hi-res screen
 			if (width < height)
 			{
-				float scale = min(config::ui_scale, max(1.0f, height * ratio_vertical) * config::ui_scale);
+				float scale = min(config::ui_scale, max(1.0f, height * config::runtime::ratioVertical) * config::ui_scale);
 				set_scale_factor(_this, scale);
 			}
 			else
 			{
-				float scale = min(config::ui_scale, max(1.0f, width / ratio_horizontal) * config::ui_scale);
+				float scale = min(config::ui_scale, max(1.0f, width / config::runtime::ratioHorizontal) * config::ui_scale);
 				set_scale_factor(_this, scale);
 			}
 		}
@@ -2696,7 +2539,7 @@ namespace
 	{
 		auto display = display_get_main();
 		canvas_scaler_setres_hook(
-			canvasScaler, Vector2_t{ static_cast<float>(get_system_width(display)), static_cast<float>(get_system_height(display)) });
+			canvasScaler, UnityEngine::Vector2{ static_cast<float>(get_system_width(display)), static_cast<float>(get_system_height(display)) });
 		reinterpret_cast<decltype(UIManager_UpdateCanvasScaler_hook)*>(
 			UIManager_UpdateCanvasScaler_orig)(canvasScaler);
 	}
@@ -2704,12 +2547,12 @@ namespace
 	void* BGManager_CalcBgScale_orig = nullptr;
 	float BGManager_CalcBgScale_hook(Il2CppObject* _this, int width, int height, int renderTextureWidth, int renderTextureHeight)
 	{
-		int width1 = il2cpp_symbols::get_method_pointer<int (*)()>("UnityEngine.CoreModule.dll", "UnityEngine", "Screen", "get_width", IgnoreNumberOfArguments)();
-		int height1 = il2cpp_symbols::get_method_pointer<int (*)()>("UnityEngine.CoreModule.dll", "UnityEngine", "Screen", "get_height", IgnoreNumberOfArguments)();
+		int width1 = UnityEngine::Screen::width();
+		int height1 = UnityEngine::Screen::height();
 		float ratio1 = (float)width1 / (float)height1;
 
 		float bgCanvasScalerBaseScale = il2cpp_class_get_method_from_name_type<float (*)(Il2CppObject*, int, int)>(_this->klass, "GetBgCanvasScalerBaseScale", 2)->methodPointer(_this, renderTextureWidth, renderTextureHeight);
-		if (is_virt())
+		if (Gallop::StandaloneWindowResize::IsVirt())
 		{
 			return max((float)renderTextureHeight / (float)height, (float)height / (float)renderTextureHeight) * (config::freeform_window ? 2 : 1) / bgCanvasScalerBaseScale;
 		}
@@ -2729,16 +2572,16 @@ namespace
 			{
 				auto transform = il2cpp_class_get_method_from_name_type<Il2CppObject * (*)(Il2CppObject*)>(_mainBg->klass, "get_transform", 0)->methodPointer(_mainBg);
 
-				int width = il2cpp_symbols::get_method_pointer<int (*)()>("UnityEngine.CoreModule.dll", "UnityEngine", "Screen", "get_width", IgnoreNumberOfArguments)();
-				int height = il2cpp_symbols::get_method_pointer<int (*)()>("UnityEngine.CoreModule.dll", "UnityEngine", "Screen", "get_height", IgnoreNumberOfArguments)();
+				int width = UnityEngine::Screen::width();
+				int height = UnityEngine::Screen::height();
 
 				if (width > height)
 				{
-					auto pos = il2cpp_class_get_method_from_name_type<Vector3_t(*)(Il2CppObject*)>(transform->klass, "get_localPosition", 0)->methodPointer(transform);
+					auto pos = il2cpp_class_get_method_from_name_type<UnityEngine::Vector3(*)(Il2CppObject*)>(transform->klass, "get_localPosition", 0)->methodPointer(transform);
 
 					if (pos.y == 0)
 					{
-						il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, Vector3_t)>(transform->klass, "set_localPosition", 1)->methodPointer(transform, Vector3_t{ 0, 0, 0 });
+						il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, UnityEngine::Vector3)>(transform->klass, "set_localPosition", 1)->methodPointer(transform, UnityEngine::Vector3{ 0, 0, 0 });
 					}
 				}
 			}
@@ -2763,13 +2606,12 @@ namespace
 		Il2CppArraySize_t<Il2CppObject*>* miniDirectors;
 		if (Game::CurrentGameRegion == Game::Region::KOR)
 		{
-			miniDirectors = il2cpp_resolve_icall_type<Il2CppArraySize_t<Il2CppObject*>*(*)(Il2CppObject*, int, int)>("UnityEngine.Object::FindObjectsByType()")(
-				GetRuntimeType("umamusume.dll", "Gallop", "MiniDirector"), 1, 0);
+			miniDirectors = UnityEngine::Object::FindObjectsByType(
+				GetRuntimeType("umamusume.dll", "Gallop", "MiniDirector"), UnityEngine::FindObjectsInactive::Include, UnityEngine::FindObjectsSortMode::None);
 		}
 		else
 		{
-			miniDirectors = il2cpp_resolve_icall_type<Il2CppArraySize_t<Il2CppObject*>*(*)(Il2CppObject*, bool)>("UnityEngine.Object::FindObjectsOfType()")(
-				GetRuntimeType("umamusume.dll", "Gallop", "MiniDirector"), true);
+			miniDirectors = UnityEngine::Object::FindObjectsOfType(GetRuntimeType("umamusume.dll", "Gallop", "MiniDirector"), true);
 		}
 
 		if (miniDirectors)
@@ -2791,7 +2633,7 @@ namespace
 						{
 							il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*)>(DirectorUI->klass, "ResetTextureSize", 0)->methodPointer(DirectorUI);
 
-							auto TextureResolution = il2cpp_class_get_method_from_name_type<Vector2Int_t(*)(Il2CppObject*)>(DirectorUI->klass, "get_TextureResolution", 0)->methodPointer(DirectorUI);
+							auto TextureResolution = il2cpp_class_get_method_from_name_type<UnityEngine::Vector2Int(*)(Il2CppObject*)>(DirectorUI->klass, "get_TextureResolution", 0)->methodPointer(DirectorUI);
 
 							auto _cameraField = il2cpp_class_get_field_from_name_wrap(cameraController->klass, "_camera");
 							Il2CppObject* _camera;
@@ -2799,7 +2641,7 @@ namespace
 
 							if (_camera)
 							{
-								il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, Vector2Int_t)>(cameraController->klass, "ResizeRenderTexture", 1)->methodPointer(cameraController, TextureResolution);
+								il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, UnityEngine::Vector2Int)>(cameraController->klass, "ResizeRenderTexture", 1)->methodPointer(cameraController, TextureResolution);
 
 								auto _renderTextureField = il2cpp_class_get_field_from_name_wrap(cameraController->klass, "_renderTexture");
 								Il2CppObject* _renderTexture;
@@ -2814,133 +2656,11 @@ namespace
 		}
 	}
 
-	Il2CppArraySize_t<Il2CppObject*>* (*UIManager_GetCanvasScalerList)(Il2CppObject* _this);
-
-	void* UIManager_ChangeResizeUIForPC_orig = nullptr;
-	void UIManager_ChangeResizeUIForPC_hook(Il2CppObject* _this, int width, int height)
-	{
-		if (!config::unlock_size && !config::freeform_window)
-		{
-			reinterpret_cast<decltype(UIManager_ChangeResizeUIForPC_hook)*>(UIManager_ChangeResizeUIForPC_orig)(_this, width, height);
-			return;
-		}
-
-		Il2CppArraySize_t<Il2CppObject*>* scalers;
-		if (Game::CurrentGameRegion == Game::Region::KOR)
-		{
-			scalers = il2cpp_resolve_icall_type<Il2CppArraySize_t<Il2CppObject*>*(*)(Il2CppObject*, int, int)>("UnityEngine.Object::FindObjectsByType()")(
-				GetRuntimeType("UnityEngine.UI.dll", "UnityEngine.UI", "CanvasScaler"), 1, 0);
-		}
-		else
-		{
-			scalers = il2cpp_resolve_icall_type<Il2CppArraySize_t<Il2CppObject*>*(*)(Il2CppObject*, bool)>("UnityEngine.Object::FindObjectsOfType()")(
-				GetRuntimeType("UnityEngine.UI.dll", "UnityEngine.UI", "CanvasScaler"), true);
-		}
-
-		// auto scalers = UIManager_GetCanvasScalerList(_this);
-		for (int i = 0; i < scalers->max_length; i++)
-		{
-			auto scaler = scalers->vector[i];
-			if (scaler)
-			{
-				auto gameObject = il2cpp_class_get_method_from_name_type<Il2CppObject * (*)(Il2CppObject*)>(scaler->klass, "get_gameObject", 0)->methodPointer(scaler);
-
-				bool keepActive = il2cpp_class_get_method_from_name_type<bool (*)(Il2CppObject*)>(gameObject->klass, "get_activeSelf", 0)->methodPointer(gameObject);
-
-				il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, bool)>(gameObject->klass, "SetActive", 1)->methodPointer(gameObject, true);
-
-				auto scaleMode = il2cpp_class_get_method_from_name_type<int (*)(Il2CppObject*)>(scaler->klass, "get_uiScaleMode", 0)->methodPointer(scaler);
-
-				if (uobject_get_name(scaler)->chars == L"SystemCanvas"s ||
-					uobject_get_name(scaler)->chars == L"GameCanvas"s ||
-					uobject_get_name(scaler)->chars == L"NoImageEffectGameCanvas"s)
-				{
-					il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, int)>(scaler->klass, "set_uiScaleMode", 1)->methodPointer(scaler, 0);
-
-					scaleMode = 0;
-				}
-
-				if (config::freeform_window)
-				{
-					if (scaleMode == 1)
-					{
-						if (width < height)
-						{
-							float scale = min(config::freeform_ui_scale_portrait, max(1.0f, height * ratio_vertical) * config::freeform_ui_scale_portrait);
-							il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, Vector2_t)>(scaler->klass, "set_referenceResolution", 1)->methodPointer(scaler, Vector2_t{ static_cast<float>(width / scale), static_cast<float>(height / scale) });
-						}
-						else
-						{
-							float scale = min(config::freeform_ui_scale_landscape, max(1.0f, width / ratio_horizontal) * config::freeform_ui_scale_landscape);
-							il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, Vector2_t)>(scaler->klass, "set_referenceResolution", 1)->methodPointer(scaler, Vector2_t{ static_cast<float>(width / scale), static_cast<float>(height / scale) });
-
-						}
-					}
-
-					if (scaleMode == 0)
-					{
-						if (width < height)
-						{
-							float scale = min(config::freeform_ui_scale_portrait, max(1.0f, height * ratio_vertical) * config::freeform_ui_scale_portrait);
-							il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, float)>(scaler->klass, "set_scaleFactor", 1)->methodPointer(scaler, scale);
-						}
-						else
-						{
-							float scale = min(config::freeform_ui_scale_landscape, max(1.0f, width / ratio_horizontal) * config::freeform_ui_scale_landscape);
-							il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, float)>(scaler->klass, "set_scaleFactor", 1)->methodPointer(scaler, scale);
-						}
-					}
-				}
-				else
-				{
-					if (scaleMode == 1)
-					{
-						if (width < height)
-						{
-							float scale = min(config::ui_scale, max(1.0f, height * ratio_vertical) * config::ui_scale);
-							il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, Vector2_t)>(scaler->klass, "set_referenceResolution", 1)->methodPointer(scaler, Vector2_t{ static_cast<float>(width / scale), static_cast<float>(height / scale) });
-						}
-						else
-						{
-							float scale = min(config::ui_scale, max(1.0f, width / ratio_horizontal) * config::ui_scale);
-							il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, Vector2_t)>(scaler->klass, "set_referenceResolution", 1)->methodPointer(scaler, Vector2_t{ static_cast<float>(width / scale), static_cast<float>(height / scale) });
-						}
-					}
-					if (scaleMode == 0)
-					{
-						// set scale factor to make ui bigger on hi-res screen
-						if (width < height)
-						{
-							float scale = min(config::ui_scale, max(1.0f, height * ratio_vertical) * config::ui_scale);
-							il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, float)>(scaler->klass, "set_scaleFactor", 1)->methodPointer(scaler, scale);
-						}
-						else
-						{
-							float scale = min(config::ui_scale, max(1.0f, width / ratio_horizontal) * config::ui_scale);
-							il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, float)>(scaler->klass, "set_scaleFactor", 1)->methodPointer(scaler, scale);
-						}
-					}
-				}
-
-				// il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, int)>(scaler->klass, "set_uiScaleMode", 1)->methodPointer(scaler, 0);
-
-				// il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, int)>(scaler->klass, "set_screenMatchMode", 1)->methodPointer(scaler, 0);
-
-				il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, bool)>(gameObject->klass, "SetActive", 1)->methodPointer(gameObject, keepActive);
-			}
-		}
-
-		if (config::unlock_size || config::freeform_window)
-		{
-			SetBGCanvasScalerSize();
-		}
-	}
-
 	void* GetLimitSize_orig = nullptr;
-	Vector2_t GetLimitSize_hook()
+	UnityEngine::Vector2 GetLimitSize_hook()
 	{
 		auto orig = reinterpret_cast<decltype(GetLimitSize_hook)*>(GetLimitSize_orig)();
-		Resolution_t r;
+		UnityEngine::Resolution r;
 		get_resolution(&r);
 		orig.x = r.width;
 		orig.y = r.height;
@@ -2987,7 +2707,7 @@ namespace
 
 	void RemakeTextures()
 	{
-		auto uiManager = GetSingletonInstance(il2cpp_symbols::get_class("umamusume.dll", "Gallop", "UIManager"));
+		auto uiManager = Gallop::UIManager::Instance();
 
 		auto graphicSettings = GetSingletonInstance(il2cpp_symbols::get_class("umamusume.dll", "Gallop", "GraphicSettings"));
 		il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*)>(graphicSettings->klass, "Update3DRenderTexture", 0)->methodPointer(graphicSettings);
@@ -2995,13 +2715,12 @@ namespace
 		Il2CppArraySize_t<Il2CppObject*>* renders;
 		if (Game::CurrentGameRegion == Game::Region::KOR)
 		{
-			renders = il2cpp_resolve_icall_type<Il2CppArraySize_t<Il2CppObject*>*(*)(Il2CppObject*, int, int)>("UnityEngine.Object::FindObjectsByType()")(
-				GetRuntimeType("umamusume.dll", "Gallop", "CutInImageEffectPostRender"), 1, 0);
+			renders = UnityEngine::Object::FindObjectsByType(
+				GetRuntimeType("umamusume.dll", "Gallop", "CutInImageEffectPostRender"), UnityEngine::FindObjectsInactive::Include, UnityEngine::FindObjectsSortMode::None);
 		}
 		else
 		{
-			renders = il2cpp_resolve_icall_type<Il2CppArraySize_t<Il2CppObject*>*(*)(Il2CppObject*, bool)>("UnityEngine.Object::FindObjectsOfType()")(
-				GetRuntimeType("umamusume.dll", "Gallop", "CutInImageEffectPostRender"), true);
+			renders = UnityEngine::Object::FindObjectsOfType(GetRuntimeType("umamusume.dll", "Gallop", "CutInImageEffectPostRender"), true);
 		}
 
 		if (renders)
@@ -3024,13 +2743,12 @@ namespace
 		Il2CppArraySize_t<Il2CppObject*>* cuts;
 		if (Game::CurrentGameRegion == Game::Region::KOR)
 		{
-			cuts = il2cpp_resolve_icall_type<Il2CppArraySize_t<Il2CppObject*>*(*)(Il2CppObject*, int, int)>("UnityEngine.Object::FindObjectsByType()")(
-				GetRuntimeType("umamusume.dll", "Gallop", "LimitBreakCut"), 1, 0);
+			cuts = UnityEngine::Object::FindObjectsByType(
+				GetRuntimeType("umamusume.dll", "Gallop", "LimitBreakCut"), UnityEngine::FindObjectsInactive::Include, UnityEngine::FindObjectsSortMode::None);
 		}
 		else
 		{
-			cuts = il2cpp_resolve_icall_type<Il2CppArraySize_t<Il2CppObject*>*(*)(Il2CppObject*, bool)>("UnityEngine.Object::FindObjectsOfType()")(
-				GetRuntimeType("umamusume.dll", "Gallop", "LimitBreakCut"), true);
+			cuts = UnityEngine::Object::FindObjectsOfType(GetRuntimeType("umamusume.dll", "Gallop", "LimitBreakCut"), true);
 		}
 
 		if (cuts)
@@ -3056,13 +2774,12 @@ namespace
 		Il2CppArraySize_t<Il2CppObject*>* raceEffect;
 		if (Game::CurrentGameRegion == Game::Region::KOR)
 		{
-			raceEffect = il2cpp_resolve_icall_type<Il2CppArraySize_t<Il2CppObject*>*(*)(Il2CppObject*, int, int)>("UnityEngine.Object::FindObjectsByType()")(
-				GetRuntimeType("umamusume.dll", "Gallop", "RaceImageEffect"), 1, 0);
+			raceEffect = UnityEngine::Object::FindObjectsByType(
+				GetRuntimeType("umamusume.dll", "Gallop", "RaceImageEffect"), UnityEngine::FindObjectsInactive::Include, UnityEngine::FindObjectsSortMode::None);
 		}
 		else
 		{
-			raceEffect = il2cpp_resolve_icall_type<Il2CppArraySize_t<Il2CppObject*>*(*)(Il2CppObject*, bool)>("UnityEngine.Object::FindObjectsOfType()")(
-				GetRuntimeType("umamusume.dll", "Gallop", "RaceImageEffect"), true);
+			raceEffect = UnityEngine::Object::FindObjectsOfType(GetRuntimeType("umamusume.dll", "Gallop", "RaceImageEffect"), true);
 		}
 
 		if (raceEffect)
@@ -3104,13 +2821,12 @@ namespace
 		Il2CppArraySize_t<Il2CppObject*>* storyEffect;
 		if (Game::CurrentGameRegion == Game::Region::KOR)
 		{
-			storyEffect = il2cpp_resolve_icall_type<Il2CppArraySize_t<Il2CppObject*>*(*)(Il2CppObject*, int, int)>("UnityEngine.Object::FindObjectsByType()")(
-				GetRuntimeType("umamusume.dll", "Gallop", "StoryImageEffect"), 1, 0);
+			storyEffect = UnityEngine::Object::FindObjectsByType(
+				GetRuntimeType("umamusume.dll", "Gallop", "StoryImageEffect"), UnityEngine::FindObjectsInactive::Include, UnityEngine::FindObjectsSortMode::None);
 		}
 		else
 		{
-			storyEffect = il2cpp_resolve_icall_type<Il2CppArraySize_t<Il2CppObject*>*(*)(Il2CppObject*, bool)>("UnityEngine.Object::FindObjectsOfType()")(
-				GetRuntimeType("umamusume.dll", "Gallop", "StoryImageEffect"), true);
+			storyEffect = UnityEngine::Object::FindObjectsOfType(GetRuntimeType("umamusume.dll", "Gallop", "StoryImageEffect"), true);
 		}
 
 		if (storyEffect)
@@ -3133,13 +2849,12 @@ namespace
 		Il2CppArraySize_t<Il2CppObject*>* lowResCameras;
 		if (Game::CurrentGameRegion == Game::Region::KOR)
 		{
-			lowResCameras = il2cpp_resolve_icall_type<Il2CppArraySize_t<Il2CppObject*>*(*)(Il2CppObject*, int, int)>("UnityEngine.Object::FindObjectsByType()")(
-				GetRuntimeType("umamusume.dll", "Gallop", "LowResolutionCameraBase"), 1, 0);
+			lowResCameras = UnityEngine::Object::FindObjectsByType(
+				GetRuntimeType("umamusume.dll", "Gallop", "LowResolutionCameraBase"), UnityEngine::FindObjectsInactive::Include, UnityEngine::FindObjectsSortMode::None);
 		}
 		else
 		{
-			lowResCameras = il2cpp_resolve_icall_type<Il2CppArraySize_t<Il2CppObject*>*(*)(Il2CppObject*, bool)>("UnityEngine.Object::FindObjectsOfType()")(
-				GetRuntimeType("umamusume.dll", "Gallop", "LowResolutionCameraBase"), true);
+			lowResCameras = UnityEngine::Object::FindObjectsOfType(GetRuntimeType("umamusume.dll", "Gallop", "LowResolutionCameraBase"), true);
 		}
 
 		if (lowResCameras)
@@ -3162,13 +2877,12 @@ namespace
 		Il2CppArraySize_t<Il2CppObject*>* liveTheaterCharaSelects;
 		if (Game::CurrentGameRegion == Game::Region::KOR)
 		{
-			liveTheaterCharaSelects = il2cpp_resolve_icall_type<Il2CppArraySize_t<Il2CppObject*>*(*)(Il2CppObject*, int, int)>("UnityEngine.Object::FindObjectsByType()")(
-				GetRuntimeType("umamusume.dll", "Gallop", "LiveTheaterCharaSelect"), 1, 0);
+			liveTheaterCharaSelects = UnityEngine::Object::FindObjectsByType(
+				GetRuntimeType("umamusume.dll", "Gallop", "LiveTheaterCharaSelect"), UnityEngine::FindObjectsInactive::Include, UnityEngine::FindObjectsSortMode::None);
 		}
 		else
 		{
-			liveTheaterCharaSelects = il2cpp_resolve_icall_type<Il2CppArraySize_t<Il2CppObject*>*(*)(Il2CppObject*, bool)>("UnityEngine.Object::FindObjectsOfType()")(
-				GetRuntimeType("umamusume.dll", "Gallop", "LiveTheaterCharaSelect"), true);
+			liveTheaterCharaSelects = UnityEngine::Object::FindObjectsOfType(GetRuntimeType("umamusume.dll", "Gallop", "LiveTheaterCharaSelect"), true);
 		}
 
 		if (liveTheaterCharaSelects)
@@ -3215,13 +2929,12 @@ namespace
 		Il2CppArraySize_t<Il2CppObject*>* miniDirectors;
 		if (Game::CurrentGameRegion == Game::Region::KOR)
 		{
-			miniDirectors = il2cpp_resolve_icall_type<Il2CppArraySize_t<Il2CppObject*>*(*)(Il2CppObject*, int, int)>("UnityEngine.Object::FindObjectsByType()")(
-				GetRuntimeType("umamusume.dll", "Gallop", "MiniDirector"), 1, 0);
+			miniDirectors = UnityEngine::Object::FindObjectsByType(
+				GetRuntimeType("umamusume.dll", "Gallop", "MiniDirector"), UnityEngine::FindObjectsInactive::Include, UnityEngine::FindObjectsSortMode::None);
 		}
 		else
 		{
-			miniDirectors = il2cpp_resolve_icall_type<Il2CppArraySize_t<Il2CppObject*>*(*)(Il2CppObject*, bool)>("UnityEngine.Object::FindObjectsOfType()")(
-				GetRuntimeType("umamusume.dll", "Gallop", "MiniDirector"), true);
+			miniDirectors = UnityEngine::Object::FindObjectsOfType(GetRuntimeType("umamusume.dll", "Gallop", "MiniDirector"), true);
 		}
 
 		if (miniDirectors && miniDirectors->max_length)
@@ -3300,7 +3013,7 @@ namespace
 
 					if (_resultCamera)
 					{
-						auto texture = il2cpp_class_get_method_from_name_type<Il2CppObject * (*)(Il2CppObject*)>(uiManager->klass, "get_UITexture", 0)->methodPointer(uiManager);
+						auto texture = uiManager.UITexture();
 						il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, Il2CppObject*)>(_resultCamera->klass, "set_targetTexture", 1)->methodPointer(_resultCamera, texture);
 					}
 				}
@@ -3334,7 +3047,7 @@ namespace
 		}
 	}
 
-	void MoviePlayerForUI_AdjustScreenSize_hook(Il2CppObject* _this, Vector2_t dispRectWH, bool isPanScan);
+	void MoviePlayerForUI_AdjustScreenSize_hook(Il2CppObject* _this, UnityEngine::Vector2 dispRectWH, bool isPanScan);
 
 	void ResizeMoviePlayer()
 	{
@@ -3349,7 +3062,7 @@ namespace
 			if (playerDic)
 			{
 				auto entriesField = il2cpp_class_get_field_from_name_wrap(playerDic->klass, "entries");
-				Il2CppArraySize_t<Entry<MoviePlayerHandle, Il2CppObject*>>* entries;
+				Il2CppArraySize_t<System::Collections::Generic::Dictionary<Cute::Cri::MoviePlayerHandle, Il2CppObject*>::Entry>* entries;
 				il2cpp_field_get_value(playerDic, entriesField, &entries);
 
 				if (entries)
@@ -3377,7 +3090,7 @@ namespace
 										auto parentGameObject = il2cpp_class_get_method_from_name_type<Il2CppObject * (*)(Il2CppObject*)>(parent->klass, "get_gameObject", 0)->methodPointer(parent);
 										auto getComponents = il2cpp_class_get_method_from_name_type<Il2CppArraySize * (*)(Il2CppObject*, Il2CppType*, bool, bool, bool, bool, Il2CppObject*)>(parentGameObject->klass, "GetComponentsInternal", 6)->methodPointer;
 
-										if (uobject_get_name(parent)->chars == L"MainCanvas"s)
+										if (UnityEngine::Object::Name(parent)->chars == L"MainCanvas"s)
 										{
 											auto array1 = getComponents(parentGameObject, reinterpret_cast<Il2CppType*>(GetRuntimeType(
 												"umamusume.dll", "Gallop", "StoryMovieView")), true, true, false, false, nullptr);
@@ -3390,7 +3103,7 @@ namespace
 													auto _handleField = il2cpp_class_get_field_from_name_wrap(fullPlayer->klass, "_handle");
 													il2cpp_field_set_value(fullPlayer, _handleField, &entry.key);
 
-													il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, int)>(fullPlayer->klass, "AdjustMovieSize", 1)->methodPointer(fullPlayer, is_virt() ? 0 : 1);
+													il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, int)>(fullPlayer->klass, "AdjustMovieSize", 1)->methodPointer(fullPlayer, Gallop::StandaloneWindowResize::IsVirt() ? 0 : 1);
 
 													return;
 												}
@@ -3422,7 +3135,7 @@ namespace
 															int CurrentDisplayMode;
 															il2cpp_field_static_get_value(CurrentDisplayModeField, &CurrentDisplayMode);
 
-															if (CurrentDisplayMode == 3 && !is_virt())
+															if (CurrentDisplayMode == 3 && !Gallop::StandaloneWindowResize::IsVirt())
 															{
 																int tmpMode = 2;
 																il2cpp_field_static_get_value(CurrentDisplayModeField, &tmpMode);
@@ -3437,7 +3150,7 @@ namespace
 												}
 											}
 
-											auto newSize = il2cpp_symbols::get_method_pointer<Vector2_t(*)()>("umamusume.dll", "Gallop", "MovieScreenSizeHelper", "GetMovieTargetCanvasSize", IgnoreNumberOfArguments)();
+											auto newSize = il2cpp_symbols::get_method_pointer<UnityEngine::Vector2(*)()>("umamusume.dll", "Gallop", "MovieScreenSizeHelper", "GetMovieTargetCanvasSize", IgnoreNumberOfArguments)();
 
 											auto criPlayer = il2cpp_class_get_method_from_name_type<Il2CppObject * (*)(Il2CppObject*)>(player->klass, "get_Player", 0)->methodPointer(player);
 
@@ -3467,9 +3180,9 @@ namespace
 														il2cpp_symbols::get_method_pointer<Il2CppObject * (*)(Il2CppObject*, long index)>("mscorlib.dll", "System", "Array", "GetValue", 1)(array, j);
 													if (!obj) continue;
 
-													auto newSize = il2cpp_class_get_method_from_name_type<Vector2_t(*)(Il2CppObject*)>(obj->klass, "CalcMovieRectSize", 0)->methodPointer(obj);
+													auto newSize = il2cpp_class_get_method_from_name_type<UnityEngine::Vector2(*)(Il2CppObject*)>(obj->klass, "CalcMovieRectSize", 0)->methodPointer(obj);
 
-													il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, Vector2_t)>(parent->klass, "set_sizeDelta", 1)->methodPointer(parent, newSize);
+													il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, UnityEngine::Vector2)>(parent->klass, "set_sizeDelta", 1)->methodPointer(parent, newSize);
 
 													auto criPlayer = il2cpp_class_get_method_from_name_type<Il2CppObject * (*)(Il2CppObject*)>(player->klass, "get_Player", 0)->methodPointer(player);
 
@@ -3502,7 +3215,7 @@ namespace
 	{
 		try
 		{
-			auto uiManager = GetSingletonInstance(il2cpp_symbols::get_class("umamusume.dll", "Gallop", "UIManager"));
+			auto uiManager = Gallop::UIManager::Instance();
 			il2cpp_symbols::get_method_pointer<void (*)(Il2CppObject*, Il2CppDelegate*)>("umamusume.dll", "Gallop", "MonoBehaviourExtension", "WaitForEndFrame", 2)(uiManager, CreateDelegateStatic(fn));
 		}
 		catch (const Il2CppExceptionWrapper& e)
@@ -3515,7 +3228,7 @@ namespace
 	{
 		try
 		{
-			auto uiManager = GetSingletonInstance(il2cpp_symbols::get_class("umamusume.dll", "Gallop", "UIManager"));
+			auto uiManager = Gallop::UIManager::Instance();
 			auto delegate = &CreateUnityAction(target, fn)->delegate;
 			il2cpp_symbols::get_method_pointer<void (*)(Il2CppObject*, Il2CppDelegate*)>("umamusume.dll", "Gallop", "MonoBehaviourExtension", "WaitForEndFrame", 2)(uiManager, delegate);
 		}
@@ -3615,9 +3328,10 @@ namespace
 						Il2CppObject* SCREEN_ORIENTATION_CATEGORIES;
 						il2cpp_field_static_get_value(SCREEN_ORIENTATION_CATEGORIES_Field, &SCREEN_ORIENTATION_CATEGORIES);
 
+						il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*)>(SCREEN_ORIENTATION_CATEGORIES->klass, "Clear", 0)->methodPointer(SCREEN_ORIENTATION_CATEGORIES);
+
 						if (lastWidth < lastHeight)
 						{
-							il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*)>(SCREEN_ORIENTATION_CATEGORIES->klass, "Clear", 0)->methodPointer(SCREEN_ORIENTATION_CATEGORIES);
 							il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, int, int)>(SCREEN_ORIENTATION_CATEGORIES->klass, "Add", 2)->methodPointer(SCREEN_ORIENTATION_CATEGORIES, 1, 1);
 							il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, int, int)>(SCREEN_ORIENTATION_CATEGORIES->klass, "Add", 2)->methodPointer(SCREEN_ORIENTATION_CATEGORIES, 2, 1);
 							il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, int, int)>(SCREEN_ORIENTATION_CATEGORIES->klass, "Add", 2)->methodPointer(SCREEN_ORIENTATION_CATEGORIES, 3, 1);
@@ -3626,7 +3340,6 @@ namespace
 						}
 						else
 						{
-							il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*)>(SCREEN_ORIENTATION_CATEGORIES->klass, "Clear", 0)->methodPointer(SCREEN_ORIENTATION_CATEGORIES);
 							il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, int, int)>(SCREEN_ORIENTATION_CATEGORIES->klass, "Add", 2)->methodPointer(SCREEN_ORIENTATION_CATEGORIES, 1, 3);
 							il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, int, int)>(SCREEN_ORIENTATION_CATEGORIES->klass, "Add", 2)->methodPointer(SCREEN_ORIENTATION_CATEGORIES, 2, 3);
 							il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, int, int)>(SCREEN_ORIENTATION_CATEGORIES->klass, "Add", 2)->methodPointer(SCREEN_ORIENTATION_CATEGORIES, 3, 3);
@@ -3634,8 +3347,8 @@ namespace
 							il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, int, int)>(SCREEN_ORIENTATION_CATEGORIES->klass, "Add", 2)->methodPointer(SCREEN_ORIENTATION_CATEGORIES, 5, 3);
 						}
 
-						int unityWidth = il2cpp_symbols::get_method_pointer<int (*)()>("UnityEngine.CoreModule.dll", "UnityEngine", "Screen", "get_width", IgnoreNumberOfArguments)();
-						int unityHeight = il2cpp_symbols::get_method_pointer<int (*)()>("UnityEngine.CoreModule.dll", "UnityEngine", "Screen", "get_height", IgnoreNumberOfArguments)();
+						int unityWidth = UnityEngine::Screen::width();
+						int unityHeight = UnityEngine::Screen::height();
 
 						if (unityWidth < unityHeight)
 						{
@@ -3654,11 +3367,11 @@ namespace
 
 						auto tapEffectController = GetSingletonInstance(il2cpp_symbols::get_class("umamusume.dll", "Gallop", "TapEffectController"));
 
-						auto uiManager = GetSingletonInstance(il2cpp_symbols::get_class("umamusume.dll", "Gallop", "UIManager"));
+						auto uiManager = Gallop::UIManager::Instance();
 
 						if (uiManager)
 						{
-							//auto loadingCanvas = il2cpp_class_get_method_from_name_type<Il2CppObject * (*)()>(uiManager->klass, "get_LoadingCanvas", IgnoreNumberOfArguments)->methodPointer();
+							//auto loadingCanvas = il2cpp_class_get_method_from_name_type<Il2CppObject * (*)()>(uiManager, "get_LoadingCanvas", IgnoreNumberOfArguments)->methodPointer();
 							//if (loadingCanvas)
 							//{
 							//	auto canvas = il2cpp_class_get_method_from_name_type<Il2CppObject * (*)(Il2CppObject*)>(loadingCanvas->klass, "get_Canvas", 0)->methodPointer(loadingCanvas);
@@ -3698,7 +3411,7 @@ namespace
 							//	{
 							//		auto id = reinterpret_cast<int>(ids->vector[i]);
 							//		cout << "Layer Id: " << id << endl;
-							//		cout << "Layer name: " << local::wide_u8(il2cpp_symbols::get_method_pointer<Il2CppString * (*)(int)>("UnityEngine.CoreModule.dll", "UnityEngine", "SortingLayer", "IDToName", 1)(id)->chars) << endl;
+							//		cout << "Layer name: " << wide_u8(il2cpp_symbols::get_method_pointer<Il2CppString * (*)(int)>("UnityEngine.CoreModule.dll", "UnityEngine", "SortingLayer", "IDToName", 1)(id)->chars) << endl;
 							//	}
 
 							//	auto _activeHorseShoeParticleField = il2cpp_class_get_field_from_name_wrap(nowLoading->klass, isPortrait ? "_horseShoeParticleVertical" : "_horseShoeParticleHorizontal");
@@ -3737,7 +3450,7 @@ namespace
 							il2cpp_symbols::get_method_pointer<void (*)(bool, Il2CppObject**)>("umamusume.dll", "Gallop", "Screen", "InitializeChangeScaleForPC", 2)(isPortrait, &_bgCameraSettings);
 
 							il2cpp_field_static_set_value(_bgCameraSettingsField, &_bgCameraSettings);*/
-							/*auto _bgCameraField = il2cpp_class_get_field_from_name_wrap(uiManager->klass, "_bgCamera");
+							/*auto _bgCameraField = il2cpp_class_get_field_from_name_wrap(uiManager, "_bgCamera");
 							Il2CppObject* _bgCamera;
 
 							il2cpp_field_get_value(uiManager, _bgCameraField, &_bgCamera);
@@ -3747,7 +3460,7 @@ namespace
 
 							il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*)>(tapEffectController->klass, "Disable", 0)->methodPointer(tapEffectController);
 
-							il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, ScreenOrientation)>(uiManager->klass, "SetCameraSizeByOrientation", 1)->methodPointer(uiManager, ScreenOrientation::Portrait);
+							uiManager.SetCameraSizeByOrientation(UnityEngine::ScreenOrientation::Portrait);
 						}
 
 						auto anRootManager = GetSingletonInstance(il2cpp_symbols::get_class("Plugins.dll", "AnimateToUnity", "AnRootManager"));
@@ -3761,23 +3474,23 @@ namespace
 
 						if (uiManager)
 						{
-							// il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, int, int)>(uiManager->klass, "ChangeResizeUIForPC", 2)->methodPointer(uiManager, lastWidth, lastHeight);
+							// il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, int, int)>(uiManager, "ChangeResizeUIForPC", 2)->methodPointer(uiManager, lastWidth, lastHeight);
 
 							// AutoRotation
 							// il2cpp_symbols::get_method_pointer<void (*)(int)>("UnityEngine.CoreModule.dll", "UnityEngine", "Screen", "set_orientation", 1)(5);
 
-							auto gameObject = il2cpp_class_get_method_from_name_type<Il2CppObject * (*)(Il2CppObject*)>(uiManager->klass, "get_gameObject", 0)->methodPointer(uiManager);
+							auto gameObject = uiManager.gameObject();
 
-							auto transform = il2cpp_class_get_method_from_name_type<Il2CppObject * (*)(Il2CppObject*)>(gameObject->klass, "get_transform", 0)->methodPointer(gameObject);
+							auto transform = il2cpp_class_get_method_from_name_type<Il2CppObject * (*)(Il2CppObject*)>(gameObject, "get_transform", 0)->methodPointer(gameObject);
 
-							il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, Vector3_t)>(transform->klass, "set_localScale", 1)->methodPointer(transform, Vector3_t{ 1, 1, 1 });
+							il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, UnityEngine::Vector3)>(transform->klass, "set_localScale", 1)->methodPointer(transform, UnityEngine::Vector3{ 1, 1, 1 });
 
 							// auto _bgCameraSettingsField = il2cpp_class_get_field_from_name_wrap(GallopScreen, "_bgCameraSettings");
 
 							// Il2CppObject* _bgCameraSettings;
 							// il2cpp_field_static_get_value(_bgCameraSettingsField, &_bgCameraSettings);
 
-							// il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, Il2CppObject**)>(uiManager->klass, "EndOrientation", 1)->methodPointer(uiManager, &_bgCameraSettings);
+							// il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, Il2CppObject**)>(uiManager, "EndOrientation", 1)->methodPointer(uiManager, &_bgCameraSettings);
 
 							// il2cpp_field_static_set_value(_bgCameraSettingsField, &_bgCameraSettings);
 
@@ -3789,15 +3502,14 @@ namespace
 							Il2CppArraySize_t<Il2CppObject*>* canvasScalerList;
 							if (Game::CurrentGameRegion == Game::Region::KOR)
 							{
-								canvasScalerList = il2cpp_resolve_icall_type<Il2CppArraySize_t<Il2CppObject*>*(*)(Il2CppObject*, int, int)>("UnityEngine.Object::FindObjectsByType()")(
-									GetRuntimeType("UnityEngine.UI.dll", "UnityEngine.UI", "CanvasScaler"), 1, 0);
+								canvasScalerList = UnityEngine::Object::FindObjectsByType(
+									GetRuntimeType("UnityEngine.UI.dll", "UnityEngine.UI", "CanvasScaler"), UnityEngine::FindObjectsInactive::Include, UnityEngine::FindObjectsSortMode::None);
 							}
 							else
 							{
-								canvasScalerList = il2cpp_resolve_icall_type<Il2CppArraySize_t<Il2CppObject*>*(*)(Il2CppObject*, bool)>("UnityEngine.Object::FindObjectsOfType()")(
-									GetRuntimeType("UnityEngine.UI.dll", "UnityEngine.UI", "CanvasScaler"), true);
+								canvasScalerList = UnityEngine::Object::FindObjectsOfType(GetRuntimeType("UnityEngine.UI.dll", "UnityEngine.UI", "CanvasScaler"), true);
 							}
-							// auto canvasScalerList = il2cpp_class_get_method_from_name_type<Il2CppArraySize_t<Il2CppObject*> *(*)(Il2CppObject*)>(uiManager->klass, "GetCanvasScalerList", 0)->methodPointer(uiManager);
+							// auto canvasScalerList = il2cpp_class_get_method_from_name_type<Il2CppArraySize_t<Il2CppObject*> *(*)(Il2CppObject*)>(uiManager, "GetCanvasScalerList", 0)->methodPointer(uiManager);
 
 							for (int i = 0; i < canvasScalerList->max_length; i++)
 							{
@@ -3812,13 +3524,13 @@ namespace
 
 									/*if (isPortrait)
 									{
-										float scale = min(config::freeform_ui_scale_portrait, max(1.0f, contentHeight * ratio_vertical) * config::freeform_ui_scale_portrait);
-										il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, Vector2_t)>(canvasScaler->klass, "set_referenceResolution", 1)->methodPointer(canvasScaler, Vector2_t{ static_cast<float>(contentWidth / scale), static_cast<float>(contentHeight / scale) });
+										float scale = min(config::freeform_ui_scale_portrait, max(1.0f, contentHeight * config::runtime::ratioVertical) * config::freeform_ui_scale_portrait);
+										il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, UnityEngine::Vector2)>(canvasScaler->klass, "set_referenceResolution", 1)->methodPointer(canvasScaler, UnityEngine::Vector2{ static_cast<float>(contentWidth / scale), static_cast<float>(contentHeight / scale) });
 									}
 									else
 									{
-										float scale = min(config::freeform_ui_scale_landscape, max(1.0f, contentWidth / ratio_horizontal) * config::freeform_ui_scale_landscape);
-										il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, Vector2_t)>(canvasScaler->klass, "set_referenceResolution", 1)->methodPointer(canvasScaler, Vector2_t{ static_cast<float>(contentWidth / scale), static_cast<float>(contentHeight / scale) });
+										float scale = min(config::freeform_ui_scale_landscape, max(1.0f, contentWidth / config::runtime::ratioHorizontal) * config::freeform_ui_scale_landscape);
+										il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, UnityEngine::Vector2)>(canvasScaler->klass, "set_referenceResolution", 1)->methodPointer(canvasScaler, UnityEngine::Vector2{ static_cast<float>(contentWidth / scale), static_cast<float>(contentHeight / scale) });
 									}*/
 
 									// il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, int)>(canvasScaler->klass, "set_uiScaleMode", 1)->methodPointer(canvasScaler, 0);
@@ -3833,13 +3545,13 @@ namespace
 									{
 										if (isPortrait)
 										{
-											float scale = min(config::freeform_ui_scale_portrait, max(1.0f, contentHeight * ratio_vertical) * config::freeform_ui_scale_portrait);
-											il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, Vector2_t)>(canvasScaler->klass, "set_referenceResolution", 1)->methodPointer(canvasScaler, Vector2_t{ static_cast<float>(contentWidth / scale), static_cast<float>(contentHeight / scale) });
+											float scale = min(config::freeform_ui_scale_portrait, max(1.0f, contentHeight * config::runtime::ratioVertical) * config::freeform_ui_scale_portrait);
+											il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, UnityEngine::Vector2)>(canvasScaler->klass, "set_referenceResolution", 1)->methodPointer(canvasScaler, UnityEngine::Vector2{ static_cast<float>(contentWidth / scale), static_cast<float>(contentHeight / scale) });
 										}
 										else
 										{
-											float scale = min(config::freeform_ui_scale_landscape, max(1.0f, contentWidth / ratio_horizontal) * config::freeform_ui_scale_landscape);
-											il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, Vector2_t)>(canvasScaler->klass, "set_referenceResolution", 1)->methodPointer(canvasScaler, Vector2_t{ static_cast<float>(contentWidth / scale), static_cast<float>(contentHeight / scale) });
+											float scale = min(config::freeform_ui_scale_landscape, max(1.0f, contentWidth / config::runtime::ratioHorizontal) * config::freeform_ui_scale_landscape);
+											il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, UnityEngine::Vector2)>(canvasScaler->klass, "set_referenceResolution", 1)->methodPointer(canvasScaler, UnityEngine::Vector2{ static_cast<float>(contentWidth / scale), static_cast<float>(contentHeight / scale) });
 										}
 									}
 
@@ -3847,12 +3559,12 @@ namespace
 									{
 										if (isPortrait)
 										{
-											float scale = min(config::freeform_ui_scale_portrait, max(1.0f, contentHeight * ratio_vertical) * config::freeform_ui_scale_portrait);
+											float scale = min(config::freeform_ui_scale_portrait, max(1.0f, contentHeight * config::runtime::ratioVertical) * config::freeform_ui_scale_portrait);
 											il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, float)>(canvasScaler->klass, "set_scaleFactor", 1)->methodPointer(canvasScaler, scale);
 										}
 										else
 										{
-											float scale = min(config::freeform_ui_scale_landscape, max(1.0f, contentWidth / ratio_horizontal) * config::freeform_ui_scale_landscape);
+											float scale = min(config::freeform_ui_scale_landscape, max(1.0f, contentWidth / config::runtime::ratioHorizontal) * config::freeform_ui_scale_landscape);
 											il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, float)>(canvasScaler->klass, "set_scaleFactor", 1)->methodPointer(canvasScaler, scale);
 										}
 									}
@@ -3888,22 +3600,19 @@ namespace
 
 								auto _originalScreenHeight_Field = il2cpp_class_get_field_from_name_wrap(GallopScreen, "_originalScreenHeight");
 
-								auto uiManager = GetSingletonInstance(il2cpp_symbols::get_class("umamusume.dll", "Gallop", "UIManager"));
+								auto uiManager = Gallop::UIManager::Instance();
 
 								if (uiManager)
 								{
-									il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*)>(uiManager->klass, "AdjustSafeArea", 0)->methodPointer(uiManager);
-									auto _bgManagerField = il2cpp_class_get_field_from_name_wrap(uiManager->klass, "_bgManager");
-									Il2CppObject* _bgManager;
-									il2cpp_field_get_value(uiManager, _bgManagerField, &_bgManager);
+									uiManager.AdjustSafeArea();
+									Il2CppObject* _bgManager = uiManager._bgManager();
 									if (_bgManager)
 									{
 										il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*)>(_bgManager->klass, "OnChangeResolutionByGraphicsSettings", 0)->methodPointer(_bgManager);
 									}
 
-									il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*)>(uiManager->klass, "CheckUIToFrameBufferBlitInstance", 0)->methodPointer(uiManager);
-									il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*)>(uiManager->klass, "ReleaseRenderTexture", 0)->methodPointer(uiManager);
-
+									uiManager.CheckUIToFrameBufferBlitInstance();
+									uiManager.ReleaseRenderTexture();
 
 									auto renderTexture = il2cpp_object_new(il2cpp_symbols::get_class("UnityEngine.CoreModule.dll", "UnityEngine", "RenderTexture"));
 									il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, int, int, int)>(renderTexture->klass, ".ctor", 3)->methodPointer(renderTexture, contentWidth, contentHeight, 24);
@@ -3911,32 +3620,23 @@ namespace
 									il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, bool)>(renderTexture->klass, "set_useMipMap", 1)->methodPointer(renderTexture, false);
 									il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, int)>(renderTexture->klass, "set_antiAliasing", 1)->methodPointer(renderTexture, 1);
 
-									auto _uiTextureField = il2cpp_class_get_field_from_name_wrap(uiManager->klass, "_uiTexture");
-									il2cpp_field_set_value(uiManager, _uiTextureField, renderTexture);
+									uiManager.UITexture(renderTexture);
 
 									if (!il2cpp_class_get_method_from_name_type<bool (*)(Il2CppObject*)>(renderTexture->klass, "Create", 0)->methodPointer(renderTexture))
 									{
-										il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*)>(uiManager->klass, "ReleaseRenderTexture", 0)->methodPointer(uiManager);
+										uiManager.ReleaseRenderTexture();
 									}
 
-									auto _uiToFrameBufferRenderCameraDataField = il2cpp_class_get_field_from_name_wrap(uiManager->klass, "_uiToFrameBufferRenderCameraData");
-									if (_uiToFrameBufferRenderCameraDataField)
+									Il2CppObject* _uiToFrameBufferRenderCameraData = uiManager._uiToFrameBufferRenderCameraData();
+									if (_uiToFrameBufferRenderCameraData)
 									{
-										Il2CppObject* _uiToFrameBufferRenderCameraData;
-										il2cpp_field_get_value(uiManager, _uiToFrameBufferRenderCameraDataField, &_uiToFrameBufferRenderCameraData);
-
 										il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, Il2CppObject*)>(_uiToFrameBufferRenderCameraData->klass, "set_ScreenTexture", 1)->methodPointer(_uiToFrameBufferRenderCameraData, renderTexture);
 									}
 									else
 									{
 										// Deprecated behavior
-										auto _uiCommandBufferField = il2cpp_class_get_field_from_name_wrap(uiManager->klass, "_uiCommandBuffer");
-										Il2CppObject* _uiCommandBuffer;
-										il2cpp_field_get_value(uiManager, _uiCommandBufferField, &_uiCommandBuffer);
-
-										auto _blitToFrameMaterialField = il2cpp_class_get_field_from_name_wrap(uiManager->klass, "_blitToFrameMaterial");
-										Il2CppObject* _blitToFrameMaterial;
-										il2cpp_field_get_value(uiManager, _blitToFrameMaterialField, &_blitToFrameMaterial);
+										Il2CppObject* _uiCommandBuffer = uiManager._uiCommandBuffer();
+										Il2CppObject* _blitToFrameMaterial = uiManager._blitToFrameMaterial();
 
 										if (_uiCommandBuffer)
 										{
@@ -3946,21 +3646,11 @@ namespace
 										}
 									}
 
-									auto _uiCameraField = il2cpp_class_get_field_from_name_wrap(uiManager->klass, "_uiCamera");
-									Il2CppObject* _uiCamera;
-									il2cpp_field_get_value(uiManager, _uiCameraField, &_uiCamera);
+									Il2CppObject* _uiCamera = uiManager._uiCamera();
+									Il2CppObject* _bgCamera = uiManager._bgCamera();
 
-									auto _bgCameraField = il2cpp_class_get_field_from_name_wrap(uiManager->klass, "_bgCamera");
-									Il2CppObject* _bgCamera;
-									il2cpp_field_get_value(uiManager, _bgCameraField, &_bgCamera);
-
-									auto _noImageEffectUICameraField = il2cpp_class_get_field_from_name_wrap(uiManager->klass, "_noImageEffectUICamera");
-									Il2CppObject* _noImageEffectUICamera;
-									il2cpp_field_get_value(uiManager, _noImageEffectUICameraField, &_noImageEffectUICamera);
-
-									auto _uiToFrameBufferBlitCameraField = il2cpp_class_get_field_from_name_wrap(uiManager->klass, "_uiToFrameBufferBlitCamera");
-									Il2CppObject* _uiToFrameBufferBlitCamera;
-									il2cpp_field_get_value(uiManager, _uiToFrameBufferBlitCameraField, &_uiToFrameBufferBlitCamera);
+									Il2CppObject* _noImageEffectUICamera = uiManager._noImageEffectUICamera();
+									Il2CppObject* _uiToFrameBufferBlitCamera = uiManager._uiToFrameBufferBlitCamera();
 
 									if (_uiCamera)
 									{
@@ -3983,10 +3673,10 @@ namespace
 
 								RemakeTextures();
 
-								auto raceCameraManager = GetSingletonInstance(il2cpp_symbols::get_class("umamusume.dll", "Gallop", "RaceCameraManager"));
+								auto raceCameraManager = Gallop::RaceCameraManager::Instance();
 								if (raceCameraManager)
 								{
-									il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, int)>(raceCameraManager->klass, "SetupOrientation", 1)->methodPointer(raceCameraManager, isPortrait ? 7 : 6);
+									raceCameraManager.SetupOrientation(isPortrait ? Gallop::LowResolutionCameraUtil::DrawDirection::Portrait : Gallop::LowResolutionCameraUtil::DrawDirection::Landscape);
 								}
 
 								auto director = GetSingletonInstance(il2cpp_symbols::get_class("umamusume.dll", "Gallop.Live", "Director"));
@@ -4010,18 +3700,18 @@ namespace
 										{
 											if (contentWidth < contentHeight)
 											{
-												float scale = min(config::freeform_ui_scale_portrait, max(1.0f, contentHeight * ratio_vertical) * config::freeform_ui_scale_portrait);
-												il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, Vector2_t)>(root->klass, "SetScreenReferenceSize", 1)->methodPointer(root, Vector2_t{ ratio_16_9 * static_cast<float>(contentHeight / scale), static_cast<float>(contentHeight / scale) });
+												float scale = min(config::freeform_ui_scale_portrait, max(1.0f, contentHeight * config::runtime::ratioVertical) * config::freeform_ui_scale_portrait);
+												il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, UnityEngine::Vector2)>(root->klass, "SetScreenReferenceSize", 1)->methodPointer(root, UnityEngine::Vector2{ ratio_16_9 * static_cast<float>(contentHeight / scale), static_cast<float>(contentHeight / scale) });
 											}
 											else
 											{
-												float scale = min(config::freeform_ui_scale_landscape, max(1.0f, contentWidth / ratio_horizontal) * config::freeform_ui_scale_landscape);
-												il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, Vector2_t)>(root->klass, "SetScreenReferenceSize", 1)->methodPointer(root, Vector2_t{ ratio_16_9 * static_cast<float>(contentHeight / scale), static_cast<float>(contentHeight / scale) });
+												float scale = min(config::freeform_ui_scale_landscape, max(1.0f, contentWidth / config::runtime::ratioHorizontal) * config::freeform_ui_scale_landscape);
+												il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, UnityEngine::Vector2)>(root->klass, "SetScreenReferenceSize", 1)->methodPointer(root, UnityEngine::Vector2{ ratio_16_9 * static_cast<float>(contentHeight / scale), static_cast<float>(contentHeight / scale) });
 											}
 										}
 										else
 										{
-											il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, Vector2_t)>(root->klass, "SetScreenReferenceSize", 1)->methodPointer(root, Vector2_t{ ratio_16_9 * static_cast<float>(contentHeight), static_cast<float>(contentHeight) });
+											il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, UnityEngine::Vector2)>(root->klass, "SetScreenReferenceSize", 1)->methodPointer(root, UnityEngine::Vector2{ ratio_16_9 * static_cast<float>(contentHeight), static_cast<float>(contentHeight) });
 										}
 									}
 								}
@@ -4033,18 +3723,16 @@ namespace
 
 								if (uiManager)
 								{
-									il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*)>(uiManager->klass, "AdjustMissionClearContentsRootRect", 0)->methodPointer(uiManager);
-									il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*)>(uiManager->klass, "AdjustSafeAreaToAnnounceRect", 0)->methodPointer(uiManager);
+									uiManager.AdjustMissionClearContentsRootRect();
+									uiManager.AdjustSafeAreaToAnnounceRect();
 
-									auto _bgCameraField = il2cpp_class_get_field_from_name_wrap(uiManager->klass, "_bgCamera");
-									Il2CppObject* _bgCamera;
-									il2cpp_field_get_value(uiManager, _bgCameraField, &_bgCamera);
+									/*Il2CppObject* _bgCamera = uiManager._bgCamera();
 
 									if (_bgCamera)
 									{
-										/*il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, Color_t)>(_bgCamera->klass, "set_backgroundColor", 1)->methodPointer(_bgCamera,
-											il2cpp_symbols::get_method_pointer<Color_t(*)()>("UnityEngine.CoreModule.dll", "UnityEngine", "Color", "get_clear", IgnoreNumberOfArguments)());*/
-									}
+										il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, Color_t)>(_bgCamera->klass, "set_backgroundColor", 1)->methodPointer(_bgCamera,
+											il2cpp_symbols::get_method_pointer<Color_t(*)()>("UnityEngine.CoreModule.dll", "UnityEngine", "Color", "get_clear", IgnoreNumberOfArguments)());
+									}*/
 								}
 
 								if (isPortrait)
@@ -4089,22 +3777,17 @@ namespace
 			IsRunChangeScene = il2cpp_class_get_method_from_name_type<bool (*)(Il2CppObject*)>(sceneManager->klass, "get_IsRunChangeScene", 0)->methodPointer(sceneManager);
 		}
 
-		auto uiManager = GetSingletonInstance(il2cpp_symbols::get_class("umamusume.dll", "Gallop", "UIManager"));
+		auto uiManager = Gallop::UIManager::Instance();
 		if (uiManager)
 		{
-			auto _noImageEffectCanvasField = il2cpp_class_get_field_from_name_wrap(uiManager->klass, "_noImageEffectCanvas");
-			if (_noImageEffectCanvasField)
-			{
-				Il2CppObject* _noImageEffectCanvas;
-				il2cpp_field_get_value(uiManager, _noImageEffectCanvasField, &_noImageEffectCanvas);
+			Il2CppObject* _noImageEffectCanvas = uiManager._noImageEffectCanvas();
 
-				if (_noImageEffectCanvas)
+			if (_noImageEffectCanvas)
+			{
+				auto camera = il2cpp_class_get_method_from_name_type<Il2CppObject * (*)(Il2CppObject*)>(_noImageEffectCanvas->klass, "get_worldCamera", 0)->methodPointer(_noImageEffectCanvas);
+				if (camera)
 				{
-					auto camera = il2cpp_class_get_method_from_name_type<Il2CppObject * (*)(Il2CppObject*)>(_noImageEffectCanvas->klass, "get_worldCamera", 0)->methodPointer(_noImageEffectCanvas);
-					if (camera)
-					{
-						return IsRunChangeView || IsRunChangeScene || il2cpp_class_get_method_from_name_type<bool (*)(Il2CppObject*)>(camera->klass, "get_enabled", 0)->methodPointer(camera);
-					}
+					return IsRunChangeView || IsRunChangeScene || il2cpp_class_get_method_from_name_type<bool (*)(Il2CppObject*)>(camera->klass, "get_enabled", 0)->methodPointer(camera);
 				}
 			}
 		}
@@ -4115,7 +3798,7 @@ namespace
 	void* Camera_set_orthographicSize_orig = nullptr;
 	void Camera_set_orthographicSize_hook(Il2CppObject* _this, float value)
 	{
-		if (wstring(uobject_get_name(_this)->chars).find(L"UICamera") != wstring::npos)
+		if (wstring(UnityEngine::Object::Name(_this)->chars).find(L"UICamera") != wstring::npos)
 		{
 			auto callback = CreateDelegateWithClass(il2cpp_symbols::get_class("DOTween.dll", "DG.Tweening", "TweenCallback"), _this, *([](Il2CppObject* _this)
 				{
@@ -4135,18 +3818,20 @@ namespace
 	}
 
 	void* RectTransform_get_rect_Injected_orig = nullptr;
-	void RectTransform_get_rect_Injected_hook(Il2CppObject* _this, Rect_t* rect)
+	void RectTransform_get_rect_Injected_hook(Il2CppObject* _this, UnityEngine::Rect* rect)
 	{
 		reinterpret_cast<decltype(RectTransform_get_rect_Injected_hook)*>(RectTransform_get_rect_Injected_orig)(_this, rect);
 
-		if (isRequestChangeResolution && il2cpp_symbols::get_method_pointer<bool (*)()>("umamusume.dll", "Gallop", "GameSystem", "IsExecutingSoftwareReset", IgnoreNumberOfArguments)())
+		if (il2cpp_symbols::get_method_pointer<bool (*)()>("umamusume.dll", "Gallop", "GameSystem", "IsExecutingSoftwareReset", IgnoreNumberOfArguments)())
 		{
-			float tmp = rect->height;
-			rect->height = rect->width;
-			rect->width = tmp;
+			if (isRequestChangeResolution || config::freeform_window && Gallop::StandaloneWindowResize::IsVirt())
+			{
+				float tmp = rect->height;
+				rect->height = rect->width;
+				rect->width = tmp;
+			}
 			return;
 		}
-
 
 		auto sceneManager = GetSingletonInstance(il2cpp_symbols::get_class("umamusume.dll", "Gallop", "SceneManager"));
 		if (sceneManager)
@@ -4186,7 +3871,7 @@ namespace
 	{
 		if (width < 72)
 		{
-			if (is_virt())
+			if (Gallop::StandaloneWindowResize::IsVirt())
 			{
 				width = 72;
 			}
@@ -4198,7 +3883,7 @@ namespace
 
 		if (height < 72)
 		{
-			if (is_virt())
+			if (Gallop::StandaloneWindowResize::IsVirt())
 			{
 				height = 128;
 			}
@@ -4223,14 +3908,14 @@ namespace
 			return;
 		}
 
-		Resolution_t r;
+		UnityEngine::Resolution r;
 		get_resolution(&r);
 
 		bool reqVirt = width < height;
 
 		bool unlockSize = config::unlock_size || config::freeform_window;
 
-		if (is_virt() && fullScreenFl)
+		if (Gallop::StandaloneWindowResize::IsVirt() && fullScreenFl)
 		{
 			fullScreenFl = false;
 			fullScreenFlOverride = false;
@@ -4241,7 +3926,7 @@ namespace
 			else
 			{
 				r.height *= 0.825f;
-				r.width = r.height * ratio_vertical;
+				r.width = r.height * config::runtime::ratioVertical;
 				reinterpret_cast<decltype(set_resolution_hook)*>(set_resolution_orig)(r.width, r.height, 3, perferredRefreshRate);
 			}
 			return;
@@ -4260,7 +3945,7 @@ namespace
 			else
 			{
 				r.height *= 0.825f;
-				r.width = r.height * ratio_vertical;
+				r.width = r.height * config::runtime::ratioVertical;
 				reinterpret_cast<decltype(set_resolution_hook)*>(set_resolution_orig)(r.width, r.height, 3, perferredRefreshRate);
 			}
 			return;
@@ -4274,11 +3959,11 @@ namespace
 			ratio *= 1000;
 			ratio = roundf(ratio) / 1000;
 
-			if (is_virt() && ratio == ratio_9_16)
+			if (Gallop::StandaloneWindowResize::IsVirt() && ratio == ratio_9_16)
 			{
 				need_fullscreen = true;
 			}
-			else if (!is_virt() && ratio == ratio_16_9)
+			else if (!Gallop::StandaloneWindowResize::IsVirt() && ratio == ratio_16_9)
 			{
 				need_fullscreen = true;
 			}
@@ -4293,7 +3978,7 @@ namespace
 				if (need_fullscreen && (!last_hriz_window_width || !last_hriz_window_height))
 				{
 					last_hriz_window_width = r.width - 400;
-					last_hriz_window_height = last_hriz_window_width * ratio_horizontal;
+					last_hriz_window_height = last_hriz_window_width * config::runtime::ratioHorizontal;
 				}
 			}
 			else
@@ -4320,10 +4005,10 @@ namespace
 			ratio *= 1000;
 			ratio = roundf(ratio) / 1000;
 
-			auto round_ratio_vertical = ratio_vertical * 1000;
+			auto round_ratio_vertical = config::runtime::ratioVertical * 1000;
 			round_ratio_vertical = roundf(round_ratio_vertical) / 1000;
 
-			auto round_ratio_horizontal = ratio_horizontal * 1000;
+			auto round_ratio_horizontal = config::runtime::ratioHorizontal * 1000;
 			round_ratio_horizontal = roundf(round_ratio_horizontal) / 1000;
 
 			if (reqVirt && ratio != round_ratio_vertical)
@@ -4337,23 +4022,23 @@ namespace
 					if (config::initial_width < config::initial_height)
 					{
 						last_virt_window_height = get_system_width(display) - 400;
-						last_virt_window_width = last_virt_window_height * ratio_vertical;
+						last_virt_window_width = last_virt_window_height * config::runtime::ratioVertical;
 
 						if (last_virt_window_height >= get_system_height(display))
 						{
 							last_virt_window_height = get_system_height(display) - 400;
-							last_virt_window_width = last_virt_window_height * ratio_vertical;
+							last_virt_window_width = last_virt_window_height * config::runtime::ratioVertical;
 						}
 					}
 					else
 					{
 						last_virt_window_height = get_system_height(display) - 400;
-						last_virt_window_width = last_virt_window_height * ratio_vertical;
+						last_virt_window_width = last_virt_window_height * config::runtime::ratioVertical;
 
 						if (last_virt_window_height >= get_system_height(display))
 						{
 							last_virt_window_height = get_system_height(display) - 400;
-							last_virt_window_width = last_virt_window_height * ratio_vertical;
+							last_virt_window_width = last_virt_window_height * config::runtime::ratioVertical;
 						}
 					}
 				}
@@ -4374,23 +4059,23 @@ namespace
 					if (config::initial_width < config::initial_height)
 					{
 						last_hriz_window_width = get_system_height(display) - 400;
-						last_hriz_window_height = last_hriz_window_width / ratio_horizontal;
+						last_hriz_window_height = last_hriz_window_width / config::runtime::ratioHorizontal;
 
 						if (last_hriz_window_height >= get_system_height(display))
 						{
 							last_hriz_window_height = get_system_height(display) - 400;
-							last_hriz_window_width = last_hriz_window_height * ratio_horizontal;
+							last_hriz_window_width = last_hriz_window_height * config::runtime::ratioHorizontal;
 						}
 					}
 					else
 					{
 						last_hriz_window_width = get_system_width(display) - 400;
-						last_hriz_window_height = last_hriz_window_width / ratio_horizontal;
+						last_hriz_window_height = last_hriz_window_width / config::runtime::ratioHorizontal;
 
 						if (last_hriz_window_height >= get_system_height(display))
 						{
 							last_hriz_window_height = get_system_height(display) - 400;
-							last_hriz_window_width = last_hriz_window_height * ratio_horizontal;
+							last_hriz_window_width = last_hriz_window_height * config::runtime::ratioHorizontal;
 						}
 					}
 				}
@@ -4435,7 +4120,7 @@ namespace
 					CreateDelegateStatic(*[]()
 						{
 							isExitOpened = false;
-							Exit();
+							UnityEngine::Application::Exit(0);
 						}),
 					GetTextIdByName(L"Common0004"),
 					GetTextIdByName(L"Common0003"),
@@ -4550,12 +4235,12 @@ namespace
 
 		auto FormTypeField = il2cpp_class_get_field_from_name_wrap(_data->klass, "FormType");
 
-		DialogCommonFormType type = WITHOUT_FRAME;
+		Gallop::DialogCommonBase::FormType type = Gallop::DialogCommonBase::FormType::WITHOUT_FRAME;
 		il2cpp_field_get_value(_data, FormTypeField, &type);
 
-		bool isOneButton = type == DialogCommonFormType::SMALL_ONE_BUTTON || type == DialogCommonFormType::MIDDLE_ONE_BUTTON || type == DialogCommonFormType::BIG_ONE_BUTTON;
-		bool isTwoButton = type == DialogCommonFormType::SMALL_TWO_BUTTON || type == DialogCommonFormType::MIDDLE_TWO_BUTTON || type == DialogCommonFormType::BIG_TWO_BUTTON;
-		bool isThreeButton = type == DialogCommonFormType::SMALL_THREE_BUTTON || type == DialogCommonFormType::MIDDLE_THREE_BUTTON || type == DialogCommonFormType::BIG_THREE_BUTTON;
+		bool isOneButton = type == Gallop::DialogCommonBase::FormType::SMALL_ONE_BUTTON || type == Gallop::DialogCommonBase::FormType::MIDDLE_ONE_BUTTON || type == Gallop::DialogCommonBase::FormType::BIG_ONE_BUTTON;
+		bool isTwoButton = type == Gallop::DialogCommonBase::FormType::SMALL_TWO_BUTTON || type == Gallop::DialogCommonBase::FormType::MIDDLE_TWO_BUTTON || type == Gallop::DialogCommonBase::FormType::BIG_TWO_BUTTON;
+		bool isThreeButton = type == Gallop::DialogCommonBase::FormType::SMALL_THREE_BUTTON || type == Gallop::DialogCommonBase::FormType::MIDDLE_THREE_BUTTON || type == Gallop::DialogCommonBase::FormType::BIG_THREE_BUTTON;
 
 		auto _currentDialogObjField = il2cpp_class_get_field_from_name_wrap(dialog->klass, "_currentDialogObj");
 
@@ -5098,7 +4783,7 @@ namespace
 
 							if (wParam == VK_RETURN)
 							{
-								auto enabledObscured = il2cpp_class_get_method_from_name_type<ObscuredBool(*)(Il2CppObject*)>(selectedMenu->klass, "get_IsEnable", 0)->methodPointer(selectedMenu);
+								auto enabledObscured = il2cpp_class_get_method_from_name_type<CodeStage::AntiCheat::ObscuredTypes::ObscuredBool(*)(Il2CppObject*)>(selectedMenu->klass, "get_IsEnable", 0)->methodPointer(selectedMenu);
 								auto enabled = enabledObscured.GetDecrypted();
 
 								if (enabled)
@@ -5134,7 +4819,7 @@ namespace
 
 								if (selectedMenu == trainingMenu)
 								{
-									auto enabledObscured = il2cpp_class_get_method_from_name_type<ObscuredBool(*)(Il2CppObject*)>(selectedMenu->klass, "get_IsEnable", 0)->methodPointer(selectedMenu);
+									auto enabledObscured = il2cpp_class_get_method_from_name_type<CodeStage::AntiCheat::ObscuredTypes::ObscuredBool(*)(Il2CppObject*)>(selectedMenu->klass, "get_IsEnable", 0)->methodPointer(selectedMenu);
 									auto enabled = enabledObscured.GetDecrypted();
 
 									if (enabled)
@@ -5428,7 +5113,7 @@ namespace
 			{
 				altEnterPressed = true;
 
-				Resolution_t r;
+				UnityEngine::Resolution r;
 				get_resolution(&r);
 
 				auto display = display_get_main();
@@ -5441,7 +5126,7 @@ namespace
 				system_ratio *= 1000;
 				system_ratio = roundf(system_ratio) / 1000;
 
-				if ((!is_virt() && rendering_ratio == system_ratio) ||
+				if ((!Gallop::StandaloneWindowResize::IsVirt() && rendering_ratio == system_ratio) ||
 					config::freeform_window)
 				{
 					if (!fullScreenFlOverride)
@@ -5495,7 +5180,7 @@ namespace
 					else if (!fullScreenFl)
 					{
 						r.width *= 0.825f;
-						r.height = r.width / ratio_horizontal;
+						r.height = r.width / config::runtime::ratioHorizontal;
 					}
 
 					reinterpret_cast<decltype(set_resolution_hook)*>(set_resolution_orig)(r.width, r.height, fullScreenFl ? 1 : 3, 0);
@@ -5505,8 +5190,8 @@ namespace
 			}
 			if (config::max_fps > -1 && wParam == 'F' && altDown)
 			{
-				useDefaultFPS = !useDefaultFPS;
-				set_fps_hook(30);
+				config::runtime::useDefaultFPS = !config::runtime::useDefaultFPS;
+				UnityEngine::Application::targetFrameRate(30);
 				return TRUE;
 			}
 		}
@@ -5589,15 +5274,10 @@ namespace
 			{
 			case SIZE_RESTORED:
 			{
-
-				auto StartCoroutine = il2cpp_symbols::find_method<Il2CppObject * (*)(Il2CppObject*, Il2CppObject*)>("UnityEngine.CoreModule.dll", "UnityEngine", "MonoBehaviour", [](const MethodInfo* method)
-					{
-						return method->name == "StartCoroutine"s && method->parameters[0].parameter_type->type == IL2CPP_TYPE_CLASS;
-					});
-				auto uiManager = GetSingletonInstance(il2cpp_symbols::get_class("umamusume.dll", "Gallop", "UIManager"));
+				auto uiManager = Gallop::UIManager::Instance();
 				if (uiManager)
 				{
-					StartCoroutine(uiManager, il2cpp_class_get_method_from_name_type<Il2CppObject * (*)()>(StandaloneWindowResize->klass, "ClearStopFlagAfterWhile", 0)->methodPointer());
+					uiManager.StartCoroutineManaged2(il2cpp_class_get_method_from_name_type<Il2CppObject * (*)()>(StandaloneWindowResize->klass, "ClearStopFlagAfterWhile", 0)->methodPointer());
 				}
 				break;
 			}
@@ -5743,8 +5423,8 @@ namespace
 				il2cpp_field_static_set_value(lastWidthField, &lastWidth);
 				il2cpp_field_static_set_value(lastHeightField, &lastHeight);
 
-				int width = il2cpp_symbols::get_method_pointer<int (*)()>("UnityEngine.CoreModule.dll", "UnityEngine", "Screen", "get_width", IgnoreNumberOfArguments)();
-				int height = il2cpp_symbols::get_method_pointer<int (*)()>("UnityEngine.CoreModule.dll", "UnityEngine", "Screen", "get_height", IgnoreNumberOfArguments)();
+				int width = UnityEngine::Screen::width();
+				int height = UnityEngine::Screen::height();
 
 				il2cpp_class_get_method_from_name_type<void (*)(float, float)>(StandaloneWindowResize, "SaveChangedWidth", 2)->methodPointer(width, height);
 
@@ -5771,16 +5451,16 @@ namespace
 		{
 			RECT* rect = reinterpret_cast<RECT*>(lParam);
 
-			float ratio = is_virt() ? ratio_vertical : ratio_horizontal;
+			float ratio = Gallop::StandaloneWindowResize::IsVirt() ? config::runtime::ratioVertical : config::runtime::ratioHorizontal;
 
 			auto StandaloneWindowResize = il2cpp_symbols::get_class("umamusume.dll", "Gallop", "StandaloneWindowResize");
 
-			if (is_virt() && ratio != (9.0 / 16.0))
+			if (Gallop::StandaloneWindowResize::IsVirt() && ratio != (9.0 / 16.0))
 			{
 				il2cpp_class_get_method_from_name_type<void (*)(bool)>(StandaloneWindowResize, "set_IsPreventReShape", 1)->methodPointer(true);
 			}
 
-			if (!is_virt() && ratio != (16.0 / 9.0))
+			if (!Gallop::StandaloneWindowResize::IsVirt() && ratio != (16.0 / 9.0))
 			{
 				il2cpp_class_get_method_from_name_type<void (*)(bool)>(StandaloneWindowResize, "set_IsPreventReShape", 1)->methodPointer(true);
 			}
@@ -5868,18 +5548,18 @@ namespace
 			il2cpp_field_static_set_value(_aspectRatioField, &_aspectRatio);
 
 
-			auto uiManager = GetSingletonInstance(il2cpp_symbols::get_class("umamusume.dll", "Gallop", "UIManager"));
+			auto uiManager = Gallop::UIManager::Instance();
 			if (uiManager)
 			{
 				bool isVirt = width < height;
 				if (config::unlock_size)
 				{
-					UIManager_ChangeResizeUIForPC_hook(uiManager, isVirt ? min(last_display_width, last_display_height) : max(last_display_width, last_display_height),
+					uiManager.ChangeResizeUIForPC(isVirt ? min(last_display_width, last_display_height) : max(last_display_width, last_display_height),
 						isVirt ? max(last_display_width, last_display_height) : min(last_display_width, last_display_height));
 				}
 				else
 				{
-					UIManager_ChangeResizeUIForPC_hook(uiManager, isVirt ? 1080 : 1920, isVirt ? 1920 : 1080);
+					uiManager.ChangeResizeUIForPC(isVirt ? 1080 : 1920, isVirt ? 1920 : 1080);
 				}
 			}
 
@@ -5901,7 +5581,7 @@ namespace
 		{
 			if (isExitOpened)
 			{
-				Exit();
+				UnityEngine::Application::Exit(0);
 				return TRUE;
 			}
 
@@ -5960,16 +5640,16 @@ namespace
 
 	void* Screen_IsCurrentOrientation_orig = nullptr;
 
-	bool Screen_IsCurrentOrientation_hook(ScreenOrientation target)
+	bool Screen_IsCurrentOrientation_hook(UnityEngine::ScreenOrientation target)
 	{
 		return true;
 	}
 
 	void* GallopInput_mousePosition_orig = nullptr;
 
-	Vector3_t GallopInput_mousePosition_hook()
+	UnityEngine::Vector3 GallopInput_mousePosition_hook()
 	{
-		return il2cpp_symbols::get_method_pointer<Vector3_t(*)()>("UnityEngine.InputLegacyModule.dll", "UnityEngine", "Input", "get_mousePosition", IgnoreNumberOfArguments)();
+		return il2cpp_symbols::get_method_pointer<UnityEngine::Vector3(*)()>("UnityEngine.InputLegacyModule.dll", "UnityEngine", "Input", "get_mousePosition", IgnoreNumberOfArguments)();
 	}
 
 	vector<Il2CppObject*> frameBuffers;
@@ -6040,7 +5720,7 @@ namespace
 		if (config::replace_to_custom_font)
 		{
 			auto font = text_get_font(_this);
-			Il2CppString* name = uobject_get_name(font);
+			Il2CppString* name = UnityEngine::Object::Name(font);
 			if (config::font_asset_name.find(name->chars) == string::npos)
 			{
 				text_set_font(_this, GetCustomFont());
@@ -6125,7 +5805,7 @@ namespace
 		il2cpp_field_get_value(customFont, customFontMaterialField, &customFontMaterial);
 
 		auto SetFloat = il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, Il2CppString*, float)>(customFontMaterial->klass, "SetFloat", 2)->methodPointer;
-		auto SetColor = il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, Il2CppString*, Color_t)>(customFontMaterial->klass, "SetColor", 2)->methodPointer;
+		auto SetColor = il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, Il2CppString*, UnityEngine::Color)>(customFontMaterial->klass, "SetColor", 2)->methodPointer;
 
 		auto origOutlineWidth = il2cpp_class_get_method_from_name_type<float (*)(Il2CppObject*)>(_this->klass, "get_outlineWidth", 0)->methodPointer(_this);
 
@@ -6151,8 +5831,8 @@ namespace
 				color32 = color;
 				break;
 			}
-			auto enumName = local::wide_u8(GetEnumName(colorType, colorEnum)->chars);
-			if (enumName == "White"s || enumName == "Black"s)
+			auto enumName = GetEnumName(colorType, colorEnum)->chars;
+			if (enumName == L"White"s || enumName == L"Black"s)
 			{
 				color32 = color;
 				break;
@@ -6163,7 +5843,7 @@ namespace
 		float b = ((color32 & 0xFF0000) >> 16) / static_cast<float>(0xff);
 		float g = ((color32 & 0xFF00) >> 8) / static_cast<float>(0xff);
 		float r = (color32 & 0xFF) / static_cast<float>(0xff);
-		auto origOutlineColor = Color_t{ r, g, b, a };
+		auto origOutlineColor = UnityEngine::Color{ r, g, b, a };
 
 		SetFloat(customFontMaterial, il2cpp_string_new("_OutlineWidth"), origOutlineWidth);
 		SetColor(customFontMaterial, il2cpp_string_new("_OutlineColor"), origOutlineColor);
@@ -6189,20 +5869,14 @@ namespace
 		reinterpret_cast<decltype(load_zekken_composite_resource_hook)*>(load_zekken_composite_resource_orig)(_this);
 	}
 
-	void* wait_resize_ui_orig = nullptr;
-	Il2CppObject* wait_resize_ui_hook(Il2CppObject* _this, bool isPortrait, bool isShowOrientationGuide)
-	{
-		return reinterpret_cast<decltype(wait_resize_ui_hook)*>(wait_resize_ui_orig)(_this, isPortrait, config::ui_loading_show_orientation_guide ? false : isShowOrientationGuide);
-	}
-
 	void* get_modified_string_orig = nullptr;
 	Il2CppString* get_modified_string_hook(Il2CppString* text, Il2CppObject* input, bool allowNewLine)
 	{
 		if (!allowNewLine)
 		{
-			auto u8str = local::wide_u8(text->chars);
-			replaceAll(u8str, "\n", "");
-			return il2cpp_string_new(u8str.data());
+			auto str = wstring(text->chars);
+			replaceAll(str, L"\n", L"");
+			return il2cpp_string_new16(str.data());
 		}
 		return text;
 	}
@@ -6294,12 +5968,12 @@ namespace
 		}
 	}
 	void* GraphicSettings_GetVirtualResolution_orig = nullptr;
-	Vector2Int_t GraphicSettings_GetVirtualResolution_hook(Il2CppObject* _this)
+	UnityEngine::Vector2Int GraphicSettings_GetVirtualResolution_hook(Il2CppObject* _this)
 	{
 		if (config::freeform_window)
 		{
-			int width = il2cpp_symbols::get_method_pointer<int (*)()>("UnityEngine.CoreModule.dll", "UnityEngine", "Screen", "get_width", IgnoreNumberOfArguments)();
-			int height = il2cpp_symbols::get_method_pointer<int (*)()>("UnityEngine.CoreModule.dll", "UnityEngine", "Screen", "get_height", IgnoreNumberOfArguments)();
+			int width = UnityEngine::Screen::width();
+			int height = UnityEngine::Screen::height();
 
 			auto GallopScreen = il2cpp_symbols::get_class("umamusume.dll", "Gallop", "Screen");
 
@@ -6315,22 +5989,22 @@ namespace
 
 			if (width < height)
 			{
-				return Vector2Int_t{ number1080, number1920 };
+				return UnityEngine::Vector2Int{ number1080, number1920 };
 			}
 
-			return Vector2Int_t{ number1920, number1080 };
+			return UnityEngine::Vector2Int{ number1920, number1080 };
 		}
 
 		return reinterpret_cast<decltype(GraphicSettings_GetVirtualResolution_hook)*>(GraphicSettings_GetVirtualResolution_orig)(_this);
 	}
 
 	void* GraphicSettings_GetVirtualResolution3D_orig = nullptr;
-	Vector2Int_t GraphicSettings_GetVirtualResolution3D_hook(Il2CppObject* _this, bool isForcedWideAspect)
+	UnityEngine::Vector2Int GraphicSettings_GetVirtualResolution3D_hook(Il2CppObject* _this, bool isForcedWideAspect)
 	{
 		if (config::freeform_window)
 		{
-			int width = il2cpp_symbols::get_method_pointer<int (*)()>("UnityEngine.CoreModule.dll", "UnityEngine", "Screen", "get_width", IgnoreNumberOfArguments)();
-			int height = il2cpp_symbols::get_method_pointer<int (*)()>("UnityEngine.CoreModule.dll", "UnityEngine", "Screen", "get_height", IgnoreNumberOfArguments)();
+			int width = UnityEngine::Screen::width();
+			int height = UnityEngine::Screen::height();
 
 			auto GallopScreen = il2cpp_symbols::get_class("umamusume.dll", "Gallop", "Screen");
 
@@ -6349,30 +6023,30 @@ namespace
 
 			if (width < height)
 			{
-				return Vector2Int_t{ number1080, number1920 };
+				return UnityEngine::Vector2Int{ number1080, number1920 };
 			}
 
-			return Vector2Int_t{ number1920, number1080 };
+			return UnityEngine::Vector2Int{ number1920, number1080 };
 		}
 
 		auto resolution = reinterpret_cast<decltype(GraphicSettings_GetVirtualResolution3D_hook)*>(GraphicSettings_GetVirtualResolution3D_orig)(_this, isForcedWideAspect);
 		if (config::unlock_size)
 		{
-			Resolution_t res;
+			UnityEngine::Resolution res;
 			get_resolution(&res);
-			if (resolution.x > resolution.y)
+			if (resolution.m_X > resolution.m_Y)
 			{
-				resolution.x = res.width;
-				resolution.y = res.height;
+				resolution.m_X = res.width;
+				resolution.m_Y = res.height;
 			}
 			else
 			{
-				resolution.x = res.height;
-				resolution.y = res.width;
+				resolution.m_X = res.height;
+				resolution.m_Y = res.width;
 			}
 		}
-		resolution.x *= config::resolution_3d_scale;
-		resolution.y *= config::resolution_3d_scale;
+		resolution.m_X *= config::resolution_3d_scale;
+		resolution.m_Y *= config::resolution_3d_scale;
 		return resolution;
 	}
 
@@ -6433,9 +6107,9 @@ namespace
 			auto texture = Material_GetTextureImpl_hook(material, Shader_PropertyToID(property));
 			if (texture)
 			{
-				auto uobject_name = uobject_get_name(texture);
-				// cout << "Material " << local::wide_u8(property->chars) << " " << local::wide_u8(uobject_name->chars) << endl;
-				if (!local::wide_u8(uobject_name->chars).empty())
+				auto uobject_name = UnityEngine::Object::Name(texture);
+				// cout << "Material " << wide_u8(property->chars) << " " << wide_u8(uobject_name->chars) << endl;
+				if (!wstring(uobject_name->chars).empty())
 				{
 					auto newTexture = GetReplacementAssets(
 						uobject_name,
@@ -6494,7 +6168,7 @@ namespace
 
 			if (obj)
 			{
-				// cout << "AssetHolder: " << i << " " << obj->klass->name << " " << local::wide_u8(uobject_get_name(obj)->chars) << endl;
+				// cout << "AssetHolder: " << i << " " << obj->klass->name << " " << wide_u8(UnityEngine::Object::Name(obj)->chars) << endl;
 				if (obj->klass->name == "GameObject"s && uobject_IsNativeObjectAlive(obj))
 				{
 					// auto getComponent = il2cpp_class_get_method_from_name_type<Il2CppObject * (*)(Il2CppObject*, Il2CppType*)>(component->klass, "GetComponent", 1)->methodPointer;
@@ -6527,8 +6201,8 @@ namespace
 				}
 				if (obj->klass->name == "Texture2D"s)
 				{
-					auto uobject_name = uobject_get_name(obj);
-					if (!local::wide_u8(uobject_name->chars).empty())
+					auto uobject_name = UnityEngine::Object::Name(obj);
+					if (!wstring(uobject_name->chars).empty())
 					{
 						auto newTexture = GetReplacementAssets(
 							uobject_name,
@@ -6562,10 +6236,10 @@ namespace
 
 		if (texture)
 		{
-			auto uobject_name = uobject_get_name(texture);
+			auto uobject_name = UnityEngine::Object::Name(texture);
 			if (uobject_name)
 			{
-				auto nameU8 = local::wide_u8(uobject_name->chars);
+				auto nameU8 = wide_u8(uobject_name->chars);
 				if (!nameU8.empty())
 				{
 					do
@@ -6640,8 +6314,8 @@ namespace
 
 											if (textureSetColor)
 											{
-												auto uobject_name = uobject_get_name(textureSetColor);
-												if (!local::wide_u8(uobject_name->chars).empty())
+												auto uobject_name = UnityEngine::Object::Name(textureSetColor);
+												if (!wstring(uobject_name->chars).empty())
 												{
 													auto newTexture = GetReplacementAssets(
 														uobject_name,
@@ -6657,8 +6331,8 @@ namespace
 
 											if (textureSetAlpha)
 											{
-												auto uobject_name = uobject_get_name(textureSetAlpha);
-												if (!local::wide_u8(uobject_name->chars).empty())
+												auto uobject_name = UnityEngine::Object::Name(textureSetAlpha);
+												if (!wstring(uobject_name->chars).empty())
 												{
 													auto newTexture = GetReplacementAssets(
 														uobject_name,
@@ -6694,8 +6368,8 @@ namespace
 
 											if (textureColor)
 											{
-												auto uobject_name = uobject_get_name(textureColor);
-												if (!local::wide_u8(uobject_name->chars).empty())
+												auto uobject_name = UnityEngine::Object::Name(textureColor);
+												if (!wstring(uobject_name->chars).empty())
 												{
 													auto newTexture = GetReplacementAssets(
 														uobject_name,
@@ -6711,8 +6385,8 @@ namespace
 
 											if (textureAlpha)
 											{
-												auto uobject_name = uobject_get_name(textureAlpha);
-												if (!local::wide_u8(uobject_name->chars).empty())
+												auto uobject_name = UnityEngine::Object::Name(textureAlpha);
+												if (!wstring(uobject_name->chars).empty())
 												{
 													auto newTexture = GetReplacementAssets(
 														uobject_name,
@@ -6757,7 +6431,7 @@ namespace
 
 			// auto gameObject = il2cpp_class_get_method_from_name_type<Il2CppObject * (*)(Il2CppObject*)>(child->klass, "get_gameObject", 0)->methodPointer(child);
 
-			// cout << "Transform gameObject " << local::wide_u8(uobject_get_name(gameObject)->chars) << endl;
+			// cout << "Transform gameObject " << wide_u8(UnityEngine::Object::Name(gameObject)->chars) << endl;
 
 			ReplaceTransformTextures(child);
 		}
@@ -6992,15 +6666,15 @@ namespace
 	void* assetbundle_LoadFromFile_orig = nullptr;
 	Il2CppObject* assetbundle_LoadFromFile_hook(Il2CppString* path, uint32_t crc, uint64_t offset)
 	{
-		stringstream pathStream(local::wide_u8(path->chars));
-		string segment;
-		vector<string> splited;
-		while (getline(pathStream, segment, '\\'))
+		wstringstream pathStream(path->chars);
+		wstring segment;
+		vector<wstring> splited;
+		while (getline(pathStream, segment, L'\\'))
 		{
 			splited.emplace_back(segment);
 		}
 
-		auto name = local::u8_wide(splited.back());
+		auto name = splited.back();
 
 		if (config::replace_assets.find(name) != config::replace_assets.end())
 		{
@@ -7015,7 +6689,7 @@ namespace
 		{
 			auto name = reinterpret_cast<Il2CppString*>(names->vector[i]);
 			if (!name) continue;
-			stringstream pathStream(local::wide_u8(name->chars));
+			stringstream pathStream(wide_u8(name->chars));
 			string segment;
 			vector<string> splited;
 			while (getline(pathStream, segment, '/'))
@@ -7037,7 +6711,7 @@ namespace
 		//		if (!obj) continue;
 		//		if (obj && obj->klass && obj->klass->name != "Transform"s)
 		//		{
-		//			stringstream pathStream(local::wide_u8(uobject_get_name(obj)->chars));
+		//			stringstream pathStream(wide_u8(UnityEngine::Object::Name(obj)->chars));
 		//			string segment;
 		//			vector<string> splited;
 		//			while (getline(pathStream, segment, '/'))
@@ -7062,20 +6736,20 @@ namespace
 
 	Il2CppObject* assetbundle_load_asset_hook(Il2CppObject* _this, Il2CppString* name, const Il2CppType* type)
 	{
-		stringstream pathStream(local::wide_u8(name->chars));
-		string segment;
-		vector<string> splited;
-		while (getline(pathStream, segment, '/'))
+		wstringstream pathStream(name->chars);
+		wstring segment;
+		vector<wstring> splited;
+		while (getline(pathStream, segment, L'/'))
 		{
 			splited.emplace_back(segment);
 		}
 		auto& fileName = splited.back();
-		if (find_if(replaceAssetNames.begin(), replaceAssetNames.end(), [fileName](const string& item)
+		if (find_if(replaceAssetNames.begin(), replaceAssetNames.end(), [fileName](const wstring& item)
 			{
-				return item.find(fileName) != string::npos;
+				return item.find(fileName) != wstring::npos;
 			}) != replaceAssetNames.end())
 		{
-			return GetReplacementAssets(il2cpp_string_new(fileName.data()), type);
+			return GetReplacementAssets(il2cpp_string_new16(fileName.data()), type);
 		}
 		auto obj = reinterpret_cast<decltype(assetbundle_load_asset_hook)*>(assetbundle_load_asset_orig)(_this, name, type);
 
@@ -7106,20 +6780,20 @@ namespace
 
 	Il2CppObject* assetbundle_load_asset_async_hook(Il2CppObject* _this, Il2CppString* name, const Il2CppType* type)
 	{
-		stringstream pathStream(local::wide_u8(name->chars));
-		string segment;
-		vector<string> splited;
-		while (getline(pathStream, segment, '/'))
+		wstringstream pathStream(name->chars);
+		wstring segment;
+		vector<wstring> splited;
+		while (getline(pathStream, segment, L'/'))
 		{
 			splited.emplace_back(segment);
 		}
 		auto& fileName = splited.back();
-		if (find_if(replaceAssetNames.begin(), replaceAssetNames.end(), [fileName](const string& item)
+		if (find_if(replaceAssetNames.begin(), replaceAssetNames.end(), [fileName](const wstring& item)
 			{
 				return item.find(fileName) != string::npos;
 			}) != replaceAssetNames.end())
 		{
-			return GetReplacementAssetsAsync(il2cpp_string_new(fileName.data()), type);
+			return GetReplacementAssetsAsync(il2cpp_string_new16(fileName.data()), type);
 		}
 		return reinterpret_cast<decltype(assetbundle_load_asset_async_hook)*>(assetbundle_load_asset_async_orig)(_this, name, type);
 	}
@@ -7143,9 +6817,9 @@ namespace
 		auto obj = reinterpret_cast<decltype(AssetBundleRequest_GetResult_hook)*>(AssetBundleRequest_GetResult_orig)(_this);
 		if (obj)
 		{
-			auto name = uobject_get_name(obj);
-			auto u8Name = local::wide_u8(name->chars);
-			if (find(replaceAssetNames.begin(), replaceAssetNames.end(), u8Name) != replaceAssetNames.end())
+			auto name = UnityEngine::Object::Name(obj);
+			wstring wName = name->chars;
+			if (find(replaceAssetNames.begin(), replaceAssetNames.end(), wName) != replaceAssetNames.end())
 			{
 				return GetReplacementAssets(name, il2cpp_class_get_type(obj->klass));
 			}
@@ -7185,11 +6859,7 @@ namespace
 
 	Il2CppObject* CreateGameObject()
 	{
-		auto gameObjectClass = il2cpp_symbols::get_class("UnityEngine.CoreModule.dll", "UnityEngine", "GameObject");
-		auto gameObject = il2cpp_object_new(gameObjectClass);
-		il2cpp_runtime_object_init(gameObject);
-
-		return gameObject;
+		return UnityEngine::GameObject();
 	}
 
 	Il2CppObject* AddComponent(Il2CppObject* gameObject, Il2CppObject* componentType)
@@ -7279,7 +6949,7 @@ namespace
 
 		auto optionItemOnOff = il2cpp_symbols::get_method_pointer<Il2CppObject * (*)(Il2CppObject*)>("UnityEngine.CoreModule.dll", "UnityEngine", "Object", "Internal_CloneSingle", 1)(object);
 
-		uobject_set_name(optionItemOnOff, il2cpp_string_new(name));
+		UnityEngine::Object::Name(optionItemOnOff, il2cpp_string_new(name));
 
 		auto getComponents = il2cpp_class_get_method_from_name_type<Il2CppArraySize_t<Il2CppObject*> *(*)(Il2CppObject*, Il2CppType*, bool, bool, bool, bool, Il2CppObject*)>(optionItemOnOff->klass, "GetComponentsInternal", 6)->methodPointer;
 		auto array = getComponents(optionItemOnOff, reinterpret_cast<Il2CppType*>(GetRuntimeType(
@@ -7299,7 +6969,7 @@ namespace
 
 		auto optionItemOnOff = il2cpp_symbols::get_method_pointer<Il2CppObject * (*)(Il2CppObject*)>("UnityEngine.CoreModule.dll", "UnityEngine", "Object", "Internal_CloneSingle", 1)(object);
 
-		uobject_set_name(optionItemOnOff, il2cpp_string_new(name));
+		UnityEngine::Object::Name(optionItemOnOff, il2cpp_string_new(name));
 
 		auto getComponents = il2cpp_class_get_method_from_name_type<Il2CppArraySize_t<Il2CppObject*> *(*)(Il2CppObject*, Il2CppType*, bool, bool, bool, bool, Il2CppObject*)>(optionItemOnOff->klass, "GetComponentsInternal", 6)->methodPointer;
 		auto array = getComponents(optionItemOnOff, reinterpret_cast<Il2CppType*>(GetRuntimeType(
@@ -7353,7 +7023,7 @@ namespace
 
 		auto optionItemButton = il2cpp_symbols::get_method_pointer<Il2CppObject * (*)(Il2CppObject*)>("UnityEngine.CoreModule.dll", "UnityEngine", "Object", "Internal_CloneSingle", 1)(object);
 
-		uobject_set_name(optionItemButton, il2cpp_string_new(name));
+		UnityEngine::Object::Name(optionItemButton, il2cpp_string_new(name));
 
 		auto getComponents = il2cpp_class_get_method_from_name_type<Il2CppArraySize_t<Il2CppObject*> *(*)(Il2CppObject*, Il2CppType*, bool, bool, bool, bool, Il2CppObject*)>(optionItemButton->klass, "GetComponentsInternal", 6)->methodPointer;
 		auto array1 = getComponents(optionItemButton, reinterpret_cast<Il2CppType*>(GetRuntimeType(
@@ -7463,11 +7133,11 @@ namespace
 
 		auto optionItemSimple = il2cpp_symbols::get_method_pointer<Il2CppObject * (*)(Il2CppObject*)>("UnityEngine.CoreModule.dll", "UnityEngine", "Object", "Internal_CloneSingle", 1)(object);
 
-		uobject_set_name(optionItemSimple, il2cpp_string_new((name + "_simple"s).data()));
+		UnityEngine::Object::Name(optionItemSimple, il2cpp_string_new((name + "_simple"s).data()));
 
 		auto rectTransform = GetRectTransform(optionItemSimple);
 
-		il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, Vector2_t)>(rectTransform->klass, "set_anchoredPosition", 1)->methodPointer(rectTransform, Vector2_t{ 71.583984375, -18 });
+		il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, UnityEngine::Vector2)>(rectTransform->klass, "set_anchoredPosition", 1)->methodPointer(rectTransform, UnityEngine::Vector2{ 71.583984375, -18 });
 
 		auto getComponents = il2cpp_class_get_method_from_name_type<Il2CppArraySize_t<Il2CppObject*> *(*)(Il2CppObject*, Il2CppType*, bool, bool, bool, bool, Il2CppObject*)>(optionItemSimple->klass, "GetComponentsInternal", 6)->methodPointer;
 
@@ -7475,7 +7145,7 @@ namespace
 
 		auto buttons00 = il2cpp_symbols::get_method_pointer<Il2CppObject * (*)(Il2CppObject*)>("UnityEngine.CoreModule.dll", "UnityEngine", "Object", "Internal_CloneSingle", 1)(buttonObject);
 
-		uobject_set_name(buttons00, il2cpp_string_new(name));
+		UnityEngine::Object::Name(buttons00, il2cpp_string_new(name));
 
 		auto array2 = getComponents(buttons00, reinterpret_cast<Il2CppType*>(GetRuntimeType(
 			"umamusume.dll", "Gallop", "ButtonCommon")), true, true, false, false, nullptr);
@@ -7486,9 +7156,9 @@ namespace
 
 		auto buttonRectTransform = GetRectTransform(buttons00);
 
-		il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, Vector2_t)>(buttonRectTransform->klass, "set_sizeDelta", 1)->methodPointer(buttonRectTransform, Vector2_t{ 167, 67 });
+		il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, UnityEngine::Vector2)>(buttonRectTransform->klass, "set_sizeDelta", 1)->methodPointer(buttonRectTransform, UnityEngine::Vector2{ 167, 67 });
 
-		il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, Vector2_t)>(buttonRectTransform->klass, "set_anchoredPosition", 1)->methodPointer(buttonRectTransform, Vector2_t{ 382.5, 0 });
+		il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, UnityEngine::Vector2)>(buttonRectTransform->klass, "set_anchoredPosition", 1)->methodPointer(buttonRectTransform, UnityEngine::Vector2{ 382.5, 0 });
 
 		AddToLayout(rectTransform, vector{ buttons00 });
 
@@ -7582,7 +7252,7 @@ namespace
 
 		auto optionItem3ToggleVertical = il2cpp_symbols::get_method_pointer<Il2CppObject * (*)(Il2CppObject*)>("UnityEngine.CoreModule.dll", "UnityEngine", "Object", "Internal_CloneSingle", 1)(object);
 
-		uobject_set_name(optionItem3ToggleVertical, il2cpp_string_new(name));
+		UnityEngine::Object::Name(optionItem3ToggleVertical, il2cpp_string_new(name));
 
 		auto getComponents = il2cpp_class_get_method_from_name_type<Il2CppArraySize_t<Il2CppObject*> *(*)(Il2CppObject*, Il2CppType*, bool, bool, bool, bool, Il2CppObject*)>(optionItem3ToggleVertical->klass, "GetComponentsInternal", 6)->methodPointer;
 		auto array = getComponents(optionItem3ToggleVertical, reinterpret_cast<Il2CppType*>(GetRuntimeType(
@@ -7605,7 +7275,7 @@ namespace
 
 		auto optionItem3Toggle = il2cpp_symbols::get_method_pointer<Il2CppObject * (*)(Il2CppObject*)>("UnityEngine.CoreModule.dll", "UnityEngine", "Object", "Internal_CloneSingle", 1)(object);
 
-		uobject_set_name(optionItem3Toggle, il2cpp_string_new(name));
+		UnityEngine::Object::Name(optionItem3Toggle, il2cpp_string_new(name));
 
 		auto getComponents = il2cpp_class_get_method_from_name_type<Il2CppArraySize_t<Il2CppObject*> *(*)(Il2CppObject*, Il2CppType*, bool, bool, bool, bool, Il2CppObject*)>(optionItem3Toggle->klass, "GetComponentsInternal", 6)->methodPointer;
 		auto array = getComponents(optionItem3Toggle, reinterpret_cast<Il2CppType*>(GetRuntimeType(
@@ -7628,7 +7298,7 @@ namespace
 
 		auto optionItem2Toggle = il2cpp_symbols::get_method_pointer<Il2CppObject * (*)(Il2CppObject*)>("UnityEngine.CoreModule.dll", "UnityEngine", "Object", "Internal_CloneSingle", 1)(object);
 
-		uobject_set_name(optionItem2Toggle, il2cpp_string_new(name));
+		UnityEngine::Object::Name(optionItem2Toggle, il2cpp_string_new(name));
 
 		auto getComponents = il2cpp_class_get_method_from_name_type<Il2CppArraySize_t<Il2CppObject*> *(*)(Il2CppObject*, Il2CppType*, bool, bool, bool, bool, Il2CppObject*)>(optionItem2Toggle->klass, "GetComponentsInternal", 6)->methodPointer;
 		auto array = getComponents(optionItem2Toggle, reinterpret_cast<Il2CppType*>(GetRuntimeType(
@@ -7777,9 +7447,9 @@ namespace
 
 			if (transform)
 			{
-				if (uobject_get_name(transform)->chars == L"ToggleMute"s ||
-					uobject_get_name(transform)->chars == L"ImageIcon"s ||
-					uobject_get_name(transform)->chars == L"Line"s)
+				if (UnityEngine::Object::Name(transform)->chars == L"ToggleMute"s ||
+					UnityEngine::Object::Name(transform)->chars == L"ImageIcon"s ||
+					UnityEngine::Object::Name(transform)->chars == L"Line"s)
 				{
 					destroyTargets.emplace_back(transform);
 				}
@@ -7804,9 +7474,9 @@ namespace
 
 			if (transform)
 			{
-				if (uobject_get_name(transform)->chars == L"Slider"s)
+				if (UnityEngine::Object::Name(transform)->chars == L"Slider"s)
 				{
-					il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, Vector2_t)>(transform->klass, "set_sizeDelta", 1)->methodPointer(transform, Vector2_t{ 560, 24 });
+					il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, UnityEngine::Vector2)>(transform->klass, "set_sizeDelta", 1)->methodPointer(transform, UnityEngine::Vector2{ 560, 24 });
 					break;
 				}
 			}
@@ -7814,19 +7484,19 @@ namespace
 
 		auto gameObject = CreateGameObject();
 
-		uobject_set_name(gameObject, il2cpp_string_new(name));
+		UnityEngine::Object::Name(gameObject, il2cpp_string_new(name));
 
 		auto rootTransform = AddComponent(gameObject, GetRuntimeType("UnityEngine.CoreModule.dll", "UnityEngine", "RectTransform"));
 
-		il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, Vector2_t)>(rootTransform->klass, "set_sizeDelta", 1)->methodPointer(rootTransform, Vector2_t{ 0, 0 });
+		il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, UnityEngine::Vector2)>(rootTransform->klass, "set_sizeDelta", 1)->methodPointer(rootTransform, UnityEngine::Vector2{ 0, 0 });
 
-		il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, Vector2_t)>(rootTransform->klass, "set_anchorMax", 1)->methodPointer(rootTransform, Vector2_t{ 0, 0 });
+		il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, UnityEngine::Vector2)>(rootTransform->klass, "set_anchorMax", 1)->methodPointer(rootTransform, UnityEngine::Vector2{ 0, 0 });
 
-		il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, Vector2_t)>(rootTransform->klass, "set_anchorMin", 1)->methodPointer(rootTransform, Vector2_t{ 0, 0 });
+		il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, UnityEngine::Vector2)>(rootTransform->klass, "set_anchorMin", 1)->methodPointer(rootTransform, UnityEngine::Vector2{ 0, 0 });
 
-		il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, Vector2_t)>(rootTransform->klass, "set_pivot", 1)->methodPointer(rootTransform, Vector2_t{ 0.5, 1 });
+		il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, UnityEngine::Vector2)>(rootTransform->klass, "set_pivot", 1)->methodPointer(rootTransform, UnityEngine::Vector2{ 0.5, 1 });
 
-		il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, Vector2_t)>(rootTransform->klass, "set_anchoredPosition", 1)->methodPointer(rootTransform, Vector2_t{ 0, 0 });
+		il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, UnityEngine::Vector2)>(rootTransform->klass, "set_anchoredPosition", 1)->methodPointer(rootTransform, UnityEngine::Vector2{ 0, 0 });
 
 		auto verticalLayoutGroup = AddComponent(gameObject, GetRuntimeType("UnityEngine.UI.dll", "UnityEngine.UI", "VerticalLayoutGroup"));
 		il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, int)>(verticalLayoutGroup->klass, "set_childAlignment", 1)->methodPointer(verticalLayoutGroup, 1);
@@ -7840,7 +7510,7 @@ namespace
 
 		auto sliderTransform = GetRectTransform(optionSlider);
 
-		il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, Vector2_t)>(sliderTransform->klass, "set_sizeDelta", 1)->methodPointer(sliderTransform, Vector2_t{ 1000, 86 });
+		il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, UnityEngine::Vector2)>(sliderTransform->klass, "set_sizeDelta", 1)->methodPointer(sliderTransform, UnityEngine::Vector2{ 1000, 86 });
 		il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, Il2CppObject*, bool)>(sliderTransform->klass, "SetParent", 2)->methodPointer(sliderTransform, rootTransform, false);
 
 		return gameObject;
@@ -7885,17 +7555,17 @@ namespace
 
 		auto transform = GetRectTransform(dropdownGameObject);
 
-		il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, Vector2_t)>(transform->klass, "set_sizeDelta", 1)->methodPointer(transform, Vector2_t{ 0, 0 });
+		il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, UnityEngine::Vector2)>(transform->klass, "set_sizeDelta", 1)->methodPointer(transform, UnityEngine::Vector2{ 0, 0 });
 
-		il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, Vector2_t)>(transform->klass, "set_anchorMax", 1)->methodPointer(transform, Vector2_t{ 1, 1 });
+		il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, UnityEngine::Vector2)>(transform->klass, "set_anchorMax", 1)->methodPointer(transform, UnityEngine::Vector2{ 1, 1 });
 
-		il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, Vector2_t)>(transform->klass, "set_anchorMin", 1)->methodPointer(transform, Vector2_t{ 0, 0 });
+		il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, UnityEngine::Vector2)>(transform->klass, "set_anchorMin", 1)->methodPointer(transform, UnityEngine::Vector2{ 0, 0 });
 
-		il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, Vector2_t)>(transform->klass, "set_pivot", 1)->methodPointer(transform, Vector2_t{ 0.5, 0.5 });
+		il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, UnityEngine::Vector2)>(transform->klass, "set_pivot", 1)->methodPointer(transform, UnityEngine::Vector2{ 0.5, 0.5 });
 
-		il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, Vector2_t)>(transform->klass, "set_anchoredPosition", 1)->methodPointer(transform, Vector2_t{ 0, 0 });
+		il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, UnityEngine::Vector2)>(transform->klass, "set_anchoredPosition", 1)->methodPointer(transform, UnityEngine::Vector2{ 0, 0 });
 
-		il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, Vector3_t)>(transform->klass, "set_localPosition", 1)->methodPointer(transform, Vector3_t{ 0, 0, -10 });
+		il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, UnityEngine::Vector3)>(transform->klass, "set_localPosition", 1)->methodPointer(transform, UnityEngine::Vector3{ 0, 0, -10 });
 
 		return dropdownGameObject;
 	}
@@ -7924,7 +7594,7 @@ namespace
 
 		auto radioButtonWithText = il2cpp_symbols::get_method_pointer<Il2CppObject * (*)(Il2CppObject*)>("UnityEngine.CoreModule.dll", "UnityEngine", "Object", "Internal_CloneSingle", 1)(object);
 
-		uobject_set_name(radioButtonWithText, il2cpp_string_new(name));
+		UnityEngine::Object::Name(radioButtonWithText, il2cpp_string_new(name));
 
 		auto getComponents = il2cpp_class_get_method_from_name_type<Il2CppArraySize_t<Il2CppObject*> *(*)(Il2CppObject*, Il2CppType*, bool, bool, bool, bool, Il2CppObject*)>(radioButtonWithText->klass, "GetComponentsInternal", 6)->methodPointer;
 		auto array = getComponents(radioButtonWithText, reinterpret_cast<Il2CppType*>(GetRuntimeType(
@@ -8023,27 +7693,24 @@ namespace
 		auto gameObject = CreateGameObject();
 		auto rootTransform = AddComponent(gameObject, GetRuntimeType("UnityEngine.CoreModule.dll", "UnityEngine", "RectTransform"));
 
-		il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, Vector2_t)>(rootTransform->klass, "set_sizeDelta", 1)->methodPointer(rootTransform, Vector2_t{ 0, 0 });
+		il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, UnityEngine::Vector2)>(rootTransform->klass, "set_sizeDelta", 1)->methodPointer(rootTransform, UnityEngine::Vector2{ 0, 0 });
 
-		il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, Vector2_t)>(rootTransform->klass, "set_anchorMax", 1)->methodPointer(rootTransform, Vector2_t{ 1, 1 });
+		il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, UnityEngine::Vector2)>(rootTransform->klass, "set_anchorMax", 1)->methodPointer(rootTransform, UnityEngine::Vector2{ 1, 1 });
 
-		il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, Vector2_t)>(rootTransform->klass, "set_anchorMin", 1)->methodPointer(rootTransform, Vector2_t{ 0, 0 });
+		il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, UnityEngine::Vector2)>(rootTransform->klass, "set_anchorMin", 1)->methodPointer(rootTransform, UnityEngine::Vector2{ 0, 0 });
 
-		il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, Vector2_t)>(rootTransform->klass, "set_pivot", 1)->methodPointer(rootTransform, Vector2_t{ 0.5, 0.5 });
+		il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, UnityEngine::Vector2)>(rootTransform->klass, "set_pivot", 1)->methodPointer(rootTransform, UnityEngine::Vector2{ 0.5, 0.5 });
 
-		il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, Vector2_t)>(rootTransform->klass, "set_anchoredPosition", 1)->methodPointer(rootTransform, Vector2_t{ 0, 0 });
+		il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, UnityEngine::Vector2)>(rootTransform->klass, "set_anchoredPosition", 1)->methodPointer(rootTransform, UnityEngine::Vector2{ 0, 0 });
 
 		auto scrollViewBase = resources_load_hook(il2cpp_string_new("ui/parts/base/scrollviewbase"), GetRuntimeType("UnityEngine.CoreModule.dll", "UnityEngine", "GameObject"));
 
-		auto uiManager = GetSingletonInstance(il2cpp_symbols::get_class("umamusume.dll", "Gallop", "UIManager"));
-		auto _mainCanvasField = il2cpp_class_get_field_from_name_wrap(uiManager->klass, "_mainCanvas");
-		Il2CppObject* _mainCanvas;
-		il2cpp_field_get_value(uiManager, _mainCanvasField, &_mainCanvas);
+		auto uiManager = Gallop::UIManager::Instance();
+		Il2CppObject* _mainCanvas = uiManager._mainCanvas();
 
 		auto transform = il2cpp_class_get_method_from_name_type<Il2CppObject * (*)(Il2CppObject*)>(_mainCanvas->klass, "get_transform", 0)->methodPointer(_mainCanvas);
 
-		scrollViewBase = il2cpp_symbols::get_method_pointer<Il2CppObject * (*)(Il2CppObject*, Il2CppObject*, bool)>("UnityEngine.CoreModule.dll", "UnityEngine", "Object", "Internal_CloneSingleWithParent", 3)
-			(scrollViewBase, transform, false);
+		scrollViewBase = UnityEngine::Object::Internal_CloneSingleWithParent(scrollViewBase, transform, false);
 
 		auto getComponents = il2cpp_class_get_method_from_name_type<Il2CppArraySize_t<Il2CppObject*> *(*)(Il2CppObject*, Il2CppType*, bool, bool, bool, bool, Il2CppObject*)>(scrollViewBase->klass, "GetComponentsInternal", 6)->methodPointer;
 
@@ -8058,15 +7725,15 @@ namespace
 
 		auto scrollRectTransform = il2cpp_class_get_method_from_name_type<Il2CppObject * (*)(Il2CppObject*)>(m_Viewport->klass, "get_parent", 0)->methodPointer(m_Viewport);
 
-		il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, Vector2_t)>(scrollRectTransform->klass, "set_sizeDelta", 1)->methodPointer(scrollRectTransform, Vector2_t{ -24, -12 });
+		il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, UnityEngine::Vector2)>(scrollRectTransform->klass, "set_sizeDelta", 1)->methodPointer(scrollRectTransform, UnityEngine::Vector2{ -24, -12 });
 
-		il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, Vector2_t)>(scrollRectTransform->klass, "set_anchorMax", 1)->methodPointer(scrollRectTransform, Vector2_t{ 1, 1 });
+		il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, UnityEngine::Vector2)>(scrollRectTransform->klass, "set_anchorMax", 1)->methodPointer(scrollRectTransform, UnityEngine::Vector2{ 1, 1 });
 
-		il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, Vector2_t)>(scrollRectTransform->klass, "set_anchorMin", 1)->methodPointer(scrollRectTransform, Vector2_t{ 0, 0 });
+		il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, UnityEngine::Vector2)>(scrollRectTransform->klass, "set_anchorMin", 1)->methodPointer(scrollRectTransform, UnityEngine::Vector2{ 0, 0 });
 
-		il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, Vector2_t)>(scrollRectTransform->klass, "set_pivot", 1)->methodPointer(scrollRectTransform, Vector2_t{ 0.5, 0.5 });
+		il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, UnityEngine::Vector2)>(scrollRectTransform->klass, "set_pivot", 1)->methodPointer(scrollRectTransform, UnityEngine::Vector2{ 0.5, 0.5 });
 
-		il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, Vector2_t)>(scrollRectTransform->klass, "set_anchoredPosition", 1)->methodPointer(scrollRectTransform, Vector2_t{ 0, -6 });
+		il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, UnityEngine::Vector2)>(scrollRectTransform->klass, "set_anchoredPosition", 1)->methodPointer(scrollRectTransform, UnityEngine::Vector2{ 0, -6 });
 
 		il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, Il2CppObject*, bool)>(scrollRectTransform->klass, "SetParent", 2)->methodPointer(scrollRectTransform, rootTransform, false);
 
@@ -8074,23 +7741,23 @@ namespace
 		Il2CppObject* m_Content;
 		il2cpp_field_get_value(scrollRect, m_ContentField, &m_Content);
 
-		il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, Vector2_t)>(m_Content->klass, "set_sizeDelta", 1)->methodPointer(m_Content, Vector2_t{ 56, 150.0f * ceilf(options.size() / 2.0f) });
+		il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, UnityEngine::Vector2)>(m_Content->klass, "set_sizeDelta", 1)->methodPointer(m_Content, UnityEngine::Vector2{ 56, 150.0f * ceilf(options.size() / 2.0f) });
 
-		il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, Vector2_t)>(m_Content->klass, "set_anchorMax", 1)->methodPointer(m_Content, Vector2_t{ 1, 1 });
+		il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, UnityEngine::Vector2)>(m_Content->klass, "set_anchorMax", 1)->methodPointer(m_Content, UnityEngine::Vector2{ 1, 1 });
 
-		il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, Vector2_t)>(m_Content->klass, "set_anchorMin", 1)->methodPointer(m_Content, Vector2_t{ 0, 1 });
+		il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, UnityEngine::Vector2)>(m_Content->klass, "set_anchorMin", 1)->methodPointer(m_Content, UnityEngine::Vector2{ 0, 1 });
 
-		il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, Vector2_t)>(m_Content->klass, "set_pivot", 1)->methodPointer(m_Content, Vector2_t{ 0.5, 1 });
+		il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, UnityEngine::Vector2)>(m_Content->klass, "set_pivot", 1)->methodPointer(m_Content, UnityEngine::Vector2{ 0.5, 1 });
 
-		il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, Vector2_t)>(m_Content->klass, "set_anchoredPosition", 1)->methodPointer(m_Content, Vector2_t{ 0, 0 });
+		il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, UnityEngine::Vector2)>(m_Content->klass, "set_anchoredPosition", 1)->methodPointer(m_Content, UnityEngine::Vector2{ 0, 0 });
 
 		auto contentGameObject = il2cpp_class_get_method_from_name_type<Il2CppObject * (*)(Il2CppObject*)>(m_Content->klass, "get_gameObject", 0)->methodPointer(m_Content);
 
 		auto gridLayoutGroup = AddComponent(contentGameObject, GetRuntimeType("UnityEngine.UI.dll", "UnityEngine.UI", "GridLayoutGroup"));
 		il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, int)>(gridLayoutGroup->klass, "set_childAlignment", 1)->methodPointer(gridLayoutGroup, 0);
 		il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, int)>(gridLayoutGroup->klass, "set_constraintCount", 1)->methodPointer(gridLayoutGroup, 2);
-		il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, Vector2_t)>(gridLayoutGroup->klass, "set_cellSize", 1)->methodPointer(gridLayoutGroup, Vector2_t{ 400, 100 });
-		il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, Vector2_t)>(gridLayoutGroup->klass, "set_spacing", 1)->methodPointer(gridLayoutGroup, Vector2_t{ 34, 50 });
+		il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, UnityEngine::Vector2)>(gridLayoutGroup->klass, "set_cellSize", 1)->methodPointer(gridLayoutGroup, UnityEngine::Vector2{ 400, 100 });
+		il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, UnityEngine::Vector2)>(gridLayoutGroup->klass, "set_spacing", 1)->methodPointer(gridLayoutGroup, UnityEngine::Vector2{ 34, 50 });
 
 		auto padding = il2cpp_class_get_method_from_name_type<Il2CppObject * (*)(Il2CppObject*)>(gridLayoutGroup->klass, "get_padding", 0)->methodPointer(gridLayoutGroup);
 		il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, int)>(padding->klass, "set_top", 1)->methodPointer(padding, 26);
@@ -8098,13 +7765,13 @@ namespace
 
 		auto toggleGroupCommon = AddComponent(contentGameObject, GetRuntimeType("umamusume.dll", "Gallop", "ToggleGroupCommon"));
 
-		uobject_set_name(contentGameObject, il2cpp_string_new("option_toggle_group_content"));
+		UnityEngine::Object::Name(contentGameObject, il2cpp_string_new("option_toggle_group_content"));
 
 		vector<Il2CppObject*> toggles;
 
 		for (auto& pair : options)
 		{
-			toggles.emplace_back(GetRadioButtonWithText(("radio_"s + pair).data(), local::u8_wide(pair).data()));
+			toggles.emplace_back(GetRadioButtonWithText(("radio_"s + pair).data(), u8_wide(pair).data()));
 		}
 
 		AddToLayout(m_Content, toggles);
@@ -8174,27 +7841,24 @@ namespace
 		auto gameObject = CreateGameObject();
 		auto rootTransform = AddComponent(gameObject, GetRuntimeType("UnityEngine.CoreModule.dll", "UnityEngine", "RectTransform"));
 
-		il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, Vector2_t)>(rootTransform->klass, "set_sizeDelta", 1)->methodPointer(rootTransform, Vector2_t{ 0, 0 });
+		il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, UnityEngine::Vector2)>(rootTransform->klass, "set_sizeDelta", 1)->methodPointer(rootTransform, UnityEngine::Vector2{ 0, 0 });
 
-		il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, Vector2_t)>(rootTransform->klass, "set_anchorMax", 1)->methodPointer(rootTransform, Vector2_t{ 1, 1 });
+		il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, UnityEngine::Vector2)>(rootTransform->klass, "set_anchorMax", 1)->methodPointer(rootTransform, UnityEngine::Vector2{ 1, 1 });
 
-		il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, Vector2_t)>(rootTransform->klass, "set_anchorMin", 1)->methodPointer(rootTransform, Vector2_t{ 0, 0 });
+		il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, UnityEngine::Vector2)>(rootTransform->klass, "set_anchorMin", 1)->methodPointer(rootTransform, UnityEngine::Vector2{ 0, 0 });
 
-		il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, Vector2_t)>(rootTransform->klass, "set_pivot", 1)->methodPointer(rootTransform, Vector2_t{ 0.5, 0.5 });
+		il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, UnityEngine::Vector2)>(rootTransform->klass, "set_pivot", 1)->methodPointer(rootTransform, UnityEngine::Vector2{ 0.5, 0.5 });
 
-		il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, Vector2_t)>(rootTransform->klass, "set_anchoredPosition", 1)->methodPointer(rootTransform, Vector2_t{ 0, 0 });
+		il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, UnityEngine::Vector2)>(rootTransform->klass, "set_anchoredPosition", 1)->methodPointer(rootTransform, UnityEngine::Vector2{ 0, 0 });
 
 		auto scrollViewBase = resources_load_hook(il2cpp_string_new("ui/parts/base/scrollviewbase"), GetRuntimeType("UnityEngine.CoreModule.dll", "UnityEngine", "GameObject"));
 
-		auto uiManager = GetSingletonInstance(il2cpp_symbols::get_class("umamusume.dll", "Gallop", "UIManager"));
-		auto _mainCanvasField = il2cpp_class_get_field_from_name_wrap(uiManager->klass, "_mainCanvas");
-		Il2CppObject* _mainCanvas;
-		il2cpp_field_get_value(uiManager, _mainCanvasField, &_mainCanvas);
+		auto uiManager = Gallop::UIManager::Instance();
+		Il2CppObject* _mainCanvas = uiManager._mainCanvas();
 
 		auto transform = il2cpp_class_get_method_from_name_type<Il2CppObject * (*)(Il2CppObject*)>(_mainCanvas->klass, "get_transform", 0)->methodPointer(_mainCanvas);
 
-		scrollViewBase = il2cpp_symbols::get_method_pointer<Il2CppObject * (*)(Il2CppObject*, Il2CppObject*, bool)>("UnityEngine.CoreModule.dll", "UnityEngine", "Object", "Internal_CloneSingleWithParent", 3)
-			(scrollViewBase, transform, false);
+		scrollViewBase = UnityEngine::Object::Internal_CloneSingleWithParent(scrollViewBase, transform, false);
 
 		auto getComponents = il2cpp_class_get_method_from_name_type<Il2CppArraySize_t<Il2CppObject*> *(*)(Il2CppObject*, Il2CppType*, bool, bool, bool, bool, Il2CppObject*)>(scrollViewBase->klass, "GetComponentsInternal", 6)->methodPointer;
 
@@ -8209,15 +7873,15 @@ namespace
 
 		auto scrollRectTransform = il2cpp_class_get_method_from_name_type<Il2CppObject * (*)(Il2CppObject*)>(m_Viewport->klass, "get_parent", 0)->methodPointer(m_Viewport);
 
-		il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, Vector2_t)>(scrollRectTransform->klass, "set_sizeDelta", 1)->methodPointer(scrollRectTransform, Vector2_t{ -24, -12 });
+		il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, UnityEngine::Vector2)>(scrollRectTransform->klass, "set_sizeDelta", 1)->methodPointer(scrollRectTransform, UnityEngine::Vector2{ -24, -12 });
 
-		il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, Vector2_t)>(scrollRectTransform->klass, "set_anchorMax", 1)->methodPointer(scrollRectTransform, Vector2_t{ 1, 1 });
+		il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, UnityEngine::Vector2)>(scrollRectTransform->klass, "set_anchorMax", 1)->methodPointer(scrollRectTransform, UnityEngine::Vector2{ 1, 1 });
 
-		il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, Vector2_t)>(scrollRectTransform->klass, "set_anchorMin", 1)->methodPointer(scrollRectTransform, Vector2_t{ 0, 0 });
+		il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, UnityEngine::Vector2)>(scrollRectTransform->klass, "set_anchorMin", 1)->methodPointer(scrollRectTransform, UnityEngine::Vector2{ 0, 0 });
 
-		il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, Vector2_t)>(scrollRectTransform->klass, "set_pivot", 1)->methodPointer(scrollRectTransform, Vector2_t{ 0.5, 0.5 });
+		il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, UnityEngine::Vector2)>(scrollRectTransform->klass, "set_pivot", 1)->methodPointer(scrollRectTransform, UnityEngine::Vector2{ 0.5, 0.5 });
 
-		il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, Vector2_t)>(scrollRectTransform->klass, "set_anchoredPosition", 1)->methodPointer(scrollRectTransform, Vector2_t{ 0, -6 });
+		il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, UnityEngine::Vector2)>(scrollRectTransform->klass, "set_anchoredPosition", 1)->methodPointer(scrollRectTransform, UnityEngine::Vector2{ 0, -6 });
 
 		il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, Il2CppObject*, bool)>(scrollRectTransform->klass, "SetParent", 2)->methodPointer(scrollRectTransform, rootTransform, false);
 
@@ -8225,23 +7889,23 @@ namespace
 		Il2CppObject* m_Content;
 		il2cpp_field_get_value(scrollRect, m_ContentField, &m_Content);
 
-		il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, Vector2_t)>(m_Content->klass, "set_sizeDelta", 1)->methodPointer(m_Content, Vector2_t{ 56, 150.0f * ceilf(options.size() / 2.0f) });
+		il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, UnityEngine::Vector2)>(m_Content->klass, "set_sizeDelta", 1)->methodPointer(m_Content, UnityEngine::Vector2{ 56, 150.0f * ceilf(options.size() / 2.0f) });
 
-		il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, Vector2_t)>(m_Content->klass, "set_anchorMax", 1)->methodPointer(m_Content, Vector2_t{ 1, 1 });
+		il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, UnityEngine::Vector2)>(m_Content->klass, "set_anchorMax", 1)->methodPointer(m_Content, UnityEngine::Vector2{ 1, 1 });
 
-		il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, Vector2_t)>(m_Content->klass, "set_anchorMin", 1)->methodPointer(m_Content, Vector2_t{ 0, 1 });
+		il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, UnityEngine::Vector2)>(m_Content->klass, "set_anchorMin", 1)->methodPointer(m_Content, UnityEngine::Vector2{ 0, 1 });
 
-		il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, Vector2_t)>(m_Content->klass, "set_pivot", 1)->methodPointer(m_Content, Vector2_t{ 0.5, 1 });
+		il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, UnityEngine::Vector2)>(m_Content->klass, "set_pivot", 1)->methodPointer(m_Content, UnityEngine::Vector2{ 0.5, 1 });
 
-		il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, Vector2_t)>(m_Content->klass, "set_anchoredPosition", 1)->methodPointer(m_Content, Vector2_t{ 0, 0 });
+		il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, UnityEngine::Vector2)>(m_Content->klass, "set_anchoredPosition", 1)->methodPointer(m_Content, UnityEngine::Vector2{ 0, 0 });
 
 		auto contentGameObject = il2cpp_class_get_method_from_name_type<Il2CppObject * (*)(Il2CppObject*)>(m_Content->klass, "get_gameObject", 0)->methodPointer(m_Content);
 
 		auto gridLayoutGroup = AddComponent(contentGameObject, GetRuntimeType("UnityEngine.UI.dll", "UnityEngine.UI", "GridLayoutGroup"));
 		il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, int)>(gridLayoutGroup->klass, "set_childAlignment", 1)->methodPointer(gridLayoutGroup, 0);
 		il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, int)>(gridLayoutGroup->klass, "set_constraintCount", 1)->methodPointer(gridLayoutGroup, 2);
-		il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, Vector2_t)>(gridLayoutGroup->klass, "set_cellSize", 1)->methodPointer(gridLayoutGroup, Vector2_t{ 400, 100 });
-		il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, Vector2_t)>(gridLayoutGroup->klass, "set_spacing", 1)->methodPointer(gridLayoutGroup, Vector2_t{ 34, 50 });
+		il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, UnityEngine::Vector2)>(gridLayoutGroup->klass, "set_cellSize", 1)->methodPointer(gridLayoutGroup, UnityEngine::Vector2{ 400, 100 });
+		il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, UnityEngine::Vector2)>(gridLayoutGroup->klass, "set_spacing", 1)->methodPointer(gridLayoutGroup, UnityEngine::Vector2{ 34, 50 });
 
 		auto padding = il2cpp_class_get_method_from_name_type<Il2CppObject * (*)(Il2CppObject*)>(gridLayoutGroup->klass, "get_padding", 0)->methodPointer(gridLayoutGroup);
 		il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, int)>(padding->klass, "set_top", 1)->methodPointer(padding, 26);
@@ -8249,13 +7913,13 @@ namespace
 
 		auto toggleGroupCommon = AddComponent(contentGameObject, GetRuntimeType("umamusume.dll", "Gallop", "ToggleGroupCommon"));
 
-		uobject_set_name(contentGameObject, il2cpp_string_new("option_toggle_group_content"));
+		UnityEngine::Object::Name(contentGameObject, il2cpp_string_new("option_toggle_group_content"));
 
 		vector<Il2CppObject*> toggles;
 
 		for (auto& color : options)
 		{
-			auto colorW = local::u8_wide(color);
+			auto colorW = u8_wide(color);
 			toggles.emplace_back(GetRadioButtonWithText(("radio_"s + color).data(), colorW.data()));
 			SetTextCommonFontColor(GetTextCommon(("radio_"s + color).data()), colorW.data());
 		}
@@ -8328,27 +7992,24 @@ namespace
 		auto gameObject = CreateGameObject();
 		auto rootTransform = AddComponent(gameObject, GetRuntimeType("UnityEngine.CoreModule.dll", "UnityEngine", "RectTransform"));
 
-		il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, Vector2_t)>(rootTransform->klass, "set_sizeDelta", 1)->methodPointer(rootTransform, Vector2_t{ 0, 0 });
+		il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, UnityEngine::Vector2)>(rootTransform->klass, "set_sizeDelta", 1)->methodPointer(rootTransform, UnityEngine::Vector2{ 0, 0 });
 
-		il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, Vector2_t)>(rootTransform->klass, "set_anchorMax", 1)->methodPointer(rootTransform, Vector2_t{ 1, 1 });
+		il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, UnityEngine::Vector2)>(rootTransform->klass, "set_anchorMax", 1)->methodPointer(rootTransform, UnityEngine::Vector2{ 1, 1 });
 
-		il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, Vector2_t)>(rootTransform->klass, "set_anchorMin", 1)->methodPointer(rootTransform, Vector2_t{ 0, 0 });
+		il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, UnityEngine::Vector2)>(rootTransform->klass, "set_anchorMin", 1)->methodPointer(rootTransform, UnityEngine::Vector2{ 0, 0 });
 
-		il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, Vector2_t)>(rootTransform->klass, "set_pivot", 1)->methodPointer(rootTransform, Vector2_t{ 0.5, 0.5 });
+		il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, UnityEngine::Vector2)>(rootTransform->klass, "set_pivot", 1)->methodPointer(rootTransform, UnityEngine::Vector2{ 0.5, 0.5 });
 
-		il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, Vector2_t)>(rootTransform->klass, "set_anchoredPosition", 1)->methodPointer(rootTransform, Vector2_t{ 0, 0 });
+		il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, UnityEngine::Vector2)>(rootTransform->klass, "set_anchoredPosition", 1)->methodPointer(rootTransform, UnityEngine::Vector2{ 0, 0 });
 
 		auto scrollViewBase = resources_load_hook(il2cpp_string_new("ui/parts/base/scrollviewbase"), GetRuntimeType("UnityEngine.CoreModule.dll", "UnityEngine", "GameObject"));
 
-		auto uiManager = GetSingletonInstance(il2cpp_symbols::get_class("umamusume.dll", "Gallop", "UIManager"));
-		auto _mainCanvasField = il2cpp_class_get_field_from_name_wrap(uiManager->klass, "_mainCanvas");
-		Il2CppObject* _mainCanvas;
-		il2cpp_field_get_value(uiManager, _mainCanvasField, &_mainCanvas);
+		auto uiManager = Gallop::UIManager::Instance();
+		Il2CppObject* _mainCanvas = uiManager._mainCanvas();
 
 		auto transform = il2cpp_class_get_method_from_name_type<Il2CppObject * (*)(Il2CppObject*)>(_mainCanvas->klass, "get_transform", 0)->methodPointer(_mainCanvas);
 
-		scrollViewBase = il2cpp_symbols::get_method_pointer<Il2CppObject * (*)(Il2CppObject*, Il2CppObject*, bool)>("UnityEngine.CoreModule.dll", "UnityEngine", "Object", "Internal_CloneSingleWithParent", 3)
-			(scrollViewBase, transform, false);
+		scrollViewBase = UnityEngine::Object::Internal_CloneSingleWithParent(scrollViewBase, transform, false);
 
 		auto getComponents = il2cpp_class_get_method_from_name_type<Il2CppArraySize_t<Il2CppObject*> *(*)(Il2CppObject*, Il2CppType*, bool, bool, bool, bool, Il2CppObject*)>(scrollViewBase->klass, "GetComponentsInternal", 6)->methodPointer;
 
@@ -8363,15 +8024,15 @@ namespace
 
 		auto scrollRectTransform = il2cpp_class_get_method_from_name_type<Il2CppObject * (*)(Il2CppObject*)>(m_Viewport->klass, "get_parent", 0)->methodPointer(m_Viewport);
 
-		il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, Vector2_t)>(scrollRectTransform->klass, "set_sizeDelta", 1)->methodPointer(scrollRectTransform, Vector2_t{ -24, -12 });
+		il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, UnityEngine::Vector2)>(scrollRectTransform->klass, "set_sizeDelta", 1)->methodPointer(scrollRectTransform, UnityEngine::Vector2{ -24, -12 });
 
-		il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, Vector2_t)>(scrollRectTransform->klass, "set_anchorMax", 1)->methodPointer(scrollRectTransform, Vector2_t{ 1, 1 });
+		il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, UnityEngine::Vector2)>(scrollRectTransform->klass, "set_anchorMax", 1)->methodPointer(scrollRectTransform, UnityEngine::Vector2{ 1, 1 });
 
-		il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, Vector2_t)>(scrollRectTransform->klass, "set_anchorMin", 1)->methodPointer(scrollRectTransform, Vector2_t{ 0, 0 });
+		il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, UnityEngine::Vector2)>(scrollRectTransform->klass, "set_anchorMin", 1)->methodPointer(scrollRectTransform, UnityEngine::Vector2{ 0, 0 });
 
-		il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, Vector2_t)>(scrollRectTransform->klass, "set_pivot", 1)->methodPointer(scrollRectTransform, Vector2_t{ 0.5, 0.5 });
+		il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, UnityEngine::Vector2)>(scrollRectTransform->klass, "set_pivot", 1)->methodPointer(scrollRectTransform, UnityEngine::Vector2{ 0.5, 0.5 });
 
-		il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, Vector2_t)>(scrollRectTransform->klass, "set_anchoredPosition", 1)->methodPointer(scrollRectTransform, Vector2_t{ 0, -6 });
+		il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, UnityEngine::Vector2)>(scrollRectTransform->klass, "set_anchoredPosition", 1)->methodPointer(scrollRectTransform, UnityEngine::Vector2{ 0, -6 });
 
 		il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, Il2CppObject*, bool)>(scrollRectTransform->klass, "SetParent", 2)->methodPointer(scrollRectTransform, rootTransform, false);
 
@@ -8379,23 +8040,23 @@ namespace
 		Il2CppObject* m_Content;
 		il2cpp_field_get_value(scrollRect, m_ContentField, &m_Content);
 
-		il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, Vector2_t)>(m_Content->klass, "set_sizeDelta", 1)->methodPointer(m_Content, Vector2_t{ 56, 150.0f * ceilf(options.size() / 2.0f) });
+		il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, UnityEngine::Vector2)>(m_Content->klass, "set_sizeDelta", 1)->methodPointer(m_Content, UnityEngine::Vector2{ 56, 150.0f * ceilf(options.size() / 2.0f) });
 
-		il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, Vector2_t)>(m_Content->klass, "set_anchorMax", 1)->methodPointer(m_Content, Vector2_t{ 1, 1 });
+		il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, UnityEngine::Vector2)>(m_Content->klass, "set_anchorMax", 1)->methodPointer(m_Content, UnityEngine::Vector2{ 1, 1 });
 
-		il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, Vector2_t)>(m_Content->klass, "set_anchorMin", 1)->methodPointer(m_Content, Vector2_t{ 0, 1 });
+		il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, UnityEngine::Vector2)>(m_Content->klass, "set_anchorMin", 1)->methodPointer(m_Content, UnityEngine::Vector2{ 0, 1 });
 
-		il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, Vector2_t)>(m_Content->klass, "set_pivot", 1)->methodPointer(m_Content, Vector2_t{ 0.5, 1 });
+		il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, UnityEngine::Vector2)>(m_Content->klass, "set_pivot", 1)->methodPointer(m_Content, UnityEngine::Vector2{ 0.5, 1 });
 
-		il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, Vector2_t)>(m_Content->klass, "set_anchoredPosition", 1)->methodPointer(m_Content, Vector2_t{ 0, 0 });
+		il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, UnityEngine::Vector2)>(m_Content->klass, "set_anchoredPosition", 1)->methodPointer(m_Content, UnityEngine::Vector2{ 0, 0 });
 
 		auto contentGameObject = il2cpp_class_get_method_from_name_type<Il2CppObject * (*)(Il2CppObject*)>(m_Content->klass, "get_gameObject", 0)->methodPointer(m_Content);
 
 		auto gridLayoutGroup = AddComponent(contentGameObject, GetRuntimeType("UnityEngine.UI.dll", "UnityEngine.UI", "GridLayoutGroup"));
 		il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, int)>(gridLayoutGroup->klass, "set_childAlignment", 1)->methodPointer(gridLayoutGroup, 0);
 		il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, int)>(gridLayoutGroup->klass, "set_constraintCount", 1)->methodPointer(gridLayoutGroup, 2);
-		il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, Vector2_t)>(gridLayoutGroup->klass, "set_cellSize", 1)->methodPointer(gridLayoutGroup, Vector2_t{ 400, 100 });
-		il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, Vector2_t)>(gridLayoutGroup->klass, "set_spacing", 1)->methodPointer(gridLayoutGroup, Vector2_t{ 34, 50 });
+		il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, UnityEngine::Vector2)>(gridLayoutGroup->klass, "set_cellSize", 1)->methodPointer(gridLayoutGroup, UnityEngine::Vector2{ 400, 100 });
+		il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, UnityEngine::Vector2)>(gridLayoutGroup->klass, "set_spacing", 1)->methodPointer(gridLayoutGroup, UnityEngine::Vector2{ 34, 50 });
 
 		auto padding = il2cpp_class_get_method_from_name_type<Il2CppObject * (*)(Il2CppObject*)>(gridLayoutGroup->klass, "get_padding", 0)->methodPointer(gridLayoutGroup);
 		il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, int)>(padding->klass, "set_top", 1)->methodPointer(padding, 26);
@@ -8403,13 +8064,13 @@ namespace
 
 		auto toggleGroupCommon = AddComponent(contentGameObject, GetRuntimeType("umamusume.dll", "Gallop", "ToggleGroupCommon"));
 
-		uobject_set_name(contentGameObject, il2cpp_string_new("option_toggle_group_content"));
+		UnityEngine::Object::Name(contentGameObject, il2cpp_string_new("option_toggle_group_content"));
 
 		vector<Il2CppObject*> toggles;
 
 		for (auto& size : options)
 		{
-			auto sizeW = local::u8_wide(size);
+			auto sizeW = u8_wide(size);
 			toggles.emplace_back(GetRadioButtonWithText(("radio_"s + size).data(), sizeW.data()));
 			SetTextCommonFontColor(GetTextCommon(("radio_"s + size).data()), L"White");
 			SetTextCommonOutlineSize(GetTextCommon(("radio_"s + size).data()), sizeW.data());
@@ -8484,27 +8145,24 @@ namespace
 		auto gameObject = CreateGameObject();
 		auto rootTransform = AddComponent(gameObject, GetRuntimeType("UnityEngine.CoreModule.dll", "UnityEngine", "RectTransform"));
 
-		il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, Vector2_t)>(rootTransform->klass, "set_sizeDelta", 1)->methodPointer(rootTransform, Vector2_t{ 0, 0 });
+		il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, UnityEngine::Vector2)>(rootTransform->klass, "set_sizeDelta", 1)->methodPointer(rootTransform, UnityEngine::Vector2{ 0, 0 });
 
-		il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, Vector2_t)>(rootTransform->klass, "set_anchorMax", 1)->methodPointer(rootTransform, Vector2_t{ 1, 1 });
+		il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, UnityEngine::Vector2)>(rootTransform->klass, "set_anchorMax", 1)->methodPointer(rootTransform, UnityEngine::Vector2{ 1, 1 });
 
-		il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, Vector2_t)>(rootTransform->klass, "set_anchorMin", 1)->methodPointer(rootTransform, Vector2_t{ 0, 0 });
+		il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, UnityEngine::Vector2)>(rootTransform->klass, "set_anchorMin", 1)->methodPointer(rootTransform, UnityEngine::Vector2{ 0, 0 });
 
-		il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, Vector2_t)>(rootTransform->klass, "set_pivot", 1)->methodPointer(rootTransform, Vector2_t{ 0.5, 0.5 });
+		il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, UnityEngine::Vector2)>(rootTransform->klass, "set_pivot", 1)->methodPointer(rootTransform, UnityEngine::Vector2{ 0.5, 0.5 });
 
-		il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, Vector2_t)>(rootTransform->klass, "set_anchoredPosition", 1)->methodPointer(rootTransform, Vector2_t{ 0, 0 });
+		il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, UnityEngine::Vector2)>(rootTransform->klass, "set_anchoredPosition", 1)->methodPointer(rootTransform, UnityEngine::Vector2{ 0, 0 });
 
 		auto scrollViewBase = resources_load_hook(il2cpp_string_new("ui/parts/base/scrollviewbase"), GetRuntimeType("UnityEngine.CoreModule.dll", "UnityEngine", "GameObject"));
 
-		auto uiManager = GetSingletonInstance(il2cpp_symbols::get_class("umamusume.dll", "Gallop", "UIManager"));
-		auto _mainCanvasField = il2cpp_class_get_field_from_name_wrap(uiManager->klass, "_mainCanvas");
-		Il2CppObject* _mainCanvas;
-		il2cpp_field_get_value(uiManager, _mainCanvasField, &_mainCanvas);
+		auto uiManager = Gallop::UIManager::Instance();
+		Il2CppObject* _mainCanvas = uiManager._mainCanvas();
 
 		auto transform = il2cpp_class_get_method_from_name_type<Il2CppObject * (*)(Il2CppObject*)>(_mainCanvas->klass, "get_transform", 0)->methodPointer(_mainCanvas);
 
-		scrollViewBase = il2cpp_symbols::get_method_pointer<Il2CppObject * (*)(Il2CppObject*, Il2CppObject*, bool)>("UnityEngine.CoreModule.dll", "UnityEngine", "Object", "Internal_CloneSingleWithParent", 3)
-			(scrollViewBase, transform, false);
+		scrollViewBase = UnityEngine::Object::Internal_CloneSingleWithParent(scrollViewBase, transform, false);
 
 		auto getComponents = il2cpp_class_get_method_from_name_type<Il2CppArraySize_t<Il2CppObject*> *(*)(Il2CppObject*, Il2CppType*, bool, bool, bool, bool, Il2CppObject*)>(scrollViewBase->klass, "GetComponentsInternal", 6)->methodPointer;
 
@@ -8519,15 +8177,15 @@ namespace
 
 		auto scrollRectTransform = il2cpp_class_get_method_from_name_type<Il2CppObject * (*)(Il2CppObject*)>(m_Viewport->klass, "get_parent", 0)->methodPointer(m_Viewport);
 
-		il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, Vector2_t)>(scrollRectTransform->klass, "set_sizeDelta", 1)->methodPointer(scrollRectTransform, Vector2_t{ -24, -12 });
+		il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, UnityEngine::Vector2)>(scrollRectTransform->klass, "set_sizeDelta", 1)->methodPointer(scrollRectTransform, UnityEngine::Vector2{ -24, -12 });
 
-		il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, Vector2_t)>(scrollRectTransform->klass, "set_anchorMax", 1)->methodPointer(scrollRectTransform, Vector2_t{ 1, 1 });
+		il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, UnityEngine::Vector2)>(scrollRectTransform->klass, "set_anchorMax", 1)->methodPointer(scrollRectTransform, UnityEngine::Vector2{ 1, 1 });
 
-		il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, Vector2_t)>(scrollRectTransform->klass, "set_anchorMin", 1)->methodPointer(scrollRectTransform, Vector2_t{ 0, 0 });
+		il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, UnityEngine::Vector2)>(scrollRectTransform->klass, "set_anchorMin", 1)->methodPointer(scrollRectTransform, UnityEngine::Vector2{ 0, 0 });
 
-		il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, Vector2_t)>(scrollRectTransform->klass, "set_pivot", 1)->methodPointer(scrollRectTransform, Vector2_t{ 0.5, 0.5 });
+		il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, UnityEngine::Vector2)>(scrollRectTransform->klass, "set_pivot", 1)->methodPointer(scrollRectTransform, UnityEngine::Vector2{ 0.5, 0.5 });
 
-		il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, Vector2_t)>(scrollRectTransform->klass, "set_anchoredPosition", 1)->methodPointer(scrollRectTransform, Vector2_t{ 0, -6 });
+		il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, UnityEngine::Vector2)>(scrollRectTransform->klass, "set_anchoredPosition", 1)->methodPointer(scrollRectTransform, UnityEngine::Vector2{ 0, -6 });
 
 		il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, Il2CppObject*, bool)>(scrollRectTransform->klass, "SetParent", 2)->methodPointer(scrollRectTransform, rootTransform, false);
 
@@ -8535,23 +8193,23 @@ namespace
 		Il2CppObject* m_Content;
 		il2cpp_field_get_value(scrollRect, m_ContentField, &m_Content);
 
-		il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, Vector2_t)>(m_Content->klass, "set_sizeDelta", 1)->methodPointer(m_Content, Vector2_t{ 56, 150.0f * ceilf(options.size() / 2.0f) });
+		il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, UnityEngine::Vector2)>(m_Content->klass, "set_sizeDelta", 1)->methodPointer(m_Content, UnityEngine::Vector2{ 56, 150.0f * ceilf(options.size() / 2.0f) });
 
-		il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, Vector2_t)>(m_Content->klass, "set_anchorMax", 1)->methodPointer(m_Content, Vector2_t{ 1, 1 });
+		il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, UnityEngine::Vector2)>(m_Content->klass, "set_anchorMax", 1)->methodPointer(m_Content, UnityEngine::Vector2{ 1, 1 });
 
-		il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, Vector2_t)>(m_Content->klass, "set_anchorMin", 1)->methodPointer(m_Content, Vector2_t{ 0, 1 });
+		il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, UnityEngine::Vector2)>(m_Content->klass, "set_anchorMin", 1)->methodPointer(m_Content, UnityEngine::Vector2{ 0, 1 });
 
-		il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, Vector2_t)>(m_Content->klass, "set_pivot", 1)->methodPointer(m_Content, Vector2_t{ 0.5, 1 });
+		il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, UnityEngine::Vector2)>(m_Content->klass, "set_pivot", 1)->methodPointer(m_Content, UnityEngine::Vector2{ 0.5, 1 });
 
-		il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, Vector2_t)>(m_Content->klass, "set_anchoredPosition", 1)->methodPointer(m_Content, Vector2_t{ 0, 0 });
+		il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, UnityEngine::Vector2)>(m_Content->klass, "set_anchoredPosition", 1)->methodPointer(m_Content, UnityEngine::Vector2{ 0, 0 });
 
 		auto contentGameObject = il2cpp_class_get_method_from_name_type<Il2CppObject * (*)(Il2CppObject*)>(m_Content->klass, "get_gameObject", 0)->methodPointer(m_Content);
 
 		auto gridLayoutGroup = AddComponent(contentGameObject, GetRuntimeType("UnityEngine.UI.dll", "UnityEngine.UI", "GridLayoutGroup"));
 		il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, int)>(gridLayoutGroup->klass, "set_childAlignment", 1)->methodPointer(gridLayoutGroup, 0);
 		il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, int)>(gridLayoutGroup->klass, "set_constraintCount", 1)->methodPointer(gridLayoutGroup, 2);
-		il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, Vector2_t)>(gridLayoutGroup->klass, "set_cellSize", 1)->methodPointer(gridLayoutGroup, Vector2_t{ 400, 100 });
-		il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, Vector2_t)>(gridLayoutGroup->klass, "set_spacing", 1)->methodPointer(gridLayoutGroup, Vector2_t{ 34, 50 });
+		il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, UnityEngine::Vector2)>(gridLayoutGroup->klass, "set_cellSize", 1)->methodPointer(gridLayoutGroup, UnityEngine::Vector2{ 400, 100 });
+		il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, UnityEngine::Vector2)>(gridLayoutGroup->klass, "set_spacing", 1)->methodPointer(gridLayoutGroup, UnityEngine::Vector2{ 34, 50 });
 
 		auto padding = il2cpp_class_get_method_from_name_type<Il2CppObject * (*)(Il2CppObject*)>(gridLayoutGroup->klass, "get_padding", 0)->methodPointer(gridLayoutGroup);
 		il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, int)>(padding->klass, "set_top", 1)->methodPointer(padding, 26);
@@ -8559,13 +8217,13 @@ namespace
 
 		auto toggleGroupCommon = AddComponent(contentGameObject, GetRuntimeType("umamusume.dll", "Gallop", "ToggleGroupCommon"));
 
-		uobject_set_name(contentGameObject, il2cpp_string_new("option_toggle_group_content"));
+		UnityEngine::Object::Name(contentGameObject, il2cpp_string_new("option_toggle_group_content"));
 
 		vector<Il2CppObject*> toggles;
 
 		for (auto& color : options)
 		{
-			auto colorW = local::u8_wide(color);
+			auto colorW = u8_wide(color);
 			toggles.emplace_back(GetRadioButtonWithText(("radio_"s + color).data(), colorW.data()));
 			SetTextCommonOutlineColor(GetTextCommon(("radio_"s + color).data()), colorW.data());
 		}
@@ -8717,6 +8375,8 @@ namespace
 
 				AddOrSet(configDocument, L"characterSystemTextCaptionBackgroundAlpha", GetOptionSliderValue("character_system_text_caption_background_alpha") / 100);
 
+				AddOrSet(configDocument, L"liveSliderAlwaysShow", GetOptionItemOnOffIsOn("live_slider_always_show"));
+
 				AddOrSet(configDocument, L"championsLiveShowText", GetOptionItemOnOffIsOn("champions_live_show_text"));
 
 				AddOrSet(configDocument, L"championsLiveYear", GetToggleGroupCommonValue("champions_live_year") + 2022);
@@ -8769,6 +8429,8 @@ namespace
 				config::character_system_text_caption_outline_size = configDocument[L"characterSystemTextCaptionOutlineSize"].GetString();
 
 				config::character_system_text_caption_outline_color = configDocument[L"characterSystemTextCaptionOutlineColor"].GetString();
+
+				config::live_slider_always_show = configDocument[L"liveSliderAlwaysShow"].GetBool();
 
 				config::champions_live_show_text = configDocument[L"championsLiveShowText"].GetBool();
 
@@ -8890,27 +8552,24 @@ namespace
 		auto gameObject = CreateGameObject();
 		auto rootTransform = AddComponent(gameObject, GetRuntimeType("UnityEngine.CoreModule.dll", "UnityEngine", "RectTransform"));
 
-		il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, Vector2_t)>(rootTransform->klass, "set_sizeDelta", 1)->methodPointer(rootTransform, Vector2_t{ 0, 0 });
+		il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, UnityEngine::Vector2)>(rootTransform->klass, "set_sizeDelta", 1)->methodPointer(rootTransform, UnityEngine::Vector2{ 0, 0 });
 
-		il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, Vector2_t)>(rootTransform->klass, "set_anchorMax", 1)->methodPointer(rootTransform, Vector2_t{ 1, 1 });
+		il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, UnityEngine::Vector2)>(rootTransform->klass, "set_anchorMax", 1)->methodPointer(rootTransform, UnityEngine::Vector2{ 1, 1 });
 
-		il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, Vector2_t)>(rootTransform->klass, "set_anchorMin", 1)->methodPointer(rootTransform, Vector2_t{ 0, 0 });
+		il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, UnityEngine::Vector2)>(rootTransform->klass, "set_anchorMin", 1)->methodPointer(rootTransform, UnityEngine::Vector2{ 0, 0 });
 
-		il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, Vector2_t)>(rootTransform->klass, "set_pivot", 1)->methodPointer(rootTransform, Vector2_t{ 0.5, 0.5 });
+		il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, UnityEngine::Vector2)>(rootTransform->klass, "set_pivot", 1)->methodPointer(rootTransform, UnityEngine::Vector2{ 0.5, 0.5 });
 
-		il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, Vector2_t)>(rootTransform->klass, "set_anchoredPosition", 1)->methodPointer(rootTransform, Vector2_t{ 0, 0 });
+		il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, UnityEngine::Vector2)>(rootTransform->klass, "set_anchoredPosition", 1)->methodPointer(rootTransform, UnityEngine::Vector2{ 0, 0 });
 
 		auto scrollViewBase = resources_load_hook(il2cpp_string_new("ui/parts/base/scrollviewbase"), GetRuntimeType("UnityEngine.CoreModule.dll", "UnityEngine", "GameObject"));
 
-		auto uiManager = GetSingletonInstance(il2cpp_symbols::get_class("umamusume.dll", "Gallop", "UIManager"));
-		auto _mainCanvasField = il2cpp_class_get_field_from_name_wrap(uiManager->klass, "_mainCanvas");
-		Il2CppObject* _mainCanvas;
-		il2cpp_field_get_value(uiManager, _mainCanvasField, &_mainCanvas);
+		auto uiManager = Gallop::UIManager::Instance();
+		Il2CppObject* _mainCanvas = uiManager._mainCanvas();
 
 		auto transform = il2cpp_class_get_method_from_name_type<Il2CppObject * (*)(Il2CppObject*)>(_mainCanvas->klass, "get_transform", 0)->methodPointer(_mainCanvas);
 
-		scrollViewBase = il2cpp_symbols::get_method_pointer<Il2CppObject * (*)(Il2CppObject*, Il2CppObject*, bool)>("UnityEngine.CoreModule.dll", "UnityEngine", "Object", "Internal_CloneSingleWithParent", 3)
-			(scrollViewBase, transform, false);
+		scrollViewBase = UnityEngine::Object::Internal_CloneSingleWithParent(scrollViewBase, transform, false);
 
 		auto getComponents = il2cpp_class_get_method_from_name_type<Il2CppArraySize_t<Il2CppObject*> *(*)(Il2CppObject*, Il2CppType*, bool, bool, bool, bool, Il2CppObject*)>(scrollViewBase->klass, "GetComponentsInternal", 6)->methodPointer;
 
@@ -8925,15 +8584,15 @@ namespace
 
 		auto scrollRectTransform = il2cpp_class_get_method_from_name_type<Il2CppObject * (*)(Il2CppObject*)>(m_Viewport->klass, "get_parent", 0)->methodPointer(m_Viewport);
 
-		il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, Vector2_t)>(scrollRectTransform->klass, "set_sizeDelta", 1)->methodPointer(scrollRectTransform, Vector2_t{ -24, -12 });
+		il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, UnityEngine::Vector2)>(scrollRectTransform->klass, "set_sizeDelta", 1)->methodPointer(scrollRectTransform, UnityEngine::Vector2{ -24, -12 });
 
-		il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, Vector2_t)>(scrollRectTransform->klass, "set_anchorMax", 1)->methodPointer(scrollRectTransform, Vector2_t{ 1, 1 });
+		il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, UnityEngine::Vector2)>(scrollRectTransform->klass, "set_anchorMax", 1)->methodPointer(scrollRectTransform, UnityEngine::Vector2{ 1, 1 });
 
-		il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, Vector2_t)>(scrollRectTransform->klass, "set_anchorMin", 1)->methodPointer(scrollRectTransform, Vector2_t{ 0, 0 });
+		il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, UnityEngine::Vector2)>(scrollRectTransform->klass, "set_anchorMin", 1)->methodPointer(scrollRectTransform, UnityEngine::Vector2{ 0, 0 });
 
-		il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, Vector2_t)>(scrollRectTransform->klass, "set_pivot", 1)->methodPointer(scrollRectTransform, Vector2_t{ 0.5, 0.5 });
+		il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, UnityEngine::Vector2)>(scrollRectTransform->klass, "set_pivot", 1)->methodPointer(scrollRectTransform, UnityEngine::Vector2{ 0.5, 0.5 });
 
-		il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, Vector2_t)>(scrollRectTransform->klass, "set_anchoredPosition", 1)->methodPointer(scrollRectTransform, Vector2_t{ 0, -6 });
+		il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, UnityEngine::Vector2)>(scrollRectTransform->klass, "set_anchoredPosition", 1)->methodPointer(scrollRectTransform, UnityEngine::Vector2{ 0, -6 });
 
 		il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, Il2CppObject*, bool)>(scrollRectTransform->klass, "SetParent", 2)->methodPointer(scrollRectTransform, rootTransform, false);
 
@@ -8941,15 +8600,15 @@ namespace
 		Il2CppObject* m_Content;
 		il2cpp_field_get_value(scrollRect, m_ContentField, &m_Content);
 
-		il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, Vector2_t)>(m_Content->klass, "set_sizeDelta", 1)->methodPointer(m_Content, Vector2_t{ 56, 0 });
+		il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, UnityEngine::Vector2)>(m_Content->klass, "set_sizeDelta", 1)->methodPointer(m_Content, UnityEngine::Vector2{ 56, 0 });
 
-		il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, Vector2_t)>(m_Content->klass, "set_anchorMax", 1)->methodPointer(m_Content, Vector2_t{ 1, 1 });
+		il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, UnityEngine::Vector2)>(m_Content->klass, "set_anchorMax", 1)->methodPointer(m_Content, UnityEngine::Vector2{ 1, 1 });
 
-		il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, Vector2_t)>(m_Content->klass, "set_anchorMin", 1)->methodPointer(m_Content, Vector2_t{ 0, 1 });
+		il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, UnityEngine::Vector2)>(m_Content->klass, "set_anchorMin", 1)->methodPointer(m_Content, UnityEngine::Vector2{ 0, 1 });
 
-		il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, Vector2_t)>(m_Content->klass, "set_pivot", 1)->methodPointer(m_Content, Vector2_t{ 0.5, 1 });
+		il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, UnityEngine::Vector2)>(m_Content->klass, "set_pivot", 1)->methodPointer(m_Content, UnityEngine::Vector2{ 0.5, 1 });
 
-		il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, Vector2_t)>(m_Content->klass, "set_anchoredPosition", 1)->methodPointer(m_Content, Vector2_t{ 0, 0 });
+		il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, UnityEngine::Vector2)>(m_Content->klass, "set_anchoredPosition", 1)->methodPointer(m_Content, UnityEngine::Vector2{ 0, 0 });
 
 		auto contentGameObject = il2cpp_class_get_method_from_name_type<Il2CppObject * (*)(Il2CppObject*)>(m_Content->klass, "get_gameObject", 0)->methodPointer(m_Content);
 
@@ -8964,6 +8623,7 @@ namespace
 
 		int antiAliasing = 0;
 		bool characterSystemTextCaption = false;
+		bool liveSliderAlwaysShow = false;
 		bool championsLiveShowText = false;
 		int championsLiveYear = 2022;
 		float characterSystemTextCaptionPositionX = 0;
@@ -9004,6 +8664,11 @@ namespace
 			if (configDocument.HasMember(L"championsLiveShowText"))
 			{
 				championsLiveShowText = configDocument[L"championsLiveShowText"].GetBool();
+			}
+
+			if (configDocument.HasMember(L"liveSliderAlwaysShow"))
+			{
+				liveSliderAlwaysShow = configDocument[L"liveSliderAlwaysShow"].GetBool();
 			}
 
 			if (configDocument.HasMember(L"championsLiveYear"))
@@ -9113,7 +8778,7 @@ namespace
 		AddToLayout(m_Content,
 			{
 				GetOptionItemTitle(LocalifySettings::GetText("graphics")),
-				GetOptionItemSimpleWithButton("graphics_quality", (LocalifySettings::GetText("graphics_quality") + L": "s + local::u8_wide(graphicsQualityOptions[config::config_document[L"graphicsQuality"].GetInt() + 1])).data(),
+				GetOptionItemSimpleWithButton("graphics_quality", (LocalifySettings::GetText("graphics_quality") + L": "s + u8_wide(graphicsQualityOptions[config::config_document[L"graphicsQuality"].GetInt() + 1])).data(),
 					localize_get_hook(GetTextIdByName(L"Circle0206"))->chars),
 				GetOptionSlider("anti_aliasing", LocalifySettings::GetText("anti_aliasing"), antiAliasing, 0, 4, true, *[](Il2CppObject* slider) {
 					auto numText = GetOptionSliderNumText(slider);
@@ -9174,8 +8839,9 @@ namespace
 				GetOptionSlider("ui_scale_portrait", LocalifySettings::GetText("ui_scale_portrait"), freeFormUiScalePortrait, 0.1, 2.0, false),
 				GetOptionSlider("ui_scale_landscape", LocalifySettings::GetText("ui_scale_landscape"), freeFormUiScaleLandscape, 0.1, 2.0, false),
 				GetOptionItemTitle(localize_get_hook(GetTextIdByName(L"Common0035"))->chars),
+				GetOptionItemOnOff("live_slider_always_show", LocalifySettings::GetText("live_slider_always_show")),
 				GetOptionItemOnOff("champions_live_show_text", LocalifySettings::GetText("champions_live_show_text")),
-				GetOptionItemSimpleWithButton("champions_live_resource_id", (LocalifySettings::GetText("champions_live_resource_id") + L": "s + local::u8_wide(MasterDB::GetChampionsResources()[config::config_document[L"championsLiveResourceId"].GetInt() - 1])).data(),
+				GetOptionItemSimpleWithButton("champions_live_resource_id", (LocalifySettings::GetText("champions_live_resource_id") + L": "s + u8_wide(MasterDB::GetChampionsResources()[config::config_document[L"championsLiveResourceId"].GetInt() - 1])).data(),
 					localize_get_hook(GetTextIdByName(L"Circle0206"))->chars),
 				GetOptionItem3Toggle("champions_live_year", LocalifySettings::GetText("champions_live_year"), L"2022", L"2023", L"2024", championsLiveYear - 2022),
 				GetOptionItemSimple(L""),
@@ -9270,6 +8936,10 @@ namespace
 			{
 			}));
 
+		SetOptionItemOnOffAction("live_slider_always_show", liveSliderAlwaysShow, *([](Il2CppObject*, bool isOn)
+			{
+			}));
+
 		SetOptionItemOnOffAction("champions_live_show_text", championsLiveShowText, *([](Il2CppObject*, bool isOn)
 			{
 			}));
@@ -9343,10 +9013,10 @@ namespace
 		SetOptionItemButtonAction("show_notification", *([](Il2CppObject*)
 			{
 				auto leader_chara_id = MsgPackData::user_info["leader_chara_id"].int_value();
-				auto title = local::u8_wide(MasterDB::GetTextData(6, leader_chara_id));
+				auto title = u8_wide(MasterDB::GetTextData(6, leader_chara_id));
 				auto contentU8 = MasterDB::GetTextData(163, leader_chara_id);
 				replaceAll(contentU8, "\\n", "\n");
-				auto content = local::u8_wide(contentU8);
+				auto content = u8_wide(contentU8);
 
 				DesktopNotificationManagerCompat::ShowToastNotification(title.data(), content.data(), MsgPackData::GetIconPath(leader_chara_id)->chars);
 			}));
@@ -9357,7 +9027,7 @@ namespace
 					AddOrSet(config::config_document, L"graphicsQuality", value - 1);
 
 					auto textCommon = GetOptionItemSimpleWithButtonTextCommon("graphics_quality");
-					SetTextCommonText(textCommon, (LocalifySettings::GetText("graphics_quality") + L": "s + local::u8_wide(GetGraphicsQualityOptions()[config::config_document[L"graphicsQuality"].GetInt() + 1])).data());
+					SetTextCommonText(textCommon, (LocalifySettings::GetText("graphics_quality") + L": "s + u8_wide(GetGraphicsQualityOptions()[config::config_document[L"graphicsQuality"].GetInt() + 1])).data());
 					});
 			}));
 
@@ -9367,7 +9037,7 @@ namespace
 					AddOrSet(config::config_document, L"championsLiveResourceId", value + 1);
 
 					auto textCommon = GetOptionItemSimpleWithButtonTextCommon("champions_live_resource_id");
-					SetTextCommonText(textCommon, (LocalifySettings::GetText("champions_live_resource_id") + L": "s + local::u8_wide(MasterDB::GetChampionsResources()[config::config_document[L"championsLiveResourceId"].GetInt() - 1])).data());
+					SetTextCommonText(textCommon, (LocalifySettings::GetText("champions_live_resource_id") + L": "s + u8_wide(MasterDB::GetChampionsResources()[config::config_document[L"championsLiveResourceId"].GetInt() - 1])).data());
 					});
 			}));
 
@@ -9379,7 +9049,7 @@ namespace
 		SetOptionItemButtonAction("character_system_text_caption_font_color", *([](Il2CppObject*)
 			{
 				auto options = GetFontColorOptions();
-				auto value = local::wide_u8(config::config_document[L"characterSystemTextCaptionFontColor"].GetString());
+				auto value = wide_u8(config::config_document[L"characterSystemTextCaptionFontColor"].GetString());
 				auto found = find(options.begin(), options.end(), value);
 				int index = 0;
 
@@ -9390,7 +9060,7 @@ namespace
 
 				OpenSelectFontColorOption(LocalifySettings::GetText("character_system_text_caption_font_color"), options, index, [](int value) {
 					auto options = GetFontColorOptions();
-					wstring color = local::u8_wide(options[value]);
+					wstring color = u8_wide(options[value]);
 					AddOrSetString(config::config_document, L"characterSystemTextCaptionFontColor", color.data());
 
 					auto textCommon = GetOptionItemSimpleWithButtonTextCommon("character_system_text_caption_font_color");
@@ -9409,7 +9079,7 @@ namespace
 		SetOptionItemButtonAction("character_system_text_caption_outline_size", *([](Il2CppObject*)
 			{
 				auto options = GetOutlineSizeOptions();
-				auto value = local::wide_u8(config::config_document[L"characterSystemTextCaptionOutlineSize"].GetString());
+				auto value = wide_u8(config::config_document[L"characterSystemTextCaptionOutlineSize"].GetString());
 				auto found = find(options.begin(), options.end(), value);
 				int index = 0;
 
@@ -9420,7 +9090,7 @@ namespace
 
 				OpenSelectOutlineSizeOption(LocalifySettings::GetText("character_system_text_caption_outline_size"), options, index, [](int value) {
 					auto options = GetOutlineSizeOptions();
-					wstring color = local::u8_wide(options[value]);
+					wstring color = u8_wide(options[value]);
 					AddOrSetString(config::config_document, L"characterSystemTextCaptionOutlineSize", color.data());
 
 					auto textCommon = GetOptionItemSimpleWithButtonTextCommon("character_system_text_caption_outline_size");
@@ -9437,7 +9107,7 @@ namespace
 		SetOptionItemButtonAction("character_system_text_caption_outline_color", *([](Il2CppObject*)
 			{
 				auto options = GetOutlineColorOptions();
-				auto value = local::wide_u8(config::config_document[L"characterSystemTextCaptionOutlineColor"].GetString());
+				auto value = wide_u8(config::config_document[L"characterSystemTextCaptionOutlineColor"].GetString());
 				auto found = find(options.begin(), options.end(), value);
 				int index = 0;
 
@@ -9448,7 +9118,7 @@ namespace
 
 				OpenSelectOutlineColorOption(LocalifySettings::GetText("character_system_text_caption_outline_color"), options, index, [](int value) {
 					auto options = GetOutlineColorOptions();
-					wstring color = local::u8_wide(options[value]);
+					wstring color = u8_wide(options[value]);
 					AddOrSetString(config::config_document, L"characterSystemTextCaptionOutlineColor", color.data());
 
 					auto textCommon = GetOptionItemSimpleWithButtonTextCommon("character_system_text_caption_outline_color");
@@ -9502,7 +9172,7 @@ namespace
 							localizeextension_text_hook(GetTextIdByName(L"Home0073")),
 							CreateDelegateStatic(*[]()
 								{
-									il2cpp_symbols::get_method_pointer<void (*)(Il2CppString*)>("UnityEngine.CoreModule.dll", "UnityEngine", "Application", "OpenURL", 1)(il2cpp_string_new("https://github.com/Kimjio/umamusume-localify"));
+									UnityEngine::Application::OpenURL(il2cpp_string_new("https://github.com/Kimjio/umamusume-localify"));
 								}),
 							GetTextIdByName(L"Common0004"),
 							GetTextIdByName(L"Common0003"),
@@ -9594,9 +9264,13 @@ namespace
 			{
 				auto& configDocument = config::config_document;
 
+				AddOrSet(configDocument, L"liveSliderAlwaysShow", GetOptionItemOnOffIsOn("live_slider_always_show"));
+
 				AddOrSet(configDocument, L"championsLiveShowText", GetOptionItemOnOffIsOn("champions_live_show_text"));
 
 				AddOrSet(configDocument, L"championsLiveYear", GetToggleGroupCommonValue("champions_live_year") + 2022);
+
+				config::live_slider_always_show = configDocument[L"liveSliderAlwaysShow"].GetBool();
 
 				config::champions_live_show_text = configDocument[L"championsLiveShowText"].GetBool();
 
@@ -9656,27 +9330,24 @@ namespace
 		auto gameObject = CreateGameObject();
 		auto rootTransform = AddComponent(gameObject, GetRuntimeType("UnityEngine.CoreModule.dll", "UnityEngine", "RectTransform"));
 
-		il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, Vector2_t)>(rootTransform->klass, "set_sizeDelta", 1)->methodPointer(rootTransform, Vector2_t{ 0, 0 });
+		il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, UnityEngine::Vector2)>(rootTransform->klass, "set_sizeDelta", 1)->methodPointer(rootTransform, UnityEngine::Vector2{ 0, 0 });
 
-		il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, Vector2_t)>(rootTransform->klass, "set_anchorMax", 1)->methodPointer(rootTransform, Vector2_t{ 1, 1 });
+		il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, UnityEngine::Vector2)>(rootTransform->klass, "set_anchorMax", 1)->methodPointer(rootTransform, UnityEngine::Vector2{ 1, 1 });
 
-		il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, Vector2_t)>(rootTransform->klass, "set_anchorMin", 1)->methodPointer(rootTransform, Vector2_t{ 0, 0 });
+		il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, UnityEngine::Vector2)>(rootTransform->klass, "set_anchorMin", 1)->methodPointer(rootTransform, UnityEngine::Vector2{ 0, 0 });
 
-		il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, Vector2_t)>(rootTransform->klass, "set_pivot", 1)->methodPointer(rootTransform, Vector2_t{ 0.5, 0.5 });
+		il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, UnityEngine::Vector2)>(rootTransform->klass, "set_pivot", 1)->methodPointer(rootTransform, UnityEngine::Vector2{ 0.5, 0.5 });
 
-		il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, Vector2_t)>(rootTransform->klass, "set_anchoredPosition", 1)->methodPointer(rootTransform, Vector2_t{ 0, 0 });
+		il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, UnityEngine::Vector2)>(rootTransform->klass, "set_anchoredPosition", 1)->methodPointer(rootTransform, UnityEngine::Vector2{ 0, 0 });
 
 		auto scrollViewBase = resources_load_hook(il2cpp_string_new("ui/parts/base/scrollviewbase"), GetRuntimeType("UnityEngine.CoreModule.dll", "UnityEngine", "GameObject"));
 
-		auto uiManager = GetSingletonInstance(il2cpp_symbols::get_class("umamusume.dll", "Gallop", "UIManager"));
-		auto _mainCanvasField = il2cpp_class_get_field_from_name_wrap(uiManager->klass, "_mainCanvas");
-		Il2CppObject* _mainCanvas;
-		il2cpp_field_get_value(uiManager, _mainCanvasField, &_mainCanvas);
+		auto uiManager = Gallop::UIManager::Instance();
+		Il2CppObject* _mainCanvas = uiManager._mainCanvas();
 
 		auto transform = il2cpp_class_get_method_from_name_type<Il2CppObject * (*)(Il2CppObject*)>(_mainCanvas->klass, "get_transform", 0)->methodPointer(_mainCanvas);
 
-		scrollViewBase = il2cpp_symbols::get_method_pointer<Il2CppObject * (*)(Il2CppObject*, Il2CppObject*, bool)>("UnityEngine.CoreModule.dll", "UnityEngine", "Object", "Internal_CloneSingleWithParent", 3)
-			(scrollViewBase, transform, false);
+		scrollViewBase = UnityEngine::Object::Internal_CloneSingleWithParent(scrollViewBase, transform, false);
 
 		auto getComponents = il2cpp_class_get_method_from_name_type<Il2CppArraySize_t<Il2CppObject*> *(*)(Il2CppObject*, Il2CppType*, bool, bool, bool, bool, Il2CppObject*)>(scrollViewBase->klass, "GetComponentsInternal", 6)->methodPointer;
 
@@ -9691,15 +9362,15 @@ namespace
 
 		auto scrollRectTransform = il2cpp_class_get_method_from_name_type<Il2CppObject * (*)(Il2CppObject*)>(m_Viewport->klass, "get_parent", 0)->methodPointer(m_Viewport);
 
-		il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, Vector2_t)>(scrollRectTransform->klass, "set_sizeDelta", 1)->methodPointer(scrollRectTransform, Vector2_t{ -24, -12 });
+		il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, UnityEngine::Vector2)>(scrollRectTransform->klass, "set_sizeDelta", 1)->methodPointer(scrollRectTransform, UnityEngine::Vector2{ -24, -12 });
 
-		il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, Vector2_t)>(scrollRectTransform->klass, "set_anchorMax", 1)->methodPointer(scrollRectTransform, Vector2_t{ 1, 1 });
+		il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, UnityEngine::Vector2)>(scrollRectTransform->klass, "set_anchorMax", 1)->methodPointer(scrollRectTransform, UnityEngine::Vector2{ 1, 1 });
 
-		il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, Vector2_t)>(scrollRectTransform->klass, "set_anchorMin", 1)->methodPointer(scrollRectTransform, Vector2_t{ 0, 0 });
+		il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, UnityEngine::Vector2)>(scrollRectTransform->klass, "set_anchorMin", 1)->methodPointer(scrollRectTransform, UnityEngine::Vector2{ 0, 0 });
 
-		il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, Vector2_t)>(scrollRectTransform->klass, "set_pivot", 1)->methodPointer(scrollRectTransform, Vector2_t{ 0.5, 0.5 });
+		il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, UnityEngine::Vector2)>(scrollRectTransform->klass, "set_pivot", 1)->methodPointer(scrollRectTransform, UnityEngine::Vector2{ 0.5, 0.5 });
 
-		il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, Vector2_t)>(scrollRectTransform->klass, "set_anchoredPosition", 1)->methodPointer(scrollRectTransform, Vector2_t{ 0, -6 });
+		il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, UnityEngine::Vector2)>(scrollRectTransform->klass, "set_anchoredPosition", 1)->methodPointer(scrollRectTransform, UnityEngine::Vector2{ 0, -6 });
 
 		il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, Il2CppObject*, bool)>(scrollRectTransform->klass, "SetParent", 2)->methodPointer(scrollRectTransform, rootTransform, false);
 
@@ -9707,15 +9378,15 @@ namespace
 		Il2CppObject* m_Content;
 		il2cpp_field_get_value(scrollRect, m_ContentField, &m_Content);
 
-		il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, Vector2_t)>(m_Content->klass, "set_sizeDelta", 1)->methodPointer(m_Content, Vector2_t{ 56, 0 });
+		il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, UnityEngine::Vector2)>(m_Content->klass, "set_sizeDelta", 1)->methodPointer(m_Content, UnityEngine::Vector2{ 56, 0 });
 
-		il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, Vector2_t)>(m_Content->klass, "set_anchorMax", 1)->methodPointer(m_Content, Vector2_t{ 1, 1 });
+		il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, UnityEngine::Vector2)>(m_Content->klass, "set_anchorMax", 1)->methodPointer(m_Content, UnityEngine::Vector2{ 1, 1 });
 
-		il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, Vector2_t)>(m_Content->klass, "set_anchorMin", 1)->methodPointer(m_Content, Vector2_t{ 0, 1 });
+		il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, UnityEngine::Vector2)>(m_Content->klass, "set_anchorMin", 1)->methodPointer(m_Content, UnityEngine::Vector2{ 0, 1 });
 
-		il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, Vector2_t)>(m_Content->klass, "set_pivot", 1)->methodPointer(m_Content, Vector2_t{ 0.5, 1 });
+		il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, UnityEngine::Vector2)>(m_Content->klass, "set_pivot", 1)->methodPointer(m_Content, UnityEngine::Vector2{ 0.5, 1 });
 
-		il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, Vector2_t)>(m_Content->klass, "set_anchoredPosition", 1)->methodPointer(m_Content, Vector2_t{ 0, 0 });
+		il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, UnityEngine::Vector2)>(m_Content->klass, "set_anchoredPosition", 1)->methodPointer(m_Content, UnityEngine::Vector2{ 0, 0 });
 
 		auto contentGameObject = il2cpp_class_get_method_from_name_type<Il2CppObject * (*)(Il2CppObject*)>(m_Content->klass, "get_gameObject", 0)->methodPointer(m_Content);
 
@@ -9728,12 +9399,18 @@ namespace
 		il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, int)>(padding->klass, "set_top", 1)->methodPointer(padding, -20);
 		il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, int)>(padding->klass, "set_bottom", 1)->methodPointer(padding, 16);
 
+		bool liveSliderAlwaysShow = false;
 		bool championsLiveShowText = false;
 		int championsLiveYear = 2023;
 
 		if (config::read_config())
 		{
 			auto& configDocument = config::config_document;
+
+			if (configDocument.HasMember(L"liveSliderAlwaysShow"))
+			{
+				liveSliderAlwaysShow = configDocument[L"liveSliderAlwaysShow"].GetBool();
+			}
 
 			if (configDocument.HasMember(L"championsLiveShowText"))
 			{
@@ -9749,17 +9426,21 @@ namespace
 		AddToLayout(m_Content,
 			{
 				GetOptionItemTitle(localize_get_hook(GetTextIdByName(L"Common0035"))->chars),
+				GetOptionItemOnOff("live_slider_always_show", LocalifySettings::GetText("live_slider_always_show")),
 				GetOptionItemOnOff("champions_live_show_text", LocalifySettings::GetText("champions_live_show_text")),
-				GetOptionItemSimpleWithButton("champions_live_resource_id", (LocalifySettings::GetText("champions_live_resource_id") + L": "s + local::u8_wide(MasterDB::GetChampionsResources()[config::config_document[L"championsLiveResourceId"].GetInt() - 1])).data(),
+				GetOptionItemSimpleWithButton("champions_live_resource_id", (LocalifySettings::GetText("champions_live_resource_id") + L": "s + u8_wide(MasterDB::GetChampionsResources()[config::config_document[L"championsLiveResourceId"].GetInt() - 1])).data(),
 					localize_get_hook(GetTextIdByName(L"Circle0206"))->chars),
 				GetOptionItem3Toggle("champions_live_year", LocalifySettings::GetText("champions_live_year"), L"2022", L"2023", L"2024", championsLiveYear - 2022),
 				GetOptionItemSimple(L""),
 			}
 			);
 
+		SetOptionItemOnOffAction("live_slider_always_show", liveSliderAlwaysShow, *([](Il2CppObject*, bool isOn)
+			{
+			}));
+
 		SetOptionItemOnOffAction("champions_live_show_text", championsLiveShowText, *([](Il2CppObject*, bool isOn)
 			{
-				// TODO
 			}));
 
 		SetOptionItemButtonAction("champions_live_resource_id", *([](Il2CppObject*)
@@ -9768,7 +9449,7 @@ namespace
 					AddOrSet(config::config_document, L"championsLiveResourceId", value + 1);
 
 					auto textCommon = GetOptionItemSimpleWithButtonTextCommon("champions_live_resource_id");
-					SetTextCommonText(textCommon, (LocalifySettings::GetText("champions_live_resource_id") + L": "s + local::u8_wide(MasterDB::GetChampionsResources()[config::config_document[L"championsLiveResourceId"].GetInt() - 1])).data());
+					SetTextCommonText(textCommon, (LocalifySettings::GetText("champions_live_resource_id") + L": "s + u8_wide(MasterDB::GetChampionsResources()[config::config_document[L"championsLiveResourceId"].GetInt() - 1])).data());
 					});
 			}));
 
@@ -9863,7 +9544,7 @@ namespace
 							auto workDataManager = GetSingletonInstance(il2cpp_symbols::get_class("umamusume.dll", "Gallop", "WorkDataManager"));
 
 							auto workUserData = il2cpp_class_get_method_from_name_type<Il2CppObject * (*)(Il2CppObject*)>(workDataManager->klass, "get_UserData", 0)->methodPointer(workDataManager);
-							auto viewerIdObscured = il2cpp_class_get_method_from_name_type<ObscuredLong(*)(Il2CppObject*)>(workUserData->klass, "get_ViewerId", 0)->methodPointer(workUserData);
+							auto viewerIdObscured = il2cpp_class_get_method_from_name_type<CodeStage::AntiCheat::ObscuredTypes::ObscuredLong(*)(Il2CppObject*)>(workUserData->klass, "get_ViewerId", 0)->methodPointer(workUserData);
 							auto viewerId = viewerIdObscured.GetDecrypted();
 
 							il2cpp_symbols::get_method_pointer<void (*)(Il2CppString*)>("UnityEngine.IMGUIModule.dll", "UnityEngine", "GUIUtility", "set_systemCopyBuffer", 1)(il2cpp_string_new16(to_wstring(viewerId).data()));
@@ -9990,12 +9671,144 @@ namespace
 		return false;
 	}
 
+	UnityEngine::GameObject GetSlider(const char* name, float value, float min = 0, float max = 10, bool wholeNumbers = true, void (*onChange)(Il2CppObject*) = nullptr)
+	{
+		auto object = resources_load_hook(il2cpp_string_new("ui/parts/outgame/option/optionsoundvolumeslider"), GetRuntimeType("UnityEngine.CoreModule.dll", "UnityEngine", "GameObject"));
+
+		auto optionSlider = il2cpp_symbols::get_method_pointer<Il2CppObject * (*)(Il2CppObject*)>("UnityEngine.CoreModule.dll", "UnityEngine", "Object", "Internal_CloneSingle", 1)(object);
+
+		auto getComponents = il2cpp_class_get_method_from_name_type<Il2CppArraySize_t<Il2CppObject*> *(*)(Il2CppObject*, Il2CppType*, bool, bool, bool, bool, Il2CppObject*)>(optionSlider->klass, "GetComponentsInternal", 6)->methodPointer;
+
+		auto optionSoundVolumeSliderArray = getComponents(optionSlider, reinterpret_cast<Il2CppType*>(GetRuntimeType(
+			"umamusume.dll", "Gallop", "OptionSoundVolumeSlider")), true, true, false, false, nullptr);
+
+		auto optionSoundVolumeSlider = optionSoundVolumeSliderArray->vector[0];
+
+		il2cpp_symbols::get_method_pointer<void (*)(Il2CppObject*)>("UnityEngine.CoreModule.dll", "UnityEngine", "Object", "Destroy", 1)(optionSoundVolumeSlider);
+
+		auto sliderCommonArray = getComponents(optionSlider, reinterpret_cast<Il2CppType*>(GetRuntimeType(
+			"umamusume.dll", "Gallop", "SliderCommon")), true, true, false, false, nullptr);
+
+		auto sliderCommon = sliderCommonArray->vector[0];
+
+		if (onChange)
+		{
+			auto onValueChanged = il2cpp_class_get_method_from_name_type<Il2CppObject * (*)(Il2CppObject*)>(sliderCommon->klass, "get_onValueChanged", 0)->methodPointer(sliderCommon);
+
+			auto AddCall = il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, Il2CppObject*)>(onValueChanged->klass, "AddCall", 1);
+
+			auto delegateClass = GetGenericClass(GetRuntimeType("UnityEngine.CoreModule.dll", "UnityEngine.Events", "UnityAction`1"), GetRuntimeType(il2cpp_defaults.single_class));
+
+			auto valueChanged = CreateDelegateWithClass(delegateClass, sliderCommon, onChange);
+
+			auto invokeableCall = il2cpp_object_new(GetGenericClass(GetRuntimeType("UnityEngine.CoreModule.dll", "UnityEngine.Events", "InvokableCall`1"), GetRuntimeType(il2cpp_defaults.single_class)));
+
+			auto delegateField = il2cpp_class_get_field_from_name_wrap(invokeableCall->klass, "Delegate");
+			il2cpp_field_set_value(invokeableCall, delegateField, valueChanged);
+
+			AddCall->methodPointer(onValueChanged, invokeableCall);
+		}
+
+		try
+		{
+			il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, bool)>(sliderCommon->klass, "set_wholeNumbers", 1)->methodPointer(sliderCommon, wholeNumbers);
+			il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, float)>(sliderCommon->klass, "set_minValue", 1)->methodPointer(sliderCommon, min);
+			il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, float)>(sliderCommon->klass, "set_maxValue", 1)->methodPointer(sliderCommon, max);
+			il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, float)>(sliderCommon->klass, "set_value", 1)->methodPointer(sliderCommon, value);
+		}
+		catch (const Il2CppExceptionWrapper& e)
+		{
+			cout << e.ex->klass->name << ": ";
+			wcout << e.ex->message << endl;
+		}
+
+		auto transformArray = GetRectTransformArray(optionSlider);
+
+		vector<Il2CppObject*> destroyTargets;
+
+		for (int i = 0; i < transformArray->max_length; i++)
+		{
+			auto transform = transformArray->vector[i];
+
+			if (transform)
+			{
+				if (UnityEngine::Object::Name(transform)->chars == L"TextName"s ||
+					UnityEngine::Object::Name(transform)->chars == L"ToggleMute"s ||
+					UnityEngine::Object::Name(transform)->chars == L"ImageIcon"s ||
+					UnityEngine::Object::Name(transform)->chars == L"Line"s)
+				{
+					destroyTargets.emplace_back(transform);
+				}
+			}
+		}
+
+		for (int i = 0; i < destroyTargets.size(); i++)
+		{
+			auto transform = destroyTargets[i];
+			il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, Il2CppObject*, bool)>(transform->klass, "SetParent", 2)->methodPointer(transform, nullptr, false);
+			auto gameObject = il2cpp_class_get_method_from_name_type<Il2CppObject * (*)(Il2CppObject*)>(transform->klass, "get_gameObject", 0)->methodPointer(transform);
+			il2cpp_symbols::get_method_pointer<void (*)(Il2CppObject*)>("UnityEngine.CoreModule.dll", "UnityEngine", "Object", "Destroy", 1)(gameObject);
+		}
+
+		destroyTargets.clear();
+
+		transformArray = GetRectTransformArray(optionSlider);
+		UnityEngine::RectTransform sliderTransform{ nullptr };
+		UnityEngine::RectTransform numTransform{ nullptr };
+
+		for (int i = 0; i < transformArray->max_length; i++)
+		{
+			auto transform = transformArray->vector[i];
+
+			if (transform)
+			{
+				if (UnityEngine::Object::Name(transform)->chars == L"Slider"s)
+				{
+					sliderTransform = UnityEngine::RectTransform(transform);
+				}
+
+				if (UnityEngine::Object::Name(transform)->chars == L"Num"s)
+				{
+					numTransform = UnityEngine::RectTransform(transform);
+				}
+
+				if (sliderTransform && numTransform)
+				{
+					break;
+				}
+			}
+		}
+
+		auto array = getComponents(numTransform.gameObject(), reinterpret_cast<Il2CppType*>(GetRuntimeType(
+			"umamusume.dll", "Gallop", "TextCommon")), true, true, false, false, nullptr);
+
+		auto textCommon = array->vector[0];
+
+		SetTextCommonText(textCommon, L"0:00");
+
+		il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, int)>(textCommon->klass, "set_OutlineSize", 1)->methodPointer(textCommon, GetEnumValue(ParseEnum(GetRuntimeType("umamusume.dll", "Gallop", "OutlineSizeType"), L"M")));
+		il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, int)>(textCommon->klass, "set_OutlineColor", 1)->methodPointer(textCommon, GetEnumValue(ParseEnum(GetRuntimeType("umamusume.dll", "Gallop", "OutlineColorType"), L"White")));
+		il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*)>(textCommon->klass, "UpdateOutline", 0)->methodPointer(textCommon);
+		
+		numTransform.anchoredPosition({ -80, 10 });
+		numTransform.anchorMax({ 0, 0.5 });
+		numTransform.anchorMin({ 0, 0.5 });
+		numTransform.sizeDelta({ 60, 50 });
+		numTransform.pivot({ 0, 0.5 });
+
+		auto gameObject = sliderTransform.gameObject();
+
+		UnityEngine::Object::Name(gameObject, il2cpp_string_new(name));
+
+		return gameObject;
+	}
+
 	void* Object_Internal_CloneSingleWithParent_orig = nullptr;
 	Il2CppObject* Object_Internal_CloneSingleWithParent_hook(Il2CppObject* data, Il2CppObject* parent, bool worldPositionStays)
 	{
 		auto cloned = reinterpret_cast<decltype(Object_Internal_CloneSingleWithParent_hook)*>(Object_Internal_CloneSingleWithParent_orig)(data, parent, worldPositionStays);
 
-		if (wstring(uobject_get_name(cloned)->chars).find(L"ProfileTopView") != wstring::npos && Game::CurrentGameRegion == Game::Region::KOR)
+		if (wstring(UnityEngine::Object::Name(cloned)->chars).find(L"ProfileTopView") != wstring::npos && Game::CurrentGameRegion == Game::Region::KOR)
 		{
 			static Il2CppDelegate* updateViewerIdText;
 			updateViewerIdText = &CreateDelegateWithClassStatic(il2cpp_symbols::get_class("DOTween.dll", "DG.Tweening", "TweenCallback"), *([](void*)
@@ -10010,7 +9823,7 @@ namespace
 			il2cpp_symbols::get_method_pointer<Il2CppObject* (*)(float, Il2CppDelegate*, bool)>("DOTween.dll", "DG.Tweening", "DOVirtual", "DelayedCall", 3)(0.05, updateViewerIdText, true);
 		}
 
-		if (wstring(uobject_get_name(cloned)->chars).find(L"DialogOptionHome") != wstring::npos)
+		if (wstring(UnityEngine::Object::Name(cloned)->chars).find(L"DialogOptionHome") != wstring::npos)
 		{
 			auto getComponents = il2cpp_class_get_method_from_name_type<Il2CppArraySize_t<Il2CppObject*> *(*)(Il2CppObject*, Il2CppType*, bool, bool, bool, bool, Il2CppObject*)>(cloned->klass, "GetComponentsInternal", 6)->methodPointer;
 			auto rectTransformArray = getComponents(cloned, reinterpret_cast<Il2CppType*>(GetRuntimeType(
@@ -10020,7 +9833,7 @@ namespace
 			{
 				auto rectTransform = rectTransformArray->vector[i];
 
-				if (rectTransform && local::wide_u8(uobject_get_name(rectTransform)->chars) == "Content")
+				if (rectTransform && wide_u8(UnityEngine::Object::Name(rectTransform)->chars) == "Content")
 				{
 					InitOptionLayout(rectTransform);
 					break;
@@ -10030,7 +9843,7 @@ namespace
 			SetupOptionLayout();
 		}
 
-		if (wstring(uobject_get_name(cloned)->chars).find(L"DialogOptionLiveTheater") != wstring::npos)
+		if (wstring(UnityEngine::Object::Name(cloned)->chars).find(L"DialogOptionLiveTheater") != wstring::npos)
 		{
 			auto getComponents = il2cpp_class_get_method_from_name_type<Il2CppArraySize_t<Il2CppObject*> *(*)(Il2CppObject*, Il2CppType*, bool, bool, bool, bool, Il2CppObject*)>(cloned->klass, "GetComponentsInternal", 6)->methodPointer;
 			auto rectTransformArray = getComponents(cloned, reinterpret_cast<Il2CppType*>(GetRuntimeType(
@@ -10040,7 +9853,7 @@ namespace
 			{
 				auto rectTransform = rectTransformArray->vector[i];
 
-				if (rectTransform && local::wide_u8(uobject_get_name(rectTransform)->chars) == "Content")
+				if (rectTransform && wide_u8(UnityEngine::Object::Name(rectTransform)->chars) == "Content")
 				{
 					InitOptionLayout(rectTransform);
 					break;
@@ -10050,7 +9863,7 @@ namespace
 			SetupLiveOptionLayout();
 		}
 
-		if (wstring(uobject_get_name(cloned)->chars).find(L"CharacterHomeTopUI") != wstring::npos)
+		if (wstring(UnityEngine::Object::Name(cloned)->chars).find(L"CharacterHomeTopUI") != wstring::npos)
 		{
 			auto getComponent = il2cpp_class_get_method_from_name_type<Il2CppObject * (*)(Il2CppObject*, Il2CppObject*)>(cloned->klass, "GetComponent", 1)->methodPointer;
 			auto CharacterHomeTopUI = getComponent(cloned, GetRuntimeType("umamusume.dll", "Gallop", "CharacterHomeTopUI"));
@@ -10074,7 +9887,229 @@ namespace
 			}
 		}
 
-		if (wstring(uobject_get_name(cloned)->chars).find(L"LiveChampionsTextController") != wstring::npos)
+		if (wstring(UnityEngine::Object::Name(cloned)->chars).find(L"LiveView") != wstring::npos)
+		{
+			auto gameObject = UnityEngine::GameObject(cloned);
+			auto contentsRoot = gameObject.transform().Find(il2cpp_string_new(config::live_slider_always_show ? "ContentsRoot" : "ContentsRoot/MenuRoot"));
+			auto slider = GetSlider("live_slider", 0, 0, 180, false,
+				*[](Il2CppObject* sliderCommon)
+				{
+					auto value = GetOptionSliderValue("live_slider");
+
+					auto director = GetSingletonInstance(il2cpp_symbols::get_class("umamusume.dll", "Gallop.Live", "Director"));
+					if (director)
+					{
+						bool isPauseLive = il2cpp_class_get_method_from_name_type<bool (*)()>(director->klass, "IsPauseLive", 0)->methodPointer();
+
+						auto _liveCurrentTimeField = il2cpp_class_get_field_from_name_wrap(director->klass, "_liveCurrentTime");
+						il2cpp_field_set_value(director, _liveCurrentTimeField, &value);
+
+						auto LiveTimeController = il2cpp_class_get_method_from_name_type<Il2CppObject * (*)(Il2CppObject*)>(director->klass, "get_LiveTimeController", 0)->methodPointer(director);
+						auto _elapsedTimeField = il2cpp_class_get_field_from_name_wrap(LiveTimeController->klass, "_elapsedTime");
+						il2cpp_field_set_value(LiveTimeController, _elapsedTimeField, &value);
+						il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, float)>(LiveTimeController->klass, "set_CurrentTime", 1)->methodPointer(LiveTimeController, value);
+
+						auto AudioManager = GetSingletonInstance(il2cpp_symbols::get_class("umamusume.dll", "Gallop", "AudioManager"));
+						auto CriAudioManager = il2cpp_class_get_method_from_name_type<Il2CppObject * (*)(Il2CppObject*)>(AudioManager->klass, "get_CriAudioManager", 0)->methodPointer(AudioManager);
+
+						auto audioCtrlDictField = il2cpp_class_get_field_from_name_wrap(CriAudioManager->klass, "audioCtrlDict");
+						Il2CppObject* audioCtrlDict;
+						il2cpp_field_get_value(CriAudioManager, audioCtrlDictField, &audioCtrlDict);
+
+						auto _songPlaybackField = il2cpp_class_get_field_from_name_wrap(AudioManager->klass, "_songPlayback");
+						Cute::Cri::AudioPlayback _songPlayback;
+						il2cpp_field_get_value(AudioManager, _songPlaybackField, &_songPlayback);
+
+						auto _songCharaPlaybacksField = il2cpp_class_get_field_from_name_wrap(AudioManager->klass, "_songCharaPlaybacks");
+						Il2CppArraySize_t<Cute::Cri::AudioPlayback>* _songCharaPlaybacks;
+						il2cpp_field_get_value(AudioManager, _songCharaPlaybacksField, &_songCharaPlaybacks);
+
+						void** params = new void* [1];
+						params[0] = &_songPlayback.soundGroup;
+
+						Il2CppException* exception;
+
+						auto audioCtrl = il2cpp_runtime_invoke(il2cpp_class_get_method_from_name(audioCtrlDict->klass, "get_Item", 1), audioCtrlDict, params, &exception);
+
+						delete[] params;
+
+						if (exception)
+						{
+							wcout << exception->message->chars << endl;
+						}
+
+						auto poolField = il2cpp_class_get_field_from_name_wrap(audioCtrl->klass, "pool");
+						Il2CppObject* pool;
+						il2cpp_field_get_value(audioCtrl, poolField, &pool);
+
+						if (pool)
+						{
+							auto method = il2cpp_symbols::find_method<int (*)(Il2CppObject*, Cute::Cri::AudioPlayback)>("Cute.Cri.Assembly.dll", "Cute.Cri", "CuteAudioSourcePool", [](const MethodInfo* info)
+								{
+									if (info->name == "FindSourceIndex"s && info->parameters[0].name == "playback"s)
+									{
+										return true;
+									}
+
+									return false;
+								});
+
+							auto sourceIndex = method(pool, _songPlayback);
+
+							params = new void* [1];
+							params[0] = &sourceIndex;
+
+							auto cuteAudioSource = il2cpp_runtime_invoke(il2cpp_class_get_method_from_name(pool->klass, "get_Item", 1), pool, params, &exception);
+
+							delete[] params;
+
+							if (exception)
+							{
+								wcout << exception->message->chars << endl;
+							}
+
+							if (cuteAudioSource)
+							{
+								auto sourceListField = il2cpp_class_get_field_from_name_wrap(cuteAudioSource->klass, "sourceList");
+								Il2CppObject* sourceList;
+								il2cpp_field_get_value(cuteAudioSource, sourceListField, &sourceList);
+
+								auto usingIndexField = il2cpp_class_get_field_from_name_wrap(cuteAudioSource->klass, "usingIndex");
+								int usingIndex;
+								il2cpp_field_get_value(cuteAudioSource, usingIndexField, &usingIndex);
+
+								params = new void* [1];
+								params[0] = &usingIndex;
+
+								auto AtomSource = il2cpp_runtime_invoke(il2cpp_class_get_method_from_name(sourceList->klass, "get_Item", 1), sourceList, params, &exception);
+
+								delete[] params;
+
+								if (exception)
+								{
+									wcout << exception->message->chars << endl;
+								}
+
+								auto player = il2cpp_class_get_method_from_name_type<Il2CppObject * (*)(Il2CppObject*)>(AtomSource->klass, "get_player", 0)->methodPointer(AtomSource);
+								il2cpp_class_get_method_from_name_type<CriWare::CriAtomExPlayback(*)(Il2CppObject*)>(player->klass, "Stop", 0)->methodPointer(player);
+								il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, long)>(player->klass, "SetStartTime", 1)->methodPointer(player, static_cast<long>(roundf(value * 1000.0f)));
+								auto playback = il2cpp_class_get_method_from_name_type<CriWare::CriAtomExPlayback(*)(Il2CppObject*)>(player->klass, "Start", 0)->methodPointer(player);
+
+
+								if (isPauseLive)
+								{
+									il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*)>(player->klass, "Pause", 0)->methodPointer(player);
+								}
+
+								_songPlayback.criAtomExPlayback = playback;
+								il2cpp_field_set_value(AudioManager, _songPlaybackField, &_songPlayback);
+								il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, CriWare::CriAtomExPlayback)>(AtomSource->klass, "set_Playback", 1)->methodPointer(AtomSource, playback);
+							}
+						}
+
+
+						if (_songCharaPlaybacks)
+						{
+							for (int i = 0; i < _songCharaPlaybacks->max_length; i++)
+							{
+								auto charaPlayback = _songCharaPlaybacks->vector[i];
+
+								void** params = new void* [1];
+								params[0] = &charaPlayback.soundGroup;
+
+								Il2CppException* exception;
+
+								auto audioCtrl = il2cpp_runtime_invoke(il2cpp_class_get_method_from_name(audioCtrlDict->klass, "get_Item", 1), audioCtrlDict, params, &exception);
+
+								delete[] params;
+
+								if (exception)
+								{
+									wcout << exception->message->chars << endl;
+									continue;
+								}
+
+								auto poolField = il2cpp_class_get_field_from_name_wrap(audioCtrl->klass, "pool");
+								Il2CppObject* pool;
+								il2cpp_field_get_value(audioCtrl, poolField, &pool);
+
+								if (pool)
+								{
+									auto method = il2cpp_symbols::find_method<int (*)(Il2CppObject*, Cute::Cri::AudioPlayback)>("Cute.Cri.Assembly.dll", "Cute.Cri", "CuteAudioSourcePool", [](const MethodInfo* info)
+										{
+											if (info->name == "FindSourceIndex"s && info->parameters[0].name == "playback"s)
+											{
+												return true;
+											}
+
+											return false;
+										});
+
+									auto sourceIndex = method(pool, charaPlayback);
+
+									params = new void* [1];
+									params[0] = &sourceIndex;
+
+									auto cuteAudioSource = il2cpp_runtime_invoke(il2cpp_class_get_method_from_name(pool->klass, "get_Item", 1), pool, params, &exception);
+
+									delete[] params;
+
+									if (exception)
+									{
+										wcout << exception->message->chars << endl;
+										continue;
+									}
+
+									if (cuteAudioSource)
+									{
+										auto sourceListField = il2cpp_class_get_field_from_name_wrap(cuteAudioSource->klass, "sourceList");
+										Il2CppObject* sourceList;
+										il2cpp_field_get_value(cuteAudioSource, sourceListField, &sourceList);
+
+										auto usingIndexField = il2cpp_class_get_field_from_name_wrap(cuteAudioSource->klass, "usingIndex");
+										int usingIndex;
+										il2cpp_field_get_value(cuteAudioSource, usingIndexField, &usingIndex);
+
+										params = new void* [1];
+										params[0] = &usingIndex;
+
+										auto AtomSource = il2cpp_runtime_invoke(il2cpp_class_get_method_from_name(sourceList->klass, "get_Item", 1), sourceList, params, &exception);
+
+										delete[] params;
+
+										if (exception)
+										{
+											wcout << exception->message->chars << endl;
+											continue;
+										}
+
+										auto player = il2cpp_class_get_method_from_name_type<Il2CppObject * (*)(Il2CppObject*)>(AtomSource->klass, "get_player", 0)->methodPointer(AtomSource);
+										il2cpp_class_get_method_from_name_type<CriWare::CriAtomExPlayback(*)(Il2CppObject*)>(player->klass, "Stop", 0)->methodPointer(player);
+										il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, long)>(player->klass, "SetStartTime", 1)->methodPointer(player, static_cast<long>(roundf(value * 1000.0f)));
+										auto playback = il2cpp_class_get_method_from_name_type<CriWare::CriAtomExPlayback(*)(Il2CppObject*)>(player->klass, "Start", 0)->methodPointer(player);
+
+										if (isPauseLive)
+										{
+											il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*)>(player->klass, "Pause", 0)->methodPointer(player);
+										}
+
+										charaPlayback.criAtomExPlayback = playback;
+									}
+								}
+							}
+						}
+					}
+				});
+			auto sliderTransform = static_cast<UnityEngine::RectTransform>(slider.transform());
+			sliderTransform.anchoredPosition({ 0, 44 });
+			sliderTransform.anchorMax({ 1, 0 });
+			sliderTransform.anchorMin({ 0, 0 });
+			sliderTransform.pivot({ 0.25, 0.5 });
+			sliderTransform.sizeDelta({ -480, 24 });
+			sliderTransform.SetParent(contentsRoot, false);
+		}
+
+		if (wstring(UnityEngine::Object::Name(cloned)->chars).find(L"LiveChampionsTextController") != wstring::npos)
 		{
 			auto updateScreenReferenceSize = CreateDelegateWithClass(il2cpp_symbols::get_class("DOTween.dll", "DG.Tweening", "TweenCallback"), cloned, *([](Il2CppObject* _this)
 				{
@@ -10093,9 +10128,9 @@ namespace
 
 							auto root = il2cpp_class_get_method_from_name_type<Il2CppObject * (*)(Il2CppObject*)>(_flashPlayer->klass, "get_Root", 0)->methodPointer(_flashPlayer);
 
-							int unityWidth = il2cpp_symbols::get_method_pointer<int (*)()>("UnityEngine.CoreModule.dll", "UnityEngine", "Screen", "get_width", IgnoreNumberOfArguments)();
+							int unityWidth = UnityEngine::Screen::width();
 
-							int unityHeight = il2cpp_symbols::get_method_pointer<int (*)()>("UnityEngine.CoreModule.dll", "UnityEngine", "Screen", "get_height", IgnoreNumberOfArguments)();
+							int unityHeight = UnityEngine::Screen::height();
 
 							if (Game::CurrentGameRegion == Game::Region::KOR)
 							{
@@ -10105,20 +10140,20 @@ namespace
 
 								if (unityWidth < unityHeight)
 								{
-									float scale = min(config::freeform_ui_scale_portrait, max(1.0f, unityHeight * ratio_vertical) * config::freeform_ui_scale_portrait);
-									il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, Vector2_t)>(_flashCanvasScaler->klass, "set_referenceResolution", 1)->methodPointer(_flashCanvasScaler, Vector2_t{ static_cast<float>(unityWidth / scale), static_cast<float>(unityHeight / scale) });
-									il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, Vector2_t)>(root->klass, "SetScreenReferenceSize", 1)->methodPointer(root, Vector2_t{ ratio_16_9 * static_cast<float>(unityHeight / scale), static_cast<float>(unityHeight / scale) });
+									float scale = min(config::freeform_ui_scale_portrait, max(1.0f, unityHeight * config::runtime::ratioVertical) * config::freeform_ui_scale_portrait);
+									il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, UnityEngine::Vector2)>(_flashCanvasScaler->klass, "set_referenceResolution", 1)->methodPointer(_flashCanvasScaler, UnityEngine::Vector2{ static_cast<float>(unityWidth / scale), static_cast<float>(unityHeight / scale) });
+									il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, UnityEngine::Vector2)>(root->klass, "SetScreenReferenceSize", 1)->methodPointer(root, UnityEngine::Vector2{ ratio_16_9 * static_cast<float>(unityHeight / scale), static_cast<float>(unityHeight / scale) });
 								}
 								else
 								{
-									float scale = min(config::freeform_ui_scale_landscape, max(1.0f, unityWidth / ratio_horizontal) * config::freeform_ui_scale_landscape);
-									il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, Vector2_t)>(_flashCanvasScaler->klass, "set_referenceResolution", 1)->methodPointer(_flashCanvasScaler, Vector2_t{ static_cast<float>(unityWidth / scale), static_cast<float>(unityHeight / scale) });
-									il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, Vector2_t)>(root->klass, "SetScreenReferenceSize", 1)->methodPointer(root, Vector2_t{ ratio_16_9 * static_cast<float>(unityHeight / scale), static_cast<float>(unityHeight / scale) });
+									float scale = min(config::freeform_ui_scale_landscape, max(1.0f, unityWidth / config::runtime::ratioHorizontal) * config::freeform_ui_scale_landscape);
+									il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, UnityEngine::Vector2)>(_flashCanvasScaler->klass, "set_referenceResolution", 1)->methodPointer(_flashCanvasScaler, UnityEngine::Vector2{ static_cast<float>(unityWidth / scale), static_cast<float>(unityHeight / scale) });
+									il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, UnityEngine::Vector2)>(root->klass, "SetScreenReferenceSize", 1)->methodPointer(root, UnityEngine::Vector2{ ratio_16_9 * static_cast<float>(unityHeight / scale), static_cast<float>(unityHeight / scale) });
 								}
 							}
 							else
 							{
-								il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, Vector2_t)>(root->klass, "SetScreenReferenceSize", 1)->methodPointer(root, Vector2_t{ ratio_16_9 * static_cast<float>(unityHeight), static_cast<float>(unityHeight) });
+								il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, UnityEngine::Vector2)>(root->klass, "SetScreenReferenceSize", 1)->methodPointer(root, UnityEngine::Vector2{ ratio_16_9 * static_cast<float>(unityHeight), static_cast<float>(unityHeight) });
 							}
 						}
 					}
@@ -10132,11 +10167,11 @@ namespace
 	}
 
 	void* Object_Internal_CloneSingle_orig = nullptr;
-	Il2CppObject* Object_Internal_CloneSingle_hook(Il2CppObject* data, Il2CppObject* parent, bool worldPositionStays)
+	Il2CppObject* Object_Internal_CloneSingle_hook(Il2CppObject* data)
 	{
-		auto cloned = reinterpret_cast<decltype(Object_Internal_CloneSingle_hook)*>(Object_Internal_CloneSingle_orig)(data, parent, worldPositionStays);
+		auto cloned = reinterpret_cast<decltype(Object_Internal_CloneSingle_hook)*>(Object_Internal_CloneSingle_orig)(data);
 
-		if (wstring(uobject_get_name(cloned)->chars).find(L"DialogHomeMenuMain") != wstring::npos && Game::CurrentGameRegion == Game::Region::KOR)
+		if (wstring(UnityEngine::Object::Name(cloned)->chars).find(L"DialogHomeMenuMain") != wstring::npos && Game::CurrentGameRegion == Game::Region::KOR)
 		{
 			auto homeMenuMain = il2cpp_class_get_method_from_name_type<Il2CppObject * (*)(Il2CppObject*, Il2CppObject*)>(cloned->klass, "GetComponent", 1)->methodPointer(cloned, GetRuntimeType("umamusume.dll", "Gallop", "DialogHomeMenuMain"));
 
@@ -10168,13 +10203,13 @@ namespace
 	void* resources_load_orig = nullptr;
 	Il2CppObject* resources_load_hook(Il2CppString* path, Il2CppObject* type)
 	{
-		string u8Name = local::wide_u8(path->chars);
+		wstring wName = path->chars;
 
-		if (u8Name == "ui/views/titleview"s)
+		if (wName == L"ui/views/titleview"s)
 		{
-			if (find_if(replaceAssetNames.begin(), replaceAssetNames.end(), [](const string& item)
+			if (find_if(replaceAssetNames.begin(), replaceAssetNames.end(), [](const wstring& item)
 				{
-					return item.find("utx_obj_title_logo_umamusume") != string::npos;
+					return item.find(L"utx_obj_title_logo_umamusume") != wstring::npos;
 				}) != replaceAssetNames.end())
 			{
 				auto gameObj = reinterpret_cast<decltype(resources_load_hook)*>(resources_load_orig)(path, type);
@@ -10193,7 +10228,7 @@ namespace
 			}
 		}
 
-		if (u8Name == "TMP Settings"s && config::replace_to_custom_font && fontAssets)
+		if (wName == L"TMP Settings"s && config::replace_to_custom_font && fontAssets)
 		{
 			auto object = reinterpret_cast<decltype(resources_load_hook)*>(resources_load_orig)(path, type);
 			auto fontAssetField = il2cpp_class_get_field_from_name_wrap(object->klass, "m_defaultFontAsset");
@@ -10201,7 +10236,7 @@ namespace
 			return object;
 		}
 
-		if (u8Name.ends_with("dialogoptionhome"))
+		if (wName.ends_with(L"dialogoptionhome"))
 		{
 			auto object = reinterpret_cast<decltype(resources_load_hook)*>(resources_load_orig)(path, type);
 
@@ -10257,7 +10292,7 @@ namespace
 						{
 							auto rectTransform = rectTransformArray->vector[j];
 
-							if (rectTransform && local::wide_u8(uobject_get_name(rectTransform)->chars) == "Content")
+							if (rectTransform && UnityEngine::Object::Name(rectTransform)->chars == L"Content"s)
 							{
 								// InitOptionLayout(rectTransform);
 								break;
@@ -10271,7 +10306,7 @@ namespace
 		}
 
 
-		if (u8Name.ends_with("dialogoptionlivetheater"))
+		if (wName.ends_with(L"dialogoptionlivetheater"))
 		{
 			auto object = reinterpret_cast<decltype(resources_load_hook)*>(resources_load_orig)(path, type);
 
@@ -10309,7 +10344,7 @@ namespace
 						{
 							auto rectTransform = rectTransformArray->vector[j];
 
-							if (rectTransform && local::wide_u8(uobject_get_name(rectTransform)->chars) == "Content")
+							if (rectTransform && UnityEngine::Object::Name(rectTransform)->chars == L"Content"s)
 							{
 								// InitOptionLayout(rectTransform);
 								break;
@@ -10330,8 +10365,8 @@ namespace
 	Il2CppObject* Sprite_get_texture_hook(Il2CppObject* _this)
 	{
 		auto texture2D = reinterpret_cast<decltype(Sprite_get_texture_hook)*>(Sprite_get_texture_orig)(_this);
-		auto uobject_name = uobject_get_name(texture2D);
-		if (!local::wide_u8(uobject_name->chars).empty())
+		auto uobject_name = UnityEngine::Object::Name(texture2D);
+		if (!wstring(uobject_name->chars).empty())
 		{
 			auto newTexture = GetReplacementAssets(
 				uobject_name,
@@ -10426,10 +10461,10 @@ namespace
 	{
 		if (texture)
 		{
-			if (!local::wide_u8(uobject_get_name(texture)->chars).empty())
+			if (!wstring(UnityEngine::Object::Name(texture)->chars).empty())
 			{
 				auto newTexture = GetReplacementAssets(
-					uobject_get_name(texture),
+					UnityEngine::Object::Name(texture),
 					(Il2CppType*)GetRuntimeType("UnityEngine.CoreModule.dll", "UnityEngine", "Texture2D"));
 				if (newTexture)
 				{
@@ -10449,8 +10484,8 @@ namespace
 		auto texture = reinterpret_cast<decltype(Material_get_mainTexture_hook)*>(Material_get_mainTexture_orig)(_this);
 		if (texture)
 		{
-			auto uobject_name = uobject_get_name(texture);
-			if (!local::wide_u8(uobject_name->chars).empty())
+			auto uobject_name = UnityEngine::Object::Name(texture);
+			if (!wstring(uobject_name->chars).empty())
 			{
 				auto newTexture = GetReplacementAssets(
 					uobject_name,
@@ -10469,10 +10504,10 @@ namespace
 	void* Material_SetTextureI4_orig = nullptr;
 	void Material_SetTextureI4_hook(Il2CppObject* _this, int nameID, Il2CppObject* texture)
 	{
-		if (texture && !local::wide_u8(uobject_get_name(texture)->chars).empty())
+		if (texture && !wstring(UnityEngine::Object::Name(texture)->chars).empty())
 		{
 			auto newTexture = GetReplacementAssets(
-				uobject_get_name(texture),
+				UnityEngine::Object::Name(texture),
 				(Il2CppType*)GetRuntimeType("UnityEngine.CoreModule.dll", "UnityEngine", "Texture2D"));
 			if (newTexture)
 			{
@@ -10489,10 +10524,10 @@ namespace
 	Il2CppObject* Material_GetTextureImpl_hook(Il2CppObject* _this, int nameID)
 	{
 		auto texture = reinterpret_cast<decltype(Material_GetTextureImpl_hook)*>(Material_GetTextureImpl_orig)(_this, nameID);
-		if (texture && !local::wide_u8(uobject_get_name(texture)->chars).empty())
+		if (texture && !wstring(UnityEngine::Object::Name(texture)->chars).empty())
 		{
 			auto newTexture = GetReplacementAssets(
-				uobject_get_name(texture),
+				UnityEngine::Object::Name(texture),
 				(Il2CppType*)GetRuntimeType("UnityEngine.CoreModule.dll", "UnityEngine", "Texture2D"));
 			if (newTexture)
 			{
@@ -10507,10 +10542,10 @@ namespace
 	void* Material_SetTextureImpl_orig = nullptr;
 	void Material_SetTextureImpl_hook(Il2CppObject* _this, int nameID, Il2CppObject* texture)
 	{
-		if (texture && !local::wide_u8(uobject_get_name(texture)->chars).empty())
+		if (texture && !wstring(UnityEngine::Object::Name(texture)->chars).empty())
 		{
 			auto newTexture = GetReplacementAssets(
-				uobject_get_name(texture),
+				UnityEngine::Object::Name(texture),
 				(Il2CppType*)GetRuntimeType("UnityEngine.CoreModule.dll", "UnityEngine", "Texture2D"));
 			if (newTexture)
 			{
@@ -10526,10 +10561,10 @@ namespace
 	void* CharaPropRendererAccessor_SetTexture_orig = nullptr;
 	void CharaPropRendererAccessor_SetTexture_hook(Il2CppObject* _this, Il2CppObject* texture)
 	{
-		if (!local::wide_u8(uobject_get_name(texture)->chars).empty())
+		if (!wstring(UnityEngine::Object::Name(texture)->chars).empty())
 		{
 			auto newTexture = GetReplacementAssets(
-				uobject_get_name(texture),
+				UnityEngine::Object::Name(texture),
 				(Il2CppType*)GetRuntimeType("UnityEngine.CoreModule.dll", "UnityEngine", "Texture2D"));
 			if (newTexture)
 			{
@@ -10567,7 +10602,7 @@ namespace
 	void GameObject_GetComponentFastPath_hook(Il2CppObject* _this, Il2CppObject* type, uintptr_t oneFurtherThanResultValue)
 	{
 		/*auto name = il2cpp_class_get_method_from_name_type<Il2CppString* (*)(Il2CppObject*)>(type->klass, "get_FullName", 0)->methodPointer(type);
-		cout << "GameObject_GetComponentFastPath " << local::wide_u8(name->chars) << endl;*/
+		cout << "GameObject_GetComponentFastPath " << wide_u8(name->chars) << endl;*/
 		reinterpret_cast<decltype(GameObject_GetComponentFastPath_hook)*>(GameObject_GetComponentFastPath_orig)(_this, type, oneFurtherThanResultValue);
 		auto helper = CastHelper{};
 		int objSize = sizeof(helper.obj);
@@ -10599,33 +10634,9 @@ namespace
 		}
 	}
 
-	void* ChangeScreenOrientation_orig = nullptr;
-
-	Il2CppObject* ChangeScreenOrientation_hook(ScreenOrientation targetOrientation, bool isForce)
-	{
-		return reinterpret_cast<decltype(ChangeScreenOrientation_hook)*>(ChangeScreenOrientation_orig)(targetOrientation, isForce);
-	}
-
-	void* ChangeScreenOrientationPortraitAsync_orig = nullptr;
-
-	Il2CppObject* ChangeScreenOrientationPortraitAsync_hook()
-	{
-		return il2cpp_symbols::get_method_pointer<Il2CppObject * (*)()>(
-			"umamusume.dll",
-			"Gallop",
-			"Screen", "ChangeScreenOrientationLandscapeAsync", IgnoreNumberOfArguments)();
-	}
-
-	void* get_IsVertical_orig = nullptr;
-
-	bool get_IsVertical_hook()
-	{
-		return true;
-	}
-
 	void* Screen_set_orientation_orig = nullptr;
 
-	void Screen_set_orientation_hook(ScreenOrientation orientation)
+	void Screen_set_orientation_hook(UnityEngine::ScreenOrientation orientation)
 	{
 		if (!config::freeform_window)
 		{
@@ -10636,11 +10647,11 @@ namespace
 
 	void* Screen_RequestOrientation_orig = nullptr;
 
-	void Screen_RequestOrientation_hook(ScreenOrientation orientation)
+	void Screen_RequestOrientation_hook(UnityEngine::ScreenOrientation orientation)
 	{
 		if (config::freeform_window)
 		{
-			reinterpret_cast<decltype(Screen_RequestOrientation_hook)*>(Screen_RequestOrientation_orig)(ScreenOrientation::AutoRotation);
+			reinterpret_cast<decltype(Screen_RequestOrientation_hook)*>(Screen_RequestOrientation_orig)(UnityEngine::ScreenOrientation::AutoRotation);
 
 			auto hWnd = GetHWND();
 
@@ -10707,7 +10718,7 @@ namespace
 
 	void* WaitDeviceOrientation_orig = nullptr;
 
-	Il2CppObject* WaitDeviceOrientation_hook(ScreenOrientation targetOrientation)
+	Il2CppObject* WaitDeviceOrientation_hook(UnityEngine::ScreenOrientation targetOrientation)
 	{
 		if (!config::freeform_window)
 		{
@@ -10715,7 +10726,9 @@ namespace
 				targetOrientation);
 		}
 
-		return nullptr;
+		auto arrayList = il2cpp_object_new(il2cpp_symbols::get_class("mscorlib.dll", "System.Collections", "ArrayList"));
+		il2cpp_runtime_object_init(arrayList);
+		return il2cpp_class_get_method_from_name_type<Il2CppObject * (*)(Il2CppObject*)>(arrayList->klass, "GetEnumerator", 0)->methodPointer(arrayList);
 	}
 
 	Il2CppObject* UIManager_WaitBootSetup_hook(Il2CppObject* _this);
@@ -10724,7 +10737,7 @@ namespace
 
 	void BootSystem_Awake_hook(Il2CppObject* _this)
 	{
-		// Resolution_t r;
+		// UnityEngine::Resolution r;
 		// get_resolution_stub(&r);
 		// last_display_width = r.width;
 		// last_display_height = r.height;
@@ -10738,17 +10751,17 @@ namespace
 
 		StartCoroutine(_this, il2cpp_class_get_method_from_name_type<Il2CppObject * (*)(Il2CppObject*)>(_this->klass, "BootCoroutine", 0)->methodPointer(_this));
 
-		/*auto uiManager = GetSingletonInstance(il2cpp_symbols::get_class("umamusume.dll", "Gallop", "UIManager"));
+		/*auto uiManager = Gallop::UIManager::Instance();
 
-		auto defaultResolution = il2cpp_class_get_method_from_name_type<Vector2_t(*)()>(uiManager->klass, "get_DefaultResolution", 0)->methodPointer();
+		auto defaultResolution = il2cpp_class_get_method_from_name_type<UnityEngine::Vector2(*)()>(uiManager, "get_DefaultResolution", 0)->methodPointer();
 
-		auto canvasScalerList = il2cpp_class_get_method_from_name_type<Il2CppArraySize_t<Il2CppObject*> *(*)(Il2CppObject*)>(uiManager->klass, "GetCanvasScalerList", 0)->methodPointer(uiManager);
+		auto canvasScalerList = il2cpp_class_get_method_from_name_type<Il2CppArraySize_t<Il2CppObject*> *(*)(Il2CppObject*)>(uiManager, "GetCanvasScalerList", 0)->methodPointer(uiManager);
 		for (int i = 0; i < canvasScalerList->max_length; i++)
 		{
 			auto canvasScaler = canvasScalerList->vector[i];
 			if (canvasScaler)
 			{
-				il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, Vector2_t)>(canvasScaler->klass, "set_referenceResolution", 1)->methodPointer(canvasScaler, defaultResolution);
+				il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, UnityEngine::Vector2)>(canvasScaler->klass, "set_referenceResolution", 1)->methodPointer(canvasScaler, defaultResolution);
 
 				if (defaultResolution.x < defaultResolution.y)
 				{
@@ -10763,7 +10776,7 @@ namespace
 			}
 		}
 
-		auto _bgCameraField = il2cpp_class_get_field_from_name_wrap(uiManager->klass, "_bgCamera");
+		auto _bgCameraField = il2cpp_class_get_field_from_name_wrap(uiManager, "_bgCamera");
 		Il2CppObject* _bgCamera;
 		il2cpp_field_get_value(uiManager, _bgCameraField, &_bgCamera);
 
@@ -10777,12 +10790,12 @@ namespace
 		{
 			auto StandaloneWindowResize = il2cpp_symbols::get_class("umamusume.dll", "Gallop", "StandaloneWindowResize");
 
-			int width = il2cpp_symbols::get_method_pointer<int (*)()>("UnityEngine.CoreModule.dll", "UnityEngine", "Screen", "get_width", IgnoreNumberOfArguments)();
-			int height = il2cpp_symbols::get_method_pointer<int (*)()>("UnityEngine.CoreModule.dll", "UnityEngine", "Screen", "get_height", IgnoreNumberOfArguments)();
+			int width = UnityEngine::Screen::width();
+			int height = UnityEngine::Screen::height();
 
 			bool isLandscape = width > height;
 
-			auto changedSize = il2cpp_class_get_method_from_name_type<Vector2_t(*)(float, float, bool)>(StandaloneWindowResize, "GetChangedSize", 3)->methodPointer(isLandscape ? height : width, isLandscape ? width : height, true);
+			auto changedSize = il2cpp_class_get_method_from_name_type<UnityEngine::Vector2(*)(float, float, bool)>(StandaloneWindowResize, "GetChangedSize", 3)->methodPointer(isLandscape ? height : width, isLandscape ? width : height, true);
 
 			if (il2cpp_class_get_method_from_name_type<bool (*)(float, float)>(StandaloneWindowResize, "CheckOverScreenSize", 2)->methodPointer(changedSize.x, changedSize.y))
 			{
@@ -10802,11 +10815,11 @@ namespace
 	}
 
 	Il2CppObject* (*MoviePlayerBase_get_MovieInfo)(Il2CppObject* _this);
-	Il2CppObject* (*MovieManager_GetMovieInfo)(Il2CppObject* _this, MoviePlayerHandle playerHandle);
+	Il2CppObject* (*MovieManager_GetMovieInfo)(Il2CppObject* _this, Cute::Cri::MoviePlayerHandle playerHandle);
 
 	void* MovieManager_SetImageUvRect_orig = nullptr;
 
-	void MovieManager_SetImageUvRect_hook(Il2CppObject* _this, MoviePlayerHandle playerHandle, Rect_t uv)
+	void MovieManager_SetImageUvRect_hook(Il2CppObject* _this, Cute::Cri::MoviePlayerHandle playerHandle, UnityEngine::Rect uv)
 	{
 		auto movieInfo = MovieManager_GetMovieInfo(_this, playerHandle);
 		if (!movieInfo)
@@ -10819,11 +10832,11 @@ namespace
 		unsigned int width, height;
 		il2cpp_field_get_value(movieInfo, widthField, &width);
 		il2cpp_field_get_value(movieInfo, heightField, &height);
-		if (width < height && !is_virt())
+		if (width < height && !Gallop::StandaloneWindowResize::IsVirt())
 		{
-			int rWidth = il2cpp_symbols::get_method_pointer<int (*)()>("UnityEngine.CoreModule.dll", "UnityEngine", "Screen", "get_width", IgnoreNumberOfArguments)();
-			int rHeight = il2cpp_symbols::get_method_pointer<int (*)()>("UnityEngine.CoreModule.dll", "UnityEngine", "Screen", "get_height", IgnoreNumberOfArguments)();
-			if (roundf(ratio_horizontal * (max(1.0f, rHeight * ratio_vertical) * (config::freeform_window ? config::freeform_ui_scale_landscape : config::ui_scale))) == uv.height)
+			int rWidth = UnityEngine::Screen::width();
+			int rHeight = UnityEngine::Screen::height();
+			if (roundf(config::runtime::ratioHorizontal * (max(1.0f, rHeight * config::runtime::ratioVertical) * (config::freeform_window ? config::freeform_ui_scale_landscape : config::ui_scale))) == uv.height)
 			{
 				uv.height = rWidth;
 			}
@@ -10835,7 +10848,7 @@ namespace
 
 	void* MovieManager_SetScreenSize_orig = nullptr;
 
-	void MovieManager_SetScreenSize_hook(Il2CppObject* _this, MoviePlayerHandle playerHandle, Vector2_t screenSize)
+	void MovieManager_SetScreenSize_hook(Il2CppObject* _this, Cute::Cri::MoviePlayerHandle playerHandle, UnityEngine::Vector2 screenSize)
 	{
 		auto movieInfo = MovieManager_GetMovieInfo(_this, playerHandle);
 		if (!movieInfo)
@@ -10848,11 +10861,11 @@ namespace
 		unsigned int width, height;
 		il2cpp_field_get_value(movieInfo, widthField, &width);
 		il2cpp_field_get_value(movieInfo, heightField, &height);
-		if (width < height && !is_virt())
+		if (width < height && !Gallop::StandaloneWindowResize::IsVirt())
 		{
-			int rWidth = il2cpp_symbols::get_method_pointer<int (*)()>("UnityEngine.CoreModule.dll", "UnityEngine", "Screen", "get_width", IgnoreNumberOfArguments)();
-			int rHeight = il2cpp_symbols::get_method_pointer<int (*)()>("UnityEngine.CoreModule.dll", "UnityEngine", "Screen", "get_height", IgnoreNumberOfArguments)();
-			if (roundf(ratio_horizontal * (max(1.0f, rHeight * ratio_vertical) * (config::freeform_window ? config::freeform_ui_scale_landscape : config::ui_scale))) == screenSize.y)
+			int rWidth = UnityEngine::Screen::width();
+			int rHeight = UnityEngine::Screen::height();
+			if (roundf(config::runtime::ratioHorizontal * (max(1.0f, rHeight * config::runtime::ratioVertical) * (config::freeform_window ? config::freeform_ui_scale_landscape : config::ui_scale))) == screenSize.y)
 			{
 				screenSize.y = rWidth;
 			}
@@ -10864,7 +10877,7 @@ namespace
 
 	void* MoviePlayerForUI_AdjustScreenSize_orig = nullptr;
 
-	void MoviePlayerForUI_AdjustScreenSize_hook(Il2CppObject* _this, Vector2_t dispRectWH, bool isPanScan)
+	void MoviePlayerForUI_AdjustScreenSize_hook(Il2CppObject* _this, UnityEngine::Vector2 dispRectWH, bool isPanScan)
 	{
 		auto movieInfo = MoviePlayerBase_get_MovieInfo(_this);
 		if (!movieInfo)
@@ -10879,10 +10892,10 @@ namespace
 		il2cpp_field_get_value(movieInfo, widthField, &width);
 		il2cpp_field_get_value(movieInfo, heightField, &height);
 
-		auto ratio = floorf(static_cast<float>(width) / height * 100) / 100;
+		// auto ratio = floorf(static_cast<float>(width) / height * 100) / 100;
 		auto ratio1 = static_cast<float>(width) / static_cast<float>(height);
 
-		if (!is_virt())
+		if (!Gallop::StandaloneWindowResize::IsVirt())
 		{
 			int rWidth;
 			int rHeight;
@@ -10902,14 +10915,14 @@ namespace
 			rWidth = number1920;
 			rHeight = number1080;
 
-			/*if (roundf(ratio_horizontal * (max(1.0f, rHeight * ratio_vertical) * (config::freeform_window ? config::freeform_ui_scale_landscape : config::ui_scale))) == dispRectWH.y)
+			/*if (roundf(ratio_horizontal * (max(1.0f, rHeight * config::runtime::ratioVertical) * (config::freeform_window ? config::freeform_ui_scale_landscape : config::ui_scale))) == dispRectWH.y)
 			{
 				dispRectWH.y = rWidth;
 				dispRectWH.x = rHeight;
 			}
 			else
 			{*/
-			float scale = min(config::freeform_ui_scale_landscape, max(1.0f, rWidth / ratio_horizontal) * config::freeform_ui_scale_landscape);
+			float scale = min(config::freeform_ui_scale_landscape, max(1.0f, rWidth / config::runtime::ratioHorizontal) * config::freeform_ui_scale_landscape);
 
 			if (roundf(dispRectWH.y * scale) != rHeight)
 			{
@@ -10949,7 +10962,7 @@ namespace
 	void* FrameRateController_ReflectionFrameRate_orig = nullptr;
 	void FrameRateController_ReflectionFrameRate_hook(Il2CppObject* _this)
 	{
-		set_fps_hook(30);
+		UnityEngine::Application::targetFrameRate(30);
 	}
 
 	Il2CppObject* errorDialog = nullptr;
@@ -11033,7 +11046,7 @@ namespace
 									auto workDataManager = GetSingletonInstance(il2cpp_symbols::get_class("umamusume.dll", "Gallop", "WorkDataManager"));
 
 									auto workUserData = il2cpp_class_get_method_from_name_type<Il2CppObject * (*)(Il2CppObject*)>(workDataManager->klass, "get_UserData", 0)->methodPointer(workDataManager);
-									auto viewerIdObscured = il2cpp_class_get_method_from_name_type<ObscuredLong(*)(Il2CppObject*)>(workUserData->klass, "get_ViewerId", 0)->methodPointer(workUserData);
+									auto viewerIdObscured = il2cpp_class_get_method_from_name_type<CodeStage::AntiCheat::ObscuredTypes::ObscuredLong(*)(Il2CppObject*)>(workUserData->klass, "get_ViewerId", 0)->methodPointer(workUserData);
 									auto viewerId = viewerIdObscured.GetDecrypted();
 
 									if (searchId == to_wstring(viewerId))
@@ -11177,12 +11190,12 @@ namespace
 		Il2CppArraySize_t<Il2CppObject*>* voiceButtonList;
 		if (Game::CurrentGameRegion == Game::Region::KOR)
 		{
-			voiceButtonList = il2cpp_resolve_icall_type<Il2CppArraySize_t<Il2CppObject*>*(*)(Il2CppObject*, int, int)>("UnityEngine.Object::FindObjectsByType()")(
-				GetRuntimeType("umamusume.dll", "Gallop", "PartsEpisodeExtraVoiceButton"), 0, 0);
+			voiceButtonList = UnityEngine::Object::FindObjectsByType(
+				GetRuntimeType("umamusume.dll", "Gallop", "PartsEpisodeExtraVoiceButton"), UnityEngine::FindObjectsInactive::Exclude, UnityEngine::FindObjectsSortMode::None);
 		}
 		else
 		{
-			voiceButtonList = il2cpp_resolve_icall_type<Il2CppArraySize_t<Il2CppObject*>*(*)(Il2CppObject*, bool)>("UnityEngine.Object::FindObjectsOfType()")(
+			voiceButtonList = UnityEngine::Object::FindObjectsOfType(
 				GetRuntimeType("umamusume.dll", "Gallop", "PartsEpisodeExtraVoiceButton"), false);
 		}
 
@@ -11517,22 +11530,6 @@ namespace
 			(_this);
 	}
 
-	void* UIManager_GetCameraSizeByOrientation_orig = nullptr;
-
-	float UIManager_GetCameraSizeByOrientation_hook(int orientation)
-	{
-		return 5;
-	}
-
-	void* UIManager_get_DefaultResolution_orig = nullptr;
-
-	Vector2_t UIManager_get_DefaultResolution_hook()
-	{
-		int width = il2cpp_symbols::get_method_pointer<int (*)()>("UnityEngine.CoreModule.dll", "UnityEngine", "Screen", "get_width", IgnoreNumberOfArguments)();
-		int height = il2cpp_symbols::get_method_pointer<int (*)()>("UnityEngine.CoreModule.dll", "UnityEngine", "Screen", "get_height", IgnoreNumberOfArguments)();
-		return Vector2_t{ static_cast<float>(width), static_cast<float>(height) };
-	}
-
 	void* UIManager_WaitBootSetup_orig = nullptr;
 
 	Il2CppObject* UIManager_WaitBootSetup_hook(Il2CppObject* _this)
@@ -11545,7 +11542,7 @@ namespace
 				0)->methodPointer;
 		while (move_next(enumerator)) {}
 
-		auto defaultResolution = UIManager_get_DefaultResolution_hook();
+		auto defaultResolution = Gallop::UIManager::DefaultResolution();
 
 		auto canvasScalerList = il2cpp_class_get_method_from_name_type<Il2CppArraySize_t<Il2CppObject*> *(*)(Il2CppObject*)>(_this->klass, "GetCanvasScalerList", 0)->methodPointer(_this);
 		for (int i = 0; i < canvasScalerList->max_length; i++)
@@ -11553,7 +11550,7 @@ namespace
 			auto canvasScaler = canvasScalerList->vector[i];
 			if (canvasScaler)
 			{
-				il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, Vector2_t)>(canvasScaler->klass, "set_referenceResolution", 1)->methodPointer(canvasScaler, defaultResolution);
+				il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, UnityEngine::Vector2)>(canvasScaler->klass, "set_referenceResolution", 1)->methodPointer(canvasScaler, defaultResolution);
 
 				if (defaultResolution.x < defaultResolution.y)
 				{
@@ -11572,8 +11569,8 @@ namespace
 		Il2CppObject* _bgCamera;
 		il2cpp_field_get_value(_this, _bgCameraField, &_bgCamera);
 
-		il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, Color_t)>(_bgCamera->klass, "set_backgroundColor", 1)->methodPointer(_bgCamera,
-			il2cpp_symbols::get_method_pointer<Color_t(*)()>("UnityEngine.CoreModule.dll", "UnityEngine", "Color", "get_clear", IgnoreNumberOfArguments)());
+		il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, UnityEngine::Color)>(_bgCamera->klass, "set_backgroundColor", 1)->methodPointer(_bgCamera,
+			il2cpp_symbols::get_method_pointer<UnityEngine::Color(*)()>("UnityEngine.CoreModule.dll", "UnityEngine", "Color", "get_clear", IgnoreNumberOfArguments)());
 
 		il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*)>(_this->klass, "AdjustSafeArea", 0)->methodPointer(_this);
 		il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*)>(_this->klass, "CreateRenderTextureFromScreen", 0)->methodPointer(_this);
@@ -11583,7 +11580,7 @@ namespace
 
 	void* Input_get_mousePosition_Injected_orig = nullptr;
 
-	void Input_get_mousePosition_Injected_hook(Vector3_t* out)
+	void Input_get_mousePosition_Injected_hook(UnityEngine::Vector3* out)
 	{
 		reinterpret_cast<decltype(Input_get_mousePosition_Injected_hook)*>(Input_get_mousePosition_Injected_orig)(out);
 	}
@@ -11640,7 +11637,7 @@ namespace
 
 		if (document.HasMember("result_code") && document["result_code"].GetInt() == 100)
 		{
-			return local::u8_wide(document["data"].GetObjectW()["url"].GetString());
+			return u8_wide(document["data"].GetObjectW()["url"].GetString());
 		}
 
 		return L"";
@@ -12061,8 +12058,8 @@ namespace
 
 				char* buf1 = reinterpret_cast<char*>(data) + kIl2CppSizeOfArray;
 				memcpy(buf1, modified.data(), modified.size());
-			}
-		}
+	}
+}
 #endif
 
 		return reinterpret_cast<decltype(UploadHandlerRaw_Create_hook)*>(UploadHandlerRaw_Create_orig)(self, data);
@@ -12102,7 +12099,7 @@ namespace
 
 				char* buf1 = reinterpret_cast<char*>(data) + kIl2CppSizeOfArray;
 				memcpy(buf1, modified.data(), modified.size());
-			}
+	}
 		}
 #endif
 
@@ -12141,7 +12138,7 @@ namespace
 
 				char* buf1 = reinterpret_cast<char*>(data) + kIl2CppSizeOfArray;
 				memcpy(buf1, modified.data(), modified.size());
-			}
+	}
 		}
 #endif
 
@@ -12182,7 +12179,7 @@ namespace
 
 				char* buf1 = reinterpret_cast<char*>(data) + kIl2CppSizeOfArray;
 				memcpy(buf1, modified.data(), modified.size());
-			}
+	}
 		}
 #endif
 
@@ -12271,7 +12268,7 @@ namespace
 					il2cpp_field_get_value(title, textField, &text);
 					if (text)
 					{
-						name = local::wide_u8(text_get_text(text)->chars);
+						name = wide_u8(text_get_text(text)->chars);
 						if (name.empty())
 						{
 							name = "Live (unknown)";
@@ -12296,13 +12293,13 @@ namespace
 			}
 			else
 			{
-				auto uiManager = GetSingletonInstance(il2cpp_symbols::get_class("umamusume.dll", "Gallop", "UIManager"));
+				auto uiManager = Gallop::UIManager::Instance();
 				auto sceneManager = GetSingletonInstance(il2cpp_symbols::get_class("umamusume.dll", "Gallop", "SceneManager"));
 				if (uiManager && sceneManager)
 				{
 					string detail;
 
-					auto CommonHeaderTitle = il2cpp_class_get_method_from_name_type<Il2CppObject * (*)(Il2CppObject*)>(uiManager->klass, "get_CommonHeaderTitle", 0)->methodPointer(uiManager);
+					auto CommonHeaderTitle = uiManager.CommonHeaderTitle();
 
 					if (CommonHeaderTitle)
 					{
@@ -12312,14 +12309,14 @@ namespace
 
 						if (_cacheText)
 						{
-							detail = local::wide_u8(_cacheText->chars);
+							detail = wide_u8(_cacheText->chars);
 						}
 					}
 
 					if (detail.empty())
 					{
 						auto viewId = il2cpp_class_get_method_from_name_type<int (*)(Il2CppObject*)>(sceneManager->klass, "GetCurrentViewId", 0)->methodPointer(sceneManager);
-						auto viewName = local::wide_u8(GetEnumName(GetRuntimeType("umamusume.dll", "Gallop", "SceneDefine/ViewId"), viewId)->chars);
+						auto viewName = wide_u8(GetEnumName(GetRuntimeType("umamusume.dll", "Gallop", "SceneDefine/ViewId"), viewId)->chars);
 						detail = GetViewName(viewName);
 
 						if (detail.empty())
@@ -12353,8 +12350,6 @@ namespace
 		{
 			if (config::cyspring_update_mode != -1)
 			{
-				il2cpp_thread_attach(il2cpp_domain_get());
-
 				auto threadClass = il2cpp_symbols::get_class("umamusume.dll", "Gallop", "CySpringController/CySpringThread");
 
 				auto instanceField = il2cpp_class_get_field_from_name_wrap(threadClass, "_instance");
@@ -12409,16 +12404,57 @@ namespace
 			TickDiscord();
 		}
 
-		if (SystemMediaTransportControlsManager::instance.IsEnabled())
+		auto active = il2cpp_symbols::get_method_pointer<UnityEngine::SceneManagement::Scene(*)()>("UnityEngine.CoreModule.dll", "UnityEngine.SceneManagement", "SceneManager", "GetActiveScene", IgnoreNumberOfArguments)();
+
+		auto handleName = il2cpp_symbols::get_method_pointer<Il2CppString * (*)(int)>("UnityEngine.CoreModule.dll", "UnityEngine.SceneManagement", "Scene", "GetNameInternal", 1)(active.handle);
+
+		if (handleName)
 		{
-			auto active = il2cpp_symbols::get_method_pointer<Scene(*)()>("UnityEngine.CoreModule.dll", "UnityEngine.SceneManagement", "SceneManager", "GetActiveScene", IgnoreNumberOfArguments)();
+			wstring sceneName = handleName->chars;
 
-			auto handleName = il2cpp_symbols::get_method_pointer<Il2CppString * (*)(int)>("UnityEngine.CoreModule.dll", "UnityEngine.SceneManagement", "Scene", "GetNameInternal", 1)(active.handle);
-
-			if (handleName)
+			if (sceneName == L"Live")
 			{
-				wstring sceneName = handleName->chars;
+				auto controller = GetCurrentViewController();
 
+				if (controller && controller->klass->name == "LiveViewController"s)
+				{
+					auto sliderCommon = GetOptionSlider("live_slider");
+
+					auto director = GetSingletonInstance(il2cpp_symbols::get_class("umamusume.dll", "Gallop.Live", "Director"));
+					if (sliderCommon && director)
+					{
+						auto LiveCurrentTime = il2cpp_class_get_method_from_name_type<float (*)(Il2CppObject*)>(director->klass, "get_LiveCurrentTime", 0)->methodPointer(director);
+						auto LiveTotalTime = il2cpp_class_get_method_from_name_type<float (*)(Il2CppObject*)>(director->klass, "get_LiveTotalTime", 0)->methodPointer(director);
+
+						auto textCommon = GetTextCommon("live_slider");
+
+						if (textCommon)
+						{
+							auto timeMin = static_cast<int>(LiveCurrentTime / 60);
+							auto timeSec = static_cast<int>(fmodf(LiveCurrentTime, 60));
+
+							wostringstream str;
+							str << setw(2) << setfill(L'0') << timeSec;
+
+							SetTextCommonText(textCommon, (to_wstring(timeMin) + L":" + str.str()).data());
+						}
+
+						try
+						{
+							il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, float)>(sliderCommon->klass, "set_maxValue", 1)->methodPointer(sliderCommon, LiveTotalTime);
+							il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, float)>(sliderCommon->klass, "SetValueWithoutNotify", 1)->methodPointer(sliderCommon, LiveCurrentTime);
+						}
+						catch (const Il2CppExceptionWrapper& e)
+						{
+							cout << e.ex->klass->name << ": ";
+							wcout << e.ex->message << endl;
+						}
+					}
+				}
+			}
+
+			if (SystemMediaTransportControlsManager::instance.IsEnabled())
+			{
 				if (sceneName == L"Home")
 				{
 					bool hasSetList = false;
@@ -12489,10 +12525,10 @@ namespace
 					if (controller && controller->klass->name == "LiveViewController"s)
 					{
 						auto _stateField = il2cpp_class_get_field_from_name_wrap(controller->klass, "_state");
-						LiveState state;
+						Gallop::LiveViewController::LiveState state;
 						il2cpp_field_get_value(controller, _stateField, &state);
 
-						if (state == LiveState::Play)
+						if (state == Gallop::LiveViewController::LiveState::Play)
 						{
 							SystemMediaTransportControlsManager::instance.PlaybackStatus(winrt::Windows::Media::MediaPlaybackStatus::Playing);
 						}
@@ -12514,8 +12550,11 @@ namespace
 
 		try
 		{
-			auto uiManager = GetSingletonInstance(il2cpp_symbols::get_class("umamusume.dll", "Gallop", "UIManager"));
-			il2cpp_symbols::get_method_pointer<void (*)(Il2CppObject*, Il2CppDelegate*)>("umamusume.dll", "Gallop", "MonoBehaviourExtension", "WaitForEndFrame", 2)(uiManager, tickFrameDelegate);
+			auto uiManager = Gallop::UIManager::Instance();
+			if (uiManager)
+			{
+				il2cpp_symbols::get_method_pointer<void (*)(Il2CppObject*, Il2CppDelegate*)>("umamusume.dll", "Gallop", "MonoBehaviourExtension", "WaitForEndFrame", 2)(uiManager, tickFrameDelegate);
+			}
 		}
 		catch (const Il2CppExceptionWrapper& e)
 		{
@@ -12531,7 +12570,7 @@ namespace
 		if (nCode == HCBT_MINMAX)
 		{
 			if (lParam != SW_RESTORE) {
-				if (il2cpp_resolve_icall_type<bool (*)()>("UnityEngine.Screen::get_fullScreen()")()) {
+				if (UnityEngine::Screen::fullScreen()) {
 					return TRUE;
 				}
 			}
@@ -12546,12 +12585,12 @@ namespace
 			{
 				auto tr = il2cpp_thread_attach(il2cpp_domain_get());
 
-				Resolution_t r;
+				UnityEngine::Resolution r;
 				get_resolution_stub(&r);
 
 				auto target_height = r.height - 100;
 
-				set_resolution(target_height * ratio_vertical, target_height, false);
+				set_resolution(target_height * config::runtime::ratioVertical, target_height, false);
 
 				il2cpp_thread_detach(tr);
 			}).detach();
@@ -12663,25 +12702,13 @@ namespace
 			"UnityEngine.AssetBundleModule.dll", "UnityEngine",
 			"AssetBundle", "LoadAsset", 2);
 
-		get_all_asset_names = il2cpp_symbols::get_method_pointer<Il2CppArraySize * (*)(Il2CppObject * _this)>(
+		get_all_asset_names = il2cpp_symbols::get_method_pointer<Il2CppArraySize_t<Il2CppString*> *(*)(Il2CppObject * _this)>(
 			"UnityEngine.AssetBundleModule.dll", "UnityEngine",
 			"AssetBundle", "GetAllAssetNames", 0);
-
-		uobject_get_name = il2cpp_symbols::get_method_pointer<Il2CppString * (*)(Il2CppObject * uObject)>(
-			"UnityEngine.CoreModule.dll", "UnityEngine",
-			"Object", "GetName", IgnoreNumberOfArguments);
-
-		uobject_set_name = il2cpp_symbols::get_method_pointer<Il2CppString * (*)(Il2CppObject * uObject, Il2CppString * name)>(
-			"UnityEngine.CoreModule.dll", "UnityEngine",
-			"Object", "SetName", 2);
 
 		uobject_IsNativeObjectAlive = il2cpp_symbols::get_method_pointer<bool (*)(Il2CppObject * uObject)>(
 			"UnityEngine.CoreModule.dll", "UnityEngine",
 			"Object", "IsNativeObjectAlive", 1);
-
-		get_unityVersion = il2cpp_symbols::get_method_pointer<Il2CppString * (*)()>(
-			"UnityEngine.CoreModule.dll", "UnityEngine",
-			"Application", "get_unityVersion", IgnoreNumberOfArguments);
 
 		auto populate_with_errors_addr = il2cpp_symbols::get_method_pointer(
 			"UnityEngine.TextRenderingModule.dll",
@@ -12790,13 +12817,6 @@ namespace
 			"CySpringUpdater", "get_SpringUpdateMode", 0
 		);
 
-		auto set_fps_addr = il2cpp_resolve_icall("UnityEngine.Application::set_targetFrameRate(System.Int32)");
-
-		auto wndproc_addr = il2cpp_symbols::get_method_pointer(
-			"umamusume.dll", "Gallop",
-			"StandaloneWindowResize", "WndProc", 4
-		);
-
 		auto StandaloneWindowResize_DisableMaximizebox_addr = il2cpp_symbols::get_method_pointer(
 			"umamusume.dll", "Gallop",
 			"StandaloneWindowResize", "DisableMaximizebox", IgnoreNumberOfArguments
@@ -12860,11 +12880,6 @@ namespace
 			"UnityEngine.CoreModule.dll",
 			"UnityEngine",
 			"Display", "get_renderingHeight", 0);
-
-		is_virt = il2cpp_symbols::get_method_pointer<bool(*)()>(
-			"umamusume.dll", "Gallop",
-			"StandaloneWindowResize", "get_IsVirt", 0
-		);
 
 		get_resolution = reinterpret_cast<decltype(get_resolution)>(il2cpp_resolve_icall("UnityEngine.Screen::get_currentResolution_Injected(UnityEngine.Resolution&)"));
 
@@ -12995,8 +13010,6 @@ namespace
 
 		auto load_zekken_composite_resource_addr = il2cpp_symbols::get_method_pointer("umamusume.dll", "Gallop", "ModelLoader", "LoadZekkenCompositeResourceInternal", 0);
 
-		auto wait_resize_ui_addr = il2cpp_symbols::get_method_pointer("umamusume.dll", "Gallop", "UIManager", "WaitResizeUI", 2);
-
 		auto set_anti_aliasing_addr = il2cpp_resolve_icall("UnityEngine.QualitySettings::set_antiAliasing(System.Int32)");
 
 		auto rendertexture_set_anti_aliasing_addr = il2cpp_resolve_icall("UnityEngine.RenderTexture::set_antiAliasing(System.Int32)");
@@ -13042,13 +13055,10 @@ namespace
 			"umamusume.dll",
 			"Gallop", "BootSystem", "Awake", 0);
 
-		UIManager_GetCanvasScalerList = il2cpp_symbols::get_method_pointer<Il2CppArraySize_t<Il2CppObject*> *(*)(Il2CppObject*)>(
-			"umamusume.dll", "Gallop", "UIManager", "GetCanvasScalerList", 0);
-
 		MoviePlayerBase_get_MovieInfo = il2cpp_symbols::get_method_pointer<Il2CppObject * (*)(Il2CppObject*)>(
 			"Cute.Cri.Assembly.dll", "Cute.Cri", "MoviePlayerBase", "get_MovieInfo", 0);
 
-		MovieManager_GetMovieInfo = il2cpp_symbols::get_method_pointer<Il2CppObject * (*)(Il2CppObject*, MoviePlayerHandle)>(
+		MovieManager_GetMovieInfo = il2cpp_symbols::get_method_pointer<Il2CppObject * (*)(Il2CppObject*, Cute::Cri::MoviePlayerHandle)>(
 			"Cute.Cri.Assembly.dll", "Cute.Cri", "MovieManager", "GetMovieInfo", 1);
 
 		auto PartsEpisodeList_SetupStoryExtraEpisodeList_addr = il2cpp_symbols::get_method_pointer(
@@ -13084,10 +13094,6 @@ namespace
 
 		auto DialogCircleItemDonate_Initialize_addr = il2cpp_symbols::get_method_pointer("umamusume.dll", "Gallop", "DialogCircleItemDonate", "Initialize", 2);
 
-		auto UIManager_GetCameraSizeByOrientation_addr = il2cpp_symbols::get_method_pointer("umamusume.dll", "Gallop", "UIManager", "GetCameraSizeByOrientation", 1);
-
-		auto UIManager_get_DefaultResolution_addr = il2cpp_symbols::get_method_pointer("umamusume.dll", "Gallop", "UIManager", "get_DefaultResolution", IgnoreNumberOfArguments);
-
 		auto UIManager_WaitBootSetup_addr = il2cpp_symbols::get_method_pointer("umamusume.dll", "Gallop", "UIManager", "WaitBootSetup", 0);
 
 		auto Object_Internal_CloneSingleWithParent_addr = il2cpp_resolve_icall("UnityEngine.Object::Internal_CloneSingleWithParent()");
@@ -13111,6 +13117,7 @@ namespace
 		auto load_scene_internal_addr = il2cpp_resolve_icall("UnityEngine.SceneManagement.SceneManager::LoadSceneAsyncNameIndexInternal_Injected(System.String,System.Int32,UnityEngine.SceneManagement.LoadSceneParameters&,System.bool)");
 
 #pragma endregion
+
 		ADD_HOOK(Certification_initDmmPlatformData, "Gallop.Certification::initDmmPlatformData at %p\n");
 
 		ADD_HOOK(TitleViewController_OnClickPushStart, "Gallop.TitleViewController::OnClickPushStart at %p\n");
@@ -13207,7 +13214,7 @@ namespace
 		{
 			try
 			{
-				MasterDB::InitReplacementMasterDB(local::wide_u8(config::replace_text_db_path.data()));
+				MasterDB::InitReplacementMasterDB(wide_u8(config::replace_text_db_path.data()));
 				ADD_HOOK(Plugin_sqlite3_step, "Plugin::sqlite3_step at %p\n");
 				ADD_HOOK(Plugin_sqlite3_reset, "Plugin::sqlite3_reset at %p\n");
 				ADD_HOOK(query_step, "Query::Step at %p\n");
@@ -13232,7 +13239,7 @@ namespace
 
 		// ADD_HOOK(load_scene_internal, "SceneManager::LoadSceneAsyncNameIndexInternal at %p\n");
 
-		ADD_HOOK(BootSystem_Awake, "Gallop.BootSystem::Awake at %p\n");
+		// ADD_HOOK(BootSystem_Awake, "Gallop.BootSystem::Awake at %p\n");
 
 		if (Game::CurrentGameRegion == Game::Region::KOR)
 		{
@@ -13250,7 +13257,7 @@ namespace
 
 		if (config::unlock_size || config::freeform_window)
 		{
-			ADD_HOOK(canvas_scaler_setres, "UnityEngine.UI.CanvasScaler::set_referenceResolution at %p\n");
+			// ADD_HOOK(canvas_scaler_setres, "UnityEngine.UI.CanvasScaler::set_referenceResolution at %p\n");
 			// ADD_HOOK(UIManager_UpdateCanvasScaler, "Gallop.UIManager::UpdateCanvasScaler at %p\n");
 		}
 
@@ -13269,7 +13276,7 @@ namespace
 			ADD_HOOK(FrameRateController_OverrideByMaxFrameRate, "Gallop.FrameRateController::OverrideByMaxFrameRate at %p\n");
 			ADD_HOOK(FrameRateController_ResetOverride, "Gallop.FrameRateController::ResetOverride at %p\n");
 			ADD_HOOK(FrameRateController_ReflectionFrameRate, "Gallop.FrameRateController::ReflectionFrameRate at %p\n");
-			ADD_HOOK(set_fps, "UnityEngine.Application.set_targetFrameRate at %p\n");
+			// ADD_HOOK(set_fps, "UnityEngine.Application.set_targetFrameRate at %p\n");
 		}
 
 		if (config::unlock_size || config::freeform_window)
@@ -13281,8 +13288,6 @@ namespace
 
 		if (config::freeform_window)
 		{
-			ADD_HOOK(UIManager_GetCameraSizeByOrientation, "Gallop.UIManager::GetCameraSizeByOrientation at %p\n");
-			ADD_HOOK(UIManager_get_DefaultResolution, "Gallop.UIManager::get_DefaultResolution at %p\n");
 			ADD_HOOK(StandaloneWindowResize_DisableMaximizebox, "Gallop.StandaloneWindowResize::DisableMaximizebox at %p\n");
 			ADD_HOOK(StandaloneWindowResize_ReshapeAspectRatio, "Gallop.StandaloneWindowResize::ReshapeAspectRatio at %p\n");
 			ADD_HOOK(StandaloneWindowResize_KeepAspectRatio, "Gallop.StandaloneWindowResize::KeepAspectRatio at %p\n");
@@ -13293,10 +13298,10 @@ namespace
 			auto StandaloneWindowResize = il2cpp_symbols::get_class("umamusume.dll", "Gallop", "StandaloneWindowResize");
 			il2cpp_class_get_method_from_name_type<void (*)(bool)>(StandaloneWindowResize, "set_IsPreventReShape", 1)->methodPointer(true);
 
-			int width = il2cpp_symbols::get_method_pointer<int (*)()>("UnityEngine.CoreModule.dll", "UnityEngine", "Screen", "get_width", IgnoreNumberOfArguments)();
-			int height = il2cpp_symbols::get_method_pointer<int (*)()>("UnityEngine.CoreModule.dll", "UnityEngine", "Screen", "get_height", IgnoreNumberOfArguments)();
+			int width = UnityEngine::Screen::width();
+			int height = UnityEngine::Screen::height();
 
-			il2cpp_symbols::get_method_pointer<void (*)(bool)>("umamusume.dll", "Gallop", "StandaloneWindowResize", "set_IsVirt", 1)(width <= height);
+			Gallop::StandaloneWindowResize::IsVirt(width <= height);
 
 			auto GallopScreen = il2cpp_symbols::get_class("umamusume.dll", "Gallop", "Screen");
 
@@ -13342,9 +13347,6 @@ namespace
 
 			auto Screen_RequestOrientation_addr = il2cpp_resolve_icall("UnityEngine.Screen::RequestOrientation(UnityEngine.ScreenOrientation)");
 
-			auto get_IsVertical_addr = il2cpp_symbols::get_method_pointer(
-				"umamusume.dll", "Gallop", "Screen", "get_IsVertical", IgnoreNumberOfArguments);
-
 			auto DeviceOrientationGuide_Show_addr = il2cpp_symbols::get_method_pointer(
 				"umamusume.dll",
 				"Gallop", "DeviceOrientationGuide", "Show", 2);
@@ -13355,10 +13357,9 @@ namespace
 			ADD_HOOK(Camera_set_orthographicSize, "UnityEngine.Camera::set_orthographicSize at %p\n");
 			ADD_HOOK(RectTransform_get_rect_Injected, "UnityEngine.RectTransform::get_rect_Injected at %p\n");
 
-			ADD_HOOK(WaitDeviceOrientation, "Gallop.Screen::WaitDeviceOrientation at %p\n");
+			// ADD_HOOK(WaitDeviceOrientation, "Gallop.Screen::WaitDeviceOrientation at %p\n");
 			ADD_HOOK(Screen_RequestOrientation, "UnityEngine.Screen::RequestOrientation at %p\n");
 			ADD_HOOK(DeviceOrientationGuide_Show, "DeviceOrientationGuide::Show at %p\n");
-			ADD_HOOK(get_IsVertical, "get_IsVertical at %p\n");
 			ADD_HOOK(MoviePlayerForUI_AdjustScreenSize, "MoviePlayerForUI::AdjustScreenSize at %p\n");
 		}
 
@@ -13414,20 +13415,18 @@ namespace
 			notification = nullptr;
 		}*/
 
-		auto uiManager = GetSingletonInstance(il2cpp_symbols::get_class("umamusume.dll", "Gallop", "UIManager"));
-		auto _noticeCanvasField = il2cpp_class_get_field_from_name_wrap(uiManager->klass, "_noticeCanvas");
-		Il2CppObject* _noticeCanvas;
-		il2cpp_field_get_value(uiManager, _noticeCanvasField, &_noticeCanvas);
+		auto uiManager = Gallop::UIManager::Instance();
+		Il2CppObject* _noticeCanvas = uiManager._noticeCanvas();
 
 		auto transform = il2cpp_class_get_method_from_name_type<Il2CppObject * (*)(Il2CppObject*)>(_noticeCanvas->klass, "get_transform", 0)->methodPointer(_noticeCanvas);
 
 		auto object = il2cpp_symbols::get_method_pointer<Il2CppObject * (*)(Il2CppString*, Il2CppObject*)>("UnityEngine.CoreModule.dll", "UnityEngine", "Resources", "Load", 2)(
 			il2cpp_string_new("UI/Parts/Notification"), GetRuntimeType("UnityEngine.CoreModule.dll", "UnityEngine", "GameObject"));
-		auto instantiated = il2cpp_symbols::get_method_pointer<Il2CppObject * (*)(Il2CppObject*, Il2CppObject*, bool)>("UnityEngine.CoreModule.dll", "UnityEngine", "Object", "Internal_CloneSingleWithParent", 3)
-			(object, transform, false);
+		auto instantiated = UnityEngine::Object::Internal_CloneSingleWithParent(object, transform, false);
 		auto helper = new CastHelper{};
 		il2cpp_symbols::get_method_pointer<void (*)(Il2CppObject*, Il2CppObject*, uintptr_t*)>("UnityEngine.CoreModule.dll", "UnityEngine", "GameObject", "GetComponentFastPath", 2)(instantiated, GetRuntimeType("umamusume.dll", "Gallop", "Notification"), &helper->oneFurtherThanResultValue);
 		notification = helper->obj;
+		delete helper;
 
 		auto canvasGroupField = il2cpp_class_get_field_from_name_wrap(notification->klass, "canvasGroup");
 		Il2CppObject* canvasGroup;
@@ -13447,12 +13446,12 @@ namespace
 
 		auto canvasGroupTransform = il2cpp_class_get_method_from_name_type<Il2CppObject * (*)(Il2CppObject*)>(canvasGroup->klass, "get_transform", 0)->methodPointer(canvasGroup);
 
-		auto position = il2cpp_class_get_method_from_name_type<Vector3_t(*)(Il2CppObject*)>(canvasGroupTransform->klass, "get_position", 0)->methodPointer(canvasGroupTransform);
+		auto position = il2cpp_class_get_method_from_name_type<UnityEngine::Vector3(*)(Il2CppObject*)>(canvasGroupTransform->klass, "get_position", 0)->methodPointer(canvasGroupTransform);
 
 		position.x = config::character_system_text_caption_position_x;
 		position.y = config::character_system_text_caption_position_y;
 
-		il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, Vector3_t)>(canvasGroupTransform->klass, "set_position", 1)->methodPointer(canvasGroupTransform, position);
+		il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, UnityEngine::Vector3)>(canvasGroupTransform->klass, "set_position", 1)->methodPointer(canvasGroupTransform, position);
 
 		auto gameObject = il2cpp_symbols::get_method_pointer<Il2CppObject * (*)(Il2CppObject*)>("UnityEngine.CoreModule.dll", "UnityEngine", "Component", "get_gameObject", 0)(notification);
 		if (gameObject)
@@ -13471,7 +13470,7 @@ namespace
 
 	void patch_after_criware()
 	{
-		auto amuid = wstring(il2cpp_resolve_icall_type<Il2CppString * (*)()>("UnityEngine.Application::get_companyName()")()->chars) + L".Gallop";
+		auto amuid = wstring(UnityEngine::Application::companyName()->chars) + L".Gallop";
 
 		DesktopNotificationManagerCompat::RegisterAumidAndComServer(amuid.data(), localize_get_hook(GetTextIdByName(L"Outgame0028"))->chars);
 
@@ -13480,16 +13479,6 @@ namespace
 		unique_ptr<DesktopNotificationHistoryCompat> history;
 		DesktopNotificationManagerCompat::get_History(&history);
 		history->Clear();
-
-		auto get_virt_size_addr = il2cpp_symbols::get_method_pointer(
-			"umamusume.dll", "Gallop",
-			"StandaloneWindowResize", "getOptimizedWindowSizeVirt", 2
-		);
-
-		auto get_hori_size_addr = il2cpp_symbols::get_method_pointer(
-			"umamusume.dll", "Gallop",
-			"StandaloneWindowResize", "getOptimizedWindowSizeHori", 2
-		);
 
 		auto gallop_get_screenwidth_addr = il2cpp_symbols::get_method_pointer(
 			"umamusume.dll", "Gallop",
@@ -13501,27 +13490,12 @@ namespace
 			"Screen", "get_Height", 0
 		);
 
-		auto ChangeScreenOrientation_addr = il2cpp_symbols::get_method_pointer(
-			"umamusume.dll",
-			"Gallop",
-			"Screen", "ChangeScreenOrientation", 2);
-
 		auto Screen_set_orientation_addr = il2cpp_symbols::get_method_pointer(
 			"UnityEngine.CoreModule.dll",
 			"UnityEngine",
 			"Screen", "set_orientation", 1);
 
-
 		auto set_resolution_addr = il2cpp_resolve_icall("UnityEngine.Screen::SetResolution(System.Int32,System.Int32,UnityEngine.FullScreenMode,System.Int32)");
-
-		auto GetLimitSize_addr = il2cpp_symbols::get_method_pointer(
-			"umamusume.dll", "Gallop", "StandaloneWindowResize", "GetLimitSize", IgnoreNumberOfArguments);
-
-		auto ChangeScreenOrientationPortraitAsync_addr = il2cpp_symbols::get_method_pointer(
-			"umamusume.dll", "Gallop", "Screen", "ChangeScreenOrientationPortraitAsync", IgnoreNumberOfArguments);
-
-		auto UIManager_ChangeResizeUIForPC_addr = il2cpp_symbols::get_method_pointer(
-			"umamusume.dll", "Gallop", "UIManager", "ChangeResizeUIForPC", 2);
 
 		auto MovieManager_SetImageUvRect_addr = il2cpp_symbols::get_method_pointer(
 			"Cute.Cri.Assembly.dll", "Cute.Cri", "MovieManager", "SetImageUvRect", 2);
@@ -13654,8 +13628,7 @@ namespace
 				auto names = get_all_asset_names(*it);
 				for (int i = 0; i < names->max_length; i++)
 				{
-					auto u8Name = local::wide_u8(static_cast<Il2CppString*>(names->vector[i])->chars);
-					replaceAssetNames.emplace_back(u8Name);
+					replaceAssetNames.emplace_back(names->vector[i]->chars);
 				}
 			}
 		}
@@ -13711,8 +13684,8 @@ namespace
 
 		if (config::freeform_window)
 		{
-			int width = il2cpp_symbols::get_method_pointer<int (*)()>("UnityEngine.CoreModule.dll", "UnityEngine", "Screen", "get_width", IgnoreNumberOfArguments)();
-			int height = il2cpp_symbols::get_method_pointer<int (*)()>("UnityEngine.CoreModule.dll", "UnityEngine", "Screen", "get_height", IgnoreNumberOfArguments)();
+			int width = UnityEngine::Screen::width();
+			int height = UnityEngine::Screen::height();
 
 			auto GallopScreen = il2cpp_symbols::get_class("umamusume.dll", "Gallop", "Screen");
 
@@ -13720,23 +13693,23 @@ namespace
 			Il2CppObject* SCREEN_ORIENTATION_CATEGORIES;
 			il2cpp_field_static_get_value(SCREEN_ORIENTATION_CATEGORIES_Field, &SCREEN_ORIENTATION_CATEGORIES);
 
+			il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*)>(SCREEN_ORIENTATION_CATEGORIES->klass, "Clear", 0)->methodPointer(SCREEN_ORIENTATION_CATEGORIES);
+
 			if (width < height)
 			{
-				il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*)>(SCREEN_ORIENTATION_CATEGORIES->klass, "Clear", 0)->methodPointer(SCREEN_ORIENTATION_CATEGORIES);
-				il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, ScreenOrientation, ScreenOrientation)>(SCREEN_ORIENTATION_CATEGORIES->klass, "Add", 2)->methodPointer(SCREEN_ORIENTATION_CATEGORIES, ScreenOrientation::Portrait, ScreenOrientation::Portrait);
-				il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, ScreenOrientation, ScreenOrientation)>(SCREEN_ORIENTATION_CATEGORIES->klass, "Add", 2)->methodPointer(SCREEN_ORIENTATION_CATEGORIES, ScreenOrientation::PortraitUpsideDown, ScreenOrientation::Portrait);
-				il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, ScreenOrientation, ScreenOrientation)>(SCREEN_ORIENTATION_CATEGORIES->klass, "Add", 2)->methodPointer(SCREEN_ORIENTATION_CATEGORIES, ScreenOrientation::LandscapeLeft, ScreenOrientation::Portrait);
-				il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, ScreenOrientation, ScreenOrientation)>(SCREEN_ORIENTATION_CATEGORIES->klass, "Add", 2)->methodPointer(SCREEN_ORIENTATION_CATEGORIES, ScreenOrientation::LandscapeRight, ScreenOrientation::Portrait);
-				il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, ScreenOrientation, ScreenOrientation)>(SCREEN_ORIENTATION_CATEGORIES->klass, "Add", 2)->methodPointer(SCREEN_ORIENTATION_CATEGORIES, ScreenOrientation::AutoRotation, ScreenOrientation::Portrait);
+				il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, UnityEngine::ScreenOrientation, UnityEngine::ScreenOrientation)>(SCREEN_ORIENTATION_CATEGORIES->klass, "Add", 2)->methodPointer(SCREEN_ORIENTATION_CATEGORIES, UnityEngine::ScreenOrientation::Portrait, UnityEngine::ScreenOrientation::Portrait);
+				il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, UnityEngine::ScreenOrientation, UnityEngine::ScreenOrientation)>(SCREEN_ORIENTATION_CATEGORIES->klass, "Add", 2)->methodPointer(SCREEN_ORIENTATION_CATEGORIES, UnityEngine::ScreenOrientation::PortraitUpsideDown, UnityEngine::ScreenOrientation::Portrait);
+				il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, UnityEngine::ScreenOrientation, UnityEngine::ScreenOrientation)>(SCREEN_ORIENTATION_CATEGORIES->klass, "Add", 2)->methodPointer(SCREEN_ORIENTATION_CATEGORIES, UnityEngine::ScreenOrientation::LandscapeLeft, UnityEngine::ScreenOrientation::Portrait);
+				il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, UnityEngine::ScreenOrientation, UnityEngine::ScreenOrientation)>(SCREEN_ORIENTATION_CATEGORIES->klass, "Add", 2)->methodPointer(SCREEN_ORIENTATION_CATEGORIES, UnityEngine::ScreenOrientation::LandscapeRight, UnityEngine::ScreenOrientation::Portrait);
+				il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, UnityEngine::ScreenOrientation, UnityEngine::ScreenOrientation)>(SCREEN_ORIENTATION_CATEGORIES->klass, "Add", 2)->methodPointer(SCREEN_ORIENTATION_CATEGORIES, UnityEngine::ScreenOrientation::AutoRotation, UnityEngine::ScreenOrientation::Portrait);
 			}
 			else
 			{
-				il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*)>(SCREEN_ORIENTATION_CATEGORIES->klass, "Clear", 0)->methodPointer(SCREEN_ORIENTATION_CATEGORIES);
-				il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, ScreenOrientation, ScreenOrientation)>(SCREEN_ORIENTATION_CATEGORIES->klass, "Add", 2)->methodPointer(SCREEN_ORIENTATION_CATEGORIES, ScreenOrientation::Portrait, ScreenOrientation::LandscapeLeft);
-				il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, ScreenOrientation, ScreenOrientation)>(SCREEN_ORIENTATION_CATEGORIES->klass, "Add", 2)->methodPointer(SCREEN_ORIENTATION_CATEGORIES, ScreenOrientation::PortraitUpsideDown, ScreenOrientation::LandscapeLeft);
-				il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, ScreenOrientation, ScreenOrientation)>(SCREEN_ORIENTATION_CATEGORIES->klass, "Add", 2)->methodPointer(SCREEN_ORIENTATION_CATEGORIES, ScreenOrientation::LandscapeLeft, ScreenOrientation::LandscapeLeft);
-				il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, ScreenOrientation, ScreenOrientation)>(SCREEN_ORIENTATION_CATEGORIES->klass, "Add", 2)->methodPointer(SCREEN_ORIENTATION_CATEGORIES, ScreenOrientation::LandscapeRight, ScreenOrientation::LandscapeLeft);
-				il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, ScreenOrientation, ScreenOrientation)>(SCREEN_ORIENTATION_CATEGORIES->klass, "Add", 2)->methodPointer(SCREEN_ORIENTATION_CATEGORIES, ScreenOrientation::AutoRotation, ScreenOrientation::LandscapeLeft);
+				il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, UnityEngine::ScreenOrientation, UnityEngine::ScreenOrientation)>(SCREEN_ORIENTATION_CATEGORIES->klass, "Add", 2)->methodPointer(SCREEN_ORIENTATION_CATEGORIES, UnityEngine::ScreenOrientation::Portrait, UnityEngine::ScreenOrientation::LandscapeLeft);
+				il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, UnityEngine::ScreenOrientation, UnityEngine::ScreenOrientation)>(SCREEN_ORIENTATION_CATEGORIES->klass, "Add", 2)->methodPointer(SCREEN_ORIENTATION_CATEGORIES, UnityEngine::ScreenOrientation::PortraitUpsideDown, UnityEngine::ScreenOrientation::LandscapeLeft);
+				il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, UnityEngine::ScreenOrientation, UnityEngine::ScreenOrientation)>(SCREEN_ORIENTATION_CATEGORIES->klass, "Add", 2)->methodPointer(SCREEN_ORIENTATION_CATEGORIES, UnityEngine::ScreenOrientation::LandscapeLeft, UnityEngine::ScreenOrientation::LandscapeLeft);
+				il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, UnityEngine::ScreenOrientation, UnityEngine::ScreenOrientation)>(SCREEN_ORIENTATION_CATEGORIES->klass, "Add", 2)->methodPointer(SCREEN_ORIENTATION_CATEGORIES, UnityEngine::ScreenOrientation::LandscapeRight, UnityEngine::ScreenOrientation::LandscapeLeft);
+				il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, UnityEngine::ScreenOrientation, UnityEngine::ScreenOrientation)>(SCREEN_ORIENTATION_CATEGORIES->klass, "Add", 2)->methodPointer(SCREEN_ORIENTATION_CATEGORIES, UnityEngine::ScreenOrientation::AutoRotation, UnityEngine::ScreenOrientation::LandscapeLeft);
 			}
 		}
 
@@ -13746,20 +13719,14 @@ namespace
 			{
 				ADD_HOOK(set_resolution, "UnityEngine.Screen.SetResolution(int, int, FullScreenMode, int) at %p\n");
 			}
-			ADD_HOOK(UIManager_ChangeResizeUIForPC, "Gallop.UIManager::ChangeResizeUIForPC at %p\n");
+			// ADD_HOOK(UIManager_ChangeResizeUIForPC, "Gallop.UIManager::ChangeResizeUIForPC at %p\n");
 		}
 
 		if (config::unlock_size || config::freeform_window)
 		{
-			// break 1080p size limit
-			ADD_HOOK(get_virt_size, "Gallop.StandaloneWindowResize.getOptimizedWindowSizeVirt at %p \n");
-			ADD_HOOK(get_hori_size, "Gallop.StandaloneWindowResize.getOptimizedWindowSizeHori at %p \n");
-
 			// remove fixed 1080p render resolution
 			ADD_HOOK(gallop_get_screenheight, "Gallop.Screen::get_Height at %p\n");
 			ADD_HOOK(gallop_get_screenwidth, "Gallop.Screen::get_Width at %p\n");
-
-			ADD_HOOK(GetLimitSize, "Gallop.StandaloneWindowResize::GetChangedSize at %p\n");
 
 			auto display = display_get_main();
 			if (config::initial_width > 72 && config::initial_height > 72)
@@ -13771,8 +13738,8 @@ namespace
 
 				if (config::initial_width < config::initial_height)
 				{
-					ratio_vertical = static_cast<float>(config::initial_width) / static_cast<float>(config::initial_height);
-					ratio_horizontal = static_cast<float>(config::initial_height) / static_cast<float> (config::initial_width);
+					config::runtime::ratioVertical = static_cast<float>(config::initial_width) / static_cast<float>(config::initial_height);
+					config::runtime::ratioHorizontal = static_cast<float>(config::initial_height) / static_cast<float> (config::initial_width);
 
 					if (config::unlock_size_use_system_resolution)
 					{
@@ -13787,8 +13754,8 @@ namespace
 				}
 				else
 				{
-					ratio_vertical = static_cast<float>(config::initial_height) / static_cast<float>(config::initial_width);
-					ratio_horizontal = static_cast<float>(config::initial_width) / static_cast<float>(config::initial_height);
+					config::runtime::ratioVertical = static_cast<float>(config::initial_height) / static_cast<float>(config::initial_width);
+					config::runtime::ratioHorizontal = static_cast<float>(config::initial_width) / static_cast<float>(config::initial_height);
 
 					if (config::unlock_size_use_system_resolution)
 					{
@@ -13857,41 +13824,41 @@ namespace
 				if (config::initial_width < config::initial_height)
 				{
 					last_hriz_window_width = last_display_height - 400;
-					last_hriz_window_height = last_hriz_window_width / ratio_horizontal;
+					last_hriz_window_height = last_hriz_window_width / config::runtime::ratioHorizontal;
 
 					if (last_hriz_window_height >= get_system_height(display))
 					{
 						last_hriz_window_height = get_system_height(display) - 400;
-						last_hriz_window_width = last_hriz_window_height * ratio_horizontal;
+						last_hriz_window_width = last_hriz_window_height * config::runtime::ratioHorizontal;
 					}
 
 					last_virt_window_height = last_display_width - 400;
-					last_virt_window_width = last_virt_window_height * ratio_vertical;
+					last_virt_window_width = last_virt_window_height * config::runtime::ratioVertical;
 
 					if (last_virt_window_height >= get_system_height(display))
 					{
 						last_virt_window_height = get_system_height(display) - 400;
-						last_virt_window_width = last_virt_window_height * ratio_vertical;
+						last_virt_window_width = last_virt_window_height * config::runtime::ratioVertical;
 					}
 				}
 				else
 				{
 					last_hriz_window_width = last_display_width - 400;
-					last_hriz_window_height = last_hriz_window_width / ratio_horizontal;
+					last_hriz_window_height = last_hriz_window_width / config::runtime::ratioHorizontal;
 
 					if (last_hriz_window_height >= get_system_height(display))
 					{
 						last_hriz_window_height = get_system_height(display) - 400;
-						last_hriz_window_width = last_hriz_window_height * ratio_horizontal;
+						last_hriz_window_width = last_hriz_window_height * config::runtime::ratioHorizontal;
 					}
 
 					last_virt_window_height = last_display_height - 400;
-					last_virt_window_width = last_virt_window_height * ratio_vertical;
+					last_virt_window_width = last_virt_window_height * config::runtime::ratioVertical;
 
 					if (last_virt_window_height >= get_system_height(display))
 					{
 						last_virt_window_height = get_system_height(display) - 400;
-						last_virt_window_width = last_virt_window_height * ratio_vertical;
+						last_virt_window_width = last_virt_window_height * config::runtime::ratioVertical;
 					}
 				}
 			}
@@ -13907,9 +13874,9 @@ namespace
 				else
 				{
 					last_hriz_window_width = last_display_width - 400;
-					last_hriz_window_height = last_hriz_window_width / ratio_horizontal;
+					last_hriz_window_height = last_hriz_window_width / config::runtime::ratioHorizontal;
 					last_virt_window_height = last_display_height - 400;
-					last_virt_window_width = last_virt_window_height * ratio_vertical;
+					last_virt_window_width = last_virt_window_height * config::runtime::ratioVertical;
 				}
 			}
 
@@ -13920,7 +13887,7 @@ namespace
 			}
 		}
 
-		/*auto uiManager = GetSingletonInstance(il2cpp_symbols::get_class("umamusume.dll", "Gallop", "UIManager"));
+		/*auto uiManager = Gallop::UIManager::Instance();
 		auto mainCanvas = il2cpp_symbols::get_method_pointer<Il2CppObject * (*)()>("umamusume.dll", "Gallop", "UIManager", "get_MainCanvas", IgnoreNumberOfArguments)();
 		auto camera = il2cpp_class_get_method_from_name_type<Il2CppObject * (*)(Il2CppObject*)>(mainCanvas->klass, "get_worldCamera", 0)->methodPointer(mainCanvas);
 
@@ -13930,7 +13897,7 @@ namespace
 		wcout << il2cpp_class_get_method_from_name_type<Il2CppString * (*)(Il2CppObject*)>(gameObject->klass, "get_tag", 0)->methodPointer(gameObject)->chars << endl;
 		il2cpp_class_get_method_from_name_type<Il2CppString* (*)(Il2CppObject*, Il2CppString*)>(gameObject->klass, "set_tag", 1)->methodPointer(gameObject, il2cpp_string_new("MainCamera"));*/
 
-		fullScreenFl = il2cpp_resolve_icall_type<bool (*)()>("UnityEngine.Screen::get_fullScreen()")();
+		fullScreenFl = UnityEngine::Screen::fullScreen();
 
 		if (config::discord_rich_presence)
 		{
@@ -13942,7 +13909,7 @@ namespace
 
 		auto activeSceneChangedField = il2cpp_class_get_field_from_name_wrap(sceneManagerClass, "activeSceneChanged");
 
-		auto action = CreateDelegateWithClassStatic(il2cpp_class_from_type(activeSceneChangedField->type), *([](void*, Scene scene, Scene scene1)
+		auto action = CreateDelegateWithClassStatic(il2cpp_class_from_type(activeSceneChangedField->type), *([](void*, UnityEngine::SceneManagement::Scene scene, UnityEngine::SceneManagement::Scene scene1)
 			{
 				auto hWnd = GetHWND();
 
@@ -13955,7 +13922,7 @@ namespace
 
 				isPortraitBeforeFullscreen = false;
 
-				auto uiManager = GetSingletonInstance(il2cpp_symbols::get_class("umamusume.dll", "Gallop", "UIManager"));
+				auto uiManager = Gallop::UIManager::Instance();
 
 				if (config::resolution_3d_scale != 1.0f)
 				{
@@ -14003,7 +13970,7 @@ namespace
 					}
 				}
 
-				auto active = il2cpp_symbols::get_method_pointer<Scene(*)()>("UnityEngine.CoreModule.dll", "UnityEngine.SceneManagement", "SceneManager", "GetActiveScene", IgnoreNumberOfArguments)();
+				auto active = il2cpp_symbols::get_method_pointer<UnityEngine::SceneManagement::Scene(*)()>("UnityEngine.CoreModule.dll", "UnityEngine.SceneManagement", "SceneManager", "GetActiveScene", IgnoreNumberOfArguments)();
 
 				auto handleName = il2cpp_symbols::get_method_pointer<Il2CppString * (*)(int)>("UnityEngine.CoreModule.dll", "UnityEngine.SceneManagement", "Scene", "GetNameInternal", 1)(active.handle);
 
@@ -14015,12 +13982,12 @@ namespace
 				/*Il2CppArraySize_t<Il2CppObject*>* CriWareInitializerList;
 				if (Game::CurrentGameRegion == Game::Region::KOR)
 				{
-					CriWareInitializerList = il2cpp_resolve_icall_type<Il2CppArraySize_t<Il2CppObject*>*(*)(Il2CppObject*, int, int)>("UnityEngine.Object::FindObjectsByType()")(
-						GetRuntimeType("CriMw.CriWare.Runtime.dll", "CriWare", "CriWareInitializer"), 1, 0);
+					CriWareInitializerList = UnityEngine::Object::FindObjectsByType(
+						GetRuntimeType("CriMw.CriWare.Runtime.dll", "CriWare", "CriWareInitializer"), UnityEngine::FindObjectsInactive::Include, UnityEngine::FindObjectsSortMode::None);
 				}
 				else
 				{
-					CriWareInitializerList = il2cpp_resolve_icall_type<Il2CppArraySize_t<Il2CppObject*>*(*)(Il2CppObject*, bool)>("UnityEngine.Object::FindObjectsOfType()")(
+					CriWareInitializerList = UnityEngine::Object::FindObjectsOfType(
 						GetRuntimeType("CriMw.CriWare.Runtime.dll", "CriWare", "CriWareInitializer"), true);
 				}
 
@@ -14045,7 +14012,7 @@ namespace
 							Il2CppString* key;
 							il2cpp_field_get_value(decrypterConfig, keyField, &key);
 
-							cout << "key: " << local::wide_u8(key->chars) << endl;
+							cout << "key: " << wide_u8(key->chars) << endl;
 						}
 					}
 				}*/
@@ -14201,9 +14168,7 @@ namespace
 
 						if (uiManager)
 						{
-							auto _bgCameraField = il2cpp_class_get_field_from_name_wrap(uiManager->klass, "_bgCamera");
-							Il2CppObject* _bgCamera;
-							il2cpp_field_get_value(uiManager, _bgCameraField, &_bgCamera);
+							Il2CppObject* _bgCamera = uiManager._bgCamera();
 
 							/*il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, Color_t)>(_bgCamera->klass, "set_backgroundColor", 1)->methodPointer(_bgCamera,
 								il2cpp_symbols::get_method_pointer<Color_t(*)()>("UnityEngine.CoreModule.dll", "UnityEngine", "Color", "get_clear", IgnoreNumberOfArguments)());*/
@@ -14212,28 +14177,28 @@ namespace
 
 					if (config::freeform_window)
 					{
-						int width = il2cpp_symbols::get_method_pointer<int (*)()>("UnityEngine.CoreModule.dll", "UnityEngine", "Screen", "get_width", IgnoreNumberOfArguments)();
-						int height = il2cpp_symbols::get_method_pointer<int (*)()>("UnityEngine.CoreModule.dll", "UnityEngine", "Screen", "get_height", IgnoreNumberOfArguments)();
+						int width = UnityEngine::Screen::width();
+						int height = UnityEngine::Screen::height();
 
 						bool isVirt = width < height;
-						il2cpp_symbols::get_method_pointer<void (*)(bool)>("umamusume.dll", "Gallop", "StandaloneWindowResize", "set_IsVirt", 1)(isVirt);
+						Gallop::StandaloneWindowResize::IsVirt(isVirt);
 					}
 
 					if (uiManager && (config::unlock_size || config::freeform_window))
 					{
-						int width = il2cpp_symbols::get_method_pointer<int (*)()>("UnityEngine.CoreModule.dll", "UnityEngine", "Screen", "get_width", IgnoreNumberOfArguments)();
-						int height = il2cpp_symbols::get_method_pointer<int (*)()>("UnityEngine.CoreModule.dll", "UnityEngine", "Screen", "get_height", IgnoreNumberOfArguments)();
+						int width = UnityEngine::Screen::width();
+						int height = UnityEngine::Screen::height();
 
 						bool isVirt = width < height;
 
 						if (config::freeform_window)
 						{
-							UIManager_ChangeResizeUIForPC_hook(uiManager, isVirt ? min(last_virt_window_width, last_virt_window_height) : max(last_hriz_window_width, last_hriz_window_height),
+							uiManager.ChangeResizeUIForPC(isVirt ? min(last_virt_window_width, last_virt_window_height) : max(last_hriz_window_width, last_hriz_window_height),
 								isVirt ? max(last_virt_window_width, last_virt_window_height) : min(last_hriz_window_width, last_hriz_window_height));
 						}
 						else
 						{
-							UIManager_ChangeResizeUIForPC_hook(uiManager, isVirt ? min(last_display_width, last_display_height) : max(last_display_width, last_display_height),
+							uiManager.ChangeResizeUIForPC(isVirt ? min(last_display_width, last_display_height) : max(last_display_width, last_display_height),
 								isVirt ? max(last_display_width, last_display_height) : min(last_display_width, last_display_height));
 						}
 					}
@@ -14357,7 +14322,7 @@ namespace
 
 				if (config::discord_rich_presence && discord)
 				{
-					auto detail = GetSceneName(local::wide_u8(sceneName));
+					auto detail = GetSceneName(wide_u8(sceneName));
 
 					discord::Activity activity{};
 					activity.GetAssets().SetLargeImage("umamusume");
@@ -14616,16 +14581,15 @@ BOOL InternetCrackUrlW_hook(
 	_Inout_ LPURL_COMPONENTSW lpUrlComponents
 )
 {
-	auto text = local::wide_u8(lpszUrl);
-	replaceAll(text, "windows", "android");
+	auto newUrlW = wstring(lpszUrl);
+	replaceAll(newUrlW, L"windows", L"android");
 
-	auto newUrlW = local::u8_wide(text);
 	wchar_t* copy = new wchar_t[newUrlW.size() + 1];
 	wcscpy(copy, newUrlW.data());
 
 	lpszUrl = copy;
 
-	dwUrlLength = text.size();
+	dwUrlLength = newUrlW.size();
 
 	return reinterpret_cast<decltype(InternetCrackUrlW_hook)*>(InternetCrackUrlW_orig)(lpszUrl, dwUrlLength, dwFlags, lpUrlComponents);
 }
@@ -14783,7 +14747,7 @@ FindFirstFileExW_hook(
 }
 
 void* GetModuleHandleW_orig = nullptr;
-HMODULE
+static HMODULE
 WINAPI
 GetModuleHandleW_hook(
 	_In_opt_ LPCWSTR lpModuleName
@@ -14791,35 +14755,41 @@ GetModuleHandleW_hook(
 {
 	if (lpModuleName && lpModuleName == L"version.dll"s)
 	{
-		return nullptr;
+		return proxy::version;
 	}
 	return reinterpret_cast<decltype(GetModuleHandleW)*>(GetModuleHandleW_orig)(lpModuleName);
 }
 
 void* WinVerifyTrust_addr = nullptr;
 void* WinVerifyTrust_orig = nullptr;
-LONG WINAPI WinVerifyTrust_hook(HWND hwnd, GUID* pgActionID, LPVOID pWVTData)
+static LONG WINAPI WinVerifyTrust_hook(HWND hwnd, GUID* pgActionID, LPVOID pWVTData)
 {
 	auto data = reinterpret_cast<WINTRUST_DATA*>(pWVTData);
 
-	wstring path = data->pFile->pcwszFilePath;
-	transform(path.begin(), path.end(), path.begin(), [](auto c)
-		{
-			return tolower(c);
-		}
-	);
-	if (path.find(L"version.dll") != wstring::npos)
+	if (data->pFile)
 	{
-		wstring dll_path;
-		dll_path.resize(MAX_PATH);
-		dll_path.resize(GetSystemDirectoryW(dll_path.data(), MAX_PATH));
+		if (data->pFile->pcwszFilePath)
+		{
+			wstring path = data->pFile->pcwszFilePath;
+			transform(path.begin(), path.end(), path.begin(), [](auto c)
+				{
+					return tolower(c);
+				}
+			);
+			if (path.find(L"version.dll") != wstring::npos)
+			{
+				wstring dll_path;
+				dll_path.resize(MAX_PATH);
+				dll_path.resize(GetSystemDirectoryW(dll_path.data(), MAX_PATH));
 
-		dll_path += LR"(\version.dll)"s;
-		data->pFile->pcwszFilePath = dll_path.data();
+				dll_path += LR"(\version.dll)"s;
+				data->pFile->pcwszFilePath = dll_path.data();
 
-		MH_DisableHook(WinVerifyTrust_addr);
+				MH_DisableHook(WinVerifyTrust_addr);
 
-		return reinterpret_cast<decltype(WinVerifyTrust)*>(WinVerifyTrust_addr)(hwnd, pgActionID, pWVTData);
+				return reinterpret_cast<decltype(WinVerifyTrust)*>(WinVerifyTrust_addr)(hwnd, pgActionID, pWVTData);
+			}
+		}
 	}
 
 	return reinterpret_cast<decltype(WinVerifyTrust)*>(WinVerifyTrust_orig)(hwnd, pgActionID, pWVTData);
@@ -14850,7 +14820,7 @@ bool init_hook_base()
 		MH_CreateHook(InternetCrackUrlW, InternetCrackUrlW_hook, &InternetCrackUrlW_orig);
 		MH_EnableHook(InternetCrackUrlW);
 #endif
-	}
+}
 
 	MH_CreateHook(FindFirstFileExW, FindFirstFileExW_hook, &FindFirstFileExW_orig);
 	MH_EnableHook(FindFirstFileExW);

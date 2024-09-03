@@ -4,7 +4,9 @@
 
 #include "il2cpp/il2cpp-tabledefs.h"
 #include "il2cpp/il2cpp-api-functions.hpp"
-#include "local/local.hpp"
+#include "string_utils.hpp"
+
+#include "scripts/UnityEngine.CoreModule/UnityEngine/BeforeRenderHelper.hpp"
 
 namespace Unity
 {
@@ -406,13 +408,13 @@ namespace Unity
 			return;
 		}
 
-		auto productName = local::wide_u8(il2cpp_resolve_icall_type<Il2CppString * (*)()>("UnityEngine.Application::get_productName")()->chars);
+		auto productName = wide_u8(il2cpp_resolve_icall_type<Il2CppString * (*)()>("UnityEngine.Application::get_productName")()->chars);
 
-		auto version = local::wide_u8(il2cpp_symbols::get_method_pointer<Il2CppString * (*)()>(
+		auto version = wide_u8(il2cpp_symbols::get_method_pointer<Il2CppString * (*)()>(
 			"UnityEngine.CoreModule.dll", "UnityEngine",
 			"Application", "get_version", IgnoreNumberOfArguments)()->chars);
 
-		auto unityVersion = local::wide_u8(il2cpp_symbols::get_method_pointer<Il2CppString * (*)()>(
+		auto unityVersion = wide_u8(il2cpp_symbols::get_method_pointer<Il2CppString * (*)()>(
 			"UnityEngine.CoreModule.dll", "UnityEngine",
 			"Application", "get_unityVersion", IgnoreNumberOfArguments)()->chars);
 
@@ -503,7 +505,7 @@ namespace Unity
 
 		auto itemField = il2cpp_class_get_field_from_name(s_OrderBlocks->klass, "_items");
 
-		Il2CppArraySize_t<OrderBlock>* array1;
+		Il2CppArraySize_t<UnityEngine::BeforeRenderHelper::OrderBlock>* array1;
 		il2cpp_field_get_value(s_OrderBlocks, itemField, &array1);
 
 		auto orderClass = il2cpp_symbols::get_class("UnityEngine.CoreModule.dll", "UnityEngine", "BeforeRenderHelper/OrderBlock");
@@ -514,7 +516,7 @@ namespace Unity
 			il2cpp_array_setref(array2, i, &array1->vector[i]);
 		}
 
-		auto orderBlock = reinterpret_cast<OrderBlock*>(il2cpp_object_new(orderClass));
+		auto orderBlock = reinterpret_cast<UnityEngine::BeforeRenderHelper::OrderBlock*>(il2cpp_object_new(orderClass));
 		orderBlock->order = 0;
 		orderBlock->callback = CreateUnityActionStatic(*([]()
 			{
@@ -822,7 +824,11 @@ namespace Unity
 			auto allUserPaths = vector<const char*>{ "/user/hand/left" , "/user/hand/right" };
 
 			string name = action.name;
-			transform(name.begin(), name.end(), name.begin(), tolower);
+			transform(name.begin(), name.end(), name.begin(), [](auto c)
+				{
+					return tolower(c);
+				}
+			);
 
 			auto actionId = Internal_CreateAction(actionSetId, name.data(), action.localizedName, action.type, guid, allUserPaths.data(), allUserPaths.size(), action.usages.data(), action.usages.size());
 

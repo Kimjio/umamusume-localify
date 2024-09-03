@@ -8,12 +8,99 @@ Il2CppDefaults il2cpp_defaults;
 
 char* il2cpp_array_addr_with_size(void* array, int32_t size, uintptr_t idx)
 {
-	return ((char*)array) + kIl2CppSizeOfArray + size * idx;
+	return reinterpret_cast<char*>(array) + kIl2CppSizeOfArray + size * idx;
+}
+
+Il2CppString* il2cpp_string_new16(const wchar_t* value)
+{
+	return il2cpp_string_new_utf16(value, wcslen(value));
+}
+
+#include "config/config.hpp"
+#include "string_utils.hpp"
+
+FieldInfo* il2cpp_class_get_field_from_name_wrap(Il2CppClass* klass, const char* name)
+{
+	if (config::code_map.IsNull() || config::code_map.HasParseError())
+	{
+		return il2cpp_class_get_field_from_name(klass, name);
+	}
+	string className = string(klass->namespaze).append(".").append(klass->name);
+
+	if (config::code_map.HasMember("!common"))
+	{
+		auto commonMap = config::code_map["!common"].GetObjectW();
+		if (commonMap.HasMember(name))
+		{
+			auto field = il2cpp_class_get_field_from_name(klass, commonMap[name].GetString());
+			if (field)
+			{
+				return field;
+			}
+		}
+	}
+
+	if (!config::code_map.HasMember(className.data()))
+	{
+		return il2cpp_class_get_field_from_name(klass, name);
+	}
+
+	auto classMap = config::code_map[className.data()].GetObjectW();
+
+	if (classMap.HasMember(name))
+	{
+		auto field = il2cpp_class_get_field_from_name(klass, classMap[name].GetString());
+		if (field)
+		{
+			return field;
+		}
+	}
+
+	if (classMap.HasMember((name + ".index"s).data()))
+	{
+		void* iter = nullptr;
+		int i = 0;
+		int index = classMap[(name + ".index"s).data()].GetInt();
+		while (FieldInfo* field = il2cpp_class_get_fields(klass, &iter))
+		{
+			if (index == i)
+			{
+				return field;
+			}
+			i++;
+		}
+	}
+
+	if (classMap.HasMember("!extends"))
+	{
+		auto parentName = classMap["!extends"].GetString();
+		auto parentMap = config::code_map[parentName].GetObjectW();
+		auto parentClass = klass->parent;
+
+		if (parentMap.HasMember((name + ".index"s).data()))
+		{
+			void* iter = nullptr;
+			int i = 0;
+			int index = parentMap[(name + ".index"s).data()].GetInt();
+			while (FieldInfo* field = il2cpp_class_get_fields(parentClass, &iter))
+			{
+				if (index == i)
+				{
+					return field;
+				}
+				i++;
+			}
+		}
+	}
+
+	return il2cpp_class_get_field_from_name(klass, name);;
 }
 
 namespace il2cpp_symbols
 {
 	Il2CppDomain* il2cpp_domain = nullptr;
+
+	std::vector<std::function<void()>> init_callbacks;
 
 	void init_functions(HMODULE game_module);
 	void init_defaults();
@@ -22,6 +109,14 @@ namespace il2cpp_symbols
 	{
 		init_functions(game_module);
 		il2cpp_domain = il2cpp_domain_get();
+	}
+
+	void call_init_callbacks()
+	{
+		for (auto& init_callback : init_callbacks)
+		{
+			init_callback();
+		}
 	}
 
 	void init_functions(HMODULE game_module)

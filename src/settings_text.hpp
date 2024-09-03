@@ -123,6 +123,11 @@ namespace LocalifySettings
 			return isKor ? L"라이브 시어터 전체 해방" : L"ライブシアター全体解放";
 		}
 
+		if (id == "live_slider_always_show")
+		{
+			return isKor ? L"재생 슬라이더 항상 표시" : L"プレイスライダーを常に表示";
+		}
+
 		if (id == "unlock_live_chara_info")
 		{
 			return isKor ? L"미해금/미해방/미공개 곡 및 우마무스메와 드레스를 사용 가능하게 변경합니다." : L"未解禁/未解放/未公開曲及びウマ娘とドレスを使えるように変更します。";

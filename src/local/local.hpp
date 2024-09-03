@@ -6,11 +6,6 @@
 
 namespace local
 {
-	std::string wide_u8(const std::wstring& str);
-	std::string u16_u8(const std::u16string& str);
-	std::wstring u8_wide(const std::string& str);
-	std::string wide_acp(const std::wstring& str);
-	std::wstring acp_wide(const std::string& str);
 	void load_textdb(const std::vector<std::wstring> *dicts);
 	void load_textId_textdb(const std::wstring& dict);
 	void reload_textdb(const std::vector<std::wstring>* dicts);

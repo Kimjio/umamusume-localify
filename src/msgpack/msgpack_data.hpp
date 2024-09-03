@@ -13,7 +13,7 @@
 
 #include "il2cpp/il2cpp_symbols.hpp"
 #include "il2cpp/il2cpp-api-functions.hpp"
-#include "local/local.hpp"
+#include "string_utils.hpp"
 #include "game.hpp"
 
 #include "masterdb/masterdb.hpp"
@@ -21,6 +21,8 @@
 #include "hook.h"
 
 #include "notification/DesktopNotificationManagerCompat.h"
+
+#include "scripts/UnityEngine.CoreModule/UnityEngine/Rect.hpp"
 
 using namespace std;
 using namespace msgpack11;
@@ -35,6 +37,13 @@ namespace MsgPackData
 
 	Il2CppString* GetIconPath(int unitId)
 	{
+		auto newMethod = il2cpp_class_get_method_from_name_type<Il2CppString * (*)(Il2CppObject*, int, int)>(il2cpp_symbols::get_class("umamusume.dll", "Gallop", "PushNotificationManager"), "createFavIconFilePath", 2);
+
+		if (newMethod)
+		{
+			return newMethod->methodPointer(nullptr, unitId, 2);
+		}
+
 		return il2cpp_class_get_method_from_name_type<Il2CppString * (*)(Il2CppObject*, int)>(il2cpp_symbols::get_class("umamusume.dll", "Gallop", "PushNotificationManager"), "createFavIconFilePath", 1)->methodPointer(nullptr, unitId);
 	}
 
@@ -55,7 +64,7 @@ namespace MsgPackData
 		auto readableTexture = il2cpp_object_new(il2cpp_symbols::get_class("UnityEngine.CoreModule.dll", "UnityEngine", "Texture2D"));
 		il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, int, int)>(readableTexture->klass, ".ctor", 2)->methodPointer(readableTexture, width, height);
 
-		il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, Rect_t, int, int)>(readableTexture->klass, "ReadPixels", 3)->methodPointer(readableTexture, Rect_t{ 0, 0, static_cast<float>(width), static_cast<float>(height) }, 0, 0);
+		il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, UnityEngine::Rect, int, int)>(readableTexture->klass, "ReadPixels", 3)->methodPointer(readableTexture, UnityEngine::Rect{ 0, 0, static_cast<float>(width), static_cast<float>(height) }, 0, 0);
 		il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*)>(readableTexture->klass, "Apply", 0)->methodPointer(readableTexture);
 
 		il2cpp_symbols::get_method_pointer<void (*)(Il2CppObject*)>("UnityEngine.CoreModule.dll", "UnityEngine", "RenderTexture", "set_active", 1)(previous);
@@ -131,8 +140,8 @@ namespace MsgPackData
 				if ((!MsgPackData::user_info.empty() || !MsgPackData::tp_info.empty()) && config::notification_tp)
 				{
 					DesktopNotificationManagerCompat::RemoveFromScheduleByTag(L"TP");
-					auto title = local::u8_wide(MasterDB::GetTextData(6, leader_chara_id));
-					auto content = local::u8_wide(MasterDB::GetTextData(184, leader_chara_id));
+					auto title = u8_wide(MasterDB::GetTextData(6, leader_chara_id));
+					auto content = u8_wide(MasterDB::GetTextData(184, leader_chara_id));
 					// history->RemoveGroupedTag(L"TP", L"Generic");
 					DesktopNotificationManagerCompat::AddScheduledToastNotification(title.data(), content.data(), L"TP", GetIconPath(leader_chara_id)->chars, MsgPackData::tp_info["max_recovery_time"].int64_value() * 1000);
 				}
@@ -180,8 +189,8 @@ namespace MsgPackData
 				if ((!MsgPackData::user_info.empty() || !MsgPackData::rp_info.empty()) && config::notification_rp)
 				{
 					DesktopNotificationManagerCompat::RemoveFromScheduleByTag(L"RP");
-					auto title = local::u8_wide(MasterDB::GetTextData(6, leader_chara_id));
-					auto content = local::u8_wide(MasterDB::GetTextData(185, leader_chara_id));
+					auto title = u8_wide(MasterDB::GetTextData(6, leader_chara_id));
+					auto content = u8_wide(MasterDB::GetTextData(185, leader_chara_id));
 					// history->RemoveGroupedTag(L"TP", L"Generic");
 					DesktopNotificationManagerCompat::AddScheduledToastNotification(title.data(), content.data(), L"RP", GetIconPath(leader_chara_id)->chars, MsgPackData::rp_info["max_recovery_time"].int64_value() * 1000);
 				}
@@ -268,18 +277,18 @@ namespace MsgPackData
 							// unique_ptr<DesktopNotificationHistoryCompat> history;
 							// DesktopNotificationManagerCompat::get_History(&history);
 
-							auto title = local::u8_wide(MasterDB::GetTextData(6, leader_chara_id));
+							auto title = u8_wide(MasterDB::GetTextData(6, leader_chara_id));
 							if ((data["user_info"].is_object() || data["tp_info"].is_object()) && config::notification_tp)
 							{
 								DesktopNotificationManagerCompat::RemoveFromScheduleByTag(L"TP");
-								auto content = local::u8_wide(MasterDB::GetTextData(184, leader_chara_id));
+								auto content = u8_wide(MasterDB::GetTextData(184, leader_chara_id));
 								// history->RemoveGroupedTag(L"TP", L"Generic");
 								DesktopNotificationManagerCompat::AddScheduledToastNotification(title.data(), content.data(), L"TP", GetIconPath(leader_chara_id)->chars, MsgPackData::tp_info["max_recovery_time"].int64_value() * 1000);
 							}
 							if ((data["user_info"].is_object() || data["rp_info"].is_object()) && config::notification_rp)
 							{
 								DesktopNotificationManagerCompat::RemoveFromScheduleByTag(L"RP");
-								auto content = local::u8_wide(MasterDB::GetTextData(185, leader_chara_id));
+								auto content = u8_wide(MasterDB::GetTextData(185, leader_chara_id));
 								// history->RemoveGroupedTag(L"RP", L"Generic");
 								DesktopNotificationManagerCompat::AddScheduledToastNotification(title.data(), content.data(), L"RP", GetIconPath(leader_chara_id)->chars, MsgPackData::rp_info["max_recovery_time"].int64_value() * 1000);
 							}

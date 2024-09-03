@@ -21,9 +21,10 @@
 
 #include "il2cpp/il2cpp_symbols.hpp"
 #include "il2cpp/il2cpp-api-functions.hpp"
-#include "local/local.hpp"
+#include "string_utils.hpp"
 #include "masterdb/masterdb.hpp"
 
+#include "scripts/UnityEngine.CoreModule/UnityEngine/Rect.hpp"
 
 using namespace std;
 
@@ -117,11 +118,11 @@ namespace SystemMediaTransportControlsManager
 
 			auto props = updater.MusicProperties();
 
-			props.Title(local::u8_wide(MasterDB::GetTextData(16, music_id)));
+			props.Title(u8_wide(MasterDB::GetTextData(16, music_id)));
 
 			auto artist = MasterDB::GetTextData(17, music_id);
 			replaceAll(artist, "\\n", ", ");
-			props.Artist(local::u8_wide(artist));
+			props.Artist(u8_wide(artist));
 
 			if (updater.Thumbnail())
 			{
@@ -170,7 +171,7 @@ namespace SystemMediaTransportControlsManager
 			auto readableTexture = il2cpp_object_new(il2cpp_symbols::get_class("UnityEngine.CoreModule.dll", "UnityEngine", "Texture2D"));
 			il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, int, int)>(readableTexture->klass, ".ctor", 2)->methodPointer(readableTexture, width, height);
 
-			il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, Rect_t, int, int)>(readableTexture->klass, "ReadPixels", 3)->methodPointer(readableTexture, Rect_t{ 0, 0, static_cast<float>(width), static_cast<float>(height) }, 0, 0);
+			il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, UnityEngine::Rect, int, int)>(readableTexture->klass, "ReadPixels", 3)->methodPointer(readableTexture, UnityEngine::Rect{ 0, 0, static_cast<float>(width), static_cast<float>(height) }, 0, 0);
 			il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*)>(readableTexture->klass, "Apply", 0)->methodPointer(readableTexture);
 
 			il2cpp_symbols::get_method_pointer<void (*)(Il2CppObject*)>("UnityEngine.CoreModule.dll", "UnityEngine", "RenderTexture", "set_active", 1)(previous);

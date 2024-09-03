@@ -1,6 +1,7 @@
 #include <stdinclude.hpp>
 
 #include "config/config.hpp"
+#include "string_utils.hpp"
 
 using namespace std;
 
@@ -55,7 +56,7 @@ namespace logger
 		if (!enabled)
 			return;
 
-		auto u8str = local::wide_u8(text);
+		auto u8str = wide_u8(text);
 		replaceAll(u8str, "\n", "\\n");
 		replaceAll(u8str, "\"", "\\\"");
 
@@ -74,7 +75,7 @@ namespace logger
 				for (int i = 0; i < dict.size(); i++)
 				{
 					auto hash = std::hash<wstring>{}(dict[i]);
-					auto u8str = local::wide_u8(dict[i]);
+					auto u8str = wide_u8(dict[i]);
 					replaceAll(u8str, "\n", "\\n");
 					replaceAll(u8str, "\"", "\\\"");
 					if (i == dict.size() - 1)
@@ -105,16 +106,16 @@ namespace logger
 			thread t([dict]() {
 				for (auto pair = dict.begin(); pair != dict.end(); pair++)
 				{
-					auto u8str = local::wide_u8(pair->second);
+					auto u8str = wide_u8(pair->second);
 					replaceAll(u8str, "\n", "\\n");
 					replaceAll(u8str, "\"", "\\\"");
 					if (next(pair) == dict.end())
 					{
-						static_json << "\"" << local::wide_u8(pair->first) << "\": \"" << u8str << "\"\n";
+						static_json << "\"" << wide_u8(pair->first) << "\": \"" << u8str << "\"\n";
 					}
 					else
 					{
-						static_json << "\"" << local::wide_u8(pair->first) << "\": \"" << u8str << "\",\n";
+						static_json << "\"" << wide_u8(pair->first) << "\": \"" << u8str << "\",\n";
 					}
 				}
 				static_json << "}\n";
@@ -129,16 +130,16 @@ namespace logger
 				thread t1([not_matched]() {
 					for (auto pair = not_matched.begin(); pair != not_matched.end(); pair++)
 					{
-						auto u8str = local::wide_u8(pair->second);
+						auto u8str = wide_u8(pair->second);
 						replaceAll(u8str, "\n", "\\n");
 						replaceAll(u8str, "\"", "\\\"");
 						if (next(pair) == not_matched.end())
 						{
-							not_matched_json << "\"" << local::wide_u8(pair->first) << "\": \"" << u8str << "\"\n";
+							not_matched_json << "\"" << wide_u8(pair->first) << "\": \"" << u8str << "\"\n";
 						}
 						else
 						{
-							not_matched_json << "\"" << local::wide_u8(pair->first) << "\": \"" << u8str << "\",\n";
+							not_matched_json << "\"" << wide_u8(pair->first) << "\": \"" << u8str << "\",\n";
 						}
 					}
 					not_matched_json << "}\n";

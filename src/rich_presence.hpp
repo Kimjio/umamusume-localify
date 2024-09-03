@@ -3,7 +3,7 @@
 #include <string>
 
 #include "il2cpp/il2cpp_symbols.hpp"
-#include "local/local.hpp"
+#include "string_utils.hpp"
 
 using namespace std;
 
@@ -666,7 +666,7 @@ namespace
 
 		if (!textId.empty())
 		{
-			return local::wide_u8(localizeextension_text_hook(GetTextIdByName(textId))->chars).append(" ");
+			return wide_u8(localizeextension_text_hook(GetTextIdByName(textId))->chars).append(" ");
 		}
 
 		return "";
@@ -798,7 +798,7 @@ namespace
 
 		if (!textId.empty())
 		{
-			return local::wide_u8(localizeextension_text_hook(GetTextIdByName(textId))->chars).append(" ");
+			return wide_u8(localizeextension_text_hook(GetTextIdByName(textId))->chars).append(" ");
 		}
 
 		return sceneId;

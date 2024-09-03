@@ -2,7 +2,7 @@
 #include <SQLiteCpp/SQLiteCpp.h>
 
 #include "il2cpp/il2cpp_symbols.hpp"
-#include "local/local.hpp"
+#include "string_utils.hpp"
 #include "game.hpp"
 
 namespace MasterDB
@@ -15,7 +15,7 @@ namespace MasterDB
 
 	void InitMasterDB()
 	{
-		auto path = local::wide_u8(il2cpp_symbols::get_method_pointer<Il2CppString * (*)()>("Cute.Core.Assembly.dll", "Cute.Core", "Device", "GetPersistentDataPath", IgnoreNumberOfArguments)()->chars);
+		auto path = wide_u8(il2cpp_symbols::get_method_pointer<Il2CppString * (*)()>("Cute.Core.Assembly.dll", "Cute.Core", "Device", "GetPersistentDataPath", IgnoreNumberOfArguments)()->chars);
 		auto metaDBPath = path + R"(\meta)";
 		masterDBPath = path + R"(\master\master.mdb)";
 

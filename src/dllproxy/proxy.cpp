@@ -1,5 +1,7 @@
 #include <stdinclude.hpp>
 
+#include "proxy.hpp"
+
 extern "C"
 {
 	void* GetFileVersionInfoA_Original = nullptr;
@@ -23,7 +25,7 @@ extern "C"
 
 using namespace std;
 
-namespace
+namespace proxy
 {
 	class version_init
 	{
@@ -46,25 +48,25 @@ namespace
 
 			// Loading version.dll from another path is prohibited.
 			//auto original_dll = LoadLibraryW(dll_path.data());
-			auto original_dll = LoadLibraryW(L"version.win.dll");
+			version = LoadLibraryW(L"version.win.dll");
 
-			GetFileVersionInfoA_Original = GetProcAddress(original_dll, "GetFileVersionInfoA");
-			GetFileVersionInfoByHandle_Original = GetProcAddress(original_dll, "GetFileVersionInfoByHandle");
-			GetFileVersionInfoExA_Original = GetProcAddress(original_dll, "GetFileVersionInfoExA");
-			GetFileVersionInfoExW_Original = GetProcAddress(original_dll, "GetFileVersionInfoExW");
-			GetFileVersionInfoSizeA_Original = GetProcAddress(original_dll, "GetFileVersionInfoSizeA");
-			GetFileVersionInfoSizeExA_Original = GetProcAddress(original_dll, "GetFileVersionInfoSizeExA");
-			GetFileVersionInfoSizeExW_Original = GetProcAddress(original_dll, "GetFileVersionInfoSizeExW");
-			GetFileVersionInfoSizeW_Original = GetProcAddress(original_dll, "GetFileVersionInfoSizeW");
-			GetFileVersionInfoW_Original = GetProcAddress(original_dll, "GetFileVersionInfoW");
-			VerFindFileA_Original = GetProcAddress(original_dll, "VerFindFileA");
-			VerFindFileW_Original = GetProcAddress(original_dll, "VerFindFileW");
-			VerInstallFileA_Original = GetProcAddress(original_dll, "VerInstallFileA");
-			VerInstallFileW_Original = GetProcAddress(original_dll, "VerInstallFileW");
-			VerLanguageNameA_Original = GetProcAddress(original_dll, "VerLanguageNameA");
-			VerLanguageNameW_Original = GetProcAddress(original_dll, "VerLanguageNameW");
-			VerQueryValueA_Original = GetProcAddress(original_dll, "VerQueryValueA");
-			VerQueryValueW_Original = GetProcAddress(original_dll, "VerQueryValueW");
+			GetFileVersionInfoA_Original = GetProcAddress(version, "GetFileVersionInfoA");
+			GetFileVersionInfoByHandle_Original = GetProcAddress(version, "GetFileVersionInfoByHandle");
+			GetFileVersionInfoExA_Original = GetProcAddress(version, "GetFileVersionInfoExA");
+			GetFileVersionInfoExW_Original = GetProcAddress(version, "GetFileVersionInfoExW");
+			GetFileVersionInfoSizeA_Original = GetProcAddress(version, "GetFileVersionInfoSizeA");
+			GetFileVersionInfoSizeExA_Original = GetProcAddress(version, "GetFileVersionInfoSizeExA");
+			GetFileVersionInfoSizeExW_Original = GetProcAddress(version, "GetFileVersionInfoSizeExW");
+			GetFileVersionInfoSizeW_Original = GetProcAddress(version, "GetFileVersionInfoSizeW");
+			GetFileVersionInfoW_Original = GetProcAddress(version, "GetFileVersionInfoW");
+			VerFindFileA_Original = GetProcAddress(version, "VerFindFileA");
+			VerFindFileW_Original = GetProcAddress(version, "VerFindFileW");
+			VerInstallFileA_Original = GetProcAddress(version, "VerInstallFileA");
+			VerInstallFileW_Original = GetProcAddress(version, "VerInstallFileW");
+			VerLanguageNameA_Original = GetProcAddress(version, "VerLanguageNameA");
+			VerLanguageNameW_Original = GetProcAddress(version, "VerLanguageNameW");
+			VerQueryValueA_Original = GetProcAddress(version, "VerQueryValueA");
+			VerQueryValueW_Original = GetProcAddress(version, "VerQueryValueW");
 		};
 	};
 

@@ -698,7 +698,7 @@ namespace MsgPackModify
 						{
 							auto userInfo = MsgPack::object{ user_info.object_items() };
 							
-							if (userInfo["viewer_id"].int64_value() != 951853429523l)
+							if (userInfo["viewer_id"].int64_value() != 000000000)
 							{
 								userInfo["name"] = "";
 							}

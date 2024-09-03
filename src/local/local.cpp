@@ -1,5 +1,4 @@
 #include <stdinclude.hpp>
-#include <codecvt>
 
 #include "config/config.hpp"
 
@@ -12,60 +11,6 @@ namespace local
 		unordered_map<size_t, wstring> text_db;
 		unordered_map<wstring, wstring> textId_text_db;
 		vector<size_t> str_list;
-	}
-
-	string wide_u8(const wstring& str)
-	{
-		string result;
-		result.resize(str.length() * 4);
-
-		int len = WideCharToMultiByte(CP_UTF8, 0, str.data(), str.length(), result.data(), result.length(), nullptr, nullptr);
-
-		result.resize(len);
-
-		return result;
-	}
-
-	string u16_u8(const u16string& str)
-	{
-		wstring_convert<codecvt_utf8_utf16<char16_t>, char16_t> utf16conv;
-		return utf16conv.to_bytes(str);
-	}
-
-	wstring u8_wide(const string& str)
-	{
-		wstring result;
-		result.resize(str.length() * 4);
-
-		int len = MultiByteToWideChar(CP_UTF8, 0, str.data(), str.length(), result.data(), result.length());
-
-		result.resize(len);
-
-		return result;
-	}
-
-	string wide_acp(const wstring& str)
-	{
-		string result;
-		result.resize(str.length() * 4);
-
-		int len = WideCharToMultiByte(CP_ACP, 0, str.data(), str.length(), result.data(), result.length(), nullptr, nullptr);
-
-		result.resize(len);
-
-		return result;
-	}
-
-	wstring acp_wide(const string& str)
-	{
-		wstring result;
-		result.resize(str.length() * 4);
-
-		int len = MultiByteToWideChar(CP_ACP, 0, str.data(), str.length(), result.data(), result.length());
-
-		result.resize(len);
-
-		return result;
 	}
 
 	void reload_textdb(const vector<wstring>* dicts)

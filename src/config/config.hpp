@@ -9,6 +9,8 @@
 #include <unordered_map>
 #include <vector>
 
+#define RAPIDJSON_HAS_STDSTRING 1
+
 #include <rapidjson/rapidjson.h>
 #include <rapidjson/document.h>
 #include <rapidjson/encodings.h>
@@ -78,6 +80,7 @@ namespace config
 	extern bool champions_live_show_text;
 	extern int champions_live_resource_id;
 	extern int champions_live_year;
+	extern bool live_slider_always_show;
 	/*
 	 * ModeNormal 0
 	 * Mode60FPS 1
@@ -102,7 +105,7 @@ namespace config
 
 	extern wstring text_id_dict;
 
-	extern WDocument code_map;
+	extern rapidjson::Document code_map;
 
 	extern bool has_json_parse_error;
 	extern wstring json_parse_error_msg;
@@ -112,6 +115,13 @@ namespace config
 
 	extern WDocument config_document;
 	extern WDocument backup_document;
+
+	namespace runtime
+	{
+		extern bool useDefaultFPS;
+		extern float ratioVertical;
+		extern float ratioHorizontal;
+	}
 
 	void read_config_init();
 	bool read_config();
