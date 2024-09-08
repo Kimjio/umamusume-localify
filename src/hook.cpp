@@ -74,6 +74,7 @@
 #include "scripts/mscorlib/System/Boolean.hpp"
 #include "scripts/mscorlib/System/Enum.hpp"
 #include "scripts/mscorlib/System/Int32.hpp"
+#include "scripts/mscorlib/System/Nullable.hpp"
 #include "scripts/mscorlib/System/Collections/Generic/Dictionary.hpp"
 
 #include "scripts/CriMw.CriWare.Runtime/CriWare/CriAtomEx.hpp"
@@ -10832,7 +10833,7 @@ namespace
 
 	void* NowLoading_Show_orig = nullptr;
 
-	void NowLoading_Show_hook(Il2CppObject* _this, int type, Il2CppDelegate* onComplete, Il2CppObject* overrideDuration, int easeType, Il2CppObject* customInEffect, Il2CppObject* customLoopEffect, Il2CppObject* customOutEffect)
+	void NowLoading_Show_hook(Il2CppObject* _this, int type, Il2CppDelegate* onComplete, Il2CppObject* overrideDuration, int easeType, Il2CppObject* customInEffect, Il2CppObject* customLoopEffect, Il2CppObject* customOutEffect, int charaId)
 	{
 		// NowLoadingOrientation
 		if (type == 2 && (config::freeform_window || !config::ui_loading_show_orientation_guide))
@@ -10846,7 +10847,7 @@ namespace
 				_this,
 				type,
 				onComplete, overrideDuration, easeType,
-				customInEffect, customLoopEffect, customOutEffect);
+				customInEffect, customLoopEffect, customOutEffect, charaId);
 		}
 		if (onComplete && config::hide_now_loading)
 		{
@@ -13222,7 +13223,7 @@ namespace
 
 		auto NowLoading_Show_addr = il2cpp_symbols::get_method_pointer(
 			"umamusume.dll",
-			"Gallop", "NowLoading", "Show", 7);
+			"Gallop", "NowLoading", "Show", 8);
 
 		auto NowLoading_Hide_addr = il2cpp_symbols::get_method_pointer(
 			"umamusume.dll",
@@ -13346,6 +13347,7 @@ namespace
 
 		ADD_HOOK(Light_set_shadowResolution, "UnityEngine.Light.set_shadowResolution(UnityEngine.Rendering.LightShadowResolution) at %p\n");
 
+		// TODO Gallop.NowLoading::ShowCustomWipeFlash
 		ADD_HOOK(NowLoading_Show, "Gallop.NowLoading::Show at %p\n");
 
 		ADD_HOOK(NowLoading_Hide, "Gallop.NowLoading::Hide at %p\n");
