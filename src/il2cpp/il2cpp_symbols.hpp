@@ -85,13 +85,31 @@ struct Il2CppDelegate_t
 char* il2cpp_array_addr_with_size(void* arr, int32_t size, uintptr_t idx);
 
 // array macro
-#define il2cpp_array_addr(array, type, index) ((type*)(void*) il2cpp_array_addr_with_size (array, sizeof (type), index))
+#define il2cpp_array_addr(array, type, index) reinterpret_cast<type*>(il2cpp_array_addr_with_size(array, sizeof(type), index))
 
 #define il2cpp_array_setref(array, index, value)  \
-    do {    \
-        void* *__p = (void* *) il2cpp_array_addr ((array), void*, (index));; \
-         *__p = (value);    \
-    } while (0)
+    do \
+	{ \
+        auto __p = il2cpp_array_addr (array, void*, index); \
+         *__p = (value); \
+    } \
+	while (0)
+
+#define il2cpp_array_setref_type(array, type, index, value)  \
+    do \
+	{ \
+        auto __p = il2cpp_array_addr (array, type, index); \
+         *__p = (value); \
+    } \
+	while (0)
+
+#define il2cpp_array_setref_type_memmove(array, type, index, value)  \
+    do \
+	{ \
+        auto __p = il2cpp_array_addr (array, type, index); \
+        memmove(__p, (value), sizeof(type)); \
+    } \
+	while (0)
 
 extern Il2CppDefaults il2cpp_defaults;
 

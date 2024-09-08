@@ -81,6 +81,7 @@ namespace config
 	extern int champions_live_resource_id;
 	extern int champions_live_year;
 	extern bool live_slider_always_show;
+	extern bool live_playback_loop;
 	/*
 	 * ModeNormal 0
 	 * Mode60FPS 1

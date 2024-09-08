@@ -5025,6 +5025,300 @@ namespace
 		return false;
 	}
 
+	void MoveLivePlayback(float value)
+	{
+		auto director = GetSingletonInstance(il2cpp_symbols::get_class("umamusume.dll", "Gallop.Live", "Director"));
+		if (director)
+		{
+			bool isPauseLive = il2cpp_class_get_method_from_name_type<bool (*)()>(director->klass, "IsPauseLive", 0)->methodPointer();
+
+			auto _liveCurrentTimeField = il2cpp_class_get_field_from_name_wrap(director->klass, "_liveCurrentTime");
+			il2cpp_field_set_value(director, _liveCurrentTimeField, &value);
+
+			auto LiveTimeController = il2cpp_class_get_method_from_name_type<Il2CppObject * (*)(Il2CppObject*)>(director->klass, "get_LiveTimeController", 0)->methodPointer(director);
+
+			if (!isPauseLive)
+			{
+				// prevent voice desync
+				il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*)>(LiveTimeController->klass, "PauseLive", 0)->methodPointer(LiveTimeController);
+			}
+
+			auto _elapsedTimeField = il2cpp_class_get_field_from_name_wrap(LiveTimeController->klass, "_elapsedTime");
+			il2cpp_field_set_value(LiveTimeController, _elapsedTimeField, &value);
+
+			il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, float)>(LiveTimeController->klass, "set_CurrentTime", 1)->methodPointer(LiveTimeController, value);
+
+			auto AudioManager = GetSingletonInstance(il2cpp_symbols::get_class("umamusume.dll", "Gallop", "AudioManager"));
+			auto CriAudioManager = il2cpp_class_get_method_from_name_type<Il2CppObject * (*)(Il2CppObject*)>(AudioManager->klass, "get_CriAudioManager", 0)->methodPointer(AudioManager);
+
+			auto audioCtrlDictField = il2cpp_class_get_field_from_name_wrap(CriAudioManager->klass, "audioCtrlDict");
+			Il2CppObject* audioCtrlDict;
+			il2cpp_field_get_value(CriAudioManager, audioCtrlDictField, &audioCtrlDict);
+
+			auto _songPlaybackField = il2cpp_class_get_field_from_name_wrap(AudioManager->klass, "_songPlayback");
+			Cute::Cri::AudioPlayback _songPlayback;
+			il2cpp_field_get_value(AudioManager, _songPlaybackField, &_songPlayback);
+
+			auto _songCharaPlaybacksField = il2cpp_class_get_field_from_name_wrap(AudioManager->klass, "_songCharaPlaybacks");
+			Il2CppArraySize_t<Cute::Cri::AudioPlayback>* _songCharaPlaybacks;
+			il2cpp_field_get_value(AudioManager, _songCharaPlaybacksField, &_songCharaPlaybacks);
+
+			void** params = new void* [1];
+			params[0] = &_songPlayback.soundGroup;
+
+			Il2CppException* exception;
+
+			auto audioCtrl = il2cpp_runtime_invoke(il2cpp_class_get_method_from_name(audioCtrlDict->klass, "get_Item", 1), audioCtrlDict, params, &exception);
+
+			delete[] params;
+
+			if (exception)
+			{
+				wcout << exception->message->chars << endl;
+			}
+
+			auto poolField = il2cpp_class_get_field_from_name_wrap(audioCtrl->klass, "pool");
+			Il2CppObject* pool;
+			il2cpp_field_get_value(audioCtrl, poolField, &pool);
+
+			if (pool)
+			{
+				FieldInfo* sourceListField = il2cpp_class_get_field_from_name_wrap(pool->klass, "sourceList");
+				Il2CppObject* sourceList;
+				il2cpp_field_get_value(pool, sourceListField, &sourceList);
+
+				FieldInfo* itemsField = il2cpp_class_get_field_from_name_wrap(sourceList->klass, "_items");
+				Il2CppArraySize_t<Il2CppObject*>* sources;
+				il2cpp_field_get_value(sourceList, itemsField, &sources);
+
+				Il2CppObject* cuteAudioSource = nullptr;
+
+				for (int i = 0; i < sources->max_length; i++)
+				{
+					auto obj = sources->vector[i];
+
+					if (obj)
+					{
+						auto isSame = il2cpp_class_get_method_from_name_type<bool (*)(Il2CppObject*, Cute::Cri::AudioPlayback)>(obj->klass, "IsSamePlaybackId", 1)->methodPointer(obj, _songPlayback);
+						if (isSame)
+						{
+							cuteAudioSource = obj;
+							break;
+						}
+					}
+				}
+
+				if (cuteAudioSource)
+				{
+					auto sourceListField = il2cpp_class_get_field_from_name_wrap(cuteAudioSource->klass, "sourceList");
+					Il2CppObject* sourceList;
+					il2cpp_field_get_value(cuteAudioSource, sourceListField, &sourceList);
+
+					auto usingIndexField = il2cpp_class_get_field_from_name_wrap(cuteAudioSource->klass, "usingIndex");
+					int usingIndex;
+					il2cpp_field_get_value(cuteAudioSource, usingIndexField, &usingIndex);
+
+					params = new void* [1];
+					params[0] = &usingIndex;
+
+					auto AtomSource = il2cpp_runtime_invoke(il2cpp_class_get_method_from_name(sourceList->klass, "get_Item", 1), sourceList, params, &exception);
+
+					delete[] params;
+
+					if (exception)
+					{
+						wcout << exception->message->chars << endl;
+					}
+
+					auto player = il2cpp_class_get_method_from_name_type<Il2CppObject * (*)(Il2CppObject*)>(AtomSource->klass, "get_player", 0)->methodPointer(AtomSource);
+					il2cpp_class_get_method_from_name_type<CriWare::CriAtomExPlayback(*)(Il2CppObject*)>(player->klass, "StopWithoutReleaseTime", 0)->methodPointer(player);
+					il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, long)>(player->klass, "SetStartTime", 1)->methodPointer(player, static_cast<long>(roundf(value * 1000.0f)));
+					auto playback = il2cpp_class_get_method_from_name_type<CriWare::CriAtomExPlayback(*)(Il2CppObject*)>(player->klass, "Start", 0)->methodPointer(player);
+					il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, CriWare::CriAtomExPlayback)>(player->klass, "Update", 1)->methodPointer(player, playback);
+
+					if (isPauseLive)
+					{
+						il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*)>(player->klass, "Pause", 0)->methodPointer(player);
+					}
+
+					_songPlayback.criAtomExPlayback = playback;
+					il2cpp_field_set_value(AudioManager, _songPlaybackField, &_songPlayback);
+					il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, CriWare::CriAtomExPlayback)>(AtomSource->klass, "set_Playback", 1)->methodPointer(AtomSource, playback);
+				}
+			}
+
+
+			if (_songCharaPlaybacks)
+			{
+				for (int i = 0; i < _songCharaPlaybacks->max_length; i++)
+				{
+					auto charaPlayback = _songCharaPlaybacks->vector[i];
+
+					void** params = new void* [1];
+					params[0] = &charaPlayback.soundGroup;
+
+					Il2CppException* exception;
+
+					auto audioCtrl = il2cpp_runtime_invoke(il2cpp_class_get_method_from_name(audioCtrlDict->klass, "get_Item", 1), audioCtrlDict, params, &exception);
+
+					delete[] params;
+
+					if (exception)
+					{
+						wcout << exception->message->chars << endl;
+						continue;
+					}
+
+					auto poolField = il2cpp_class_get_field_from_name_wrap(audioCtrl->klass, "pool");
+					Il2CppObject* pool;
+					il2cpp_field_get_value(audioCtrl, poolField, &pool);
+
+					if (pool)
+					{
+						FieldInfo* sourceListField = il2cpp_class_get_field_from_name_wrap(pool->klass, "sourceList");
+						Il2CppObject* sourceList;
+						il2cpp_field_get_value(pool, sourceListField, &sourceList);
+
+						FieldInfo* itemsField = il2cpp_class_get_field_from_name_wrap(sourceList->klass, "_items");
+						Il2CppArraySize_t<Il2CppObject*>* sources;
+						il2cpp_field_get_value(sourceList, itemsField, &sources);
+
+						Il2CppObject* cuteAudioSource = nullptr;
+
+						for (int i = 0; i < sources->max_length; i++)
+						{
+							auto obj = sources->vector[i];
+
+							if (obj)
+							{
+								auto isSame = il2cpp_class_get_method_from_name_type<bool (*)(Il2CppObject*, Cute::Cri::AudioPlayback)>(obj->klass, "IsSamePlaybackId", 1)->methodPointer(obj, charaPlayback);
+								if (isSame)
+								{
+									cuteAudioSource = obj;
+									break;
+								}
+							}
+						}
+
+						if (cuteAudioSource)
+						{
+							auto sourceListField = il2cpp_class_get_field_from_name_wrap(cuteAudioSource->klass, "sourceList");
+							Il2CppObject* sourceList;
+							il2cpp_field_get_value(cuteAudioSource, sourceListField, &sourceList);
+
+							auto usingIndexField = il2cpp_class_get_field_from_name_wrap(cuteAudioSource->klass, "usingIndex");
+							int usingIndex;
+							il2cpp_field_get_value(cuteAudioSource, usingIndexField, &usingIndex);
+
+							params = new void* [1];
+							params[0] = &usingIndex;
+
+							auto AtomSource = il2cpp_runtime_invoke(il2cpp_class_get_method_from_name(sourceList->klass, "get_Item", 1), sourceList, params, &exception);
+
+							delete[] params;
+
+							if (exception)
+							{
+								wcout << exception->message->chars << endl;
+								continue;
+							}
+
+							auto player = il2cpp_class_get_method_from_name_type<Il2CppObject * (*)(Il2CppObject*)>(AtomSource->klass, "get_player", 0)->methodPointer(AtomSource);
+							il2cpp_class_get_method_from_name_type<CriWare::CriAtomExPlayback(*)(Il2CppObject*)>(player->klass, "StopWithoutReleaseTime", 0)->methodPointer(player);
+							il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, long)>(player->klass, "SetStartTime", 1)->methodPointer(player, static_cast<long>(roundf(value * 1000.0f)));
+							auto playback = il2cpp_class_get_method_from_name_type<CriWare::CriAtomExPlayback(*)(Il2CppObject*)>(player->klass, "Start", 0)->methodPointer(player);
+							il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, CriWare::CriAtomExPlayback)>(player->klass, "Update", 1)->methodPointer(player, playback);
+
+							if (isPauseLive)
+							{
+								il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*)>(player->klass, "Pause", 0)->methodPointer(player);
+							}
+
+							charaPlayback.criAtomExPlayback = playback;
+
+							il2cpp_array_setref_type_memmove(_songCharaPlaybacks, Cute::Cri::AudioPlayback, i, &playback);
+							il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, CriWare::CriAtomExPlayback)>(AtomSource->klass, "set_Playback", 1)->methodPointer(AtomSource, playback);
+						}
+					}
+				}
+			}
+
+			if (!isPauseLive)
+			{
+				il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*)>(LiveTimeController->klass, "ResumeLive", 0)->methodPointer(LiveTimeController);
+			}
+		}
+	}
+
+	bool ControlLiveTime(WPARAM wParam)
+	{
+		if (wParam == VK_LEFT || wParam == VK_RIGHT)
+		{
+			auto director = GetSingletonInstance(il2cpp_symbols::get_class("umamusume.dll", "Gallop.Live", "Director"));
+			if (director)
+			{
+				auto LiveCurrentTime = il2cpp_class_get_method_from_name_type<float (*)(Il2CppObject*)>(director->klass, "get_LiveCurrentTime", 0)->methodPointer(director);
+
+				bool shiftKeyDown = GetKeyState(VK_SHIFT) < 0;
+				bool controlKeyDown = GetKeyState(VK_CONTROL) < 0;
+
+				if (wParam == VK_LEFT)
+				{
+					if (controlKeyDown)
+					{
+						LiveCurrentTime -= shiftKeyDown ? 1.0f : 0.5f;
+					}
+					else
+					{
+						LiveCurrentTime -= shiftKeyDown ? 0.01f : 0.1f;
+					}
+				}
+
+				if (wParam == VK_RIGHT)
+				{
+					if (controlKeyDown)
+					{
+						LiveCurrentTime += shiftKeyDown ? 1.0f : 0.5f;
+					}
+					else
+					{
+						LiveCurrentTime += shiftKeyDown ? 0.01f : 0.1f;
+					}
+				}
+
+				MoveLivePlayback(LiveCurrentTime);
+
+				return true;
+			}
+		}
+
+		if (wParam == VK_SPACE)
+		{
+			auto director = GetSingletonInstance(il2cpp_symbols::get_class("umamusume.dll", "Gallop.Live", "Director"));
+			if (director)
+			{
+				bool isPauseLive = il2cpp_class_get_method_from_name_type<bool (*)()>(director->klass, "IsPauseLive", 0)->methodPointer();
+
+				auto controller = GetCurrentViewController();
+				if (controller)
+				{
+					if (isPauseLive)
+					{
+						il2cpp_class_get_method_from_name_type<void(*)(Il2CppObject*)>(controller->klass, "ResumeLive", 0)->methodPointer(controller);
+					}
+					else
+					{
+						il2cpp_class_get_method_from_name_type<void(*)(Il2CppObject*)>(controller->klass, "PauseLive", 0)->methodPointer(controller);
+					}
+				}
+
+				return true;
+			}
+		}
+
+		return false;
+	}
+
 	bool isPortraitBeforeFullscreen = false;
 
 	bool isWndProcInitRequired = true;
@@ -5088,6 +5382,11 @@ namespace
 			}
 
 			if (SelectRaceStoryChoice(wParam))
+			{
+				return TRUE;
+			}
+
+			if (ControlLiveTime(wParam))
 			{
 				return TRUE;
 			}
@@ -8377,6 +8676,8 @@ namespace
 
 				AddOrSet(configDocument, L"liveSliderAlwaysShow", GetOptionItemOnOffIsOn("live_slider_always_show"));
 
+				AddOrSet(configDocument, L"livePlaybackLoop", GetOptionItemOnOffIsOn("live_playback_loop"));
+
 				AddOrSet(configDocument, L"championsLiveShowText", GetOptionItemOnOffIsOn("champions_live_show_text"));
 
 				AddOrSet(configDocument, L"championsLiveYear", GetToggleGroupCommonValue("champions_live_year") + 2022);
@@ -8431,6 +8732,8 @@ namespace
 				config::character_system_text_caption_outline_color = configDocument[L"characterSystemTextCaptionOutlineColor"].GetString();
 
 				config::live_slider_always_show = configDocument[L"liveSliderAlwaysShow"].GetBool();
+
+				config::live_playback_loop = configDocument[L"livePlaybackLoop"].GetBool();
 
 				config::champions_live_show_text = configDocument[L"championsLiveShowText"].GetBool();
 
@@ -8624,6 +8927,7 @@ namespace
 		int antiAliasing = 0;
 		bool characterSystemTextCaption = false;
 		bool liveSliderAlwaysShow = false;
+		bool livePlaybackLoop = false;
 		bool championsLiveShowText = false;
 		int championsLiveYear = 2022;
 		float characterSystemTextCaptionPositionX = 0;
@@ -8669,6 +8973,11 @@ namespace
 			if (configDocument.HasMember(L"liveSliderAlwaysShow"))
 			{
 				liveSliderAlwaysShow = configDocument[L"liveSliderAlwaysShow"].GetBool();
+			}
+
+			if (configDocument.HasMember(L"livePlaybackLoop"))
+			{
+				livePlaybackLoop = configDocument[L"livePlaybackLoop"].GetBool();
 			}
 
 			if (configDocument.HasMember(L"championsLiveYear"))
@@ -8840,6 +9149,7 @@ namespace
 				GetOptionSlider("ui_scale_landscape", LocalifySettings::GetText("ui_scale_landscape"), freeFormUiScaleLandscape, 0.1, 2.0, false),
 				GetOptionItemTitle(localize_get_hook(GetTextIdByName(L"Common0035"))->chars),
 				GetOptionItemOnOff("live_slider_always_show", LocalifySettings::GetText("live_slider_always_show")),
+				GetOptionItemOnOff("live_playback_loop", LocalifySettings::GetText("live_playback_loop")),
 				GetOptionItemOnOff("champions_live_show_text", LocalifySettings::GetText("champions_live_show_text")),
 				GetOptionItemSimpleWithButton("champions_live_resource_id", (LocalifySettings::GetText("champions_live_resource_id") + L": "s + u8_wide(MasterDB::GetChampionsResources()[config::config_document[L"championsLiveResourceId"].GetInt() - 1])).data(),
 					localize_get_hook(GetTextIdByName(L"Circle0206"))->chars),
@@ -8937,6 +9247,10 @@ namespace
 			}));
 
 		SetOptionItemOnOffAction("live_slider_always_show", liveSliderAlwaysShow, *([](Il2CppObject*, bool isOn)
+			{
+			}));
+
+		SetOptionItemOnOffAction("live_playback_loop", livePlaybackLoop, *([](Il2CppObject*, bool isOn)
 			{
 			}));
 
@@ -9266,11 +9580,15 @@ namespace
 
 				AddOrSet(configDocument, L"liveSliderAlwaysShow", GetOptionItemOnOffIsOn("live_slider_always_show"));
 
+				AddOrSet(configDocument, L"livePlaybackLoop", GetOptionItemOnOffIsOn("live_playback_loop"));
+
 				AddOrSet(configDocument, L"championsLiveShowText", GetOptionItemOnOffIsOn("champions_live_show_text"));
 
 				AddOrSet(configDocument, L"championsLiveYear", GetToggleGroupCommonValue("champions_live_year") + 2022);
 
 				config::live_slider_always_show = configDocument[L"liveSliderAlwaysShow"].GetBool();
+
+				config::live_playback_loop = configDocument[L"livePlaybackLoop"].GetBool();
 
 				config::champions_live_show_text = configDocument[L"championsLiveShowText"].GetBool();
 
@@ -9400,6 +9718,7 @@ namespace
 		il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, int)>(padding->klass, "set_bottom", 1)->methodPointer(padding, 16);
 
 		bool liveSliderAlwaysShow = false;
+		bool livePlaybackLoop = false;
 		bool championsLiveShowText = false;
 		int championsLiveYear = 2023;
 
@@ -9410,6 +9729,11 @@ namespace
 			if (configDocument.HasMember(L"liveSliderAlwaysShow"))
 			{
 				liveSliderAlwaysShow = configDocument[L"liveSliderAlwaysShow"].GetBool();
+			}
+
+			if (configDocument.HasMember(L"livePlaybackLoop"))
+			{
+				livePlaybackLoop = configDocument[L"livePlaybackLoop"].GetBool();
 			}
 
 			if (configDocument.HasMember(L"championsLiveShowText"))
@@ -9427,6 +9751,7 @@ namespace
 			{
 				GetOptionItemTitle(localize_get_hook(GetTextIdByName(L"Common0035"))->chars),
 				GetOptionItemOnOff("live_slider_always_show", LocalifySettings::GetText("live_slider_always_show")),
+				GetOptionItemOnOff("live_playback_loop", LocalifySettings::GetText("live_playback_loop")),
 				GetOptionItemOnOff("champions_live_show_text", LocalifySettings::GetText("champions_live_show_text")),
 				GetOptionItemSimpleWithButton("champions_live_resource_id", (LocalifySettings::GetText("champions_live_resource_id") + L": "s + u8_wide(MasterDB::GetChampionsResources()[config::config_document[L"championsLiveResourceId"].GetInt() - 1])).data(),
 					localize_get_hook(GetTextIdByName(L"Circle0206"))->chars),
@@ -9436,6 +9761,10 @@ namespace
 			);
 
 		SetOptionItemOnOffAction("live_slider_always_show", liveSliderAlwaysShow, *([](Il2CppObject*, bool isOn)
+			{
+			}));
+
+		SetOptionItemOnOffAction("live_playback_loop", livePlaybackLoop, *([](Il2CppObject*, bool isOn)
 			{
 			}));
 
@@ -9675,7 +10004,7 @@ namespace
 	{
 		auto object = resources_load_hook(il2cpp_string_new("ui/parts/outgame/option/optionsoundvolumeslider"), GetRuntimeType("UnityEngine.CoreModule.dll", "UnityEngine", "GameObject"));
 
-		auto optionSlider = il2cpp_symbols::get_method_pointer<Il2CppObject * (*)(Il2CppObject*)>("UnityEngine.CoreModule.dll", "UnityEngine", "Object", "Internal_CloneSingle", 1)(object);
+		auto optionSlider = UnityEngine::Object::Internal_CloneSingle(object);
 
 		auto getComponents = il2cpp_class_get_method_from_name_type<Il2CppArraySize_t<Il2CppObject*> *(*)(Il2CppObject*, Il2CppType*, bool, bool, bool, bool, Il2CppObject*)>(optionSlider->klass, "GetComponentsInternal", 6)->methodPointer;
 
@@ -9789,12 +10118,37 @@ namespace
 		il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, int)>(textCommon->klass, "set_OutlineSize", 1)->methodPointer(textCommon, GetEnumValue(ParseEnum(GetRuntimeType("umamusume.dll", "Gallop", "OutlineSizeType"), L"M")));
 		il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, int)>(textCommon->klass, "set_OutlineColor", 1)->methodPointer(textCommon, GetEnumValue(ParseEnum(GetRuntimeType("umamusume.dll", "Gallop", "OutlineColorType"), L"White")));
 		il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*)>(textCommon->klass, "UpdateOutline", 0)->methodPointer(textCommon);
-		
-		numTransform.anchoredPosition({ -80, 10 });
+
+		numTransform.anchoredPosition({ -100, 11 });
 		numTransform.anchorMax({ 0, 0.5 });
 		numTransform.anchorMin({ 0, 0.5 });
-		numTransform.sizeDelta({ 60, 50 });
+		numTransform.sizeDelta({ 80, 50 });
 		numTransform.pivot({ 0, 0.5 });
+
+		auto parent = numTransform.GetParent();
+
+		auto clonedText = UnityEngine::GameObject(UnityEngine::Object::Internal_CloneSingle(numTransform.gameObject()));
+		UnityEngine::Object::Name(clonedText, il2cpp_string_new((name + "_total"s).data()));
+		auto totalNumTransform = static_cast<UnityEngine::RectTransform>(clonedText.transform());
+
+		totalNumTransform.SetParent(parent);
+
+		auto array1 = getComponents(clonedText, reinterpret_cast<Il2CppType*>(GetRuntimeType(
+			"umamusume.dll", "Gallop", "TextCommon")), true, true, false, false, nullptr);
+
+		auto textCommon1 = array1->vector[0];
+
+		SetTextCommonText(textCommon1, L"1:00");
+
+		il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, int)>(textCommon1->klass, "set_OutlineSize", 1)->methodPointer(textCommon1, GetEnumValue(ParseEnum(GetRuntimeType("umamusume.dll", "Gallop", "OutlineSizeType"), L"M")));
+		il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, int)>(textCommon1->klass, "set_OutlineColor", 1)->methodPointer(textCommon1, GetEnumValue(ParseEnum(GetRuntimeType("umamusume.dll", "Gallop", "OutlineColorType"), L"White")));
+		il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*)>(textCommon1->klass, "UpdateOutline", 0)->methodPointer(textCommon1);
+
+		totalNumTransform.anchoredPosition({ 100, 11 });
+		totalNumTransform.anchorMax({ 1, 0.5 });
+		totalNumTransform.anchorMin({ 1, 0.5 });
+		totalNumTransform.sizeDelta({ 80, 50 });
+		totalNumTransform.pivot({ 1, 0.5 });
 
 		auto gameObject = sliderTransform.gameObject();
 
@@ -9896,216 +10250,14 @@ namespace
 				{
 					auto value = GetOptionSliderValue("live_slider");
 
-					auto director = GetSingletonInstance(il2cpp_symbols::get_class("umamusume.dll", "Gallop.Live", "Director"));
-					if (director)
-					{
-						bool isPauseLive = il2cpp_class_get_method_from_name_type<bool (*)()>(director->klass, "IsPauseLive", 0)->methodPointer();
-
-						auto _liveCurrentTimeField = il2cpp_class_get_field_from_name_wrap(director->klass, "_liveCurrentTime");
-						il2cpp_field_set_value(director, _liveCurrentTimeField, &value);
-
-						auto LiveTimeController = il2cpp_class_get_method_from_name_type<Il2CppObject * (*)(Il2CppObject*)>(director->klass, "get_LiveTimeController", 0)->methodPointer(director);
-						auto _elapsedTimeField = il2cpp_class_get_field_from_name_wrap(LiveTimeController->klass, "_elapsedTime");
-						il2cpp_field_set_value(LiveTimeController, _elapsedTimeField, &value);
-						il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, float)>(LiveTimeController->klass, "set_CurrentTime", 1)->methodPointer(LiveTimeController, value);
-
-						auto AudioManager = GetSingletonInstance(il2cpp_symbols::get_class("umamusume.dll", "Gallop", "AudioManager"));
-						auto CriAudioManager = il2cpp_class_get_method_from_name_type<Il2CppObject * (*)(Il2CppObject*)>(AudioManager->klass, "get_CriAudioManager", 0)->methodPointer(AudioManager);
-
-						auto audioCtrlDictField = il2cpp_class_get_field_from_name_wrap(CriAudioManager->klass, "audioCtrlDict");
-						Il2CppObject* audioCtrlDict;
-						il2cpp_field_get_value(CriAudioManager, audioCtrlDictField, &audioCtrlDict);
-
-						auto _songPlaybackField = il2cpp_class_get_field_from_name_wrap(AudioManager->klass, "_songPlayback");
-						Cute::Cri::AudioPlayback _songPlayback;
-						il2cpp_field_get_value(AudioManager, _songPlaybackField, &_songPlayback);
-
-						auto _songCharaPlaybacksField = il2cpp_class_get_field_from_name_wrap(AudioManager->klass, "_songCharaPlaybacks");
-						Il2CppArraySize_t<Cute::Cri::AudioPlayback>* _songCharaPlaybacks;
-						il2cpp_field_get_value(AudioManager, _songCharaPlaybacksField, &_songCharaPlaybacks);
-
-						void** params = new void* [1];
-						params[0] = &_songPlayback.soundGroup;
-
-						Il2CppException* exception;
-
-						auto audioCtrl = il2cpp_runtime_invoke(il2cpp_class_get_method_from_name(audioCtrlDict->klass, "get_Item", 1), audioCtrlDict, params, &exception);
-
-						delete[] params;
-
-						if (exception)
-						{
-							wcout << exception->message->chars << endl;
-						}
-
-						auto poolField = il2cpp_class_get_field_from_name_wrap(audioCtrl->klass, "pool");
-						Il2CppObject* pool;
-						il2cpp_field_get_value(audioCtrl, poolField, &pool);
-
-						if (pool)
-						{
-							auto method = il2cpp_symbols::find_method<int (*)(Il2CppObject*, Cute::Cri::AudioPlayback)>("Cute.Cri.Assembly.dll", "Cute.Cri", "CuteAudioSourcePool", [](const MethodInfo* info)
-								{
-									if (info->name == "FindSourceIndex"s && info->parameters[0].name == "playback"s)
-									{
-										return true;
-									}
-
-									return false;
-								});
-
-							auto sourceIndex = method(pool, _songPlayback);
-
-							params = new void* [1];
-							params[0] = &sourceIndex;
-
-							auto cuteAudioSource = il2cpp_runtime_invoke(il2cpp_class_get_method_from_name(pool->klass, "get_Item", 1), pool, params, &exception);
-
-							delete[] params;
-
-							if (exception)
-							{
-								wcout << exception->message->chars << endl;
-							}
-
-							if (cuteAudioSource)
-							{
-								auto sourceListField = il2cpp_class_get_field_from_name_wrap(cuteAudioSource->klass, "sourceList");
-								Il2CppObject* sourceList;
-								il2cpp_field_get_value(cuteAudioSource, sourceListField, &sourceList);
-
-								auto usingIndexField = il2cpp_class_get_field_from_name_wrap(cuteAudioSource->klass, "usingIndex");
-								int usingIndex;
-								il2cpp_field_get_value(cuteAudioSource, usingIndexField, &usingIndex);
-
-								params = new void* [1];
-								params[0] = &usingIndex;
-
-								auto AtomSource = il2cpp_runtime_invoke(il2cpp_class_get_method_from_name(sourceList->klass, "get_Item", 1), sourceList, params, &exception);
-
-								delete[] params;
-
-								if (exception)
-								{
-									wcout << exception->message->chars << endl;
-								}
-
-								auto player = il2cpp_class_get_method_from_name_type<Il2CppObject * (*)(Il2CppObject*)>(AtomSource->klass, "get_player", 0)->methodPointer(AtomSource);
-								il2cpp_class_get_method_from_name_type<CriWare::CriAtomExPlayback(*)(Il2CppObject*)>(player->klass, "Stop", 0)->methodPointer(player);
-								il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, long)>(player->klass, "SetStartTime", 1)->methodPointer(player, static_cast<long>(roundf(value * 1000.0f)));
-								auto playback = il2cpp_class_get_method_from_name_type<CriWare::CriAtomExPlayback(*)(Il2CppObject*)>(player->klass, "Start", 0)->methodPointer(player);
-
-
-								if (isPauseLive)
-								{
-									il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*)>(player->klass, "Pause", 0)->methodPointer(player);
-								}
-
-								_songPlayback.criAtomExPlayback = playback;
-								il2cpp_field_set_value(AudioManager, _songPlaybackField, &_songPlayback);
-								il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, CriWare::CriAtomExPlayback)>(AtomSource->klass, "set_Playback", 1)->methodPointer(AtomSource, playback);
-							}
-						}
-
-
-						if (_songCharaPlaybacks)
-						{
-							for (int i = 0; i < _songCharaPlaybacks->max_length; i++)
-							{
-								auto charaPlayback = _songCharaPlaybacks->vector[i];
-
-								void** params = new void* [1];
-								params[0] = &charaPlayback.soundGroup;
-
-								Il2CppException* exception;
-
-								auto audioCtrl = il2cpp_runtime_invoke(il2cpp_class_get_method_from_name(audioCtrlDict->klass, "get_Item", 1), audioCtrlDict, params, &exception);
-
-								delete[] params;
-
-								if (exception)
-								{
-									wcout << exception->message->chars << endl;
-									continue;
-								}
-
-								auto poolField = il2cpp_class_get_field_from_name_wrap(audioCtrl->klass, "pool");
-								Il2CppObject* pool;
-								il2cpp_field_get_value(audioCtrl, poolField, &pool);
-
-								if (pool)
-								{
-									auto method = il2cpp_symbols::find_method<int (*)(Il2CppObject*, Cute::Cri::AudioPlayback)>("Cute.Cri.Assembly.dll", "Cute.Cri", "CuteAudioSourcePool", [](const MethodInfo* info)
-										{
-											if (info->name == "FindSourceIndex"s && info->parameters[0].name == "playback"s)
-											{
-												return true;
-											}
-
-											return false;
-										});
-
-									auto sourceIndex = method(pool, charaPlayback);
-
-									params = new void* [1];
-									params[0] = &sourceIndex;
-
-									auto cuteAudioSource = il2cpp_runtime_invoke(il2cpp_class_get_method_from_name(pool->klass, "get_Item", 1), pool, params, &exception);
-
-									delete[] params;
-
-									if (exception)
-									{
-										wcout << exception->message->chars << endl;
-										continue;
-									}
-
-									if (cuteAudioSource)
-									{
-										auto sourceListField = il2cpp_class_get_field_from_name_wrap(cuteAudioSource->klass, "sourceList");
-										Il2CppObject* sourceList;
-										il2cpp_field_get_value(cuteAudioSource, sourceListField, &sourceList);
-
-										auto usingIndexField = il2cpp_class_get_field_from_name_wrap(cuteAudioSource->klass, "usingIndex");
-										int usingIndex;
-										il2cpp_field_get_value(cuteAudioSource, usingIndexField, &usingIndex);
-
-										params = new void* [1];
-										params[0] = &usingIndex;
-
-										auto AtomSource = il2cpp_runtime_invoke(il2cpp_class_get_method_from_name(sourceList->klass, "get_Item", 1), sourceList, params, &exception);
-
-										delete[] params;
-
-										if (exception)
-										{
-											wcout << exception->message->chars << endl;
-											continue;
-										}
-
-										auto player = il2cpp_class_get_method_from_name_type<Il2CppObject * (*)(Il2CppObject*)>(AtomSource->klass, "get_player", 0)->methodPointer(AtomSource);
-										il2cpp_class_get_method_from_name_type<CriWare::CriAtomExPlayback(*)(Il2CppObject*)>(player->klass, "Stop", 0)->methodPointer(player);
-										il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, long)>(player->klass, "SetStartTime", 1)->methodPointer(player, static_cast<long>(roundf(value * 1000.0f)));
-										auto playback = il2cpp_class_get_method_from_name_type<CriWare::CriAtomExPlayback(*)(Il2CppObject*)>(player->klass, "Start", 0)->methodPointer(player);
-
-										if (isPauseLive)
-										{
-											il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*)>(player->klass, "Pause", 0)->methodPointer(player);
-										}
-
-										charaPlayback.criAtomExPlayback = playback;
-									}
-								}
-							}
-						}
-					}
+					MoveLivePlayback(value);
 				});
 			auto sliderTransform = static_cast<UnityEngine::RectTransform>(slider.transform());
-			sliderTransform.anchoredPosition({ 0, 44 });
+			sliderTransform.anchoredPosition({ 0, 28 });
 			sliderTransform.anchorMax({ 1, 0 });
 			sliderTransform.anchorMin({ 0, 0 });
-			sliderTransform.pivot({ 0.25, 0.5 });
-			sliderTransform.sizeDelta({ -480, 24 });
+			sliderTransform.pivot({ 0.2, 0.5 });
+			sliderTransform.sizeDelta({ -520, 24 });
 			sliderTransform.SetParent(contentsRoot, false);
 		}
 
@@ -12418,13 +12570,13 @@ namespace
 
 				if (controller && controller->klass->name == "LiveViewController"s)
 				{
-					auto sliderCommon = GetOptionSlider("live_slider");
-
 					auto director = GetSingletonInstance(il2cpp_symbols::get_class("umamusume.dll", "Gallop.Live", "Director"));
-					if (sliderCommon && director)
+					if (director)
 					{
 						auto LiveCurrentTime = il2cpp_class_get_method_from_name_type<float (*)(Il2CppObject*)>(director->klass, "get_LiveCurrentTime", 0)->methodPointer(director);
 						auto LiveTotalTime = il2cpp_class_get_method_from_name_type<float (*)(Il2CppObject*)>(director->klass, "get_LiveTotalTime", 0)->methodPointer(director);
+
+						auto sliderCommon = GetOptionSlider("live_slider");
 
 						auto textCommon = GetTextCommon("live_slider");
 
@@ -12439,10 +12591,35 @@ namespace
 							SetTextCommonText(textCommon, (to_wstring(timeMin) + L":" + str.str()).data());
 						}
 
+						auto textCommonTotal = GetTextCommon("live_slider_total");
+
+						if (textCommonTotal)
+						{
+							auto timeMin = static_cast<int>(LiveTotalTime / 60);
+							auto timeSec = static_cast<int>(fmodf(LiveTotalTime, 60));
+
+							wostringstream str;
+							str << setw(2) << setfill(L'0') << timeSec;
+
+							SetTextCommonText(textCommonTotal, (to_wstring(timeMin) + L":" + str.str()).data());
+						}
+
+						if (config::live_playback_loop)
+						{
+							if (LiveCurrentTime >= LiveTotalTime - 0.1f)
+							{
+								LiveCurrentTime = 0;
+								MoveLivePlayback(LiveCurrentTime);
+							}
+						}
+
 						try
 						{
-							il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, float)>(sliderCommon->klass, "set_maxValue", 1)->methodPointer(sliderCommon, LiveTotalTime);
-							il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, float)>(sliderCommon->klass, "SetValueWithoutNotify", 1)->methodPointer(sliderCommon, LiveCurrentTime);
+							if (sliderCommon)
+							{
+								il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, float)>(sliderCommon->klass, "set_maxValue", 1)->methodPointer(sliderCommon, LiveTotalTime);
+								il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, float)>(sliderCommon->klass, "SetValueWithoutNotify", 1)->methodPointer(sliderCommon, LiveCurrentTime);
+							}
 						}
 						catch (const Il2CppExceptionWrapper& e)
 						{
@@ -14854,7 +15031,7 @@ bool init_hook_base()
 	MH_EnableHook(UnityMain_addr);
 
 	return true;
-	}
+}
 
 bool init_hook()
 {

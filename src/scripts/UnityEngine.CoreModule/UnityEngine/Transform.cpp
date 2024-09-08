@@ -4,11 +4,14 @@
 
 void* SetParent_addr = nullptr;
 
+void* GetParent_addr = nullptr;
+
 void* FindRelativeTransformWithPath_addr = nullptr;
 
 static void InitAddress()
 {
 	SetParent_addr = il2cpp_resolve_icall("UnityEngine.Transform::SetParent()");
+	GetParent_addr = il2cpp_resolve_icall("UnityEngine.Transform::GetParent()");
 	FindRelativeTransformWithPath_addr = il2cpp_resolve_icall("UnityEngine.Transform::FindRelativeTransformWithPath()");
 }
 
@@ -22,6 +25,12 @@ namespace UnityEngine
 	void Transform::SetParent(Il2CppObject* parent, bool worldPositionStays)
 	{
 		reinterpret_cast<void (*)(Il2CppObject*, Il2CppObject*, bool)>(SetParent_addr)(instance, parent, worldPositionStays);
+	}
+
+	Transform Transform::GetParent()
+	{
+		auto obj = reinterpret_cast<Il2CppObject* (*)(Il2CppObject*)>(GetParent_addr)(instance);
+		return Transform(obj);
 	}
 
 	Transform Transform::FindRelativeTransformWithPath(Transform transform, Il2CppString* path, bool isActiveOnly)

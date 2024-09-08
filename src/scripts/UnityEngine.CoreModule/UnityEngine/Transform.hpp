@@ -20,6 +20,8 @@ namespace UnityEngine
 
 		void SetParent(Il2CppObject* parent, bool worldPositionStays);
 
+		Transform GetParent();
+
 		Transform Find(Il2CppString* name)
 		{
 			return FindRelativeTransformWithPath(instance, name, false);

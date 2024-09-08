@@ -128,6 +128,11 @@ namespace LocalifySettings
 			return isKor ? L"재생 슬라이더 항상 표시" : L"プレイスライダーを常に表示";
 		}
 
+		if (id == "live_playback_loop")
+		{
+			return isKor ? L"반복 재생" : L"ループプレイ";
+		}
+
 		if (id == "unlock_live_chara_info")
 		{
 			return isKor ? L"미해금/미해방/미공개 곡 및 우마무스메와 드레스를 사용 가능하게 변경합니다." : L"未解禁/未解放/未公開曲及びウマ娘とドレスを使えるように変更します。";

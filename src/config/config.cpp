@@ -51,6 +51,7 @@ namespace config
 	int champions_live_resource_id = 1;
 	int champions_live_year = 2023;
 	bool live_slider_always_show = false;
+	bool live_playback_loop = false;
 	/*
 	 * ModeNormal 0
 	 * Mode60FPS 1
@@ -278,6 +279,8 @@ if (document.HasMember(L##_name_) && document[L##_name_].Is##_type_())\
 			GetValue("characterSystemTextCaptionPositionY", Float, character_system_text_caption_position_y);
 
 			GetValue("liveSliderAlwaysShow", Bool, live_slider_always_show);
+			
+			GetValue("livePlaybackLoop", Bool, live_playback_loop);
 
 			GetValue("championsLiveShowText", Bool, champions_live_show_text);
 
