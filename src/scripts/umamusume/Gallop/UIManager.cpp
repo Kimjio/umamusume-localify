@@ -215,22 +215,8 @@ static void ChangeResizeUIForPC_hook(Il2CppObject* _this, int width, int height)
 	}
 }
 
-static void LockGameCanvas_hook(Il2CppObject* _this)
-{
-	cout << "LockGameCanvas" << endl;
-	PrintStackTrace();
-}
-
-static void UnlockGameCanvas_hook(Il2CppObject* _this)
-{
-	cout << "UnlockGameCanvas" << endl;
-	PrintStackTrace();
-}
-
 static Il2CppObject* WaitResizeUI_hook(Il2CppObject* _this, bool isPortrait, bool isShowOrientationGuide)
 {
-	cout << "WaitResizeUI_hook" << endl;
-	PrintStackTrace();
 	if (config::freeform_window)
 	{
 		auto yield = il2cpp_object_new(il2cpp_symbols::get_class("UnityEngine.CoreModule.dll", "UnityEngine", "WaitWhile"));
@@ -293,8 +279,6 @@ static void HookMethods()
 	{
 		ADD_HOOK(GetCameraSizeByOrientation, "Gallop.UIManager::GetCameraSizeByOrientation at %p\n");
 		ADD_HOOK(get_DefaultResolution, "Gallop.UIManager::get_DefaultResolution at %p\n");
-		// ADD_HOOK(LockGameCanvas, "Gallop.UIManager::LockGameCanvas at %p\n");
-		// ADD_HOOK(UnlockGameCanvas, "Gallop.UIManager::UnlockGameCanvas at %p\n");
 	}
 }
 
@@ -495,6 +479,12 @@ namespace Gallop
 #ifdef _MSC_VER
 	void UIManager::ChangeResizeUIForPC(int width, int height)
 	{
+		if (ChangeResizeUIForPC_orig)
+		{
+			ChangeResizeUIForPC_hook(instance, width, height);
+			return;
+		}
+
 		reinterpret_cast<void (*)(Il2CppObject*, int, int)>(ChangeResizeUIForPC_addr)(instance, width, height);
 	}
 #endif
