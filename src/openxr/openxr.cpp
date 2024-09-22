@@ -6,6 +6,7 @@
 #include "il2cpp/il2cpp-api-functions.hpp"
 #include "string_utils.hpp"
 
+#include "scripts/ScriptInternal.hpp"
 #include "scripts/UnityEngine.CoreModule/UnityEngine/BeforeRenderHelper.hpp"
 
 namespace Unity
@@ -333,34 +334,6 @@ namespace Unity
 		}
 	};
 
-	template<typename... T, typename R>
-	Il2CppDelegate* CreateUnityActionStatic(R(*fn)(void*, T...))
-	{
-		const auto delegateClass = il2cpp_symbols::get_class("UnityEngine.CoreModule.dll", "UnityEngine.Events", "UnityAction");
-		auto delegate = reinterpret_cast<Il2CppDelegate*>(il2cpp_object_new(delegateClass));
-		delegate->method_ptr = reinterpret_cast<Il2CppMethodPointer>(fn);
-
-		const auto methodInfo = new MethodInfo{};
-		methodInfo->name = "AnonymousStaticMethod";
-		methodInfo->methodPointer = delegate->method_ptr;
-		methodInfo->klass = il2cpp_symbols::get_class("mscorlib.dll", "System.Reflection", "MonoMethod");
-		// methodInfo->invoker_method = GetInvokerMethod(fn, index_sequence_for<T...>{});
-		methodInfo->slot = kInvalidIl2CppMethodSlot;
-		methodInfo->flags = METHOD_ATTRIBUTE_STATIC;
-		methodInfo->parameters_count = sizeof...(T);
-
-		delegate->method = reinterpret_cast<const MethodInfo*>(il2cpp_method_get_object(methodInfo, methodInfo->klass));
-		// delegate->invoke_impl = il2cpp_class_get_method_from_name(delegateClass, "Invoke", IgnoreNumberOfArguments)->invoker_method;
-
-		return delegate;
-	}
-
-	template<typename R>
-	Il2CppDelegate* CreateUnityActionStatic(R(*fn)())
-	{
-		return CreateUnityActionStatic(reinterpret_cast<R(*)(void*)>(fn));
-	}
-
 	void OpenXR::InitLibrary(IUnityInterfaces* interfaces)
 	{
 		auto productName = il2cpp_resolve_icall_type<Il2CppString * (*)()>("UnityEngine.Application::get_productName")()->chars;
@@ -518,11 +491,11 @@ namespace Unity
 
 		auto orderBlock = reinterpret_cast<UnityEngine::BeforeRenderHelper::OrderBlock*>(il2cpp_object_new(orderClass));
 		orderBlock->order = 0;
-		orderBlock->callback = CreateUnityActionStatic(*([]()
+		orderBlock->callback = &CreateUnityActionStatic(*([]()
 			{
 				cout << "BeforeRender" << endl;
 				Internal_PumpMessageLoop();
-			}));
+			}))->delegate;
 
 		il2cpp_array_setref(array2, array1->max_length, orderBlock);
 

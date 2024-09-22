@@ -98,6 +98,7 @@ namespace config
 	extern bool unlock_live_chara;
 	extern bool notification_tp;
 	extern bool notification_rp;
+	extern bool notification_jobs;
 	extern bool msgpack_notifier;
 	extern bool msgpack_notifier_request;
 	extern wstring msgpack_notifier_host;

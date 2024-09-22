@@ -68,6 +68,7 @@ namespace config
 	bool unlock_live_chara = false;
 	bool notification_tp = false;
 	bool notification_rp = false;
+	bool notification_jobs = false;
 	bool msgpack_notifier = false;
 	bool msgpack_notifier_request = false;
 	wstring msgpack_notifier_host = L"http://localhost:4693";
@@ -338,6 +339,8 @@ if (document.HasMember(L##_name_) && document[L##_name_].Is##_type_())\
 			GetValue("notificationTp", Bool, notification_tp);
 
 			GetValue("notificationRp", Bool, notification_rp);
+
+			GetValue("notificationJobs", Bool, notification_jobs);
 
 			GetValue("msgpackNotifier", Bool, msgpack_notifier);
 

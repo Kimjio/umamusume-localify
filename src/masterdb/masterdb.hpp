@@ -1,4 +1,8 @@
 #pragma once
+#include <string>
+#include <tuple>
+#include <vector>
+
 #include <SQLiteCpp/SQLiteCpp.h>
 
 #include "il2cpp/il2cpp_symbols.hpp"
@@ -92,5 +96,50 @@ namespace MasterDB
 		delete statement;
 
 		return "";
+	}
+
+	tuple<int, int> GetJobsInfo(int rewardId)
+	{
+		if (!masterDB)
+		{
+			InitMasterDB();
+		}
+
+		auto statement = new SQLite::Statement(*masterDB, R"(SELECT place_id, genre_id FROM jobs_reward WHERE "id" = ?1)");
+		statement->bind(1, rewardId);
+
+		while (statement->executeStep())
+		{
+			auto placeId = statement->getColumn(0).getInt();
+			auto genreId = statement->getColumn(1).getInt();
+			delete statement;
+			return tuple{ placeId, genreId };
+		}
+
+		delete statement;
+
+		return tuple{ 0, 0 };
+	}
+
+	int GetJobsPlaceRaceTrackId(int placeId)
+	{
+		if (!masterDB)
+		{
+			InitMasterDB();
+		}
+
+		auto statement = new SQLite::Statement(*masterDB, R"(SELECT race_track_id FROM jobs_place WHERE "id" = ?1)");
+		statement->bind(1, placeId);
+
+		while (statement->executeStep())
+		{
+			auto raceTrackId = statement->getColumn(0).getInt();
+			delete statement;
+			return raceTrackId;
+		}
+
+		delete statement;
+
+		return 0;
 	}
 }

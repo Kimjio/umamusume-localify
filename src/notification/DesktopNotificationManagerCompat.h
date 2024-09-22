@@ -70,9 +70,13 @@ namespace DesktopNotificationManagerCompat
 
     HRESULT ShowToastNotification(const wchar_t* title, const wchar_t* content, const wchar_t* iconPath, bool suppressPopup = false);
 
-    HRESULT AddScheduledToastNotification(const wchar_t* title, const wchar_t* content, const wchar_t* tag, const wchar_t* iconPath, int64_t epoch);
+    HRESULT ShowToastNotification(const wchar_t* title, const wchar_t* content, const wchar_t* tag, const wchar_t* iconPath, bool removeHistory = false, bool suppressPopup = false);
+
+    HRESULT AddScheduledToastNotification(const wchar_t* title, const wchar_t* content, const wchar_t* tag, const wchar_t* iconPath, int64_t epoch, const wchar_t* group = L"Generic");
 
     HRESULT RemoveFromScheduleByTag(const wchar_t* tag);
+
+    HRESULT RemoveFromScheduleByGroup(const wchar_t* group);
 
     /// <summary>
     /// Gets the DesktopNotificationHistoryCompat object. You must have called RegisterActivator first (and also RegisterAumidAndComServer if you're a classic Win32 app), or this will throw an exception.

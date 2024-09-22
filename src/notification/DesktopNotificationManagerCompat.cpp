@@ -294,11 +294,12 @@ namespace DesktopNotificationManagerCompat
 			return S_OK;
 		}
 
-		ComPtr<IXmlDocument> doc;
-		RETURN_IF_FAILED(CreateXmlDocumentFromString(
-			LR"(<toast><visual><binding template='ToastGeneric'>
+		wstring templateString = LR"(<toast><visual><binding template='ToastGeneric'>
             <text>New Notification</text>
-        </binding></visual></toast>)", &doc));
+        </binding></visual></toast>)";
+
+		ComPtr<IXmlDocument> doc;
+		RETURN_IF_FAILED(CreateXmlDocumentFromString(templateString.data(), &doc));
 
 		ComPtr<ABI::IToastNotifier> notifier;
 		RETURN_IF_FAILED(CreateToastNotifier(&notifier));
@@ -341,20 +342,20 @@ namespace DesktopNotificationManagerCompat
 
 		if (!iconPath)
 		{
-			RETURN_IF_FAILED(CreateXmlDocumentFromString(
-				(LR"(<toast><visual><binding template='ToastGeneric'>
+			wstring templateString = LR"(<toast><visual><binding template='ToastGeneric'>
 				<text>)"s + title + LR"(</text>
 				<text>)" + content + LR"(</text>
-			</binding></visual></toast>)").data(), &doc));
+			</binding></visual></toast>)";
+			RETURN_IF_FAILED(CreateXmlDocumentFromString(templateString.data(), &doc));
 		}
 		else
 		{
-			RETURN_IF_FAILED(CreateXmlDocumentFromString(
-				(LR"(<toast><visual><binding template='ToastGeneric'>
+			wstring templateString = LR"(<toast><visual><binding template='ToastGeneric'>
 				<image placement='appLogoOverride' src=')"s + L"file://" + iconPath + LR"('/>
 				<text>)" + title + LR"(</text>
 				<text>)" + content + LR"(</text>
-			</binding></visual></toast>)").data(), &doc));
+			</binding></visual></toast>)";
+			RETURN_IF_FAILED(CreateXmlDocumentFromString(templateString.data(), &doc));
 		}
 
 		// Create the notifier
@@ -380,19 +381,70 @@ namespace DesktopNotificationManagerCompat
 		return notifier->Show(toast.Get());
 	}
 
-	HRESULT AddScheduledToastNotification(const wchar_t* title, const wchar_t* content, const wchar_t* tag, const wchar_t* iconPath, int64_t epoch)
+	HRESULT ShowToastNotification(const wchar_t* title, const wchar_t* content, const wchar_t* tag, const wchar_t* iconPath, bool removeHistory, bool suppressPopup)
+	{
+		RETURN_IF_FAILED(EnsureRegistered());
+
+		ComPtr<IXmlDocument> doc;
+
+		if (!iconPath)
+		{
+			wstring templateString = LR"(<toast><visual><binding template='ToastGeneric'>
+				<text>)"s + title + LR"(</text>
+				<text>)" + content + LR"(</text>
+			</binding></visual></toast>)";
+			RETURN_IF_FAILED(CreateXmlDocumentFromString(templateString.data(), &doc));
+		}
+		else
+		{
+			wstring templateString = LR"(<toast><visual><binding template='ToastGeneric'>
+				<image placement='appLogoOverride' src=')"s + L"file://" + iconPath + LR"('/>
+				<text>)" + title + LR"(</text>
+				<text>)" + content + LR"(</text>
+			</binding></visual></toast>)";
+			RETURN_IF_FAILED(CreateXmlDocumentFromString(templateString.data(), &doc));
+		}
+
+		// Create the notifier
+		// Desktop apps must use the compat method to create the notifier.
+		ComPtr<ABI::IToastNotifier> notifier;
+		RETURN_IF_FAILED(CreateToastNotifier(&notifier));
+
+		if (removeHistory)
+		{
+			unique_ptr<DesktopNotificationHistoryCompat> history;
+			RETURN_IF_FAILED(get_History(&history));
+			history->RemoveGroupedTag(tag, L"Generic");
+		}
+
+		// Create the notification itself (using helper method from compat library)
+		ComPtr<ABI::IToastNotification> toast;
+		RETURN_IF_FAILED(CreateToastNotification(doc.Get(), &toast));
+
+		ComPtr<ABI::IToastNotification2> toast2;
+		RETURN_IF_FAILED(toast.As(&toast2));
+
+		toast2.Get()->put_Group(HStringReference(L"Generic").Get());
+		toast2.Get()->put_Tag(HStringReference(tag).Get());
+		toast2.Get()->put_SuppressPopup(suppressPopup);
+
+		return notifier->Show(toast.Get());
+	}
+
+	HRESULT AddScheduledToastNotification(const wchar_t* title, const wchar_t* content, const wchar_t* tag, const wchar_t* iconPath, int64_t epoch, const wchar_t* group)
 	{
 		RETURN_IF_FAILED(EnsureRegistered());
 
 		RETURN_IF_FAILED(PreRegisterIdentityLessApp());
 
-		ComPtr<IXmlDocument> doc;
-		RETURN_IF_FAILED(CreateXmlDocumentFromString(
-			(LR"(<toast><visual><binding template='ToastGeneric'>
+		wstring templateString = LR"(<toast><visual><binding template='ToastGeneric'>
             <image placement='appLogoOverride' src=')"s + L"file://" + iconPath + LR"('/>
             <text>)" + title + LR"(</text>
             <text>)" + content + LR"(</text>
-        </binding></visual></toast>)").data(), &doc));
+        </binding></visual></toast>)";
+
+		ComPtr<IXmlDocument> doc;
+		RETURN_IF_FAILED(CreateXmlDocumentFromString(templateString.data(), &doc));
 
 		// Create the notifier
 		// Desktop apps must use the compat method to create the notifier.
@@ -415,7 +467,7 @@ namespace DesktopNotificationManagerCompat
 		ComPtr<ABI::IScheduledToastNotification2> toast2;
 		RETURN_IF_FAILED(toast.As(&toast2));
 
-		toast2.Get()->put_Group(HStringReference(L"Generic").Get());
+		toast2.Get()->put_Group(HStringReference(group).Get());
 		toast2.Get()->put_Tag(HStringReference(tag).Get());
 
 		return notifier->AddToSchedule(toast.Get());
@@ -449,6 +501,42 @@ namespace DesktopNotificationManagerCompat
 			auto tag1 = WindowsGetStringRawBuffer(hTag, nullptr);
 
 			if (tag1 == wstring(tag))
+			{
+				RETURN_IF_FAILED(notifier.Get()->RemoveFromSchedule(toast));
+			}
+		}
+
+		return S_OK;
+	}
+
+	HRESULT RemoveFromScheduleByGroup(const wchar_t* group)
+	{
+		RETURN_IF_FAILED(EnsureRegistered());
+
+		// Create the notifier
+		// Desktop apps must use the compat method to create the notifier.
+		ComPtr<ABI::IToastNotifier> notifier;
+		RETURN_IF_FAILED(CreateToastNotifier(&notifier));
+
+		ABI::Windows::Foundation::Collections::IVectorView<ABI::ScheduledToastNotification*>* toasts;
+		RETURN_IF_FAILED(notifier.Get()->GetScheduledToastNotifications(&toasts));
+
+		uint32_t size;
+		RETURN_IF_FAILED(toasts->get_Size(&size));
+		for (int i = 0; i < size; i++)
+		{
+			ABI::IScheduledToastNotification* toast;
+			RETURN_IF_FAILED(toasts->GetAt(i, &toast));
+
+			ABI::IScheduledToastNotification2* toast2;
+			RETURN_IF_FAILED(toast->QueryInterface(&toast2));
+
+			HSTRING hGroup;
+			RETURN_IF_FAILED(toast2->get_Group(&hGroup));
+
+			auto group1 = WindowsGetStringRawBuffer(hGroup, nullptr);
+
+			if (group1 == wstring(group))
 			{
 				RETURN_IF_FAILED(notifier.Get()->RemoveFromSchedule(toast));
 			}

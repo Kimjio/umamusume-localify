@@ -8,6 +8,31 @@
 
 using namespace std;
 
+// copy-pasted from https://stackoverflow.com/questions/3418231/replace-part-of-a-string-with-another-string
+inline void replaceAll(std::string& str, const std::string& from, const std::string& to)
+{
+	if (from.empty())
+		return;
+	size_t start_pos = 0;
+	while ((start_pos = str.find(from, start_pos)) != std::string::npos)
+	{
+		str.replace(start_pos, from.length(), to);
+		start_pos += to.length(); // In case 'to' contains 'from', like replacing 'x' with 'yx'
+	}
+}
+
+inline void replaceAll(std::wstring& str, const std::wstring& from, const std::wstring& to)
+{
+	if (from.empty())
+		return;
+	size_t start_pos = 0;
+	while ((start_pos = str.find(from, start_pos)) != std::wstring::npos)
+	{
+		str.replace(start_pos, from.length(), to);
+		start_pos += to.length(); // In case 'to' contains 'from', like replacing 'x' with 'yx'
+	}
+}
+
 inline string wide_u8(const wstring& wstr)
 {
 #ifdef _MSC_VER

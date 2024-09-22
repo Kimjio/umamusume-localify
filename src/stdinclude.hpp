@@ -35,35 +35,12 @@
 #include "local/local.hpp"
 #include "logger/logger.hpp"
 
+constexpr auto Cryptographer_KEY = "r!I@mt8e5i=";
+
 // Unity App icon
 constexpr auto IDI_APP_ICON = 103;
 
 namespace {
-	// copy-pasted from https://stackoverflow.com/questions/3418231/replace-part-of-a-string-with-another-string
-	void replaceAll(std::string& str, const std::string& from, const std::string& to)
-	{
-		if (from.empty())
-			return;
-		size_t start_pos = 0;
-		while ((start_pos = str.find(from, start_pos)) != std::string::npos)
-		{
-			str.replace(start_pos, from.length(), to);
-			start_pos += to.length(); // In case 'to' contains 'from', like replacing 'x' with 'yx'
-		}
-	}
-
-	void replaceAll(std::wstring& str, const std::wstring& from, const std::wstring& to)
-	{
-		if (from.empty())
-			return;
-		size_t start_pos = 0;
-		while ((start_pos = str.find(from, start_pos)) != std::wstring::npos)
-		{
-			str.replace(start_pos, from.length(), to);
-			start_pos += to.length(); // In case 'to' contains 'from', like replacing 'x' with 'yx'
-		}
-	}
-
 	BOOL IsElevated() {
 		BOOL fRet = FALSE;
 		HANDLE hToken = NULL;
