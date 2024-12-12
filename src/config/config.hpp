@@ -21,6 +21,8 @@
 
 #include "il2cpp/il2cpp_symbols.hpp"
 
+#define _EXPERIMENTS
+
 typedef rapidjson::GenericDocument<rapidjson::UTF16<>> WDocument;
 typedef rapidjson::GenericValue<rapidjson::UTF16<>> WValue;
 typedef rapidjson::GenericStringBuffer<rapidjson::UTF16<>> WStringBuffer;
@@ -108,6 +110,7 @@ namespace config
 	extern wstring text_id_dict;
 
 	extern rapidjson::Document code_map;
+	extern rapidjson::Document fn_map;
 
 	extern bool has_json_parse_error;
 	extern wstring json_parse_error_msg;
@@ -123,6 +126,7 @@ namespace config
 		extern bool useDefaultFPS;
 		extern float ratioVertical;
 		extern float ratioHorizontal;
+		extern bool allowStart;
 	}
 
 	void read_config_init();

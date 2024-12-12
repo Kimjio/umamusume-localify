@@ -96,6 +96,28 @@ FieldInfo* il2cpp_class_get_field_from_name_wrap(Il2CppClass* klass, const char*
 	return il2cpp_class_get_field_from_name(klass, name);;
 }
 
+std::string il2cpp_fn_name(const char* name)
+{
+	if (config::fn_map.IsNull() || config::fn_map.HasParseError())
+	{
+		return name;
+	}
+
+	if (!config::fn_map.HasMember(name))
+	{
+		return name;
+	}
+
+	auto mapped = config::fn_map[name].GetString();
+
+	if (mapped)
+	{
+		return mapped;
+	}
+
+	return name;
+}
+
 namespace il2cpp_symbols
 {
 	Il2CppDomain* il2cpp_domain = nullptr;
@@ -121,7 +143,7 @@ namespace il2cpp_symbols
 
 	void init_functions(HMODULE game_module)
 	{
-#define DO_API(r, n, p) n = reinterpret_cast<decltype(n)>(GetProcAddress(game_module, #n))
+#define DO_API(r, n, p) n = reinterpret_cast<decltype(n)>(GetProcAddress(game_module, il2cpp_fn_name(#n).data()))
 #include "il2cpp-api-functions.h"
 #undef DO_API
 	}

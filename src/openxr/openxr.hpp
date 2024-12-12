@@ -204,7 +204,7 @@ namespace Unity
 
 			static uint64_t Internal_CreateAction(uint64_t actionSetId, const char* name, const char* localizedName, uint32_t actionType, GUID guid, const char** userPaths, uint32_t userPathCount, const char** usages, uint32_t usageCount);
 
-			static bool Internal_SuggestBindings(const char* interactionProfile, SerializedBinding** serializedBindings, uint32_t serializedBindingCount);
+			static bool Internal_SuggestBindings(const char* interactionProfile, Il2CppArraySize_t<SerializedBinding>* serializedBindings, uint32_t serializedBindingCount);
 
 			static bool Internal_AttachActionSets();
 

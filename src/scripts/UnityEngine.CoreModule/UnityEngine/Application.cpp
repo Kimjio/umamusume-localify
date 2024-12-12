@@ -16,6 +16,8 @@ void* get_unityVersion_addr = nullptr;
 
 void* get_companyName_addr = nullptr;
 
+void* get_productName_addr = nullptr;
+
 void* get_persistentDataPath_addr = nullptr;
 
 void* set_targetFrameRate_addr = nullptr;
@@ -57,6 +59,7 @@ static void InitAddress()
 	OpenURL_addr = il2cpp_symbols::get_method_pointer(ASSEMBLY_NAME, "UnityEngine", "Application", "OpenURL", 1);
 	get_unityVersion_addr = il2cpp_resolve_icall("UnityEngine.Application::get_unityVersion()");
 	get_companyName_addr = il2cpp_resolve_icall("UnityEngine.Application::get_companyName()");
+	get_productName_addr = il2cpp_resolve_icall("UnityEngine.Application::get_productName()");
 	get_persistentDataPath_addr = il2cpp_resolve_icall("UnityEngine.Application::get_persistentDataPath()");
 	set_targetFrameRate_addr = il2cpp_resolve_icall("UnityEngine.Application::set_targetFrameRate(System.Int32)");
 }
@@ -97,6 +100,11 @@ namespace UnityEngine
 	Il2CppString* Application::companyName()
 	{
 		return reinterpret_cast<Il2CppString * (*)()>(get_companyName_addr)();
+	}
+
+	Il2CppString* Application::productName()
+	{
+		return reinterpret_cast<Il2CppString * (*)()>(get_productName_addr)();
 	}
 
 	Il2CppString* Application::persistentDataPath()

@@ -8,6 +8,8 @@
 
 #include <vector>
 
+#include <string>
+
 #include "il2cpp-object-internals.h"
 
 template<typename T>
@@ -118,6 +120,8 @@ constexpr int IgnoreNumberOfArguments = -1;
 Il2CppString* il2cpp_string_new16(const wchar_t* value);
 
 FieldInfo* il2cpp_class_get_field_from_name_wrap(Il2CppClass* klass, const char* name);
+
+std::string il2cpp_fn_name(const char* name);
 
 namespace il2cpp_symbols
 {

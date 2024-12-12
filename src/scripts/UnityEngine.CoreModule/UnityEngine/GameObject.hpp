@@ -21,12 +21,18 @@ namespace UnityEngine
 
 		Il2CppObject* GetComponentByName(Il2CppString* name);
 
+		Il2CppObject* GetComponent(Il2CppObject* runtimeType);
+
 		Il2CppObject* AddComponent(Il2CppObject* runtimeType)
 		{
 			return Internal_AddComponentWithType(runtimeType);
 		}
 
 		Transform transform();
+
+		Il2CppString* tag();
+
+		void tag(Il2CppString* value);
 
 		void SetActive(bool value);
 

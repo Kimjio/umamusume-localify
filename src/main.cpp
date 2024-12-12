@@ -2,8 +2,7 @@
 
 #include "config/config.hpp"
 
-extern bool init_hook_base();
-extern bool init_hook();
+extern void init_hook();
 extern void uninit_hook();
 
 namespace
@@ -199,9 +198,7 @@ BOOL WINAPI DllMain(HINSTANCE, DWORD reason, LPVOID)
 			return TRUE;
 		}
 
-		filesystem::current_path(
-			module_path.parent_path()
-		);
+		filesystem::current_path(module_path.parent_path());
 
 		config::read_config_init();
 
@@ -288,14 +285,10 @@ BOOL WINAPI DllMain(HINSTANCE, DWORD reason, LPVOID)
 			DWORD dataSize = sizeof(data);
 			RegGetValueW(HKEY_CURRENT_USER, subKeyStream.str().data(), L"AgreeOwnYourRisk", RRF_RT_REG_DWORD, nullptr, &data, &dataSize);
 
-			if (!data)
-			{
-				ExitProcess(1);
-				return TRUE;
-			}
+			config::runtime::allowStart = data > 0;
 		}
 
-		init_hook_base();
+		init_hook();
 
 		thread init_thread([]() {
 			logger::init_logger();
@@ -305,8 +298,6 @@ BOOL WINAPI DllMain(HINSTANCE, DWORD reason, LPVOID)
 			{
 				local::load_textId_textdb(config::text_id_dict);
 			}
-
-			init_hook();
 			});
 		init_thread.detach();
 	}

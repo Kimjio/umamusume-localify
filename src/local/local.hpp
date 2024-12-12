@@ -15,4 +15,5 @@ namespace local
 	Il2CppString* get_localized_string(size_t hash_or_id);
 	Il2CppString* get_localized_string(const std::wstring& textIdName);
 	Il2CppString* get_localized_string(Il2CppString* str);
+	const char* get_localized_string(const char* str);
 };

@@ -6,7 +6,6 @@
 #include <random>
 #include <unordered_map>
 #include <queue>
-#include <SQLiteCpp/SQLiteCpp.h>
 #include <msgpack11.hpp>
 
 #include "config/config.hpp"

@@ -78,6 +78,7 @@ namespace config
 	wstring text_id_dict;
 
 	rapidjson::Document code_map;
+	rapidjson::Document fn_map;
 
 	bool has_json_parse_error = false;
 	wstring json_parse_error_msg;
@@ -93,6 +94,7 @@ namespace config
 		bool useDefaultFPS = false;
 		float ratioVertical = 0.5625f;
 		float ratioHorizontal = 1.7777778f;
+		bool allowStart = true;
 	}
 
 	void read_config_init()
@@ -145,35 +147,35 @@ if (document.HasMember(L##_name_) && document[L##_name_].Is##_type_())\
 				{
 					unlock_size = true;
 				}
-				);
+					);
 
 			GetValue("freeFormUiScalePortrait", Float, freeform_ui_scale_portrait,
 				if (freeform_ui_scale_portrait <= 0)
 				{
 					freeform_ui_scale_portrait = 0.5f;
 				}
-				);
+					);
 
 			GetValue("freeFormUiScaleLandscape", Float, freeform_ui_scale_landscape,
 				if (freeform_ui_scale_landscape <= 0)
 				{
 					freeform_ui_scale_landscape = 0.5f;
 				}
-				);
+					);
 
 			GetValue("initialWidth", Int, initial_width,
 				if (initial_width <= 72)
 				{
 					initial_width = -1;
 				}
-				);
+					);
 
 			GetValue("initialHeight", Int, initial_height,
 				if (initial_height <= 72)
 				{
 					initial_height = -1;
 				}
-				);
+					);
 
 			GetValue("uiAnimationScale", Float, resolution_3d_scale);
 
@@ -196,25 +198,25 @@ if (document.HasMember(L##_name_) && document[L##_name_].Is##_type_())\
 				{
 					graphics_quality = -1;
 				}
-				if (graphics_quality > 4)
-				{
-					graphics_quality = 3;
-				}
+			if (graphics_quality > 4)
+			{
+				graphics_quality = 3;
+			}
 				);
 
 			GetValue("antiAliasing", Int, anti_aliasing,
 				vector<int> options = { 0, 2, 4, 8, -1 };
-				anti_aliasing = options[find(options.begin(), options.end(), anti_aliasing) - options.begin()];
+			anti_aliasing = options[find(options.begin(), options.end(), anti_aliasing) - options.begin()];
 				);
 
 			GetValue("anisotropicFiltering", Int, anisotropic_filtering,
 				vector<int> options = { 0, 1, 2, -1 };
-				anisotropic_filtering = options[find(options.begin(), options.end(), anisotropic_filtering) - options.begin()];
+			anisotropic_filtering = options[find(options.begin(), options.end(), anisotropic_filtering) - options.begin()];
 				);
 
 			GetValue("vSyncCount", Int, vsync_count,
 				vector<int> options = { 0, 1, 2, 3, 4, -1 };
-				vsync_count = options[find(options.begin(), options.end(), vsync_count) - options.begin()];
+			vsync_count = options[find(options.begin(), options.end(), vsync_count) - options.begin()];
 				);
 
 			GetValue("uiLoadingShowOrientationGuide", Bool, ui_loading_show_orientation_guide);
@@ -244,7 +246,7 @@ if (document.HasMember(L##_name_) && document[L##_name_].Is##_type_())\
 						}
 					}
 				}
-				);
+					);
 
 			GetValue("replaceAssetBundleFilePath", String, replace_assetbundle_file_path);
 
@@ -257,7 +259,7 @@ if (document.HasMember(L##_name_) && document[L##_name_].Is##_type_())\
 						replace_assetbundle_file_paths.emplace_back(value);
 					}
 				}
-				);
+					);
 
 			GetValue("replaceTextDBPath", String, replace_text_db_path);
 
@@ -280,7 +282,7 @@ if (document.HasMember(L##_name_) && document[L##_name_].Is##_type_())\
 			GetValue("characterSystemTextCaptionPositionY", Float, character_system_text_caption_position_y);
 
 			GetValue("liveSliderAlwaysShow", Bool, live_slider_always_show);
-			
+
 			GetValue("livePlaybackLoop", Bool, live_playback_loop);
 
 			GetValue("championsLiveShowText", Bool, champions_live_show_text);
@@ -290,18 +292,18 @@ if (document.HasMember(L##_name_) && document[L##_name_].Is##_type_())\
 				{
 					champions_live_resource_id = 1;
 				}
-				);
+					);
 
 			GetValue("championsLiveYear", Int, champions_live_year);
 
 			GetValue("cySpringUpdateMode", Int, cyspring_update_mode,
 				vector<int> options = { 0, 1, 2, 3, -1 };
-				cyspring_update_mode = options[find(options.begin(), options.end(), cyspring_update_mode) - options.begin()];
+			cyspring_update_mode = options[find(options.begin(), options.end(), cyspring_update_mode) - options.begin()];
 				)
-			else if (max_fps > 30)
-			{
-				cyspring_update_mode = 1;
-			}
+				else if (max_fps > 30)
+				{
+					cyspring_update_mode = 1;
+				}
 
 			GetValue("hideNowLoading", Bool, hide_now_loading);
 
@@ -313,13 +315,25 @@ if (document.HasMember(L##_name_) && document[L##_name_].Is##_type_())\
 			GetValue("codeMapPath", String, auto path,
 				ifstream code_map_stream{ path };
 
-				if (code_map_stream.is_open())
-				{
-					rapidjson::IStreamWrapper wrapper{ code_map_stream };
-					code_map.ParseStream(wrapper);
+			if (code_map_stream.is_open())
+			{
+				rapidjson::IStreamWrapper wrapper{ code_map_stream };
+				code_map.ParseStream(wrapper);
 
-					code_map_stream.close();
-				}
+				code_map_stream.close();
+			}
+				);
+
+			GetValue("il2cppFnMapPath", String, auto path,
+				ifstream fn_map_stream{ path };
+
+			if (fn_map_stream.is_open())
+			{
+				rapidjson::IStreamWrapper wrapper{ fn_map_stream };
+				fn_map.ParseStream(wrapper);
+
+				fn_map_stream.close();
+			}
 				);
 
 			GetValue("discordRichPresence", Bool, discord_rich_presence);
@@ -332,7 +346,7 @@ if (document.HasMember(L##_name_) && document[L##_name_].Is##_type_())\
 
 			GetValue("dumpMsgPackRequest", Bool, dump_msgpack_request);
 
-#ifdef _DEBUG
+#ifdef EXPERIMENTS
 			GetValue("unlockLiveChara", Bool, unlock_live_chara);
 #endif
 
@@ -361,7 +375,7 @@ if (document.HasMember(L##_name_) && document[L##_name_].Is##_type_())\
 						dicts.emplace_back(value);
 					}
 				}
-				);
+					);
 
 			GetValue("externalDlls", Array, auto array,
 				for (auto it = array.Begin(); it != array.End(); it++)
@@ -372,7 +386,7 @@ if (document.HasMember(L##_name_) && document[L##_name_].Is##_type_())\
 						external_dlls_path.emplace_back(value);
 					}
 				}
-				);
+					);
 		}
 		else
 		{

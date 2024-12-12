@@ -12,6 +12,8 @@ void* Internal_CloneSingleWithParent_orig = nullptr;
 void* Internal_CloneSingle_addr = nullptr;
 void* Internal_CloneSingle_orig = nullptr;
 
+void* DontDestroyOnLoad_addr = nullptr;
+
 void* GetName_addr = nullptr;
 
 void* SetName_addr = nullptr;
@@ -23,6 +25,7 @@ static void InitAddress()
 	FindObjectsOfType_addr = il2cpp_resolve_icall("UnityEngine.Object::FindObjectsOfType()");
 	Internal_CloneSingleWithParent_addr = il2cpp_resolve_icall("UnityEngine.Object::Internal_CloneSingleWithParent()");
 	Internal_CloneSingle_addr = il2cpp_resolve_icall("UnityEngine.Object::Internal_CloneSingle()");
+	DontDestroyOnLoad_addr = il2cpp_resolve_icall("UnityEngine.Object::DontDestroyOnLoad()");
 	GetName_addr = il2cpp_resolve_icall("UnityEngine.Object::GetName()");
 	SetName_addr = il2cpp_resolve_icall("UnityEngine.Object::SetName()");
 }
@@ -52,6 +55,11 @@ namespace UnityEngine
 	Il2CppObject* Object::Internal_CloneSingle(Il2CppObject* data)
 	{
 		return reinterpret_cast<decltype(Internal_CloneSingle)*>(Internal_CloneSingle_addr)(data);
+	}
+
+	void Object::DontDestroyOnLoad(Il2CppObject* obj)
+	{
+		reinterpret_cast<decltype(DontDestroyOnLoad)*>(DontDestroyOnLoad_addr)(obj);
 	}
 
 	Il2CppString* Object::Name(Il2CppObject* obj)

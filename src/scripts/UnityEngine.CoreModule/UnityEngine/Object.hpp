@@ -22,6 +22,7 @@ namespace UnityEngine
 		static Il2CppArraySize_t<Il2CppObject*>* FindObjectsOfType(Il2CppObject* type, bool includeInactive);
 		static Il2CppObject* Internal_CloneSingleWithParent(Il2CppObject* data, Il2CppObject* parent, bool worldPositionStays);
 		static Il2CppObject* Internal_CloneSingle(Il2CppObject* data);
+		static void DontDestroyOnLoad(Il2CppObject* obj);
 		static Il2CppString* Name(Il2CppObject* obj);
 		static void Name(Il2CppObject* obj, Il2CppString* name);
 

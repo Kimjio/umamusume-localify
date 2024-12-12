@@ -12,6 +12,8 @@
 
 #include "config/config.hpp"
 
+inline static HWND currentHWnd = nullptr;
+
 #define STATIC \
 static void __static__();\
 [[maybe_unused]] static const char __static_value__ = (__static__(), 0);\
@@ -56,6 +58,24 @@ inline const MethodInfo* GetGenericMethod(const MethodInfo* baseMethodInfo, Ts..
 
 	auto runtimeType = il2cpp_class_get_method_from_name_type<Il2CppReflectionMethod * (*)(Il2CppObject*, Il2CppArraySize*)>(runtimeMethodInfo->object.klass, "MakeGenericMethod", 1)->methodPointer(&runtimeMethodInfo->object, typeArray);
 	return il2cpp_method_get_from_reflection(runtimeType);
+}
+
+template<typename... T, typename R, size_t... S>
+InvokerMethod GetInvokerMethod(R(*fn)(Il2CppObject*, T...), index_sequence<S...>)
+{
+	return *([](Il2CppMethodPointer fn, const MethodInfo* method, void* obj, void** params)
+		{
+			return reinterpret_cast<void* (*)(void*, ...)>(fn)(obj, params[S]...);
+		});
+}
+
+template<typename... T, typename R, size_t... S>
+InvokerMethod GetInvokerMethod(R(*fn)(void*, T...), index_sequence<S...>)
+{
+	return *([](Il2CppMethodPointer fn, const MethodInfo* method, void*, void** params)
+		{
+			return reinterpret_cast<void* (*)(void*, ...)>(fn)(nullptr, params[S]...);
+		});
 }
 
 template<typename... T, typename R>
@@ -290,7 +310,7 @@ inline Il2CppObject* GetSingletonInstanceByMethod(Il2CppClass* klass)
 	{
 		return nullptr;
 	}
-	auto get_Instance = il2cpp_class_get_method_from_name_type<Il2CppObject * (*)()>(klass, "get_Instance", IgnoreNumberOfArguments);
+	auto get_Instance = il2cpp_class_get_method_from_name_type<Il2CppObject * (*)()>(klass, "get_Instance", 0);
 	if (get_Instance)
 	{
 		return get_Instance->methodPointer();
@@ -306,6 +326,21 @@ inline Il2CppObject* GetRuntimeType(const char* assemblyName, const char* namesp
 inline Il2CppObject* GetRuntimeType(Il2CppClass* klass)
 {
 	return il2cpp_type_get_object(il2cpp_class_get_type(klass));
+}
+
+inline Il2CppObject* ParseEnum(Il2CppObject* runtimeType, const wstring& name)
+{
+	return il2cpp_symbols::get_method_pointer<Il2CppObject * (*)(Il2CppObject*, Il2CppString*)>("mscorlib.dll", "System", "Enum", "Parse", 2)(runtimeType, il2cpp_string_new16(name.data()));
+}
+
+inline Il2CppString* GetEnumName(Il2CppObject* runtimeType, int id)
+{
+	return il2cpp_symbols::get_method_pointer<Il2CppString * (*)(Il2CppObject*, Il2CppObject*)>("mscorlib.dll", "System", "Enum", "GetName", 2)(runtimeType, il2cpp_value_box(il2cpp_defaults.int32_class, &id));
+}
+
+inline uint64_t GetEnumValue(Il2CppObject* runtimeEnum)
+{
+	return il2cpp_symbols::get_method_pointer<uint64_t(*)(Il2CppObject*)>("mscorlib.dll", "System", "Enum", "ToUInt64", 1)(runtimeEnum);
 }
 
 #ifdef _MSC_VER

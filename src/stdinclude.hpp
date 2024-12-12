@@ -30,6 +30,8 @@
 
 #include "game.hpp"
 
+#define _EXPERIMENTS
+
 #include "il2cpp/il2cpp_symbols.hpp"
 #include "il2cpp/il2cpp-api-functions.hpp"
 #include "local/local.hpp"

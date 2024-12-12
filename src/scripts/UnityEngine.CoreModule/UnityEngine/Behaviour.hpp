@@ -7,6 +7,11 @@ namespace UnityEngine
 {
 	class Behaviour : public Component
 	{
+	public:
+		bool enabled();
+
+		void enabled(bool value);
+
 		using Component::Component;
 	};
 }

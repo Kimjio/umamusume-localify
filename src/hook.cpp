@@ -39,8 +39,6 @@
 
 #include <WinTrust.h>
 
-#include <SQLiteCpp/SQLiteCpp.h>
-
 #include "ntdll.h"
 
 #include "config/config.hpp"
@@ -91,6 +89,7 @@
 #include "scripts/UnityEngine.CoreModule/UnityEngine/RectTransform.hpp"
 #include "scripts/UnityEngine.CoreModule/UnityEngine/Vector2.hpp"
 #include "scripts/UnityEngine.CoreModule/UnityEngine/Vector3.hpp"
+#include "scripts/UnityEngine.CoreModule/UnityEngine/Vector4.hpp"
 #include "scripts/UnityEngine.CoreModule/UnityEngine/Vector2Int.hpp"
 #include "scripts/UnityEngine.CoreModule/UnityEngine/Rect.hpp"
 #include "scripts/UnityEngine.CoreModule/UnityEngine/Resolution.hpp"
@@ -113,8 +112,6 @@
 #include "scripts/Plugins/CodeStage/AntiCheat/ObscuredTypes/ObscuredLong.hpp"
 
 #include "string_utils.hpp"
-
-#include "dllproxy/proxy.hpp"
 
 using namespace std;
 
@@ -177,8 +174,6 @@ namespace
 	{
 	}
 
-	void PrintStackTrace();
-
 	void* UpdateDispatcher_Initialize_orig = nullptr;
 	void UpdateDispatcher_Initialize_hook()
 	{
@@ -212,8 +207,9 @@ namespace
 		MH_CreateHook(UpdateDispatcher_Initialize_addr, UpdateDispatcher_Initialize_hook, &UpdateDispatcher_Initialize_orig);
 		MH_EnableHook(UpdateDispatcher_Initialize_addr);
 
-		il2cpp_symbols::get_method_pointer<void (*)()>("UnityEngine.SubsystemsModule.dll", "UnityEngine", "SubsystemManager", ".cctor", IgnoreNumberOfArguments)();
-		il2cpp_symbols::get_method_pointer<void (*)()>("UnityEngine.SubsystemsModule.dll", "UnityEngine.SubsystemsImplementation", "SubsystemDescriptorStore", ".cctor", IgnoreNumberOfArguments)();
+		il2cpp_runtime_class_init(il2cpp_symbols::get_class("UnityEngine.SubsystemsModule.dll", "UnityEngine", "SubsystemManager"));
+		il2cpp_runtime_class_init(il2cpp_symbols::get_class("UnityEngine.SubsystemsModule.dll", "UnityEngine.SubsystemsImplementation", "SubsystemDescriptorStore"));
+		//il2cpp_runtime_class_init(il2cpp_symbols::get_class("UnityEngine.CoreModule.dll", "UnityEngine", "BeforeRenderHelper"));
 
 		if (Game::CurrentGameRegion == Game::Region::KOR)
 		{
@@ -230,8 +226,15 @@ namespace
 			MH_CreateHook(UncheaterInit_OnApplicationPause_addr, UncheaterInit_OnApplicationPause_hook, &UncheaterInit_OnApplicationPause_orig);
 			MH_EnableHook(UncheaterInit_OnApplicationPause_addr);
 
+			auto CuteCoreDevice = il2cpp_symbols::get_class("Cute.Core.Assembly.dll", "Cute.Core", "Device");
+			auto persistentDataPathField = il2cpp_class_get_field_from_name_wrap(CuteCoreDevice, "persistentDataPath");
+
+			il2cpp_field_static_set_value(persistentDataPathField, UnityEngine::Application::persistentDataPath());
+
 			patch_game_assembly();
 		}
+
+		init_sqlite3();
 
 		if (attachIl2CppThread)
 		{
@@ -359,9 +362,6 @@ namespace
 
 		il2cpp_field_set_value(notification, _tweenerField, _tweener);
 	}
-
-	unsigned long GetEnumValue(Il2CppObject* runtimeEnum);
-	Il2CppObject* ParseEnum(Il2CppObject* runtimeType, const wstring& name);
 
 	void SetNotificationFontSize(int size)
 	{
@@ -982,7 +982,16 @@ namespace
 
 	extern "C" __declspec(dllexport) int __stdcall UnityMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPWSTR lpCmdLine, int nShowCmd)
 	{
+		try
+		{
+			filesystem::copy_file(filesystem::current_path().append(L"UnityPlayer.dll"), L"umamusume.exe.local\\UnityPlayer.orig.dll", filesystem::copy_options::update_existing);
+		}
+		catch (...)
+		{
+		}
+
 		auto unity = LoadLibraryW(L"UnityPlayer.orig.dll");
+
 		UnityMain_orig = GetProcAddress(unity, "UnityMain");
 
 		return UnityMain_hook(hInstance, hPrevInstance, lpCmdLine, nShowCmd);
@@ -990,17 +999,34 @@ namespace
 
 	IUnityInterfaces* unityInterfaces;
 
+	void UnityOpenXR_UnityPluginLoad_hook(IUnityInterfaces* unityInterfaces);
+
 	void* UnityPluginLoad_orig = nullptr;
 	void UnityPluginLoad_hook(IUnityInterfaces* unityInterfaces)
 	{
 		reinterpret_cast<decltype(UnityPluginLoad_hook)*>(UnityPluginLoad_orig)(unityInterfaces);
 
+
 		::unityInterfaces = unityInterfaces;
+		// Unity::OpenXR::InitLibrary(unityInterfaces);
 
-		Unity::OpenXR::InitLibrary(unityInterfaces);
+		//Unity::OpenXR::DiagnosticReport::StartReport();
+		// Unity::OpenXR::Init();
+		// Unity::OpenXR::Start();
+	}
 
-		Unity::OpenXR::DiagnosticReport::StartReport();
-		Unity::OpenXR::Init();
+	void* UnityOpenXR_UnityPluginLoad_orig = nullptr;
+	void UnityOpenXR_UnityPluginLoad_hook(IUnityInterfaces* unityInterfaces)
+	{
+		reinterpret_cast<decltype(UnityOpenXR_UnityPluginLoad_hook)*>(UnityOpenXR_UnityPluginLoad_orig)(unityInterfaces);
+
+		::unityInterfaces = unityInterfaces;
+		// Unity::OpenXR::Init();
+
+		// Unity::OpenXR::InitLibrary(unityInterfaces);
+
+		//Unity::OpenXR::DiagnosticReport::StartReport();
+		// Unity::OpenXR::Init();
 		// Unity::OpenXR::Start();
 	}
 
@@ -1015,7 +1041,7 @@ namespace
 	{
 		auto text = wide_u8(request);
 
-#ifdef _DEBUG
+#ifdef EXPERIMENTS
 		replaceAll(text, "gameWeb", "googlePlay");
 #endif
 
@@ -1107,7 +1133,7 @@ namespace
 				}
 			}*/
 
-			const auto il2cpp_init_addr = GetProcAddress(il2cpp, "il2cpp_init");
+			const auto il2cpp_init_addr = GetProcAddress(il2cpp, il2cpp_fn_name("il2cpp_init").data());
 
 			il2cpp_symbols::init(il2cpp);
 
@@ -1142,21 +1168,12 @@ namespace
 		// GameAssembly.dll code must be loaded and decrypted while loading criware library
 		if (lpLibFileName == L"cri_ware_unity.dll"s && !criwareInit)
 		{
-			auto hWnd = FindWindowW(L"UnityWndClass", L"umamusume");
-			if (hWnd)
-			{
-				if (!config::custom_title_name.empty())
-				{
-					SetWindowTextW(hWnd, config::custom_title_name.data());
-				}
-				if (config::has_json_parse_error)
-				{
-					MessageBoxW(hWnd, config::json_parse_error_msg.data(), L"Umamusume Localify", MB_OK | MB_ICONWARNING);
-				}
-			}
-
 			criwareInit = true;
+
 			patch_after_criware();
+
+			auto productName = il2cpp_resolve_icall_type<Il2CppString * (*)()>("UnityEngine.Application::get_productName")()->chars;
+			SetDllDirectoryW((productName + L"_Data\\Plugins\\x86_64\\"s).data());
 
 			// use original function beacuse we have unhooked that
 			auto criware = reinterpret_cast<decltype(LoadLibraryW)*>(load_library_w_orig)(lpLibFileName);
@@ -1166,11 +1183,6 @@ namespace
 				MH_DisableHook(LoadLibraryW);
 				MH_RemoveHook(LoadLibraryW);
 			}
-
-			auto UnityPluginLoad_addr = GetProcAddress(criware, "UnityPluginLoad");
-
-			MH_CreateHook(UnityPluginLoad_addr, UnityPluginLoad_hook, &UnityPluginLoad_orig);
-			MH_EnableHook(UnityPluginLoad_addr);
 
 			if (config::character_system_text_caption)
 			{
@@ -1266,30 +1278,6 @@ namespace
 
 	Il2CppArraySize_t<Il2CppString*>* (*get_all_asset_names)(Il2CppObject* _this);
 
-	void PrintStackTrace()
-	{
-		Il2CppString* (*trace)() = il2cpp_symbols::get_method_pointer<Il2CppString * (*)()>("UnityEngine.CoreModule.dll", "UnityEngine", "StackTraceUtility", "ExtractStackTrace", 0);
-		wcout << trace()->chars << endl;
-	}
-
-	template<typename... T, typename R, size_t... S>
-	InvokerMethod GetInvokerMethod(R(*fn)(Il2CppObject*, T...), index_sequence<S...>)
-	{
-		return *([](Il2CppMethodPointer fn, const MethodInfo* method, void* obj, void** params)
-			{
-				return reinterpret_cast<void* (*)(void*, ...)>(fn)(obj, params[S]...);
-			});
-	}
-
-	template<typename... T, typename R, size_t... S>
-	InvokerMethod GetInvokerMethod(R(*fn)(void*, T...), index_sequence<S...>)
-	{
-		return *([](Il2CppMethodPointer fn, const MethodInfo* method, void*, void** params)
-			{
-				return reinterpret_cast<void* (*)(void*, ...)>(fn)(nullptr, params[S]...);
-			});
-	}
-
 	Il2CppDelegate* GetButtonCommonOnClickDelegate(Il2CppObject* object)
 	{
 		if (!object)
@@ -1356,22 +1344,7 @@ namespace
 		return il2cpp_value_box(il2cpp_defaults.int32_class, &value);
 	}
 
-	Il2CppObject* ParseEnum(Il2CppObject* runtimeType, const wstring& name)
-	{
-		return il2cpp_symbols::get_method_pointer<Il2CppObject * (*)(Il2CppObject*, Il2CppString*)>("mscorlib.dll", "System", "Enum", "Parse", 2)(runtimeType, il2cpp_string_new16(name.data()));
-	}
-
-	Il2CppString* GetEnumName(Il2CppObject* runtimeType, int id)
-	{
-		return il2cpp_symbols::get_method_pointer<Il2CppString * (*)(Il2CppObject*, Il2CppObject*)>("mscorlib.dll", "System", "Enum", "GetName", 2)(runtimeType, GetInt32Instance(id));
-	}
-
-	unsigned long GetEnumValue(Il2CppObject* runtimeEnum)
-	{
-		return il2cpp_symbols::get_method_pointer<unsigned long (*)(Il2CppObject*)>("mscorlib.dll", "System", "Enum", "ToUInt64", 1)(runtimeEnum);
-	}
-
-	unsigned long GetTextIdByName(const wstring& name)
+	uint64_t GetTextIdByName(const wstring& name)
 	{
 		return GetEnumValue(ParseEnum(GetRuntimeType("umamusume.dll", "Gallop", "TextId"), name));
 	}
@@ -1451,8 +1424,7 @@ namespace
 
 	string GetUnityVersion()
 	{
-		string version(wide_u8(UnityEngine::Application::unityVersion()->chars));
-		return version;
+		return wide_u8(UnityEngine::Application::unityVersion()->chars);
 	}
 
 	void* populate_with_errors_orig = nullptr;
@@ -1464,7 +1436,7 @@ namespace
 	}
 
 	void* localizeextension_text_orig = nullptr;
-	Il2CppString* localizeextension_text_hook(int id)
+	Il2CppString* localizeextension_text_hook(uint64_t id)
 	{
 		auto orig_result = reinterpret_cast<decltype(localizeextension_text_hook)*>(localizeextension_text_orig)(id);
 		auto result = config::static_entries_use_text_id_name ?
@@ -1503,10 +1475,21 @@ namespace
 	Il2CppString* localize_get_hook(int id)
 	{
 		auto orig_result = reinterpret_cast<decltype(localize_get_hook)*>(localize_get_orig)(id);
-		auto result = config::static_entries_use_text_id_name ?
-			local::get_localized_string(GetTextIdNameById(id)) :
-			config::static_entries_use_hash ?
-			local::get_localized_string(orig_result) : local::get_localized_string(id);
+
+		Il2CppString* result = nullptr;
+
+		if (config::static_entries_use_text_id_name)
+		{
+			result = local::get_localized_string(GetTextIdNameById(id));
+		}
+		else if (config::static_entries_use_hash)
+		{
+			result = local::get_localized_string(orig_result);
+		}
+		else
+		{
+			result = local::get_localized_string(id);
+		}
 
 		return result ? result : orig_result;
 	}
@@ -1601,403 +1584,246 @@ namespace
 		return reinterpret_cast<decltype(update_hook)*>(update_orig)(_this, updateType, deltaTime * config::ui_animation_scale, independentTime * config::ui_animation_scale);
 	}
 
-	unordered_map<void*, SQLite::Statement*> text_queries;
-	unordered_map<void*, bool> replacement_queries_can_next;
+	unordered_map<sqlite3_stmt*, tuple<sqlite3_stmt*, string, bool>> text_queries;
+	unordered_map<sqlite3_stmt*, bool> replacement_queries_can_next;
 
-	void* query_setup_orig = nullptr;
-	void query_setup_hook(Il2CppObject* _this, void* conn, Il2CppString* sql)
+	sqlite3_stmt* select_character_system_text_characterId;
+	tuple<sqlite3_stmt*, bool> select_character_system_text_characterId_replacement;
+	bool select_character_system_text_characterId_replacement_can_next = true;
+
+	void* sqlite3_prepare_v2_orig = nullptr;
+	int sqlite3_prepare_v2_hook(sqlite3* db, const char* zSql, int nBytes, sqlite3_stmt** ppStmt, const char** pzTail)
 	{
-		reinterpret_cast<decltype(query_setup_hook)*>(query_setup_orig)(_this, conn, sql);
+		auto result = reinterpret_cast<decltype(sqlite3_prepare_v2_hook)*>(sqlite3_prepare_v2_orig)(db, zSql, nBytes, ppStmt, pzTail);
 
-		auto ssql = wstring(sql->chars);
+		string sql = string(zSql, nBytes);
 
-		if (ssql.find(L"text_data") != string::npos ||
-			ssql.find(L"character_system_text") != string::npos ||
-			ssql.find(L"race_jikkyo_comment") != string::npos ||
-			ssql.find(L"race_jikkyo_message") != string::npos)
+		if (sql.find("text_data") != string::npos ||
+			sql.find("race_jikkyo_comment") != string::npos ||
+			sql.find("race_jikkyo_message") != string::npos)
 		{
-			auto stmtField = il2cpp_class_get_field_from_name_wrap(_this->klass, "_stmt");
-			intptr_t* stmtPtr;
-			il2cpp_field_get_value(_this, stmtField, &stmtPtr);
-			try
+			sqlite3_stmt* pStmt = *ppStmt;
+
+			if (MasterDB::replacementMasterDB)
+			{
+				sqlite3_stmt* stmt;
+				reinterpret_cast<decltype(sqlite3_prepare_v2_hook)*>(sqlite3_prepare_v2_orig)(MasterDB::replacementMasterDB, zSql, nBytes, &stmt, pzTail);
+				text_queries.emplace(pStmt, make_tuple(stmt, sql, false));
+			}
+		}
+
+		if (sql.find("character_system_text") != string::npos)
+		{
+			sqlite3_stmt* pStmt = *ppStmt;
+
+			if (sql.find("`voice_id`=?") != string::npos)
 			{
 				if (MasterDB::replacementMasterDB)
 				{
-					text_queries.emplace(stmtPtr, new SQLite::Statement(*MasterDB::replacementMasterDB, wide_u8(ssql)));
+					sqlite3_stmt* stmt;
+					reinterpret_cast<decltype(sqlite3_prepare_v2_hook)*>(sqlite3_prepare_v2_orig)(MasterDB::replacementMasterDB, zSql, nBytes, &stmt, pzTail);
+					text_queries.emplace(pStmt, make_tuple(stmt, sql, false));
 				}
-				else
+			}
+			else
+			{
+				select_character_system_text_characterId = pStmt;
+
+
+				if (MasterDB::replacementMasterDB)
 				{
-					text_queries.emplace(stmtPtr, nullptr);
+					reinterpret_cast<decltype(sqlite3_prepare_v2_hook)*>(sqlite3_prepare_v2_orig)(MasterDB::replacementMasterDB, zSql, nBytes, &get<0>(select_character_system_text_characterId_replacement), pzTail);
 				}
 			}
-			catch (exception& e)
-			{
-				cout << "query_setup ERROR: " << e.what() << endl;
-			}
-		}
-	}
-
-	void* Plugin_sqlite3_step_orig = nullptr;
-	bool Plugin_sqlite3_step_hook(intptr_t* pStmt)
-	{
-		if (text_queries.contains(pStmt))
-		{
-			try
-			{
-				auto stmt = text_queries.at(pStmt);
-				if (stmt)
-				{
-					if (stmt->getQuery().find("`race_jikkyo_message`;") != string::npos ||
-						stmt->getQuery().find("`race_jikkyo_comment`;") != string::npos)
-					{
-						if (replacement_queries_can_next.find(pStmt) == replacement_queries_can_next.end())
-						{
-							replacement_queries_can_next.emplace(pStmt, true);
-						}
-						if (replacement_queries_can_next.at(pStmt))
-						{
-							try
-							{
-								stmt->executeStep();
-							}
-							catch (exception& e)
-							{
-							}
-						}
-					}
-					else
-					{
-						stmt->executeStep();
-					}
-				}
-			}
-			catch (exception& e)
-			{
-			}
-		}
-
-		return reinterpret_cast<decltype(Plugin_sqlite3_step_hook)*>(Plugin_sqlite3_step_orig)(pStmt);
-	}
-
-	void* Plugin_sqlite3_reset_orig = nullptr;
-	bool Plugin_sqlite3_reset_hook(intptr_t* pStmt)
-	{
-		if (text_queries.contains(pStmt))
-		{
-			try
-			{
-				auto stmt = text_queries.at(pStmt);
-				if (stmt)
-				{
-					stmt->reset();
-					stmt->clearBindings();
-					replacement_queries_can_next.insert_or_assign(pStmt, true);
-				}
-			}
-			catch (exception& e)
-			{
-			}
-		}
-		return reinterpret_cast<decltype(Plugin_sqlite3_reset_hook)*>(Plugin_sqlite3_reset_orig)(pStmt);
-	}
-
-	void* query_step_orig = nullptr;
-	bool query_step_hook(Il2CppObject* _this)
-	{
-		auto stmtField = il2cpp_class_get_field_from_name_wrap(_this->klass, "_stmt");
-		intptr_t* stmtPtr;
-		il2cpp_field_get_value(_this, stmtField, &stmtPtr);
-		if (text_queries.contains(stmtPtr))
-		{
-			try
-			{
-				auto stmt = text_queries.at(stmtPtr);
-				if (stmt)
-				{
-					stmt->executeStep();
-				}
-			}
-			catch (exception& e)
-			{
-			}
-		}
-		return reinterpret_cast<decltype(query_step_hook)*>(query_step_orig)(_this);
-	}
-
-	void* prepared_query_reset_orig = nullptr;
-	bool prepared_query_reset_hook(Il2CppObject* _this)
-	{
-		auto stmtField = il2cpp_class_get_field_from_name_wrap(_this->klass, "_stmt");
-		intptr_t* stmtPtr;
-		il2cpp_field_get_value(_this, stmtField, &stmtPtr);
-		if (text_queries.contains(stmtPtr))
-		{
-			try
-			{
-				auto stmt = text_queries.at(stmtPtr);
-				if (stmt)
-				{
-
-					stmt->reset();
-					stmt->clearBindings();
-					replacement_queries_can_next.insert_or_assign(stmtPtr, true);
-				}
-			}
-			catch (exception& e)
-			{
-			}
-		}
-		return reinterpret_cast<decltype(prepared_query_reset_hook)*>(prepared_query_reset_orig)(_this);
-	}
-
-	void* prepared_query_bind_text_orig = nullptr;
-	bool prepared_query_bind_text_hook(Il2CppObject* _this, int idx, Il2CppString* text)
-	{
-		auto stmtField = il2cpp_class_get_field_from_name_wrap(_this->klass, "_stmt");
-		intptr_t* stmtPtr;
-		il2cpp_field_get_value(_this, stmtField, &stmtPtr);
-		if (text_queries.contains(stmtPtr))
-		{
-			try
-			{
-				auto stmt = text_queries.at(stmtPtr);
-				if (stmt)
-				{
-					stmt->bind(idx, wide_u8(text->chars));
-				}
-			}
-			catch (exception& e)
-			{
-			}
-		}
-		return reinterpret_cast<decltype(prepared_query_bind_text_hook)*>(prepared_query_bind_text_orig)(_this, idx, text);
-	}
-
-	void* prepared_query_bind_int_orig = nullptr;
-	bool prepared_query_bind_int_hook(Il2CppObject* _this, int idx, int iValue)
-	{
-		auto stmtField = il2cpp_class_get_field_from_name_wrap(_this->klass, "_stmt");
-		intptr_t* stmtPtr;
-		il2cpp_field_get_value(_this, stmtField, &stmtPtr);
-		if (text_queries.contains(stmtPtr))
-		{
-			try
-			{
-				auto stmt = text_queries.at(stmtPtr);
-				if (stmt)
-				{
-					stmt->bind(idx, iValue);
-				}
-			}
-			catch (exception& e)
-			{
-			}
-		}
-		return reinterpret_cast<decltype(prepared_query_bind_int_hook)*>(prepared_query_bind_int_orig)(_this, idx, iValue);
-	}
-
-	void* prepared_query_bind_long_orig = nullptr;
-	bool prepared_query_bind_long_hook(Il2CppObject* _this, int idx, int64_t lValue)
-	{
-		auto stmtField = il2cpp_class_get_field_from_name_wrap(_this->klass, "_stmt");
-		intptr_t* stmtPtr;
-		il2cpp_field_get_value(_this, stmtField, &stmtPtr);
-		if (text_queries.contains(stmtPtr))
-		{
-			try
-			{
-				auto stmt = text_queries.at(stmtPtr);
-				if (stmt)
-				{
-					stmt->bind(idx, lValue);
-				}
-			}
-			catch (exception& e)
-			{
-			}
-		}
-		return reinterpret_cast<decltype(prepared_query_bind_long_hook)*>(prepared_query_bind_long_orig)(_this, idx, lValue);
-	}
-
-	void* prepared_query_bind_double_orig = nullptr;
-	bool prepared_query_bind_double_hook(Il2CppObject* _this, int idx, double rValue)
-	{
-		auto stmtField = il2cpp_class_get_field_from_name_wrap(_this->klass, "_stmt");
-		intptr_t* stmtPtr;
-		il2cpp_field_get_value(_this, stmtField, &stmtPtr);
-		if (text_queries.contains(stmtPtr))
-		{
-			try
-			{
-				auto stmt = text_queries.at(stmtPtr);
-				if (stmt)
-				{
-					stmt->bind(idx, rValue);
-				}
-			}
-			catch (exception& e)
-			{
-			}
-		}
-		return reinterpret_cast<decltype(prepared_query_bind_double_hook)*>(prepared_query_bind_double_orig)(_this, idx, rValue);
-	}
-
-	void* query_dispose_orig = nullptr;
-	void query_dispose_hook(Il2CppObject* _this)
-	{
-		auto stmtField = il2cpp_class_get_field_from_name_wrap(_this->klass, "_stmt");
-		intptr_t* stmtPtr;
-		il2cpp_field_get_value(_this, stmtField, &stmtPtr);
-		if (text_queries.contains(stmtPtr))
-			text_queries.erase(stmtPtr);
-
-		return reinterpret_cast<decltype(query_dispose_hook)*>(query_dispose_orig)(_this);
-	}
-
-	int (*query_getint)(Il2CppObject* _this, int index) = nullptr;
-
-	void* query_gettext_orig = nullptr;
-	Il2CppString* query_gettext_hook(Il2CppObject* _this, int idx)
-	{
-		auto stmtField = il2cpp_class_get_field_from_name_wrap(_this->klass, "_stmt");
-		intptr_t* stmtPtr;
-		il2cpp_field_get_value(_this, stmtField, &stmtPtr);
-		auto result = reinterpret_cast<decltype(query_gettext_hook)*>(query_gettext_orig)(_this, idx);
-
-		if (text_queries.contains(stmtPtr))
-		{
-			try
-			{
-				auto stmt = text_queries.at(stmtPtr);
-				if (stmt)
-				{
-					string text;
-					if (stmt->hasRow())
-					{
-						text = stmt->getColumn(idx).getString();
-						if (!text.empty())
-						{
-							if (stmt->getQuery().find("`race_jikkyo_message`;") != string::npos ||
-								stmt->getQuery().find("`race_jikkyo_comment`;") != string::npos)
-							{
-								int id = query_getint(_this, 0);
-								int id1 = stmt->getColumn(0).getInt();
-								int groupId = query_getint(_this, 1);
-								int groupId1 = stmt->getColumn(1).getInt();
-								if (stmt->hasRow())
-								{
-									if (id == id1 && groupId == groupId1)
-									{
-										replacement_queries_can_next.insert_or_assign(stmtPtr, true);
-										return il2cpp_string_new(text.data());
-									}
-									else
-									{
-										replacement_queries_can_next.insert_or_assign(stmtPtr, false);
-									}
-								}
-							}
-							else if (stmt->getQuery().find("character_system_text") != string::npos)
-							{
-								int cueId, cueId1;
-								string cueSheet, cueSheet1;
-								if (stmt->getQuery().find("`voice_id`=?") != string::npos)
-								{
-									cueId = query_getint(_this, 2);
-									cueId1 = stmt->getColumn(2).getInt();
-									cueSheet = wide_u8(
-										reinterpret_cast<decltype(query_gettext_hook)*>(query_gettext_orig)(_this, 1)->chars
-									);
-									cueSheet1 = stmt->getColumn(1).getString();
-								}
-								else
-								{
-									cueId = query_getint(_this, 3);
-									cueId1 = stmt->getColumn(3).getInt();
-									cueSheet = wide_u8(
-										reinterpret_cast<decltype(query_gettext_hook)*>(query_gettext_orig)(_this, 2)->chars
-									);
-									cueSheet1 = stmt->getColumn(2).getString();
-								}
-								if (cueId == cueId1 && cueSheet == cueSheet1)
-								{
-									return il2cpp_string_new(text.data());
-								}
-							}
-							else
-							{
-								return il2cpp_string_new(text.data());
-							}
-						}
-					}
-				}
-			}
-			catch (exception& e)
-			{
-			}
-			return local::get_localized_string(result);
 		}
 
 		return result;
 	}
 
-	void* MasterCharacterSystemText_CreateOrmByQueryResultWithCharacterId_orig = nullptr;
-	Il2CppObject* MasterCharacterSystemText_CreateOrmByQueryResultWithCharacterId_hook(Il2CppObject* _this, Il2CppObject* query, int characterId)
+	int sqlite3_step_hook(sqlite3_stmt* pStmt)
 	{
-		auto stmtField = il2cpp_class_get_field_from_name_wrap(query->klass, "_stmt");
-		intptr_t* stmtPtr;
-		il2cpp_field_get_value(query, stmtField, &stmtPtr);
-		if (text_queries.contains(stmtPtr))
+		if (text_queries.contains(pStmt))
 		{
-
-			try
+			auto& stmt = text_queries.at(pStmt);
+			if (get<1>(stmt).find("`race_jikkyo_message`;") != string::npos ||
+				get<1>(stmt).find("`race_jikkyo_comment`;") != string::npos)
 			{
-				auto stmt = text_queries.at(stmtPtr);
-				if (stmt)
+				if (replacement_queries_can_next.find(pStmt) == replacement_queries_can_next.end())
 				{
-					if (replacement_queries_can_next.find(stmtPtr) == replacement_queries_can_next.end())
-					{
-						replacement_queries_can_next.emplace(stmtPtr, true);
-					}
-					if (replacement_queries_can_next.at(stmtPtr))
-					{
-						try
-						{
-							stmt->executeStep();
-						}
-						catch (exception& e)
-						{
-						}
-					}
-					if (stmt->hasRow())
-					{
-						int voiceId = query_getint(query, 0);
-						int voiceId1 = stmt->getColumn(0).getInt();
-						int cueId = query_getint(query, 3);
-						int cueId1 = stmt->getColumn(3).getInt();
-						string cueSheet = wide_u8(
-							reinterpret_cast<decltype(query_gettext_hook)*>(query_gettext_orig)(query, 2)->chars
-						);
-						string cueSheet1 = stmt->getColumn(2).getString();
+					replacement_queries_can_next.emplace(pStmt, true);
+				}
+				if (replacement_queries_can_next.at(pStmt))
+				{
+					get<2>(stmt) = (reinterpret_cast<decltype(sqlite3_step_hook)*>(sqlite3_step_orig)(get<0>(stmt)) == SQLITE_ROW);
+				}
+			}
+			else
+			{
+				get<2>(stmt) = (reinterpret_cast<decltype(sqlite3_step_hook)*>(sqlite3_step_orig)(get<0>(stmt)) == SQLITE_ROW);
+			}
+		}
 
-						if (voiceId == voiceId1 && cueId == cueId1 && cueSheet == cueSheet1)
+		if (pStmt == select_character_system_text_characterId)
+		{
+			if (get<0>(select_character_system_text_characterId_replacement))
+			{
+				auto res = reinterpret_cast<decltype(sqlite3_step_hook)*>(sqlite3_step_orig)(pStmt);
+
+				if (res == SQLITE_ROW)
+				{
+					int voiceId = sqlite3_column_int(pStmt, 0);
+
+					if (select_character_system_text_characterId_replacement_can_next)
+					{
+						get<1>(select_character_system_text_characterId_replacement) = (sqlite3_step(get<0>(select_character_system_text_characterId_replacement)) == SQLITE_ROW);
+					}
+
+					if (get<1>(select_character_system_text_characterId_replacement))
+					{
+						select_character_system_text_characterId_replacement_can_next = voiceId == sqlite3_column_int(get<0>(select_character_system_text_characterId_replacement), 0);
+					}
+				}
+
+				return res;
+			}
+		}
+
+		return reinterpret_cast<decltype(sqlite3_step_hook)*>(sqlite3_step_orig)(pStmt);
+	}
+
+	int sqlite3_reset_hook(sqlite3_stmt* pStmt)
+	{
+		if (text_queries.contains(pStmt))
+		{
+			auto& stmt = text_queries.at(pStmt);
+			reinterpret_cast<decltype(sqlite3_reset_hook)*>(sqlite3_reset_orig)(get<0>(stmt));
+			get<2>(stmt) = false;
+			replacement_queries_can_next.insert_or_assign(pStmt, true);
+		}
+
+		if (pStmt == select_character_system_text_characterId && get<0>(select_character_system_text_characterId_replacement))
+		{
+			reinterpret_cast<decltype(sqlite3_reset_hook)*>(sqlite3_reset_orig)(get<0>(select_character_system_text_characterId_replacement));
+			get<1>(select_character_system_text_characterId_replacement) = false;
+			select_character_system_text_characterId_replacement_can_next = true;
+		}
+
+		return reinterpret_cast<decltype(sqlite3_reset_hook)*>(sqlite3_reset_orig)(pStmt);
+	}
+
+	int sqlite3_bind_text_hook(sqlite3_stmt* pStmt, int i, const char* zData, int nData, void (*xDel)(void*))
+	{
+		if (text_queries.contains(pStmt))
+		{
+			auto& stmt = text_queries.at(pStmt);
+			reinterpret_cast<decltype(sqlite3_bind_text_hook)*>(sqlite3_bind_text_orig)(get<0>(stmt), i, zData, nData, xDel);
+		}
+
+		return reinterpret_cast<decltype(sqlite3_bind_text_hook)*>(sqlite3_bind_text_orig)(pStmt, i, zData, nData, xDel);
+	}
+
+	int sqlite3_bind_int_hook(sqlite3_stmt* pStmt, int i, int iValue)
+	{
+		if (text_queries.contains(pStmt))
+		{
+			auto& stmt = text_queries.at(pStmt);
+			reinterpret_cast<decltype(sqlite3_bind_int_hook)*>(sqlite3_bind_int_orig)(get<0>(stmt), i, iValue);
+		}
+
+		if (pStmt == select_character_system_text_characterId && get<0>(select_character_system_text_characterId_replacement))
+		{
+			reinterpret_cast<decltype(sqlite3_bind_int_hook)*>(sqlite3_bind_int_orig)(get<0>(select_character_system_text_characterId_replacement), i, iValue);
+		}
+
+		return reinterpret_cast<decltype(sqlite3_bind_int_hook)*>(sqlite3_bind_int_orig)(pStmt, i, iValue);
+	}
+
+	int sqlite3_bind_int64_hook(sqlite3_stmt* pStmt, int i, sqlite_int64 iValue)
+	{
+		if (text_queries.contains(pStmt))
+		{
+			auto& stmt = text_queries.at(pStmt);
+			reinterpret_cast<decltype(sqlite3_bind_int64_hook)*>(sqlite3_bind_int64_orig)(get<0>(stmt), i, iValue);
+		}
+
+		return reinterpret_cast<decltype(sqlite3_bind_int64_hook)*>(sqlite3_bind_int64_orig)(pStmt, i, iValue);
+	}
+
+	int sqlite3_bind_double_hook(sqlite3_stmt* pStmt, int i, double rValue)
+	{
+		if (text_queries.contains(pStmt))
+		{
+			auto& stmt = text_queries.at(pStmt);
+			reinterpret_cast<decltype(sqlite3_bind_double_hook)*>(sqlite3_bind_double_orig)(get<0>(stmt), i, rValue);
+		}
+
+		return reinterpret_cast<decltype(sqlite3_bind_double_hook)*>(sqlite3_bind_double_orig)(pStmt, i, rValue);
+	}
+
+	int sqlite3_finalize_hook(sqlite3_stmt* pStmt)
+	{
+		if (text_queries.contains(pStmt))
+		{
+			auto& stmt = text_queries.at(pStmt);
+			reinterpret_cast<decltype(sqlite3_finalize_hook)*>(sqlite3_finalize_orig)(get<0>(stmt));
+			text_queries.erase(pStmt);
+		}
+
+		return reinterpret_cast<decltype(sqlite3_finalize_hook)*>(sqlite3_finalize_orig)(pStmt);
+	}
+
+	const unsigned char* sqlite3_column_text_hook(sqlite3_stmt* pStmt, int i)
+	{
+		auto result = reinterpret_cast<decltype(sqlite3_column_text_hook)*>(sqlite3_column_text_orig)(pStmt, i);
+
+		if (text_queries.contains(pStmt))
+		{
+			auto& stmt = text_queries.at(pStmt);
+			const char* text;
+			if (get<2>(stmt))
+			{
+				text = reinterpret_cast<const char*>(reinterpret_cast<decltype(sqlite3_column_text_hook)*>(sqlite3_column_text_orig)(get<0>(stmt), i));
+				if (text && !string(text).empty())
+				{
+					if (get<1>(stmt).find("`race_jikkyo_message`;") != string::npos ||
+						get<1>(stmt).find("`race_jikkyo_comment`;") != string::npos)
+					{
+						int id = sqlite3_column_int(pStmt, 0);
+						int id1 = sqlite3_column_int(get<0>(stmt), 0);
+						int groupId = sqlite3_column_int(pStmt, 1);
+						int groupId1 = sqlite3_column_int(get<0>(stmt), 1);
+
+						if (id == id1 && groupId == groupId1)
 						{
-							replacement_queries_can_next.insert_or_assign(stmtPtr, true);
+							replacement_queries_can_next.insert_or_assign(pStmt, true);
+							return reinterpret_cast<const unsigned char*>(text);
 						}
 						else
 						{
-							replacement_queries_can_next.insert_or_assign(stmtPtr, false);
+							replacement_queries_can_next.insert_or_assign(pStmt, false);
 						}
+					}
+					else
+					{
+						return reinterpret_cast<const unsigned char*>(text);
 					}
 				}
 			}
-			catch (exception& e)
-			{
-			}
+
+			return reinterpret_cast<const unsigned char*>(local::get_localized_string(reinterpret_cast<const char*>(result)));
 		}
-		return reinterpret_cast<decltype(MasterCharacterSystemText_CreateOrmByQueryResultWithCharacterId_hook)*>(
-			MasterCharacterSystemText_CreateOrmByQueryResultWithCharacterId_orig
-			)(_this, query, characterId);
+
+		if (pStmt == select_character_system_text_characterId)
+		{
+			if (get<1>(select_character_system_text_characterId_replacement) && select_character_system_text_characterId_replacement_can_next)
+			{
+				return reinterpret_cast<decltype(sqlite3_column_text_hook)*>(sqlite3_column_text_orig)(get<0>(select_character_system_text_characterId_replacement), i);
+			}
+
+			return reinterpret_cast<const unsigned char*>(local::get_localized_string(reinterpret_cast<const char*>(result)));
+		}
+
+		return reinterpret_cast<const unsigned char*>(local::get_localized_string(reinterpret_cast<const char*>(result)));
 	}
 
 	void* CySpringUpdater_set_SpringUpdateMode_orig = nullptr;
@@ -2929,6 +2755,7 @@ namespace
 		catch (const Il2CppExceptionWrapper& e)
 		{
 			wcout << "WaitForEndOfFrame error: " << e.ex->message->chars << endl;
+			PrintStackTrace();
 		}
 	}
 
@@ -2943,6 +2770,7 @@ namespace
 		catch (const Il2CppExceptionWrapper& e)
 		{
 			wcout << "WaitForEndOfFrame error: " << e.ex->message->chars << endl;
+			PrintStackTrace();
 		}
 	}
 
@@ -3336,23 +3164,7 @@ namespace
 									}
 
 									Il2CppObject* _uiToFrameBufferRenderCameraData = uiManager._uiToFrameBufferRenderCameraData();
-									if (_uiToFrameBufferRenderCameraData)
-									{
-										il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, Il2CppObject*)>(_uiToFrameBufferRenderCameraData->klass, "set_ScreenTexture", 1)->methodPointer(_uiToFrameBufferRenderCameraData, renderTexture);
-									}
-									else
-									{
-										// Deprecated behavior
-										Il2CppObject* _uiCommandBuffer = uiManager._uiCommandBuffer();
-										Il2CppObject* _blitToFrameMaterial = uiManager._blitToFrameMaterial();
-
-										if (_uiCommandBuffer)
-										{
-											auto dest = il2cpp_symbols::get_method_pointer<Il2CppObject * (*)(Il2CppClass*, int)>("UnityEngine.CoreModule.dll", "UnityEngine.Rendering", "RenderTargetIdentifier", "op_Implicit", 1)(
-												il2cpp_symbols::get_class("UnityEngine.CoreModule.dll", "UnityEngine.Rendering", "RenderTargetIdentifier"), 1);
-											il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, Il2CppObject*, Il2CppObject*, Il2CppObject*)>(_uiCommandBuffer->klass, "Blit", 3)->methodPointer(_uiCommandBuffer, renderTexture, dest, _blitToFrameMaterial);
-										}
-									}
+									il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, Il2CppObject*)>(_uiToFrameBufferRenderCameraData->klass, "set_ScreenTexture", 1)->methodPointer(_uiToFrameBufferRenderCameraData, renderTexture);
 
 									Il2CppObject* _uiCamera = uiManager._uiCamera();
 									Il2CppObject* _bgCamera = uiManager._bgCamera();
@@ -3815,8 +3627,8 @@ namespace
 			Il2CppString * headerTextArg,
 			Il2CppString * message,
 			Il2CppDelegate * onRight,
-			unsigned long leftTextId,
-			unsigned long rightTextId,
+			uint64_t leftTextId,
+			uint64_t rightTextId,
 			Il2CppDelegate * onLeft,
 			int dialogFormType)>(
 				il2cpp_class_get_method_from_name(dialogData->klass,
@@ -4733,8 +4545,17 @@ namespace
 		return false;
 	}
 
+	static bool IsMovingLivePlayback = false;
+
 	void MoveLivePlayback(float value)
 	{
+		if (IsMovingLivePlayback)
+		{
+			return;
+		}
+
+		IsMovingLivePlayback = true;
+
 		auto director = GetSingletonInstance(il2cpp_symbols::get_class("umamusume.dll", "Gallop.Live", "Director"));
 		if (director)
 		{
@@ -4956,6 +4777,8 @@ namespace
 				il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*)>(LiveTimeController->klass, "ResumeLive", 0)->methodPointer(LiveTimeController);
 			}
 		}
+
+		IsMovingLivePlayback = false;
 	}
 
 	bool ControlLiveTime(WPARAM wParam)
@@ -5027,9 +4850,114 @@ namespace
 		return false;
 	}
 
+
+	static vector<int8_t> KONAMI_COMMAND{ VK_UP, VK_UP, VK_DOWN, VK_DOWN, VK_LEFT, VK_RIGHT, VK_LEFT, VK_RIGHT, static_cast<int8_t>('B'), static_cast<int8_t>('A') };
+
+	static int konamiCommandIndex = 0;
+
+	static bool isKonamiOpened = false;
+
+	bool CheckKonamiCmd(WPARAM wParam)
+	{
+		if (!config::runtime::allowStart)
+		{
+			if (isKonamiOpened)
+			{
+				return false;
+			}
+
+			if (wParam == KONAMI_COMMAND[konamiCommandIndex])
+			{
+				if (konamiCommandIndex == KONAMI_COMMAND.size() - 1)
+				{
+					konamiCommandIndex = 0;
+
+					auto dialogData = il2cpp_object_new(
+						il2cpp_symbols::get_class("umamusume.dll", "Gallop",
+							"DialogCommon/Data"));
+					il2cpp_runtime_object_init(dialogData);
+
+					dialogData = reinterpret_cast<Il2CppObject * (*)(Il2CppObject * thisObj,
+						Il2CppString * headerTextArg,
+						Il2CppString * message,
+						Il2CppDelegate * onRight,
+						uint64_t leftTextId,
+						uint64_t rightTextId,
+						Il2CppDelegate * onLeft,
+						int dialogFormType)>(
+							il2cpp_class_get_method_from_name(dialogData->klass,
+								"SetSimpleTwoButtonMessage",
+								7)->methodPointer
+							)(dialogData,
+								localizeextension_text_hook(GetTextIdByName(L"Title0002")),
+								localizeextension_text_hook(GetTextIdByName(L"Title0023")),
+								CreateDelegateStatic(*[]()
+									{
+										wstringstream subKeyStream;
+
+										subKeyStream << L"Software";
+										subKeyStream << L"\\" << UnityEngine::Application::companyName()->chars;
+										subKeyStream << L"\\" << UnityEngine::Application::productName()->chars;
+
+										DWORD data = 1;
+										HKEY hKey;
+										RegCreateKeyExW(HKEY_CURRENT_USER, subKeyStream.str().data(), 0, nullptr, 0, KEY_WRITE, 0, &hKey, nullptr);
+										RegSetValueExW(hKey, L"AgreeOwnYourRisk", 0, REG_DWORD, reinterpret_cast<const BYTE*>(&data), sizeof(data));
+										RegCloseKey(hKey);
+
+										auto dialogData = il2cpp_object_new(
+											il2cpp_symbols::get_class("umamusume.dll", "Gallop", "DialogCommon/Data"));
+										il2cpp_runtime_object_init(dialogData);
+
+										dialogData = reinterpret_cast<Il2CppObject * (*)(Il2CppObject * thisObj,
+											ULONG headerTextId,
+											Il2CppString * message,
+											Il2CppDelegate * onClose,
+											ULONG closeTextId)>(
+												il2cpp_class_get_method_from_name(dialogData->klass, "SetSimpleOneButtonMessage",
+													4)->methodPointer
+												)(dialogData, GetTextIdByName(L"AccoutDataLink0061"), localize_get_hook(GetTextIdByName(L"Outgame0309")), nullptr, GetTextIdByName(L"Common0185"));
+
+										auto onDestroy = CreateDelegateStatic(*[]()
+											{
+												UnityEngine::Application::Exit(0);
+											});
+
+										il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, Il2CppDelegate*)>(dialogData->klass, "AddDestroyCallback", 1)->methodPointer(dialogData, onDestroy);
+										il2cpp_symbols::get_method_pointer<Il2CppObject* (*)(Il2CppObject* data)>("umamusume.dll", "Gallop", "DialogManager", "PushDialog", 1)(dialogData);
+									}),
+								GetTextIdByName(L"Common0309"),
+								GetTextIdByName(L"Common0150"),
+								CreateDelegateStatic(*[]()
+									{
+										isKonamiOpened = false;
+									}),
+								2);
+
+					isKonamiOpened = true;
+
+					il2cpp_symbols::get_method_pointer<Il2CppObject* (*)(Il2CppObject*, bool)>(
+						"umamusume.dll", "Gallop", "DialogManager", "PushSystemDialog", 2)(
+							dialogData, true);
+				}
+				else
+				{
+					konamiCommandIndex++;
+				}
+				return true;
+			}
+			else
+			{
+				konamiCommandIndex = 0;
+			}
+		}
+
+		return false;
+	}
+
 	bool isPortraitBeforeFullscreen = false;
 
-	bool isWndProcInitRequired = true;
+	WNDPROC oldWndProcPtr = nullptr;
 
 	LRESULT WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 	{
@@ -5098,6 +5026,11 @@ namespace
 			{
 				return TRUE;
 			}
+
+			if (CheckKonamiCmd(wParam))
+			{
+				return TRUE;
+			}
 		}
 
 		if (uMsg == WM_KEYUP)
@@ -5111,7 +5044,6 @@ namespace
 
 		if (uMsg == WM_SYSKEYDOWN)
 		{
-
 			bool altDown = (lParam & (static_cast<long long>(1) << 29)) != 0;
 			if ((config::auto_fullscreen || config::unlock_size || config::freeform_window) &&
 				wParam == VK_RETURN &&
@@ -5358,13 +5290,6 @@ namespace
 					windowHeight = windowRect.bottom - windowRect.top;
 				resizeWindow(hWnd, windowWidth, windowHeight);
 
-
-				WNDPROC oldWndProcPtr = nullptr;
-
-				auto oldWndProcPtrField = il2cpp_class_get_field_from_name_wrap(StandaloneWindowResize, "oldWndProcPtr");
-				il2cpp_field_static_get_value(oldWndProcPtrField, &oldWndProcPtr);
-
-
 				if (oldWndProcPtr)
 				{
 					return CallWindowProcW(oldWndProcPtr, hWnd, uMsg, wParam, lParam);
@@ -5439,12 +5364,6 @@ namespace
 				float _aspectRatio = contentWidth / contentHeight;
 				il2cpp_field_static_set_value(_aspectRatioField, &_aspectRatio);
 			}
-
-			WNDPROC oldWndProcPtr = nullptr;
-
-			auto oldWndProcPtrField = il2cpp_class_get_field_from_name_wrap(StandaloneWindowResize, "oldWndProcPtr");
-			il2cpp_field_static_get_value(oldWndProcPtrField, &oldWndProcPtr);
-
 
 			if (oldWndProcPtr)
 			{
@@ -5595,11 +5514,6 @@ namespace
 			ShowExitDialog();
 			return TRUE;
 		}
-
-		WNDPROC oldWndProcPtr = nullptr;
-
-		auto oldWndProcPtrField = il2cpp_class_get_field_from_name_wrap(il2cpp_symbols::get_class("umamusume.dll", "Gallop", "StandaloneWindowResize"), "oldWndProcPtr");
-		il2cpp_field_static_get_value(oldWndProcPtrField, &oldWndProcPtr);
 
 		if (oldWndProcPtr)
 		{
@@ -5830,7 +5744,7 @@ namespace
 		auto color32 = 0xFFFFFFFF;
 		for (int i = 0; i < entries->max_length; i++)
 		{
-			auto entry = reinterpret_cast<unsigned long long>(entries->vector[i]);
+			auto entry = reinterpret_cast<uint64_t>(entries->vector[i]);
 			auto color = (entry & 0xFFFFFFFF00000000) >> 32;
 			auto key = entry & 0xFFFFFFFF;
 			if (key == colorEnum && (color != 0xFFFFFFFF && color != 0))
@@ -6921,18 +6835,18 @@ namespace
 
 	void SetTextCommonFontColor(Il2CppObject* textCommon, const wchar_t* color)
 	{
-		il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, unsigned long)>(textCommon->klass, "set_FontColor", 1)->methodPointer(textCommon, GetEnumValue(ParseEnum(GetRuntimeType("umamusume.dll", "Gallop", "FontColorType"), color)));
+		il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, uint64_t)>(textCommon->klass, "set_FontColor", 1)->methodPointer(textCommon, GetEnumValue(ParseEnum(GetRuntimeType("umamusume.dll", "Gallop", "FontColorType"), color)));
 	}
 
 	void SetTextCommonOutlineSize(Il2CppObject* textCommon, const wchar_t* size)
 	{
-		il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, unsigned long)>(textCommon->klass, "set_OutlineSize", 1)->methodPointer(textCommon, GetEnumValue(ParseEnum(GetRuntimeType("umamusume.dll", "Gallop", "OutlineSizeType"), size)));
+		il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, uint64_t)>(textCommon->klass, "set_OutlineSize", 1)->methodPointer(textCommon, GetEnumValue(ParseEnum(GetRuntimeType("umamusume.dll", "Gallop", "OutlineSizeType"), size)));
 		il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*)>(textCommon->klass, "UpdateOutline", 0)->methodPointer(textCommon);
 	}
 
 	void SetTextCommonOutlineColor(Il2CppObject* textCommon, const wchar_t* color)
 	{
-		il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, unsigned long)>(textCommon->klass, "set_OutlineColor", 1)->methodPointer(textCommon, GetEnumValue(ParseEnum(GetRuntimeType("umamusume.dll", "Gallop", "OutlineColorType"), color)));
+		il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, uint64_t)>(textCommon->klass, "set_OutlineColor", 1)->methodPointer(textCommon, GetEnumValue(ParseEnum(GetRuntimeType("umamusume.dll", "Gallop", "OutlineColorType"), color)));
 		il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*)>(textCommon->klass, "RebuildOutline", 0)->methodPointer(textCommon);
 	}
 
@@ -8411,7 +8325,7 @@ namespace
 
 				AddOrSet(configDocument, L"dumpMsgPackRequest", GetOptionItemOnOffIsOn("dump_msgpack_request"));
 
-#ifdef _DEBUG
+#ifdef EXPERIMENTS
 				AddOrSet(configDocument, L"unlockLiveChara", GetOptionItemOnOffIsOn("unlock_live_chara"));
 #endif
 				AddOrSet(configDocument, L"unlockSize", GetOptionItemOnOffIsOn("unlock_size"));
@@ -8524,7 +8438,7 @@ namespace
 
 				config::dump_msgpack_request = configDocument[L"dumpMsgPackRequest"].GetBool();
 
-#ifdef _DEBUG
+#ifdef EXPERIMENTS
 				config::unlock_live_chara = configDocument[L"unlockLiveChara"].GetBool();
 #endif
 				config::write_config();
@@ -8770,7 +8684,7 @@ namespace
 				dumpMsgPackRequest = configDocument[L"dumpMsgPackRequest"].GetBool();
 			}
 
-#ifdef _DEBUG
+#ifdef EXPERIMENTS
 			if (configDocument.HasMember(L"unlockLiveChara"))
 			{
 				unlockLiveChara = configDocument[L"unlockLiveChara"].GetBool();
@@ -8810,7 +8724,7 @@ namespace
 			{
 				freeFormUiScaleLandscape = configDocument[L"freeFormUiScaleLandscape"].GetFloat();
 			}
-			}
+		}
 
 		vector<string> graphicsQualityOptions = GetGraphicsQualityOptions();
 
@@ -8952,7 +8866,7 @@ namespace
 					GetOptionItemOnOff("allow_delete_cookie", LocalifySettings::GetText("allow_delete_cookie")),
 				GetOptionItemOnOff("dump_msgpack", LocalifySettings::GetText("dump_msgpack")),
 				GetOptionItemOnOff("dump_msgpack_request", LocalifySettings::GetText("dump_msgpack_request")),
-#ifdef _DEBUG
+#ifdef EXPERIMENTS
 				GetOptionItemOnOff("unlock_live_chara", LocalifySettings::GetText("unlock_live_chara")),
 				GetOptionItemInfo(LocalifySettings::GetText("unlock_live_chara_info")),
 #endif
@@ -9199,12 +9113,52 @@ namespace
 
 				if (Unity::OpenXR::initialized)
 				{
+					static auto currentCamera = UnityEngine::Behaviour(il2cpp_resolve_icall_type<Il2CppObject * (*)()>("UnityEngine.Camera::get_current()")());
+					//wcout << UnityEngine::Object::Name(currentCamera)->chars << endl;
+					//wcout << il2cpp_resolve_icall_type<float (*)(Il2CppObject*)>("UnityEngine.Camera::get_depth()")(currentCamera) << endl;
+					//Vector3 origPos{};
+					//il2cpp_resolve_icall_type<void (*)(Il2CppObject*, Vector3*)>("UnityEngine.Transform::get_position_Injected()")(currentCamera.gameObject().transform(), &origPos);
+
+					//static auto xrRig = UnityEngine::GameObject(il2cpp_string_new("XRRig"));
+					//
+					//UnityEngine::Object::DontDestroyOnLoad(xrRig);
+					//
+					//static auto cameraOffset = UnityEngine::GameObject(il2cpp_string_new("Camera Offset"));
+					//UnityEngine::Object::DontDestroyOnLoad(cameraOffset);
+
+					//cout << "POS: " << origPos.x << " " << origPos.y << " " << origPos.z << endl;
+					//origPos.y += 1000;
+					//origPos.z += 1000;
+
+					//static auto gameObject = UnityEngine::GameObject(il2cpp_string_new("Main Camera"));
+					//UnityEngine::Object::DontDestroyOnLoad(gameObject);
+
+					//xrRig.transform().SetParent(cameraOffset.transform(), false);
+					//cameraOffset.transform().SetParent(gameObject.transform(), false);
+					//static auto camera = UnityEngine::Behaviour(gameObject.AddComponent(GetRuntimeType("UnityEngine.CoreModule.dll", "UnityEngine", "Camera")));
+					//UnityEngine::Object::DontDestroyOnLoad(camera);
+					//// il2cpp_resolve_icall_type<Il2CppString* (*)(Il2CppObject*, int)>("UnityEngine.Camera::set_cullingMask()")(camera, 4294967295);
+					//il2cpp_resolve_icall_type<void (*)(Il2CppObject*, bool)>("UnityEngine.Camera::set_allowDynamicResolution()")(camera, true);
+
+					//il2cpp_resolve_icall_type<void (*)(Il2CppObject*, Vector3)>("UnityEngine.Transform::set_position_Injected()")(cameraOffset.transform(), origPos);
+
+					auto gameObject = currentCamera.gameObject();
+					gameObject.tag(il2cpp_string_new("MainCamera"));
+
+					// il2cpp_resolve_icall_type<void (*)(Il2CppObject*, float)>("UnityEngine.Camera::set_depth()")(camera, 23);
+
+					//il2cpp_resolve_icall_type<Il2CppString* (*)(Il2CppObject*, int)>("UnityEngine.Camera::set_stereoTargetEye()")(camera, 3);
+
 					if (Unity::OpenXR::started)
 					{
+						// camera.enabled(false);
+						// currentCamera.enabled(true);
 						Unity::OpenXR::Stop();
 					}
 					else
 					{
+						// camera.enabled(true);
+						// currentCamera.enabled(false);
 						Unity::OpenXR::Start();
 					}
 				}
@@ -9221,8 +9175,8 @@ namespace
 					Il2CppString * headerTextArg,
 					Il2CppString * message,
 					Il2CppDelegate * onRight,
-					unsigned long leftTextId,
-					unsigned long rightTextId,
+					uint64_t leftTextId,
+					uint64_t rightTextId,
 					Il2CppDelegate * onLeft,
 					int dialogFormType)>(
 						il2cpp_class_get_method_from_name(dialogData->klass,
@@ -9257,8 +9211,8 @@ namespace
 						Il2CppString * headerTextArg,
 						Il2CppString * message,
 						Il2CppDelegate * onRight,
-						unsigned long leftTextId,
-						unsigned long rightTextId,
+						uint64_t leftTextId,
+						uint64_t rightTextId,
 						Il2CppDelegate * onLeft,
 						int dialogFormType)>(
 							il2cpp_class_get_method_from_name(dialogData->klass,
@@ -9306,7 +9260,7 @@ namespace
 		il2cpp_field_set_value(dialogData, ContentsObjectField, gameObject);
 
 		settingsDialog = il2cpp_symbols::get_method_pointer<Il2CppObject * (*)(Il2CppObject * data)>("umamusume.dll", "Gallop", "DialogManager", "PushDialog", 1)(dialogData);
-		}
+	}
 
 	void OpenLiveSettings()
 	{
@@ -9655,8 +9609,8 @@ namespace
 							Il2CppString * headerTextArg,
 							Il2CppString * message,
 							Il2CppDelegate * onRight,
-							unsigned long leftTextId,
-							unsigned long rightTextId,
+							uint64_t leftTextId,
+							uint64_t rightTextId,
 							Il2CppDelegate * onLeft,
 							int dialogFormType)>(dialogData->klass, "SetSimpleTwoButtonMessage", 7)->methodPointer
 							(dialogData,
@@ -9727,8 +9681,8 @@ namespace
 							Il2CppString * headerTextArg,
 							Il2CppString * message,
 							Il2CppDelegate * onRight,
-							unsigned long leftTextId,
-							unsigned long rightTextId,
+							uint64_t leftTextId,
+							uint64_t rightTextId,
 							Il2CppDelegate * onLeft,
 							int dialogFormType)>(dialogData->klass, "SetSimpleTwoButtonMessage", 7)->methodPointer
 							(dialogData,
@@ -10006,6 +9960,44 @@ namespace
 			sliderTransform.pivot({ 0.2, 0.5 });
 			sliderTransform.sizeDelta({ -520, 24 });
 			sliderTransform.SetParent(contentsRoot, false);
+		}
+
+		if (wstring(UnityEngine::Object::Name(cloned)->chars).find(L"RaceResultList") != wstring::npos)
+		{
+			auto raceInfo = il2cpp_symbols::get_method_pointer<Il2CppObject * (*)()>("umamusume.dll", "Gallop", "RaceManager", "get_RaceInfo", 0)();
+
+			if (raceInfo)
+			{
+				auto raceType = il2cpp_class_get_method_from_name_type<int (*)(Il2CppObject*)>(raceInfo->klass, "get_RaceType", 0)->methodPointer(raceInfo);
+
+				if (raceType == 6 || raceType == 7)
+				{
+					auto raceInstanceId = il2cpp_class_get_method_from_name_type<int (*)(Il2CppObject*)>(raceInfo->klass, "get_RaceInstanceId", 0)->methodPointer(raceInfo);
+					auto grade = il2cpp_class_get_method_from_name_type<int (*)(Il2CppObject*)>(raceInfo->klass, "get_Grade", 0)->methodPointer(raceInfo);
+
+					auto musicId = MasterDB::GetSingleModeRaceLiveMusicId(raceInstanceId, grade);
+
+					auto playerHorseIndex = il2cpp_class_get_method_from_name_type<int (*)(Il2CppObject*)>(raceInfo->klass, "get_PlayerHorseIndex", 0)->methodPointer(raceInfo);
+					auto raceHorse = il2cpp_class_get_method_from_name_type<Il2CppArraySize_t<Il2CppObject*>*(*)(Il2CppObject*)>(raceInfo->klass, "get_RaceHorse", 0)->methodPointer(raceInfo);
+					auto horseData = raceHorse->vector[playerHorseIndex];
+
+					auto charaIdField = il2cpp_class_get_field_from_name_wrap(horseData->klass, "charaId");
+
+					int charaId;
+					il2cpp_field_get_value(horseData, charaIdField, &charaId);
+
+					if (MasterDB::HasLivePermission(musicId, charaId))
+					{
+						auto gameObject = UnityEngine::GameObject(cloned);
+						auto raceResultList = gameObject.GetComponent(GetRuntimeType("umamusume.dll", "Gallop", "RaceResultList"));
+						auto _singleModeLiveButtonField = il2cpp_class_get_field_from_name_wrap(raceResultList->klass, "_singleModeLiveButton");
+						Il2CppObject* _singleModeLiveButton;
+						il2cpp_field_get_value(raceResultList, _singleModeLiveButtonField, &_singleModeLiveButton);
+
+						il2cpp_symbols::get_method_pointer<Il2CppObject* (*)(Il2CppObject*)>("umamusume.dll", "Gallop", "PartsLiveTheaterVoiceIcon", "FindOrCreate", 1)(MonoBehaviour(_singleModeLiveButton).gameObject().transform());
+					}
+				}
+			}
 		}
 
 		if (wstring(UnityEngine::Object::Name(cloned)->chars).find(L"LiveChampionsTextController") != wstring::npos)
@@ -10892,7 +10884,7 @@ namespace
 		auto dialogData = il2cpp_object_new(il2cpp_symbols::get_class("umamusume.dll", "Gallop", "DialogCommon/Data"));
 		il2cpp_runtime_object_init(dialogData);
 		dialogData =
-			il2cpp_class_get_method_from_name_type<Il2CppObject * (*)(Il2CppObject * _this, unsigned long headerTextId, Il2CppString * message, Il2CppObject * onClickCenterButton, unsigned long closeTextId)>(dialogData->klass, "SetSimpleOneButtonMessage", 4)->methodPointer
+			il2cpp_class_get_method_from_name_type<Il2CppObject * (*)(Il2CppObject * _this, uint64_t headerTextId, Il2CppString * message, Il2CppObject * onClickCenterButton, uint64_t closeTextId)>(dialogData->klass, "SetSimpleOneButtonMessage", 4)->methodPointer
 			(dialogData, errorText, local::get_localized_string(il2cpp_string_new16(GotoTitleErrorJa.data())), nullptr, okText);
 		errorDialog = il2cpp_symbols::get_method_pointer<Il2CppObject * (*)(Il2CppObject * data, bool isEnableOutsideClick)>("umamusume.dll", "Gallop", "DialogManager", "PushSystemDialog", 2)(dialogData, true);
 	}
@@ -11060,8 +11052,8 @@ namespace
 							Il2CppString * headerTextArg,
 							Il2CppString * message,
 							Il2CppDelegate * onRight,
-							unsigned long leftTextId,
-							unsigned long rightTextId,
+							uint64_t leftTextId,
+							uint64_t rightTextId,
 							Il2CppDelegate * onLeft,
 							int dialogFormType)>(dialogData->klass, "SetSimpleTwoButtonMessage", 7)->methodPointer
 							(dialogData,
@@ -11279,8 +11271,8 @@ namespace
 												Il2CppString * headerTextArg,
 												Il2CppString * message,
 												Il2CppDelegate * onRight,
-												unsigned long leftTextId,
-												unsigned long rightTextId,
+												uint64_t leftTextId,
+												uint64_t rightTextId,
 												Il2CppDelegate * onLeft,
 												int dialogFormType)>(dialogData->klass, "SetSimpleTwoButtonMessage", 7)->methodPointer
 												(dialogData,
@@ -11931,38 +11923,44 @@ namespace
 	{
 		auto buf = reinterpret_cast<const char*>(data) + kIl2CppSizeOfArray;
 
-		if (config::msgpack_notifier && config::msgpack_notifier_request)
+		try
 		{
-			notifier::notify_request(string(buf, data->max_length));
-		}
-
-		if (config::dump_msgpack && config::dump_msgpack_request)
-		{
-			string out_path =
-				"msgpack_dump/"s.append(to_string(current_time())).append("Q.msgpack");
-
-			DumpMsgPackFile(out_path, buf, data->max_length);
-		}
-
-		MsgPackData::ReadRequest(buf, data->max_length);
-
-#ifdef _DEBUG
-		if (config::unlock_live_chara)
-		{
-			auto modified = MsgPackModify::ModifyRequest(buf, data->max_length);
-
-			if (!modified.empty())
+			if (config::msgpack_notifier && config::msgpack_notifier_request)
 			{
-				data = il2cpp_array_new_type<int8_t>(il2cpp_defaults.byte_class, modified.size());
-
-				char* buf1 = reinterpret_cast<char*>(data) + kIl2CppSizeOfArray;
-				memcpy(buf1, modified.data(), modified.size());
+				notifier::notify_request(string(buf, data->max_length));
 			}
-		}
+
+			if (config::dump_msgpack && config::dump_msgpack_request)
+			{
+				string out_path =
+					"msgpack_dump/"s.append(to_string(current_time())).append("Q.msgpack");
+
+				DumpMsgPackFile(out_path, buf, data->max_length);
+			}
+
+			MsgPackData::ReadRequest(buf, data->max_length);
+
+#ifdef EXPERIMENTS
+			if (config::unlock_live_chara)
+			{
+				auto modified = MsgPackModify::ModifyRequest(buf, data->max_length);
+
+				if (!modified.empty())
+				{
+					data = il2cpp_array_new_type<int8_t>(il2cpp_defaults.byte_class, modified.size());
+
+					char* buf1 = reinterpret_cast<char*>(data) + kIl2CppSizeOfArray;
+					memcpy(buf1, modified.data(), modified.size());
+				}
+			}
 #endif
+		}
+		catch (...)
+		{
+		}
 
 		return reinterpret_cast<decltype(UploadHandlerRaw_Create_hook)*>(UploadHandlerRaw_Create_orig)(self, data);
-		}
+	}
 
 	void* DownloadHandler_InternalGetByteArray_orig = nullptr;
 
@@ -11970,40 +11968,46 @@ namespace
 	{
 		auto data = reinterpret_cast<decltype(DownloadHandler_InternalGetByteArray_hook)*>(DownloadHandler_InternalGetByteArray_orig)(self);
 
-		auto buf = reinterpret_cast<const char*>(data) + kIl2CppSizeOfArray;
-
-		if (config::msgpack_notifier)
+		try
 		{
-			notifier::notify_response(string(buf, data->max_length));
-		}
+			auto buf = reinterpret_cast<const char*>(data) + kIl2CppSizeOfArray;
 
-		if (config::dump_msgpack)
-		{
-			string out_path =
-				"msgpack_dump/"s.append(to_string(current_time())).append("R.msgpack");
-
-			DumpMsgPackFile(out_path, buf, data->max_length);
-		}
-
-		MsgPackData::ReadResponse(buf, data->max_length);
-
-#ifdef _DEBUG
-		if (config::unlock_live_chara)
-		{
-			auto modified = MsgPackModify::ModifyResponse(buf, data->max_length);
-
-			if (!modified.empty())
+			if (config::msgpack_notifier)
 			{
-				data = il2cpp_array_new_type<int8_t>(il2cpp_defaults.byte_class, modified.size());
-
-				char* buf1 = reinterpret_cast<char*>(data) + kIl2CppSizeOfArray;
-				memcpy(buf1, modified.data(), modified.size());
+				notifier::notify_response(string(buf, data->max_length));
 			}
-		}
+
+			if (config::dump_msgpack)
+			{
+				string out_path =
+					"msgpack_dump/"s.append(to_string(current_time())).append("R.msgpack");
+
+				DumpMsgPackFile(out_path, buf, data->max_length);
+			}
+
+			MsgPackData::ReadResponse(buf, data->max_length);
+
+#ifdef EXPERIMENTS
+			if (config::unlock_live_chara)
+			{
+				auto modified = MsgPackModify::ModifyResponse(buf, data->max_length);
+
+				if (!modified.empty())
+				{
+					data = il2cpp_array_new_type<int8_t>(il2cpp_defaults.byte_class, modified.size());
+
+					char* buf1 = reinterpret_cast<char*>(data) + kIl2CppSizeOfArray;
+					memcpy(buf1, modified.data(), modified.size());
+				}
+			}
 #endif
+		}
+		catch (...)
+		{
+		}
 
 		return data;
-		}
+	}
 
 	void* HttpHelper_CompressRequest_orig = nullptr;
 
@@ -12011,38 +12015,44 @@ namespace
 	{
 		auto buf = reinterpret_cast<const char*>(data) + kIl2CppSizeOfArray;
 
-		if (config::msgpack_notifier && config::msgpack_notifier_request)
+		try
 		{
-			notifier::notify_request(string(buf, data->max_length));
-		}
-
-		if (config::dump_msgpack && config::dump_msgpack_request)
-		{
-			string out_path =
-				"msgpack_dump/"s.append(to_string(current_time())).append("Q.msgpack");
-
-			DumpMsgPackFile(out_path, buf, data->max_length);
-		}
-
-		MsgPackData::ReadRequest(buf, data->max_length);
-
-#ifdef _DEBUG
-		if (config::unlock_live_chara)
-		{
-			auto modified = MsgPackModify::ModifyRequest(buf, data->max_length);
-
-			if (!modified.empty())
+			if (config::msgpack_notifier && config::msgpack_notifier_request)
 			{
-				data = il2cpp_array_new_type<int8_t>(il2cpp_defaults.byte_class, modified.size());
-
-				char* buf1 = reinterpret_cast<char*>(data) + kIl2CppSizeOfArray;
-				memcpy(buf1, modified.data(), modified.size());
+				notifier::notify_request(string(buf, data->max_length));
 			}
-		}
+
+			if (config::dump_msgpack && config::dump_msgpack_request)
+			{
+				string out_path =
+					"msgpack_dump/"s.append(to_string(current_time())).append("Q.msgpack");
+
+				DumpMsgPackFile(out_path, buf, data->max_length);
+			}
+
+			MsgPackData::ReadRequest(buf, data->max_length);
+
+#ifdef EXPERIMENTS
+			if (config::unlock_live_chara)
+			{
+				auto modified = MsgPackModify::ModifyRequest(buf, data->max_length);
+
+				if (!modified.empty())
+				{
+					data = il2cpp_array_new_type<int8_t>(il2cpp_defaults.byte_class, modified.size());
+
+					char* buf1 = reinterpret_cast<char*>(data) + kIl2CppSizeOfArray;
+					memcpy(buf1, modified.data(), modified.size());
+				}
+			}
 #endif
+		}
+		catch (...)
+		{
+		}
 
 		return reinterpret_cast<decltype(HttpHelper_CompressRequest_hook)*>(HttpHelper_CompressRequest_orig)(data);
-		}
+	}
 
 	void* HttpHelper_DecompressResponse_orig = nullptr;
 
@@ -12050,40 +12060,46 @@ namespace
 	{
 		auto data = reinterpret_cast<decltype(HttpHelper_DecompressResponse_hook)*>(HttpHelper_DecompressResponse_orig)(compressed);
 
-		auto buf = reinterpret_cast<const char*>(data) + kIl2CppSizeOfArray;
-
-		if (config::msgpack_notifier)
+		try
 		{
-			notifier::notify_response(string(buf, data->max_length));
-		}
+			auto buf = reinterpret_cast<const char*>(data) + kIl2CppSizeOfArray;
 
-		if (config::dump_msgpack)
-		{
-			string out_path =
-				"msgpack_dump/"s.append(to_string(current_time())).append("R.msgpack");
-
-			DumpMsgPackFile(out_path, buf, data->max_length);
-		}
-
-		MsgPackData::ReadResponse(buf, data->max_length);
-
-#ifdef _DEBUG
-		if (config::unlock_live_chara)
-		{
-			auto modified = MsgPackModify::ModifyResponse(buf, data->max_length);
-
-			if (!modified.empty())
+			if (config::msgpack_notifier)
 			{
-				data = il2cpp_array_new_type<int8_t>(il2cpp_defaults.byte_class, modified.size());
-
-				char* buf1 = reinterpret_cast<char*>(data) + kIl2CppSizeOfArray;
-				memcpy(buf1, modified.data(), modified.size());
+				notifier::notify_response(string(buf, data->max_length));
 			}
-		}
+
+			if (config::dump_msgpack)
+			{
+				string out_path =
+					"msgpack_dump/"s.append(to_string(current_time())).append("R.msgpack");
+
+				DumpMsgPackFile(out_path, buf, data->max_length);
+			}
+
+			MsgPackData::ReadResponse(buf, data->max_length);
+
+#ifdef EXPERIMENTS
+			if (config::unlock_live_chara)
+			{
+				auto modified = MsgPackModify::ModifyResponse(buf, data->max_length);
+
+				if (!modified.empty())
+				{
+					data = il2cpp_array_new_type<int8_t>(il2cpp_defaults.byte_class, modified.size());
+
+					char* buf1 = reinterpret_cast<char*>(data) + kIl2CppSizeOfArray;
+					memcpy(buf1, modified.data(), modified.size());
+				}
+			}
 #endif
+		}
+		catch (...)
+		{
+		}
 
 		return data;
-		}
+	}
 
 	Il2CppObject* GetRaceManager()
 	{
@@ -12278,11 +12294,6 @@ namespace
 			}
 		}
 
-		if (Unity::OpenXR::started)
-		{
-			Unity::OpenXR::Internal_PumpMessageLoop();
-		}
-
 		if (config::unlock_size || config::freeform_window)
 		{
 			SetBGCanvasScalerSize();
@@ -12332,7 +12343,7 @@ namespace
 							auto timeMin = static_cast<int>(LiveCurrentTime / 60);
 							auto timeSec = static_cast<int>(fmodf(LiveCurrentTime, 60));
 
-							wostringstream str;
+							wstringstream str;
 							str << setw(2) << setfill(L'0') << timeSec;
 
 							SetTextCommonText(textCommon, (to_wstring(timeMin) + L":" + str.str()).data());
@@ -12345,7 +12356,7 @@ namespace
 							auto timeMin = static_cast<int>(LiveTotalTime / 60);
 							auto timeSec = static_cast<int>(fmodf(LiveTotalTime, 60));
 
-							wostringstream str;
+							wstringstream str;
 							str << setw(2) << setfill(L'0') << timeSec;
 
 							SetTextCommonText(textCommonTotal, (to_wstring(timeMin) + L":" + str.str()).data());
@@ -12664,71 +12675,6 @@ namespace
 
 		auto update_timeline_data_addr = il2cpp_symbols::get_method_pointer(
 			"umamusume.dll", "Gallop", "StoryTimelineBlockData", "UpdateBlockData", 4
-		);
-
-		auto query_setup_addr = il2cpp_symbols::get_method_pointer(
-			"LibNative.Runtime.dll", "LibNative.Sqlite3",
-			"Query", "_Setup", 2
-		);
-
-		auto Plugin_sqlite3_step_addr = il2cpp_symbols::get_method_pointer(
-			"LibNative.Runtime.dll", "LibNative.Sqlite3",
-			"Plugin", "sqlite3_step", 1
-		);
-
-		auto Plugin_sqlite3_reset_addr = il2cpp_symbols::get_method_pointer(
-			"LibNative.Runtime.dll", "LibNative.Sqlite3",
-			"Plugin", "sqlite3_reset", 1
-		);
-
-		auto query_step_addr = il2cpp_symbols::get_method_pointer(
-			"LibNative.Runtime.dll", "LibNative.Sqlite3",
-			"Query", "Step", 0
-		);
-
-		auto prepared_query_reset_addr = il2cpp_symbols::get_method_pointer(
-			"LibNative.Runtime.dll", "LibNative.Sqlite3",
-			"PreparedQuery", "Reset", 0
-		);
-
-		auto prepared_query_bind_text_addr = il2cpp_symbols::get_method_pointer(
-			"LibNative.Runtime.dll", "LibNative.Sqlite3",
-			"PreparedQuery", "BindText", 2
-		);
-
-		auto prepared_query_bind_int_addr = il2cpp_symbols::get_method_pointer(
-			"LibNative.Runtime.dll", "LibNative.Sqlite3",
-			"PreparedQuery", "BindInt", 2
-		);
-
-		auto prepared_query_bind_long_addr = il2cpp_symbols::get_method_pointer(
-			"LibNative.Runtime.dll", "LibNative.Sqlite3",
-			"PreparedQuery", "BindLong", 2
-		);
-
-		auto prepared_query_bind_double_addr = il2cpp_symbols::get_method_pointer(
-			"LibNative.Runtime.dll", "LibNative.Sqlite3",
-			"PreparedQuery", "BindDouble", 2
-		);
-
-		auto query_gettext_addr = il2cpp_symbols::get_method_pointer(
-			"LibNative.Runtime.dll", "LibNative.Sqlite3",
-			"Query", "GetText", 1
-		);
-
-		query_getint = il2cpp_symbols::get_method_pointer<int (*)(Il2CppObject*, int)>(
-			"LibNative.Runtime.dll", "LibNative.Sqlite3",
-			"Query", "GetInt", 1
-		);
-
-		auto query_dispose_addr = il2cpp_symbols::get_method_pointer(
-			"LibNative.Runtime.dll", "LibNative.Sqlite3",
-			"Query", "Dispose", 0
-		);
-
-		auto MasterCharacterSystemText_CreateOrmByQueryResultWithCharacterId_addr = il2cpp_symbols::get_method_pointer(
-			"umamusume.dll", "Gallop",
-			"MasterCharacterSystemText", "_CreateOrmByQueryResultWithCharacterId", 2
 		);
 
 		auto CySpringUpdater_set_SpringUpdateMode_addr = il2cpp_symbols::get_method_pointer(
@@ -13131,28 +13077,19 @@ namespace
 
 		ADD_HOOK(update, "DG.Tweening.Core.TweenManager::Update at %p\n");
 
-		ADD_HOOK(query_setup, "Query::_Setup at %p\n");
-		ADD_HOOK(query_gettext, "Query::GetString at %p\n");
-		ADD_HOOK(query_dispose, "Query::Dispose at %p\n");
-
 		if (!config::replace_text_db_path.empty())
 		{
-			try
+			if (MasterDB::InitReplacementMasterDB(wide_u8(config::replace_text_db_path.data())))
 			{
-				MasterDB::InitReplacementMasterDB(wide_u8(config::replace_text_db_path.data()));
-				ADD_HOOK(Plugin_sqlite3_step, "Plugin::sqlite3_step at %p\n");
-				ADD_HOOK(Plugin_sqlite3_reset, "Plugin::sqlite3_reset at %p\n");
-				ADD_HOOK(query_step, "Query::Step at %p\n");
-				ADD_HOOK(prepared_query_reset, "PreparedQuery::Reset at %p\n");
-				ADD_HOOK(prepared_query_bind_text, "PreparedQuery::BindText at %p\n");
-				ADD_HOOK(prepared_query_bind_int, "PreparedQuery::BindInt at %p\n");
-				ADD_HOOK(prepared_query_bind_long, "PreparedQuery::BindLong at %p\n");
-				ADD_HOOK(prepared_query_bind_double, "PreparedQuery::BindDouble at %p\n");
-				ADD_HOOK(MasterCharacterSystemText_CreateOrmByQueryResultWithCharacterId,
-					"MasterCharacterSystemText::_CreateOrmByQueryResultWithCharacterId at %p\n");
-			}
-			catch (exception& e)
-			{
+				ADD_HOOK(sqlite3_prepare_v2, "Plugin::sqlite3_prepare_v2 at %p\n");
+				ADD_HOOK(sqlite3_step, "Plugin::sqlite3_step at %p\n");
+				ADD_HOOK(sqlite3_reset, "Plugin::sqlite3_reset at %p\n");
+				ADD_HOOK(sqlite3_bind_text, "Plugin::sqlite3_bind_text at %p\n");
+				ADD_HOOK(sqlite3_bind_int, "Plugin::sqlite3_bind_int at %p\n");
+				ADD_HOOK(sqlite3_bind_int64, "Plugin::sqlite3_bind_int64 at %p\n");
+				ADD_HOOK(sqlite3_bind_double, "Plugin::sqlite3_bind_double at %p\n");
+				ADD_HOOK(sqlite3_column_text, "Plugin::sqlite3_column_text at %p\n");
+				ADD_HOOK(sqlite3_finalize, "Plugin::sqlite3_finalize at %p\n");
 			}
 		}
 
@@ -13259,7 +13196,7 @@ namespace
 
 			if (SCREEN_ORIENTATION_CATEGORIES)
 			{
-				il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*)>(SCREEN_ORIENTATION_CATEGORIES->klass, "Clear", 0)->methodPointer(SCREEN_ORIENTATION_CATEGORIES);
+				// il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*)>(SCREEN_ORIENTATION_CATEGORIES->klass, "Clear", 0)->methodPointer(SCREEN_ORIENTATION_CATEGORIES);
 			}
 
 			auto Camera_set_orthographicSize_addr = il2cpp_resolve_icall("UnityEngine.Camera::set_orthographicSize(System.Single)");
@@ -13397,7 +13334,7 @@ namespace
 	{
 		auto amuid = wstring(UnityEngine::Application::companyName()->chars) + L".Gallop";
 
-		DesktopNotificationManagerCompat::RegisterAumidAndComServer(amuid.data(), localize_get_hook(GetTextIdByName(L"Outgame0028"))->chars);
+		DesktopNotificationManagerCompat::RegisterAumidAndComServer(amuid.data(), L"우마무스메"/*localize_get_hook(GetTextIdByName(L"Outgame0028"))->chars*/);
 
 		DesktopNotificationManagerCompat::RegisterActivator();
 
@@ -13812,15 +13749,23 @@ namespace
 			}
 		}
 
-		/*auto uiManager = Gallop::UIManager::Instance();
-		auto mainCanvas = il2cpp_symbols::get_method_pointer<Il2CppObject * (*)()>("umamusume.dll", "Gallop", "UIManager", "get_MainCanvas", IgnoreNumberOfArguments)();
-		auto camera = il2cpp_class_get_method_from_name_type<Il2CppObject * (*)(Il2CppObject*)>(mainCanvas->klass, "get_worldCamera", 0)->methodPointer(mainCanvas);
+		if (!config::unlock_live_chara)
+		{
+			auto path = wide_u8(il2cpp_symbols::get_method_pointer<Il2CppString * (*)()>("Cute.Core.Assembly.dll", "Cute.Core", "Device", "GetPersistentDataPath", IgnoreNumberOfArguments)()->chars);
 
-		cout << "Camera " << camera << endl;
+			if (filesystem::exists(path + R"(\master\master_orig.mdb)"))
+			{
+				filesystem::remove_all(path + +R"(\master)");
+			}
+		}
 
-		auto gameObject = il2cpp_class_get_method_from_name_type<Il2CppObject * (*)(Il2CppObject*)>(camera->klass, "get_gameObject", 0)->methodPointer(camera);
-		wcout << il2cpp_class_get_method_from_name_type<Il2CppString * (*)(Il2CppObject*)>(gameObject->klass, "get_tag", 0)->methodPointer(gameObject)->chars << endl;
-		il2cpp_class_get_method_from_name_type<Il2CppString* (*)(Il2CppObject*, Il2CppString*)>(gameObject->klass, "set_tag", 1)->methodPointer(gameObject, il2cpp_string_new("MainCamera"));*/
+		// auto uiManager = Gallop::UIManager::Instance();
+		// auto camera = uiManager._bgCamera();
+		// auto gameObject = UnityEngine::Behaviour(camera).gameObject();
+		/*il2cpp_resolve_icall_type<Il2CppString* (*)(Il2CppObject*, int)>("UnityEngine.Camera::set_stereoTargetEye()")(camera, 3);
+		il2cpp_resolve_icall_type<Il2CppString* (*)(Il2CppObject*, float)>("UnityEngine.Camera::set_stereoConvergence()")(camera, 10);
+		il2cpp_resolve_icall_type<Il2CppString* (*)(Il2CppObject*, float)>("UnityEngine.Camera::set_stereoSeparation()")(camera, 0.022);
+		il2cpp_resolve_icall_type<void (*)(Il2CppObject*, float)>("UnityEngine.Camera::set_fieldOfView()")(camera, 60);*/
 
 		fullScreenFl = UnityEngine::Screen::fullScreen();
 
@@ -14060,45 +14005,16 @@ namespace
 						notification = nullptr;
 					}
 
-					if (config::max_fps > -1 || config::unlock_size || config::freeform_window)
-					{
-						if (isWndProcInitRequired)
-						{
-							isWndProcInitRequired = false;
-							auto StandaloneWindowResize = il2cpp_symbols::get_class("umamusume.dll", "Gallop", "StandaloneWindowResize");
-							WNDPROC oldWndProcPtr = nullptr;
-							WNDPROC newWndProcPtr = nullptr;
-
-							auto oldWndProcPtrField = il2cpp_class_get_field_from_name_wrap(StandaloneWindowResize, "oldWndProcPtr");
-							auto newWndProcPtrField = il2cpp_class_get_field_from_name_wrap(StandaloneWindowResize, "newWndProcPtr");
-							il2cpp_field_static_get_value(oldWndProcPtrField, &oldWndProcPtr);
-							il2cpp_field_static_get_value(newWndProcPtrField, &newWndProcPtr);
-
-							reinterpret_cast<WNDPROC>(SetWindowLongPtrW(hWnd, GWLP_WNDPROC, reinterpret_cast<LONG_PTR>(oldWndProcPtr)));
-							auto oldWndProcPtr2 = reinterpret_cast<WNDPROC>(SetWindowLongPtrW(hWnd, GWLP_WNDPROC, reinterpret_cast<LONG_PTR>(WndProc)));
-							il2cpp_field_static_set_value(oldWndProcPtrField, &oldWndProcPtr2);
-
-							if ((config::unlock_size || config::freeform_window) && config::initial_width > 72 && config::initial_height > 72)
-							{
-								if (config::initial_width < config::initial_height)
-								{
-									reinterpret_cast<decltype(set_resolution_hook)*>(set_resolution_orig)(last_virt_window_width, last_virt_window_height, 3, 0);
-								}
-								else
-								{
-									reinterpret_cast<decltype(set_resolution_hook)*>(set_resolution_orig)(last_hriz_window_width, last_hriz_window_height, 3, 0);
-								}
-							}
-						}
-
-						if (uiManager)
-						{
-							Il2CppObject* _bgCamera = uiManager._bgCamera();
+					// if (config::max_fps > -1 || config::unlock_size || config::freeform_window)
+					// {
+						// if (uiManager)
+						// {
+							// Il2CppObject* _bgCamera = uiManager._bgCamera();
 
 							/*il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, Color_t)>(_bgCamera->klass, "set_backgroundColor", 1)->methodPointer(_bgCamera,
 								il2cpp_symbols::get_method_pointer<Color_t(*)()>("UnityEngine.CoreModule.dll", "UnityEngine", "Color", "get_clear", IgnoreNumberOfArguments)());*/
-						}
-					}
+								// }
+							// }
 
 					if (config::freeform_window)
 					{
@@ -14387,7 +14303,7 @@ namespace
 				});
 		}
 	}
-	}
+}
 
 void* MessageBoxW_orig = nullptr;
 
@@ -14436,10 +14352,37 @@ SetWindowLongPtrW_hook(
 	_In_ int nIndex,
 	_In_ LONG_PTR dwNewLong)
 {
-	if (nIndex == GWL_STYLE)
+	if (config::freeform_window && hWnd == currentHWnd && nIndex == GWL_STYLE)
 	{
 		dwNewLong |= WS_MAXIMIZEBOX;
 	}
+
+	if (hWnd == currentHWnd && nIndex == GWLP_WNDPROC)
+	{
+		if ((config::unlock_size || config::freeform_window) && config::initial_width > 72 && config::initial_height > 72)
+		{
+			if (config::initial_width < config::initial_height)
+			{
+				reinterpret_cast<decltype(set_resolution_hook)*>(set_resolution_orig)(last_virt_window_width, last_virt_window_height, 3, 0);
+			}
+			else
+			{
+				reinterpret_cast<decltype(set_resolution_hook)*>(set_resolution_orig)(last_hriz_window_width, last_hriz_window_height, 3, 0);
+			}
+		}
+
+		if (config::freeform_window)
+		{
+			int width = UnityEngine::Screen::width();
+			int height = UnityEngine::Screen::height();
+
+			bool isVirt = width < height;
+			Gallop::StandaloneWindowResize::IsVirt(isVirt);
+		}
+
+		return reinterpret_cast<LONG_PTR>(oldWndProcPtr);
+	}
+
 	return reinterpret_cast<decltype(SetWindowLongPtrW)*>(SetWindowLongPtrW_orig)(hWnd, nIndex, dwNewLong);
 }
 
@@ -14452,11 +14395,65 @@ SetWindowLongPtrA_hook(
 	_In_ int nIndex,
 	_In_ LONG_PTR dwNewLong)
 {
-	if (nIndex == GWL_STYLE)
+	if (config::freeform_window && hWnd == currentHWnd && nIndex == GWL_STYLE)
 	{
 		dwNewLong |= WS_MAXIMIZEBOX;
 	}
+
+	if (hWnd == currentHWnd && nIndex == GWLP_WNDPROC)
+	{
+		if ((config::unlock_size || config::freeform_window) && config::initial_width > 72 && config::initial_height > 72)
+		{
+			if (config::initial_width < config::initial_height)
+			{
+				reinterpret_cast<decltype(set_resolution_hook)*>(set_resolution_orig)(last_virt_window_width, last_virt_window_height, 3, 0);
+			}
+			else
+			{
+				reinterpret_cast<decltype(set_resolution_hook)*>(set_resolution_orig)(last_hriz_window_width, last_hriz_window_height, 3, 0);
+			}
+		}
+
+		if (config::freeform_window)
+		{
+			int width = UnityEngine::Screen::width();
+			int height = UnityEngine::Screen::height();
+
+			bool isVirt = width < height;
+			Gallop::StandaloneWindowResize::IsVirt(isVirt);
+		}
+
+		return reinterpret_cast<LONG_PTR>(oldWndProcPtr);
+	}
+
 	return reinterpret_cast<decltype(SetWindowLongPtrA)*>(SetWindowLongPtrA_orig)(hWnd, nIndex, dwNewLong);
+}
+
+void* ShowWindow_orig = nullptr;
+BOOL
+WINAPI
+ShowWindow_hook(
+	_In_ HWND hWnd,
+	_In_ int nCmdShow)
+{
+	if (!config::custom_title_name.empty())
+	{
+		SetWindowTextW(hWnd, config::custom_title_name.data());
+	}
+
+	if (config::has_json_parse_error)
+	{
+		MessageBoxW(hWnd, config::json_parse_error_msg.data(), L"Umamusume Localify", MB_OK | MB_ICONWARNING);
+	}
+
+	oldWndProcPtr = reinterpret_cast<WNDPROC>(SetWindowLongPtrW(hWnd, GWLP_WNDPROC, reinterpret_cast<LONG_PTR>(WndProc)));
+
+	currentHWnd = hWnd;
+
+	MH_DisableHook(ShowWindow);
+	MH_RemoveHook(ShowWindow);
+
+	return ShowWindow(hWnd, nCmdShow);
 }
 
 void* HttpSendRequestW_orig = nullptr;
@@ -14671,62 +14668,17 @@ FindFirstFileExW_hook(
 	return result;
 }
 
-void* GetModuleHandleW_orig = nullptr;
-static HMODULE
-WINAPI
-GetModuleHandleW_hook(
-	_In_opt_ LPCWSTR lpModuleName
-)
-{
-	if (lpModuleName && lpModuleName == L"version.dll"s)
-	{
-		return proxy::version;
-	}
-	return reinterpret_cast<decltype(GetModuleHandleW)*>(GetModuleHandleW_orig)(lpModuleName);
-}
-
-void* WinVerifyTrust_addr = nullptr;
-void* WinVerifyTrust_orig = nullptr;
-static LONG WINAPI WinVerifyTrust_hook(HWND hwnd, GUID* pgActionID, LPVOID pWVTData)
-{
-	auto data = reinterpret_cast<WINTRUST_DATA*>(pWVTData);
-
-	if (data->pFile)
-	{
-		if (data->pFile->pcwszFilePath)
-		{
-			wstring path = data->pFile->pcwszFilePath;
-			transform(path.begin(), path.end(), path.begin(), [](auto c)
-				{
-					return tolower(c);
-				}
-			);
-			if (path.find(L"version.dll") != wstring::npos)
-			{
-				wstring dll_path;
-				dll_path.resize(MAX_PATH);
-				dll_path.resize(GetSystemDirectoryW(dll_path.data(), MAX_PATH));
-
-				dll_path += LR"(\version.dll)"s;
-				data->pFile->pcwszFilePath = dll_path.data();
-
-				MH_DisableHook(WinVerifyTrust_addr);
-
-				return reinterpret_cast<decltype(WinVerifyTrust)*>(WinVerifyTrust_addr)(hwnd, pgActionID, pWVTData);
-			}
-		}
-	}
-
-	return reinterpret_cast<decltype(WinVerifyTrust)*>(WinVerifyTrust_orig)(hwnd, pgActionID, pWVTData);
-}
-
-bool init_hook_base()
+void init_hook()
 {
 	if (mh_inited)
-		return false;
+	{
+		return;
+	}
 
 	if (MH_Initialize() != MH_OK)
-		return false;
+	{
+		return;
+	}
 
 	mh_inited = true;
 
@@ -14738,7 +14690,7 @@ bool init_hook_base()
 
 	if (Game::CurrentGameRegion == Game::Region::KOR)
 	{
-#ifdef _DEBUG
+#ifdef EXPERIMENTS
 		MH_CreateHook(HttpSendRequestW, HttpSendRequestW_hook, &HttpSendRequestW_orig);
 		MH_EnableHook(HttpSendRequestW);
 
@@ -14753,9 +14705,6 @@ bool init_hook_base()
 	MH_CreateHook(FindNextFileW, FindNextFileW_hook, &FindNextFileW_orig);
 	MH_EnableHook(FindNextFileW);
 
-	MH_CreateHook(GetModuleHandleW, GetModuleHandleW_hook, &GetModuleHandleW_orig);
-	MH_EnableHook(GetModuleHandleW);
-
 	if (!config::allow_delete_cookie && Game::CurrentGameRegion == Game::Region::KOR)
 	{
 		MH_CreateHook(LoadLibraryExW, load_library_ex_w_hook, &load_library_ex_w_orig);
@@ -14765,35 +14714,21 @@ bool init_hook_base()
 	MH_CreateHook(LoadLibraryW, load_library_w_hook, &load_library_w_orig);
 	MH_EnableHook(LoadLibraryW);
 
-	auto wintrust = LoadLibraryW(L"wintrust.dll");
-
-	WinVerifyTrust_addr = GetProcAddress(wintrust, "WinVerifyTrust");
-
-	MH_CreateHook(WinVerifyTrust_addr, WinVerifyTrust_hook, &WinVerifyTrust_orig);
-	MH_EnableHook(WinVerifyTrust_addr);
-
-	auto UnityPlayer = GetModuleHandleW(L"UnityPlayer.dll");
+	/*auto UnityPlayer = GetModuleHandleW(L"UnityPlayer.dll");
 	auto UnityMain_addr = GetProcAddress(UnityPlayer, "UnityMain");
 
 	MH_CreateHook(UnityMain_addr, UnityMain_hook, &UnityMain_orig);
-	MH_EnableHook(UnityMain_addr);
+	MH_EnableHook(UnityMain_addr);*/
 
-	return true;
-}
-
-bool init_hook()
-{
 	fullScreenFl = config::auto_fullscreen && !config::freeform_window;
 
-	if (config::freeform_window)
-	{
-		MH_CreateHook(SetWindowLongPtrW, SetWindowLongPtrW_hook, &SetWindowLongPtrW_orig);
-		MH_EnableHook(SetWindowLongPtrW);
-		MH_CreateHook(SetWindowLongPtrA, SetWindowLongPtrA_hook, &SetWindowLongPtrA_orig);
-		MH_EnableHook(SetWindowLongPtrA);
-	}
+	MH_CreateHook(SetWindowLongPtrW, SetWindowLongPtrW_hook, &SetWindowLongPtrW_orig);
+	MH_EnableHook(SetWindowLongPtrW);
+	MH_CreateHook(SetWindowLongPtrA, SetWindowLongPtrA_hook, &SetWindowLongPtrA_orig);
+	MH_EnableHook(SetWindowLongPtrA);
 
-	return true;
+	MH_CreateHook(ShowWindow, ShowWindow_hook, &ShowWindow_orig);
+	MH_EnableHook(ShowWindow);
 }
 
 void uninit_hook()

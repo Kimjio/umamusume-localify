@@ -75,7 +75,7 @@ workspace "umamusume-localify"
 	dependencies.projects()
 
 	project "umamusume-localify"
-	targetname "version"
+	targetname "UnityPlayer"
 
 	language "C++"
 	kind "SharedLib"

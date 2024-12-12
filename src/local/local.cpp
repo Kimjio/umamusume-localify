@@ -2,6 +2,8 @@
 
 #include "config/config.hpp"
 
+#include "string_utils.hpp"
+
 using namespace std;
 
 namespace local
@@ -191,6 +193,38 @@ namespace local
 			str_list.emplace_back(hash);
 
 			logger::write_entry(hash, str->chars);
+		}
+
+		return str;
+	}
+
+	const char* get_localized_string(const char* str)
+	{
+		if (!str)
+		{
+			return nullptr;
+		}
+
+		wstring wstr = u8_wide(str);
+
+		wstring* result;
+
+		auto hash = std::hash<wstring>{}(wstr);
+
+		if (local::localify_text(hash, &result))
+		{
+			string resultU8 = wide_u8(*result);
+			auto dest = new char[resultU8.size() + 1];
+			strncpy(dest, resultU8.data(), resultU8.size());
+			dest[resultU8.size()] = '\0';
+			return dest;
+		}
+
+		if (config::enable_logger && !any_of(str_list.begin(), str_list.end(), [hash](size_t hash1) { return hash1 == hash; }))
+		{
+			str_list.emplace_back(hash);
+
+			logger::write_entry(hash, wstr);
 		}
 
 		return str;

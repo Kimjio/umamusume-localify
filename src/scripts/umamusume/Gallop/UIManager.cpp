@@ -36,6 +36,8 @@ void* LockGameCanvas_orig = nullptr;
 void* UnlockGameCanvas_addr = nullptr;
 void* UnlockGameCanvas_orig = nullptr;
 
+void* UnlockAllCanvas_addr = nullptr;
+
 void* WaitResizeUI_addr = nullptr;
 void* WaitResizeUI_orig = nullptr;
 
@@ -251,6 +253,7 @@ static void InitAddress()
 	ReleaseRenderTexture_addr = il2cpp_symbols::get_method_pointer(ASSEMBLY_NAME, "Gallop", "UIManager", "ReleaseRenderTexture", 0);
 	LockGameCanvas_addr = il2cpp_symbols::get_method_pointer(ASSEMBLY_NAME, "Gallop", "UIManager", "LockGameCanvas", 0);
 	UnlockGameCanvas_addr = il2cpp_symbols::get_method_pointer(ASSEMBLY_NAME, "Gallop", "UIManager", "UnlockGameCanvas", 0);
+	UnlockAllCanvas_addr = il2cpp_symbols::get_method_pointer(ASSEMBLY_NAME, "Gallop", "UIManager", "UnlockAllCanvas", 0);
 	WaitResizeUI_addr = il2cpp_symbols::get_method_pointer(ASSEMBLY_NAME, "Gallop", "UIManager", "WaitResizeUI", 2);
 	GetCanvasScalerList_addr = il2cpp_symbols::get_method_pointer(ASSEMBLY_NAME, "Gallop", "UIManager", "GetCanvasScalerList", 0);
 	GetCameraSizeByOrientation_addr = il2cpp_symbols::get_method_pointer(ASSEMBLY_NAME, "Gallop", "UIManager", "GetCameraSizeByOrientation", 1);
@@ -454,6 +457,11 @@ namespace Gallop
 	void UIManager::UnlockGameCanvas()
 	{
 		reinterpret_cast<void (*)(Il2CppObject*)>(UnlockGameCanvas_addr)(instance);
+	}
+
+	void UIManager::UnlockAllCanvas()
+	{
+		reinterpret_cast<void (*)(Il2CppObject*)>(UnlockAllCanvas_addr)(instance);
 	}
 
 	Il2CppObject* UIManager::WaitResizeUI(bool isPortrait, bool isShowOrientationGuide)

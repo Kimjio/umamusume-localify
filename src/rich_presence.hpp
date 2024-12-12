@@ -9,9 +9,9 @@ using namespace std;
 
 namespace
 {
-	extern unsigned long GetTextIdByName(const wstring& name);
+	extern uint64_t GetTextIdByName(const wstring& name);
 
-	extern Il2CppString* localizeextension_text_hook(int id);
+	extern Il2CppString* localizeextension_text_hook(uint64_t id);
 
 	string GetViewName(string viewId)
 	{

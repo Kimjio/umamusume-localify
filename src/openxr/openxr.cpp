@@ -4,10 +4,16 @@
 
 #include "il2cpp/il2cpp-tabledefs.h"
 #include "il2cpp/il2cpp-api-functions.hpp"
+
+#include "game.hpp"
+
 #include "string_utils.hpp"
 
 #include "scripts/ScriptInternal.hpp"
+#include "scripts/UnityEngine.CoreModule/UnityEngine/Application.hpp"
 #include "scripts/UnityEngine.CoreModule/UnityEngine/BeforeRenderHelper.hpp"
+#include "scripts/UnityEngine.XRModule/UnityEngine/XR/InputTracking.hpp"
+#include "scripts/UnityEngine.XRModule/UnityEngine/XR/XRNodeState.hpp"
 
 namespace Unity
 {
@@ -41,305 +47,312 @@ namespace Unity
 		},
 		vector<ActionConfig>
 		{
-			ActionConfig
+		ActionConfig
+		{
+			"thumbstick",
+			"Thumbstick",
+			ActionType::Axis2D,
+			vector<const char*> { "Primary2DAxis" },
+			vector<ActionBinding>
 			{
-				"thumbstick",
-				"Thumbstick",
-				ActionType::Axis2D,
-				vector<const char*> { "Primary2DAxis" },
-				vector<ActionBinding>
+				ActionBinding
 				{
-					ActionBinding
-					{
-						"/input/thumbstick",
-						"/interaction_profiles/oculus/touch_controller"
-					}
+					"/input/thumbstick",
+					"/interaction_profiles/oculus/touch_controller"
 				}
-			},
-			ActionConfig
+			}
+		},
+		ActionConfig
+		{
+			"grip",
+			"Grip",
+			ActionType::Axis1D,
+			vector<const char*> { "Grip" },
+			vector<ActionBinding>
 			{
-				"grip",
-				"Grip",
-				ActionType::Axis1D,
-				vector<const char*> { "Grip" },
-				vector<ActionBinding>
+				ActionBinding
 				{
-					ActionBinding
-					{
-						"/input/squeeze/value",
-						"/interaction_profiles/oculus/touch_controller"
-					}
+					"/input/squeeze/value",
+					"/interaction_profiles/oculus/touch_controller"
 				}
-			},
-			ActionConfig
+			}
+		},
+		ActionConfig
+		{
+			"gripPressed",
+			"Grip Pressed",
+			ActionType::Binary,
+			vector<const char*> { "GripButton" },
+			vector<ActionBinding>
 			{
-				"gripPressed",
-				"Grip Pressed",
-				ActionType::Binary,
-				vector<const char*> { "GripButton" },
-				vector<ActionBinding>
+				ActionBinding
 				{
-					ActionBinding
-					{
-						"/input/squeeze/value",
-						"/interaction_profiles/oculus/touch_controller"
-					}
+					"/input/squeeze/value",
+					"/interaction_profiles/oculus/touch_controller"
 				}
-			},
-			ActionConfig
+			}
+		},
+		ActionConfig
+		{
+			"menu",
+			"Menu",
+			ActionType::Binary,
+			vector<const char*> { "MenuButton" },
+			vector<ActionBinding>
 			{
-				"menu",
-				"Menu",
-				ActionType::Binary,
-				vector<const char*> { "MenuButton" },
-				vector<ActionBinding>
+				ActionBinding
 				{
-					ActionBinding
-					{
-						"/input/menu/click",
-						"/interaction_profiles/oculus/touch_controller",
-						vector<const char*> { "/user/hand/left" }
-					},
-					ActionBinding
-					{
-						"/input/system/click",
-						"/interaction_profiles/oculus/touch_controller",
-						vector<const char*> { "/user/hand/right" }
-					}
+					"/input/menu/click",
+					"/interaction_profiles/oculus/touch_controller",
+					vector<const char*> { "/user/hand/left" }
+				},
+				ActionBinding
+				{
+					"/input/system/click",
+					"/interaction_profiles/oculus/touch_controller",
+					vector<const char*> { "/user/hand/right" }
 				}
-			},
-			ActionConfig
+			}
+		},
+		ActionConfig
+		{
+			"primaryButton",
+			"Primary Button",
+			ActionType::Binary,
+			vector<const char*> { "PrimaryButton" },
+			vector<ActionBinding>
 			{
-				"primaryButton",
-				"Primary Button",
-				ActionType::Binary,
-				vector<const char*> { "PrimaryButton" },
-				vector<ActionBinding>
+				ActionBinding
 				{
-					ActionBinding
-					{
-						"/input/x/click",
-						"/interaction_profiles/oculus/touch_controller",
-						vector<const char*> { "/user/hand/left" }
-					},
-					ActionBinding
-					{
-						"/input/a/click",
-						"/interaction_profiles/oculus/touch_controller",
-						vector<const char*> { "/user/hand/right" }
-					}
+					"/input/x/click",
+					"/interaction_profiles/oculus/touch_controller",
+					vector<const char*> { "/user/hand/left" }
+				},
+				ActionBinding
+				{
+					"/input/a/click",
+					"/interaction_profiles/oculus/touch_controller",
+					vector<const char*> { "/user/hand/right" }
 				}
-			},
-			ActionConfig
+			}
+		},
+		ActionConfig
+		{
+			"primaryTouched",
+			"Primary Touched",
+			ActionType::Binary,
+			vector<const char*> { "PrimaryTouch" },
+			vector<ActionBinding>
 			{
-				"primaryTouched",
-				"Primary Touched",
-				ActionType::Binary,
-				vector<const char*> { "PrimaryTouch" },
-				vector<ActionBinding>
+				ActionBinding
 				{
-					ActionBinding
-					{
-						"/input/x/touch",
-						"/interaction_profiles/oculus/touch_controller",
-						vector<const char*> { "/user/hand/left" }
-					},
-					ActionBinding
-					{
-						"/input/a/touch",
-						"/interaction_profiles/oculus/touch_controller",
-						vector<const char*> { "/user/hand/right" }
-					}
+					"/input/x/touch",
+					"/interaction_profiles/oculus/touch_controller",
+					vector<const char*> { "/user/hand/left" }
+				},
+				ActionBinding
+				{
+					"/input/a/touch",
+					"/interaction_profiles/oculus/touch_controller",
+					vector<const char*> { "/user/hand/right" }
 				}
-			},
-			ActionConfig
+			}
+		},
+		ActionConfig
+		{
+			"secondaryButton",
+			"Secondary Button",
+			ActionType::Binary,
+			vector<const char*> { "SecondaryButton" },
+			vector<ActionBinding>
 			{
-				"secondaryButton",
-				"Secondary Button",
-				ActionType::Binary,
-				vector<const char*> { "SecondaryButton" },
-				vector<ActionBinding>
+				ActionBinding
 				{
-					ActionBinding
-					{
-						"/input/y/click",
-						"/interaction_profiles/oculus/touch_controller",
-						vector<const char*> { "/user/hand/left" }
-					},
-					ActionBinding
-					{
-						"/input/b/click",
-						"/interaction_profiles/oculus/touch_controller",
-						vector<const char*> { "/user/hand/right" }
-					}
+					"/input/y/click",
+					"/interaction_profiles/oculus/touch_controller",
+					vector<const char*> { "/user/hand/left" }
+				},
+				ActionBinding
+				{
+					"/input/b/click",
+					"/interaction_profiles/oculus/touch_controller",
+					vector<const char*> { "/user/hand/right" }
 				}
-			},
-			ActionConfig
+			}
+		},
+		ActionConfig
+		{
+			"secondaryTouched",
+			"Secondary Touched",
+			ActionType::Binary,
+			vector<const char*> { "SecondaryTouch" },
+			vector<ActionBinding>
 			{
-				"secondaryTouched",
-				"Secondary Touched",
-				ActionType::Binary,
-				vector<const char*> { "SecondaryTouch" },
-				vector<ActionBinding>
+				ActionBinding
 				{
-					ActionBinding
-					{
-						"/input/y/touch",
-						"/interaction_profiles/oculus/touch_controller",
-						vector<const char*> { "/user/hand/left" }
-					},
-					ActionBinding
-					{
-						"/input/b/touch",
-						"/interaction_profiles/oculus/touch_controller",
-						vector<const char*> { "/user/hand/right" }
-					}
+					"/input/y/touch",
+					"/interaction_profiles/oculus/touch_controller",
+					vector<const char*> { "/user/hand/left" }
+				},
+				ActionBinding
+				{
+					"/input/b/touch",
+					"/interaction_profiles/oculus/touch_controller",
+					vector<const char*> { "/user/hand/right" }
 				}
-			},
-			ActionConfig
+			}
+		},
+		ActionConfig
+		{
+			"trigger",
+			"Trigger",
+			ActionType::Axis1D,
+			vector<const char*> { "Trigger" },
+			vector<ActionBinding>
 			{
-				"trigger",
-				"Trigger",
-				ActionType::Axis1D,
-				vector<const char*> { "Trigger" },
-				vector<ActionBinding>
+				ActionBinding
 				{
-					ActionBinding
-					{
-						"/input/trigger/value",
-						"/interaction_profiles/oculus/touch_controller"
-					}
+					"/input/trigger/value",
+					"/interaction_profiles/oculus/touch_controller"
 				}
-			},
-			ActionConfig
+			}
+		},
+		ActionConfig
+		{
+			"triggerPressed",
+			"Trigger Pressed",
+			ActionType::Binary,
+			vector<const char*> { "TriggerButton" },
+			vector<ActionBinding>
 			{
-				"triggerPressed",
-				"Trigger Pressed",
-				ActionType::Binary,
-				vector<const char*> { "TriggerButton" },
-				vector<ActionBinding>
+				ActionBinding
 				{
-					ActionBinding
-					{
-						"/input/trigger/value",
-						"/interaction_profiles/oculus/touch_controller"
-					}
+					"/input/trigger/value",
+					"/interaction_profiles/oculus/touch_controller"
 				}
-			},
-			ActionConfig
+			}
+		},
+		ActionConfig
+		{
+			"triggerTouched",
+			"Trigger Touched",
+			ActionType::Binary,
+			vector<const char*> { "TriggerTouch" },
+			vector<ActionBinding>
 			{
-				"triggerTouched",
-				"Trigger Touched",
-				ActionType::Binary,
-				vector<const char*> { "TriggerTouch" },
-				vector<ActionBinding>
+				ActionBinding
 				{
-					ActionBinding
-					{
-						"/input/trigger/touch",
-						"/interaction_profiles/oculus/touch_controller"
-					}
+					"/input/trigger/touch",
+					"/interaction_profiles/oculus/touch_controller"
 				}
-			},
-			ActionConfig
+			}
+		},
+		ActionConfig
+		{
+			"thumbstickClicked",
+			"Thumbstick Clicked",
+			ActionType::Binary,
+			vector<const char*> { "Primary2DAxisClick" },
+			vector<ActionBinding>
 			{
-				"thumbstickClicked",
-				"Thumbstick Clicked",
-				ActionType::Binary,
-				vector<const char*> { "Primary2DAxisClick" },
-				vector<ActionBinding>
+				ActionBinding
 				{
-					ActionBinding
-					{
-						"/input/thumbstick/click",
-						"/interaction_profiles/oculus/touch_controller"
-					}
+					"/input/thumbstick/click",
+					"/interaction_profiles/oculus/touch_controller"
 				}
-			},
-			ActionConfig
+			}
+		},
+		ActionConfig
+		{
+			"thumbstickTouched",
+			"Thumbstick Touched",
+			ActionType::Binary,
+			vector<const char*> { "Primary2DAxisTouch" },
+			vector<ActionBinding>
 			{
-				"thumbstickTouched",
-				"Thumbstick Touched",
-				ActionType::Binary,
-				vector<const char*> { "Primary2DAxisTouch" },
-				vector<ActionBinding>
+				ActionBinding
 				{
-					ActionBinding
-					{
-						"/input/thumbstick/touch",
-						"/interaction_profiles/oculus/touch_controller"
-					}
+					"/input/thumbstick/touch",
+					"/interaction_profiles/oculus/touch_controller"
 				}
-			},
-			ActionConfig
+			}
+		},
+		ActionConfig
+		{
+			"thumbrestTouched",
+			"Thumbrest Touched",
+			ActionType::Binary,
+			vector<const char*> { "ThumbrestTouch" },
+			vector<ActionBinding>
 			{
-				"thumbrestTouched",
-				"Thumbrest Touched",
-				ActionType::Binary,
-				vector<const char*> { "ThumbrestTouch" },
-				vector<ActionBinding>
+				ActionBinding
 				{
-					ActionBinding
-					{
-						"/input/thumbrest/touch",
-						"/interaction_profiles/oculus/touch_controller"
-					}
+					"/input/thumbrest/touch",
+					"/interaction_profiles/oculus/touch_controller"
 				}
-			},
-			ActionConfig
+			}
+		},
+		ActionConfig
+		{
+			"devicePose",
+			"Device Pose",
+			ActionType::Pose,
+			vector<const char*> { "Device" },
+			vector<ActionBinding>
 			{
-				"devicePose",
-				"Device Pose",
-				ActionType::Pose,
-				vector<const char*> { "Device" },
-				vector<ActionBinding>
+				ActionBinding
 				{
-					ActionBinding
-					{
-						"/input/grip/pose",
-						"/interaction_profiles/oculus/touch_controller"
-					}
+					"/input/grip/pose",
+					"/interaction_profiles/oculus/touch_controller"
 				}
-			},
-			ActionConfig
+			}
+		},
+		ActionConfig
+		{
+			"pointer",
+			"Pointer Pose",
+			ActionType::Pose,
+			vector<const char*> { "Pointer" },
+			vector<ActionBinding>
 			{
-				"pointer",
-				"Pointer Pose",
-				ActionType::Pose,
-				vector<const char*> { "Pointer" },
-				vector<ActionBinding>
+				ActionBinding
 				{
-					ActionBinding
-					{
-						"/input/aim/pose",
-						"/interaction_profiles/oculus/touch_controller"
-					}
+					"/input/aim/pose",
+					"/interaction_profiles/oculus/touch_controller"
 				}
-			},
-			ActionConfig
+			}
+		},
+		ActionConfig
+		{
+			"haptic",
+			"Haptic Output",
+			ActionType::Vibrate,
+			vector<const char*> { "Haptic" },
+			vector<ActionBinding>
 			{
-				"haptic",
-				"Haptic Output",
-				ActionType::Vibrate,
-				vector<const char*> { "Haptic" },
-				vector<ActionBinding>
+				ActionBinding
 				{
-					ActionBinding
-					{
-						"/output/haptic",
-						"/interaction_profiles/oculus/touch_controller"
-					}
+					"/output/haptic",
+					"/interaction_profiles/oculus/touch_controller"
 				}
 			}
 		}
+	}
 	};
 
 	void OpenXR::InitLibrary(IUnityInterfaces* interfaces)
 	{
-		auto productName = il2cpp_resolve_icall_type<Il2CppString * (*)()>("UnityEngine.Application::get_productName")()->chars;
-		module = LoadLibraryW((productName + L"_Data\\Plugins\\x86_64\\UnityOpenXR.dll"s).data());
-
 		if (module)
+		{
+			return;
+		}
+
+		auto productName = UnityEngine::Application::productName()->chars;
+		SetDllDirectoryW((productName + L"_Data\\Plugins\\x86_64\\"s).data());
+		module = LoadLibraryW(L"UnityOpenXR.dll");
+		SetDllDirectoryW(nullptr);
+
+		if (module && interfaces)
 		{
 			reinterpret_cast<decltype(UnityPluginLoad)*>(GetProcAddress(module, "UnityPluginLoad"))(interfaces);
 		}
@@ -360,6 +373,53 @@ namespace Unity
 		OpenXR::module = module;
 	}
 
+	static Il2CppObject* nodeStates;
+
+	static void UpdateHeadPosition()
+	{
+		//if (!nodeStates)
+		//{
+		//	// GetRuntimeType("UnityEngine.XRModule.dll", "UnityEngine.XR", "XRNodeState")
+		//	auto listClass = GetGenericClass(GetRuntimeType("mscorlib.dll", "System.Collections.Generic", "List`1"), GetRuntimeType("mscorlib.dll", "System", "ValueType"));
+		//	il2cpp_runtime_class_init(listClass);
+		//	nodeStates = il2cpp_object_new(listClass);
+		//	/*cout << "listClass " << listClass << endl;
+		//	cout << "listClass " << listClass->name << endl;
+		//	cout << "nodeStates " << nodeStates << endl;*/
+
+		//	il2cpp_runtime_object_init(nodeStates);
+		//}
+
+		//auto Clear = il2cpp_class_get_method_from_name(nodeStates->klass, "Clear", 0);
+
+		//Il2CppException* exception;
+		//il2cpp_runtime_invoke(Clear, nodeStates, nullptr, &exception);
+
+		//UnityEngine::XR::InputTracking::GetNodeStates_Internal(nodeStates);
+
+		//FieldInfo* itemsField = il2cpp_class_get_field_from_name_wrap(nodeStates->klass, "_items");
+		//Il2CppArraySize_t<UnityEngine::XR::XRNodeState>* array;
+		//il2cpp_field_get_value(nodeStates, itemsField, &array);
+
+		//if (array)
+		//{
+		//	cout << "List: " << array->max_length << endl;
+
+		//	for (int i = 0; i < array->max_length; i++)
+		//	{
+		//		auto state = array->vector[i];
+		//	}
+		//}
+		UnityEngine::Vector3 position;
+		UnityEngine::Quaternion rotation;
+
+		UnityEngine::XR::InputTracking::GetLocalPosition_Injected(UnityEngine::XR::XRNode::Head, &position);
+		UnityEngine::XR::InputTracking::GetLocalRotation_Injected(UnityEngine::XR::XRNode::Head, &rotation);
+
+		cout << "position " << position.x << " " << position.y << " " << position.z << endl;
+		cout << "rotation " << rotation.x << " " << rotation.y << " " << rotation.z << " " << rotation.w << endl;
+	}
+
 	void OpenXR::Init()
 	{
 		if (!module)
@@ -368,9 +428,11 @@ namespace Unity
 		}
 
 		Internal_SetSuccessfullyInitialized(false);
+
 		if (!Internal_LoadOpenXRLibrary(L"openxr_loader"))
 		{
 			cout << "Fail Internal_LoadOpenXRLibrary" << endl;
+			return;
 		}
 
 		Feature::Internal_SetProcAddressPtrAndLoadStage1(Feature::Internal_GetProcAddressPtr(true));
@@ -424,6 +486,11 @@ namespace Unity
 
 		cout << "s_IntegratedDescriptors " << s_IntegratedDescriptors << endl;
 
+		if (!s_IntegratedDescriptors)
+		{
+			return;
+		}
+
 		FieldInfo* itemsField = il2cpp_class_get_field_from_name(s_IntegratedDescriptors->klass, "_items");
 		Il2CppArraySize_t<Il2CppObject*>* arr;
 		il2cpp_field_get_value(s_IntegratedDescriptors, itemsField, &arr);
@@ -450,20 +517,23 @@ namespace Unity
 
 					auto subsystem = il2cpp_symbols::get_method_pointer<Il2CppObject * (*)(void*)>("UnityEngine.SubsystemsModule.dll", "UnityEngine", "SubsystemManager", "GetIntegratedSubsystemByPtr", 1)(ptr);
 
-					wcout << id << endl;
+					wcout << id->chars << endl;
 
-					if (wstring(id->chars).find(L"Display"))
+					if (wstring(id->chars).find(L"Display") != wstring::npos)
 					{
 						xrDisplaySubsystem = subsystem;
 					}
 
-					if (wstring(id->chars).find(L"Input"))
+					if (wstring(id->chars).find(L"Input") != wstring::npos)
 					{
 						xrInputSubsystem = subsystem;
 					}
 				}
 			}
 		}
+
+		cout << "xrDisplaySubsystem " << xrDisplaySubsystem << endl;
+		cout << "xrInputSubsystem " << xrInputSubsystem << endl;
 
 		if (!xrDisplaySubsystem || !xrInputSubsystem)
 		{
@@ -476,34 +546,22 @@ namespace Unity
 		Il2CppObject* s_OrderBlocks;
 		il2cpp_field_static_get_value(s_OrderBlocksField, &s_OrderBlocks);
 
-		auto itemField = il2cpp_class_get_field_from_name(s_OrderBlocks->klass, "_items");
-
-		Il2CppArraySize_t<UnityEngine::BeforeRenderHelper::OrderBlock>* array1;
-		il2cpp_field_get_value(s_OrderBlocks, itemField, &array1);
-
-		auto orderClass = il2cpp_symbols::get_class("UnityEngine.CoreModule.dll", "UnityEngine", "BeforeRenderHelper/OrderBlock");
-
-		auto array2 = il2cpp_array_new(orderClass, array1->max_length + 1);
-
-		for (int i = 0; i < array1->max_length; i++) {
-			il2cpp_array_setref(array2, i, &array1->vector[i]);
-		}
-
-		auto orderBlock = reinterpret_cast<UnityEngine::BeforeRenderHelper::OrderBlock*>(il2cpp_object_new(orderClass));
-		orderBlock->order = 0;
-		orderBlock->callback = &CreateUnityActionStatic(*([]()
+		auto orderBlock = UnityEngine::BeforeRenderHelper::OrderBlock{};
+		orderBlock.order = -3000;
+		orderBlock.callback = &CreateUnityActionStatic(*([]()
 			{
-				cout << "BeforeRender" << endl;
 				Internal_PumpMessageLoop();
+				UpdateHeadPosition();
 			}))->delegate;
 
-		il2cpp_array_setref(array2, array1->max_length, orderBlock);
+		auto listAdd = il2cpp_class_get_method_from_name(s_OrderBlocks->klass, "Add", 1);
 
-		il2cpp_field_set_value(s_OrderBlocks, itemField, array2);
+		void** params = new void* [1];
+		params[0] = &orderBlock;
 
-		auto sizeField = il2cpp_class_get_field_from_name(s_OrderBlocks->klass, "_size");
-		int size = array2->max_length;
-		il2cpp_field_set_value(s_OrderBlocks, sizeField, &size);
+		Il2CppException* exception;
+
+		il2cpp_runtime_invoke_type<void>(listAdd, s_OrderBlocks, params, &exception);
 
 		initialized = true;
 	}
@@ -527,7 +585,6 @@ namespace Unity
 
 				Input::AttachActionSets();
 
-				Start(xrDisplaySubsystem);
 				Start(xrInputSubsystem);
 
 				started = true;
@@ -596,6 +653,11 @@ namespace Unity
 			return false;
 		}
 
+		if (Game::CurrentGameRegion == Game::Region::JAP)
+		{
+			return reinterpret_cast<bool (*)(const char* loaderPath)>(GetProcAddress(module, "main_LoadOpenXRLibrary"))(wide_u8(loaderPath).data());
+		}
+
 		return reinterpret_cast<decltype(Internal_LoadOpenXRLibrary)*>(GetProcAddress(module, "main_LoadOpenXRLibrary"))(loaderPath);
 	}
 
@@ -623,6 +685,27 @@ namespace Unity
 	{
 		if (!module)
 		{
+			return;
+		}
+
+		if (Game::CurrentGameRegion == Game::Region::JAP)
+		{
+			auto engineVersionString = string(engineVersion);
+
+			auto MD5 = il2cpp_symbols::get_method_pointer<Il2CppObject * (*)()>("mscorlib.dll", "System.Security.Cryptography", "MD5", "Create", IgnoreNumberOfArguments)();
+
+			auto versionByteArray = il2cpp_array_new_type<int8_t>(il2cpp_symbols::get_class("mscorlib.dll", "System", "Byte"), engineVersionString.size());
+
+			for (int i = 0; i < engineVersionString.size(); i++)
+			{
+				auto c = engineVersionString.at(i);
+				il2cpp_array_setref(versionByteArray, i, &c);
+			}
+
+			auto versionMD5Data = il2cpp_class_get_method_from_name_type<Il2CppArraySize_t<int8_t>*(*)(Il2CppObject*, Il2CppArraySize_t<int8_t>*, int, int)>(MD5->klass, "ComputeHash", 3)->methodPointer(MD5, versionByteArray, 0, versionByteArray->max_length);
+
+			auto versionHash = il2cpp_symbols::get_method_pointer<uint32_t(*)(Il2CppArraySize_t<int8_t>*, int)>("mscorlib.dll", "System", "BitConverter", "ToUInt32", 2)(versionMD5Data, 0);
+			reinterpret_cast<void (*)(const char* applicationName, UINT applicationVersionHash, UINT engineVersionHash)>(GetProcAddress(module, "NativeConfig_SetApplicationInfo"))(applicationName, applicationVersionHash, versionHash);
 			return;
 		}
 
@@ -696,6 +779,11 @@ namespace Unity
 			return;
 		}
 
+		if (Game::CurrentGameRegion == Game::Region::JAP)
+		{
+			return;
+		}
+
 		reinterpret_cast<decltype(Internal_SetSuccessfullyInitialized)*>(GetProcAddress(module, "session_SetSuccessfullyInitialized"))(value);
 	}
 
@@ -721,6 +809,7 @@ namespace Unity
 			DiagnosticReport::Internal_DumpReport("System Startup Completed");
 			break;
 		case Feature::XrStopping:
+			Stop();
 			break;
 		case Feature::XrRestartRequested:
 			break;
@@ -760,10 +849,10 @@ namespace Unity
 			return;
 		}
 
-		auto actionMap = oculusTouchConfig;
+		ActionMapConfig actionMap = oculusTouchConfig;
 		for (int i = 0; i < actionMap.deviceInfos.size(); i++)
 		{
-			auto deviceInfo = actionMap.deviceInfos[i];
+			DeviceConfig deviceInfo = actionMap.deviceInfos[i];
 			auto res = Internal_RegisterDeviceDefinition(deviceInfo.userPath, actionMap.desiredInteractionProfile, deviceInfo.characteristics, actionMap.localizedName, actionMap.manufacturer, actionMap.serialNumber);
 			if (res == 0)
 			{
@@ -786,14 +875,14 @@ namespace Unity
 			cout << "Internal_CreateActionSet Error: " << error << endl;
 		}
 
-		unordered_map<const char*, vector<SerializedBinding*>> interactionProfiles;
+		unordered_map<const char*, vector<SerializedBinding>> interactionProfiles;
 
-		auto& actions = actionMap.actions;
+		vector<ActionConfig> actions = actionMap.actions;
 		for (int i = 0; i < actions.size(); i++)
 		{
 			CoCreateGuid(&guid);
 
-			auto action = actions[i];
+			ActionConfig action = actions[i];
 			auto allUserPaths = vector<const char*>{ "/user/hand/left" , "/user/hand/right" };
 
 			string name = action.name;
@@ -818,7 +907,7 @@ namespace Unity
 
 			for (int j = 0; j < action.bindings.size(); j++)
 			{
-				auto binding = action.bindings[j];
+				ActionBinding binding = action.bindings[j];
 
 				for (int k = 0; k < binding.userPaths.size(); k++)
 				{
@@ -826,10 +915,10 @@ namespace Unity
 
 					if (!interactionProfiles.contains(userPath))
 					{
-						interactionProfiles.emplace(userPath, vector<SerializedBinding*>{});
+						interactionProfiles.emplace(userPath, vector<SerializedBinding>{});
 					}
 
-					auto& exist = interactionProfiles.at(userPath);
+					vector<SerializedBinding> exist = interactionProfiles.at(userPath);
 
 					auto str = userPath + string(binding.interactionPath);
 					vector<char> writable(str.begin(), str.end());
@@ -839,20 +928,25 @@ namespace Unity
 
 					cout << "SerializedBinding interactionProfiles " << ptr << endl;
 
-					exist.emplace_back(new SerializedBinding{ actionId, ptr });
+					exist.emplace_back(SerializedBinding{ actionId, ptr });
 				}
 			}
 		}
 
 		for (auto& [key, value] : interactionProfiles) {
 			cout << "Internal_SuggestBindings " << key << endl;
+			auto array = il2cpp_array_new_type<SerializedBinding>(il2cpp_symbols::get_class("mscorlib.dll", "System", "ValueType"), value.size());
+
+			int i = 0;
 			for (auto& v : value)
 			{
-				cout << "Internal_SuggestBindings actionId " << v->actionId << endl;
-				cout << "Internal_SuggestBindings path " << v->path << endl;
+				cout << "Internal_SuggestBindings actionId " << v.actionId << endl;
+				cout << "Internal_SuggestBindings path " << v.path << endl;
+				il2cpp_array_setref(array, i, &v);
+				i++;
 			}
 
-			bool result = Internal_SuggestBindings(key, value.data(), value.size());
+			bool result = Internal_SuggestBindings(key, array, value.size());
 			if (!result)
 			{
 				const char* error;
@@ -924,7 +1018,7 @@ namespace Unity
 		return reinterpret_cast<decltype(Internal_CreateAction)*>(GetProcAddress(module, "OpenXRInputProvider_CreateAction"))(actionSetId, name, localizedName, actionType, guid, userPaths, userPathCount, usages, usageCount);
 	}
 
-	bool OpenXR::Input::Internal_SuggestBindings(const char* interactionProfile, SerializedBinding** serializedBindings, uint32_t serializedBindingCount)
+	bool OpenXR::Input::Internal_SuggestBindings(const char* interactionProfile, Il2CppArraySize_t<SerializedBinding>* serializedBindings, uint32_t serializedBindingCount)
 	{
 		if (!module)
 		{
