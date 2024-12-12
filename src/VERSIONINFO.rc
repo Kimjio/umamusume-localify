@@ -3,7 +3,6 @@
 #include <Windows.h>
 #include "resource.h"
 /////////////////////////////////////////////////////////////////////////////
-// 한국어(대한민국) resources
 
 #pragma code_page(65001)
 
@@ -13,8 +12,8 @@
 //
 
 VS_VERSION_INFO VERSIONINFO
- FILEVERSION 1,38,0,0
- PRODUCTVERSION 1,38,0,0
+ FILEVERSION 1,39,0,0
+ PRODUCTVERSION 1,39,0,0
  FILEFLAGSMASK 0x3fL
 #ifdef _DEBUG
  FILEFLAGS 0x1L
@@ -30,25 +29,16 @@ BEGIN
         BLOCK "000004b0"
         BEGIN
             VALUE "FileDescription", "Localization patch for Umamusume"
-            VALUE "FileVersion", "1.38.0.0"
+            VALUE "FileVersion", "1.39.0.0"
             VALUE "InternalName", "umamusume-localify"
             VALUE "LegalCopyright", "Copyright ⓒ Ji O Kim"
             VALUE "ProductName", "Umamusume Localify"
-            VALUE "ProductVersion", "1.8.0.0"
-        END
-        BLOCK "041204b0"
-        BEGIN
-            VALUE "FileDescription", "우마무스메 현지화 패치"
-            VALUE "FileVersion", "1.38.0.0"
-            VALUE "InternalName", "umamusume-localify"
-            VALUE "LegalCopyright", "Copyright ⓒ Ji O Kim"
-            VALUE "ProductName", "Umamusume Localify"
-            VALUE "ProductVersion", "1.38.0.0"
+            VALUE "ProductVersion", "1.39.0.0"
         END
     END
     BLOCK "VarFileInfo"
     BEGIN
-        VALUE "Translation", 0x412, 1200, 0x0, 1200
+        VALUE "Translation", 0x0, 1200
     END
 END
 
@@ -78,7 +68,6 @@ END
 #endif    // APSTUDIO_INVOKED
 
 
-// 한국어(대한민국) resources
 /////////////////////////////////////////////////////////////////////////////
 
 
