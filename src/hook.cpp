@@ -83,8 +83,12 @@
 #include "scripts/Cute.Cri.Assembly/Cute/Cri/AudioPlayback.hpp"
 #include "scripts/Cute.Cri.Assembly/Cute/Cri/MoviePlayerHandle.hpp"
 
+#include "scripts/UnityEngine.AssetBundleModule/UnityEngine/AssetBundle.hpp"
+
 #include "scripts/UnityEngine.CoreModule/UnityEngine/Application.hpp"
 #include "scripts/UnityEngine.CoreModule/UnityEngine/Object.hpp"
+#include "scripts/UnityEngine.CoreModule/UnityEngine/Shader.hpp"
+#include "scripts/UnityEngine.CoreModule/UnityEngine/Material.hpp"
 #include "scripts/UnityEngine.CoreModule/UnityEngine/GameObject.hpp"
 #include "scripts/UnityEngine.CoreModule/UnityEngine/RectTransform.hpp"
 #include "scripts/UnityEngine.CoreModule/UnityEngine/Vector2.hpp"
@@ -269,8 +273,6 @@ namespace
 
 	bool isRequiredInitNotification = true;
 
-	bool (*uobject_IsNativeObjectAlive)(Il2CppObject* uObject);
-
 	void SetNotificationDisplayTime(float time)
 	{
 		if (!notification)
@@ -278,7 +280,7 @@ namespace
 			return;
 		}
 
-		if (!uobject_IsNativeObjectAlive(notification))
+		if (!UnityEngine::Object::IsNativeObjectAlive(notification))
 		{
 			return;
 		}
@@ -299,7 +301,7 @@ namespace
 			return;
 		}
 
-		if (!uobject_IsNativeObjectAlive(notification))
+		if (!UnityEngine::Object::IsNativeObjectAlive(notification))
 		{
 			return;
 		}
@@ -370,7 +372,7 @@ namespace
 			return;
 		}
 
-		if (!uobject_IsNativeObjectAlive(notification))
+		if (!UnityEngine::Object::IsNativeObjectAlive(notification))
 		{
 			return;
 		}
@@ -389,7 +391,7 @@ namespace
 			return;
 		}
 
-		if (!uobject_IsNativeObjectAlive(notification))
+		if (!UnityEngine::Object::IsNativeObjectAlive(notification))
 		{
 			return;
 		}
@@ -408,7 +410,7 @@ namespace
 			return;
 		}
 
-		if (!uobject_IsNativeObjectAlive(notification))
+		if (!UnityEngine::Object::IsNativeObjectAlive(notification))
 		{
 			return;
 		}
@@ -428,7 +430,7 @@ namespace
 			return;
 		}
 
-		if (!uobject_IsNativeObjectAlive(notification))
+		if (!UnityEngine::Object::IsNativeObjectAlive(notification))
 		{
 			return;
 		}
@@ -447,7 +449,7 @@ namespace
 			return;
 		}
 
-		if (!uobject_IsNativeObjectAlive(notification))
+		if (!UnityEngine::Object::IsNativeObjectAlive(notification))
 		{
 			return;
 		}
@@ -464,7 +466,7 @@ namespace
 			return;
 		}
 
-		if (!uobject_IsNativeObjectAlive(notification))
+		if (!UnityEngine::Object::IsNativeObjectAlive(notification))
 		{
 			return;
 		}
@@ -758,7 +760,7 @@ namespace
 		{
 			currentElem = nullptr;
 
-			if (notification && uobject_IsNativeObjectAlive(notification))
+			if (notification && UnityEngine::Object::IsNativeObjectAlive(notification))
 			{
 				auto gameObject = il2cpp_symbols::get_method_pointer<Il2CppObject * (*)(Il2CppObject*)>("UnityEngine.CoreModule.dll", "UnityEngine", "Component", "get_gameObject", 0)(notification);
 				if (gameObject)
@@ -982,6 +984,30 @@ namespace
 
 	extern "C" __declspec(dllexport) int __stdcall UnityMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPWSTR lpCmdLine, int nShowCmd)
 	{
+		wstring module_name;
+		module_name.resize(MAX_PATH);
+		module_name.resize(GetModuleFileNameW(GetModuleHandleW(L"UnityPlayer.dll"), module_name.data(), MAX_PATH));
+
+		filesystem::path module_path(module_name);
+
+		wstring szISOLang;
+		szISOLang.resize(5);
+		szISOLang.resize(static_cast<size_t>(GetLocaleInfoW(LOCALE_USER_DEFAULT, LOCALE_SISO639LANGNAME, szISOLang.data(), szISOLang.size()) - 1));
+
+		if (module_path.parent_path() == filesystem::current_path())
+		{
+			if (szISOLang == L"ko")
+			{
+				MessageBoxW(nullptr, L"기존 UnityPlayer.dll을 찾을 수 없습니다.", L"오류", MB_ICONERROR);
+			}
+			else
+			{
+				MessageBoxW(nullptr, L"Don't overwrite the existing UnityPlayer.dll.", L"Error", MB_ICONERROR);
+			}
+
+			return 1;
+		}
+
 		try
 		{
 			filesystem::copy_file(filesystem::current_path().append(L"UnityPlayer.dll"), L"umamusume.exe.local\\UnityPlayer.orig.dll", filesystem::copy_options::update_existing);
@@ -1266,18 +1292,6 @@ namespace
 		return reinterpret_cast<decltype(LoadLibraryW)*>(load_library_w_orig)(lpLibFileName);
 	}
 
-	Il2CppObject* fontAssets = nullptr;
-
-	vector<Il2CppObject*> replaceAssets;
-
-	vector<wstring> replaceAssetNames;
-
-	Il2CppObject* (*load_from_file)(Il2CppString* path);
-
-	Il2CppObject* (*load_asset)(Il2CppObject* _this, Il2CppString* name, Il2CppObject* runtimeType);
-
-	Il2CppArraySize_t<Il2CppString*>* (*get_all_asset_names)(Il2CppObject* _this);
-
 	Il2CppDelegate* GetButtonCommonOnClickDelegate(Il2CppObject* object)
 	{
 		if (!object)
@@ -1356,10 +1370,10 @@ namespace
 
 	Il2CppObject* GetCustomFont()
 	{
-		if (!fontAssets) return nullptr;
+		if (!config::runtime::fontAssets) return nullptr;
 		if (!config::font_asset_name.empty())
 		{
-			return load_asset(fontAssets, il2cpp_string_new16(config::font_asset_name.data()), GetRuntimeType("UnityEngine.TextRenderingModule.dll", "UnityEngine", "Font"));
+			return UnityEngine::AssetBundle{ config::runtime::fontAssets }.LoadAsset(il2cpp_string_new16(config::font_asset_name.data()), GetRuntimeType("UnityEngine.TextRenderingModule.dll", "UnityEngine", "Font"));
 		}
 		return nullptr;
 	}
@@ -1367,7 +1381,7 @@ namespace
 	// Fallback not support outline style
 	Il2CppObject* GetCustomTMPFontFallback()
 	{
-		if (!fontAssets) return nullptr;
+		if (!config::runtime::fontAssets) return nullptr;
 		auto font = GetCustomFont();
 		if (font)
 		{
@@ -1381,45 +1395,13 @@ namespace
 
 	Il2CppObject* GetCustomTMPFont()
 	{
-		if (!fontAssets) return nullptr;
+		if (!config::runtime::fontAssets) return nullptr;
 		if (!config::tmpro_font_asset_name.empty())
 		{
-			auto tmpFont = load_asset(fontAssets, il2cpp_string_new16(config::tmpro_font_asset_name.data()), GetRuntimeType("Unity.TextMeshPro.dll", "TMPro", "TMP_FontAsset"));
+			auto tmpFont = UnityEngine::AssetBundle{ config::runtime::fontAssets }.LoadAsset(il2cpp_string_new16(config::tmpro_font_asset_name.data()), GetRuntimeType("Unity.TextMeshPro.dll", "TMPro", "TMP_FontAsset"));
 			return tmpFont ? tmpFont : GetCustomTMPFontFallback();
 		}
 		return GetCustomTMPFontFallback();
-	}
-
-	void* assetbundle_load_asset_orig = nullptr;
-	Il2CppObject* assetbundle_load_asset_hook(Il2CppObject* _this, Il2CppString* name, const Il2CppType* type);
-
-	void* assetbundle_load_asset_async_orig = nullptr;
-	Il2CppObject* assetbundle_load_asset_async_hook(Il2CppObject* _this, Il2CppString* name, const Il2CppType* type);
-
-	Il2CppObject* GetReplacementAssets(Il2CppString* name, const Il2CppType* type)
-	{
-		for (auto it = replaceAssets.begin(); it != replaceAssets.end(); it++)
-		{
-			auto assets = reinterpret_cast<decltype(assetbundle_load_asset_hook)*>(assetbundle_load_asset_orig)(*it, name, type);
-			if (assets)
-			{
-				return assets;
-			}
-		}
-		return nullptr;
-	}
-
-	Il2CppObject* GetReplacementAssetsAsync(Il2CppString* name, const Il2CppType* type)
-	{
-		for (auto it = replaceAssets.begin(); it != replaceAssets.end(); it++)
-		{
-			auto assets = reinterpret_cast<decltype(assetbundle_load_asset_async_hook)*>(assetbundle_load_asset_async_orig)(*it, name, type);
-			if (assets)
-			{
-				return assets;
-			}
-		}
-		return nullptr;
 	}
 
 	string GetUnityVersion()
@@ -1450,6 +1432,12 @@ namespace
 	void ReplaceTextMeshFont(Il2CppObject* textMesh, Il2CppObject* meshRenderer)
 	{
 		Il2CppObject* font = GetCustomFont();
+
+		if (!font)
+		{
+			return;
+		}
+
 		Il2CppObject* fontMaterial = il2cpp_class_get_method_from_name_type<Il2CppObject * (*)(Il2CppObject * _this)>(font->klass, "get_material", 0)->methodPointer(font);
 		Il2CppObject* fontTexture = il2cpp_class_get_method_from_name_type<Il2CppObject * (*)(Il2CppObject * _this)>(fontMaterial->klass, "get_mainTexture", 0)->methodPointer(fontMaterial);
 
@@ -1498,7 +1486,7 @@ namespace
 	void an_text_set_material_to_textmesh_hook(Il2CppObject* _this)
 	{
 		reinterpret_cast<decltype(an_text_set_material_to_textmesh_hook)*>(an_text_set_material_to_textmesh_orig)(_this);
-		if (!(fontAssets && config::replace_to_custom_font)) return;
+		if (!(config::runtime::fontAssets && config::replace_to_custom_font)) return;
 
 		FieldInfo* mainField = il2cpp_class_get_field_from_name_wrap(_this->klass, "_mainTextMesh");
 		FieldInfo* mainRenderer = il2cpp_class_get_field_from_name_wrap(_this->klass, "_mainTextMeshRenderer");
@@ -5644,7 +5632,11 @@ namespace
 			Il2CppString* name = UnityEngine::Object::Name(font);
 			if (config::font_asset_name.find(name->chars) == string::npos)
 			{
-				text_set_font(_this, GetCustomFont());
+				auto customFont = GetCustomFont();
+				if (customFont)
+				{
+					text_set_font(_this, customFont);
+				}
 			}
 		}
 		auto textId = textcommon_get_TextId(_this);
@@ -5778,7 +5770,7 @@ namespace
 	void* load_zekken_composite_resource_orig = nullptr;
 	void load_zekken_composite_resource_hook(Il2CppObject* _this)
 	{
-		if (fontAssets && config::replace_to_custom_font)
+		if (config::runtime::fontAssets && config::replace_to_custom_font)
 		{
 			auto font = GetCustomFont();
 			if (font)
@@ -5983,6 +5975,8 @@ namespace
 	}
 
 	void* Renderer_get_material_orig = nullptr;
+
+	Il2CppObject* Material_GetTextureImpl_hook(Il2CppObject* _this, int nameID);
 	Il2CppObject* Renderer_get_material_hook(Il2CppObject* _this);
 	Il2CppArraySize_t<Il2CppObject*>* Renderer_get_materials_hook(Il2CppObject* _this);
 	Il2CppObject* Renderer_get_sharedMaterial_hook(Il2CppObject* _this);
@@ -5990,15 +5984,9 @@ namespace
 
 	void ReplaceMaterialTexture(Il2CppObject* material);
 
-	int (*Shader_PropertyToID)(Il2CppString* name);
-
-	Il2CppObject* Material_GetTextureImpl_hook(Il2CppObject* _this, int nameID);
-	void Material_SetTextureImpl_hook(Il2CppObject* _this, int nameID, Il2CppObject* texture);
-	bool (*Material_HasProperty)(Il2CppObject* _this, int nameID);
-
 	void ReplaceRendererTexture(Il2CppObject* renderer)
 	{
-		if (!uobject_IsNativeObjectAlive(renderer))
+		if (!UnityEngine::Object::IsNativeObjectAlive(renderer))
 		{
 			return;
 		}
@@ -6021,32 +6009,9 @@ namespace
 		}
 	}
 
-	void ReplaceMaterialTextureProperty(Il2CppObject* material, Il2CppString* property)
-	{
-		if (Material_HasProperty(material, Shader_PropertyToID(property)))
-		{
-			auto texture = Material_GetTextureImpl_hook(material, Shader_PropertyToID(property));
-			if (texture)
-			{
-				auto uobject_name = UnityEngine::Object::Name(texture);
-				// cout << "Material " << wide_u8(property->chars) << " " << wide_u8(uobject_name->chars) << endl;
-				if (!wstring(uobject_name->chars).empty())
-				{
-					auto newTexture = GetReplacementAssets(
-						uobject_name,
-						(Il2CppType*)GetRuntimeType("UnityEngine.CoreModule.dll", "UnityEngine", "Texture2D"));
-					if (newTexture)
-					{
-						Material_SetTextureImpl_hook(material, Shader_PropertyToID(property), newTexture);
-					}
-				}
-			}
-		}
-	}
-
 	void ReplaceMaterialTexture(Il2CppObject* material)
 	{
-		if (!uobject_IsNativeObjectAlive(material))
+		if (!UnityEngine::Object::IsNativeObjectAlive(material))
 		{
 			return;
 		}
@@ -6063,7 +6028,7 @@ namespace
 
 	void ReplaceAssetHolderTextures(Il2CppObject* holder)
 	{
-		if (!uobject_IsNativeObjectAlive(holder))
+		if (!UnityEngine::Object::IsNativeObjectAlive(holder))
 		{
 			return;
 		}
@@ -6090,7 +6055,7 @@ namespace
 			if (obj)
 			{
 				// cout << "AssetHolder: " << i << " " << obj->klass->name << " " << wide_u8(UnityEngine::Object::Name(obj)->chars) << endl;
-				if (obj->klass->name == "GameObject"s && uobject_IsNativeObjectAlive(obj))
+				if (obj->klass->name == "GameObject"s && UnityEngine::Object::IsNativeObjectAlive(obj))
 				{
 					// auto getComponent = il2cpp_class_get_method_from_name_type<Il2CppObject * (*)(Il2CppObject*, Il2CppType*)>(component->klass, "GetComponent", 1)->methodPointer;
 					auto getComponents = il2cpp_class_get_method_from_name_type<Il2CppArraySize * (*)(Il2CppObject*, Il2CppType*, bool, bool, bool, bool, Il2CppObject*)>(obj->klass, "GetComponentsInternal", 6)->methodPointer;
@@ -6127,7 +6092,7 @@ namespace
 					{
 						auto newTexture = GetReplacementAssets(
 							uobject_name,
-							reinterpret_cast<Il2CppType*>(GetRuntimeType("UnityEngine.CoreModule.dll", "UnityEngine", "Texture2D")));
+							GetRuntimeType("UnityEngine.CoreModule.dll", "UnityEngine", "Texture2D"));
 						if (newTexture)
 						{
 							il2cpp_symbols::get_method_pointer<void (*)(Il2CppObject*, int)>("UnityEngine.CoreModule.dll", "UnityEngine", "Object", "set_hideFlags", 1)
@@ -6146,7 +6111,7 @@ namespace
 
 	void ReplaceRawImageTexture(Il2CppObject* rawImage)
 	{
-		if (!uobject_IsNativeObjectAlive(rawImage))
+		if (!UnityEngine::Object::IsNativeObjectAlive(rawImage))
 		{
 			return;
 		}
@@ -6176,7 +6141,7 @@ namespace
 						if (!textureName.empty())
 						{
 							auto texture2D = GetReplacementAssets(il2cpp_string_new(split.back().data()),
-								reinterpret_cast<Il2CppType*>(GetRuntimeType("UnityEngine.CoreModule.dll", "UnityEngine", "Texture2D")));
+								GetRuntimeType("UnityEngine.CoreModule.dll", "UnityEngine", "Texture2D"));
 							if (texture2D)
 							{
 								il2cpp_field_set_value(rawImage, textureField, texture2D);
@@ -6190,7 +6155,7 @@ namespace
 
 	void ReplaceAnimateToUnityTextures(Il2CppObject* anRoot)
 	{
-		if (!uobject_IsNativeObjectAlive(anRoot))
+		if (!UnityEngine::Object::IsNativeObjectAlive(anRoot))
 		{
 			return;
 		}
@@ -6240,7 +6205,7 @@ namespace
 												{
 													auto newTexture = GetReplacementAssets(
 														uobject_name,
-														reinterpret_cast<Il2CppType*>(GetRuntimeType("UnityEngine.CoreModule.dll", "UnityEngine", "Texture2D")));
+														GetRuntimeType("UnityEngine.CoreModule.dll", "UnityEngine", "Texture2D"));
 													if (newTexture)
 													{
 														il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, Il2CppObject*)>(group->klass, "set_TextureSetColor", 1)->methodPointer(group, newTexture);
@@ -6257,7 +6222,7 @@ namespace
 												{
 													auto newTexture = GetReplacementAssets(
 														uobject_name,
-														reinterpret_cast<Il2CppType*>(GetRuntimeType("UnityEngine.CoreModule.dll", "UnityEngine", "Texture2D")));
+														GetRuntimeType("UnityEngine.CoreModule.dll", "UnityEngine", "Texture2D"));
 													if (newTexture)
 													{
 														il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, Il2CppObject*)>(group->klass, "set_TextureSetAlpha", 1)->methodPointer(group, newTexture);
@@ -6294,7 +6259,7 @@ namespace
 												{
 													auto newTexture = GetReplacementAssets(
 														uobject_name,
-														reinterpret_cast<Il2CppType*>(GetRuntimeType("UnityEngine.CoreModule.dll", "UnityEngine", "Texture2D")));
+														GetRuntimeType("UnityEngine.CoreModule.dll", "UnityEngine", "Texture2D"));
 													if (newTexture)
 													{
 														il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, Il2CppObject*)>(customParameter->klass, "set_TextureColor", 1)->methodPointer(customParameter, newTexture);
@@ -6311,7 +6276,7 @@ namespace
 												{
 													auto newTexture = GetReplacementAssets(
 														uobject_name,
-														reinterpret_cast<Il2CppType*>(GetRuntimeType("UnityEngine.CoreModule.dll", "UnityEngine", "Texture2D")));
+														GetRuntimeType("UnityEngine.CoreModule.dll", "UnityEngine", "Texture2D"));
 													if (newTexture)
 													{
 														il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, Il2CppObject*)>(customParameter->klass, "set_TextureAlpha", 1)->methodPointer(customParameter, newTexture);
@@ -6333,7 +6298,7 @@ namespace
 
 	void ReplaceTransformTextures(Il2CppObject* transform)
 	{
-		if (!uobject_IsNativeObjectAlive(transform))
+		if (!UnityEngine::Object::IsNativeObjectAlive(transform))
 		{
 			return;
 		}
@@ -6360,7 +6325,7 @@ namespace
 
 	void ReplaceCutInTimelineControllerTextures(Il2CppObject* controller)
 	{
-		if (!uobject_IsNativeObjectAlive(controller))
+		if (!UnityEngine::Object::IsNativeObjectAlive(controller))
 		{
 			return;
 		}
@@ -6467,12 +6432,12 @@ namespace
 
 	void ReplaceGameObjectTextures(Il2CppObject* gameObject, bool isChild)
 	{
-		auto getComponent = il2cpp_class_get_method_from_name_type<Il2CppObject * (*)(Il2CppObject*, Il2CppType*)>(gameObject->klass, "GetComponent", 1)->methodPointer;
+		auto getComponent = il2cpp_class_get_method_from_name_type<Il2CppObject * (*)(Il2CppObject*, Il2CppObject*)>(gameObject->klass, "GetComponent", 1)->methodPointer;
 		auto getComponents =
-			il2cpp_class_get_method_from_name_type<Il2CppArraySize_t<Il2CppObject*> *(*)(Il2CppObject*, Il2CppType*, bool, bool, bool, bool, Il2CppObject*)>(gameObject->klass, "GetComponentsInternal", 6)->methodPointer;
+			il2cpp_class_get_method_from_name_type<Il2CppArraySize_t<Il2CppObject*> *(*)(Il2CppObject*, Il2CppObject*, bool, bool, bool, bool, Il2CppObject*)>(gameObject->klass, "GetComponentsInternal", 6)->methodPointer;
 
-		auto array = getComponents(gameObject, reinterpret_cast<Il2CppType*>(GetRuntimeType(
-			"UnityEngine.CoreModule.dll", "UnityEngine", "Object")), true, true, true, false, nullptr);
+		auto array = getComponents(gameObject, GetRuntimeType(
+			"UnityEngine.CoreModule.dll", "UnityEngine", "Object"), true, true, true, false, nullptr);
 
 		if (array)
 		{
@@ -6498,7 +6463,7 @@ namespace
 			}
 		}
 
-		auto rawImages = getComponents(gameObject, reinterpret_cast<Il2CppType*>(GetRuntimeType("umamusume.dll", "Gallop", "RawImageCommon")),
+		auto rawImages = getComponents(gameObject, GetRuntimeType("umamusume.dll", "Gallop", "RawImageCommon"),
 			true, true, true, false, nullptr);
 
 		if (rawImages && rawImages->max_length)
@@ -6513,7 +6478,7 @@ namespace
 			}
 		}
 
-		auto anRoots = getComponents(gameObject, reinterpret_cast<Il2CppType*>(GetRuntimeType("Plugins.dll", "AnimateToUnity", "AnRoot")),
+		auto anRoots = getComponents(gameObject, GetRuntimeType("Plugins.dll", "AnimateToUnity", "AnRoot"),
 			true, true, true, false, nullptr);
 
 		if (anRoots && anRoots->max_length)
@@ -6528,7 +6493,7 @@ namespace
 			}
 		}
 
-		auto cutInTimelineControllers = getComponents(gameObject, reinterpret_cast<Il2CppType*>(GetRuntimeType("umamusume.dll", "Gallop.CutIn.Cutt", "CutInTimelineController")),
+		auto cutInTimelineControllers = getComponents(gameObject, GetRuntimeType("umamusume.dll", "Gallop.CutIn.Cutt", "CutInTimelineController"),
 			true, true, true, false, nullptr);
 
 		if (cutInTimelineControllers && cutInTimelineControllers->max_length)
@@ -6545,7 +6510,7 @@ namespace
 
 		if (!isChild)
 		{
-			auto transforms = getComponents(gameObject, reinterpret_cast<Il2CppType*>(GetRuntimeType("UnityEngine.CoreModule.dll", "UnityEngine", "Transform")),
+			auto transforms = getComponents(gameObject, GetRuntimeType("UnityEngine.CoreModule.dll", "UnityEngine", "Transform"),
 				true, true, true, false, nullptr);
 
 			if (transforms && transforms->max_length)
@@ -6561,7 +6526,7 @@ namespace
 			}
 		}
 
-		auto assetholder = getComponent(gameObject, reinterpret_cast<Il2CppType*>(GetRuntimeType("umamusume.dll", "Gallop", "AssetHolder")));
+		auto assetholder = getComponent(gameObject, GetRuntimeType("umamusume.dll", "Gallop", "AssetHolder"));
 
 		if (assetholder)
 		{
@@ -6571,7 +6536,7 @@ namespace
 
 	void ReplaceFontTexture(Il2CppObject* font)
 	{
-		if (!uobject_IsNativeObjectAlive(font))
+		if (!UnityEngine::Object::IsNativeObjectAlive(font))
 		{
 			return;
 		}
@@ -6584,154 +6549,6 @@ namespace
 		}
 	}
 
-	void* assetbundle_LoadFromFile_orig = nullptr;
-	Il2CppObject* assetbundle_LoadFromFile_hook(Il2CppString* path, uint32_t crc, uint64_t offset)
-	{
-		wstringstream pathStream(path->chars);
-		wstring segment;
-		vector<wstring> splited;
-		while (getline(pathStream, segment, L'\\'))
-		{
-			splited.emplace_back(segment);
-		}
-
-		auto name = splited.back();
-
-		if (config::replace_assets.find(name) != config::replace_assets.end())
-		{
-			auto& replaceAsset = config::replace_assets.at(name);
-			auto assets = reinterpret_cast<decltype(assetbundle_LoadFromFile_hook)*>(assetbundle_LoadFromFile_orig)(il2cpp_string_new16(replaceAsset.path.data()), crc, offset);
-			replaceAsset.asset = assets;
-			return assets;
-		}
-		auto assetBundle = reinterpret_cast<decltype(assetbundle_LoadFromFile_hook)*>(assetbundle_LoadFromFile_orig)(path, crc, offset);
-		/*auto names = get_all_asset_names(assetBundle);
-		for (int i = 0; i < names->max_length; i++)
-		{
-			auto name = reinterpret_cast<Il2CppString*>(names->vector[i]);
-			if (!name) continue;
-			stringstream pathStream(wide_u8(name->chars));
-			string segment;
-			vector<string> splited;
-			while (getline(pathStream, segment, '/'))
-			{
-				splited.emplace_back(segment);
-			}
-			auto& fileName = splited.back();
-			cout << "AssetBundle Name: " << fileName << endl;
-		}*/
-		//auto array =
-		//	il2cpp_class_get_method_from_name_type<Il2CppArraySize * (*)(Il2CppObject*, const Il2CppType*)>(assetBundle->klass, "LoadAllAssets", 1)->methodPointer
-		//	(assetBundle, reinterpret_cast<Il2CppType*>(GetRuntimeType("UnityEngine.CoreModule.dll", "UnityEngine", "Object")));
-		//if (array)
-		//{
-		//	for (int j = 0; j < array->max_length; j++)
-		//	{
-		//		auto obj = 
-		//			il2cpp_symbols::get_method_pointer<Il2CppObject * (*)(Il2CppObject*, long index)>("mscorlib.dll", "System", "Array", "GetValue", 1)(&array->obj, j);
-		//		if (!obj) continue;
-		//		if (obj && obj->klass && obj->klass->name != "Transform"s)
-		//		{
-		//			stringstream pathStream(wide_u8(UnityEngine::Object::Name(obj)->chars));
-		//			string segment;
-		//			vector<string> splited;
-		//			while (getline(pathStream, segment, '/'))
-		//			{
-		//				splited.emplace_back(segment);
-		//			}
-		//			auto fileName = splited.empty() ? "Unnamed"s : splited.back();
-		//			cout << "AssetBundle: " << fileName << " " << obj->klass->name << endl;
-		//		}
-		//		if (string(obj->klass->name).find("MeshRenderer") != string::npos)
-		//		{
-		//			// ReplaceRendererTexture(obj);
-		//		}
-		//		if (obj->klass->name == "Material"s)
-		//		{
-		//			// ReplaceMaterialTexture(obj);
-		//		}
-		//	}
-		//}
-		return assetBundle;
-	}
-
-	Il2CppObject* assetbundle_load_asset_hook(Il2CppObject* _this, Il2CppString* name, const Il2CppType* type)
-	{
-		wstringstream pathStream(name->chars);
-		wstring segment;
-		vector<wstring> splited;
-		while (getline(pathStream, segment, L'/'))
-		{
-			splited.emplace_back(segment);
-		}
-		auto& fileName = splited.back();
-		if (find_if(replaceAssetNames.begin(), replaceAssetNames.end(), [fileName](const wstring& item)
-			{
-				return item.find(fileName) != wstring::npos;
-			}) != replaceAssetNames.end())
-		{
-			return GetReplacementAssets(il2cpp_string_new16(fileName.data()), type);
-		}
-		auto obj = reinterpret_cast<decltype(assetbundle_load_asset_hook)*>(assetbundle_load_asset_orig)(_this, name, type);
-
-		// cout << fileName << " " << obj->klass->name << endl;
-
-		if (!obj)
-		{
-			return nullptr;
-		}
-
-		if (obj->klass->name == "GameObject"s)
-		{
-			ReplaceGameObjectTextures(obj);
-		}
-
-		if (obj->klass->name == "Material"s)
-		{
-			ReplaceMaterialTexture(obj);
-		}
-
-		if (obj->klass->name == "Font"s)
-		{
-			ReplaceFontTexture(obj);
-		}
-
-		return obj;
-	}
-
-	Il2CppObject* assetbundle_load_asset_async_hook(Il2CppObject* _this, Il2CppString* name, const Il2CppType* type)
-	{
-		wstringstream pathStream(name->chars);
-		wstring segment;
-		vector<wstring> splited;
-		while (getline(pathStream, segment, L'/'))
-		{
-			splited.emplace_back(segment);
-		}
-		auto& fileName = splited.back();
-		if (find_if(replaceAssetNames.begin(), replaceAssetNames.end(), [fileName](const wstring& item)
-			{
-				return item.find(fileName) != string::npos;
-			}) != replaceAssetNames.end())
-		{
-			return GetReplacementAssetsAsync(il2cpp_string_new16(fileName.data()), type);
-		}
-		return reinterpret_cast<decltype(assetbundle_load_asset_async_hook)*>(assetbundle_load_asset_async_orig)(_this, name, type);
-	}
-
-	void* assetbundle_unload_orig = nullptr;
-	void assetbundle_unload_hook(Il2CppObject* _this, bool unloadAllLoadedObjects)
-	{
-		reinterpret_cast<decltype(assetbundle_unload_hook)*>(assetbundle_unload_orig)(_this, unloadAllLoadedObjects);
-		for (auto& pair : config::replace_assets)
-		{
-			if (pair.second.asset == _this)
-			{
-				pair.second.asset = nullptr;
-			}
-		}
-	}
-
 	void* AssetBundleRequest_GetResult_orig = nullptr;
 	Il2CppObject* AssetBundleRequest_GetResult_hook(Il2CppObject* _this)
 	{
@@ -6740,9 +6557,9 @@ namespace
 		{
 			auto name = UnityEngine::Object::Name(obj);
 			wstring wName = name->chars;
-			if (find(replaceAssetNames.begin(), replaceAssetNames.end(), wName) != replaceAssetNames.end())
+			if (find(config::runtime::replaceAssetNames.begin(), config::runtime::replaceAssetNames.end(), wName) != config::runtime::replaceAssetNames.end())
 			{
-				return GetReplacementAssets(name, il2cpp_class_get_type(obj->klass));
+				return GetReplacementAssets(name, il2cpp_type_get_object(il2cpp_class_get_type(obj->klass)));
 			}
 
 			if (obj->klass->name == "GameObject"s)
@@ -6757,18 +6574,18 @@ namespace
 
 	Il2CppArraySize_t<Il2CppObject*>* GetRectTransformArray(Il2CppObject* object)
 	{
-		auto getComponents = il2cpp_class_get_method_from_name_type<Il2CppArraySize_t<Il2CppObject*> *(*)(Il2CppObject*, Il2CppType*, bool, bool, bool, bool, Il2CppObject*)>(object->klass, "GetComponentsInternal", 6)->methodPointer;
-		auto rectTransformArray = getComponents(object, reinterpret_cast<Il2CppType*>(GetRuntimeType(
-			"UnityEngine.CoreModule.dll", "UnityEngine", "RectTransform")), true, true, false, false, nullptr);
+		auto getComponents = il2cpp_class_get_method_from_name_type<Il2CppArraySize_t<Il2CppObject*> *(*)(Il2CppObject*, Il2CppObject*, bool, bool, bool, bool, Il2CppObject*)>(object->klass, "GetComponentsInternal", 6)->methodPointer;
+		auto rectTransformArray = getComponents(object, GetRuntimeType(
+			"UnityEngine.CoreModule.dll", "UnityEngine", "RectTransform"), true, true, false, false, nullptr);
 
 		return rectTransformArray;
 	}
 
 	Il2CppObject* GetRectTransform(Il2CppObject* object)
 	{
-		auto getComponents = il2cpp_class_get_method_from_name_type<Il2CppArraySize_t<Il2CppObject*> *(*)(Il2CppObject*, Il2CppType*, bool, bool, bool, bool, Il2CppObject*)>(object->klass, "GetComponentsInternal", 6)->methodPointer;
-		auto rectTransformArray = getComponents(object, reinterpret_cast<Il2CppType*>(GetRuntimeType(
-			"UnityEngine.CoreModule.dll", "UnityEngine", "RectTransform")), true, true, false, false, nullptr);
+		auto getComponents = il2cpp_class_get_method_from_name_type<Il2CppArraySize_t<Il2CppObject*> *(*)(Il2CppObject*, Il2CppObject*, bool, bool, bool, bool, Il2CppObject*)>(object->klass, "GetComponentsInternal", 6)->methodPointer;
+		auto rectTransformArray = getComponents(object, GetRuntimeType(
+			"UnityEngine.CoreModule.dll", "UnityEngine", "RectTransform"), true, true, false, false, nullptr);
 
 		if (rectTransformArray->max_length)
 		{
@@ -6808,9 +6625,9 @@ namespace
 
 		if (gameObject)
 		{
-			auto getComponents = il2cpp_class_get_method_from_name_type<Il2CppArraySize_t<Il2CppObject*> *(*)(Il2CppObject*, Il2CppType*, bool, bool, bool, bool, Il2CppObject*)>(gameObject->klass, "GetComponentsInternal", 6)->methodPointer;
-			auto array = getComponents(gameObject, reinterpret_cast<Il2CppType*>(GetRuntimeType(
-				"umamusume.dll", "Gallop", "TextCommon")), true, true, false, false, nullptr);
+			auto getComponents = il2cpp_class_get_method_from_name_type<Il2CppArraySize_t<Il2CppObject*> *(*)(Il2CppObject*, Il2CppObject*, bool, bool, bool, bool, Il2CppObject*)>(gameObject->klass, "GetComponentsInternal", 6)->methodPointer;
+			auto array = getComponents(gameObject, GetRuntimeType(
+				"umamusume.dll", "Gallop", "TextCommon"), true, true, false, false, nullptr);
 
 			return array->vector[0];
 		}
@@ -6856,9 +6673,9 @@ namespace
 
 		auto optionItemTitle = il2cpp_symbols::get_method_pointer<Il2CppObject * (*)(Il2CppObject*)>("UnityEngine.CoreModule.dll", "UnityEngine", "Object", "Internal_CloneSingle", 1)(object);
 
-		auto getComponents = il2cpp_class_get_method_from_name_type<Il2CppArraySize_t<Il2CppObject*> *(*)(Il2CppObject*, Il2CppType*, bool, bool, bool, bool, Il2CppObject*)>(optionItemTitle->klass, "GetComponentsInternal", 6)->methodPointer;
-		auto array = getComponents(optionItemTitle, reinterpret_cast<Il2CppType*>(GetRuntimeType(
-			"umamusume.dll", "Gallop", "TextCommon")), true, true, false, false, nullptr);
+		auto getComponents = il2cpp_class_get_method_from_name_type<Il2CppArraySize_t<Il2CppObject*> *(*)(Il2CppObject*, Il2CppObject*, bool, bool, bool, bool, Il2CppObject*)>(optionItemTitle->klass, "GetComponentsInternal", 6)->methodPointer;
+		auto array = getComponents(optionItemTitle, GetRuntimeType(
+			"umamusume.dll", "Gallop", "TextCommon"), true, true, false, false, nullptr);
 
 		auto textCommon = array->vector[0];
 
@@ -6875,9 +6692,9 @@ namespace
 
 		UnityEngine::Object::Name(optionItemOnOff, il2cpp_string_new(name));
 
-		auto getComponents = il2cpp_class_get_method_from_name_type<Il2CppArraySize_t<Il2CppObject*> *(*)(Il2CppObject*, Il2CppType*, bool, bool, bool, bool, Il2CppObject*)>(optionItemOnOff->klass, "GetComponentsInternal", 6)->methodPointer;
-		auto array = getComponents(optionItemOnOff, reinterpret_cast<Il2CppType*>(GetRuntimeType(
-			"umamusume.dll", "Gallop", "TextCommon")), true, true, false, false, nullptr);
+		auto getComponents = il2cpp_class_get_method_from_name_type<Il2CppArraySize_t<Il2CppObject*> *(*)(Il2CppObject*, Il2CppObject*, bool, bool, bool, bool, Il2CppObject*)>(optionItemOnOff->klass, "GetComponentsInternal", 6)->methodPointer;
+		auto array = getComponents(optionItemOnOff, GetRuntimeType(
+			"umamusume.dll", "Gallop", "TextCommon"), true, true, false, false, nullptr);
 
 		auto textCommon = array->vector[0];
 
@@ -6895,9 +6712,9 @@ namespace
 
 		UnityEngine::Object::Name(optionItemOnOff, il2cpp_string_new(name));
 
-		auto getComponents = il2cpp_class_get_method_from_name_type<Il2CppArraySize_t<Il2CppObject*> *(*)(Il2CppObject*, Il2CppType*, bool, bool, bool, bool, Il2CppObject*)>(optionItemOnOff->klass, "GetComponentsInternal", 6)->methodPointer;
-		auto array = getComponents(optionItemOnOff, reinterpret_cast<Il2CppType*>(GetRuntimeType(
-			"umamusume.dll", "Gallop", "TextCommon")), true, true, false, false, nullptr);
+		auto getComponents = il2cpp_class_get_method_from_name_type<Il2CppArraySize_t<Il2CppObject*> *(*)(Il2CppObject*, Il2CppObject*, bool, bool, bool, bool, Il2CppObject*)>(optionItemOnOff->klass, "GetComponentsInternal", 6)->methodPointer;
+		auto array = getComponents(optionItemOnOff, GetRuntimeType(
+			"umamusume.dll", "Gallop", "TextCommon"), true, true, false, false, nullptr);
 
 		auto textCommon = array->vector[0];
 
@@ -6913,9 +6730,9 @@ namespace
 
 		if (optionItemOnOff)
 		{
-			auto getComponents = il2cpp_class_get_method_from_name_type<Il2CppArraySize_t<Il2CppObject*> *(*)(Il2CppObject*, Il2CppType*, bool, bool, bool, bool, Il2CppObject*)>(optionItemOnOff->klass, "GetComponentsInternal", 6)->methodPointer;
-			auto array = getComponents(optionItemOnOff, reinterpret_cast<Il2CppType*>(GetRuntimeType(
-				"umamusume.dll", "Gallop", "PartsOnOffToggleSwitch")), true, true, false, false, nullptr);
+			auto getComponents = il2cpp_class_get_method_from_name_type<Il2CppArraySize_t<Il2CppObject*> *(*)(Il2CppObject*, Il2CppObject*, bool, bool, bool, bool, Il2CppObject*)>(optionItemOnOff->klass, "GetComponentsInternal", 6)->methodPointer;
+			auto array = getComponents(optionItemOnOff, GetRuntimeType(
+				"umamusume.dll", "Gallop", "PartsOnOffToggleSwitch"), true, true, false, false, nullptr);
 
 			auto toggleSwitch = array->vector[0];
 
@@ -6930,9 +6747,9 @@ namespace
 
 		if (optionItemOnOff)
 		{
-			auto getComponents = il2cpp_class_get_method_from_name_type<Il2CppArraySize_t<Il2CppObject*> *(*)(Il2CppObject*, Il2CppType*, bool, bool, bool, bool, Il2CppObject*)>(optionItemOnOff->klass, "GetComponentsInternal", 6)->methodPointer;
-			auto array = getComponents(optionItemOnOff, reinterpret_cast<Il2CppType*>(GetRuntimeType(
-				"umamusume.dll", "Gallop", "PartsOnOffToggleSwitch")), true, true, false, false, nullptr);
+			auto getComponents = il2cpp_class_get_method_from_name_type<Il2CppArraySize_t<Il2CppObject*> *(*)(Il2CppObject*, Il2CppObject*, bool, bool, bool, bool, Il2CppObject*)>(optionItemOnOff->klass, "GetComponentsInternal", 6)->methodPointer;
+			auto array = getComponents(optionItemOnOff, GetRuntimeType(
+				"umamusume.dll", "Gallop", "PartsOnOffToggleSwitch"), true, true, false, false, nullptr);
 
 			auto toggleSwitch = array->vector[0];
 
@@ -6949,16 +6766,16 @@ namespace
 
 		UnityEngine::Object::Name(optionItemButton, il2cpp_string_new(name));
 
-		auto getComponents = il2cpp_class_get_method_from_name_type<Il2CppArraySize_t<Il2CppObject*> *(*)(Il2CppObject*, Il2CppType*, bool, bool, bool, bool, Il2CppObject*)>(optionItemButton->klass, "GetComponentsInternal", 6)->methodPointer;
-		auto array1 = getComponents(optionItemButton, reinterpret_cast<Il2CppType*>(GetRuntimeType(
-			"umamusume.dll", "Gallop", "TextCommon")), true, true, false, false, nullptr);
+		auto getComponents = il2cpp_class_get_method_from_name_type<Il2CppArraySize_t<Il2CppObject*> *(*)(Il2CppObject*, Il2CppObject*, bool, bool, bool, bool, Il2CppObject*)>(optionItemButton->klass, "GetComponentsInternal", 6)->methodPointer;
+		auto array1 = getComponents(optionItemButton, GetRuntimeType(
+			"umamusume.dll", "Gallop", "TextCommon"), true, true, false, false, nullptr);
 
 		auto textCommon = array1->vector[0];
 
 		SetTextCommonText(textCommon, title);
 
-		auto array2 = getComponents(optionItemButton, reinterpret_cast<Il2CppType*>(GetRuntimeType(
-			"umamusume.dll", "Gallop", "ButtonCommon")), true, true, false, false, nullptr);
+		auto array2 = getComponents(optionItemButton, GetRuntimeType(
+			"umamusume.dll", "Gallop", "ButtonCommon"), true, true, false, false, nullptr);
 
 		auto buttonCommon = array2->vector[0];
 
@@ -6973,9 +6790,9 @@ namespace
 
 		if (optionItemButton)
 		{
-			auto getComponents = il2cpp_class_get_method_from_name_type<Il2CppArraySize_t<Il2CppObject*> *(*)(Il2CppObject*, Il2CppType*, bool, bool, bool, bool, Il2CppObject*)>(optionItemButton->klass, "GetComponentsInternal", 6)->methodPointer;
-			auto array = getComponents(optionItemButton, reinterpret_cast<Il2CppType*>(GetRuntimeType(
-				"umamusume.dll", "Gallop", "ButtonCommon")), true, true, false, false, nullptr);
+			auto getComponents = il2cpp_class_get_method_from_name_type<Il2CppArraySize_t<Il2CppObject*> *(*)(Il2CppObject*, Il2CppObject*, bool, bool, bool, bool, Il2CppObject*)>(optionItemButton->klass, "GetComponentsInternal", 6)->methodPointer;
+			auto array = getComponents(optionItemButton, GetRuntimeType(
+				"umamusume.dll", "Gallop", "ButtonCommon"), true, true, false, false, nullptr);
 
 			auto buttonCommon = array->vector[0];
 
@@ -6990,9 +6807,9 @@ namespace
 
 		auto optionItemAttention = il2cpp_symbols::get_method_pointer<Il2CppObject * (*)(Il2CppObject*)>("UnityEngine.CoreModule.dll", "UnityEngine", "Object", "Internal_CloneSingle", 1)(object);
 
-		auto getComponents = il2cpp_class_get_method_from_name_type<Il2CppArraySize_t<Il2CppObject*> *(*)(Il2CppObject*, Il2CppType*, bool, bool, bool, bool, Il2CppObject*)>(optionItemAttention->klass, "GetComponentsInternal", 6)->methodPointer;
-		auto array = getComponents(optionItemAttention, reinterpret_cast<Il2CppType*>(GetRuntimeType(
-			"umamusume.dll", "Gallop", "TextCommon")), true, true, false, false, nullptr);
+		auto getComponents = il2cpp_class_get_method_from_name_type<Il2CppArraySize_t<Il2CppObject*> *(*)(Il2CppObject*, Il2CppObject*, bool, bool, bool, bool, Il2CppObject*)>(optionItemAttention->klass, "GetComponentsInternal", 6)->methodPointer;
+		auto array = getComponents(optionItemAttention, GetRuntimeType(
+			"umamusume.dll", "Gallop", "TextCommon"), true, true, false, false, nullptr);
 
 		auto textCommon = array->vector[0];
 
@@ -7007,9 +6824,9 @@ namespace
 
 		auto optionItemInfo = il2cpp_symbols::get_method_pointer<Il2CppObject * (*)(Il2CppObject*)>("UnityEngine.CoreModule.dll", "UnityEngine", "Object", "Internal_CloneSingle", 1)(object);
 
-		auto getComponents = il2cpp_class_get_method_from_name_type<Il2CppArraySize_t<Il2CppObject*> *(*)(Il2CppObject*, Il2CppType*, bool, bool, bool, bool, Il2CppObject*)>(optionItemInfo->klass, "GetComponentsInternal", 6)->methodPointer;
-		auto array = getComponents(optionItemInfo, reinterpret_cast<Il2CppType*>(GetRuntimeType(
-			"umamusume.dll", "Gallop", "TextCommon")), true, true, false, false, nullptr);
+		auto getComponents = il2cpp_class_get_method_from_name_type<Il2CppArraySize_t<Il2CppObject*> *(*)(Il2CppObject*, Il2CppObject*, bool, bool, bool, bool, Il2CppObject*)>(optionItemInfo->klass, "GetComponentsInternal", 6)->methodPointer;
+		auto array = getComponents(optionItemInfo, GetRuntimeType(
+			"umamusume.dll", "Gallop", "TextCommon"), true, true, false, false, nullptr);
 
 		auto textCommon = array->vector[0];
 
@@ -7040,9 +6857,9 @@ namespace
 
 		auto optionItemSimple = il2cpp_symbols::get_method_pointer<Il2CppObject * (*)(Il2CppObject*)>("UnityEngine.CoreModule.dll", "UnityEngine", "Object", "Internal_CloneSingle", 1)(object);
 
-		auto getComponents = il2cpp_class_get_method_from_name_type<Il2CppArraySize_t<Il2CppObject*> *(*)(Il2CppObject*, Il2CppType*, bool, bool, bool, bool, Il2CppObject*)>(optionItemSimple->klass, "GetComponentsInternal", 6)->methodPointer;
-		auto array = getComponents(optionItemSimple, reinterpret_cast<Il2CppType*>(GetRuntimeType(
-			"umamusume.dll", "Gallop", "TextCommon")), true, true, false, false, nullptr);
+		auto getComponents = il2cpp_class_get_method_from_name_type<Il2CppArraySize_t<Il2CppObject*> *(*)(Il2CppObject*, Il2CppObject*, bool, bool, bool, bool, Il2CppObject*)>(optionItemSimple->klass, "GetComponentsInternal", 6)->methodPointer;
+		auto array = getComponents(optionItemSimple, GetRuntimeType(
+			"umamusume.dll", "Gallop", "TextCommon"), true, true, false, false, nullptr);
 
 		auto textCommon = array->vector[0];
 
@@ -7063,7 +6880,7 @@ namespace
 
 		il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, UnityEngine::Vector2)>(rectTransform->klass, "set_anchoredPosition", 1)->methodPointer(rectTransform, UnityEngine::Vector2{ 71.583984375, -18 });
 
-		auto getComponents = il2cpp_class_get_method_from_name_type<Il2CppArraySize_t<Il2CppObject*> *(*)(Il2CppObject*, Il2CppType*, bool, bool, bool, bool, Il2CppObject*)>(optionItemSimple->klass, "GetComponentsInternal", 6)->methodPointer;
+		auto getComponents = il2cpp_class_get_method_from_name_type<Il2CppArraySize_t<Il2CppObject*> *(*)(Il2CppObject*, Il2CppObject*, bool, bool, bool, bool, Il2CppObject*)>(optionItemSimple->klass, "GetComponentsInternal", 6)->methodPointer;
 
 		auto buttonObject = resources_load_hook(il2cpp_string_new("ui/parts/base/buttons00"), GetRuntimeType("UnityEngine.CoreModule.dll", "UnityEngine", "GameObject"));
 
@@ -7071,8 +6888,8 @@ namespace
 
 		UnityEngine::Object::Name(buttons00, il2cpp_string_new(name));
 
-		auto array2 = getComponents(buttons00, reinterpret_cast<Il2CppType*>(GetRuntimeType(
-			"umamusume.dll", "Gallop", "ButtonCommon")), true, true, false, false, nullptr);
+		auto array2 = getComponents(buttons00, GetRuntimeType(
+			"umamusume.dll", "Gallop", "ButtonCommon"), true, true, false, false, nullptr);
 
 		auto buttonCommon = array2->vector[0];
 
@@ -7086,8 +6903,8 @@ namespace
 
 		AddToLayout(rectTransform, vector{ buttons00 });
 
-		auto array = getComponents(optionItemSimple, reinterpret_cast<Il2CppType*>(GetRuntimeType(
-			"umamusume.dll", "Gallop", "TextCommon")), true, true, false, false, nullptr);
+		auto array = getComponents(optionItemSimple, GetRuntimeType(
+			"umamusume.dll", "Gallop", "TextCommon"), true, true, false, false, nullptr);
 
 		SetTextCommonText(array->vector[0], text);
 		SetTextCommonText(array->vector[1], title);
@@ -7101,9 +6918,9 @@ namespace
 
 		if (gameObject)
 		{
-			auto getComponents = il2cpp_class_get_method_from_name_type<Il2CppArraySize_t<Il2CppObject*> *(*)(Il2CppObject*, Il2CppType*, bool, bool, bool, bool, Il2CppObject*)>(gameObject->klass, "GetComponentsInternal", 6)->methodPointer;
-			auto array = getComponents(gameObject, reinterpret_cast<Il2CppType*>(GetRuntimeType(
-				"umamusume.dll", "Gallop", "TextCommon")), true, true, false, false, nullptr);
+			auto getComponents = il2cpp_class_get_method_from_name_type<Il2CppArraySize_t<Il2CppObject*> *(*)(Il2CppObject*, Il2CppObject*, bool, bool, bool, bool, Il2CppObject*)>(gameObject->klass, "GetComponentsInternal", 6)->methodPointer;
+			auto array = getComponents(gameObject, GetRuntimeType(
+				"umamusume.dll", "Gallop", "TextCommon"), true, true, false, false, nullptr);
 
 			return array->vector[1];
 		}
@@ -7116,9 +6933,9 @@ namespace
 
 		if (toggleObject)
 		{
-			auto getComponents = il2cpp_class_get_method_from_name_type<Il2CppArraySize_t<Il2CppObject*> *(*)(Il2CppObject*, Il2CppType*, bool, bool, bool, bool, Il2CppObject*)>(toggleObject->klass, "GetComponentsInternal", 6)->methodPointer;
-			auto array = getComponents(toggleObject, reinterpret_cast<Il2CppType*>(GetRuntimeType(
-				"umamusume.dll", "Gallop", "ToggleCommon")), true, true, false, false, nullptr);
+			auto getComponents = il2cpp_class_get_method_from_name_type<Il2CppArraySize_t<Il2CppObject*> *(*)(Il2CppObject*, Il2CppObject*, bool, bool, bool, bool, Il2CppObject*)>(toggleObject->klass, "GetComponentsInternal", 6)->methodPointer;
+			auto array = getComponents(toggleObject, GetRuntimeType(
+				"umamusume.dll", "Gallop", "ToggleCommon"), true, true, false, false, nullptr);
 
 			auto toggleCommon = array->vector[0];
 
@@ -7131,9 +6948,9 @@ namespace
 	{
 		if (toggleGroupObject)
 		{
-			auto getComponents = il2cpp_class_get_method_from_name_type<Il2CppArraySize_t<Il2CppObject*> *(*)(Il2CppObject*, Il2CppType*, bool, bool, bool, bool, Il2CppObject*)>(toggleGroupObject->klass, "GetComponentsInternal", 6)->methodPointer;
-			auto array = getComponents(toggleGroupObject, reinterpret_cast<Il2CppType*>(GetRuntimeType(
-				"umamusume.dll", "Gallop", "ToggleGroupCommon")), true, true, false, false, nullptr);
+			auto getComponents = il2cpp_class_get_method_from_name_type<Il2CppArraySize_t<Il2CppObject*> *(*)(Il2CppObject*, Il2CppObject*, bool, bool, bool, bool, Il2CppObject*)>(toggleGroupObject->klass, "GetComponentsInternal", 6)->methodPointer;
+			auto array = getComponents(toggleGroupObject, GetRuntimeType(
+				"umamusume.dll", "Gallop", "ToggleGroupCommon"), true, true, false, false, nullptr);
 
 			auto toggleGroupCommon = array->vector[0];
 
@@ -7159,9 +6976,9 @@ namespace
 
 		if (gameObject)
 		{
-			auto getComponents = il2cpp_class_get_method_from_name_type<Il2CppArraySize_t<Il2CppObject*> *(*)(Il2CppObject*, Il2CppType*, bool, bool, bool, bool, Il2CppObject*)>(gameObject->klass, "GetComponentsInternal", 6)->methodPointer;
-			auto array = getComponents(gameObject, reinterpret_cast<Il2CppType*>(GetRuntimeType(
-				"umamusume.dll", "Gallop", "ToggleGroupCommon")), true, true, false, false, nullptr);
+			auto getComponents = il2cpp_class_get_method_from_name_type<Il2CppArraySize_t<Il2CppObject*> *(*)(Il2CppObject*, Il2CppObject*, bool, bool, bool, bool, Il2CppObject*)>(gameObject->klass, "GetComponentsInternal", 6)->methodPointer;
+			auto array = getComponents(gameObject, GetRuntimeType(
+				"umamusume.dll", "Gallop", "ToggleGroupCommon"), true, true, false, false, nullptr);
 
 			auto toggleGroupCommon = array->vector[0];
 
@@ -7178,9 +6995,9 @@ namespace
 
 		UnityEngine::Object::Name(optionItem3ToggleVertical, il2cpp_string_new(name));
 
-		auto getComponents = il2cpp_class_get_method_from_name_type<Il2CppArraySize_t<Il2CppObject*> *(*)(Il2CppObject*, Il2CppType*, bool, bool, bool, bool, Il2CppObject*)>(optionItem3ToggleVertical->klass, "GetComponentsInternal", 6)->methodPointer;
-		auto array = getComponents(optionItem3ToggleVertical, reinterpret_cast<Il2CppType*>(GetRuntimeType(
-			"umamusume.dll", "Gallop", "TextCommon")), true, true, false, false, nullptr);
+		auto getComponents = il2cpp_class_get_method_from_name_type<Il2CppArraySize_t<Il2CppObject*> *(*)(Il2CppObject*, Il2CppObject*, bool, bool, bool, bool, Il2CppObject*)>(optionItem3ToggleVertical->klass, "GetComponentsInternal", 6)->methodPointer;
+		auto array = getComponents(optionItem3ToggleVertical, GetRuntimeType(
+			"umamusume.dll", "Gallop", "TextCommon"), true, true, false, false, nullptr);
 
 		SetTextCommonText(array->vector[0], title);
 		SetTextCommonText(array->vector[1], option1);
@@ -7201,9 +7018,9 @@ namespace
 
 		UnityEngine::Object::Name(optionItem3Toggle, il2cpp_string_new(name));
 
-		auto getComponents = il2cpp_class_get_method_from_name_type<Il2CppArraySize_t<Il2CppObject*> *(*)(Il2CppObject*, Il2CppType*, bool, bool, bool, bool, Il2CppObject*)>(optionItem3Toggle->klass, "GetComponentsInternal", 6)->methodPointer;
-		auto array = getComponents(optionItem3Toggle, reinterpret_cast<Il2CppType*>(GetRuntimeType(
-			"umamusume.dll", "Gallop", "TextCommon")), true, true, false, false, nullptr);
+		auto getComponents = il2cpp_class_get_method_from_name_type<Il2CppArraySize_t<Il2CppObject*> *(*)(Il2CppObject*, Il2CppObject*, bool, bool, bool, bool, Il2CppObject*)>(optionItem3Toggle->klass, "GetComponentsInternal", 6)->methodPointer;
+		auto array = getComponents(optionItem3Toggle, GetRuntimeType(
+			"umamusume.dll", "Gallop", "TextCommon"), true, true, false, false, nullptr);
 
 		SetTextCommonText(array->vector[0], title);
 		SetTextCommonText(array->vector[1], option1);
@@ -7224,9 +7041,9 @@ namespace
 
 		UnityEngine::Object::Name(optionItem2Toggle, il2cpp_string_new(name));
 
-		auto getComponents = il2cpp_class_get_method_from_name_type<Il2CppArraySize_t<Il2CppObject*> *(*)(Il2CppObject*, Il2CppType*, bool, bool, bool, bool, Il2CppObject*)>(optionItem2Toggle->klass, "GetComponentsInternal", 6)->methodPointer;
-		auto array = getComponents(optionItem2Toggle, reinterpret_cast<Il2CppType*>(GetRuntimeType(
-			"umamusume.dll", "Gallop", "TextCommon")), true, true, false, false, nullptr);
+		auto getComponents = il2cpp_class_get_method_from_name_type<Il2CppArraySize_t<Il2CppObject*> *(*)(Il2CppObject*, Il2CppObject*, bool, bool, bool, bool, Il2CppObject*)>(optionItem2Toggle->klass, "GetComponentsInternal", 6)->methodPointer;
+		auto array = getComponents(optionItem2Toggle, GetRuntimeType(
+			"umamusume.dll", "Gallop", "TextCommon"), true, true, false, false, nullptr);
 
 		SetTextCommonText(array->vector[0], title);
 		SetTextCommonText(array->vector[1], option1);
@@ -7242,9 +7059,9 @@ namespace
 	{
 		auto gameObject = il2cpp_class_get_method_from_name_type<Il2CppObject * (*)(Il2CppObject*)>(slider->klass, "get_gameObject", 0)->methodPointer(slider);
 
-		auto getComponents = il2cpp_class_get_method_from_name_type<Il2CppArraySize_t<Il2CppObject*> *(*)(Il2CppObject*, Il2CppType*, bool, bool, bool, bool, Il2CppObject*)>(gameObject->klass, "GetComponentsInternal", 6)->methodPointer;
-		auto array = getComponents(gameObject, reinterpret_cast<Il2CppType*>(GetRuntimeType(
-			"umamusume.dll", "Gallop", "TextCommon")), true, true, false, false, nullptr);
+		auto getComponents = il2cpp_class_get_method_from_name_type<Il2CppArraySize_t<Il2CppObject*> *(*)(Il2CppObject*, Il2CppObject*, bool, bool, bool, bool, Il2CppObject*)>(gameObject->klass, "GetComponentsInternal", 6)->methodPointer;
+		auto array = getComponents(gameObject, GetRuntimeType(
+			"umamusume.dll", "Gallop", "TextCommon"), true, true, false, false, nullptr);
 
 		return array->vector[0];
 	}
@@ -7260,9 +7077,9 @@ namespace
 
 		if (optionSlider)
 		{
-			auto getComponents = il2cpp_class_get_method_from_name_type<Il2CppArraySize_t<Il2CppObject*> *(*)(Il2CppObject*, Il2CppType*, bool, bool, bool, bool, Il2CppObject*)>(optionSlider->klass, "GetComponentsInternal", 6)->methodPointer;
-			auto array = getComponents(optionSlider, reinterpret_cast<Il2CppType*>(GetRuntimeType(
-				"umamusume.dll", "Gallop", "SliderCommon")), true, true, false, false, nullptr);
+			auto getComponents = il2cpp_class_get_method_from_name_type<Il2CppArraySize_t<Il2CppObject*> *(*)(Il2CppObject*, Il2CppObject*, bool, bool, bool, bool, Il2CppObject*)>(optionSlider->klass, "GetComponentsInternal", 6)->methodPointer;
+			auto array = getComponents(optionSlider, GetRuntimeType(
+				"umamusume.dll", "Gallop", "SliderCommon"), true, true, false, false, nullptr);
 
 			auto sliderCommon = array->vector[0];
 
@@ -7277,9 +7094,9 @@ namespace
 
 		if (optionSlider)
 		{
-			auto getComponents = il2cpp_class_get_method_from_name_type<Il2CppArraySize_t<Il2CppObject*> *(*)(Il2CppObject*, Il2CppType*, bool, bool, bool, bool, Il2CppObject*)>(optionSlider->klass, "GetComponentsInternal", 6)->methodPointer;
-			auto array = getComponents(optionSlider, reinterpret_cast<Il2CppType*>(GetRuntimeType(
-				"umamusume.dll", "Gallop", "SliderCommon")), true, true, false, false, nullptr);
+			auto getComponents = il2cpp_class_get_method_from_name_type<Il2CppArraySize_t<Il2CppObject*> *(*)(Il2CppObject*, Il2CppObject*, bool, bool, bool, bool, Il2CppObject*)>(optionSlider->klass, "GetComponentsInternal", 6)->methodPointer;
+			auto array = getComponents(optionSlider, GetRuntimeType(
+				"umamusume.dll", "Gallop", "SliderCommon"), true, true, false, false, nullptr);
 
 			return array->vector[0];
 		}
@@ -7292,24 +7109,24 @@ namespace
 
 		auto optionSlider = il2cpp_symbols::get_method_pointer<Il2CppObject * (*)(Il2CppObject*)>("UnityEngine.CoreModule.dll", "UnityEngine", "Object", "Internal_CloneSingle", 1)(object);
 
-		auto getComponents = il2cpp_class_get_method_from_name_type<Il2CppArraySize_t<Il2CppObject*> *(*)(Il2CppObject*, Il2CppType*, bool, bool, bool, bool, Il2CppObject*)>(optionSlider->klass, "GetComponentsInternal", 6)->methodPointer;
-		auto array = getComponents(optionSlider, reinterpret_cast<Il2CppType*>(GetRuntimeType(
-			"umamusume.dll", "Gallop", "TextCommon")), true, true, false, false, nullptr);
+		auto getComponents = il2cpp_class_get_method_from_name_type<Il2CppArraySize_t<Il2CppObject*> *(*)(Il2CppObject*, Il2CppObject*, bool, bool, bool, bool, Il2CppObject*)>(optionSlider->klass, "GetComponentsInternal", 6)->methodPointer;
+		auto array = getComponents(optionSlider, GetRuntimeType(
+			"umamusume.dll", "Gallop", "TextCommon"), true, true, false, false, nullptr);
 
 		auto textCommon = array->vector[0];
 
 		text_set_verticalOverflow(textCommon, 1);
 		SetTextCommonText(textCommon, title);
 
-		auto optionSoundVolumeSliderArray = getComponents(optionSlider, reinterpret_cast<Il2CppType*>(GetRuntimeType(
-			"umamusume.dll", "Gallop", "OptionSoundVolumeSlider")), true, true, false, false, nullptr);
+		auto optionSoundVolumeSliderArray = getComponents(optionSlider, GetRuntimeType(
+			"umamusume.dll", "Gallop", "OptionSoundVolumeSlider"), true, true, false, false, nullptr);
 
 		auto optionSoundVolumeSlider = optionSoundVolumeSliderArray->vector[0];
 
 		il2cpp_symbols::get_method_pointer<void (*)(Il2CppObject*)>("UnityEngine.CoreModule.dll", "UnityEngine", "Object", "Destroy", 1)(optionSoundVolumeSlider);
 
-		auto sliderCommonArray = getComponents(optionSlider, reinterpret_cast<Il2CppType*>(GetRuntimeType(
-			"umamusume.dll", "Gallop", "SliderCommon")), true, true, false, false, nullptr);
+		auto sliderCommonArray = getComponents(optionSlider, GetRuntimeType(
+			"umamusume.dll", "Gallop", "SliderCommon"), true, true, false, false, nullptr);
 
 		auto sliderCommon = sliderCommonArray->vector[0];
 
@@ -7520,9 +7337,9 @@ namespace
 
 		UnityEngine::Object::Name(radioButtonWithText, il2cpp_string_new(name));
 
-		auto getComponents = il2cpp_class_get_method_from_name_type<Il2CppArraySize_t<Il2CppObject*> *(*)(Il2CppObject*, Il2CppType*, bool, bool, bool, bool, Il2CppObject*)>(radioButtonWithText->klass, "GetComponentsInternal", 6)->methodPointer;
-		auto array = getComponents(radioButtonWithText, reinterpret_cast<Il2CppType*>(GetRuntimeType(
-			"umamusume.dll", "Gallop", "TextCommon")), true, true, false, false, nullptr);
+		auto getComponents = il2cpp_class_get_method_from_name_type<Il2CppArraySize_t<Il2CppObject*> *(*)(Il2CppObject*, Il2CppObject*, bool, bool, bool, bool, Il2CppObject*)>(radioButtonWithText->klass, "GetComponentsInternal", 6)->methodPointer;
+		auto array = getComponents(radioButtonWithText, GetRuntimeType(
+			"umamusume.dll", "Gallop", "TextCommon"), true, true, false, false, nullptr);
 
 		auto textCommon = array->vector[0];
 
@@ -10098,10 +9915,10 @@ namespace
 
 		if (wName == L"ui/views/titleview"s)
 		{
-			if (find_if(replaceAssetNames.begin(), replaceAssetNames.end(), [](const wstring& item)
+			if (find_if(config::runtime::replaceAssetNames.begin(), config::runtime::replaceAssetNames.end(), [](const wstring& item)
 				{
 					return item.find(L"utx_obj_title_logo_umamusume") != wstring::npos;
-				}) != replaceAssetNames.end())
+				}) != config::runtime::replaceAssetNames.end())
 			{
 				auto gameObj = reinterpret_cast<decltype(resources_load_hook)*>(resources_load_orig)(path, type);
 				auto getComponent = il2cpp_class_get_method_from_name_type<Il2CppObject * (*)(Il2CppObject*, Il2CppType*)>(gameObj->klass, "GetComponent", 1)->methodPointer;
@@ -10112,14 +9929,14 @@ namespace
 				il2cpp_field_get_value(component, imgField, &imgCommon);
 				auto texture = GetReplacementAssets(
 					il2cpp_string_new("utx_obj_title_logo_umamusume.png"),
-					reinterpret_cast<Il2CppType*>(GetRuntimeType("UnityEngine.CoreModule.dll", "UnityEngine", "Texture2D")));
+					GetRuntimeType("UnityEngine.CoreModule.dll", "UnityEngine", "Texture2D"));
 				auto m_TextureField = il2cpp_class_get_field_from_name_wrap(imgCommon->klass->parent, "m_Texture");
 				il2cpp_field_set_value(imgCommon, m_TextureField, texture);
 				return gameObj;
 			}
 		}
 
-		if (wName == L"TMP Settings"s && config::replace_to_custom_font && fontAssets)
+		if (wName == L"TMP Settings"s && config::replace_to_custom_font && config::runtime::fontAssets)
 		{
 			auto object = reinterpret_cast<decltype(resources_load_hook)*>(resources_load_orig)(path, type);
 			auto fontAssetField = il2cpp_class_get_field_from_name_wrap(object->klass, "m_defaultFontAsset");
@@ -10261,7 +10078,7 @@ namespace
 		{
 			auto newTexture = GetReplacementAssets(
 				uobject_name,
-				(Il2CppType*)GetRuntimeType("UnityEngine.CoreModule.dll", "UnityEngine", "Texture2D"));
+				GetRuntimeType("UnityEngine.CoreModule.dll", "UnityEngine", "Texture2D"));
 			if (newTexture)
 			{
 				il2cpp_symbols::get_method_pointer<void (*)(Il2CppObject*, int)>("UnityEngine.CoreModule.dll", "UnityEngine", "Object", "set_hideFlags", 1)
@@ -10356,7 +10173,7 @@ namespace
 			{
 				auto newTexture = GetReplacementAssets(
 					UnityEngine::Object::Name(texture),
-					(Il2CppType*)GetRuntimeType("UnityEngine.CoreModule.dll", "UnityEngine", "Texture2D"));
+					GetRuntimeType("UnityEngine.CoreModule.dll", "UnityEngine", "Texture2D"));
 				if (newTexture)
 				{
 					il2cpp_symbols::get_method_pointer<void (*)(Il2CppObject*, int)>("UnityEngine.CoreModule.dll", "UnityEngine", "Object", "set_hideFlags", 1)
@@ -10380,7 +10197,7 @@ namespace
 			{
 				auto newTexture = GetReplacementAssets(
 					uobject_name,
-					(Il2CppType*)GetRuntimeType("UnityEngine.CoreModule.dll", "UnityEngine", "Texture2D"));
+					GetRuntimeType("UnityEngine.CoreModule.dll", "UnityEngine", "Texture2D"));
 				if (newTexture)
 				{
 					il2cpp_symbols::get_method_pointer<void (*)(Il2CppObject*, int)>("UnityEngine.CoreModule.dll", "UnityEngine", "Object", "set_hideFlags", 1)
@@ -10399,7 +10216,7 @@ namespace
 		{
 			auto newTexture = GetReplacementAssets(
 				UnityEngine::Object::Name(texture),
-				(Il2CppType*)GetRuntimeType("UnityEngine.CoreModule.dll", "UnityEngine", "Texture2D"));
+				GetRuntimeType("UnityEngine.CoreModule.dll", "UnityEngine", "Texture2D"));
 			if (newTexture)
 			{
 				il2cpp_symbols::get_method_pointer<void (*)(Il2CppObject*, int)>("UnityEngine.CoreModule.dll", "UnityEngine", "Object", "set_hideFlags", 1)
@@ -10419,7 +10236,7 @@ namespace
 		{
 			auto newTexture = GetReplacementAssets(
 				UnityEngine::Object::Name(texture),
-				(Il2CppType*)GetRuntimeType("UnityEngine.CoreModule.dll", "UnityEngine", "Texture2D"));
+				GetRuntimeType("UnityEngine.CoreModule.dll", "UnityEngine", "Texture2D"));
 			if (newTexture)
 			{
 				il2cpp_symbols::get_method_pointer<void (*)(Il2CppObject*, int)>("UnityEngine.CoreModule.dll", "UnityEngine", "Object", "set_hideFlags", 1)
@@ -10437,7 +10254,7 @@ namespace
 		{
 			auto newTexture = GetReplacementAssets(
 				UnityEngine::Object::Name(texture),
-				(Il2CppType*)GetRuntimeType("UnityEngine.CoreModule.dll", "UnityEngine", "Texture2D"));
+				GetRuntimeType("UnityEngine.CoreModule.dll", "UnityEngine", "Texture2D"));
 			if (newTexture)
 			{
 				il2cpp_symbols::get_method_pointer<void (*)(Il2CppObject*, int)>("UnityEngine.CoreModule.dll", "UnityEngine", "Object", "set_hideFlags", 1)
@@ -10456,7 +10273,7 @@ namespace
 		{
 			auto newTexture = GetReplacementAssets(
 				UnityEngine::Object::Name(texture),
-				(Il2CppType*)GetRuntimeType("UnityEngine.CoreModule.dll", "UnityEngine", "Texture2D"));
+				GetRuntimeType("UnityEngine.CoreModule.dll", "UnityEngine", "Texture2D"));
 			if (newTexture)
 			{
 				il2cpp_symbols::get_method_pointer<void (*)(Il2CppObject*, int)>("UnityEngine.CoreModule.dll", "UnityEngine", "Object", "set_hideFlags", 1)
@@ -12633,18 +12450,6 @@ namespace
 	}
 #pragma endregion
 #pragma region HOOK_ADDRESSES
-		load_asset = il2cpp_symbols::get_method_pointer<Il2CppObject * (*)(Il2CppObject * _this, Il2CppString * name, Il2CppObject * runtimeType)>(
-			"UnityEngine.AssetBundleModule.dll", "UnityEngine",
-			"AssetBundle", "LoadAsset", 2);
-
-		get_all_asset_names = il2cpp_symbols::get_method_pointer<Il2CppArraySize_t<Il2CppString*> *(*)(Il2CppObject * _this)>(
-			"UnityEngine.AssetBundleModule.dll", "UnityEngine",
-			"AssetBundle", "GetAllAssetNames", 0);
-
-		uobject_IsNativeObjectAlive = il2cpp_symbols::get_method_pointer<bool (*)(Il2CppObject * uObject)>(
-			"UnityEngine.CoreModule.dll", "UnityEngine",
-			"Object", "IsNativeObjectAlive", 1);
-
 		auto populate_with_errors_addr = il2cpp_symbols::get_method_pointer(
 			"UnityEngine.TextRenderingModule.dll",
 			"UnityEngine", "TextGenerator",
@@ -12934,17 +12739,9 @@ namespace
 		auto PartsEpisodeList_SetupStoryExtraEpisodeList_addr = il2cpp_symbols::get_method_pointer(
 			"umamusume.dll", "Gallop", "PartsEpisodeList", "SetupStoryExtraEpisodeList", 4);
 
-		load_from_file = il2cpp_symbols::get_method_pointer<Il2CppObject * (*)(Il2CppString * path)>(
-			"UnityEngine.AssetBundleModule.dll", "UnityEngine", "AssetBundle",
-			"LoadFromFile", 1);
-
 		auto PathResolver_GetLocalPath_addr = il2cpp_symbols::get_method_pointer(
 			"_Cyan.dll", "Cyan.LocalFile", "PathResolver",
 			"GetLocalPath", 2);
-
-		Shader_PropertyToID = il2cpp_symbols::get_method_pointer<int (*)(Il2CppString*)>("UnityEngine.CoreModule.dll", "UnityEngine", "Shader", "PropertyToID", 1);
-
-		Material_HasProperty = il2cpp_symbols::get_method_pointer<bool (*)(Il2CppObject*, int)>("UnityEngine.CoreModule.dll", "UnityEngine", "Material", "HasProperty", 1);
 
 		auto FrameRateController_OverrideByNormalFrameRate_addr = il2cpp_symbols::get_method_pointer("umamusume.dll", "Gallop", "FrameRateController", "OverrideByNormalFrameRate", 1);
 
@@ -13270,7 +13067,7 @@ namespace
 
 		/*if (notification)
 		{
-			if (uobject_IsNativeObjectAlive(notification))
+			if (UnityEngine::Object::IsNativeObjectAlive(notification))
 			{
 				il2cpp_symbols::get_method_pointer<void (*)(Il2CppObject*)>("UnityEngine.CoreModule.dll", "UnityEngine", "Object", "Destroy", 1)(notification);
 			}
@@ -13365,15 +13162,7 @@ namespace
 		auto MovieManager_SetScreenSize_addr = il2cpp_symbols::get_method_pointer(
 			"Cute.Cri.Assembly.dll", "Cute.Cri", "MovieManager", "SetScreenSize", 2);
 
-		auto assetbundle_LoadFromFile_addr = il2cpp_resolve_icall("UnityEngine.AssetBundle::LoadFromFile_Internal(System.String,System.UInt32,System.UInt64)");
-
 		auto AssetBundleRequest_GetResult_addr = il2cpp_resolve_icall("UnityEngine.AssetBundleRequest::GetResult()");
-
-		auto assetbundle_load_asset_addr = il2cpp_resolve_icall("UnityEngine.AssetBundle::LoadAsset_Internal(System.String,System.Type)");
-
-		auto assetbundle_load_asset_async_addr = il2cpp_resolve_icall("UnityEngine.AssetBundle::LoadAssetAsync_Internal(System.String,System.Type)");
-
-		auto assetbundle_unload_addr = il2cpp_symbols::get_method_pointer("UnityEngine.AssetBundleModule.dll", "UnityEngine", "AssetBundle", "Unload", 1);
 
 		auto resources_load_addr = il2cpp_resolve_icall("UnityEngine.ResourcesAPIInternal::Load()");
 
@@ -13405,114 +13194,16 @@ namespace
 
 		auto GameObject_GetComponentFastPath_addr = il2cpp_resolve_icall("UnityEngine.GameObject::GetComponentFastPath(System.Type,System.IntPtr)");
 
-#pragma region LOAD_ASSETBUNDLE
-		if (!fontAssets && !config::font_assetbundle_path.empty() && config::replace_to_custom_font)
-		{
-			wstring assetbundlePath = config::font_assetbundle_path;
-			if (PathIsRelativeW(assetbundlePath.data()))
-			{
-				assetbundlePath.insert(0, filesystem::current_path().wstring().append(L"/"));
-			}
-
-			wcout << L"Loading font asset: " << assetbundlePath << L"... ";
-
-			DesktopNotificationManagerCompat::ShowToastNotification(L"Loading font AssetBundle", assetbundlePath.data(), nullptr, true);
-
-			fontAssets = load_from_file(il2cpp_string_new_utf16(assetbundlePath.data(), assetbundlePath.length()));
-
-			if (!fontAssets && filesystem::exists(assetbundlePath))
-			{
-				wcout << L"Asset founded but not loaded. Maybe Asset BuildTarget is not for Windows" << endl;
-			}
-
-			wcout << L"OK: " << fontAssets << endl;
-		}
-
-		if (!config::replace_assetbundle_file_path.empty())
-		{
-			wstring assetbundlePath = config::replace_assetbundle_file_path;
-			if (PathIsRelativeW(assetbundlePath.data()))
-			{
-				assetbundlePath.insert(0, filesystem::current_path().wstring().append(L"/"));
-			}
-
-			wcout << L"Loading replacement AssetBundle: " << assetbundlePath << L"... ";
-
-			DesktopNotificationManagerCompat::ShowToastNotification(L"Loading replacement AssetBundle", assetbundlePath.data(), nullptr, true);
-
-			auto assets = load_from_file(il2cpp_string_new_utf16(assetbundlePath.data(), assetbundlePath.length()));
-
-			if (!assets && filesystem::exists(assetbundlePath))
-			{
-				wcout << L"Replacement AssetBundle founded but not loaded. Maybe Asset BuildTarget is not for Windows" << endl;
-			}
-			else
-			{
-				wcout << L"OK: " << assets << endl;
-				replaceAssets.emplace_back(assets);
-			}
-		}
-
-		if (!config::replace_assetbundle_file_paths.empty())
-		{
-			for (auto it = config::replace_assetbundle_file_paths.begin(); it != config::replace_assetbundle_file_paths.end(); it++)
-			{
-				wstring assetbundlePath = *it;
-				if (PathIsRelativeW(assetbundlePath.data()))
-				{
-					assetbundlePath.insert(0, filesystem::current_path().wstring().append(L"/"));
-				}
-
-				wcout << L"Loading replacement AssetBundle: " << assetbundlePath << L"... ";
-
-				DesktopNotificationManagerCompat::ShowToastNotification(L"Loading replacement AssetBundle", assetbundlePath.data(), nullptr, true);
-
-				auto assets = load_from_file(il2cpp_string_new_utf16(assetbundlePath.data(), assetbundlePath.length()));
-
-				if (!assets && filesystem::exists(assetbundlePath))
-				{
-					wcout << L"Replacement AssetBundle founded but not loaded. Maybe Asset BuildTarget is not for Windows" << endl;
-				}
-				else if (assets)
-				{
-					wcout << L"OK: " << assets << endl;
-					replaceAssets.emplace_back(assets);
-				}
-			}
-		}
-
 		history->Clear();
-
-		if (!replaceAssets.empty())
-		{
-			for (auto it = replaceAssets.begin(); it != replaceAssets.end(); it++)
-			{
-				auto names = get_all_asset_names(*it);
-				for (int i = 0; i < names->max_length; i++)
-				{
-					replaceAssetNames.emplace_back(names->vector[i]->chars);
-				}
-			}
-		}
-#pragma endregion
-
-		ADD_HOOK(assetbundle_LoadFromFile, "UnityEngine.AssetBundle::LoadFromFile at %p\n");
-
-		ADD_HOOK(assetbundle_unload, "UnityEngine.AssetBundle::Unload at %p\n");
 
 		ADD_HOOK(resources_load, "UnityEngine.Resources::Load at %p\n");
 
-		if (!replaceAssets.empty())
+		if (!config::runtime::replaceAssets.empty())
 		{
+
 			ADD_HOOK(AssetBundleRequest_GetResult, "UnityEngine.AssetBundleRequest::GetResult at %p\n");
 
-			ADD_HOOK(assetbundle_load_asset, "UnityEngine.AssetBundle::LoadAsset at %p\n");
-
-			ADD_HOOK(assetbundle_load_asset_async, "UnityEngine.AssetBundle::LoadAssetAsync at %p\n");
-
 			ADD_HOOK(GameObject_GetComponent, "UnityEngine.GameObject::GetComponent at %p\n");
-
-			// ADD_HOOK(GameObject_GetComponentFastPath, "UnityEngine.GameObject::GetComponentFastPath at %p\n");
 
 			ADD_HOOK(Sprite_get_texture, "UnityEngine.Sprite::get_texture at %p\n");
 

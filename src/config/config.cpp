@@ -95,6 +95,9 @@ namespace config
 		float ratioVertical = 0.5625f;
 		float ratioHorizontal = 1.7777778f;
 		bool allowStart = true;
+		Il2CppObject* fontAssets = nullptr;
+		vector<Il2CppObject*> replaceAssets;
+		vector<wstring> replaceAssetNames;
 	}
 
 	void read_config_init()

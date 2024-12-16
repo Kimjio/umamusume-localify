@@ -18,6 +18,7 @@ void* GetName_addr = nullptr;
 
 void* SetName_addr = nullptr;
 
+void* IsNativeObjectAlive_addr = nullptr;
 
 static void InitAddress()
 {
@@ -28,6 +29,7 @@ static void InitAddress()
 	DontDestroyOnLoad_addr = il2cpp_resolve_icall("UnityEngine.Object::DontDestroyOnLoad()");
 	GetName_addr = il2cpp_resolve_icall("UnityEngine.Object::GetName()");
 	SetName_addr = il2cpp_resolve_icall("UnityEngine.Object::SetName()");
+	IsNativeObjectAlive_addr = il2cpp_symbols::get_method_pointer(ASSEMBLY_NAME, "UnityEngine", "Object", "IsNativeObjectAlive", 1);
 }
 
 STATIC
@@ -70,5 +72,10 @@ namespace UnityEngine
 	void Object::Name(Il2CppObject* obj, Il2CppString* name)
 	{
 		reinterpret_cast<void (*)(Il2CppObject*, Il2CppString*)>(SetName_addr)(obj, name);
+	}
+
+	bool Object::IsNativeObjectAlive(Il2CppObject* obj)
+	{
+		return reinterpret_cast<decltype(IsNativeObjectAlive)*>(IsNativeObjectAlive_addr)(obj);
 	}
 }

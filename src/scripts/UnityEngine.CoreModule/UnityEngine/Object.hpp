@@ -25,6 +25,7 @@ namespace UnityEngine
 		static void DontDestroyOnLoad(Il2CppObject* obj);
 		static Il2CppString* Name(Il2CppObject* obj);
 		static void Name(Il2CppObject* obj, Il2CppString* name);
+		static bool IsNativeObjectAlive(Il2CppObject* obj);
 
 		Il2CppObject* NativeObject() const noexcept
 		{

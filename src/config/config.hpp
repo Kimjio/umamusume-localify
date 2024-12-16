@@ -127,6 +127,9 @@ namespace config
 		extern float ratioVertical;
 		extern float ratioHorizontal;
 		extern bool allowStart;
+		extern Il2CppObject* fontAssets;
+		extern vector<Il2CppObject*> replaceAssets;
+		extern vector<wstring> replaceAssetNames;
 	}
 
 	void read_config_init();
