@@ -163,7 +163,7 @@ static void LoadAssets()
 
 static Il2CppObject* StartCoroutineManaged2_hook(Il2CppObject* self, Il2CppObject* enumerator)
 {
-	if (string(enumerator->klass->name).find("BootCoroutine") != string::npos)
+	if (!BootSystem && string(enumerator->klass->name).find("BootCoroutine") != string::npos)
 	{
 		BootSystem = self;
 		auto _bgCanvasObjectField = il2cpp_class_get_field_from_name_wrap(self->klass, "_bgCanvasObject");

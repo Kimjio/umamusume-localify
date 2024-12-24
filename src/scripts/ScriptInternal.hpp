@@ -44,6 +44,15 @@ inline Il2CppClass* GetGenericClass(Il2CppObject* baseRuntimeType, Ts... runtime
 }
 
 template<typename... Ts, typename = Il2CppObject*>
+inline Il2CppClass* GetArrayClass(Il2CppObject* runtimeType)
+{
+	auto arrayRuntimeType = il2cpp_class_get_method_from_name_type<Il2CppReflectionRuntimeType * (*)(Il2CppObject*)>(runtimeType->klass, "MakeArrayType", 0)->methodPointer(runtimeType);
+	auto newType = arrayRuntimeType->type.type;
+
+	return il2cpp_class_from_type(newType);
+}
+
+template<typename... Ts, typename = Il2CppObject*>
 inline const MethodInfo* GetGenericMethod(const MethodInfo* baseMethodInfo, Ts... runtimeTypes)
 {
 	auto runtimeMethodInfo = il2cpp_method_get_object(baseMethodInfo, nullptr);

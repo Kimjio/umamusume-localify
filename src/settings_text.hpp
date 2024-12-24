@@ -233,6 +233,11 @@ namespace LocalifySettings
 			return isKor ? L"</i></color> 를 체크해주세요." : L"</i></color>をチェックしてください。";
 		}
 
+		if (id == "title")
+		{
+			return isKor ? L"우마무스메" : L"ウマ娘";
+		}
+
 		return L"";
 	}
 }

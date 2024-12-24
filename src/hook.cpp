@@ -10439,83 +10439,6 @@ namespace
 		return il2cpp_class_get_method_from_name_type<Il2CppObject * (*)(Il2CppObject*)>(arrayList->klass, "GetEnumerator", 0)->methodPointer(arrayList);
 	}
 
-	Il2CppObject* UIManager_WaitBootSetup_hook(Il2CppObject* _this);
-
-	void* BootSystem_Awake_orig = nullptr;
-
-	void BootSystem_Awake_hook(Il2CppObject* _this)
-	{
-		// UnityEngine::Resolution r;
-		// get_resolution_stub(&r);
-		// last_display_width = r.width;
-		// last_display_height = r.height;
-
-		il2cpp_symbols::get_method_pointer<Il2CppObject* (*)()>("Cute.Core.Assembly.dll", "Cute.Core", "Perf/Time", "get_Instance", IgnoreNumberOfArguments)();
-
-		auto StartCoroutine = il2cpp_symbols::find_method<Il2CppObject * (*)(Il2CppObject*, Il2CppObject*)>("UnityEngine.CoreModule.dll", "UnityEngine", "MonoBehaviour", [](const MethodInfo* method)
-			{
-				return method->name == "StartCoroutine"s && method->parameters[0].parameter_type->type == IL2CPP_TYPE_CLASS;
-			});
-
-		StartCoroutine(_this, il2cpp_class_get_method_from_name_type<Il2CppObject * (*)(Il2CppObject*)>(_this->klass, "BootCoroutine", 0)->methodPointer(_this));
-
-		/*auto uiManager = Gallop::UIManager::Instance();
-
-		auto defaultResolution = il2cpp_class_get_method_from_name_type<UnityEngine::Vector2(*)()>(uiManager, "get_DefaultResolution", 0)->methodPointer();
-
-		auto canvasScalerList = il2cpp_class_get_method_from_name_type<Il2CppArraySize_t<Il2CppObject*> *(*)(Il2CppObject*)>(uiManager, "GetCanvasScalerList", 0)->methodPointer(uiManager);
-		for (int i = 0; i < canvasScalerList->max_length; i++)
-		{
-			auto canvasScaler = canvasScalerList->vector[i];
-			if (canvasScaler)
-			{
-				il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, UnityEngine::Vector2)>(canvasScaler->klass, "set_referenceResolution", 1)->methodPointer(canvasScaler, defaultResolution);
-
-				if (defaultResolution.x < defaultResolution.y)
-				{
-					float scale = min(1, max(1.0f, defaultResolution.y / 1080) * config::freeform_ui_scale_portrait / (defaultResolution.y / 1080));
-					il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, float)>(canvasScaler->klass, "set_scaleFactor", 1)->methodPointer(canvasScaler, scale);
-				}
-				else
-				{
-					float scale = min(1, max(1.0f, defaultResolution.x / 1920) * config::freeform_ui_scale_landscape / (defaultResolution.x / 1920));
-					il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, float)>(canvasScaler->klass, "set_scaleFactor", 1)->methodPointer(canvasScaler, scale);
-				}
-			}
-		}
-
-		auto _bgCameraField = il2cpp_class_get_field_from_name_wrap(uiManager, "_bgCamera");
-		Il2CppObject* _bgCamera;
-		il2cpp_field_get_value(uiManager, _bgCameraField, &_bgCamera);
-
-		il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, Color_t)>(_bgCamera->klass, "set_backgroundColor", 1)->methodPointer(_bgCamera,
-			il2cpp_symbols::get_method_pointer<Color_t(*)()>("UnityEngine.CoreModule.dll", "UnityEngine", "Color", "get_clear", IgnoreNumberOfArguments)());
-
-		il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*)>(_this->klass, "AdjustSafeArea", 0)->methodPointer(_this);
-		il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*)>(_this->klass, "CreateRenderTextureFromScreen", 0)->methodPointer(_this);*/
-
-		if (!config::freeform_window)
-		{
-			auto StandaloneWindowResize = il2cpp_symbols::get_class("umamusume.dll", "Gallop", "StandaloneWindowResize");
-
-			int width = UnityEngine::Screen::width();
-			int height = UnityEngine::Screen::height();
-
-			bool isLandscape = width > height;
-
-			auto changedSize = il2cpp_class_get_method_from_name_type<UnityEngine::Vector2(*)(float, float, bool)>(StandaloneWindowResize, "GetChangedSize", 3)->methodPointer(isLandscape ? height : width, isLandscape ? width : height, true);
-
-			if (il2cpp_class_get_method_from_name_type<bool (*)(float, float)>(StandaloneWindowResize, "CheckOverScreenSize", 2)->methodPointer(changedSize.x, changedSize.y))
-			{
-				il2cpp_class_get_method_from_name_type<void (*)(bool)>(StandaloneWindowResize, "set_IsPreventReShape", 1)->methodPointer(false);
-				il2cpp_class_get_method_from_name_type<void (*)(float, float)>(StandaloneWindowResize, "KeepAspectRatio", 2)->methodPointer(changedSize.x, changedSize.y);
-				il2cpp_class_get_method_from_name_type<void (*)(bool)>(StandaloneWindowResize, "set_IsPreventReShape", 1)->methodPointer(true);
-				return;
-			}
-			il2cpp_symbols::get_method_pointer<void (*)(int, int, bool, bool)>("umamusume.dll", "Gallop", "Screen", "SetResolution", 4)(changedSize.x, changedSize.y, false, false);
-		}
-	}
-
 	void* SplashViewController_KakaoStart_orig;
 	void SplashViewController_KakaoStart_hook(Il2CppObject* _this)
 	{
@@ -10769,8 +10692,8 @@ namespace
 											il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*)>(controller->klass, "UpdateCurrentTabView", 0)->methodPointer(controller);
 										};
 
-									il2cpp_symbols::get_method_pointer<void (*)(int64_t, Il2CppDelegate*, Il2CppDelegate*, Il2CppDelegate*, Il2CppDelegate*, Il2CppObject*, bool, Il2CppDelegate*, bool)>("umamusume.dll", "Gallop", "DialogTrainerInfo", "PushDialog", 9)
-										(stoll(searchId), CreateDelegateStatic(onModifyFriendCloseFn), nullptr, nullptr, nullptr, nullptr, false, nullptr, false);
+									il2cpp_symbols::get_method_pointer<void (*)(int64_t, Il2CppDelegate*, Il2CppDelegate*, Il2CppDelegate*, Il2CppDelegate*, Il2CppObject*, bool, Il2CppDelegate*, bool, Il2CppDelegate*)>("umamusume.dll", "Gallop", "DialogTrainerInfo", "PushDialog", 10)
+										(stoll(searchId), CreateDelegateStatic(onModifyFriendCloseFn), nullptr, nullptr, nullptr, nullptr, false, nullptr, false, nullptr);
 								};
 							il2cpp_symbols::get_method_pointer<void (*)(Il2CppDelegate*)>("umamusume.dll", "Gallop", "DialogIDSearch", "PushDialog", 1)(CreateDelegateStatic(fn));
 
@@ -11236,54 +11159,6 @@ namespace
 		il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*)>(_this->klass, "OnClickPlusButton",
 			0)->methodPointer
 			(_this);
-	}
-
-	void* UIManager_WaitBootSetup_orig = nullptr;
-
-	Il2CppObject* UIManager_WaitBootSetup_hook(Il2CppObject* _this)
-	{
-		auto enumerator = reinterpret_cast<decltype(UIManager_WaitBootSetup_hook)*>(UIManager_WaitBootSetup_orig)(_this);
-
-		auto move_next = il2cpp_class_get_method_from_name_type<bool (*)(
-			Il2CppObject * _this)>(enumerator->klass,
-				"MoveNext",
-				0)->methodPointer;
-		while (move_next(enumerator)) {}
-
-		auto defaultResolution = Gallop::UIManager::DefaultResolution();
-
-		auto canvasScalerList = il2cpp_class_get_method_from_name_type<Il2CppArraySize_t<Il2CppObject*> *(*)(Il2CppObject*)>(_this->klass, "GetCanvasScalerList", 0)->methodPointer(_this);
-		for (int i = 0; i < canvasScalerList->max_length; i++)
-		{
-			auto canvasScaler = canvasScalerList->vector[i];
-			if (canvasScaler)
-			{
-				il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, UnityEngine::Vector2)>(canvasScaler->klass, "set_referenceResolution", 1)->methodPointer(canvasScaler, defaultResolution);
-
-				if (defaultResolution.x < defaultResolution.y)
-				{
-					float scale = min(1.0f, max(1.0f, defaultResolution.y / 1080) * config::freeform_ui_scale_portrait / (defaultResolution.y / 1080));
-					il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, float)>(canvasScaler->klass, "set_scaleFactor", 1)->methodPointer(canvasScaler, scale);
-				}
-				else
-				{
-					float scale = min(1.0f, max(1.0f, defaultResolution.x / 1920) * config::freeform_ui_scale_landscape / (defaultResolution.x / 1920));
-					il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, float)>(canvasScaler->klass, "set_scaleFactor", 1)->methodPointer(canvasScaler, scale);
-				}
-			}
-		}
-
-		auto _bgCameraField = il2cpp_class_get_field_from_name_wrap(_this->klass, "_bgCamera");
-		Il2CppObject* _bgCamera;
-		il2cpp_field_get_value(_this, _bgCameraField, &_bgCamera);
-
-		il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, UnityEngine::Color)>(_bgCamera->klass, "set_backgroundColor", 1)->methodPointer(_bgCamera,
-			il2cpp_symbols::get_method_pointer<UnityEngine::Color(*)()>("UnityEngine.CoreModule.dll", "UnityEngine", "Color", "get_clear", IgnoreNumberOfArguments)());
-
-		il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*)>(_this->klass, "AdjustSafeArea", 0)->methodPointer(_this);
-		il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*)>(_this->klass, "CreateRenderTextureFromScreen", 0)->methodPointer(_this);
-
-		return enumerator;
 	}
 
 	void* Input_get_mousePosition_Injected_orig = nullptr;
@@ -12078,197 +11953,68 @@ namespace
 
 	void TickFrame()
 	{
-		if (Game::CurrentGameRegion == Game::Region::KOR)
+		try
 		{
-			if (config::cyspring_update_mode != -1)
+			if (Game::CurrentGameRegion == Game::Region::KOR)
 			{
-				auto threadClass = il2cpp_symbols::get_class("umamusume.dll", "Gallop", "CySpringController/CySpringThread");
-
-				auto instanceField = il2cpp_class_get_field_from_name_wrap(threadClass, "_instance");
-
-				if (instanceField)
+				if (config::cyspring_update_mode != -1)
 				{
-					Il2CppObject* instance;
-					il2cpp_field_static_get_value(instanceField, &instance);
+					auto threadClass = il2cpp_symbols::get_class("umamusume.dll", "Gallop", "CySpringController/CySpringThread");
 
-					if (instance)
+					auto instanceField = il2cpp_class_get_field_from_name_wrap(threadClass, "_instance");
+
+					if (instanceField)
 					{
-						auto _taskQueueArrayField = il2cpp_class_get_field_from_name_wrap(instance->klass, "_taskQueueArray");
-						Il2CppArraySize* _taskQueueArray;
+						Il2CppObject* instance;
+						il2cpp_field_static_get_value(instanceField, &instance);
 
-						il2cpp_field_get_value(instance, _taskQueueArrayField, &_taskQueueArray);
-
-						for (int i = 0; i < _taskQueueArray->max_length; i++)
+						if (instance)
 						{
-							auto item = reinterpret_cast<Il2CppObject*>(_taskQueueArray->vector[i]);
-							if (item)
+							auto _taskQueueArrayField = il2cpp_class_get_field_from_name_wrap(instance->klass, "_taskQueueArray");
+							Il2CppArraySize* _taskQueueArray;
+
+							il2cpp_field_get_value(instance, _taskQueueArrayField, &_taskQueueArray);
+
+							for (int i = 0; i < _taskQueueArray->max_length; i++)
 							{
-								il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, int)>(item->klass, "set_UpdateMode", 1)->methodPointer(item, config::cyspring_update_mode);
+								auto item = reinterpret_cast<Il2CppObject*>(_taskQueueArray->vector[i]);
+								if (item)
+								{
+									il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, int)>(item->klass, "set_UpdateMode", 1)->methodPointer(item, config::cyspring_update_mode);
+								}
 							}
 						}
 					}
 				}
 			}
-		}
 
-		if (config::unlock_size || config::freeform_window)
-		{
-			SetBGCanvasScalerSize();
-		}
-
-		if (config::freeform_window)
-		{
-			ResizeMoviePlayer();
-		}
-
-		if (Game::CurrentGameRegion == Game::Region::KOR)
-		{
-			UpdateVoiceButton();
-		}
-
-		if (config::discord_rich_presence)
-		{
-			TickDiscord();
-		}
-
-		auto active = il2cpp_symbols::get_method_pointer<UnityEngine::SceneManagement::Scene(*)()>("UnityEngine.CoreModule.dll", "UnityEngine.SceneManagement", "SceneManager", "GetActiveScene", IgnoreNumberOfArguments)();
-
-		auto handleName = il2cpp_symbols::get_method_pointer<Il2CppString * (*)(int)>("UnityEngine.CoreModule.dll", "UnityEngine.SceneManagement", "Scene", "GetNameInternal", 1)(active.handle);
-
-		if (handleName)
-		{
-			wstring sceneName = handleName->chars;
-
-			if (sceneName == L"Live")
+			if (config::unlock_size || config::freeform_window)
 			{
-				auto controller = GetCurrentViewController();
-
-				if (controller && controller->klass->name == "LiveViewController"s)
-				{
-					auto director = GetSingletonInstance(il2cpp_symbols::get_class("umamusume.dll", "Gallop.Live", "Director"));
-					if (director)
-					{
-						auto LiveCurrentTime = il2cpp_class_get_method_from_name_type<float (*)(Il2CppObject*)>(director->klass, "get_LiveCurrentTime", 0)->methodPointer(director);
-						auto LiveTotalTime = il2cpp_class_get_method_from_name_type<float (*)(Il2CppObject*)>(director->klass, "get_LiveTotalTime", 0)->methodPointer(director);
-
-						auto sliderCommon = GetOptionSlider("live_slider");
-
-						auto textCommon = GetTextCommon("live_slider");
-
-						if (textCommon)
-						{
-							auto timeMin = static_cast<int>(LiveCurrentTime / 60);
-							auto timeSec = static_cast<int>(fmodf(LiveCurrentTime, 60));
-
-							wstringstream str;
-							str << setw(2) << setfill(L'0') << timeSec;
-
-							SetTextCommonText(textCommon, (to_wstring(timeMin) + L":" + str.str()).data());
-						}
-
-						auto textCommonTotal = GetTextCommon("live_slider_total");
-
-						if (textCommonTotal)
-						{
-							auto timeMin = static_cast<int>(LiveTotalTime / 60);
-							auto timeSec = static_cast<int>(fmodf(LiveTotalTime, 60));
-
-							wstringstream str;
-							str << setw(2) << setfill(L'0') << timeSec;
-
-							SetTextCommonText(textCommonTotal, (to_wstring(timeMin) + L":" + str.str()).data());
-						}
-
-						if (config::live_playback_loop)
-						{
-							if (LiveCurrentTime >= LiveTotalTime - 0.1f)
-							{
-								LiveCurrentTime = 0;
-								MoveLivePlayback(LiveCurrentTime);
-							}
-						}
-
-						try
-						{
-							if (sliderCommon)
-							{
-								il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, float)>(sliderCommon->klass, "set_maxValue", 1)->methodPointer(sliderCommon, LiveTotalTime);
-								il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, float)>(sliderCommon->klass, "SetValueWithoutNotify", 1)->methodPointer(sliderCommon, LiveCurrentTime);
-							}
-						}
-						catch (const Il2CppExceptionWrapper& e)
-						{
-							cout << e.ex->klass->name << ": ";
-							wcout << e.ex->message << endl;
-						}
-					}
-				}
+				SetBGCanvasScalerSize();
 			}
 
-			if (SystemMediaTransportControlsManager::instance.IsEnabled())
+			if (config::freeform_window)
 			{
-				if (sceneName == L"Home")
-				{
-					bool hasSetList = false;
+				ResizeMoviePlayer();
+			}
 
-					auto hubViewController = GetCurrentHubViewChildController();
+			if (Game::CurrentGameRegion == Game::Region::KOR)
+			{
+				UpdateVoiceButton();
+			}
 
-					if (hubViewController && hubViewController->klass->name == "HomeViewController"s)
-					{
-						auto topUi = il2cpp_class_get_method_from_name_type<Il2CppObject * (*)(Il2CppObject*, int)>(hubViewController->klass, "GetTopUI", 1)->methodPointer(hubViewController, 10);
-						if (topUi)
-						{
-							auto data = il2cpp_class_get_method_from_name_type<Il2CppObject * (*)(Il2CppObject*)>(topUi->klass, "get_TempSetListPlayingData", 0)->methodPointer(topUi);
+			if (config::discord_rich_presence)
+			{
+				TickDiscord();
+			}
 
-							auto IsPlayingField = il2cpp_class_get_field_from_name_wrap(data->klass, "IsPlaying");
-							bool IsPlaying;
-							il2cpp_field_get_value(data, IsPlayingField, &IsPlaying);
+			auto active = il2cpp_symbols::get_method_pointer<UnityEngine::SceneManagement::Scene(*)()>("UnityEngine.CoreModule.dll", "UnityEngine.SceneManagement", "SceneManager", "GetActiveScene", IgnoreNumberOfArguments)();
 
-							hasSetList = IsPlaying;
+			auto handleName = il2cpp_symbols::get_method_pointer<Il2CppString * (*)(int)>("UnityEngine.CoreModule.dll", "UnityEngine.SceneManagement", "Scene", "GetNameInternal", 1)(active.handle);
 
-							if (IsPlaying)
-							{
-								SystemMediaTransportControlsManager::instance.PlaybackStatus(winrt::Windows::Media::MediaPlaybackStatus::Playing);
-
-								auto SetListIndexField = il2cpp_class_get_field_from_name_wrap(data->klass, "SetListIndex");
-								int SetListIndex;
-								il2cpp_field_get_value(data, SetListIndexField, &SetListIndex);
-
-								int MusicListCount = il2cpp_class_get_method_from_name_type<int (*)(Il2CppObject*)>(data->klass, "GetMusicListCount", 0)->methodPointer(data);
-
-								SystemMediaTransportControlsManager::instance.IsPreviousEnabled(SetListIndex > 0);
-								SystemMediaTransportControlsManager::instance.IsNextEnabled(SetListIndex < MusicListCount - 1);
-
-								auto musicData = il2cpp_class_get_method_from_name_type<Il2CppObject * (*)(Il2CppObject*)>(data->klass, "GetMasterSetListMusicData", 0)->methodPointer(data);
-
-								auto MusicIdField = il2cpp_class_get_field_from_name_wrap(musicData->klass, "MusicId");
-								int MusicId;
-								il2cpp_field_get_value(musicData, MusicIdField, &MusicId);
-
-								SystemMediaTransportControlsManager::UpdateMetadata(MusicId);
-							}
-						}
-					}
-
-					if (!hasSetList)
-					{
-						auto workDataManager = GetSingletonInstance(il2cpp_symbols::get_class("umamusume.dll", "Gallop", "WorkDataManager"));
-
-						auto workJukeboxData = il2cpp_class_get_method_from_name_type<Il2CppObject * (*)(Il2CppObject*)>(workDataManager->klass, "get_JukeboxData", 0)->methodPointer(workDataManager);
-						auto currentBgmMusicId = il2cpp_class_get_method_from_name_type<int (*)(Il2CppObject*)>(workJukeboxData->klass, "GetCurrentBgmMusicId", 0)->methodPointer(workJukeboxData);
-
-						SystemMediaTransportControlsManager::UpdateMetadata(currentBgmMusicId);
-
-						if (currentBgmMusicId)
-						{
-							SystemMediaTransportControlsManager::instance.PlaybackStatus(winrt::Windows::Media::MediaPlaybackStatus::Playing);
-						}
-						else
-						{
-							SystemMediaTransportControlsManager::instance.PlaybackStatus(winrt::Windows::Media::MediaPlaybackStatus::Paused);
-						}
-					}
-				}
+			if (handleName)
+			{
+				wstring sceneName = handleName->chars;
 
 				if (sceneName == L"Live")
 				{
@@ -12276,24 +12022,160 @@ namespace
 
 					if (controller && controller->klass->name == "LiveViewController"s)
 					{
-						auto _stateField = il2cpp_class_get_field_from_name_wrap(controller->klass, "_state");
-						Gallop::LiveViewController::LiveState state;
-						il2cpp_field_get_value(controller, _stateField, &state);
+						auto director = GetSingletonInstance(il2cpp_symbols::get_class("umamusume.dll", "Gallop.Live", "Director"));
+						if (director)
+						{
+							auto LiveCurrentTime = il2cpp_class_get_method_from_name_type<float (*)(Il2CppObject*)>(director->klass, "get_LiveCurrentTime", 0)->methodPointer(director);
+							auto LiveTotalTime = il2cpp_class_get_method_from_name_type<float (*)(Il2CppObject*)>(director->klass, "get_LiveTotalTime", 0)->methodPointer(director);
 
-						if (state == Gallop::LiveViewController::LiveState::Play)
-						{
-							SystemMediaTransportControlsManager::instance.PlaybackStatus(winrt::Windows::Media::MediaPlaybackStatus::Playing);
+							auto sliderCommon = GetOptionSlider("live_slider");
+
+							auto textCommon = GetTextCommon("live_slider");
+
+							if (textCommon)
+							{
+								auto timeMin = static_cast<int>(LiveCurrentTime / 60);
+								auto timeSec = static_cast<int>(fmodf(LiveCurrentTime, 60));
+
+								wstringstream str;
+								str << setw(2) << setfill(L'0') << timeSec;
+
+								SetTextCommonText(textCommon, (to_wstring(timeMin) + L":" + str.str()).data());
+							}
+
+							auto textCommonTotal = GetTextCommon("live_slider_total");
+
+							if (textCommonTotal)
+							{
+								auto timeMin = static_cast<int>(LiveTotalTime / 60);
+								auto timeSec = static_cast<int>(fmodf(LiveTotalTime, 60));
+
+								wstringstream str;
+								str << setw(2) << setfill(L'0') << timeSec;
+
+								SetTextCommonText(textCommonTotal, (to_wstring(timeMin) + L":" + str.str()).data());
+							}
+
+							if (config::live_playback_loop)
+							{
+								if (LiveCurrentTime >= LiveTotalTime - 0.1f)
+								{
+									LiveCurrentTime = 0;
+									MoveLivePlayback(LiveCurrentTime);
+								}
+							}
+
+							try
+							{
+								if (sliderCommon)
+								{
+									il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, float)>(sliderCommon->klass, "set_maxValue", 1)->methodPointer(sliderCommon, LiveTotalTime);
+									il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, float)>(sliderCommon->klass, "SetValueWithoutNotify", 1)->methodPointer(sliderCommon, LiveCurrentTime);
+								}
+							}
+							catch (const Il2CppExceptionWrapper& e)
+							{
+								cout << e.ex->klass->name << ": ";
+								wcout << e.ex->message << endl;
+							}
 						}
-						else
+					}
+				}
+
+				if (SystemMediaTransportControlsManager::instance.IsEnabled())
+				{
+					if (sceneName == L"Home")
+					{
+						bool hasSetList = false;
+
+						auto hubViewController = GetCurrentHubViewChildController();
+
+						if (hubViewController && hubViewController->klass->name == "HomeViewController"s)
 						{
-							SystemMediaTransportControlsManager::instance.PlaybackStatus(winrt::Windows::Media::MediaPlaybackStatus::Paused);
+							auto topUi = il2cpp_class_get_method_from_name_type<Il2CppObject * (*)(Il2CppObject*, int)>(hubViewController->klass, "GetTopUI", 1)->methodPointer(hubViewController, 10);
+							if (topUi)
+							{
+								auto data = il2cpp_class_get_method_from_name_type<Il2CppObject * (*)(Il2CppObject*)>(topUi->klass, "get_TempSetListPlayingData", 0)->methodPointer(topUi);
+
+								auto IsPlayingField = il2cpp_class_get_field_from_name_wrap(data->klass, "IsPlaying");
+								bool IsPlaying;
+								il2cpp_field_get_value(data, IsPlayingField, &IsPlaying);
+
+								hasSetList = IsPlaying;
+
+								if (IsPlaying)
+								{
+									SystemMediaTransportControlsManager::instance.PlaybackStatus(winrt::Windows::Media::MediaPlaybackStatus::Playing);
+
+									auto SetListIndexField = il2cpp_class_get_field_from_name_wrap(data->klass, "SetListIndex");
+									int SetListIndex;
+									il2cpp_field_get_value(data, SetListIndexField, &SetListIndex);
+
+									int MusicListCount = il2cpp_class_get_method_from_name_type<int (*)(Il2CppObject*)>(data->klass, "GetMusicListCount", 0)->methodPointer(data);
+
+									SystemMediaTransportControlsManager::instance.IsPreviousEnabled(SetListIndex > 0);
+									SystemMediaTransportControlsManager::instance.IsNextEnabled(SetListIndex < MusicListCount - 1);
+
+									auto musicData = il2cpp_class_get_method_from_name_type<Il2CppObject * (*)(Il2CppObject*)>(data->klass, "GetMasterSetListMusicData", 0)->methodPointer(data);
+
+									auto MusicIdField = il2cpp_class_get_field_from_name_wrap(musicData->klass, "MusicId");
+									int MusicId;
+									il2cpp_field_get_value(musicData, MusicIdField, &MusicId);
+
+									SystemMediaTransportControlsManager::UpdateMetadata(MusicId);
+								}
+							}
+						}
+
+						if (!hasSetList)
+						{
+							auto workDataManager = GetSingletonInstance(il2cpp_symbols::get_class("umamusume.dll", "Gallop", "WorkDataManager"));
+
+							auto workJukeboxData = il2cpp_class_get_method_from_name_type<Il2CppObject * (*)(Il2CppObject*)>(workDataManager->klass, "get_JukeboxData", 0)->methodPointer(workDataManager);
+							auto currentBgmMusicId = il2cpp_class_get_method_from_name_type<int (*)(Il2CppObject*)>(workJukeboxData->klass, "GetCurrentBgmMusicId", 0)->methodPointer(workJukeboxData);
+
+							SystemMediaTransportControlsManager::UpdateMetadata(currentBgmMusicId);
+
+							if (currentBgmMusicId)
+							{
+								SystemMediaTransportControlsManager::instance.PlaybackStatus(winrt::Windows::Media::MediaPlaybackStatus::Playing);
+							}
+							else
+							{
+								SystemMediaTransportControlsManager::instance.PlaybackStatus(winrt::Windows::Media::MediaPlaybackStatus::Paused);
+							}
+						}
+					}
+
+					if (sceneName == L"Live")
+					{
+						auto controller = GetCurrentViewController();
+
+						if (controller && controller->klass->name == "LiveViewController"s)
+						{
+							auto _stateField = il2cpp_class_get_field_from_name_wrap(controller->klass, "_state");
+							Gallop::LiveViewController::LiveState state;
+							il2cpp_field_get_value(controller, _stateField, &state);
+
+							if (state == Gallop::LiveViewController::LiveState::Play)
+							{
+								SystemMediaTransportControlsManager::instance.PlaybackStatus(winrt::Windows::Media::MediaPlaybackStatus::Playing);
+							}
+							else
+							{
+								SystemMediaTransportControlsManager::instance.PlaybackStatus(winrt::Windows::Media::MediaPlaybackStatus::Paused);
+							}
 						}
 					}
 				}
 			}
-		}
 
-		StartTickFrame();
+			StartTickFrame();
+		}
+		catch (const Il2CppExceptionWrapper& e)
+		{
+			wcout << "TickFrame error: " << e.ex->message->chars << endl;
+		}
 	}
 
 	void StartTickFrame()
@@ -12321,8 +12203,10 @@ namespace
 	{
 		if (nCode == HCBT_MINMAX)
 		{
-			if (lParam != SW_RESTORE) {
-				if (UnityEngine::Screen::fullScreen()) {
+			if (lParam != SW_RESTORE)
+			{
+				if (UnityEngine::Screen::fullScreen())
+				{
 					return TRUE;
 				}
 			}
@@ -12391,7 +12275,9 @@ namespace
 				// check next string, if it's still empty, then we are done!
 				auto* nextStr = reinterpret_cast<decltype(localize_get_hook)*>(localize_get_orig)(i + 1);
 				if (!(nextStr && *nextStr->chars))
+				{
 					break;
+				}
 			}
 		}
 		if (config::static_entries_use_text_id_name)
@@ -12421,7 +12307,9 @@ namespace
 		}
 
 		if (!mh_inited)
+		{
 			return;
+		}
 
 		printf("Trying to patch GameAssembly.dll...\n");
 
@@ -12726,10 +12614,6 @@ namespace
 			"umamusume.dll",
 			"Gallop", "NowLoading", "Hide", 4);
 
-		auto BootSystem_Awake_addr = il2cpp_symbols::get_method_pointer(
-			"umamusume.dll",
-			"Gallop", "BootSystem", "Awake", 0);
-
 		MoviePlayerBase_get_MovieInfo = il2cpp_symbols::get_method_pointer<Il2CppObject * (*)(Il2CppObject*)>(
 			"Cute.Cri.Assembly.dll", "Cute.Cri", "MoviePlayerBase", "get_MovieInfo", 0);
 
@@ -12761,8 +12645,6 @@ namespace
 
 		auto DialogCircleItemDonate_Initialize_addr = il2cpp_symbols::get_method_pointer("umamusume.dll", "Gallop", "DialogCircleItemDonate", "Initialize", 2);
 
-		auto UIManager_WaitBootSetup_addr = il2cpp_symbols::get_method_pointer("umamusume.dll", "Gallop", "UIManager", "WaitBootSetup", 0);
-
 		auto Object_Internal_CloneSingleWithParent_addr = il2cpp_resolve_icall("UnityEngine.Object::Internal_CloneSingleWithParent()");
 
 		auto Object_Internal_CloneSingle_addr = il2cpp_resolve_icall("UnityEngine.Object::Internal_CloneSingle()");
@@ -12792,8 +12674,6 @@ namespace
 		ADD_HOOK(Object_Internal_CloneSingleWithParent, "UnityEngine.Object::Internal_CloneSingleWithParent at %p\n");
 
 		ADD_HOOK(Object_Internal_CloneSingle, "UnityEngine.Object::Internal_CloneSingle at %p\n");
-
-		// ADD_HOOK(UIManager_WaitBootSetup, "Gallop.UIManager::WaitBootSetup at %p\n");
 
 		ADD_HOOK(PartsEpisodeList_SetupStoryExtraEpisodeList, "Gallop.PartsEpisodeList::SetupStoryExtraEpisodeList at %p\n");
 
@@ -12897,8 +12777,6 @@ namespace
 		}
 
 		// ADD_HOOK(load_scene_internal, "SceneManager::LoadSceneAsyncNameIndexInternal at %p\n");
-
-		// ADD_HOOK(BootSystem_Awake, "Gallop.BootSystem::Awake at %p\n");
 
 		if (Game::CurrentGameRegion == Game::Region::KOR)
 		{
@@ -13024,7 +12902,7 @@ namespace
 
 		if (config::graphics_quality != -1)
 		{
-			ADD_HOOK(apply_graphics_quality, "Gallop.GraphicSettings.ApplyGraphicsQuality at %p\n");
+			apply_graphics_quality_orig = apply_graphics_quality_addr;
 		}
 
 		if (config::freeform_window || config::unlock_size || config::resolution_3d_scale != 1.0f)
@@ -13053,6 +12931,75 @@ namespace
 				wcout << dll << endl;
 			}
 		}
+
+		auto delegate = CreateDelegateWithClassStatic(
+			GetGenericClass(
+				GetRuntimeType("mscorlib.dll", "System", "Action`2"),
+				GetRuntimeType("UnityEngine.CoreModule.dll", "UnityEngine.Rendering", "ScriptableRenderContext"),
+				GetRuntimeType("UnityEngine.CoreModule.dll", "UnityEngine", "Camera")
+			),
+			*[](void*, void* context, Il2CppObject* camera)
+			{
+				if (config::anti_aliasing < 0)
+				{
+					return;
+				}
+
+				auto graphicSettings = GetSingletonInstance(il2cpp_symbols::get_class("umamusume.dll", "Gallop", "GraphicSettings"));
+
+				if (!graphicSettings)
+				{
+					return;
+				}
+
+				auto s_CamerasField = il2cpp_class_get_field_from_name_wrap(
+					il2cpp_symbols::get_class("UnityEngine.CoreModule.dll", "UnityEngine.Rendering", "RenderPipelineManager"),
+					"s_Cameras");
+				Il2CppArraySize_t<Il2CppObject*>* s_Cameras;
+				il2cpp_field_static_get_value(s_CamerasField, &s_Cameras);
+
+				for (int i = 0; i < s_Cameras->max_length; i++)
+				{
+					auto camera = s_Cameras->vector[i];
+					if (camera)
+					{
+						auto name = UnityEngine::Object::Name(camera)->chars;
+
+						if (!name)
+						{
+							continue;
+						}
+
+						if (name == L"BGCamera"s ||
+							name == L"UICamera"s ||
+							// name == L"ViewerCamera"s ||
+							// name == L"TimelineCamera"s ||
+							name == L"ShortStoryCamera"s ||
+							wstring(name).find(L"Camera") == wstring::npos)
+						{
+							continue;
+						}
+
+						if (!il2cpp_class_get_method_from_name_type<bool (*)(Il2CppObject*)>(camera->klass, "get_allowMSAA", 0)->methodPointer(camera))
+						{
+							continue;
+						}
+
+						auto gameObject = UnityEngine::Behaviour{ camera }.gameObject();
+
+						auto cameraData = gameObject.GetComponent(GetRuntimeType("umamusume.dll", "Gallop.RenderPipeline", "CameraData"));
+
+						if (cameraData && !il2cpp_class_get_method_from_name_type<bool (*)(Il2CppObject*)>(cameraData->klass, "get_IsUIRendering", 0)->methodPointer(cameraData))
+						{
+							il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, int)>(cameraData->klass, "set_RenderingAntiAliasing", 1)->methodPointer(cameraData, config::anti_aliasing);
+							il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, bool)>(cameraData->klass, "set_IsCreateAntialiasTexture", 1)->methodPointer(cameraData, true);
+						}
+					}
+				}
+			}
+		);
+
+		il2cpp_symbols::get_method_pointer<void (*)(Il2CppDelegate*)>("UnityEngine.CoreModule.dll", "UnityEngine.Rendering", "RenderPipelineManager", "add_beginCameraRendering", 1)(&delegate->delegate);
 
 		const auto nameArray = reinterpret_cast<Il2CppArraySize_t<Il2CppString*>*(*)()>(il2cpp_resolve_icall("UnityEngine.QualitySettings::get_names()"))();
 		reinterpret_cast<void(*)(int)>(il2cpp_resolve_icall("UnityEngine.QualitySettings::SetQualityLevel()"))(nameArray->max_length - 1);
@@ -13131,7 +13078,7 @@ namespace
 	{
 		auto amuid = wstring(UnityEngine::Application::companyName()->chars) + L".Gallop";
 
-		DesktopNotificationManagerCompat::RegisterAumidAndComServer(amuid.data(), L"우마무스메"/*localize_get_hook(GetTextIdByName(L"Outgame0028"))->chars*/);
+		DesktopNotificationManagerCompat::RegisterAumidAndComServer(amuid.data(), LocalifySettings::GetText("title"));
 
 		DesktopNotificationManagerCompat::RegisterActivator();
 
@@ -13194,39 +13141,37 @@ namespace
 
 		auto GameObject_GetComponentFastPath_addr = il2cpp_resolve_icall("UnityEngine.GameObject::GetComponentFastPath(System.Type,System.IntPtr)");
 
-		history->Clear();
-
 		ADD_HOOK(resources_load, "UnityEngine.Resources::Load at %p\n");
 
 		// if (!config::runtime::replaceAssets.empty())
 		// {
-			ADD_HOOK(AssetBundleRequest_GetResult, "UnityEngine.AssetBundleRequest::GetResult at %p\n");
+		ADD_HOOK(AssetBundleRequest_GetResult, "UnityEngine.AssetBundleRequest::GetResult at %p\n");
 
-			ADD_HOOK(GameObject_GetComponent, "UnityEngine.GameObject::GetComponent at %p\n");
+		ADD_HOOK(GameObject_GetComponent, "UnityEngine.GameObject::GetComponent at %p\n");
 
-			ADD_HOOK(Sprite_get_texture, "UnityEngine.Sprite::get_texture at %p\n");
+		ADD_HOOK(Sprite_get_texture, "UnityEngine.Sprite::get_texture at %p\n");
 
-			ADD_HOOK(Renderer_get_material, "UnityEngine.Renderer::get_material at %p\n");
+		ADD_HOOK(Renderer_get_material, "UnityEngine.Renderer::get_material at %p\n");
 
-			ADD_HOOK(Renderer_get_materials, "UnityEngine.Renderer::get_materials at %p\n");
+		ADD_HOOK(Renderer_get_materials, "UnityEngine.Renderer::get_materials at %p\n");
 
-			ADD_HOOK(Renderer_get_sharedMaterial, "UnityEngine.Renderer::get_sharedMaterial at %p\n");
+		ADD_HOOK(Renderer_get_sharedMaterial, "UnityEngine.Renderer::get_sharedMaterial at %p\n");
 
-			ADD_HOOK(Renderer_get_sharedMaterials, "UnityEngine.Renderer::get_sharedMaterials at %p\n");
+		ADD_HOOK(Renderer_get_sharedMaterials, "UnityEngine.Renderer::get_sharedMaterials at %p\n");
 
-			ADD_HOOK(Renderer_set_material, "UnityEngine.Renderer::set_material at %p\n");
+		ADD_HOOK(Renderer_set_material, "UnityEngine.Renderer::set_material at %p\n");
 
-			ADD_HOOK(Renderer_set_materials, "UnityEngine.Renderer::set_materials at %p\n");
+		ADD_HOOK(Renderer_set_materials, "UnityEngine.Renderer::set_materials at %p\n");
 
-			ADD_HOOK(Material_get_mainTexture, "UnityEngine.Material::get_mainTexture at %p\n");
+		ADD_HOOK(Material_get_mainTexture, "UnityEngine.Material::get_mainTexture at %p\n");
 
-			ADD_HOOK(Material_set_mainTexture, "UnityEngine.Material::set_mainTexture at %p\n");
+		ADD_HOOK(Material_set_mainTexture, "UnityEngine.Material::set_mainTexture at %p\n");
 
-			ADD_HOOK(Material_GetTextureImpl, "UnityEngine.Material::GetTextureImpl at %p\n");
+		ADD_HOOK(Material_GetTextureImpl, "UnityEngine.Material::GetTextureImpl at %p\n");
 
-			ADD_HOOK(Material_SetTextureImpl, "UnityEngine.Material::SetTextureImpl at %p\n");
+		ADD_HOOK(Material_SetTextureImpl, "UnityEngine.Material::SetTextureImpl at %p\n");
 
-			ADD_HOOK(CharaPropRendererAccessor_SetTexture, "Gallop.CharaPropRendererAccessor::SetTexture at %p\n");
+		ADD_HOOK(CharaPropRendererAccessor_SetTexture, "Gallop.CharaPropRendererAccessor::SetTexture at %p\n");
 		// }
 
 		if (config::dump_entries)
@@ -13445,7 +13390,7 @@ namespace
 
 			if (filesystem::exists(path + R"(\master\master_orig.mdb)"))
 			{
-				filesystem::remove_all(path + +R"(\master)");
+				filesystem::remove_all(path + R"(\master)");
 			}
 		}
 
@@ -13511,24 +13456,24 @@ namespace
 
 				auto graphicSettings = GetSingletonInstance(il2cpp_symbols::get_class("umamusume.dll", "Gallop", "GraphicSettings"));
 
-				if (graphicSettings)
-				{
-					const auto get_RenderingManager = il2cpp_class_get_method_from_name_type<Il2CppObject * (*)(Il2CppObject*)>(graphicSettings->klass, "get_RenderingManager", 0);
-					if (get_RenderingManager)
-					{
-						auto renderingManager = get_RenderingManager->methodPointer(graphicSettings);
-						il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, bool)>(renderingManager->klass, "set_IsOverrideAntiAliasingLevel", 1)->methodPointer(renderingManager, true);
+				// if (graphicSettings)
+				// {
+					// const auto get_RenderingManager = il2cpp_class_get_method_from_name_type<Il2CppObject * (*)(Il2CppObject*)>(graphicSettings->klass, "get_RenderingManager", 0);
+					// if (get_RenderingManager)
+					// {
+						// auto renderingManager = get_RenderingManager->methodPointer(graphicSettings);
+						// il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, bool)>(renderingManager->klass, "set_IsOverrideAntiAliasingLevel", 1)->methodPointer(renderingManager, true);
 
-						if (config::anti_aliasing == 0)
+						/*if (config::anti_aliasing == 0)
 						{
 							il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, int)>(renderingManager->klass, "set_OverrideAntiAliasingLevel", 1)->methodPointer(renderingManager, 1);
 						}
 						else
 						{
 							il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, int)>(renderingManager->klass, "set_OverrideAntiAliasingLevel", 1)->methodPointer(renderingManager, 0);
-						}
-					}
-				}
+						}*/
+					// }
+				// }
 
 				auto active = il2cpp_symbols::get_method_pointer<UnityEngine::SceneManagement::Scene(*)()>("UnityEngine.CoreModule.dll", "UnityEngine.SceneManagement", "SceneManager", "GetActiveScene", IgnoreNumberOfArguments)();
 
@@ -13873,124 +13818,130 @@ namespace
 		);
 		il2cpp_field_static_set_value(activeSceneChangedField, action);
 
-		SystemMediaTransportControlsManager::CreateShortcutForSMTC(reinterpret_cast<decltype(localize_get_hook)*>(localize_get_orig)(GetTextIdByName(L"Outgame0028"))->chars);
-		SystemMediaTransportControlsManager::Initialze(GetHWND());
-
-		auto& smtc = SystemMediaTransportControlsManager::instance;
-		if (smtc)
+		try
 		{
-			smtc.ButtonPressed([](winrt::Windows::Media::SystemMediaTransportControls smtc, winrt::Windows::Media::SystemMediaTransportControlsButtonPressedEventArgs args)
-				{
-					auto button = args.Button();
-					switch (button)
-					{
-					case winrt::Windows::Media::SystemMediaTransportControlsButton::Play:
-						WaitForEndOfFrame(*[]()
-							{
-								auto controller = GetCurrentViewController();
-								auto hubViewController = GetCurrentHubViewChildController();
+			SystemMediaTransportControlsManager::CreateShortcutForSMTC(LocalifySettings::GetText("title"));
+			SystemMediaTransportControlsManager::Initialze(GetHWND());
 
-								if (hubViewController && hubViewController->klass->name == "HomeViewController"s)
+			auto& smtc = SystemMediaTransportControlsManager::instance;
+			if (smtc)
+			{
+				smtc.ButtonPressed([](winrt::Windows::Media::SystemMediaTransportControls smtc, winrt::Windows::Media::SystemMediaTransportControlsButtonPressedEventArgs args)
+					{
+						auto button = args.Button();
+						switch (button)
+						{
+						case winrt::Windows::Media::SystemMediaTransportControlsButton::Play:
+							WaitForEndOfFrame(*[]()
 								{
-									auto topUi = il2cpp_class_get_method_from_name_type<Il2CppObject * (*)(Il2CppObject*, int)>(hubViewController->klass, "GetTopUI", 1)->methodPointer(hubViewController, 10);
-									if (topUi)
+									auto controller = GetCurrentViewController();
+									auto hubViewController = GetCurrentHubViewChildController();
+
+									if (hubViewController && hubViewController->klass->name == "HomeViewController"s)
 									{
+										auto topUi = il2cpp_class_get_method_from_name_type<Il2CppObject * (*)(Il2CppObject*, int)>(hubViewController->klass, "GetTopUI", 1)->methodPointer(hubViewController, 10);
+										if (topUi)
+										{
+											auto data = il2cpp_class_get_method_from_name_type<Il2CppObject * (*)(Il2CppObject*)>(topUi->klass, "get_TempSetListPlayingData", 0)->methodPointer(topUi);
+
+											auto SetListIdField = il2cpp_class_get_field_from_name_wrap(data->klass, "SetListId");
+											int SetListId;
+											il2cpp_field_get_value(data, SetListIdField, &SetListId);
+
+											if (SetListId > 0)
+											{
+												auto _jukeboxBgmSelectorField = il2cpp_class_get_field_from_name_wrap(topUi->klass, "_jukeboxBgmSelector");
+												Il2CppObject* _jukeboxBgmSelector;
+												il2cpp_field_get_value(topUi, _jukeboxBgmSelectorField, &_jukeboxBgmSelector);
+
+												il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, bool, float, bool)>(_jukeboxBgmSelector->klass, "PlayCoroutinePlaySetList", 3)->methodPointer(_jukeboxBgmSelector, true, 0.0f, true);
+											}
+											else
+											{
+												il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*)>(topUi->klass, "PlayRequestSong", 0)->methodPointer(topUi);
+											}
+										}
+									}
+
+									if (controller && controller->klass->name == "LiveViewController"s)
+									{
+										il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*)>(controller->klass, "ResumeLive", 0)->methodPointer(controller);
+									}
+								});
+							break;
+
+						case winrt::Windows::Media::SystemMediaTransportControlsButton::Pause:
+							WaitForEndOfFrame(*[]()
+								{
+									auto controller = GetCurrentViewController();
+									auto hubViewController = GetCurrentHubViewChildController();
+
+									if (hubViewController && hubViewController->klass->name == "HomeViewController"s)
+									{
+										auto topUi = il2cpp_class_get_method_from_name_type<Il2CppObject * (*)(Il2CppObject*, int)>(hubViewController->klass, "GetTopUI", 1)->methodPointer(hubViewController, 10);
+										il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, bool)>(topUi->klass, "SetPlayMusicFlag", 1)->methodPointer(topUi, false);
+									}
+
+									if (controller && controller->klass->name == "LiveViewController"s)
+									{
+										il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*)>(controller->klass, "PauseLive", 0)->methodPointer(controller);
+									}
+								});
+							break;
+
+						case winrt::Windows::Media::SystemMediaTransportControlsButton::Previous:
+							WaitForEndOfFrame(*[]()
+								{
+									auto controller = GetCurrentViewController();
+									auto hubViewController = GetCurrentHubViewChildController();
+
+									if (hubViewController && hubViewController->klass->name == "HomeViewController"s)
+									{
+										auto topUi = il2cpp_class_get_method_from_name_type<Il2CppObject * (*)(Il2CppObject*, int)>(hubViewController->klass, "GetTopUI", 1)->methodPointer(hubViewController, 10);
+										il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, bool)>(topUi->klass, "OnClickSetListArrow", 1)->methodPointer(topUi, false);
+									}
+								});
+							break;
+
+						case winrt::Windows::Media::SystemMediaTransportControlsButton::Next:
+							WaitForEndOfFrame(*[]()
+								{
+									auto controller = GetCurrentViewController();
+									auto hubViewController = GetCurrentHubViewChildController();
+
+									if (hubViewController && hubViewController->klass->name == "HomeViewController"s)
+									{
+										auto topUi = il2cpp_class_get_method_from_name_type<Il2CppObject * (*)(Il2CppObject*, int)>(hubViewController->klass, "GetTopUI", 1)->methodPointer(hubViewController, 10);
+
 										auto data = il2cpp_class_get_method_from_name_type<Il2CppObject * (*)(Il2CppObject*)>(topUi->klass, "get_TempSetListPlayingData", 0)->methodPointer(topUi);
 
-										auto SetListIdField = il2cpp_class_get_field_from_name_wrap(data->klass, "SetListId");
-										int SetListId;
-										il2cpp_field_get_value(data, SetListIdField, &SetListId);
+										auto IsPlayingField = il2cpp_class_get_field_from_name_wrap(data->klass, "IsPlaying");
+										bool IsPlaying;
+										il2cpp_field_get_value(data, IsPlayingField, &IsPlaying);
 
-										if (SetListId > 0)
+										if (IsPlaying)
 										{
-											auto _jukeboxBgmSelectorField = il2cpp_class_get_field_from_name_wrap(topUi->klass, "_jukeboxBgmSelector");
-											Il2CppObject* _jukeboxBgmSelector;
-											il2cpp_field_get_value(topUi, _jukeboxBgmSelectorField, &_jukeboxBgmSelector);
-
-											il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, bool, float, bool)>(_jukeboxBgmSelector->klass, "PlayCoroutinePlaySetList", 3)->methodPointer(_jukeboxBgmSelector, true, 0.0f, true);
-										}
-										else
-										{
-											il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*)>(topUi->klass, "PlayRequestSong", 0)->methodPointer(topUi);
+											il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, bool)>(topUi->klass, "OnClickSetListArrow", 1)->methodPointer(topUi, true);
 										}
 									}
-								}
 
-								if (controller && controller->klass->name == "LiveViewController"s)
-								{
-									il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*)>(controller->klass, "ResumeLive", 0)->methodPointer(controller);
-								}
-							});
-						break;
-
-					case winrt::Windows::Media::SystemMediaTransportControlsButton::Pause:
-						WaitForEndOfFrame(*[]()
-							{
-								auto controller = GetCurrentViewController();
-								auto hubViewController = GetCurrentHubViewChildController();
-
-								if (hubViewController && hubViewController->klass->name == "HomeViewController"s)
-								{
-									auto topUi = il2cpp_class_get_method_from_name_type<Il2CppObject * (*)(Il2CppObject*, int)>(hubViewController->klass, "GetTopUI", 1)->methodPointer(hubViewController, 10);
-									il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, bool)>(topUi->klass, "SetPlayMusicFlag", 1)->methodPointer(topUi, false);
-								}
-
-								if (controller && controller->klass->name == "LiveViewController"s)
-								{
-									il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*)>(controller->klass, "PauseLive", 0)->methodPointer(controller);
-								}
-							});
-						break;
-
-					case winrt::Windows::Media::SystemMediaTransportControlsButton::Previous:
-						WaitForEndOfFrame(*[]()
-							{
-								auto controller = GetCurrentViewController();
-								auto hubViewController = GetCurrentHubViewChildController();
-
-								if (hubViewController && hubViewController->klass->name == "HomeViewController"s)
-								{
-									auto topUi = il2cpp_class_get_method_from_name_type<Il2CppObject * (*)(Il2CppObject*, int)>(hubViewController->klass, "GetTopUI", 1)->methodPointer(hubViewController, 10);
-									il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, bool)>(topUi->klass, "OnClickSetListArrow", 1)->methodPointer(topUi, false);
-								}
-							});
-						break;
-
-					case winrt::Windows::Media::SystemMediaTransportControlsButton::Next:
-						WaitForEndOfFrame(*[]()
-							{
-								auto controller = GetCurrentViewController();
-								auto hubViewController = GetCurrentHubViewChildController();
-
-								if (hubViewController && hubViewController->klass->name == "HomeViewController"s)
-								{
-									auto topUi = il2cpp_class_get_method_from_name_type<Il2CppObject * (*)(Il2CppObject*, int)>(hubViewController->klass, "GetTopUI", 1)->methodPointer(hubViewController, 10);
-
-									auto data = il2cpp_class_get_method_from_name_type<Il2CppObject * (*)(Il2CppObject*)>(topUi->klass, "get_TempSetListPlayingData", 0)->methodPointer(topUi);
-
-									auto IsPlayingField = il2cpp_class_get_field_from_name_wrap(data->klass, "IsPlaying");
-									bool IsPlaying;
-									il2cpp_field_get_value(data, IsPlayingField, &IsPlaying);
-
-									if (IsPlaying)
+									if (controller && controller->klass->name == "LiveViewController"s)
 									{
-										il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, bool)>(topUi->klass, "OnClickSetListArrow", 1)->methodPointer(topUi, true);
+										auto view = il2cpp_class_get_method_from_name_type<Il2CppObject * (*)(Il2CppObject*)>(controller->klass, "GetViewBase", 0)->methodPointer(controller);
+										auto coroutine = il2cpp_class_get_method_from_name_type<Il2CppObject * (*)(Il2CppObject*)>(controller->klass, "SkipLive", 0)->methodPointer(controller);
+
+										il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, Il2CppObject*)>(view->klass, "StartCoroutineManaged2", 1)->methodPointer(view, coroutine);
 									}
-								}
+								});
+							break;
+						}
 
-								if (controller && controller->klass->name == "LiveViewController"s)
-								{
-									auto view = il2cpp_class_get_method_from_name_type<Il2CppObject * (*)(Il2CppObject*)>(controller->klass, "GetViewBase", 0)->methodPointer(controller);
-									auto coroutine = il2cpp_class_get_method_from_name_type<Il2CppObject * (*)(Il2CppObject*)>(controller->klass, "SkipLive", 0)->methodPointer(controller);
-
-									il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, Il2CppObject*)>(view->klass, "StartCoroutineManaged2", 1)->methodPointer(view, coroutine);
-								}
-							});
-						break;
-					}
-
-					return S_OK;
-				});
+						return S_OK;
+					});
+			}
+		}
+		catch (...)
+		{
 		}
 	}
 }

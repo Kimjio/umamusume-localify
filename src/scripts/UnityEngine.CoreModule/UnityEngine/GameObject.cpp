@@ -10,6 +10,10 @@ void* Internal_AddComponentWithType_addr = nullptr;
 
 void* Internal_AddComponentWithType_orig = nullptr;
 
+void* TryGetComponentFastPath_addr = nullptr;
+
+void* TryGetComponentFastPath_orig = nullptr;
+
 void* GetComponent_addr = nullptr;
 
 void* GetComponentByName_addr = nullptr;
@@ -36,13 +40,49 @@ static Il2CppObject* Internal_AddComponentWithType_hook(Il2CppObject* _this, Il2
 {
 	auto component = reinterpret_cast<decltype(Internal_AddComponentWithType_hook)*>(Internal_AddComponentWithType_orig)(_this, runtimeType);
 
+	if (string(component->klass->namespaze).find("Gallop") != string::npos &&
+		string(component->klass->name).find("CameraData") != string::npos)
+	{
+		wcout << L"Internal_AddComponentWithType " << component->klass->name << endl;
+		PrintStackTrace();
+		il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, int)>(component->klass, "set_RenderingAntiAliasing", 1)->methodPointer(component, 8);
+		il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, bool)>(component->klass, "set_IsCreateAntialiasTexture", 1)->methodPointer(component, true);
+	}
+
 	return component;
+}
+
+struct CastHelper
+{
+	Il2CppObject* obj;
+	uintptr_t oneFurtherThanResultValue;
+};
+
+static void TryGetComponentFastPath_hook(Il2CppObject* self, Il2CppObject* runtimeType, uintptr_t oneFurtherThanResultValue)
+{
+	reinterpret_cast<decltype(TryGetComponentFastPath_hook)*>(TryGetComponentFastPath_orig)(self, runtimeType, oneFurtherThanResultValue);
+	
+	auto helper = reinterpret_cast<CastHelper*>(oneFurtherThanResultValue - sizeof(Il2CppObject*));
+
+	if (helper->obj)
+	{
+		if (helper->obj->klass->name == "CameraData"s)
+		{
+			auto data = helper->obj;
+			if (!il2cpp_class_get_method_from_name_type<bool (*)(Il2CppObject*)>(data->klass, "get_IsUIRendering", 0)->methodPointer(data))
+			{
+				il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, int)>(data->klass, "set_RenderingAntiAliasing", 1)->methodPointer(data, config::anti_aliasing);
+				il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, bool)>(data->klass, "set_IsCreateAntialiasTexture", 1)->methodPointer(data, true);
+			}
+		}
+	}
 }
 
 static void InitAddress()
 {
 	Internal_CreateGameObject_addr = il2cpp_resolve_icall("UnityEngine.GameObject::Internal_CreateGameObject()");
 	Internal_AddComponentWithType_addr = il2cpp_resolve_icall("UnityEngine.GameObject::Internal_AddComponentWithType()");
+	TryGetComponentFastPath_addr = il2cpp_resolve_icall("UnityEngine.GameObject::TryGetComponentFastPath()");
 	GetComponent_addr = il2cpp_resolve_icall("UnityEngine.GameObject::GetComponent()");
 	GetComponentByName_addr = il2cpp_resolve_icall("UnityEngine.GameObject::GetComponentByName()");
 	get_transform_addr = il2cpp_resolve_icall("UnityEngine.GameObject::get_transform()");
@@ -55,6 +95,7 @@ static void HookMethods()
 {
 	// ADD_HOOK(Internal_CreateGameObject, "UnityEngine.GameObject::Internal_CreateGameObject at %p\n");
 	// ADD_HOOK(Internal_AddComponentWithType, "UnityEngine.GameObject::Internal_AddComponentWithType at %p\n");
+	// ADD_HOOK(TryGetComponentFastPath, "UnityEngine.GameObject::TryGetComponentFastPath at %p\n");
 }
 
 STATIC
