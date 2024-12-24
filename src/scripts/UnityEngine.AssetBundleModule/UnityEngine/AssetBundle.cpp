@@ -717,10 +717,6 @@ static void HookMethods()
 	ADD_HOOK(LoadAsset_Internal, "UnityEngine.AssetBundle::LoadAsset_Internal at %p\n");
 	ADD_HOOK(LoadAssetAsync_Internal, "UnityEngine.AssetBundle::LoadAssetAsync_Internal at %p\n");
 	ADD_HOOK(Unload, "UnityEngine.AssetBundle::Unload at %p\n");
-
-	if (!config::runtime::replaceAssets.empty())
-	{
-	}
 }
 
 STATIC

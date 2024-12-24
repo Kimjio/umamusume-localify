@@ -13198,9 +13198,8 @@ namespace
 
 		ADD_HOOK(resources_load, "UnityEngine.Resources::Load at %p\n");
 
-		if (!config::runtime::replaceAssets.empty())
-		{
-
+		// if (!config::runtime::replaceAssets.empty())
+		// {
 			ADD_HOOK(AssetBundleRequest_GetResult, "UnityEngine.AssetBundleRequest::GetResult at %p\n");
 
 			ADD_HOOK(GameObject_GetComponent, "UnityEngine.GameObject::GetComponent at %p\n");
@@ -13228,7 +13227,7 @@ namespace
 			ADD_HOOK(Material_SetTextureImpl, "UnityEngine.Material::SetTextureImpl at %p\n");
 
 			ADD_HOOK(CharaPropRendererAccessor_SetTexture, "Gallop.CharaPropRendererAccessor::SetTexture at %p\n");
-		}
+		// }
 
 		if (config::dump_entries)
 		{
