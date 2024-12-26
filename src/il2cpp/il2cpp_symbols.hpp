@@ -5,10 +5,9 @@
 #include <Windows.h>
 
 #include <functional>
-
 #include <vector>
-
 #include <string>
+#include <filesystem>
 
 #include "il2cpp-object-internals.h"
 
@@ -128,6 +127,8 @@ namespace il2cpp_symbols
 	extern Il2CppDomain* il2cpp_domain;
 
 	extern std::vector<std::function<void()>> init_callbacks;
+
+	void load_symbols(std::filesystem::path& path);
 
 	void init(HMODULE game_module);
 

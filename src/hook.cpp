@@ -1008,13 +1008,17 @@ namespace
 			return 1;
 		}
 
+		filesystem::path path = filesystem::current_path().append(L"UnityPlayer.dll");
+
 		try
 		{
-			filesystem::copy_file(filesystem::current_path().append(L"UnityPlayer.dll"), L"umamusume.exe.local\\UnityPlayer.orig.dll", filesystem::copy_options::update_existing);
+			filesystem::copy_file(path, L"umamusume.exe.local\\UnityPlayer.orig.dll", filesystem::copy_options::update_existing);
 		}
 		catch (...)
 		{
 		}
+
+		il2cpp_symbols::load_symbols(path);
 
 		auto unity = LoadLibraryW(L"UnityPlayer.orig.dll");
 
@@ -12945,13 +12949,6 @@ namespace
 					return;
 				}
 
-				auto graphicSettings = GetSingletonInstance(il2cpp_symbols::get_class("umamusume.dll", "Gallop", "GraphicSettings"));
-
-				if (!graphicSettings)
-				{
-					return;
-				}
-
 				auto s_CamerasField = il2cpp_class_get_field_from_name_wrap(
 					il2cpp_symbols::get_class("UnityEngine.CoreModule.dll", "UnityEngine.Rendering", "RenderPipelineManager"),
 					"s_Cameras");
@@ -12974,6 +12971,7 @@ namespace
 							name == L"UICamera"s ||
 							// name == L"ViewerCamera"s ||
 							// name == L"TimelineCamera"s ||
+							// name == L"CutInCamera"s ||
 							name == L"ShortStoryCamera"s ||
 							wstring(name).find(L"Camera") == wstring::npos)
 						{
@@ -13472,8 +13470,8 @@ namespace
 						{
 							il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, int)>(renderingManager->klass, "set_OverrideAntiAliasingLevel", 1)->methodPointer(renderingManager, 0);
 						}*/
+						// }
 					// }
-				// }
 
 				auto active = il2cpp_symbols::get_method_pointer<UnityEngine::SceneManagement::Scene(*)()>("UnityEngine.CoreModule.dll", "UnityEngine.SceneManagement", "SceneManager", "GetActiveScene", IgnoreNumberOfArguments)();
 

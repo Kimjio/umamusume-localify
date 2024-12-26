@@ -18,6 +18,10 @@ Il2CppString* il2cpp_string_new16(const wchar_t* value)
 
 #include "config/config.hpp"
 #include "string_utils.hpp"
+#include "game.hpp"
+
+#include "pe_lib/pe_base.h"
+#include "pe_lib/pe_properties_generic.h"
 
 FieldInfo* il2cpp_class_get_field_from_name_wrap(Il2CppClass* klass, const char* name)
 {
@@ -123,6 +127,104 @@ namespace il2cpp_symbols
 	Il2CppDomain* il2cpp_domain = nullptr;
 
 	std::vector<std::function<void()>> init_callbacks;
+
+	void load_symbols(filesystem::path& path)
+	{
+		if (!config::fn_map.IsNull())
+		{
+			return;
+		}
+
+		int startRva;
+
+		if (Game::CurrentGameRegion == Game::Region::KOR)
+		{
+			// 2020.3.47f
+			startRva = 0x8984d4;
+		}
+		else
+		{
+			// 2020.3.24f
+			startRva = 0x8c6714;
+		}
+
+		int rva = startRva;
+
+		try
+		{
+			config::fn_map.SetObject();
+
+			auto file = CreateFileW(path.wstring().data(), GENERIC_READ, FILE_SHARE_READ, nullptr, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, nullptr);
+
+			auto map = CreateFileMappingW(file, nullptr, PAGE_READONLY, 0, 0, nullptr);
+			CloseHandle(file);
+
+			auto view = MapViewOfFile(map, FILE_MAP_READ, 0, 0, 0);
+
+			MEMORY_BASIC_INFORMATION memInfo;
+			VirtualQuery(view, &memInfo, sizeof(memInfo));
+
+			stringstream stream{ string(reinterpret_cast<char*>(view), memInfo.RegionSize) };
+
+			auto base = pe_bliss::pe_base(stream, pe_bliss::pe_properties_64(), false);
+
+			vector<const char*> symbol_names;
+
+#define DO_API(r, n, p) symbol_names.emplace_back(#n)
+			// PROFILER is only used in debug builds
+#undef IL2CPP_ENABLE_PROFILER
+#define IL2CPP_ENABLE_PROFILER 0
+			// DO_API_NO_RETURN is not obfuscated
+#define DO_API_NO_RETURN(r, n, p) symbol_names.emplace_back("_"#n)
+#include "il2cpp-api-functions.h"
+#undef DO_API_NO_RETURN
+#undef IL2CPP_ENABLE_PROFILER
+#define IL2CPP_ENABLE_PROFILER !IL2CPP_TINY
+#undef DO_API
+
+			for (auto name : symbol_names)
+			{
+				auto offset = base.rva_to_file_offset(rva);
+
+				uint8_t bytes[4]
+				{
+					reinterpret_cast<uint8_t*>(view)[offset],
+					reinterpret_cast<uint8_t*>(view)[offset + 1],
+					reinterpret_cast<uint8_t*>(view)[offset + 2],
+					reinterpret_cast<uint8_t*>(view)[offset + 3]
+				};
+
+				uint32_t rip_offset;
+				memcpy(&rip_offset, bytes, sizeof(uint32_t));
+
+				auto name_offset = base.rva_to_file_offset(rva + 0x4 + rip_offset);
+
+				string real_symbol_name = string(&reinterpret_cast<char*>(view)[name_offset]);
+				if (name == real_symbol_name)
+				{
+					// Symbol is not obfuscated
+					break;
+				}
+
+				char* real_name = new char[real_symbol_name.size() + 1];
+				strcpy(real_name, real_symbol_name.data());
+
+				config::fn_map.AddMember(
+					rapidjson::StringRef(name),
+					rapidjson::StringRef(real_name),
+					config::fn_map.GetAllocator());
+
+				rva += rva == startRva ? 0x35 : 0x30;
+			}
+
+			UnmapViewOfFile(view);
+			CloseHandle(map);
+		}
+		catch (const exception& e)
+		{
+			cout << e.what() << endl;
+		}
+	}
 
 	void init_functions(HMODULE game_module);
 	void init_defaults();
