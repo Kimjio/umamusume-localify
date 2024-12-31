@@ -12923,7 +12923,7 @@ namespace
 		if (config::anti_aliasing != -1)
 		{
 			ADD_HOOK(set_anti_aliasing, "UnityEngine.QualitySettings.set_antiAliasing(int) at %p\n");
-			ADD_HOOK(rendertexture_set_anti_aliasing, "UnityEngine.RenderTexture.set_antiAliasing(int) at %p\n");
+			// ADD_HOOK(rendertexture_set_anti_aliasing, "UnityEngine.RenderTexture.set_antiAliasing(int) at %p\n");
 		}
 
 		if (!config::external_dlls_path.empty())
