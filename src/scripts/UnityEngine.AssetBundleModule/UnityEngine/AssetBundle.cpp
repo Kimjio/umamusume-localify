@@ -610,8 +610,7 @@ static Il2CppObject* LoadFromFile_Internal_hook(Il2CppString* path, uint32_t crc
 		splited.emplace_back(segment);
 	}
 
-	auto name = splited.back();
-
+	auto& name = splited.back();
 	if (config::replace_assets.find(name) != config::replace_assets.end())
 	{
 		auto& replaceAsset = config::replace_assets.at(name);
@@ -633,6 +632,7 @@ static Il2CppObject* LoadAsset_Internal_hook(Il2CppObject* self, Il2CppString* n
 	{
 		splited.emplace_back(segment);
 	}
+
 	auto& fileName = splited.back();
 	if (find_if(config::runtime::replaceAssetNames.begin(), config::runtime::replaceAssetNames.end(), [fileName](const wstring& item)
 		{
@@ -694,6 +694,7 @@ static void Unload_hook(Il2CppObject* self, bool unloadAllLoadedObjects)
 	{
 		if (pair.second.asset == self)
 		{
+			reinterpret_cast<decltype(Unload_hook)*>(Unload_orig)(self, unloadAllLoadedObjects);
 			pair.second.asset = nullptr;
 			return;
 		}
