@@ -1599,8 +1599,13 @@ namespace
 			if (MasterDB::replacementMasterDB)
 			{
 				sqlite3_stmt* stmt;
-				reinterpret_cast<decltype(sqlite3_prepare_v2_hook)*>(sqlite3_prepare_v2_orig)(MasterDB::replacementMasterDB, zSql, nBytes, &stmt, pzTail);
+				auto res = reinterpret_cast<decltype(sqlite3_prepare_v2_hook)*>(sqlite3_prepare_v2_orig)(MasterDB::replacementMasterDB, zSql, nBytes, &stmt, pzTail);
 				text_queries.emplace(pStmt, make_tuple(stmt, sql, false));
+
+				if (res != SQLITE_OK)
+				{
+					cout << "ERROR: sqlite3_prepare_v2_hook SQL:" << sql << endl;
+				}
 			}
 		}
 
@@ -1613,8 +1618,13 @@ namespace
 				if (MasterDB::replacementMasterDB)
 				{
 					sqlite3_stmt* stmt;
-					reinterpret_cast<decltype(sqlite3_prepare_v2_hook)*>(sqlite3_prepare_v2_orig)(MasterDB::replacementMasterDB, zSql, nBytes, &stmt, pzTail);
+					auto res = reinterpret_cast<decltype(sqlite3_prepare_v2_hook)*>(sqlite3_prepare_v2_orig)(MasterDB::replacementMasterDB, zSql, nBytes, &stmt, pzTail);
 					text_queries.emplace(pStmt, make_tuple(stmt, sql, false));
+					
+					if (res != SQLITE_OK)
+					{
+						cout << "ERROR: sqlite3_prepare_v2_hook SQL:" << sql << endl;
+					}
 				}
 			}
 			else
@@ -1624,7 +1634,11 @@ namespace
 
 				if (MasterDB::replacementMasterDB)
 				{
-					reinterpret_cast<decltype(sqlite3_prepare_v2_hook)*>(sqlite3_prepare_v2_orig)(MasterDB::replacementMasterDB, zSql, nBytes, &get<0>(select_character_system_text_characterId_replacement), pzTail);
+					auto res = reinterpret_cast<decltype(sqlite3_prepare_v2_hook)*>(sqlite3_prepare_v2_orig)(MasterDB::replacementMasterDB, zSql, nBytes, &get<0>(select_character_system_text_characterId_replacement), pzTail);
+					if (res != SQLITE_OK)
+					{
+						cout << "ERROR: sqlite3_prepare_v2_hook SQL:" << sql << endl;
+					}
 				}
 			}
 		}
@@ -1711,6 +1725,11 @@ namespace
 			reinterpret_cast<decltype(sqlite3_bind_text_hook)*>(sqlite3_bind_text_orig)(get<0>(stmt), i, zData, nData, xDel);
 		}
 
+		if (pStmt == select_character_system_text_characterId && get<0>(select_character_system_text_characterId_replacement))
+		{
+			reinterpret_cast<decltype(sqlite3_bind_text_hook)*>(sqlite3_bind_text_orig)(get<0>(select_character_system_text_characterId_replacement), i, zData, nData, xDel);
+		}
+
 		return reinterpret_cast<decltype(sqlite3_bind_text_hook)*>(sqlite3_bind_text_orig)(pStmt, i, zData, nData, xDel);
 	}
 
@@ -1738,6 +1757,11 @@ namespace
 			reinterpret_cast<decltype(sqlite3_bind_int64_hook)*>(sqlite3_bind_int64_orig)(get<0>(stmt), i, iValue);
 		}
 
+		if (pStmt == select_character_system_text_characterId && get<0>(select_character_system_text_characterId_replacement))
+		{
+			reinterpret_cast<decltype(sqlite3_bind_int64_hook)*>(sqlite3_bind_int64_orig)(get<0>(select_character_system_text_characterId_replacement), i, iValue);
+		}
+
 		return reinterpret_cast<decltype(sqlite3_bind_int64_hook)*>(sqlite3_bind_int64_orig)(pStmt, i, iValue);
 	}
 
@@ -1747,6 +1771,11 @@ namespace
 		{
 			auto& stmt = text_queries.at(pStmt);
 			reinterpret_cast<decltype(sqlite3_bind_double_hook)*>(sqlite3_bind_double_orig)(get<0>(stmt), i, rValue);
+		}
+
+		if (pStmt == select_character_system_text_characterId && get<0>(select_character_system_text_characterId_replacement))
+		{
+			reinterpret_cast<decltype(sqlite3_bind_int64_hook)*>(sqlite3_bind_int64_orig)(get<0>(select_character_system_text_characterId_replacement), i, rValue);
 		}
 
 		return reinterpret_cast<decltype(sqlite3_bind_double_hook)*>(sqlite3_bind_double_orig)(pStmt, i, rValue);
@@ -1759,6 +1788,12 @@ namespace
 			auto& stmt = text_queries.at(pStmt);
 			reinterpret_cast<decltype(sqlite3_finalize_hook)*>(sqlite3_finalize_orig)(get<0>(stmt));
 			text_queries.erase(pStmt);
+		}
+
+		if (pStmt == select_character_system_text_characterId && get<0>(select_character_system_text_characterId_replacement))
+		{
+			reinterpret_cast<decltype(sqlite3_finalize_hook)*>(sqlite3_finalize_orig)(get<0>(select_character_system_text_characterId_replacement));
+			get<0>(select_character_system_text_characterId_replacement) = nullptr;
 		}
 
 		return reinterpret_cast<decltype(sqlite3_finalize_hook)*>(sqlite3_finalize_orig)(pStmt);
@@ -8297,7 +8332,7 @@ namespace
 			int dialogFormType)>(
 				il2cpp_class_get_method_from_name(dialogData->klass, "SetSimpleTwoButtonMessage",
 					7)->methodPointer
-				)(dialogData, il2cpp_string_new16(LocalifySettings::GetText("title")), nullptr, onRight, GetTextIdByName(L"Common0004"), GetTextIdByName(L"Common0261"), onLeft, 10);
+				)(dialogData, il2cpp_string_new16(LocalifySettings::GetText("settings_title")), nullptr, onRight, GetTextIdByName(L"Common0004"), GetTextIdByName(L"Common0261"), onLeft, 10);
 
 		auto DispStackTypeField = il2cpp_class_get_field_from_name_wrap(dialogData->klass, "DispStackType");
 		int DispStackType = 2;
@@ -8681,7 +8716,7 @@ namespace
 				isJobsExist ? GetOptionItemOnOff("notification_jobs", localize_get_hook(GetTextIdByName(L"Jobs600005"))->chars) : nullptr,
 				GetOptionItemButton("show_notification", LocalifySettings::GetText("show_notification")),
 				GetOptionItemAttention(localize_get_hook(GetTextIdByName(L"Outgame0297"))->chars),
-				GetOptionItemTitle(LocalifySettings::GetText("title")),
+				GetOptionItemTitle(LocalifySettings::GetText("settings_title")),
 				Game::CurrentGameRegion == Game::Region::JAP ?
 					GetOptionItemButton("clear_webview_cache", LocalifySettings::GetText("clear_webview_cache")) :
 					GetOptionItemOnOff("allow_delete_cookie", LocalifySettings::GetText("allow_delete_cookie")),
@@ -9153,7 +9188,7 @@ namespace
 			int dialogFormType)>(
 				il2cpp_class_get_method_from_name(dialogData->klass, "SetSimpleTwoButtonMessage",
 					7)->methodPointer
-				)(dialogData, il2cpp_string_new16(LocalifySettings::GetText("title")), nullptr, onRight, GetTextIdByName(L"Common0004"), GetTextIdByName(L"Common0261"), onLeft, 10);
+				)(dialogData, il2cpp_string_new16(LocalifySettings::GetText("settings_title")), nullptr, onRight, GetTextIdByName(L"Common0004"), GetTextIdByName(L"Common0261"), onLeft, 10);
 
 		auto DispStackTypeField = il2cpp_class_get_field_from_name_wrap(dialogData->klass, "DispStackType");
 		int DispStackType = 2;
@@ -9326,7 +9361,7 @@ namespace
 	{
 		AddToLayout(parentRectTransform,
 			{
-				GetOptionItemTitle(LocalifySettings::GetText("title")),
+				GetOptionItemTitle(LocalifySettings::GetText("settings_title")),
 				GetOptionItemButton("open_settings", LocalifySettings::GetText("open_settings")),
 			}
 			);

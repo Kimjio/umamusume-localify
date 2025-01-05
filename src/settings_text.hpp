@@ -13,7 +13,7 @@ namespace LocalifySettings
 	{
 		bool isKor = Game::CurrentGameRegion == Game::Region::KOR || config::localify_settings_force_korean;
 
-		if (id == "title")
+		if (id == "settings_title")
 		{
 			return isKor ? L"Localify 설정" : L"Localify設定";
 		}
