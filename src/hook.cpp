@@ -1283,7 +1283,7 @@ namespace
 
 				if (!CriMana_SetFileAppend_addr)
 				{
-					CriMana_SetFileAppend_addr = GetProcAddress(criware, "CRIWARE46A04F06");
+					CriMana_SetFileAppend_addr = GetProcAddress(criware, "CRIWARE6F49ABEA");
 				}
 
 				MH_CreateHook(CriMana_SetFileAppend_addr, CriMana_SetFileAppend_hook, &CriMana_SetFileAppend_orig);
