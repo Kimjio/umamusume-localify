@@ -456,6 +456,50 @@ static void ReplaceRawImageTexture(Il2CppObject* rawImage)
 	}
 }
 
+static void ReplaceImageTexture(Il2CppObject* image)
+{
+	if (!UnityEngine::Object::IsNativeObjectAlive(image))
+	{
+		return;
+	}
+
+	auto spriteField = il2cpp_class_get_field_from_name_wrap(image->klass, "m_Sprite");
+	Il2CppObject* sprite;
+	il2cpp_field_get_value(image, spriteField, &sprite);
+
+	if (sprite)
+	{
+		auto uobject_name = UnityEngine::Object::Name(sprite);
+		if (uobject_name)
+		{
+			auto nameU8 = wide_u8(uobject_name->chars);
+			if (!nameU8.empty())
+			{
+				do
+				{
+					stringstream pathStream(nameU8);
+					string segment;
+					vector<string> split;
+					while (getline(pathStream, segment, '/'))
+					{
+						split.emplace_back(segment);
+					}
+					auto& spriteName = split.back();
+					if (!spriteName.empty())
+					{
+						auto spriteNew = GetReplacementAssets(il2cpp_string_new(split.back().data()),
+							GetRuntimeType("UnityEngine.CoreModule.dll", "UnityEngine", "Sprite"));
+						if (spriteNew)
+						{
+							il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, Il2CppObject*)>(image->klass, "set_sprite", 1)->methodPointer(image, spriteNew);
+						}
+					}
+				} while (false);
+			}
+		}
+	}
+}
+
 static void ReplaceGameObjectTextures(Il2CppObject* gameObject, bool isChild)
 {
 	auto getComponent = il2cpp_class_get_method_from_name_type<Il2CppObject * (*)(Il2CppObject*, Il2CppType*)>(gameObject->klass, "GetComponent", 1)->methodPointer;
@@ -467,10 +511,10 @@ static void ReplaceGameObjectTextures(Il2CppObject* gameObject, bool isChild)
 
 	if (array)
 	{
-		for (int j = 0; j < array->max_length; j++)
+		for (int i = 0; i < array->max_length; i++)
 		{
 			auto obj =
-				il2cpp_symbols::get_method_pointer<Il2CppObject * (*)(Il2CppObject*, long index)>("mscorlib.dll", "System", "Array", "GetValue", 1)(array, j);
+				il2cpp_symbols::get_method_pointer<Il2CppObject * (*)(Il2CppObject*, long index)>("mscorlib.dll", "System", "Array", "GetValue", 1)(array, i);
 			
 			if (!obj) continue;
 
@@ -492,6 +536,21 @@ static void ReplaceGameObjectTextures(Il2CppObject* gameObject, bool isChild)
 			if (rawImage)
 			{
 				ReplaceRawImageTexture(rawImage);
+			}
+		}
+	}
+
+	auto images = getComponents(gameObject, reinterpret_cast<Il2CppType*>(GetRuntimeType("umamusume.dll", "Gallop", "ImageCommon")),
+		true, true, true, false, nullptr);
+
+	if (images && images->max_length)
+	{
+		for (int i = 0; i < images->max_length; i++)
+		{
+			auto image = images->vector[i];
+			if (image)
+			{
+				ReplaceImageTexture(image);
 			}
 		}
 	}
