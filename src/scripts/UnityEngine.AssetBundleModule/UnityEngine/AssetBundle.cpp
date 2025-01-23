@@ -739,7 +739,7 @@ static Il2CppObject* LoadAssetAsync_Internal_hook(Il2CppObject* self, Il2CppStri
 	auto& fileName = splited.back();
 	if (find_if(config::runtime::replaceAssetNames.begin(), config::runtime::replaceAssetNames.end(), [fileName](const wstring& item)
 		{
-			return item.find(fileName) != string::npos;
+			return item.find(fileName) != wstring::npos;
 		}) != config::runtime::replaceAssetNames.end())
 	{
 		return GetReplacementAssetsAsync(il2cpp_string_new16(fileName.data()), type);

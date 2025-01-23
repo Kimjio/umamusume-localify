@@ -83,7 +83,7 @@ struct Il2CppDelegate_t
 #include "il2cpp-api-functions.h"
 #undef DO_API
 
-char* il2cpp_array_addr_with_size(void* arr, int32_t size, uintptr_t idx);
+// char* il2cpp_array_addr_with_size(void* arr, int32_t size, uintptr_t idx);
 
 // array macro
 #define il2cpp_array_addr(array, type, index) reinterpret_cast<type*>(il2cpp_array_addr_with_size(array, sizeof(type), index))

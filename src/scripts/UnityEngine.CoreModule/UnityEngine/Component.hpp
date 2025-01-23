@@ -5,10 +5,14 @@
 
 namespace UnityEngine
 {
+	class Transform;
+
 	class GameObject;
 	class Component : public Object
 	{
 	public:
+		Transform transform();
+
 		GameObject gameObject();
 
 		using Object::Object;

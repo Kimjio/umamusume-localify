@@ -270,10 +270,10 @@ BOOL WINAPI DllMain(HINSTANCE, DWORD reason, LPVOID)
 		}
 		else
 		{
-			Game::CurrentGameRegion = Game::Region::JAP;
+			Game::CurrentGameRegion = Game::Region::JPN;
 		}
 
-		if (Game::CurrentGameRegion != Game::Region::JAP)
+		if (Game::CurrentGameRegion != Game::Region::JPN)
 		{
 			wstringstream subKeyStream;
 

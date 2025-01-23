@@ -18,7 +18,7 @@ void* GetComponent_addr = nullptr;
 
 void* GetComponentByName_addr = nullptr;
 
-void* get_transform_addr = nullptr;
+void* GameObject_get_transform_addr = nullptr;
 
 void* get_tag_addr = nullptr;
 
@@ -85,7 +85,7 @@ static void InitAddress()
 	TryGetComponentFastPath_addr = il2cpp_resolve_icall("UnityEngine.GameObject::TryGetComponentFastPath()");
 	GetComponent_addr = il2cpp_resolve_icall("UnityEngine.GameObject::GetComponent()");
 	GetComponentByName_addr = il2cpp_resolve_icall("UnityEngine.GameObject::GetComponentByName()");
-	get_transform_addr = il2cpp_resolve_icall("UnityEngine.GameObject::get_transform()");
+	GameObject_get_transform_addr = il2cpp_resolve_icall("UnityEngine.GameObject::get_transform()");
 	get_tag_addr = il2cpp_resolve_icall("UnityEngine.GameObject::get_tag()");
 	set_tag_addr = il2cpp_resolve_icall("UnityEngine.GameObject::set_tag()");
 	SetActive_addr = il2cpp_resolve_icall("UnityEngine.GameObject::SetActive()");
@@ -135,7 +135,7 @@ namespace UnityEngine
 
 	Transform GameObject::transform()
 	{
-		auto transform = reinterpret_cast<Il2CppObject * (*)(Il2CppObject*)>(get_transform_addr)(instance);
+		auto transform = reinterpret_cast<Il2CppObject * (*)(Il2CppObject*)>(GameObject_get_transform_addr)(instance);
 		return Transform(transform);
 	}
 

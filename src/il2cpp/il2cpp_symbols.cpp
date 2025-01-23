@@ -1,15 +1,15 @@
 #include "il2cpp_symbols.hpp"
 
 #define DO_API(r, n, p) r (*n) p
-#include "il2cpp-api-functions.h"
+#include "il2cpp-api-functions_unified.h"
 #undef DO_API
 
 Il2CppDefaults il2cpp_defaults;
 
-char* il2cpp_array_addr_with_size(void* array, int32_t size, uintptr_t idx)
-{
-	return reinterpret_cast<char*>(array) + kIl2CppSizeOfArray + size * idx;
-}
+//char* il2cpp_array_addr_with_size(void* array, int32_t size, uintptr_t idx)
+//{
+//	return reinterpret_cast<char*>(array) + kIl2CppSizeOfArray + size * idx;
+//}
 
 Il2CppString* il2cpp_string_new16(const wchar_t* value)
 {
@@ -144,8 +144,8 @@ namespace il2cpp_symbols
 		}
 		else
 		{
-			// 2020.3.24f
-			startRva = 0x8c6714;
+			// 2022.3.20f
+			startRva = 0x7834A2;
 		}
 
 		int rva = startRva;
@@ -176,7 +176,14 @@ namespace il2cpp_symbols
 #define IL2CPP_ENABLE_PROFILER 0
 			// DO_API_NO_RETURN is not obfuscated
 #define DO_API_NO_RETURN(r, n, p) symbol_names.emplace_back("_"#n)
+			if (Game::CurrentGameRegion == Game::Region::KOR)
+			{
+#include "il2cpp-api-functions_2020.h"
+			}
+			else
+			{
 #include "il2cpp-api-functions.h"
+			}
 #undef DO_API_NO_RETURN
 #undef IL2CPP_ENABLE_PROFILER
 #define IL2CPP_ENABLE_PROFILER !IL2CPP_TINY
@@ -214,7 +221,14 @@ namespace il2cpp_symbols
 					rapidjson::StringRef(real_name),
 					config::fn_map.GetAllocator());
 
-				rva += rva == startRva ? 0x35 : 0x30;
+				if (Game::CurrentGameRegion == Game::Region::KOR)
+				{
+					rva += rva == startRva ? 0x35 : 0x30;
+				}
+				else
+				{
+					rva += rva == startRva ? 0x28 : 0x26;
+				}
 			}
 
 			UnmapViewOfFile(view);
@@ -232,7 +246,7 @@ namespace il2cpp_symbols
 	void init(HMODULE game_module)
 	{
 		init_functions(game_module);
-		il2cpp_domain = il2cpp_domain_get();
+		//il2cpp_domain = il2cpp_domain_get();
 	}
 
 	void call_init_callbacks()
@@ -246,7 +260,14 @@ namespace il2cpp_symbols
 	void init_functions(HMODULE game_module)
 	{
 #define DO_API(r, n, p) n = reinterpret_cast<decltype(n)>(GetProcAddress(game_module, il2cpp_fn_name(#n).data()))
+		if (Game::CurrentGameRegion == Game::Region::KOR)
+		{
+#include "il2cpp-api-functions_2020.h"
+		}
+		else
+		{
 #include "il2cpp-api-functions.h"
+		}
 #undef DO_API
 	}
 
@@ -262,7 +283,16 @@ namespace il2cpp_symbols
 
 #define DEFAULTS_INIT_TYPE_OPTIONAL(field, ns, n, nativetype) do { DEFAULTS_INIT_OPTIONAL(field, ns, n); } while (0)
 
+#define DEFAULTS_GEN_INIT_TYPE(field, ns, n, nativetype) do { il2cpp_defaults.field = il2cpp_class_from_name(il2cpp_defaults.corlib_gen, ns, n); } while (0)
+
+#define DEFAULTS_GEN_INIT_OPTIONAL(field, ns, n) do { il2cpp_defaults.field = il2cpp_class_from_name(il2cpp_defaults.corlib_gen, ns, n); } while (0)
+
 		il2cpp_defaults.corlib = const_cast<Il2CppImage*>(il2cpp_get_corlib());
+		auto gen_assembly = il2cpp_domain_assembly_open(il2cpp_domain, "__Generated");
+		if (gen_assembly)
+		{
+			il2cpp_defaults.corlib_gen = const_cast<Il2CppImage*>(il2cpp_assembly_get_image(gen_assembly));
+		}
 		DEFAULTS_INIT(object_class, "System", "Object");
 		DEFAULTS_INIT(void_class, "System", "Void");
 		DEFAULTS_INIT_TYPE(boolean_class, "System", "Boolean", bool);
@@ -282,6 +312,7 @@ namespace il2cpp_symbols
 		DEFAULTS_INIT(string_class, "System", "String");
 		DEFAULTS_INIT(enum_class, "System", "Enum");
 		DEFAULTS_INIT(array_class, "System", "Array");
+		DEFAULTS_INIT(value_type_class, "System", "ValueType");
 #if !IL2CPP_TINY
 		DEFAULTS_INIT_TYPE(delegate_class, "System", "Delegate", Il2CppDelegate);
 		DEFAULTS_INIT_TYPE(multicastdelegate_class, "System", "MulticastDelegate",
@@ -306,13 +337,12 @@ namespace il2cpp_symbols
 #if !IL2CPP_TINY
 		DEFAULTS_INIT(appdomain_class, "System", "AppDomain");
 		DEFAULTS_INIT(appdomain_setup_class, "System", "AppDomainSetup");
+		DEFAULTS_INIT(member_info_class, "System.Reflection", "MemberInfo");
 		DEFAULTS_INIT(field_info_class, "System.Reflection", "FieldInfo");
 		DEFAULTS_INIT(method_info_class, "System.Reflection", "MethodInfo");
 		DEFAULTS_INIT(property_info_class, "System.Reflection", "PropertyInfo");
 		DEFAULTS_INIT_TYPE(event_info_class, "System.Reflection", "EventInfo",
 			Il2CppReflectionEvent);
-		DEFAULTS_INIT_TYPE(mono_event_info_class, "System.Reflection", "MonoEventInfo",
-			Il2CppReflectionMonoEventInfo);
 		DEFAULTS_INIT_TYPE(stringbuilder_class, "System.Text", "StringBuilder",
 			Il2CppStringBuilder);
 		DEFAULTS_INIT_TYPE(stack_frame_class, "System.Diagnostics", "StackFrame", Il2CppStackFrame);
@@ -329,29 +359,15 @@ namespace il2cpp_symbols
 #if !IL2CPP_TINY
 		DEFAULTS_INIT(version, "System", "Version");
 		DEFAULTS_INIT(culture_info, "System.Globalization", "CultureInfo");
-		DEFAULTS_INIT_TYPE(assembly_class, "System.Reflection", "Assembly",
-			Il2CppReflectionAssembly);
-		DEFAULTS_INIT_TYPE(assembly_name_class, "System.Reflection", "AssemblyName",
+		DEFAULTS_INIT_TYPE(assembly_class, "System.Reflection", "RuntimeAssembly", Il2CppReflectionAssembly);
+		DEFAULTS_INIT_TYPE_OPTIONAL(assembly_name_class, "System.Reflection", "AssemblyName",
 			Il2CppReflectionAssemblyName);
 #endif // !IL2CPP_TINY
-		DEFAULTS_INIT_TYPE(mono_assembly_class, "System.Reflection", "MonoAssembly",
-			Il2CppReflectionAssembly);
 #if !IL2CPP_TINY
-		DEFAULTS_INIT_TYPE(mono_field_class, "System.Reflection", "MonoField",
-			Il2CppReflectionField);
-		DEFAULTS_INIT_TYPE(mono_method_class, "System.Reflection", "MonoMethod",
-			Il2CppReflectionMethod);
-		DEFAULTS_INIT_TYPE(mono_method_info_class, "System.Reflection", "MonoMethodInfo",
-			Il2CppMethodInfo);
-		DEFAULTS_INIT_TYPE(mono_property_info_class, "System.Reflection", "MonoPropertyInfo",
-			Il2CppPropertyInfo);
-		DEFAULTS_INIT_TYPE(parameter_info_class, "System.Reflection", "ParameterInfo",
+		DEFAULTS_INIT_TYPE(parameter_info_class, "System.Reflection", "RuntimeParameterInfo",
 			Il2CppReflectionParameter);
-		DEFAULTS_INIT_TYPE(mono_parameter_info_class, "System.Reflection", "MonoParameterInfo",
-			Il2CppReflectionParameter);
-		DEFAULTS_INIT_TYPE(module_class, "System.Reflection", "Module", Il2CppReflectionModule);
+		DEFAULTS_INIT_TYPE(module_class, "System.Reflection", "RuntimeModule", Il2CppReflectionModule);
 
-		DEFAULTS_INIT_TYPE(pointer_class, "System.Reflection", "Pointer", Il2CppReflectionPointer);
 		DEFAULTS_INIT_TYPE(exception_class, "System", "Exception", Il2CppException);
 		DEFAULTS_INIT_TYPE(system_exception_class, "System", "SystemException",
 			Il2CppSystemException);
@@ -359,7 +375,14 @@ namespace il2cpp_symbols
 			Il2CppArgumentException);
 		DEFAULTS_INIT_TYPE(marshalbyrefobject_class, "System", "MarshalByRefObject",
 			Il2CppMarshalByRefObject);
-		DEFAULTS_INIT_TYPE(il2cpp_com_object_class, "System", "__Il2CppComObject", Il2CppComObject);
+		if (Game::CurrentGameRegion == Game::Region::JPN)
+		{
+			DEFAULTS_GEN_INIT_TYPE(il2cpp_com_object_class, "System", "__Il2CppComObject", Il2CppComObject);
+		}
+		else
+		{
+			DEFAULTS_INIT_TYPE(il2cpp_com_object_class, "System", "__Il2CppComObject", Il2CppComObject);
+		}
 		DEFAULTS_INIT_TYPE(safe_handle_class, "System.Runtime.InteropServices", "SafeHandle",
 			Il2CppSafeHandle);
 		DEFAULTS_INIT_TYPE(sort_key_class, "System.Globalization", "SortKey", Il2CppSortKey);
@@ -368,8 +391,9 @@ namespace il2cpp_symbols
 			"ErrorWrapper", Il2CppErrorWrapper);
 		DEFAULTS_INIT(missing_class, "System.Reflection", "Missing");
 		DEFAULTS_INIT(attribute_class, "System", "Attribute");
-		DEFAULTS_INIT(customattribute_data_class, "System.Reflection", "CustomAttributeData");
-		DEFAULTS_INIT(value_type_class, "System", "ValueType");
+		DEFAULTS_INIT_OPTIONAL(customattribute_data_class, "System.Reflection", "CustomAttributeData");
+		DEFAULTS_INIT_OPTIONAL(customattribute_typed_argument_class, "System.Reflection", "CustomAttributeTypedArgument");
+		DEFAULTS_INIT_OPTIONAL(customattribute_named_argument_class, "System.Reflection", "CustomAttributeNamedArgument");
 		DEFAULTS_INIT(key_value_pair_class, "System.Collections.Generic", "KeyValuePair`2");
 		DEFAULTS_INIT(system_guid_class, "System", "Guid");
 #endif // !IL2CPP_TINY
@@ -393,6 +417,12 @@ namespace il2cpp_symbols
 		DEFAULTS_INIT_OPTIONAL(uint16_shared_enum, "System", "UInt16Enum");
 		DEFAULTS_INIT_OPTIONAL(uint32_shared_enum, "System", "UInt32Enum");
 		DEFAULTS_INIT_OPTIONAL(uint64_shared_enum, "System", "UInt64Enum");
+
+		if (Game::CurrentGameRegion == Game::Region::JPN)
+		{
+			DEFAULTS_GEN_INIT_OPTIONAL(il2cpp_fully_shared_type, "Unity.IL2CPP.Metadata", "__Il2CppFullySharedGenericType");
+			DEFAULTS_GEN_INIT_OPTIONAL(il2cpp_fully_shared_struct_type, "Unity.IL2CPP.Metadata", "__Il2CppFullySharedGenericStructType");
+		}
 	}
 
 	Il2CppClass* get_class(const char* assemblyName, const char* namespaze, const char* klassName)

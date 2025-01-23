@@ -12,6 +12,8 @@
 
 #include "config/config.hpp"
 
+#include "game.hpp"
+
 inline static HWND currentHWnd = nullptr;
 
 #define STATIC \
@@ -72,155 +74,338 @@ inline const MethodInfo* GetGenericMethod(const MethodInfo* baseMethodInfo, Ts..
 template<typename... T, typename R, size_t... S>
 InvokerMethod GetInvokerMethod(R(*fn)(Il2CppObject*, T...), index_sequence<S...>)
 {
-	return *([](Il2CppMethodPointer fn, const MethodInfo* method, void* obj, void** params)
+	return *([](Il2CppMethodPointer fn, const MethodInfo* method, void* obj, void** params, void** returnValue)
 		{
-			return reinterpret_cast<void* (*)(void*, ...)>(fn)(obj, params[S]...);
+			*returnValue = reinterpret_cast<void* (*)(void*, ...)>(fn)(obj, params[S]...);
 		});
 }
 
 template<typename... T, typename R, size_t... S>
 InvokerMethod GetInvokerMethod(R(*fn)(void*, T...), index_sequence<S...>)
 {
-	return *([](Il2CppMethodPointer fn, const MethodInfo* method, void*, void** params)
+	return *([](Il2CppMethodPointer fn, const MethodInfo* method, void*, void** params, void** returnValue)
 		{
-			return reinterpret_cast<void* (*)(void*, ...)>(fn)(nullptr, params[S]...);
+			*returnValue = reinterpret_cast<void* (*)(void*, ...)>(fn)(nullptr, params[S]...);
 		});
+}
+
+static void InvokeDelegateConstructor(Il2CppDelegate* delegate, Il2CppObject* target, const MethodInfo* method)
+{
+	const MethodInfo* ctor = il2cpp_class_get_method_from_name(delegate->object.klass, ".ctor", 2);
+
+	if (!ctor) {
+		return;
+	}
+
+	void* ctorArgs[2] = { target, reinterpret_cast<void*>(&method) };
+	ctor->invoker_method(ctor->methodPointer, ctor, delegate, ctorArgs, nullptr);
 }
 
 template<typename... T, typename R>
 inline Il2CppMulticastDelegate* CreateDelegateWithClass(Il2CppClass* klass, Il2CppObject* target, R(*fn)(Il2CppObject*, T...))
 {
-	auto delegate = reinterpret_cast<Il2CppMulticastDelegate*>(il2cpp_object_new(klass));
-	delegate->delegate.method_ptr = reinterpret_cast<Il2CppMethodPointer>(fn);
+	if (Game::CurrentGameRegion == Game::Region::JPN)
+	{
+		auto delegate = reinterpret_cast<Il2CppMulticastDelegate*>(il2cpp_object_new(klass));
+		delegate->delegate.method_ptr = reinterpret_cast<Il2CppMethodPointer>(fn);
+		delegate->delegate.invoke_impl = reinterpret_cast<Il2CppMethodPointer>(fn);
 
-	const auto methodInfo = new MethodInfo{};
-	methodInfo->name = "AnonymousMethod";
-	methodInfo->methodPointer = delegate->delegate.method_ptr;
-	methodInfo->klass = il2cpp_defaults.mono_method_class;
-	// methodInfo->invoker_method = GetInvokerMethod(fn, index_sequence_for<T...>{});
-	methodInfo->slot = kInvalidIl2CppMethodSlot;
-	// methodInfo->flags = METHOD_ATTRIBUTE_PINVOKE_IMPL;
-	methodInfo->parameters_count = sizeof...(T);
+		MethodInfo* methodInfo = new MethodInfo{};
+		methodInfo->name = "AnonymousMethod";
+		methodInfo->methodPointer = delegate->delegate.method_ptr;
+		methodInfo->virtualMethodPointer = delegate->delegate.method_ptr;
+		methodInfo->klass = il2cpp_defaults.method_info_class;
+		// methodInfo->invoker_method = GetInvokerMethod(fn, index_sequence_for<T...>{});
+		methodInfo->slot = kInvalidIl2CppMethodSlot;
+		// methodInfo->flags = METHOD_ATTRIBUTE_PINVOKE_IMPL;
+		methodInfo->parameters_count = sizeof...(T);
 
-	methodInfo->nativeFunction = reinterpret_cast<Il2CppMethodPointer>(fn);
-	methodInfo->is_marshaled_from_native = true;
+		// methodInfo->nativeFunction = reinterpret_cast<Il2CppMethodPointer>(fn);
+		// methodInfo->is_marshaled_from_native = true;
+		delegate->delegate.method = reinterpret_cast<const MethodInfo*>(il2cpp_method_get_object(methodInfo, methodInfo->klass));
 
-	delegate->delegate.method = reinterpret_cast<const MethodInfo*>(il2cpp_method_get_object(methodInfo, methodInfo->klass));
-	// delegate->delegate.invoke_impl = il2cpp_class_get_method_from_name(klass, "Invoke", IgnoreNumberOfArguments)->invoker_method;
+		InvokeDelegateConstructor(&delegate->delegate, target, methodInfo);
 
-	delegate->delegates = il2cpp_array_new(klass, 1);
-	il2cpp_array_setref(delegate->delegates, 0, &delegate->delegate);
+		delegate->delegates = il2cpp_array_new(klass, 1);
+		il2cpp_array_setref(delegate->delegates, 0, &delegate->delegate);
 
-	auto object1 = reinterpret_cast<Il2CppObject*>(&delegate->delegate);
+		auto object1 = reinterpret_cast<Il2CppObject*>(&delegate->delegate);
 
-	il2cpp_gc_wbarrier_set_field(object1, reinterpret_cast<void**>(&(delegate->delegate).target), target);
+		il2cpp_gc_wbarrier_set_field(object1, reinterpret_cast<void**>(&(delegate->delegate).target), target);
 
-	return delegate;
+		return delegate;
+	}
+	else
+	{
+		auto delegate = reinterpret_cast<Il2CppMulticastDelegate2020*>(il2cpp_object_new(klass));
+		delegate->delegate.method_ptr = reinterpret_cast<Il2CppMethodPointer>(fn);
+		// delegate->delegate.invoke_impl = il2cpp_class_get_method_from_name(klass, "Invoke", IgnoreNumberOfArguments)->invoker_method;
+
+		MethodInfo2020* methodInfo = new MethodInfo2020{};
+		methodInfo->name = "AnonymousMethod";
+		methodInfo->methodPointer = delegate->delegate.method_ptr;
+		methodInfo->klass = il2cpp_defaults.method_info_class;
+		// methodInfo->invoker_method = GetInvokerMethod(fn, index_sequence_for<T...>{});
+		methodInfo->slot = kInvalidIl2CppMethodSlot;
+		// methodInfo->flags = METHOD_ATTRIBUTE_PINVOKE_IMPL;
+		methodInfo->parameters_count = sizeof...(T);
+
+		methodInfo->nativeFunction = reinterpret_cast<Il2CppMethodPointer>(fn);
+		methodInfo->is_marshaled_from_native = true;
+
+		delegate->delegate.method = reinterpret_cast<const MethodInfo2020*>(il2cpp_method_get_object(
+			reinterpret_cast<const MethodInfo*>(methodInfo), methodInfo->klass));
+
+		// InvokeDelegateConstructor(reinterpret_cast<Il2CppDelegate*>(&delegate->delegate), target, reinterpret_cast<const MethodInfo*>(methodInfo));
+
+		delegate->delegates = il2cpp_array_new(klass, 1);
+		il2cpp_array_setref(delegate->delegates, 0, &delegate->delegate);
+
+		auto object1 = reinterpret_cast<Il2CppObject*>(&delegate->delegate);
+
+		il2cpp_gc_wbarrier_set_field(object1, reinterpret_cast<void**>(&(delegate->delegate).target), target);
+
+		return reinterpret_cast<Il2CppMulticastDelegate*>(delegate);
+	}
 }
 
 template<typename... T, typename R>
 inline Il2CppDelegate* CreateDelegate(Il2CppObject* target, R(*fn)(Il2CppObject*, T...))
 {
-	auto delegate = reinterpret_cast<Il2CppDelegate*>(il2cpp_object_new(il2cpp_defaults.delegate_class));
-	delegate->method_ptr = reinterpret_cast<Il2CppMethodPointer>(fn);
+	const auto delegateClass = il2cpp_symbols::get_class("mscorlib.dll", "System", "Action");
 
-	const auto methodInfo = new MethodInfo{};
-	methodInfo->name = "AnonymousMethod";
-	methodInfo->methodPointer = delegate->method_ptr;
-	methodInfo->klass = il2cpp_defaults.mono_method_class;
-	// methodInfo->invoker_method = GetInvokerMethod(fn, index_sequence_for<T...>{});
-	methodInfo->slot = kInvalidIl2CppMethodSlot;
-	// methodInfo->flags = METHOD_ATTRIBUTE_PINVOKE_IMPL;
-	methodInfo->parameters_count = sizeof...(T);
+	if (Game::CurrentGameRegion == Game::Region::JPN)
+	{
+		auto delegate = reinterpret_cast<Il2CppDelegate*>(il2cpp_object_new(delegateClass));
+		delegate->method_ptr = reinterpret_cast<Il2CppMethodPointer>(fn);
+		delegate->invoke_impl = reinterpret_cast<Il2CppMethodPointer>(fn);
 
-	methodInfo->nativeFunction = reinterpret_cast<Il2CppMethodPointer>(fn);
-	methodInfo->is_marshaled_from_native = true;
+		MethodInfo* methodInfo = reinterpret_cast<MethodInfo*>(new MethodInfo{});
+		methodInfo->name = "AnonymousMethod";
+		methodInfo->methodPointer = delegate->method_ptr;
+		methodInfo->virtualMethodPointer = delegate->method_ptr;
+		methodInfo->klass = il2cpp_defaults.method_info_class;
+		// methodInfo->invoker_method = GetInvokerMethod(fn, index_sequence_for<T...>{});
+		methodInfo->slot = kInvalidIl2CppMethodSlot;
+		// methodInfo->flags = METHOD_ATTRIBUTE_PINVOKE_IMPL;
+		methodInfo->parameters_count = sizeof...(T);
+		methodInfo->return_type = il2cpp_class_get_type(il2cpp_defaults.void_class);
 
-	delegate->method = reinterpret_cast<const MethodInfo*>(il2cpp_method_get_object(methodInfo, methodInfo->klass));
-	// delegate->invoke_impl = methodInfo->invoker_method;
+		// methodInfo->nativeFunction = reinterpret_cast<Il2CppMethodPointer>(fn);
+		// methodInfo->is_marshaled_from_native = true;
 
-	auto object = reinterpret_cast<Il2CppObject*>(delegate);
+		delegate->method = reinterpret_cast<const MethodInfo*>(il2cpp_method_get_object(methodInfo, methodInfo->klass));
 
-	il2cpp_gc_wbarrier_set_field(object, reinterpret_cast<void**>(&(delegate)->target), target);
+		InvokeDelegateConstructor(delegate, nullptr, methodInfo);
 
-	return delegate;
+		auto object = reinterpret_cast<Il2CppObject*>(delegate);
+
+		il2cpp_gc_wbarrier_set_field(object, reinterpret_cast<void**>(&(delegate)->target), target);
+
+		return delegate;
+	}
+	else
+	{
+		auto delegate = reinterpret_cast<Il2CppDelegate2020*>(il2cpp_object_new(delegateClass));
+		delegate->method_ptr = reinterpret_cast<Il2CppMethodPointer>(fn);
+		// delegate->invoke_impl = methodInfo->invoker_method;
+
+		MethodInfo2020* methodInfo = new MethodInfo2020{};
+		methodInfo->name = "AnonymousMethod";
+		methodInfo->methodPointer = delegate->method_ptr;
+		methodInfo->klass = il2cpp_defaults.method_info_class;
+		// methodInfo->invoker_method = GetInvokerMethod(fn, index_sequence_for<T...>{});
+		methodInfo->slot = kInvalidIl2CppMethodSlot;
+		// methodInfo->flags = METHOD_ATTRIBUTE_PINVOKE_IMPL;
+		methodInfo->parameters_count = sizeof...(T);
+
+		methodInfo->nativeFunction = reinterpret_cast<Il2CppMethodPointer>(fn);
+		methodInfo->is_marshaled_from_native = true;
+
+		delegate->method = reinterpret_cast<const MethodInfo2020*>(il2cpp_method_get_object(
+			reinterpret_cast<const MethodInfo*>(methodInfo), methodInfo->klass));
+
+		// InvokeDelegateConstructor(reinterpret_cast<Il2CppDelegate*>(delegate), target, reinterpret_cast<const MethodInfo*>(methodInfo));
+
+		auto object = reinterpret_cast<Il2CppObject*>(delegate);
+
+		il2cpp_gc_wbarrier_set_field(object, reinterpret_cast<void**>(&(delegate)->target), target);
+
+		return reinterpret_cast<Il2CppDelegate*>(delegate);
+	}
 }
 
 template<typename... T, typename R>
 inline Il2CppMulticastDelegate* CreateUnityAction(Il2CppObject* target, R(*fn)(Il2CppObject*, T...))
 {
 	const auto delegateClass = il2cpp_symbols::get_class("UnityEngine.CoreModule.dll", "UnityEngine.Events", "UnityAction");
-	auto delegate = reinterpret_cast<Il2CppMulticastDelegate*>(il2cpp_object_new(delegateClass));
-	delegate->delegate.method_ptr = reinterpret_cast<Il2CppMethodPointer>(fn);
 
-	const auto methodInfo = new MethodInfo{};
-	methodInfo->name = "AnonymousMethod";
-	methodInfo->methodPointer = delegate->delegate.method_ptr;
-	methodInfo->klass = il2cpp_defaults.mono_method_class;
-	// methodInfo->invoker_method = GetInvokerMethod(fn, index_sequence_for<T...>{});
-	methodInfo->slot = kInvalidIl2CppMethodSlot;
-	// methodInfo->flags = METHOD_ATTRIBUTE_PINVOKE_IMPL;
-	methodInfo->parameters_count = sizeof...(T);
+	if (Game::CurrentGameRegion == Game::Region::JPN)
+	{
+		auto delegate = reinterpret_cast<Il2CppMulticastDelegate*>(il2cpp_object_new(delegateClass));
+		delegate->delegate.method_ptr = reinterpret_cast<Il2CppMethodPointer>(fn);
+		delegate->delegate.invoke_impl = reinterpret_cast<Il2CppMethodPointer>(fn);
 
-	methodInfo->nativeFunction = reinterpret_cast<Il2CppMethodPointer>(fn);
-	methodInfo->is_marshaled_from_native = true;
+		MethodInfo* methodInfo = reinterpret_cast<MethodInfo*>(new MethodInfo{});
+		methodInfo->name = "AnonymousMethod";
+		methodInfo->methodPointer = delegate->delegate.method_ptr;
+		methodInfo->virtualMethodPointer = delegate->delegate.method_ptr;
+		methodInfo->klass = il2cpp_defaults.method_info_class;
+		// methodInfo->invoker_method = GetInvokerMethod(fn, index_sequence_for<T...>{});
+		methodInfo->slot = kInvalidIl2CppMethodSlot;
+		// methodInfo->flags = METHOD_ATTRIBUTE_PINVOKE_IMPL;
+		methodInfo->parameters_count = sizeof...(T);
+		methodInfo->return_type = il2cpp_class_get_type(il2cpp_defaults.void_class);
 
-	delegate->delegate.method = reinterpret_cast<const MethodInfo*>(il2cpp_method_get_object(methodInfo, methodInfo->klass));
-	// delegate->delegate.invoke_impl = il2cpp_class_get_method_from_name(delegateClass, "Invoke", IgnoreNumberOfArguments)->invoker_method;
+		// methodInfo->nativeFunction = reinterpret_cast<Il2CppMethodPointer>(fn);
+		// methodInfo->is_marshaled_from_native = true;
 
-	delegate->delegates = il2cpp_array_new(delegateClass, 1);
-	il2cpp_array_setref(delegate->delegates, 0, &delegate->delegate);
+		delegate->delegate.method = reinterpret_cast<const MethodInfo*>(il2cpp_method_get_object(methodInfo, methodInfo->klass));
 
-	auto object1 = reinterpret_cast<Il2CppObject*>(&delegate->delegate);
+		InvokeDelegateConstructor(&delegate->delegate, target, methodInfo);
 
-	il2cpp_gc_wbarrier_set_field(object1, reinterpret_cast<void**>(&(delegate->delegate).target), target);
+		delegate->delegates = il2cpp_array_new(delegateClass, 1);
+		il2cpp_array_setref(delegate->delegates, 0, &delegate->delegate);
 
-	return delegate;
+		auto object1 = reinterpret_cast<Il2CppObject*>(&delegate->delegate);
+
+		il2cpp_gc_wbarrier_set_field(object1, reinterpret_cast<void**>(&(delegate->delegate).target), target);
+
+		return delegate;
+	}
+	else
+	{
+		auto delegate = reinterpret_cast<Il2CppMulticastDelegate2020*>(il2cpp_object_new(delegateClass));
+		delegate->delegate.method_ptr = reinterpret_cast<Il2CppMethodPointer>(fn);
+		// delegate->delegate.invoke_impl = il2cpp_class_get_method_from_name(delegateClass, "Invoke", IgnoreNumberOfArguments)->invoker_method;
+
+		MethodInfo2020* methodInfo = new MethodInfo2020{};
+		methodInfo->name = "AnonymousMethod";
+		methodInfo->methodPointer = delegate->delegate.method_ptr;
+		methodInfo->klass = il2cpp_defaults.method_info_class;
+		// methodInfo->invoker_method = GetInvokerMethod(fn, index_sequence_for<T...>{});
+		methodInfo->slot = kInvalidIl2CppMethodSlot;
+		// methodInfo->flags = METHOD_ATTRIBUTE_PINVOKE_IMPL;
+		methodInfo->parameters_count = sizeof...(T);
+
+		methodInfo->nativeFunction = reinterpret_cast<Il2CppMethodPointer>(fn);
+		methodInfo->is_marshaled_from_native = true;
+
+		delegate->delegate.method = reinterpret_cast<const MethodInfo2020*>(il2cpp_method_get_object(
+			reinterpret_cast<const MethodInfo*>(methodInfo), methodInfo->klass));
+
+		// InvokeDelegateConstructor(reinterpret_cast<Il2CppDelegate*>(&delegate->delegate), target, reinterpret_cast<const MethodInfo*>(methodInfo));
+
+		delegate->delegates = il2cpp_array_new(delegateClass, 1);
+		il2cpp_array_setref(delegate->delegates, 0, &delegate->delegate);
+
+		auto object1 = reinterpret_cast<Il2CppObject*>(&delegate->delegate);
+
+		il2cpp_gc_wbarrier_set_field(object1, reinterpret_cast<void**>(&(delegate->delegate).target), target);
+
+		return reinterpret_cast<Il2CppMulticastDelegate*>(delegate);
+	}
 }
 
 template<typename... T, typename R>
 inline Il2CppReflectionMethod* GetRuntimeMethodInfo(R(*fn)(void*, T...))
 {
-	const auto methodInfo = new MethodInfo{};
-	methodInfo->name = "AnonymousMethod";
-	methodInfo->methodPointer = reinterpret_cast<Il2CppMethodPointer>(fn);
-	methodInfo->klass = il2cpp_defaults.mono_method_class;
-	// methodInfo->invoker_method = GetInvokerMethod(fn, index_sequence_for<T...>{});
-	methodInfo->slot = kInvalidIl2CppMethodSlot;
-	// methodInfo->flags = METHOD_ATTRIBUTE_PINVOKE_IMPL;
-	methodInfo->parameters_count = sizeof...(T);
+	if (Game::CurrentGameRegion == Game::Region::JPN)
+	{
+		MethodInfo* methodInfo = new MethodInfo{};
+		methodInfo->name = "AnonymousMethod";
+		methodInfo->methodPointer = reinterpret_cast<Il2CppMethodPointer>(fn);
+		methodInfo->virtualMethodPointer = reinterpret_cast<Il2CppMethodPointer>(fn);
+		methodInfo->klass = il2cpp_defaults.method_info_class;
+		// methodInfo->invoker_method = GetInvokerMethod(fn, index_sequence_for<T...>{});
+		methodInfo->slot = kInvalidIl2CppMethodSlot;
+		// methodInfo->flags = METHOD_ATTRIBUTE_PINVOKE_IMPL;
+		methodInfo->parameters_count = sizeof...(T);
+		methodInfo->return_type = il2cpp_class_get_type(il2cpp_defaults.void_class);
 
-	methodInfo->nativeFunction = reinterpret_cast<Il2CppMethodPointer>(fn);
-	methodInfo->is_marshaled_from_native = true;
+		// methodInfo->nativeFunction = reinterpret_cast<Il2CppMethodPointer>(fn);
+		// methodInfo->is_marshaled_from_native = true;
 
-	return il2cpp_method_get_object(methodInfo, methodInfo->klass);
+		return il2cpp_method_get_object(methodInfo, methodInfo->klass);
+	}
+	else
+	{
+		MethodInfo2020* methodInfo = new MethodInfo2020{};
+		methodInfo->name = "AnonymousMethod";
+		methodInfo->methodPointer = reinterpret_cast<Il2CppMethodPointer>(fn);
+		methodInfo->klass = il2cpp_defaults.method_info_class;
+		// methodInfo->invoker_method = GetInvokerMethod(fn, index_sequence_for<T...>{});
+		methodInfo->slot = kInvalidIl2CppMethodSlot;
+		// methodInfo->flags = METHOD_ATTRIBUTE_PINVOKE_IMPL;
+		methodInfo->parameters_count = sizeof...(T);
+
+		methodInfo->nativeFunction = reinterpret_cast<Il2CppMethodPointer>(fn);
+		methodInfo->is_marshaled_from_native = true;
+
+		return il2cpp_method_get_object(reinterpret_cast<const MethodInfo*>(methodInfo), methodInfo->klass);
+	}
 }
 
 template<typename... T, typename R>
 inline Il2CppMulticastDelegate* CreateDelegateWithClassStatic(Il2CppClass* klass, R(*fn)(void*, T...))
 {
-	auto delegate = reinterpret_cast<Il2CppMulticastDelegate*>(il2cpp_object_new(klass));
-	delegate->delegate.method_ptr = reinterpret_cast<Il2CppMethodPointer>(fn);
+	if (Game::CurrentGameRegion == Game::Region::JPN)
+	{
+		auto delegate = reinterpret_cast<Il2CppMulticastDelegate*>(il2cpp_object_new(klass));
+		delegate->delegate.method_ptr = reinterpret_cast<Il2CppMethodPointer>(fn);
+		delegate->delegate.invoke_impl = reinterpret_cast<Il2CppMethodPointer>(fn);
 
-	const auto methodInfo = new MethodInfo{};
-	methodInfo->name = "AnonymousStaticMethod";
-	methodInfo->methodPointer = delegate->delegate.method_ptr;
-	methodInfo->klass = il2cpp_defaults.mono_method_class;
-	// methodInfo->invoker_method = GetInvokerMethod(fn, index_sequence_for<T...>{});
-	methodInfo->slot = kInvalidIl2CppMethodSlot;
-	methodInfo->flags = METHOD_ATTRIBUTE_STATIC;
-	methodInfo->parameters_count = sizeof...(T);
+		MethodInfo* methodInfo = new MethodInfo{};
+		methodInfo->name = "AnonymousStaticMethod";
+		methodInfo->methodPointer = delegate->delegate.method_ptr;
+		methodInfo->virtualMethodPointer = delegate->delegate.method_ptr;
+		methodInfo->klass = il2cpp_defaults.method_info_class;
+		// methodInfo->invoker_method = GetInvokerMethod(fn, index_sequence_for<T...>{});
+		methodInfo->slot = kInvalidIl2CppMethodSlot;
+		methodInfo->flags = METHOD_ATTRIBUTE_STATIC;
+		methodInfo->parameters_count = sizeof...(T);
+		methodInfo->return_type = il2cpp_class_get_type(il2cpp_defaults.void_class);
 
-	methodInfo->nativeFunction = reinterpret_cast<Il2CppMethodPointer>(fn);
-	methodInfo->is_marshaled_from_native = true;
+		// methodInfo->nativeFunction = reinterpret_cast<Il2CppMethodPointer>(fn);
+		// methodInfo->is_marshaled_from_native = true;
 
-	delegate->delegate.method = reinterpret_cast<const MethodInfo*>(il2cpp_method_get_object(methodInfo, methodInfo->klass));
-	// delegate->delegate.invoke_impl = il2cpp_class_get_method_from_name(klass, "Invoke", IgnoreNumberOfArguments)->invoker_method;
+		delegate->delegate.method = reinterpret_cast<const MethodInfo*>(il2cpp_method_get_object(methodInfo, methodInfo->klass));
 
-	delegate->delegates = il2cpp_array_new(klass, 1);
-	il2cpp_array_setref(delegate->delegates, 0, &delegate->delegate);
+		InvokeDelegateConstructor(&delegate->delegate, nullptr, methodInfo);
 
-	return delegate;
+		delegate->delegates = il2cpp_array_new(klass, 1);
+		il2cpp_array_setref(delegate->delegates, 0, &delegate->delegate);
+
+		return delegate;
+	}
+	else
+	{
+		auto delegate = reinterpret_cast<Il2CppMulticastDelegate2020*>(il2cpp_object_new(klass));
+		delegate->delegate.method_ptr = reinterpret_cast<Il2CppMethodPointer>(fn);
+		// delegate->delegate.invoke_impl = il2cpp_class_get_method_from_name(klass, "Invoke", IgnoreNumberOfArguments)->invoker_method;
+
+		MethodInfo2020* methodInfo = new MethodInfo2020{};
+		methodInfo->name = "AnonymousStaticMethod";
+		methodInfo->methodPointer = delegate->delegate.method_ptr;
+		methodInfo->klass = il2cpp_defaults.method_info_class;
+		// methodInfo->invoker_method = GetInvokerMethod(fn, index_sequence_for<T...>{});
+		methodInfo->slot = kInvalidIl2CppMethodSlot;
+		methodInfo->flags = METHOD_ATTRIBUTE_STATIC;
+		methodInfo->parameters_count = sizeof...(T);
+
+		methodInfo->nativeFunction = reinterpret_cast<Il2CppMethodPointer>(fn);
+		methodInfo->is_marshaled_from_native = true;
+
+		delegate->delegate.method = reinterpret_cast<const MethodInfo2020*>(il2cpp_method_get_object(
+			reinterpret_cast<const MethodInfo*>(methodInfo), methodInfo->klass));
+
+		// InvokeDelegateConstructor(reinterpret_cast<Il2CppDelegate*>(&delegate->delegate), nullptr, reinterpret_cast<const MethodInfo*>(methodInfo));
+
+		delegate->delegates = il2cpp_array_new(klass, 1);
+		il2cpp_array_setref(delegate->delegates, 0, &delegate->delegate);
+
+		return reinterpret_cast<Il2CppMulticastDelegate*>(delegate);
+	}
 }
 
 template<typename R>
@@ -232,25 +417,59 @@ inline Il2CppMulticastDelegate* CreateDelegateWithClassStatic(Il2CppClass* klass
 template<typename... T, typename R>
 inline Il2CppDelegate* CreateDelegateStatic(R(*fn)(void*, T...))
 {
-	auto delegate = reinterpret_cast<Il2CppDelegate*>(il2cpp_object_new(il2cpp_defaults.delegate_class));
-	delegate->method_ptr = reinterpret_cast<Il2CppMethodPointer>(fn);
+	const auto delegateClass = il2cpp_symbols::get_class("mscorlib.dll", "System", "Action");
 
-	const auto methodInfo = new MethodInfo{};
-	methodInfo->name = "AnonymousStaticMethod";
-	methodInfo->methodPointer = delegate->method_ptr;
-	methodInfo->klass = il2cpp_defaults.mono_method_class;
-	// methodInfo->invoker_method = GetInvokerMethod(fn, index_sequence_for<T...>{});
-	methodInfo->slot = kInvalidIl2CppMethodSlot;
-	methodInfo->flags = METHOD_ATTRIBUTE_STATIC;
-	methodInfo->parameters_count = sizeof...(T);
+	if (Game::CurrentGameRegion == Game::Region::JPN)
+	{
+		auto delegate = reinterpret_cast<Il2CppDelegate*>(il2cpp_object_new(delegateClass));
+		delegate->method_ptr = reinterpret_cast<Il2CppMethodPointer>(fn);
+		delegate->invoke_impl = reinterpret_cast<Il2CppMethodPointer>(fn);
 
-	methodInfo->nativeFunction = reinterpret_cast<Il2CppMethodPointer>(fn);
-	methodInfo->is_marshaled_from_native = true;
+		MethodInfo* methodInfo = new MethodInfo{};
+		methodInfo->name = "AnonymousStaticMethod";
+		methodInfo->methodPointer = delegate->method_ptr;
+		methodInfo->virtualMethodPointer = delegate->method_ptr;
+		methodInfo->klass = il2cpp_defaults.method_info_class;
+		// methodInfo->invoker_method = GetInvokerMethod(fn, index_sequence_for<T...>{});
+		methodInfo->slot = kInvalidIl2CppMethodSlot;
+		methodInfo->flags = METHOD_ATTRIBUTE_STATIC;
+		methodInfo->parameters_count = sizeof...(T);
+		methodInfo->return_type = il2cpp_class_get_type(il2cpp_defaults.void_class);
 
-	delegate->method = reinterpret_cast<const MethodInfo*>(il2cpp_method_get_object(methodInfo, methodInfo->klass));
-	// delegate->invoke_impl = methodInfo->invoker_method;
+		// methodInfo->nativeFunction = reinterpret_cast<Il2CppMethodPointer>(fn);
+		// methodInfo->is_marshaled_from_native = true;
 
-	return delegate;
+		delegate->method = reinterpret_cast<const MethodInfo*>(il2cpp_method_get_object(methodInfo, methodInfo->klass));
+
+		InvokeDelegateConstructor(delegate, nullptr, methodInfo);
+
+		return delegate;
+	}
+	else
+	{
+		auto delegate = reinterpret_cast<Il2CppDelegate2020*>(il2cpp_object_new(delegateClass));
+		delegate->method_ptr = reinterpret_cast<Il2CppMethodPointer>(fn);
+		// delegate->invoke_impl = methodInfo->invoker_method;
+
+		MethodInfo2020* methodInfo = new MethodInfo2020{};
+		methodInfo->name = "AnonymousStaticMethod";
+		methodInfo->methodPointer = delegate->method_ptr;
+		methodInfo->klass = il2cpp_defaults.method_info_class;
+		// methodInfo->invoker_method = GetInvokerMethod(fn, index_sequence_for<T...>{});
+		methodInfo->slot = kInvalidIl2CppMethodSlot;
+		methodInfo->flags = METHOD_ATTRIBUTE_STATIC;
+		methodInfo->parameters_count = sizeof...(T);
+
+		methodInfo->nativeFunction = reinterpret_cast<Il2CppMethodPointer>(fn);
+		methodInfo->is_marshaled_from_native = true;
+
+		delegate->method = reinterpret_cast<const MethodInfo2020*>(il2cpp_method_get_object(
+			reinterpret_cast<const MethodInfo*>(methodInfo), methodInfo->klass));
+
+		// InvokeDelegateConstructor(reinterpret_cast<Il2CppDelegate*>(delegate), nullptr, reinterpret_cast<const MethodInfo*>(methodInfo));
+
+		return reinterpret_cast<Il2CppDelegate*>(delegate);
+	}
 }
 
 template<typename R>
@@ -263,28 +482,64 @@ template<typename... T, typename R>
 inline Il2CppMulticastDelegate* CreateUnityActionStatic(R(*fn)(void*, T...))
 {
 	const auto delegateClass = il2cpp_symbols::get_class("UnityEngine.CoreModule.dll", "UnityEngine.Events", "UnityAction");
-	auto delegate = reinterpret_cast<Il2CppMulticastDelegate*>(il2cpp_object_new(delegateClass));
-	delegate->delegate.method_ptr = reinterpret_cast<Il2CppMethodPointer>(fn);
 
-	const auto methodInfo = new MethodInfo{};
-	methodInfo->name = "AnonymousStaticMethod";
-	methodInfo->methodPointer = delegate->delegate.method_ptr;
-	methodInfo->klass = il2cpp_defaults.mono_method_class;
-	// methodInfo->invoker_method = GetInvokerMethod(fn, index_sequence_for<T...>{});
-	methodInfo->slot = kInvalidIl2CppMethodSlot;
-	methodInfo->flags = METHOD_ATTRIBUTE_STATIC;
-	methodInfo->parameters_count = sizeof...(T);
+	if (Game::CurrentGameRegion == Game::Region::JPN)
+	{
+		auto delegate = reinterpret_cast<Il2CppMulticastDelegate*>(il2cpp_object_new(delegateClass));
+		delegate->delegate.method_ptr = reinterpret_cast<Il2CppMethodPointer>(fn);
+		delegate->delegate.invoke_impl = reinterpret_cast<Il2CppMethodPointer>(fn);
 
-	methodInfo->nativeFunction = reinterpret_cast<Il2CppMethodPointer>(fn);
-	methodInfo->is_marshaled_from_native = true;
+		MethodInfo* methodInfo = new MethodInfo{};
+		methodInfo->name = "AnonymousStaticMethod";
+		methodInfo->methodPointer = delegate->delegate.method_ptr;
+		methodInfo->virtualMethodPointer = delegate->delegate.method_ptr;
+		methodInfo->klass = il2cpp_defaults.method_info_class;
+		// methodInfo->invoker_method = GetInvokerMethod(fn, index_sequence_for<T...>{});
+		methodInfo->slot = kInvalidIl2CppMethodSlot;
+		methodInfo->flags = METHOD_ATTRIBUTE_STATIC;
+		methodInfo->parameters_count = sizeof...(T);
+		methodInfo->return_type = il2cpp_class_get_type(il2cpp_defaults.void_class);
 
-	delegate->delegate.method = reinterpret_cast<const MethodInfo*>(il2cpp_method_get_object(methodInfo, methodInfo->klass));
-	// delegate->delegate.invoke_impl = il2cpp_class_get_method_from_name(delegateClass, "Invoke", IgnoreNumberOfArguments)->invoker_method;
+		// methodInfo->nativeFunction = reinterpret_cast<Il2CppMethodPointer>(fn);
+		// methodInfo->is_marshaled_from_native = true;
 
-	delegate->delegates = il2cpp_array_new(delegateClass, 1);
-	il2cpp_array_setref(delegate->delegates, 0, &delegate->delegate);
+		delegate->delegate.method = reinterpret_cast<const MethodInfo*>(il2cpp_method_get_object(methodInfo, methodInfo->klass));
 
-	return delegate;
+		InvokeDelegateConstructor(&delegate->delegate, nullptr, methodInfo);
+
+		delegate->delegates = il2cpp_array_new(delegateClass, 1);
+		il2cpp_array_setref(delegate->delegates, 0, &delegate->delegate);
+
+		return delegate;
+	}
+	else
+	{
+		auto delegate = reinterpret_cast<Il2CppMulticastDelegate2020*>(il2cpp_object_new(delegateClass));
+		delegate->delegate.method_ptr = reinterpret_cast<Il2CppMethodPointer>(fn);
+		// delegate->delegate.invoke_impl = il2cpp_class_get_method_from_name(delegateClass, "Invoke", IgnoreNumberOfArguments)->invoker_method;
+
+		MethodInfo2020* methodInfo = new MethodInfo2020{};
+		methodInfo->name = "AnonymousStaticMethod";
+		methodInfo->methodPointer = delegate->delegate.method_ptr;
+		methodInfo->klass = il2cpp_defaults.method_info_class;
+		// methodInfo->invoker_method = GetInvokerMethod(fn, index_sequence_for<T...>{});
+		methodInfo->slot = kInvalidIl2CppMethodSlot;
+		methodInfo->flags = METHOD_ATTRIBUTE_STATIC;
+		methodInfo->parameters_count = sizeof...(T);
+
+		methodInfo->nativeFunction = reinterpret_cast<Il2CppMethodPointer>(fn);
+		methodInfo->is_marshaled_from_native = true;
+
+		delegate->delegate.method = reinterpret_cast<const MethodInfo2020*>(il2cpp_method_get_object(
+			reinterpret_cast<const MethodInfo*>(methodInfo), methodInfo->klass));
+
+		// InvokeDelegateConstructor(reinterpret_cast<Il2CppDelegate*>(&delegate->delegate), nullptr, reinterpret_cast<const MethodInfo*>(methodInfo));
+
+		delegate->delegates = il2cpp_array_new(delegateClass, 1);
+		il2cpp_array_setref(delegate->delegates, 0, &delegate->delegate);
+
+		return reinterpret_cast<Il2CppMulticastDelegate*>(delegate);
+	}
 }
 
 template<typename R>

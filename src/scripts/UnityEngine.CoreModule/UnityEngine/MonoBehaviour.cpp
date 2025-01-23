@@ -282,7 +282,12 @@ static Il2CppObject* StartCoroutineManaged2_hook(Il2CppObject* self, Il2CppObjec
 		return reinterpret_cast<decltype(StartCoroutineManaged2_hook)*>(StartCoroutineManaged2_orig)(self, newEnumerator);
 	}
 
-	auto coroutine = reinterpret_cast<decltype(StartCoroutineManaged2_hook)*>(StartCoroutineManaged2_orig)(self, enumerator);
+	/*if (config::freeform_window && string(enumerator->klass->name).find("ChangeScreenOrientation") != string::npos)
+	{
+		auto newEnumerator = il2cpp_symbols::get_method_pointer<Il2CppObject * (*)(Il2CppDelegate*)>("umamusume.dll", "Gallop", "MonoBehaviourExtension", "WaitForEndFrameAsync", 1)(CreateDelegateStatic(*[]() {}));
+
+		return reinterpret_cast<decltype(StartCoroutineManaged2_hook)*>(StartCoroutineManaged2_orig)(self, newEnumerator);
+	}*/
 
 	if (config::freeform_window && string(enumerator->klass->name).find("ChangeOrientation") != string::npos)
 	{
@@ -293,7 +298,7 @@ static Il2CppObject* StartCoroutineManaged2_hook(Il2CppObject* self, Il2CppObjec
 		}
 	}
 
-	return coroutine;
+	return reinterpret_cast<decltype(StartCoroutineManaged2_hook)*>(StartCoroutineManaged2_orig)(self, enumerator);
 }
 
 static void InitAddress()

@@ -6,6 +6,12 @@
 
 namespace UnityEngine
 {
+	struct RefreshRate
+	{
+		uint32_t numerator;
+		uint32_t denominator;
+	};
+
 	class Screen
 	{
 	public:

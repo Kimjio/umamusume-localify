@@ -10,6 +10,10 @@ namespace UnityEngine
 	public:
 		static int PropertyToID(Il2CppString* name);
 
+		static Il2CppObject* GetGlobalTextureImpl(int name);
+
+		static void SetGlobalTextureImpl(int name, Il2CppObject* value);
+
 		using Object::Object;
 	};
 }

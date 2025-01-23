@@ -188,8 +188,11 @@ namespace
 		il2cpp_field_static_set_value(isQuitField, &isQuit);
 	}
 
-	void* set_resolution_orig;
-	void set_resolution_hook(int width, int height, int fullscreenMode, int perferredRefreshRate);
+	void* SetResolution_orig;
+	void SetResolution_hook(int width, int height, int fullscreenMode, int perferredRefreshRate);
+
+	void* SetResolution_Injected_orig;
+	void SetResolution_Injected_hook(int width, int height, int fullscreenMode, UnityEngine::RefreshRate* perferredRefreshRate);
 
 	void init_il2cpp(bool attachIl2CppThread = false)
 	{
@@ -217,9 +220,9 @@ namespace
 
 		if (Game::CurrentGameRegion == Game::Region::KOR)
 		{
-			auto set_resolution = il2cpp_resolve_icall("UnityEngine.Screen::SetResolution(System.Int32,System.Int32,UnityEngine.FullScreenMode,System.Int32)");
-			MH_CreateHook(set_resolution, set_resolution_hook, &set_resolution_orig);
-			MH_EnableHook(set_resolution);
+			auto SetResolution = il2cpp_resolve_icall("UnityEngine.Screen::SetResolution(System.Int32,System.Int32,UnityEngine.FullScreenMode,System.Int32)");
+			MH_CreateHook(SetResolution, SetResolution_hook, &SetResolution_orig);
+			MH_EnableHook(SetResolution);
 
 			KillProcessByName(L"ucldr_Umamusume_KR_loader_x64.exe");
 
@@ -250,7 +253,7 @@ namespace
 	bool __stdcall il2cpp_init_hook(const char* domain_name)
 	{
 		const auto result = reinterpret_cast<decltype(il2cpp_init_hook)*>(il2cpp_init_orig)(domain_name);
-
+		il2cpp_symbols::il2cpp_domain = il2cpp_domain_get();
 		init_il2cpp();
 
 		return result;
@@ -978,7 +981,7 @@ namespace
 	int __stdcall UnityMain_hook(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPWSTR lpCmdLine, int nShowCmd)
 	{
 		::hInstance = hInstance;
-		Windows::Foundation::Initialize(RO_INIT_MULTITHREADED);
+		// Windows::Foundation::Initialize(RO_INIT_MULTITHREADED);
 		return reinterpret_cast<decltype(UnityMain_hook)*>(UnityMain_orig)(hInstance, hPrevInstance, lpCmdLine, nShowCmd);
 	}
 
@@ -1620,7 +1623,7 @@ namespace
 					sqlite3_stmt* stmt;
 					auto res = reinterpret_cast<decltype(sqlite3_prepare_v2_hook)*>(sqlite3_prepare_v2_orig)(MasterDB::replacementMasterDB, zSql, nBytes, &stmt, pzTail);
 					text_queries.emplace(pStmt, make_tuple(stmt, sql, false));
-					
+
 					if (res != SQLITE_OK)
 					{
 						cout << "ERROR: sqlite3_prepare_v2_hook SQL:" << sql << endl;
@@ -2165,15 +2168,9 @@ namespace
 	void ResizeMiniDirector()
 	{
 		Il2CppArraySize_t<Il2CppObject*>* miniDirectors;
-		if (Game::CurrentGameRegion == Game::Region::KOR)
-		{
-			miniDirectors = UnityEngine::Object::FindObjectsByType(
-				GetRuntimeType("umamusume.dll", "Gallop", "MiniDirector"), UnityEngine::FindObjectsInactive::Include, UnityEngine::FindObjectsSortMode::None);
-		}
-		else
-		{
-			miniDirectors = UnityEngine::Object::FindObjectsOfType(GetRuntimeType("umamusume.dll", "Gallop", "MiniDirector"), true);
-		}
+		miniDirectors = UnityEngine::Object::FindObjectsByType(
+			GetRuntimeType("umamusume.dll", "Gallop", "MiniDirector"), UnityEngine::FindObjectsInactive::Include, UnityEngine::FindObjectsSortMode::None);
+
 
 		if (miniDirectors)
 		{
@@ -2239,7 +2236,13 @@ namespace
 
 		auto GetCurrentViewController = il2cpp_symbols::find_method<Il2CppObject * (*)(Il2CppObject*)>("umamusume.dll", "Gallop", "SceneManager", [](const MethodInfo* info)
 			{
-				return info->name == "GetCurrentViewController"s && info->methodPointer;
+				if (Game::CurrentGameRegion == Game::Region::KOR)
+				{
+					auto info2020 = reinterpret_cast<const MethodInfo2020*>(info);
+					return info2020->name == "GetCurrentViewController"s && !info2020->is_generic;
+				}
+
+				return info->name == "GetCurrentViewController"s && !info->is_generic;
 			});
 
 		return GetCurrentViewController(sceneManager);
@@ -2274,15 +2277,8 @@ namespace
 		il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*)>(graphicSettings->klass, "Update3DRenderTexture", 0)->methodPointer(graphicSettings);
 
 		Il2CppArraySize_t<Il2CppObject*>* renders;
-		if (Game::CurrentGameRegion == Game::Region::KOR)
-		{
-			renders = UnityEngine::Object::FindObjectsByType(
-				GetRuntimeType("umamusume.dll", "Gallop", "CutInImageEffectPostRender"), UnityEngine::FindObjectsInactive::Include, UnityEngine::FindObjectsSortMode::None);
-		}
-		else
-		{
-			renders = UnityEngine::Object::FindObjectsOfType(GetRuntimeType("umamusume.dll", "Gallop", "CutInImageEffectPostRender"), true);
-		}
+		renders = UnityEngine::Object::FindObjectsByType(
+			GetRuntimeType("umamusume.dll", "Gallop", "CutInImageEffectPostRender"), UnityEngine::FindObjectsInactive::Include, UnityEngine::FindObjectsSortMode::None);
 
 		if (renders)
 		{
@@ -2295,22 +2291,18 @@ namespace
 					auto buffer = il2cpp_class_get_method_from_name_type<Il2CppObject * (*)(Il2CppObject*)>(obj->klass, "get_FrameBuffer", 0)->methodPointer(obj);
 					if (buffer)
 					{
-						il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*)>(buffer->klass, "RemakeRenderTexture", 0)->methodPointer(buffer);
+						if (il2cpp_class_get_method_from_name_type<Il2CppObject * (*)(Il2CppObject*)>(buffer->klass, "get_ColorBuffer", 0)->methodPointer(buffer))
+						{
+							il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*)>(buffer->klass, "RemakeRenderTexture", 0)->methodPointer(buffer);
+						}
 					}
 				}
 			}
 		}
 
 		Il2CppArraySize_t<Il2CppObject*>* cuts;
-		if (Game::CurrentGameRegion == Game::Region::KOR)
-		{
-			cuts = UnityEngine::Object::FindObjectsByType(
-				GetRuntimeType("umamusume.dll", "Gallop", "LimitBreakCut"), UnityEngine::FindObjectsInactive::Include, UnityEngine::FindObjectsSortMode::None);
-		}
-		else
-		{
-			cuts = UnityEngine::Object::FindObjectsOfType(GetRuntimeType("umamusume.dll", "Gallop", "LimitBreakCut"), true);
-		}
+		cuts = UnityEngine::Object::FindObjectsByType(
+			GetRuntimeType("umamusume.dll", "Gallop", "LimitBreakCut"), UnityEngine::FindObjectsInactive::Include, UnityEngine::FindObjectsSortMode::None);
 
 		if (cuts)
 		{
@@ -2326,22 +2318,18 @@ namespace
 
 					if (_frameBuffer)
 					{
-						il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*)>(_frameBuffer->klass, "RemakeRenderTexture", 0)->methodPointer(_frameBuffer);
+						if (il2cpp_class_get_method_from_name_type<Il2CppObject * (*)(Il2CppObject*)>(_frameBuffer->klass, "get_ColorBuffer", 0)->methodPointer(_frameBuffer))
+						{
+							il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*)>(_frameBuffer->klass, "RemakeRenderTexture", 0)->methodPointer(_frameBuffer);
+						}
 					}
 				}
 			}
 		}
 
 		Il2CppArraySize_t<Il2CppObject*>* raceEffect;
-		if (Game::CurrentGameRegion == Game::Region::KOR)
-		{
-			raceEffect = UnityEngine::Object::FindObjectsByType(
-				GetRuntimeType("umamusume.dll", "Gallop", "RaceImageEffect"), UnityEngine::FindObjectsInactive::Include, UnityEngine::FindObjectsSortMode::None);
-		}
-		else
-		{
-			raceEffect = UnityEngine::Object::FindObjectsOfType(GetRuntimeType("umamusume.dll", "Gallop", "RaceImageEffect"), true);
-		}
+		raceEffect = UnityEngine::Object::FindObjectsByType(
+			GetRuntimeType("umamusume.dll", "Gallop", "RaceImageEffect"), UnityEngine::FindObjectsInactive::Include, UnityEngine::FindObjectsSortMode::None);
 
 		if (raceEffect)
 		{
@@ -2368,7 +2356,10 @@ namespace
 							}
 
 
-							il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*)>(buffer->klass, "RemakeRenderTexture", 0)->methodPointer(buffer);
+							if (il2cpp_class_get_method_from_name_type<Il2CppObject * (*)(Il2CppObject*)>(buffer->klass, "get_ColorBuffer", 0)->methodPointer(buffer))
+							{
+								il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*)>(buffer->klass, "RemakeRenderTexture", 0)->methodPointer(buffer);
+							}
 						}
 					}
 					else
@@ -2379,16 +2370,9 @@ namespace
 			}
 		}
 
-		Il2CppArraySize_t<Il2CppObject*>* storyEffect;
-		if (Game::CurrentGameRegion == Game::Region::KOR)
-		{
-			storyEffect = UnityEngine::Object::FindObjectsByType(
-				GetRuntimeType("umamusume.dll", "Gallop", "StoryImageEffect"), UnityEngine::FindObjectsInactive::Include, UnityEngine::FindObjectsSortMode::None);
-		}
-		else
-		{
-			storyEffect = UnityEngine::Object::FindObjectsOfType(GetRuntimeType("umamusume.dll", "Gallop", "StoryImageEffect"), true);
-		}
+		/*Il2CppArraySize_t<Il2CppObject*>* storyEffect;
+		storyEffect = UnityEngine::Object::FindObjectsByType(
+			GetRuntimeType("umamusume.dll", "Gallop", "StoryImageEffect"), UnityEngine::FindObjectsInactive::Include, UnityEngine::FindObjectsSortMode::None);
 
 		if (storyEffect)
 		{
@@ -2405,18 +2389,11 @@ namespace
 					}
 				}
 			}
-		}
+		}*/
 
 		Il2CppArraySize_t<Il2CppObject*>* lowResCameras;
-		if (Game::CurrentGameRegion == Game::Region::KOR)
-		{
-			lowResCameras = UnityEngine::Object::FindObjectsByType(
-				GetRuntimeType("umamusume.dll", "Gallop", "LowResolutionCameraBase"), UnityEngine::FindObjectsInactive::Include, UnityEngine::FindObjectsSortMode::None);
-		}
-		else
-		{
-			lowResCameras = UnityEngine::Object::FindObjectsOfType(GetRuntimeType("umamusume.dll", "Gallop", "LowResolutionCameraBase"), true);
-		}
+		lowResCameras = UnityEngine::Object::FindObjectsByType(
+			GetRuntimeType("umamusume.dll", "Gallop", "LowResolutionCameraBase"), UnityEngine::FindObjectsInactive::Include, UnityEngine::FindObjectsSortMode::None);
 
 		if (lowResCameras)
 		{
@@ -2426,7 +2403,7 @@ namespace
 
 				if (obj)
 				{
-					auto method = il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*)>(obj->klass, "UpdateDirection", 0);
+					auto method = il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*)>(obj->klass, "ResizeRenderTextureSize", 0);
 					if (method)
 					{
 						method->methodPointer(obj);
@@ -2436,15 +2413,8 @@ namespace
 		}
 
 		Il2CppArraySize_t<Il2CppObject*>* liveTheaterCharaSelects;
-		if (Game::CurrentGameRegion == Game::Region::KOR)
-		{
-			liveTheaterCharaSelects = UnityEngine::Object::FindObjectsByType(
-				GetRuntimeType("umamusume.dll", "Gallop", "LiveTheaterCharaSelect"), UnityEngine::FindObjectsInactive::Include, UnityEngine::FindObjectsSortMode::None);
-		}
-		else
-		{
-			liveTheaterCharaSelects = UnityEngine::Object::FindObjectsOfType(GetRuntimeType("umamusume.dll", "Gallop", "LiveTheaterCharaSelect"), true);
-		}
+		liveTheaterCharaSelects = UnityEngine::Object::FindObjectsByType(
+			GetRuntimeType("umamusume.dll", "Gallop", "LiveTheaterCharaSelect"), UnityEngine::FindObjectsInactive::Include, UnityEngine::FindObjectsSortMode::None);
 
 		if (liveTheaterCharaSelects)
 		{
@@ -2488,15 +2458,8 @@ namespace
 		}
 
 		Il2CppArraySize_t<Il2CppObject*>* miniDirectors;
-		if (Game::CurrentGameRegion == Game::Region::KOR)
-		{
-			miniDirectors = UnityEngine::Object::FindObjectsByType(
-				GetRuntimeType("umamusume.dll", "Gallop", "MiniDirector"), UnityEngine::FindObjectsInactive::Include, UnityEngine::FindObjectsSortMode::None);
-		}
-		else
-		{
-			miniDirectors = UnityEngine::Object::FindObjectsOfType(GetRuntimeType("umamusume.dll", "Gallop", "MiniDirector"), true);
-		}
+		miniDirectors = UnityEngine::Object::FindObjectsByType(
+			GetRuntimeType("umamusume.dll", "Gallop", "MiniDirector"), UnityEngine::FindObjectsInactive::Include, UnityEngine::FindObjectsSortMode::None);
 
 		if (miniDirectors && miniDirectors->max_length)
 		{
@@ -2534,7 +2497,10 @@ namespace
 
 					if (_frameBuffer)
 					{
-						il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*)>(_frameBuffer->klass, "RemakeRenderTexture", 0)->methodPointer(_frameBuffer);
+						if (il2cpp_class_get_method_from_name_type<Il2CppObject * (*)(Il2CppObject*)>(_frameBuffer->klass, "get_ColorBuffer", 0)->methodPointer(_frameBuffer))
+						{
+							il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*)>(_frameBuffer->klass, "RemakeRenderTexture", 0)->methodPointer(_frameBuffer);
+						}
 					}
 				}
 			}
@@ -2553,7 +2519,10 @@ namespace
 
 					if (FrameBuffer)
 					{
-						il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*)>(FrameBuffer->klass, "RemakeRenderTexture", 0)->methodPointer(FrameBuffer);
+						if (il2cpp_class_get_method_from_name_type<Il2CppObject * (*)(Il2CppObject*)>(FrameBuffer->klass, "get_ColorBuffer", 0)->methodPointer(FrameBuffer))
+						{
+							il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*)>(FrameBuffer->klass, "RemakeRenderTexture", 0)->methodPointer(FrameBuffer);
+						}
 					}
 				}
 			}
@@ -2588,22 +2557,94 @@ namespace
 
 				if (_frameBuffer)
 				{
-					il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*)>(_frameBuffer->klass, "RemakeRenderTexture", 0)->methodPointer(_frameBuffer);
+					if (il2cpp_class_get_method_from_name_type<Il2CppObject * (*)(Il2CppObject*)>(_frameBuffer->klass, "get_ColorBuffer", 0)->methodPointer(_frameBuffer))
+					{
+						il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*)>(_frameBuffer->klass, "RemakeRenderTexture", 0)->methodPointer(_frameBuffer);
+					}
 				}
-
 			}
 		}
 
-		if (GetSingletonInstance(il2cpp_symbols::get_class("umamusume.dll", "Gallop", "StoryManager")))
+		auto storyManager = GetSingletonInstance(il2cpp_symbols::get_class("umamusume.dll", "Gallop", "StoryManager"));
+		if (storyManager)
 		{
 			auto storySceneController = il2cpp_symbols::get_method_pointer<Il2CppObject * (*)()>("umamusume.dll", "Gallop", "StoryManager", "get_StorySceneController", IgnoreNumberOfArguments)();
 			if (storySceneController)
 			{
-				auto CurrentDisplayModeField = il2cpp_class_get_field_from_name_wrap(il2cpp_symbols::get_class("umamusume.dll", "Gallop", "StoryTimelineController"), "CurrentDisplayMode");
-				int mode;
-				il2cpp_field_static_get_value(CurrentDisplayModeField, &mode);
+				auto DisplayMode = il2cpp_class_get_method_from_name_type<uint64_t(*)(Il2CppObject*)>(storySceneController->klass, "get_DisplayMode", 0)->methodPointer(storySceneController);
 
-				il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, int)>(storySceneController->klass, "ChangeCameraDirection", 1)->methodPointer(storySceneController, mode);
+				auto storyViewController = il2cpp_symbols::get_method_pointer<Il2CppObject * (*)(Il2CppObject*)>("umamusume.dll", "Gallop", "StoryManager", "get_ViewController", 0)(storyManager);
+
+				auto IsSingleModeOrGallery = il2cpp_class_get_method_from_name_type<bool (*)(Il2CppObject*)>(storyViewController->klass, "get_IsSingleModeOrGallery", 0)->methodPointer(storyViewController);
+
+				auto scene = il2cpp_class_get_method_from_name_type<Il2CppObject * (*)(Il2CppObject*)>(storySceneController->klass, "GetSceneBase", 0)->methodPointer(storySceneController);
+
+				if (!IsSingleModeOrGallery)
+				{
+					il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, uint64_t)>(storyViewController->klass, "SetDisplayMode", 1)->methodPointer(storyViewController, DisplayMode);
+				}
+				else
+				{
+					if (DisplayMode == 1)
+					{
+						il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*)>(storySceneController->klass, "SetDisplayAreaPortrait", 0)->methodPointer(storySceneController);
+					}
+					else
+					{
+						il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*)>(storySceneController->klass, "SetDisplayAreaFullScreen", 0)->methodPointer(storySceneController);
+					}
+
+					uint64_t drawDirection = 6;
+
+					if (DisplayMode == 0 || DisplayMode == 3)
+					{
+						drawDirection = 0;
+					}
+					else if (DisplayMode == 1)
+					{
+						drawDirection = 7;
+					}
+
+					auto _lowResolutionCameraListField = il2cpp_class_get_field_from_name_wrap(storySceneController->klass, "_lowResolutionCameraList");
+					Il2CppObject* _lowResolutionCameraList;
+					il2cpp_field_get_value(storySceneController, _lowResolutionCameraListField, &_lowResolutionCameraList);
+
+					if (_lowResolutionCameraList)
+					{
+						FieldInfo* _itemsField = il2cpp_class_get_field_from_name_wrap(_lowResolutionCameraList->klass, "_items");
+						Il2CppArraySize_t<Il2CppObject*>* _items;
+						il2cpp_field_get_value(_lowResolutionCameraList, _itemsField, &_items);
+
+						for (int i = 0; i < _items->max_length; i++)
+						{
+							auto lowResolutionCamera = _items->vector[i];
+
+							if (lowResolutionCamera)
+							{
+								il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, uint64_t)>(lowResolutionCamera->klass, "ChangeDirection", 1)->methodPointer(lowResolutionCamera, drawDirection);
+							}
+						}
+					}
+
+					auto FrameBufferDisplayMode = il2cpp_symbols::get_method_pointer<uint64_t(*)(uint64_t)>("umamusume.dll", "Gallop", "LowResolutionCameraUtil", "GetDrawPass", 1)(DisplayMode);
+
+					auto FrameBuffer = il2cpp_class_get_method_from_name_type<Il2CppObject * (*)(Il2CppObject*)>(storySceneController->klass, "get_FrameBuffer", 0)->methodPointer(storySceneController);
+
+					if (il2cpp_class_get_method_from_name_type<Il2CppObject * (*)(Il2CppObject*)>(FrameBuffer->klass, "get_ColorBuffer", 0)->methodPointer(FrameBuffer))
+					{
+						il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, uint64_t)>(FrameBuffer->klass, "RemakeRenderTexture", 1)->methodPointer(FrameBuffer, FrameBufferDisplayMode);
+					}
+
+					// il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, uint64_t)>(storySceneController->klass, "UpdateFovFactor", 1)->methodPointer(storySceneController, DisplayMode);
+
+					auto FullScreenImageRendererField = il2cpp_class_get_field_from_name_wrap(scene->klass, "FullScreenImageRenderer");
+					Il2CppObject* FullScreenImageRenderer;
+					il2cpp_field_get_value(scene, FullScreenImageRendererField, &FullScreenImageRenderer);
+
+					il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*)>(FullScreenImageRenderer->klass, "ForceRender", 0)->methodPointer(FullScreenImageRenderer);
+				}
+
+				il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*)>(storyViewController->klass, "SetupUIOnChangeOrientation", 0)->methodPointer(storyViewController);
 			}
 		}
 	}
@@ -2622,7 +2663,12 @@ namespace
 
 			if (playerDic)
 			{
-				auto entriesField = il2cpp_class_get_field_from_name_wrap(playerDic->klass, "entries");
+				auto entriesField = il2cpp_class_get_field_from_name_wrap(playerDic->klass, "_entries");
+				if (!entriesField)
+				{
+					entriesField = il2cpp_class_get_field_from_name_wrap(playerDic->klass, "entries");
+				}
+
 				Il2CppArraySize_t<System::Collections::Generic::Dictionary<Cute::Cri::MoviePlayerHandle, Il2CppObject*>::Entry>* entries;
 				il2cpp_field_get_value(playerDic, entriesField, &entries);
 
@@ -3063,15 +3109,8 @@ namespace
 							}
 
 							Il2CppArraySize_t<Il2CppObject*>* canvasScalerList;
-							if (Game::CurrentGameRegion == Game::Region::KOR)
-							{
-								canvasScalerList = UnityEngine::Object::FindObjectsByType(
-									GetRuntimeType("UnityEngine.UI.dll", "UnityEngine.UI", "CanvasScaler"), UnityEngine::FindObjectsInactive::Include, UnityEngine::FindObjectsSortMode::None);
-							}
-							else
-							{
-								canvasScalerList = UnityEngine::Object::FindObjectsOfType(GetRuntimeType("UnityEngine.UI.dll", "UnityEngine.UI", "CanvasScaler"), true);
-							}
+							canvasScalerList = UnityEngine::Object::FindObjectsByType(
+								GetRuntimeType("UnityEngine.UI.dll", "UnityEngine.UI", "CanvasScaler"), UnityEngine::FindObjectsInactive::Include, UnityEngine::FindObjectsSortMode::None);
 							// auto canvasScalerList = il2cpp_class_get_method_from_name_type<Il2CppArraySize_t<Il2CppObject*> *(*)(Il2CppObject*)>(uiManager, "GetCanvasScalerList", 0)->methodPointer(uiManager);
 
 							for (int i = 0; i < canvasScalerList->max_length; i++)
@@ -3144,6 +3183,11 @@ namespace
 
 						WaitForEndOfFrame(*[]()
 							{
+								if (!sizeTuple)
+								{
+									return;
+								}
+
 								int contentWidth = il2cpp_class_get_method_from_name_type<int (*)(Il2CppObject*)>(sizeTuple->klass, "get_Item1", 0)->methodPointer(sizeTuple);
 								int contentHeight = il2cpp_class_get_method_from_name_type<int (*)(Il2CppObject*)>(sizeTuple->klass, "get_Item2", 0)->methodPointer(sizeTuple);
 
@@ -3413,8 +3457,7 @@ namespace
 		}
 	}
 
-	// void* set_resolution_orig;
-	void set_resolution_hook(int width, int height, int fullscreenMode, int perferredRefreshRate)
+	void SetResolution_hook(int width, int height, int fullscreenMode, int perferredRefreshRate)
 	{
 		if (width < 72)
 		{
@@ -3468,13 +3511,13 @@ namespace
 			fullScreenFlOverride = false;
 			if (unlockSize)
 			{
-				reinterpret_cast<decltype(set_resolution_hook)*>(set_resolution_orig)(last_virt_window_width, last_virt_window_height, 3, perferredRefreshRate);
+				reinterpret_cast<decltype(SetResolution_hook)*>(SetResolution_orig)(last_virt_window_width, last_virt_window_height, 3, perferredRefreshRate);
 			}
 			else
 			{
 				r.height *= 0.825f;
 				r.width = r.height * config::runtime::ratioVertical;
-				reinterpret_cast<decltype(set_resolution_hook)*>(set_resolution_orig)(r.width, r.height, 3, perferredRefreshRate);
+				reinterpret_cast<decltype(SetResolution_hook)*>(SetResolution_orig)(r.width, r.height, 3, perferredRefreshRate);
 			}
 			return;
 		}
@@ -3487,13 +3530,13 @@ namespace
 			fullScreenFlOverride = false;
 			if (unlockSize)
 			{
-				reinterpret_cast<decltype(set_resolution_hook)*>(set_resolution_orig)(last_virt_window_width, last_virt_window_height, 3, perferredRefreshRate);
+				reinterpret_cast<decltype(SetResolution_hook)*>(SetResolution_orig)(last_virt_window_width, last_virt_window_height, 3, perferredRefreshRate);
 			}
 			else
 			{
 				r.height *= 0.825f;
 				r.width = r.height * config::runtime::ratioVertical;
-				reinterpret_cast<decltype(set_resolution_hook)*>(set_resolution_orig)(r.width, r.height, 3, perferredRefreshRate);
+				reinterpret_cast<decltype(SetResolution_hook)*>(SetResolution_orig)(r.width, r.height, 3, perferredRefreshRate);
 			}
 			return;
 		}
@@ -3590,7 +3633,7 @@ namespace
 					}
 				}
 
-				reinterpret_cast<decltype(set_resolution_hook)*>(set_resolution_orig)(last_virt_window_width, last_virt_window_height, 3, perferredRefreshRate);
+				reinterpret_cast<decltype(SetResolution_hook)*>(SetResolution_orig)(last_virt_window_width, last_virt_window_height, 3, perferredRefreshRate);
 				return;
 
 			}
@@ -3627,12 +3670,234 @@ namespace
 					}
 				}
 
-				reinterpret_cast<decltype(set_resolution_hook)*>(set_resolution_orig)(last_hriz_window_width, last_hriz_window_height, 3, perferredRefreshRate);
+				reinterpret_cast<decltype(SetResolution_hook)*>(SetResolution_orig)(last_hriz_window_width, last_hriz_window_height, 3, perferredRefreshRate);
 				return;
 			}
 		}
 
-		reinterpret_cast<decltype(set_resolution_hook)*>(set_resolution_orig)(
+		reinterpret_cast<decltype(SetResolution_hook)*>(SetResolution_orig)(
+			fullScreenFl ? r.width : width, fullScreenFl ? r.height : height, fullScreenFl ? 1 : 3, perferredRefreshRate);
+	}
+
+	void SetResolution_Injected_hook(int width, int height, int fullscreenMode, UnityEngine::RefreshRate* perferredRefreshRate)
+	{
+		if (width < 72)
+		{
+			if (Gallop::StandaloneWindowResize::IsVirt())
+			{
+				width = 72;
+			}
+			else
+			{
+				width = 128;
+			}
+		}
+
+		if (height < 72)
+		{
+			if (Gallop::StandaloneWindowResize::IsVirt())
+			{
+				height = 128;
+			}
+			else
+			{
+				height = 72;
+			}
+		}
+
+		if (config::freeform_window)
+		{
+			auto hWnd = GetHWND();
+
+			long style = GetWindowLongW(hWnd, GWL_STYLE);
+			style |= WS_MAXIMIZEBOX;
+			SetWindowLongPtrW(hWnd, GWL_STYLE, style);
+
+			auto StandaloneWindowResize = il2cpp_symbols::get_class("umamusume.dll", "Gallop", "StandaloneWindowResize");
+			il2cpp_class_get_method_from_name_type<void (*)(bool)>(StandaloneWindowResize, "set_IsPreventReShape", 1)->methodPointer(true);
+
+			isRequestChangeResolution = true;
+			return;
+		}
+
+		UnityEngine::Resolution r;
+		get_resolution(&r);
+
+		bool reqVirt = width < height;
+
+		bool unlockSize = config::unlock_size || config::freeform_window;
+
+		if (Gallop::StandaloneWindowResize::IsVirt() && fullScreenFl)
+		{
+			fullScreenFl = false;
+			fullScreenFlOverride = false;
+			if (unlockSize)
+			{
+				reinterpret_cast<decltype(SetResolution_Injected_hook)*>(SetResolution_Injected_orig)(last_virt_window_width, last_virt_window_height, 3, perferredRefreshRate);
+			}
+			else
+			{
+				r.height *= 0.825f;
+				r.width = r.height * config::runtime::ratioVertical;
+				reinterpret_cast<decltype(SetResolution_Injected_hook)*>(SetResolution_Injected_orig)(r.width, r.height, 3, perferredRefreshRate);
+			}
+			return;
+		}
+
+		auto display = display_get_main();
+
+		if (reqVirt && (get_rendering_width(display) > get_rendering_height(display)))
+		{
+			fullScreenFl = false;
+			fullScreenFlOverride = false;
+			if (unlockSize)
+			{
+				reinterpret_cast<decltype(SetResolution_Injected_hook)*>(SetResolution_Injected_orig)(last_virt_window_width, last_virt_window_height, 3, perferredRefreshRate);
+			}
+			else
+			{
+				r.height *= 0.825f;
+				r.width = r.height * config::runtime::ratioVertical;
+				reinterpret_cast<decltype(SetResolution_Injected_hook)*>(SetResolution_Injected_orig)(r.width, r.height, 3, perferredRefreshRate);
+			}
+			return;
+		}
+
+		bool need_fullscreen = false;
+
+		if (config::auto_fullscreen)
+		{
+			auto ratio = static_cast<float>(r.width) / static_cast<float>(r.height);
+			ratio *= 1000;
+			ratio = roundf(ratio) / 1000;
+
+			if (Gallop::StandaloneWindowResize::IsVirt() && ratio == ratio_9_16)
+			{
+				need_fullscreen = true;
+			}
+			else if (!Gallop::StandaloneWindowResize::IsVirt() && ratio == ratio_16_9)
+			{
+				need_fullscreen = true;
+			}
+		}
+
+		if (!fullScreenFl && unlockSize)
+		{
+			if (!(get_rendering_width(display) > get_rendering_height(display)))
+			{
+				last_virt_window_width = get_rendering_width(display);
+				last_virt_window_height = get_rendering_height(display);
+				if (need_fullscreen && (!last_hriz_window_width || !last_hriz_window_height))
+				{
+					last_hriz_window_width = r.width - 400;
+					last_hriz_window_height = last_hriz_window_width * config::runtime::ratioHorizontal;
+				}
+			}
+			else
+			{
+				last_hriz_window_width = get_rendering_width(display);
+				last_hriz_window_height = get_rendering_height(display);
+			}
+		}
+
+		if (!fullScreenFlOverride)
+		{
+			fullScreenFl = need_fullscreen;
+		}
+
+		if (!reqVirt && !fullScreenFl && last_hriz_window_width && last_hriz_window_height && unlockSize)
+		{
+			width = last_hriz_window_width;
+			height = last_hriz_window_height;
+		}
+
+		if (unlockSize)
+		{
+			auto ratio = static_cast<float>(width) / static_cast<float>(height);
+			ratio *= 1000;
+			ratio = roundf(ratio) / 1000;
+
+			auto round_ratio_vertical = config::runtime::ratioVertical * 1000;
+			round_ratio_vertical = roundf(round_ratio_vertical) / 1000;
+
+			auto round_ratio_horizontal = config::runtime::ratioHorizontal * 1000;
+			round_ratio_horizontal = roundf(round_ratio_horizontal) / 1000;
+
+			if (reqVirt && ratio != round_ratio_vertical)
+			{
+				auto StandaloneWindowResize = il2cpp_symbols::get_class("umamusume.dll", "Gallop", "StandaloneWindowResize");
+				il2cpp_class_get_method_from_name_type<void (*)(bool)>(StandaloneWindowResize, "set_IsPreventReShape", 1)->methodPointer(true);
+
+				if (last_virt_window_width > last_virt_window_height)
+				{
+					auto display = display_get_main();
+					if (config::initial_width < config::initial_height)
+					{
+						last_virt_window_height = get_system_width(display) - 400;
+						last_virt_window_width = last_virt_window_height * config::runtime::ratioVertical;
+
+						if (last_virt_window_height >= get_system_height(display))
+						{
+							last_virt_window_height = get_system_height(display) - 400;
+							last_virt_window_width = last_virt_window_height * config::runtime::ratioVertical;
+						}
+					}
+					else
+					{
+						last_virt_window_height = get_system_height(display) - 400;
+						last_virt_window_width = last_virt_window_height * config::runtime::ratioVertical;
+
+						if (last_virt_window_height >= get_system_height(display))
+						{
+							last_virt_window_height = get_system_height(display) - 400;
+							last_virt_window_width = last_virt_window_height * config::runtime::ratioVertical;
+						}
+					}
+				}
+
+				reinterpret_cast<decltype(SetResolution_Injected_hook)*>(SetResolution_Injected_orig)(last_virt_window_width, last_virt_window_height, 3, perferredRefreshRate);
+				return;
+
+			}
+
+			if (!reqVirt && ratio != round_ratio_horizontal)
+			{
+				auto StandaloneWindowResize = il2cpp_symbols::get_class("umamusume.dll", "Gallop", "StandaloneWindowResize");
+				il2cpp_class_get_method_from_name_type<void (*)(bool)>(StandaloneWindowResize, "set_IsPreventReShape", 1)->methodPointer(true);
+
+				if (last_hriz_window_width < last_hriz_window_height)
+				{
+					auto display = display_get_main();
+					if (config::initial_width < config::initial_height)
+					{
+						last_hriz_window_width = get_system_height(display) - 400;
+						last_hriz_window_height = last_hriz_window_width / config::runtime::ratioHorizontal;
+
+						if (last_hriz_window_height >= get_system_height(display))
+						{
+							last_hriz_window_height = get_system_height(display) - 400;
+							last_hriz_window_width = last_hriz_window_height * config::runtime::ratioHorizontal;
+						}
+					}
+					else
+					{
+						last_hriz_window_width = get_system_width(display) - 400;
+						last_hriz_window_height = last_hriz_window_width / config::runtime::ratioHorizontal;
+
+						if (last_hriz_window_height >= get_system_height(display))
+						{
+							last_hriz_window_height = get_system_height(display) - 400;
+							last_hriz_window_width = last_hriz_window_height * config::runtime::ratioHorizontal;
+						}
+					}
+				}
+
+				reinterpret_cast<decltype(SetResolution_Injected_hook)*>(SetResolution_Injected_orig)(last_hriz_window_width, last_hriz_window_height, 3, perferredRefreshRate);
+				return;
+			}
+		}
+
+		reinterpret_cast<decltype(SetResolution_Injected_hook)*>(SetResolution_Injected_orig)(
 			fullScreenFl ? r.width : width, fullScreenFl ? r.height : height, fullScreenFl ? 1 : 3, perferredRefreshRate);
 	}
 
@@ -4339,7 +4604,10 @@ namespace
 									bool _onClickEnable = true;
 									il2cpp_field_set_value(footer, _onClickEnableField, &_onClickEnable);
 
-									il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, Il2CppObject*, Il2CppObject*)>(footer->klass, "OnClickItem", 2)->methodPointer(footer, selectedItem, selectedMenu);
+									auto button = il2cpp_class_get_method_from_name_type<Il2CppObject * (*)(Il2CppObject*)>(selectedItem->klass, "get_Button", 0)->methodPointer(selectedItem);
+
+									auto delegate = GetButtonCommonOnClickDelegate(button);
+									reinterpret_cast<void (*)(Il2CppObject*)>(delegate->method_ptr)(delegate->target);
 									return true;
 								}
 							}
@@ -4375,7 +4643,11 @@ namespace
 										bool _onClickEnable = true;
 										il2cpp_field_set_value(footer, _onClickEnableField, &_onClickEnable);
 
-										il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, Il2CppObject*, Il2CppObject*)>(footer->klass, "OnClickItem", 2)->methodPointer(footer, selectedItem, selectedMenu);
+
+										auto button = il2cpp_class_get_method_from_name_type<Il2CppObject * (*)(Il2CppObject*)>(selectedItem->klass, "get_Button", 0)->methodPointer(selectedItem);
+
+										auto delegate = GetButtonCommonOnClickDelegate(button);
+										reinterpret_cast<void (*)(Il2CppObject*)>(delegate->method_ptr)(delegate->target);
 									}
 									return true;
 								}
@@ -5149,7 +5421,15 @@ namespace
 						r.height = r.width / config::runtime::ratioHorizontal;
 					}
 
-					reinterpret_cast<decltype(set_resolution_hook)*>(set_resolution_orig)(r.width, r.height, fullScreenFl ? 1 : 3, 0);
+					if (Game::CurrentGameRegion == Game::Region::KOR)
+					{
+						reinterpret_cast<decltype(SetResolution_hook)*>(SetResolution_orig)(r.width, r.height, fullScreenFl ? 1 : 3, 0);
+					}
+					else
+					{
+						auto refreshRate = RefreshRate{ 0, 1 };
+						reinterpret_cast<decltype(SetResolution_Injected_hook)*>(SetResolution_Injected_orig)(r.width, r.height, fullScreenFl ? 1 : 3, &refreshRate);
+					}
 				}
 				return TRUE;
 
@@ -5279,22 +5559,24 @@ namespace
 
 		if ((uMsg == WM_EXITSIZEMOVE || uMsg == WM_SIZE) && config::character_system_text_caption)
 		{
-			auto callback = &CreateDelegateWithClassStatic(il2cpp_symbols::get_class("DOTween.dll", "DG.Tweening", "TweenCallback"), *([](void*)
-				{
-					auto sliderX = GetOptionSlider("character_system_text_caption_position_x");
-					auto sliderY = GetOptionSlider("character_system_text_caption_position_y");
-
-					if (sliderX && sliderY)
+			WaitForEndOfFrame(*[]() {
+				auto callback = &CreateDelegateWithClassStatic(il2cpp_symbols::get_class("DOTween.dll", "DG.Tweening", "TweenCallback"), *([](void*)
 					{
-						SetNotificationPosition(GetOptionSliderValue(sliderX) / 10, GetOptionSliderValue(sliderY) / 10);
-					}
-					else
-					{
-						SetNotificationPosition(config::character_system_text_caption_position_x, config::character_system_text_caption_position_y);
-					}
-				}))->delegate;
+						auto sliderX = GetOptionSlider("character_system_text_caption_position_x");
+						auto sliderY = GetOptionSlider("character_system_text_caption_position_y");
 
-			il2cpp_symbols::get_method_pointer<Il2CppObject* (*)(float, Il2CppDelegate*, bool)>("DOTween.dll", "DG.Tweening", "DOVirtual", "DelayedCall", 3)(0.01, callback, true);
+						if (sliderX && sliderY)
+						{
+							SetNotificationPosition(GetOptionSliderValue(sliderX) / 10, GetOptionSliderValue(sliderY) / 10);
+						}
+						else
+						{
+							SetNotificationPosition(config::character_system_text_caption_position_x, config::character_system_text_caption_position_y);
+						}
+					}))->delegate;
+
+				il2cpp_symbols::get_method_pointer<Il2CppObject* (*)(float, Il2CppDelegate*, bool)>("DOTween.dll", "DG.Tweening", "DOVirtual", "DelayedCall", 3)(0.01, callback, true);
+				});
 		}
 
 		if (uMsg == WM_SIZE && config::freeform_window)
@@ -5527,6 +5809,12 @@ namespace
 				"umamusume.dll", "Gallop",
 				"StandaloneWindowResize", "DisableMaximizebox", IgnoreNumberOfArguments
 			)();
+
+			if (oldWndProcPtr)
+			{
+				return CallWindowProcW(oldWndProcPtr, hWnd, uMsg, wParam, lParam);
+			}
+
 			return TRUE;
 		}
 
@@ -5634,11 +5922,14 @@ namespace
 	{
 		for (auto buffer : frameBuffers)
 		{
-			auto _drawPathField = il2cpp_class_get_field_from_name_wrap(buffer->klass, "_drawPass");
-			Il2CppObject* _drawPath;
-			il2cpp_field_get_value(buffer, _drawPathField, &_drawPath);
+			if (il2cpp_class_get_method_from_name_type<Il2CppObject * (*)(Il2CppObject*)>(buffer->klass, "get_ColorBuffer", 0)->methodPointer(buffer))
+			{
+				auto _drawPathField = il2cpp_class_get_field_from_name_wrap(buffer->klass, "_drawPass");
+				Il2CppObject* _drawPath;
+				il2cpp_field_get_value(buffer, _drawPathField, &_drawPath);
 
-			il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, Il2CppObject*)>(buffer->klass, "RemakeRenderTexture", 1)->methodPointer(buffer, _drawPath);
+				il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, Il2CppObject*)>(buffer->klass, "RemakeRenderTexture", 1)->methodPointer(buffer, _drawPath);
+			}
 		}
 	}
 
@@ -5766,7 +6057,11 @@ namespace
 		il2cpp_field_static_get_value(outlineColorDictField, &outlineColorDict);
 		auto colorEnum = il2cpp_class_get_method_from_name_type<int (*)(Il2CppObject*)>(_this->klass, "get_OutlineColor", 0)->methodPointer(_this);
 
-		auto entriesField = il2cpp_class_get_field_from_name_wrap(outlineColorDict->klass, "entries");
+		auto entriesField = il2cpp_class_get_field_from_name_wrap(outlineColorDict->klass, "_entries");
+		if (!entriesField)
+		{
+			entriesField = il2cpp_class_get_field_from_name_wrap(outlineColorDict->klass, "entries");
+		}
 		Il2CppArraySize* entries;
 		il2cpp_field_get_value(outlineColorDict, entriesField, &entries);
 
@@ -8717,7 +9012,7 @@ namespace
 				GetOptionItemButton("show_notification", LocalifySettings::GetText("show_notification")),
 				GetOptionItemAttention(localize_get_hook(GetTextIdByName(L"Outgame0297"))->chars),
 				GetOptionItemTitle(LocalifySettings::GetText("settings_title")),
-				Game::CurrentGameRegion == Game::Region::JAP ?
+				Game::CurrentGameRegion == Game::Region::JPN ?
 					GetOptionItemButton("clear_webview_cache", LocalifySettings::GetText("clear_webview_cache")) :
 					GetOptionItemOnOff("allow_delete_cookie", LocalifySettings::GetText("allow_delete_cookie")),
 				GetOptionItemOnOff("dump_msgpack", LocalifySettings::GetText("dump_msgpack")),
@@ -10858,16 +11153,9 @@ namespace
 	void UpdateVoiceButton()
 	{
 		Il2CppArraySize_t<Il2CppObject*>* voiceButtonList;
-		if (Game::CurrentGameRegion == Game::Region::KOR)
-		{
-			voiceButtonList = UnityEngine::Object::FindObjectsByType(
-				GetRuntimeType("umamusume.dll", "Gallop", "PartsEpisodeExtraVoiceButton"), UnityEngine::FindObjectsInactive::Exclude, UnityEngine::FindObjectsSortMode::None);
-		}
-		else
-		{
-			voiceButtonList = UnityEngine::Object::FindObjectsOfType(
-				GetRuntimeType("umamusume.dll", "Gallop", "PartsEpisodeExtraVoiceButton"), false);
-		}
+		voiceButtonList = UnityEngine::Object::FindObjectsByType(
+			GetRuntimeType("umamusume.dll", "Gallop", "PartsEpisodeExtraVoiceButton"), UnityEngine::FindObjectsInactive::Exclude, UnityEngine::FindObjectsSortMode::None);
+
 
 		if (voiceButtonList && voiceButtonList->max_length)
 		{
@@ -11565,14 +11853,21 @@ namespace
 
 													onetimeToken = string(split1.back());
 
+													auto t = il2cpp_thread_attach(il2cpp_domain_get());
+
 													il2cpp_symbols::get_method_pointer<void (*)(Il2CppString*)>("umamusume.dll", "Gallop", "Certification", "set_dmmViewerId", 1)(il2cpp_string_new(viewerId.data()));
 													il2cpp_symbols::get_method_pointer<void (*)(Il2CppString*)>("umamusume.dll", "Gallop", "Certification", "set_dmmOnetimeToken", 1)(il2cpp_string_new(onetimeToken.data()));
+
+													isLoginWebViewOpen = false;
+
+													auto viewController = GetCurrentViewController();
+													il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*)>(viewController->klass, "OnClickPushStart", 0)->methodPointer(viewController);
+
+													il2cpp_thread_detach(t);
 												}
 
 												webviewController->Close();
 												PostMessageW(hWnd, WM_CLOSE, NULL, NULL);
-
-												isLoginWebViewOpen = false;
 
 												return S_OK;
 											}).Get());
@@ -12397,8 +12692,14 @@ namespace
 		// the string one looks like will not be called by elsewhere
 		auto localize_get_addr = il2cpp_symbols::find_method("umamusume.dll", "Gallop", "Localize", [](const MethodInfo* method)
 			{
+				if (Game::CurrentGameRegion == Game::Region::JPN)
+				{
+					return method->name == "Get"s &&
+						(*method->parameters)->type == IL2CPP_TYPE_VALUETYPE;
+				}
+
 				return method->name == "Get"s &&
-					method->parameters->parameter_type->type == IL2CPP_TYPE_VALUETYPE;
+					reinterpret_cast<const MethodInfo2020*>(method)->parameters->parameter_type->type == IL2CPP_TYPE_VALUETYPE;
 			});
 
 		auto update_addr = il2cpp_symbols::get_method_pointer(
@@ -12987,8 +13288,31 @@ namespace
 				auto s_CamerasField = il2cpp_class_get_field_from_name_wrap(
 					il2cpp_symbols::get_class("UnityEngine.CoreModule.dll", "UnityEngine.Rendering", "RenderPipelineManager"),
 					"s_Cameras");
+
 				Il2CppArraySize_t<Il2CppObject*>* s_Cameras;
-				il2cpp_field_static_get_value(s_CamerasField, &s_Cameras);
+
+				if (Game::CurrentGameRegion == Game::Region::KOR)
+				{
+					il2cpp_field_static_get_value(s_CamerasField, &s_Cameras);
+				}
+				else
+				{
+					Il2CppObject* cameraList;
+					il2cpp_field_static_get_value(s_CamerasField, &cameraList);
+
+					if (!cameraList)
+					{
+						return;
+					}
+
+					FieldInfo* itemsField = il2cpp_class_get_field_from_name_wrap(cameraList->klass, "_items");
+					il2cpp_field_get_value(cameraList, itemsField, &s_Cameras);
+				}
+
+				if (!s_Cameras)
+				{
+					return;
+				}
 
 				for (int i = 0; i < s_Cameras->max_length; i++)
 				{
@@ -13134,7 +13458,9 @@ namespace
 			"UnityEngine",
 			"Screen", "set_orientation", 1);
 
-		auto set_resolution_addr = il2cpp_resolve_icall("UnityEngine.Screen::SetResolution(System.Int32,System.Int32,UnityEngine.FullScreenMode,System.Int32)");
+		auto SetResolution_addr = il2cpp_resolve_icall("UnityEngine.Screen::SetResolution(System.Int32,System.Int32,UnityEngine.FullScreenMode,System.Int32)");
+
+		auto SetResolution_Injected_addr = il2cpp_resolve_icall("UnityEngine.Screen::SetResolution_Injected(System.Int32,System.Int32,UnityEngine.FullScreenMode,UnityEngine.RefreshRate)");
 
 		auto MovieManager_SetImageUvRect_addr = il2cpp_symbols::get_method_pointer(
 			"Cute.Cri.Assembly.dll", "Cute.Cri", "MovieManager", "SetImageUvRect", 2);
@@ -13245,10 +13571,11 @@ namespace
 
 		if (config::auto_fullscreen || config::unlock_size || config::freeform_window)
 		{
-			if (!set_resolution_orig)
+			if (!SetResolution_orig && SetResolution_addr)
 			{
-				ADD_HOOK(set_resolution, "UnityEngine.Screen.SetResolution(int, int, FullScreenMode, int) at %p\n");
+				ADD_HOOK(SetResolution, "UnityEngine.Screen.SetResolution(int, int, FullScreenMode, int) at %p\n");
 			}
+			ADD_HOOK(SetResolution_Injected, "UnityEngine.Screen.SetResolution_Injected(int, int, FullScreenMode, RefreshRate) at %p\n");
 			// ADD_HOOK(UIManager_ChangeResizeUIForPC, "Gallop.UIManager::ChangeResizeUIForPC at %p\n");
 		}
 
@@ -13518,16 +13845,9 @@ namespace
 				}
 
 				/*Il2CppArraySize_t<Il2CppObject*>* CriWareInitializerList;
-				if (Game::CurrentGameRegion == Game::Region::KOR)
-				{
-					CriWareInitializerList = UnityEngine::Object::FindObjectsByType(
-						GetRuntimeType("CriMw.CriWare.Runtime.dll", "CriWare", "CriWareInitializer"), UnityEngine::FindObjectsInactive::Include, UnityEngine::FindObjectsSortMode::None);
-				}
-				else
-				{
-					CriWareInitializerList = UnityEngine::Object::FindObjectsOfType(
-						GetRuntimeType("CriMw.CriWare.Runtime.dll", "CriWare", "CriWareInitializer"), true);
-				}
+				CriWareInitializerList = UnityEngine::Object::FindObjectsByType(
+					GetRuntimeType("CriMw.CriWare.Runtime.dll", "CriWare", "CriWareInitializer"), UnityEngine::FindObjectsInactive::Include, UnityEngine::FindObjectsSortMode::None);
+
 
 				if (CriWareInitializerList && CriWareInitializerList->max_length)
 				{
@@ -14035,13 +14355,28 @@ SetWindowLongPtrW_hook(
 	{
 		if ((config::unlock_size || config::freeform_window) && config::initial_width > 72 && config::initial_height > 72)
 		{
-			if (config::initial_width < config::initial_height)
+			if (Game::CurrentGameRegion == Game::Region::KOR)
 			{
-				reinterpret_cast<decltype(set_resolution_hook)*>(set_resolution_orig)(last_virt_window_width, last_virt_window_height, 3, 0);
+				if (config::initial_width < config::initial_height)
+				{
+					reinterpret_cast<decltype(SetResolution_hook)*>(SetResolution_orig)(last_virt_window_width, last_virt_window_height, 3, 0);
+				}
+				else
+				{
+					reinterpret_cast<decltype(SetResolution_hook)*>(SetResolution_orig)(last_hriz_window_width, last_hriz_window_height, 3, 0);
+				}
 			}
 			else
 			{
-				reinterpret_cast<decltype(set_resolution_hook)*>(set_resolution_orig)(last_hriz_window_width, last_hriz_window_height, 3, 0);
+				auto refreshRate = RefreshRate{ 0, 1 };
+				if (config::initial_width < config::initial_height)
+				{
+					reinterpret_cast<decltype(SetResolution_Injected_hook)*>(SetResolution_Injected_orig)(last_virt_window_width, last_virt_window_height, 3, &refreshRate);
+				}
+				else
+				{
+					reinterpret_cast<decltype(SetResolution_Injected_hook)*>(SetResolution_Injected_orig)(last_hriz_window_width, last_hriz_window_height, 3, &refreshRate);
+				}
 			}
 		}
 
@@ -14078,13 +14413,28 @@ SetWindowLongPtrA_hook(
 	{
 		if ((config::unlock_size || config::freeform_window) && config::initial_width > 72 && config::initial_height > 72)
 		{
-			if (config::initial_width < config::initial_height)
+			if (Game::CurrentGameRegion == Game::Region::KOR)
 			{
-				reinterpret_cast<decltype(set_resolution_hook)*>(set_resolution_orig)(last_virt_window_width, last_virt_window_height, 3, 0);
+				if (config::initial_width < config::initial_height)
+				{
+					reinterpret_cast<decltype(SetResolution_hook)*>(SetResolution_orig)(last_virt_window_width, last_virt_window_height, 3, 0);
+				}
+				else
+				{
+					reinterpret_cast<decltype(SetResolution_hook)*>(SetResolution_orig)(last_hriz_window_width, last_hriz_window_height, 3, 0);
+				}
 			}
 			else
 			{
-				reinterpret_cast<decltype(set_resolution_hook)*>(set_resolution_orig)(last_hriz_window_width, last_hriz_window_height, 3, 0);
+				auto refreshRate = RefreshRate{ 0, 1 };
+				if (config::initial_width < config::initial_height)
+				{
+					reinterpret_cast<decltype(SetResolution_Injected_hook)*>(SetResolution_Injected_orig)(last_virt_window_width, last_virt_window_height, 3, &refreshRate);
+				}
+				else
+				{
+					reinterpret_cast<decltype(SetResolution_Injected_hook)*>(SetResolution_Injected_orig)(last_hriz_window_width, last_hriz_window_height, 3, &refreshRate);
+				}
 			}
 		}
 

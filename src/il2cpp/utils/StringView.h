@@ -1,16 +1,10 @@
 #pragma once
-#include "../il2cpp-config.h"
+#include "il2cpp-config.h"
 #include <limits.h>
 #if IL2CPP_TARGET_WINDOWS
 #include <malloc.h>
 #else
 #include <alloca.h>
-#endif
-
-#if IL2CPP_TARGET_LINUX
-#define GCC_VERSION (__GNUC__ * 10000 \
-                   + __GNUC_MINOR__ * 100 \
-                   + __GNU_PATCHLEVEL__)
 #endif
 
 namespace il2cpp
@@ -59,7 +53,7 @@ namespace utils
 
 // This is to work around a bug in gcc (24666) where arrays decay to pointers too fast
 // This is known to be fixed by at least 7.3.0
-#if IL2CPP_TARGET_LINUX && GCC_VERSION < 70300
+#if defined(__GNUC__) && IL2CPP_GCC_VERSION < 70300
         inline StringView(const char* str) :
             m_String(str), m_Length(strlen(str))
         {
