@@ -180,7 +180,7 @@ if (document.HasMember(L##_name_) && document[L##_name_].Is##_type_())\
 				}
 					);
 
-			GetValue("uiAnimationScale", Float, resolution_3d_scale);
+			GetValue("uiAnimationScale", Float, ui_animation_scale);
 
 			GetValue("resolution3dScale", Float, resolution_3d_scale);
 
