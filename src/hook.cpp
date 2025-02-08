@@ -12698,7 +12698,7 @@ namespace
 						(*method->parameters)->type == IL2CPP_TYPE_VALUETYPE;
 				}
 
-				return method->name == "Get"s &&
+				return reinterpret_cast<const MethodInfo2020*>(method)->name == "Get"s &&
 					reinterpret_cast<const MethodInfo2020*>(method)->parameters->parameter_type->type == IL2CPP_TYPE_VALUETYPE;
 			});
 
