@@ -103,8 +103,8 @@ workspace "umamusume-localify"
 	}
 
 	nuget {
-		"Microsoft.Web.WebView2:1.0.2420.47",
-		"Microsoft.Windows.ImplementationLibrary:1.0.240122.1"
+		"Microsoft.Web.WebView2:1.0.3065.39",
+		"Microsoft.Windows.ImplementationLibrary:1.0.240803.1"
 	}
 
 	dependencies.imports()

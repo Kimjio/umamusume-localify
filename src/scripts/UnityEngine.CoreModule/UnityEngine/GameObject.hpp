@@ -19,6 +19,8 @@ namespace UnityEngine
 			return *this;
 		}
 
+		static GameObject Find(Il2CppString* name);
+
 		Il2CppObject* GetComponentByName(Il2CppString* name);
 
 		Il2CppObject* GetComponent(Il2CppObject* runtimeType);
@@ -41,7 +43,7 @@ namespace UnityEngine
 	private:
 		static void Internal_CreateGameObject(Il2CppObject* self, Il2CppString* name);
 
-	    Il2CppObject* Internal_AddComponentWithType(Il2CppObject* runtimeType);
+		Il2CppObject* Internal_AddComponentWithType(Il2CppObject* runtimeType);
 	};
 }
 

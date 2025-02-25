@@ -620,8 +620,8 @@ inline HWND GetHWND()
 
 	EnumWindows(reinterpret_cast<WNDENUMPROC>(*([](HWND hWnd, LPARAM lParam)
 		{
-			TCHAR buf[MAX_CLASS_NAME]{};
-			GetClassNameW(hWnd, (LPTSTR)&buf, MAX_CLASS_NAME);
+			WCHAR buf[MAX_CLASS_NAME]{};
+			GetClassNameW(hWnd, (LPWSTR)&buf, MAX_CLASS_NAME);
 
 			if (std::wstring(buf).find(L"UnityWndClass") != std::wstring::npos)
 			{

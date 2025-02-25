@@ -11581,7 +11581,7 @@ namespace
 
 	string GetGameArgs(wstring sessionId, wstring secureId)
 	{
-		auto hInternet = InternetOpenW(L"DMMGamePlayer5/5.2.47", INTERNET_OPEN_TYPE_PRECONFIG, nullptr, nullptr, 0);
+		auto hInternet = InternetOpenW(L"DMMGamePlayer5/5.3.22", INTERNET_OPEN_TYPE_PRECONFIG, nullptr, nullptr, 0);
 
 		auto hConnect = InternetConnectW(hInternet, L"apidgp-gameplayer.games.dmm.com", INTERNET_DEFAULT_HTTPS_PORT, nullptr, nullptr, INTERNET_SERVICE_HTTP, 0, NULL);
 
@@ -11590,7 +11590,7 @@ namespace
 
 		wstringstream headerStream;
 		headerStream << L"Client-App: DMMGamePlayer5" << endl
-			<< L"Client-version: 5.2.47" << endl
+			<< L"Client-version: 5.3.22" << endl
 			<< L"Cookie: login_session_id=" << sessionId << L";login_secure_id=" << secureId << endl;
 
 		auto body = R"({"product_id":"umamusume","game_type":"GCL","launch_type":"LIB","game_os":"win","user_os":"win","mac_address":"null","hdd_serial":"null","motherboard":"null"})"s;
@@ -11750,7 +11750,7 @@ namespace
 		envOptions->put_AdditionalBrowserArguments(L"--enable-logging --v=1");
 #endif
 
-		wstring loginUrl = GetLoginURL();
+		wstring loginUrl = L"https://accounts.dmm.com/service/login/password/=/"; //GetLoginURL();
 
 		PWSTR path;
 		SHGetKnownFolderPath(FOLDERID_LocalAppDataLow, 0, NULL, &path);
@@ -11780,6 +11780,10 @@ namespace
 							settings->put_AreDefaultScriptDialogsEnabled(TRUE);
 							settings->put_IsWebMessageEnabled(TRUE);
 
+							ICoreWebView2Settings4* settings4;
+							settings->QueryInterface<ICoreWebView2Settings4>(&settings4);
+							settings4->put_IsGeneralAutofillEnabled(FALSE);
+
 							RECT bounds;
 							GetClientRect(hWnd, &bounds);
 
@@ -11799,8 +11803,10 @@ namespace
 									args->get_Uri(&uri);
 									std::wstring source(uri);
 
-									if (source == L"dmmgameplayer://showLibrary")
+									if (source == L"https://www.dmm.com/")
 									{
+										args->put_Cancel(true);
+
 										ICoreWebView2_2* webView2;
 										webview->QueryInterface<ICoreWebView2_2>(&webView2);
 
@@ -14078,7 +14084,7 @@ namespace
 									{
 										il2cpp_symbols::get_method_pointer<void (*)(Il2CppObject*)>("umamusume.dll", "Gallop", "DialogCommon", "Close", 0)(GetFrontDialog());
 										il2cpp_symbols::get_method_pointer<void (*)(Il2CppString*, int)>("UnityEngine.CoreModule.dll", "UnityEngine", "PlayerPrefs", "SetInt", 2)(il2cpp_string_new("ReadDisclaimer"), 1);
-										il2cpp_symbols::get_method_pointer<void (*)()>("UnityEngine.CoreModule.dll", "UnityEngine", "PlayerPrefs", "Save", IgnoreNumberOfArguments);
+										il2cpp_symbols::get_method_pointer<void (*)()>("UnityEngine.CoreModule.dll", "UnityEngine", "PlayerPrefs", "Save", IgnoreNumberOfArguments)();
 									}), nullptr, false, true, nullptr);
 					}
 

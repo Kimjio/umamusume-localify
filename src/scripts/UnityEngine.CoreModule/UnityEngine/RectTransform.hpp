@@ -3,6 +3,7 @@
 
 #include "Transform.hpp"
 #include "Vector2.hpp"
+#include "Rect.hpp"
 
 namespace UnityEngine
 {
@@ -10,10 +11,16 @@ namespace UnityEngine
 	{
 	public:
 		void anchoredPosition(Vector2 value);
+		Vector2 anchoredPosition();
 		void anchorMax(Vector2 value);
+		Vector2 anchorMax();
 		void anchorMin(Vector2 value);
+		Vector2 anchorMin();
 		void pivot(Vector2 value);
+		Vector2 pivot();
 		void sizeDelta(Vector2 value);
+		Vector2 sizeDelta();
+		Rect rect();
 
 		using Transform::Transform;
 	};

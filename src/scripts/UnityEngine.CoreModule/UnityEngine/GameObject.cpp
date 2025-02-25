@@ -26,6 +26,8 @@ void* set_tag_addr = nullptr;
 
 void* SetActive_addr = nullptr;
 
+void* Find_addr = nullptr;
+
 static void Internal_CreateGameObject_hook(Il2CppObject* _this, Il2CppString* name)
 {
 	reinterpret_cast<decltype(Internal_CreateGameObject_hook)*>(Internal_CreateGameObject_orig)(_this, name);
@@ -89,6 +91,7 @@ static void InitAddress()
 	get_tag_addr = il2cpp_resolve_icall("UnityEngine.GameObject::get_tag()");
 	set_tag_addr = il2cpp_resolve_icall("UnityEngine.GameObject::set_tag()");
 	SetActive_addr = il2cpp_resolve_icall("UnityEngine.GameObject::SetActive()");
+	Find_addr = il2cpp_resolve_icall("UnityEngine.GameObject::Find()");
 }
 
 static void HookMethods()
@@ -111,6 +114,12 @@ namespace UnityEngine
 		auto gameObject = il2cpp_object_new(il2cpp_symbols::get_class(ASSEMBLY_NAME, "UnityEngine", "GameObject"));
 		Internal_CreateGameObject(gameObject, name);
 		this->instance = gameObject;
+	}
+
+	GameObject GameObject::Find(Il2CppString* name)
+	{
+		auto gameObject = reinterpret_cast<Il2CppObject * (*)(Il2CppString*)>(Find_addr)(name);
+		return GameObject(gameObject);
 	}
 
 	void GameObject::Internal_CreateGameObject(Il2CppObject* self, Il2CppString* name)
