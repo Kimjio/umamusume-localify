@@ -36,9 +36,7 @@ static void Quit_hook(int exitCode)
 
 		auto method = reinterpret_cast<const MethodInfo2020*>(il2cpp_method_get_from_reflection(methodRef));
 
-		if (string(method->klass->name).find("Uncheater") != string::npos ||
-			string(method->klass->name).find("Boot") != string::npos ||
-			string(method->name).find("Uncheater") != string::npos)
+		if (string(method->klass->name).find("Boot") != string::npos)
 		{
 			return;
 		}
