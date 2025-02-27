@@ -10,6 +10,8 @@ typedef _Return_type_success_(return >= 0) LONG NTSTATUS;
 #define NT_SUCCESS(Status) ((NTSTATUS)(Status) >= 0)
 
 #define STATUS_SUCCESS                   ((NTSTATUS)0x00000000L)
+#define STATUS_ACCESS_DENIED             ((NTSTATUS)0xC0000022L)
+#define STATUS_SECTION_PROTECTION        ((NTSTATUS)0xC000004EL)
 #define STATUS_INVALID_PAGE_PROTECTION   ((NTSTATUS)0xC0000045L)
 #define STATUS_PROCEDURE_NOT_FOUND       ((NTSTATUS)0xC000007AL)
 
@@ -86,6 +88,29 @@ NTAPI
 NtUnmapViewOfSection(
     _In_        HANDLE  ProcessHandle,
     _In_opt_    PVOID   BaseAddress
+);
+
+EXTERN_C
+NTSTATUS
+NTAPI
+NtProtectVirtualMemory(
+    IN      HANDLE      ProcessHandle,
+    IN OUT  PVOID* BaseAddress,
+    IN OUT  PSIZE_T     NumberOfBytesToProtect,
+    IN      ULONG       NewAccessProtection,
+    OUT     PULONG      OldAccessProtection
+);
+
+EXTERN_C
+NTSTATUS
+NTAPI
+NtQueryVirtualMemory(
+    _In_      HANDLE                   ProcessHandle,
+    _In_opt_  PVOID                    BaseAddress,
+    _In_      MEMORY_INFORMATION_CLASS MemoryInformationClass,
+    _Out_     PVOID                    MemoryInformation,
+    _In_      SIZE_T                   MemoryInformationLength,
+    _Out_opt_ PSIZE_T                  ReturnLength
 );
 
 EXTERN_C

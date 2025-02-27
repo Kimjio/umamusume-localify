@@ -6,6 +6,7 @@
 #include <random>
 #include <unordered_map>
 #include <queue>
+#include <set>
 #include <msgpack11.hpp>
 
 #include "il2cpp/il2cpp_symbols.hpp"
@@ -169,7 +170,6 @@ namespace MsgPackModify
 			// stringstream ss;
 			// ss << setw(1) << setfill('0') << stoi(body_type) + 1;
 			metaDressIds.emplace_back(stoi(chara_id + body_type));
-			cout << "Dress ID: " << stoi(chara_id + body_type) << endl;
 		}
 
 		sqlite3_finalize(mstmt1);
@@ -236,9 +236,20 @@ namespace MsgPackModify
 					{
 						bool valid = true;
 
+						set<int> chara_id_set;
+
 						for (auto& member : member_info_array)
 						{
 							int chara_id = member["chara_id"].int32_value();
+
+							if (chara_id_set.contains(chara_id))
+							{
+								cout << "Duplicated Chara: " << chara_id << endl;
+								valid = false;
+								break;
+							}
+
+							chara_id_set.insert(chara_id);
 
 							if (chara_id > 0 && !availableCharaIds.contains(chara_id))
 							{
@@ -638,7 +649,6 @@ namespace MsgPackModify
 						{
 							int card_id = sqlite3_column_int(stmt, 0);
 
-							cout << "Card ID " << card_id << endl;
 							if (card_map.contains(card_id))
 							{
 								MsgPack::object card = card_map[card_id];
