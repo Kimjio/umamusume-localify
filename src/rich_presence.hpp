@@ -7,10 +7,10 @@
 
 using namespace std;
 
+extern uint64_t GetTextIdByName(const wstring& name);
+
 namespace
 {
-	extern uint64_t GetTextIdByName(const wstring& name);
-
 	extern Il2CppString* localizeextension_text_hook(uint64_t id);
 
 	string GetViewName(string viewId)

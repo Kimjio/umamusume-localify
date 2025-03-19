@@ -107,6 +107,7 @@
 #include "scripts/umamusume/Gallop/LiveViewController.hpp"
 #include "scripts/umamusume/Gallop/RaceCameraManager.hpp"
 #include "scripts/umamusume/Gallop/LowResolutionCameraUtil.hpp"
+#include "scripts/umamusume/Gallop/WebViewManager.hpp"
 #ifdef _MSC_VER
 #include "scripts/umamusume/Gallop/StandaloneWindowResize.hpp"
 #endif
@@ -1273,80 +1274,9 @@ namespace
 		return reinterpret_cast<decltype(LoadLibraryW)*>(load_library_w_orig)(lpLibFileName);
 	}
 
-	Il2CppDelegate* GetButtonCommonOnClickDelegate(Il2CppObject* object)
-	{
-		if (!object)
-		{
-			return nullptr;
-		}
-		if (object->klass != il2cpp_symbols::get_class("umamusume.dll", "Gallop", "ButtonCommon"))
-		{
-			return nullptr;
-		}
-		auto onClickField = il2cpp_class_get_field_from_name_wrap(object->klass, "m_OnClick");
-		Il2CppObject* onClick;
-		il2cpp_field_get_value(object, onClickField, &onClick);
-		if (onClick)
-		{
-			auto callsField = il2cpp_class_get_field_from_name_wrap(onClick->klass, "m_Calls");
-			Il2CppObject* calls;
-			il2cpp_field_get_value(onClick, callsField, &calls);
-			if (calls)
-			{
-				auto runtimeCallsField = il2cpp_class_get_field_from_name_wrap(calls->klass,
-					"m_RuntimeCalls");
-				Il2CppObject* runtimeCalls;
-				il2cpp_field_get_value(calls, runtimeCallsField, &runtimeCalls);
-
-				if (runtimeCalls)
-				{
-					FieldInfo* itemsField = il2cpp_class_get_field_from_name_wrap(runtimeCalls->klass,
-						"_items");
-					Il2CppArraySize* arr;
-					il2cpp_field_get_value(runtimeCalls, itemsField, &arr);
-					if (arr)
-					{
-						for (int i = 0; i < arr->max_length; i++)
-						{
-							auto value = reinterpret_cast<Il2CppObject*>(arr->vector[i]);
-							if (value)
-							{
-								auto delegateField = il2cpp_class_get_field_from_name_wrap(value->klass,
-									"Delegate");
-								Il2CppDelegate* delegate;
-								il2cpp_field_get_value(value, delegateField, &delegate);
-								if (delegate)
-								{
-									// Unbox delegate
-									auto callbackField = il2cpp_class_get_field_from_name_wrap(
-										delegate->target->klass, "callback");
-									Il2CppDelegate* callback;
-									il2cpp_field_get_value(delegate->target, callbackField, &callback);
-
-									return callback;
-								}
-							}
-						}
-					}
-				}
-			}
-		}
-		return nullptr;
-	}
-
 	Il2CppObject* GetInt32Instance(int value)
 	{
 		return il2cpp_value_box(il2cpp_defaults.int32_class, &value);
-	}
-
-	uint64_t GetTextIdByName(const wstring& name)
-	{
-		return GetEnumValue(ParseEnum(GetRuntimeType("umamusume.dll", "Gallop", "TextId"), name));
-	}
-
-	wstring GetTextIdNameById(int id)
-	{
-		return GetEnumName(GetRuntimeType("umamusume.dll", "Gallop", "TextId"), id)->chars;
 	}
 
 	Il2CppObject* GetCustomFont()
@@ -3238,6 +3168,26 @@ namespace
 
 								RemakeTextures();
 
+								if (Cute::Core::WebViewManager::webviewController)
+								{
+									BOOL isWebViewVisible;
+									Cute::Core::WebViewManager::webviewController->get_IsVisible(&isWebViewVisible);
+
+									if (isWebViewVisible)
+									{
+										auto dialog = Gallop::WebViewManager::Instance()._currentWebViewDialog();
+
+										auto _dataField = il2cpp_class_get_field_from_name_wrap(dialog->klass, "_data");
+										Il2CppObject* _data;
+										il2cpp_field_get_value(dialog, _dataField, &_data);
+
+										UnityEngine::Rect WebViewRectOffset;
+										auto WebViewRectOffsetField = il2cpp_class_get_field_from_name(_data->klass, "WebViewRectOffset");
+										il2cpp_field_get_value(_data, WebViewRectOffsetField, &WebViewRectOffset);
+										Gallop::WebViewManager::Instance().SetMargin(WebViewRectOffset);
+									}
+								}
+
 								auto raceCameraManager = Gallop::RaceCameraManager::Instance();
 								if (raceCameraManager)
 								{
@@ -4931,10 +4881,7 @@ namespace
 					auto playback = il2cpp_class_get_method_from_name_type<CriWare::CriAtomExPlayback(*)(Il2CppObject*)>(player->klass, "Start", 0)->methodPointer(player);
 					il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, CriWare::CriAtomExPlayback)>(player->klass, "Update", 1)->methodPointer(player, playback);
 
-					if (isPauseLive)
-					{
-						il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*)>(player->klass, "Pause", 0)->methodPointer(player);
-					}
+					il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*)>(player->klass, "Pause", 0)->methodPointer(player);
 
 					_songPlayback.criAtomExPlayback = playback;
 					il2cpp_field_set_value(AudioManager, _songPlaybackField, &_songPlayback);
@@ -5024,10 +4971,7 @@ namespace
 							auto playback = il2cpp_class_get_method_from_name_type<CriWare::CriAtomExPlayback(*)(Il2CppObject*)>(player->klass, "Start", 0)->methodPointer(player);
 							il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, CriWare::CriAtomExPlayback)>(player->klass, "Update", 1)->methodPointer(player, playback);
 
-							if (isPauseLive)
-							{
-								il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*)>(player->klass, "Pause", 0)->methodPointer(player);
-							}
+							il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*)>(player->klass, "Pause", 0)->methodPointer(player);
 
 							charaPlayback.criAtomExPlayback = playback;
 
@@ -8506,6 +8450,8 @@ namespace
 
 				AddOrSet(configDocument, L"dumpMsgPackRequest", GetOptionItemOnOffIsOn("dump_msgpack_request"));
 
+				AddOrSet(configDocument, L"useThirdPartyNews", GetOptionItemOnOffIsOn("use_third_party_news"));
+
 #ifdef EXPERIMENTS
 				AddOrSet(configDocument, L"unlockLiveChara", GetOptionItemOnOffIsOn("unlock_live_chara"));
 #endif
@@ -8618,6 +8564,8 @@ namespace
 				config::dump_msgpack = configDocument[L"dumpMsgPack"].GetBool();
 
 				config::dump_msgpack_request = configDocument[L"dumpMsgPackRequest"].GetBool();
+
+				config::use_third_party_news = configDocument[L"useThirdPartyNews"].GetBool();
 
 #ifdef EXPERIMENTS
 				config::unlock_live_chara = configDocument[L"unlockLiveChara"].GetBool();
@@ -8761,6 +8709,7 @@ namespace
 		bool notificationJobs = false;
 		bool dumpMsgPack = false;
 		bool dumpMsgPackRequest = false;
+		bool useThirdPartyNews = false;
 		bool unlockLiveChara = false;
 		bool unlockSize = false;
 		bool unlockSizeUseSystemResolution = false;
@@ -8863,6 +8812,11 @@ namespace
 			if (configDocument.HasMember(L"dumpMsgPackRequest"))
 			{
 				dumpMsgPackRequest = configDocument[L"dumpMsgPackRequest"].GetBool();
+			}
+
+			if (configDocument.HasMember(L"useThirdPartyNews"))
+			{
+				useThirdPartyNews = configDocument[L"useThirdPartyNews"].GetBool();
 			}
 
 #ifdef EXPERIMENTS
@@ -9048,6 +9002,10 @@ namespace
 					GetOptionItemOnOff("allow_delete_cookie", LocalifySettings::GetText("allow_delete_cookie")),
 				GetOptionItemOnOff("dump_msgpack", LocalifySettings::GetText("dump_msgpack")),
 				GetOptionItemOnOff("dump_msgpack_request", LocalifySettings::GetText("dump_msgpack_request")),
+				Game::CurrentGameRegion == Game::Region::KOR ? 
+					GetOptionItemOnOff("use_third_party_news", LocalifySettings::GetText("use_third_party_news")) : nullptr,
+				Game::CurrentGameRegion == Game::Region::KOR ? 
+					GetOptionItemInfo(LocalifySettings::GetText("use_third_party_news_info")) : nullptr,
 #ifdef EXPERIMENTS
 				GetOptionItemOnOff("unlock_live_chara", LocalifySettings::GetText("unlock_live_chara")),
 				GetOptionItemInfo(LocalifySettings::GetText("unlock_live_chara_info")),
@@ -9114,6 +9072,10 @@ namespace
 			}));
 
 		SetOptionItemOnOffAction("dump_msgpack_request", dumpMsgPackRequest, *([](Il2CppObject*, bool isOn)
+			{
+			}));
+
+		SetOptionItemOnOffAction("use_third_party_news", useThirdPartyNews, *([](Il2CppObject*, bool isOn)
 			{
 			}));
 
@@ -10968,6 +10930,12 @@ namespace
 		reinterpret_cast<decltype(MoviePlayerForUI_AdjustScreenSize_hook)*>(MoviePlayerForUI_AdjustScreenSize_orig)(_this, dispRectWH, isPanScan);
 	}
 
+	void* FrameRateController_GetLayerFrameRate_orig = nullptr;
+	int FrameRateController_GetLayerFrameRate_hook(Il2CppObject* _this, int layer)
+	{
+		return UnityEngine::Application::targetFrameRate();
+	}
+
 	void* FrameRateController_OverrideByNormalFrameRate_orig = nullptr;
 	void FrameRateController_OverrideByNormalFrameRate_hook(Il2CppObject* _this, int layer)
 	{
@@ -11765,9 +11733,9 @@ namespace
 							webview->add_NavigationStarting(Callback<ICoreWebView2NavigationStartingEventHandler>(
 								[hWnd](ICoreWebView2* webview, ICoreWebView2NavigationStartingEventArgs* args) -> HRESULT
 								{
-									LPWSTR uri;
+									wil::unique_cotaskmem_string uri;
 									args->get_Uri(&uri);
-									std::wstring source(uri);
+									wstring source(uri.get());
 
 									if (source == L"https://www.dmm.com/")
 									{
@@ -11876,8 +11844,8 @@ namespace
 										args->put_Cancel(true);
 									}
 									return S_OK;
-								}).Get(), &token);
-
+								}
+							).Get(), &token);
 							return S_OK;
 						}
 					).Get());
@@ -11907,13 +11875,37 @@ namespace
 			dmmOnetimeToken && !wstring(dmmOnetimeToken->chars).empty()) ||
 			Game::CurrentGameRegion != Game::Region::JPN)
 		{
+			auto readDisclaimer = il2cpp_symbols::get_method_pointer<int (*)(Il2CppString*, int)>("UnityEngine.CoreModule.dll", "UnityEngine", "PlayerPrefs", "GetInt", 2)(il2cpp_string_new("ReadDisclaimer"), 0);
+
+			if (!readDisclaimer)
+			{
+				il2cpp_symbols::get_method_pointer<Il2CppObject* (*)(Il2CppString*, Il2CppString*, Il2CppString*, uint64_t, Il2CppDelegate*, Il2CppDelegate*, bool, bool, Il2CppString*)>
+					("umamusume.dll", "Gallop", "DialogSimpleCheckNoWarning", "OpenMiddleOneButton", 9)(localize_get_hook(GetTextIdByName(L"Common0081")), il2cpp_string_new16(
+						(LocalifySettings::GetText("initial_disclaimer_1") + wstring(localize_get_hook(GetTextIdByName(L"Common187002"))->chars) + LocalifySettings::GetText("initial_disclaimer_2")).data()),
+						localize_get_hook(GetTextIdByName(L"Common187002")), GetTextIdByName(L"Common0007"),
+						CreateDelegateStatic(*[](void*, Il2CppObject* dialog)
+							{
+								il2cpp_symbols::get_method_pointer<void (*)(Il2CppObject*)>("umamusume.dll", "Gallop", "DialogCommon", "Close", 0)(GetFrontDialog());
+								il2cpp_symbols::get_method_pointer<void (*)(Il2CppString*, int)>("UnityEngine.CoreModule.dll", "UnityEngine", "PlayerPrefs", "SetInt", 2)(il2cpp_string_new("ReadDisclaimer"), 1);
+								il2cpp_symbols::get_method_pointer<void (*)()>("UnityEngine.CoreModule.dll", "UnityEngine", "PlayerPrefs", "Save", IgnoreNumberOfArguments)();
+							}), nullptr, false, true, nullptr);
+				return;
+			}
+
+			const auto AudioManager = GetSingletonInstance(il2cpp_symbols::get_class("umamusume.dll", "Gallop", "AudioManager"));
+
 			reinterpret_cast<decltype(TitleViewController_OnClickPushStart_hook)*>(TitleViewController_OnClickPushStart_orig)(_this);
 		}
 		else
 		{
 			const auto AudioManager = GetSingletonInstance(il2cpp_symbols::get_class("umamusume.dll", "Gallop", "AudioManager"));
 
-			il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*)>(AudioManager->klass, "PlaySe_UIDecide", 0)->methodPointer(AudioManager);
+			// il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*)>(AudioManager->klass, "PlaySe_UIDecide", 0)->methodPointer(AudioManager);
+
+			Cute::Cri::AudioPlayback res{};
+			il2cpp_class_get_method_from_name_type<Il2CppObject* (*)(Cute::Cri::AudioPlayback*, Il2CppObject*, uint64_t, bool, float, Il2CppObject*,
+				float, float, float, float, float, float, float, float, float, bool, float, uint64_t, int
+				)>(AudioManager->klass, "PlaySe", 17)->methodPointer(&res, AudioManager, 200000000L, 0, 0.0, 0L, 0.0, 10.0, 100.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0, 1.0, 0, INT_MAX);
 
 			if (!isLoginWebViewOpen)
 			{
@@ -12935,6 +12927,8 @@ namespace
 			"_Cyan.dll", "Cyan.LocalFile", "PathResolver",
 			"GetLocalPath", 2);
 
+		auto FrameRateController_GetLayerFrameRate_addr = il2cpp_symbols::get_method_pointer("umamusume.dll", "Gallop", "FrameRateController", "GetLayerFrameRate", 1);
+
 		auto FrameRateController_OverrideByNormalFrameRate_addr = il2cpp_symbols::get_method_pointer("umamusume.dll", "Gallop", "FrameRateController", "OverrideByNormalFrameRate", 1);
 
 		auto FrameRateController_OverrideByMaxFrameRate_addr = il2cpp_symbols::get_method_pointer("umamusume.dll", "Gallop", "FrameRateController", "OverrideByMaxFrameRate", 1);
@@ -12979,10 +12973,7 @@ namespace
 
 		ADD_HOOK(Certification_initDmmPlatformData, "Gallop.Certification::initDmmPlatformData at %p\n");
 
-		if (Game::CurrentGameRegion != Game::Region::KOR)
-		{
-			ADD_HOOK(TitleViewController_OnClickPushStart, "Gallop.TitleViewController::OnClickPushStart at %p\n");
-		}
+		ADD_HOOK(TitleViewController_OnClickPushStart, "Gallop.TitleViewController::OnClickPushStart at %p\n");
 
 		ADD_HOOK(Object_Internal_CloneSingleWithParent, "UnityEngine.Object::Internal_CloneSingleWithParent at %p\n");
 
@@ -13127,11 +13118,11 @@ namespace
 		if (config::max_fps > -1)
 		{
 			// break 30-40fps limit
+			ADD_HOOK(FrameRateController_GetLayerFrameRate, "Gallop.FrameRateController::GetLayerFrameRate at %p\n");
 			ADD_HOOK(FrameRateController_OverrideByNormalFrameRate, "Gallop.FrameRateController::OverrideByNormalFrameRate at %p\n");
 			ADD_HOOK(FrameRateController_OverrideByMaxFrameRate, "Gallop.FrameRateController::OverrideByMaxFrameRate at %p\n");
 			ADD_HOOK(FrameRateController_ResetOverride, "Gallop.FrameRateController::ResetOverride at %p\n");
 			ADD_HOOK(FrameRateController_ReflectionFrameRate, "Gallop.FrameRateController::ReflectionFrameRate at %p\n");
-			// ADD_HOOK(set_fps, "UnityEngine.Application.set_targetFrameRate at %p\n");
 		}
 
 		if (config::unlock_size || config::freeform_window)
@@ -13231,7 +13222,7 @@ namespace
 		if (config::resolution_3d_scale != 1.0f || config::freeform_window)
 		{
 			ADD_HOOK(GraphicSettings_GetVirtualResolution3D, "Gallop.GraphicSettings.GetVirtualResolution3D at %p\n");
-			// ADD_HOOK(GraphicSettings_GetVirtualResolution, "Gallop.GraphicSettings.GetVirtualResolution at %p\n");
+			ADD_HOOK(GraphicSettings_GetVirtualResolution, "Gallop.GraphicSettings.GetVirtualResolution at %p\n");
 		}
 
 		if (config::anti_aliasing != -1)
@@ -13579,7 +13570,7 @@ namespace
 				if (config::initial_width < config::initial_height)
 				{
 					config::runtime::ratioVertical = static_cast<float>(config::initial_width) / static_cast<float>(config::initial_height);
-					config::runtime::ratioHorizontal = static_cast<float>(config::initial_height) / static_cast<float> (config::initial_width);
+					config::runtime::ratioHorizontal = static_cast<float>(config::initial_height) / static_cast<float>(config::initial_width);
 
 					if (config::unlock_size_use_system_resolution)
 					{
@@ -14021,22 +14012,6 @@ namespace
 					if (config::character_system_text_caption)
 					{
 						InitNotification();
-					}
-
-					auto readDisclaimer = il2cpp_symbols::get_method_pointer<int (*)(Il2CppString*, int)>("UnityEngine.CoreModule.dll", "UnityEngine", "PlayerPrefs", "GetInt", 2)(il2cpp_string_new("ReadDisclaimer"), 0);
-
-					if (!readDisclaimer)
-					{
-						il2cpp_symbols::get_method_pointer<Il2CppObject* (*)(Il2CppString*, Il2CppString*, Il2CppString*, uint64_t, Il2CppDelegate*, Il2CppDelegate*, bool, bool, Il2CppString*)>
-							("umamusume.dll", "Gallop", "DialogSimpleCheckNoWarning", "OpenMiddleOneButton", 9)(localize_get_hook(GetTextIdByName(L"Common0081")), il2cpp_string_new16(
-								(LocalifySettings::GetText("initial_disclaimer_1") + wstring(localize_get_hook(GetTextIdByName(L"Common187002"))->chars) + LocalifySettings::GetText("initial_disclaimer_2")).data()),
-								localize_get_hook(GetTextIdByName(L"Common187002")), GetTextIdByName(L"Common0007"),
-								CreateDelegateStatic(*[](void*, Il2CppObject* dialog)
-									{
-										il2cpp_symbols::get_method_pointer<void (*)(Il2CppObject*)>("umamusume.dll", "Gallop", "DialogCommon", "Close", 0)(GetFrontDialog());
-										il2cpp_symbols::get_method_pointer<void (*)(Il2CppString*, int)>("UnityEngine.CoreModule.dll", "UnityEngine", "PlayerPrefs", "SetInt", 2)(il2cpp_string_new("ReadDisclaimer"), 1);
-										il2cpp_symbols::get_method_pointer<void (*)()>("UnityEngine.CoreModule.dll", "UnityEngine", "PlayerPrefs", "Save", IgnoreNumberOfArguments)();
-									}), nullptr, false, true, nullptr);
 					}
 
 					if (config::unlock_live_chara)

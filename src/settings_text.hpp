@@ -218,6 +218,16 @@ namespace LocalifySettings
 			return isKor ? L"UI 스케일 (가로)" : L"UIスケール(横)";
 		}
 
+		if (id == "use_third_party_news")
+		{
+			return isKor ? L"타사 공지 사용" : L"サードパーティのお知らせの使用";
+		}
+
+		if (id == "use_third_party_news_info")
+		{
+			return isKor ? L"인앱 공지 대신 타사 공지를 사용합니다" : L"アプリ内お知らせの代わりにサードパーティのお知らせを使用します";
+		}
+
 		if (id == "experiments")
 		{
 			return L"Experiments";

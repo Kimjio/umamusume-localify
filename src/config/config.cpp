@@ -74,6 +74,7 @@ namespace config
 	wstring msgpack_notifier_host = L"http://localhost:4693";
 	int msgpack_notifier_connection_timeout_ms = 1000;
 	bool msgpack_notifier_print_error = false;
+	bool use_third_party_news = false;
 
 	wstring text_id_dict;
 
@@ -348,6 +349,8 @@ if (document.HasMember(L##_name_) && document[L##_name_].Is##_type_())\
 			GetValue("dumpMsgPack", Bool, dump_msgpack);
 
 			GetValue("dumpMsgPackRequest", Bool, dump_msgpack_request);
+
+			GetValue("useThirdPartyNews", Bool, use_third_party_news);
 
 #ifdef EXPERIMENTS
 			GetValue("unlockLiveChara", Bool, unlock_live_chara);

@@ -1,6 +1,7 @@
 #include "../umamusume.hpp"
 #include "../../ScriptInternal.hpp"
 #include "Screen.hpp"
+#include "../../UnityEngine.CoreModule/UnityEngine/Screen.hpp"
 
 #include "config/config.hpp"
 
@@ -32,10 +33,12 @@ void* get_IsVertical_orig = nullptr;
 
 static int get_OriginalScreenWidth_hook()
 {
-	auto widthField = il2cpp_class_get_field_from_name_wrap(ScreenClass, "_originalScreenWidth");
+	/*auto widthField = il2cpp_class_get_field_from_name_wrap(ScreenClass, "_originalScreenWidth");
 	int _originalScreenWidth;
 	il2cpp_field_static_get_value(widthField, &_originalScreenWidth);
-	return _originalScreenWidth;
+	return _originalScreenWidth;*/
+
+	return UnityEngine::Screen::width();
 }
 
 static void set_OriginalScreenWidth_hook(int value)
@@ -46,10 +49,12 @@ static void set_OriginalScreenWidth_hook(int value)
 
 static int get_OriginalScreenHeight_hook()
 {
-	auto heightField = il2cpp_class_get_field_from_name_wrap(ScreenClass, "_originalScreenHeight");
+	/*auto heightField = il2cpp_class_get_field_from_name_wrap(ScreenClass, "_originalScreenHeight");
 	int _originalScreenHeight;
 	il2cpp_field_static_get_value(heightField, &_originalScreenHeight);
-	return _originalScreenHeight;
+	return _originalScreenHeight;*/
+
+	return UnityEngine::Screen::height();
 }
 
 static void set_OriginalScreenHeight_hook(int value)

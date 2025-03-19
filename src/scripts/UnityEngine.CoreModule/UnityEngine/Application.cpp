@@ -23,6 +23,10 @@ void* get_persistentDataPath_addr = nullptr;
 void* set_targetFrameRate_addr = nullptr;
 void* set_targetFrameRate_orig = nullptr;
 
+void* get_targetFrameRate_addr = nullptr;
+
+void* get_internetReachability_addr = nullptr;
+
 static void Quit_hook(int exitCode)
 {
 #ifdef _MSC_VER
@@ -60,6 +64,8 @@ static void InitAddress()
 	get_productName_addr = il2cpp_resolve_icall("UnityEngine.Application::get_productName()");
 	get_persistentDataPath_addr = il2cpp_resolve_icall("UnityEngine.Application::get_persistentDataPath()");
 	set_targetFrameRate_addr = il2cpp_resolve_icall("UnityEngine.Application::set_targetFrameRate(System.Int32)");
+	get_targetFrameRate_addr = il2cpp_resolve_icall("UnityEngine.Application::get_targetFrameRate()");
+	get_internetReachability_addr = il2cpp_resolve_icall("UnityEngine.Application::get_internetReachability()");
 }
 
 static void HookMethods()
@@ -112,7 +118,17 @@ namespace UnityEngine
 
 	void Application::targetFrameRate(int value)
 	{
-		reinterpret_cast<decltype(targetFrameRate)*>(set_targetFrameRate_addr)(value);
+		reinterpret_cast<void (*)(int)>(set_targetFrameRate_addr)(value);
+	}
+
+	int Application::targetFrameRate()
+	{
+		return reinterpret_cast<int (*)()>(get_targetFrameRate_addr)();
+	}
+
+	NetworkReachability Application::internetReachability()
+	{
+		return reinterpret_cast<NetworkReachability(*)()>(get_internetReachability_addr)();
 	}
 
 	void Application::Exit(int exitCode)
