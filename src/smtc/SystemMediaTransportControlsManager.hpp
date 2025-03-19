@@ -149,7 +149,7 @@ namespace SystemMediaTransportControlsManager
 				return;
 			}
 
-			auto texture2DType = reinterpret_cast<Il2CppType*>(::GetRuntimeType("UnityEngine.CoreModule.dll", "UnityEngine", "Texture2D"));
+			auto texture2DType = reinterpret_cast<Il2CppType*>(GetRuntimeType("UnityEngine.CoreModule.dll", "UnityEngine", "Texture2D"));
 			auto texture2D = reinterpret_cast<Il2CppObject * (*)(Il2CppObject*, Il2CppString*, const Il2CppType*)>(il2cpp_resolve_icall("UnityEngine.AssetBundle::LoadAsset_Internal(System.String,System.Type)"))(assetBundle, il2cpp_string_new(jacket_icon.data()), texture2DType);
 
 			winrt::Windows::Storage::Streams::InMemoryRandomAccessStream stream;

@@ -607,6 +607,77 @@ inline uint64_t GetEnumValue(Il2CppObject* runtimeEnum)
 	return il2cpp_symbols::get_method_pointer<uint64_t(*)(Il2CppObject*)>("mscorlib.dll", "System", "Enum", "ToUInt64", 1)(runtimeEnum);
 }
 
+inline Il2CppDelegate* GetButtonCommonOnClickDelegate(Il2CppObject* object)
+{
+	if (!object)
+	{
+		return nullptr;
+	}
+	if (object->klass != il2cpp_symbols::get_class("umamusume.dll", "Gallop", "ButtonCommon"))
+	{
+		return nullptr;
+	}
+	auto onClickField = il2cpp_class_get_field_from_name_wrap(object->klass, "m_OnClick");
+	Il2CppObject* onClick;
+	il2cpp_field_get_value(object, onClickField, &onClick);
+	if (onClick)
+	{
+		auto callsField = il2cpp_class_get_field_from_name_wrap(onClick->klass, "m_Calls");
+		Il2CppObject* calls;
+		il2cpp_field_get_value(onClick, callsField, &calls);
+		if (calls)
+		{
+			auto runtimeCallsField = il2cpp_class_get_field_from_name_wrap(calls->klass,
+				"m_RuntimeCalls");
+			Il2CppObject* runtimeCalls;
+			il2cpp_field_get_value(calls, runtimeCallsField, &runtimeCalls);
+
+			if (runtimeCalls)
+			{
+				FieldInfo* itemsField = il2cpp_class_get_field_from_name_wrap(runtimeCalls->klass,
+					"_items");
+				Il2CppArraySize* arr;
+				il2cpp_field_get_value(runtimeCalls, itemsField, &arr);
+				if (arr)
+				{
+					for (int i = 0; i < arr->max_length; i++)
+					{
+						auto value = reinterpret_cast<Il2CppObject*>(arr->vector[i]);
+						if (value)
+						{
+							auto delegateField = il2cpp_class_get_field_from_name_wrap(value->klass,
+								"Delegate");
+							Il2CppDelegate* delegate;
+							il2cpp_field_get_value(value, delegateField, &delegate);
+							if (delegate)
+							{
+								// Unbox delegate
+								auto callbackField = il2cpp_class_get_field_from_name_wrap(
+									delegate->target->klass, "callback");
+								Il2CppDelegate* callback;
+								il2cpp_field_get_value(delegate->target, callbackField, &callback);
+
+								return callback;
+							}
+						}
+					}
+				}
+			}
+		}
+	}
+	return nullptr;
+}
+
+inline uint64_t GetTextIdByName(const wstring& name)
+{
+	return GetEnumValue(ParseEnum(GetRuntimeType("umamusume.dll", "Gallop", "TextId"), name));
+}
+
+inline wstring GetTextIdNameById(int id)
+{
+	return GetEnumName(GetRuntimeType("umamusume.dll", "Gallop", "TextId"), id)->chars;
+}
+
 #ifdef _MSC_VER
 inline HWND GetHWND()
 {

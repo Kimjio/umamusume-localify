@@ -106,6 +106,7 @@ namespace config
 	extern wstring msgpack_notifier_host;
 	extern int msgpack_notifier_connection_timeout_ms;
 	extern bool msgpack_notifier_print_error;
+	extern bool use_third_party_news;
 
 	extern wstring text_id_dict;
 
