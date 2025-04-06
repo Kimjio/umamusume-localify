@@ -81,6 +81,13 @@ namespace config
 	rapidjson::Document code_map;
 	rapidjson::Document fn_map;
 
+	rapidjson::Document faq_index;
+	rapidjson::Document glossary_index;
+
+	wstring web_icon_sprite_path;
+	wstring web_icon_sprite_version;
+	wstring web_font_path;
+
 	bool has_json_parse_error = false;
 	wstring json_parse_error_msg;
 
@@ -339,6 +346,36 @@ if (document.HasMember(L##_name_) && document[L##_name_].Is##_type_())\
 				fn_map_stream.close();
 			}
 				);
+
+			GetValue("faqIndexPath", String, auto path,
+				ifstream faq_index_stream{ path };
+
+			if (faq_index_stream.is_open())
+			{
+				rapidjson::IStreamWrapper wrapper{ faq_index_stream };
+				faq_index.ParseStream(wrapper);
+
+				faq_index_stream.close();
+			}
+				);
+
+			GetValue("glossaryIndexPath", String, auto path,
+				ifstream glossary_index_stream{ path };
+
+			if (glossary_index_stream.is_open())
+			{
+				rapidjson::IStreamWrapper wrapper{ glossary_index_stream };
+				glossary_index.ParseStream(wrapper);
+
+				glossary_index_stream.close();
+			}
+				);
+
+			GetValue("webIconSpritePath", String, web_icon_sprite_path);
+
+			GetValue("webIconSpriteVersion", String, web_icon_sprite_version);
+
+			GetValue("webFontPath", String, web_font_path);
 
 			GetValue("discordRichPresence", Bool, discord_rich_presence);
 

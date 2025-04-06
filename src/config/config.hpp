@@ -113,6 +113,13 @@ namespace config
 	extern rapidjson::Document code_map;
 	extern rapidjson::Document fn_map;
 
+	extern rapidjson::Document faq_index;
+	extern rapidjson::Document glossary_index;
+
+	extern wstring web_icon_sprite_path;
+	extern wstring web_icon_sprite_version;
+	extern wstring web_font_path;
+
 	extern bool has_json_parse_error;
 	extern wstring json_parse_error_msg;
 

@@ -3,6 +3,8 @@
 #include "../../../UnityEngine.CoreModule/UnityEngine/MonoBehaviour.hpp"
 #include "../../../UnityEngine.CoreModule/UnityEngine/Vector4.hpp"
 
+#include <unordered_map>
+
 #include <WebView2.h>
 #include <wil/com.h>
 
@@ -16,6 +18,8 @@ namespace Cute
 			static WebViewManager Instance();
 
 			static wil::com_ptr<ICoreWebView2Controller> webviewController;
+
+			static unordered_map<wstring, wstring> customFontMap;
 
 			void OpenWeb(Il2CppString* url);
 

@@ -67,6 +67,8 @@ FieldInfo* Gallop_WebViewManager__currentWebViewDialog = nullptr;
 
 FieldInfo* Gallop_WebViewManager__errorCallback = nullptr;
 
+FieldInfo* Gallop_WebViewManager__fontFilePaths = nullptr;
+
 void* Gallop_WebViewManager_WebViewInfo_ctor_addr = nullptr;
 
 FieldInfo* Gallop_WebViewManager_WebViewInfo__url = nullptr;
@@ -414,7 +416,7 @@ static void Gallop_WebViewManager_Open_hook(Il2CppObject* self, Il2CppString* ur
 			{
 				if (Cute::Core::WebViewManager::webviewController)
 				{
-					Cute::Core::WebViewManager::webviewController->put_IsVisible(true);
+					Cute::Core::WebViewManager::Instance().SetVisible(true);
 				}
 				Gallop::WebViewManager::SettingUIEffectOnOpen();
 			}
@@ -442,7 +444,7 @@ static void Gallop_WebViewManager_Open_hook(Il2CppObject* self, Il2CppString* ur
 			{
 				if (Cute::Core::WebViewManager::webviewController)
 				{
-					Cute::Core::WebViewManager::webviewController->put_IsVisible(false);
+					Cute::Core::WebViewManager::Instance().SetVisible(false);
 				}
 				Gallop::WebViewManager::SettingUIEffectOnClose();
 			}
@@ -461,6 +463,36 @@ static void Gallop_WebViewManager_Open_hook(Il2CppObject* self, Il2CppString* ur
 		il2cpp_field_get_value(dialogData, WebViewRectOffsetField, &WebViewRectOffset);
 		Gallop::WebViewManager(self).SetMargin(WebViewRectOffset);
 	}
+}
+
+static void Gallop_WebViewManager_SetCustomFont_hook(Il2CppObject* self, Gallop::WebViewDefine::FontNameDefine fontName)
+{
+	auto fontFilePaths = Gallop::WebViewManager(self)._fontFilePaths();
+
+	if (fontName < fontFilePaths->max_length)
+	{
+		auto filePath = fontFilePaths->vector[fontName];
+		wstringstream pathStream(filePath->chars);
+		wstring segment;
+		vector<wstring> splited;
+		while (getline(pathStream, segment, L'/'))
+		{
+			splited.emplace_back(segment);
+		}
+
+		if (!Cute::Core::WebViewManager::customFontMap.contains(splited.back()))
+		{
+			auto LocalFile = il2cpp_symbols::get_method_pointer<Il2CppObject* (*)()>(ASSEMBLY_NAME, "Gallop", "AssetManager", "get_LocalFile", 0)();
+			auto pathAllowUnknown = il2cpp_class_get_method_from_name_type<Il2CppString* (*)(Il2CppObject*, Il2CppString*)>(LocalFile->klass, "GetPathAllowUnknown", 1)->methodPointer(LocalFile, filePath);
+	
+			if (filesystem::exists(wstring(pathAllowUnknown->chars)))
+			{
+				Cute::Core::WebViewManager::customFontMap.emplace(splited.back(), pathAllowUnknown->chars);
+			}
+		}
+	}
+
+	Gallop::WebViewManager(self).CuteWebView();
 }
 
 static Il2CppString* Gallop_WebViewManager_GetGachaURLProperty_hook(int gachaId)
@@ -814,6 +846,7 @@ static void InitAddress()
 	Gallop_WebViewManager_Open_addr = il2cpp_symbols::get_method_pointer(ASSEMBLY_NAME, "Gallop", "WebViewManager", "Open", 5);
 	Gallop_WebViewManager_OpenWebView_addr = il2cpp_symbols::get_method_pointer(ASSEMBLY_NAME, "Gallop", "WebViewManager", "OpenWebView", 2);
 	Gallop_WebViewManager_SetMargin_addr = il2cpp_symbols::get_method_pointer(ASSEMBLY_NAME, "Gallop", "WebViewManager", "SetMargin", 1);
+	Gallop_WebViewManager_SetCustomFont_addr = il2cpp_symbols::get_method_pointer(ASSEMBLY_NAME, "Gallop", "WebViewManager", "SetCustomFont", 1);
 	Gallop_WebViewManager_get_CuteWebView_addr = il2cpp_symbols::get_method_pointer(ASSEMBLY_NAME, "Gallop", "WebViewManager", "get_CuteWebView", 0);
 	Gallop_WebViewManager_SetErrorCallback_addr = il2cpp_symbols::get_method_pointer(ASSEMBLY_NAME, "Gallop", "WebViewManager", "SetErrorCallback", 0);
 	Gallop_WebViewManager_OpenErrorDialog_addr = il2cpp_symbols::get_method_pointer(ASSEMBLY_NAME, "Gallop", "WebViewManager", "OpenErrorDialog", 0);
@@ -831,6 +864,7 @@ static void InitAddress()
 	Gallop_WebViewManager_TryGetWebViewInfo_addr = Gallop_WebViewManager_TryGetWebViewInfo->methodPointer;
 	Gallop_WebViewManager__currentWebViewDialog = il2cpp_class_get_field_from_name_wrap(il2cpp_symbols::get_class(ASSEMBLY_NAME, "Gallop", "WebViewManager"), "_currentWebViewDialog");
 	Gallop_WebViewManager__errorCallback = il2cpp_class_get_field_from_name_wrap(il2cpp_symbols::get_class(ASSEMBLY_NAME, "Gallop", "WebViewManager"), "_errorCallback");
+	Gallop_WebViewManager__fontFilePaths = il2cpp_class_get_field_from_name_wrap(il2cpp_symbols::get_class(ASSEMBLY_NAME, "Gallop", "WebViewManager"), "_fontFilePaths");
 
 	if (Game::CurrentGameRegion == Game::Region::KOR)
 	{
@@ -878,6 +912,7 @@ static void HookMethods()
 	ADD_HOOK(Gallop_WebViewManager_cctor, "Gallop.WebViewManager::.cctor at %p\n");
 	ADD_HOOK(Gallop_WebViewManager_GetUrl, "Gallop.WebViewManager::GetUrl at %p\n");
 	ADD_HOOK(Gallop_WebViewManager_Open, "Gallop.WebViewManager::Open at %p\n");
+	ADD_HOOK(Gallop_WebViewManager_SetCustomFont, "Gallop.WebViewManager::SetCustomFont at %p\n");
 	ADD_HOOK(Gallop_WebViewManager_GetGachaURLProperty, "Gallop.WebViewManager::GetGachaURLProperty at %p\n");
 	ADD_HOOK(Gallop_WebViewManager_GetGachaUrl, "Gallop.WebViewManager::GetGachaUrl at %p\n");
 	ADD_HOOK(Gallop_WebViewManager_GetProductUrl, "Gallop.WebViewManager::GetProductUrl at %p\n");
@@ -898,7 +933,7 @@ static void HookMethods()
 		ADD_HOOK(StoryEventTopViewController_OnClickHelpButton, "Gallop.StoryEventTopViewController::OnClickHelpButton at %p\n");
 		ADD_HOOK(PartsNewsButton_Setup, "Gallop.PartsNewsButton::Setup at %p\n");
 		ADD_HOOK(BannerUI_OnClickBannerItem, "Gallop.BannerUI::OnClickBannerItem at %p\n");
-		ADD_HOOK(KakaoManager_OnKakaoShowInAppWebView, "OnKakaoShowInAppWebView at %p\n");
+		ADD_HOOK(KakaoManager_OnKakaoShowInAppWebView, "KakaoManager::OnKakaoShowInAppWebView at %p\n");
 	}
 }
 
@@ -954,6 +989,13 @@ namespace Gallop
 	void WebViewManager::_errorCallback(Il2CppObject* value)
 	{
 		il2cpp_field_set_value(instance, Gallop_WebViewManager__errorCallback, value);
+	}
+
+	Il2CppArraySize_t<Il2CppString*>* WebViewManager::_fontFilePaths()
+	{
+		Il2CppArraySize_t<Il2CppString*>* value;
+		il2cpp_field_get_value(instance, Gallop_WebViewManager__fontFilePaths, &value);
+		return value;
 	}
 
 	Cute::Core::WebViewManager WebViewManager::CuteWebView()

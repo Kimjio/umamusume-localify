@@ -26,6 +26,7 @@ namespace Gallop
 		Il2CppObject* _currentWebViewDialog();
 		void _currentWebViewDialog(Il2CppObject*);
 		void _errorCallback(Il2CppObject*);
+		Il2CppArraySize_t<Il2CppString*>* _fontFilePaths();
 		void SetErrorCallback();
 		void OpenErrorDialog();
 		void OpenWebView(Il2CppString* url, Il2CppDelegate* onLoadedCallback);

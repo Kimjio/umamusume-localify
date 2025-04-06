@@ -10,8 +10,16 @@
 #include <ShlObj.h>
 #include <WebView2EnvironmentOptions.h>
 
-#include <unordered_map>
 #include <sstream>
+
+#define RAPIDJSON_HAS_STDSTRING 1
+
+#include <rapidjson/rapidjson.h>
+#include <rapidjson/document.h>
+#include <rapidjson/writer.h>
+#include <rapidjson/stringbuffer.h>
+
+#include "config/config.hpp"
 
 using namespace Microsoft::WRL;
 using namespace Microsoft::WRL::Wrappers;
@@ -22,26 +30,14 @@ Il2CppClass* Cute_Core_WebViewManager = nullptr;
 void* Cute_Core_WebViewManager_Awake_addr = nullptr;
 void* Cute_Core_WebViewManager_Awake_orig = nullptr;
 
-void* Cute_Core_WebViewManager_InitCustomFontFileInfo_addr = nullptr;
-void* Cute_Core_WebViewManager_InitCustomFontFileInfo_orig = nullptr;
-
 void* Cute_Core_WebViewManager_OpenWeb_addr = nullptr;
 void* Cute_Core_WebViewManager_OpenWeb_orig = nullptr;
-
-//void* Cute_Core_WebViewManager_ClearHistory_addr = nullptr;
-//void* Cute_Core_WebViewManager_ClearHistory_orig = nullptr;
 
 void* Cute_Core_WebViewManager_SetMargins_addr = nullptr;
 void* Cute_Core_WebViewManager_SetMargins_orig = nullptr;
 
 void* Cute_Core_WebViewManager_EvaluateJS_addr = nullptr;
 void* Cute_Core_WebViewManager_EvaluateJS_orig = nullptr;
-
-//void* Cute_Core_WebViewManager_ClearCaches_addr = nullptr;
-//void* Cute_Core_WebViewManager_ClearCaches_orig = nullptr;
-
-//void* Cute_Core_WebViewManager_Reload_addr = nullptr;
-//void* Cute_Core_WebViewManager_Reload_orig = nullptr;
 
 void* Cute_Core_WebViewManager_CanGoBack_addr = nullptr;
 void* Cute_Core_WebViewManager_CanGoBack_orig = nullptr;
@@ -56,8 +52,6 @@ void* Cute_Core_WebViewManager_Callback_addr = nullptr;
 
 FieldInfo* Cute_Core_WebViewManager_marginNow = nullptr;
 
-unordered_map<wstring, wstring> customFontMap;
-
 RECT webViewBounds{};
 
 wil::com_ptr<ICoreWebView2> webview;
@@ -66,6 +60,8 @@ wstring CurrentUrlString;
 
 static void Cute_Core_WebViewManager_Awake_hook(Il2CppObject* self)
 {
+	cout << "Cute_Core_WebViewManager_Awake_hook " << endl;
+	PrintStackTrace();
 	reinterpret_cast<decltype(Cute_Core_WebViewManager_Awake_hook)*>(Cute_Core_WebViewManager_Awake_orig)(self);
 	auto path = UnityEngine::Application::persistentDataPath()->chars;
 
@@ -194,7 +190,15 @@ static void Cute_Core_WebViewManager_Awake_hook(Il2CppObject* self)
 							COREWEBVIEW2_WEB_RESOURCE_REQUEST_SOURCE_KINDS_DOCUMENT);
 
 						webview22->AddWebResourceRequestedFilterWithRequestSourceKinds(
+							L"*", COREWEBVIEW2_WEB_RESOURCE_CONTEXT_IMAGE,
+							COREWEBVIEW2_WEB_RESOURCE_REQUEST_SOURCE_KINDS_DOCUMENT);
+
+						webview22->AddWebResourceRequestedFilterWithRequestSourceKinds(
 							L"*", COREWEBVIEW2_WEB_RESOURCE_CONTEXT_DOCUMENT,
+							COREWEBVIEW2_WEB_RESOURCE_REQUEST_SOURCE_KINDS_DOCUMENT);
+
+						webview22->AddWebResourceRequestedFilterWithRequestSourceKinds(
+							L"*", COREWEBVIEW2_WEB_RESOURCE_CONTEXT_XML_HTTP_REQUEST,
 							COREWEBVIEW2_WEB_RESOURCE_REQUEST_SOURCE_KINDS_DOCUMENT);
 
 						webview->add_NavigationStarting(Callback<ICoreWebView2NavigationStartingEventHandler>(
@@ -307,9 +311,6 @@ viewport.content = `width=device-width, initial-scale=${zoom}, user-scalable=no`
 
 								if (resourceContext == COREWEBVIEW2_WEB_RESOURCE_CONTEXT_FONT)
 								{
-									ICoreWebView2_2* webview2;
-									webview->QueryInterface(&webview2);
-
 									wstringstream pathStream(uri.get());
 									wstring segment;
 									vector<wstring> splited;
@@ -318,13 +319,187 @@ viewport.content = `width=device-width, initial-scale=${zoom}, user-scalable=no`
 										splited.emplace_back(segment);
 									}
 
-									if (customFontMap.contains(splited.back()))
+									if (!config::web_font_path.empty() && filesystem::exists(config::web_font_path))
 									{
 										IStream* stream;
-										SHCreateStreamOnFileEx(customFontMap.at(splited.back()).data(), STGM_READ, FILE_ATTRIBUTE_NORMAL, FALSE, nullptr, &stream);
+										SHCreateStreamOnFileEx(config::web_font_path.data(), STGM_READ, FILE_ATTRIBUTE_NORMAL, FALSE, nullptr, &stream);
 
 										ICoreWebView2WebResourceResponse* response;
 										env->CreateWebResourceResponse(stream, 200, L"OK", L"Content-Type: font/otf", &response);
+										args->put_Response(response);
+
+										return S_OK;
+
+									}
+
+									if (Cute::Core::WebViewManager::customFontMap.contains(splited.back()))
+									{
+										IStream* stream;
+										SHCreateStreamOnFileEx(Cute::Core::WebViewManager::customFontMap.at(splited.back()).data(), STGM_READ, FILE_ATTRIBUTE_NORMAL, FALSE, nullptr, &stream);
+
+										ICoreWebView2WebResourceResponse* response;
+										env->CreateWebResourceResponse(stream, 200, L"OK", L"Content-Type: font/otf", &response);
+										args->put_Response(response);
+
+										return S_OK;
+									}
+								}
+
+								if (resourceContext == COREWEBVIEW2_WEB_RESOURCE_CONTEXT_IMAGE)
+								{
+									if (wstring(uri.get()).find(L"v_sprites/icon/sprite.png") != wstring::npos)
+									{
+										wstringstream pathStream(uri.get());
+										wstring segment;
+										vector<wstring> splited;
+										while (getline(pathStream, segment, L'='))
+										{
+											splited.emplace_back(segment);
+										}
+
+										wstring version = splited.back();
+
+										if (!config::web_icon_sprite_path.empty() &&
+											filesystem::exists(config::web_icon_sprite_path))
+										{
+											if (!config::web_icon_sprite_version.empty() && version != config::web_icon_sprite_version)
+											{
+												return E_INVALIDARG;
+											}
+
+											IStream* stream;
+											SHCreateStreamOnFileEx(config::web_icon_sprite_path.data(), STGM_READ, FILE_ATTRIBUTE_NORMAL, FALSE, nullptr, &stream);
+
+											ICoreWebView2WebResourceResponse* response;
+											env->CreateWebResourceResponse(stream, 200, L"OK", L"Content-Type: image/png", &response);
+											args->put_Response(response);
+
+											return S_OK;
+										}
+									}
+								}
+
+								if (resourceContext == COREWEBVIEW2_WEB_RESOURCE_CONTEXT_XML_HTTP_REQUEST)
+								{
+									if (wstring(uri.get()).find(L"/ajax/faq_index") != wstring::npos)
+									{
+										if (!config::faq_index.IsArray())
+										{
+											return E_INVALIDARG;
+										}
+
+										rapidjson::StringBuffer buffer;
+										buffer.Clear();
+										rapidjson::Writer<rapidjson::StringBuffer> writer(buffer);
+										config::faq_index.Accept(writer);
+
+										string responseJson = R"({"response_code": 1,"faq_list":)"s + buffer.GetString() + "}";
+
+										IStream* stream;
+										stream = SHCreateMemStream(reinterpret_cast<const BYTE*>(responseJson.data()), static_cast<UINT>(responseJson.size()));
+
+										ICoreWebView2WebResourceResponse* response;
+										env->CreateWebResourceResponse(stream, 200, L"OK", L"Content-Type: application/json", &response);
+										args->put_Response(response);
+
+										return S_OK;
+									}
+
+									if (wstring(uri.get()).find(L"/ajax/glossary_index") != wstring::npos)
+									{
+										if (!config::glossary_index.IsArray())
+										{
+											return E_INVALIDARG;
+										}
+
+										rapidjson::StringBuffer buffer;
+										buffer.Clear();
+										rapidjson::Writer<rapidjson::StringBuffer> writer(buffer);
+										config::glossary_index.Accept(writer);
+
+										string responseJson = R"({"response_code": 1,"glossary_list":)"s + buffer.GetString() + "}";
+
+										IStream* stream;
+										stream = SHCreateMemStream(reinterpret_cast<const BYTE*>(responseJson.data()), static_cast<UINT>(responseJson.size()));
+
+										ICoreWebView2WebResourceResponse* response;
+										env->CreateWebResourceResponse(stream, 200, L"OK", L"Content-Type: application/json", &response);
+										args->put_Response(response);
+
+										return S_OK;
+									}
+
+									if (wstring(uri.get()).find(L"/ajax/glossary_search") != wstring::npos)
+									{
+										if (!config::glossary_index.IsArray())
+										{
+											return E_INVALIDARG;
+										}
+
+										IStream* requestStream;
+										req->get_Content(&requestStream);
+										STATSTG stat;
+										requestStream->Stat(&stat, STATFLAG_DEFAULT);
+										requestStream->Seek({ 0 }, STREAM_SEEK_SET, nullptr);
+
+										string streamData;
+										streamData.resize(stat.cbSize.QuadPart);
+
+										requestStream->Read(streamData.data(), stat.cbSize.QuadPart, nullptr);
+
+										rapidjson::Document requestParams;
+										requestParams.Parse(streamData.data());
+
+										if (requestParams.HasParseError() || !requestParams.HasMember("keyword"))
+										{
+											return E_INVALIDARG;
+										}
+
+										string keyword = requestParams["keyword"].GetString();
+
+										rapidjson::Document searchResult;
+										searchResult.SetArray();
+
+										auto groupArray = config::glossary_index.GetArray();
+
+										for (auto& group : groupArray)
+										{
+											if (!group.HasMember("pages"))
+											{
+												continue;
+											}
+
+											auto itemArray = group["pages"].GetArray();
+											for (auto& item : itemArray)
+											{
+												if (!item.HasMember("title") || !item.HasMember("description"))
+												{
+													continue;
+												}
+												auto title = item["title"].GetString();
+												auto description = item["description"].GetString();
+												if (string(title).find(keyword) != string::npos || string(description).find(keyword) != string::npos)
+												{
+													rapidjson::Value item(rapidjson::kObjectType);
+													item.AddMember("title", rapidjson::Value(title, searchResult.GetAllocator()), searchResult.GetAllocator());
+													item.AddMember("description", rapidjson::Value(description, searchResult.GetAllocator()), searchResult.GetAllocator());
+													searchResult.PushBack(item, searchResult.GetAllocator());
+												}
+											}
+										}
+
+										rapidjson::StringBuffer buffer;
+										buffer.Clear();
+										rapidjson::Writer<rapidjson::StringBuffer> writer(buffer);
+										searchResult.Accept(writer);
+
+										string responseJson = R"({"response_code": 1,"glossary_list":)"s + buffer.GetString() + "}";
+
+										IStream* stream;
+										stream = SHCreateMemStream(reinterpret_cast<const BYTE*>(responseJson.data()), static_cast<UINT>(responseJson.size()));
+
+										ICoreWebView2WebResourceResponse* response;
+										env->CreateWebResourceResponse(stream, 200, L"OK", L"Content-Type: application/json", &response);
 										args->put_Response(response);
 
 										return S_OK;
@@ -346,49 +521,15 @@ viewport.content = `width=device-width, initial-scale=${zoom}, user-scalable=no`
 }
 
 // unified no-op method
-static void Cute_Core_WebViewManager_InitCustomFontFileInfo_hook(Il2CppObject* self, Il2CppObject* fileNamePathDict, int /*currentCustomFontFileIndex*/, bool /*iOSCacheMode*/)
+static void Cute_Core_WebViewManager_GoBack_hook(Il2CppObject* self)
 {
 	auto obj = GetSingletonInstance(Cute_Core_WebViewManager);
 	if (obj && self == obj)
 	{
-		if (fileNamePathDict)
+		PrintStackTrace();
+		if (webview)
 		{
-			auto entriesField = il2cpp_class_get_field_from_name_wrap(fileNamePathDict->klass, "_entries");
-			if (!entriesField)
-			{
-				entriesField = il2cpp_class_get_field_from_name_wrap(fileNamePathDict->klass, "entries");
-			}
-
-			Il2CppArraySize_t<System::Collections::Generic::Dictionary<Il2CppString*, Il2CppString*>::Entry>* entries;
-			il2cpp_field_get_value(fileNamePathDict, entriesField, &entries);
-
-			if (entries)
-			{
-				for (int i = 0; i < entries->max_length; i++)
-				{
-					auto entry = entries->vector[i];
-
-					if (entry.hashCode)
-					{
-						wstringstream pathStream(entry.key->chars);
-						wstring segment;
-						vector<wstring> splited;
-						while (getline(pathStream, segment, L'/'))
-						{
-							splited.emplace_back(segment);
-						}
-
-						customFontMap.emplace(splited.back(), entry.value->chars);
-					}
-				}
-			}
-		}
-		else
-		{
-			if (webview)
-			{
-				webview->GoBack();
-			}
+			webview->GoBack();
 		}
 	}
 }
@@ -428,17 +569,22 @@ static void Cute_Core_WebViewManager_SetVisible_hook(Il2CppObject* self, bool vi
 	{
 		Cute::Core::WebViewManager::webviewController->put_IsVisible(visible);
 	}
+
+	if (visible)
+	{
+		MH_EnableHook(Cute_Core_WebViewManager_GoBack_addr);
+	}
+	else
+	{
+		MH_DisableHook(Cute_Core_WebViewManager_GoBack_addr);
+	}
 }
 
 static void InitAddress()
 {
 	Cute_Core_WebViewManager = il2cpp_symbols::get_class(ASSEMBLY_NAME, "Cute.Core", "WebViewManager");
 	Cute_Core_WebViewManager_Awake_addr = il2cpp_symbols::get_method_pointer(ASSEMBLY_NAME, "Cute.Core", "WebViewManager", "Awake", 0);
-	Cute_Core_WebViewManager_InitCustomFontFileInfo_addr = il2cpp_symbols::get_method_pointer(ASSEMBLY_NAME, "Cute.Core", "WebViewManager", "InitCustomFontFileInfo", 3);
-	if (!Cute_Core_WebViewManager_InitCustomFontFileInfo_addr)
-	{
-		Cute_Core_WebViewManager_InitCustomFontFileInfo_addr = il2cpp_symbols::get_method_pointer(ASSEMBLY_NAME, "Cute.Core", "WebViewManager", "InitCustomFontFileInfo", 2);
-	}
+	Cute_Core_WebViewManager_GoBack_addr = il2cpp_symbols::get_method_pointer(ASSEMBLY_NAME, "Cute.Core", "WebViewManager", "GoBack", 0);
 	Cute_Core_WebViewManager_OpenWeb_addr = il2cpp_symbols::get_method_pointer(ASSEMBLY_NAME, "Cute.Core", "WebViewManager", "OpenWeb", 1);
 	Cute_Core_WebViewManager_SetMargins_addr = il2cpp_symbols::get_method_pointer(ASSEMBLY_NAME, "Cute.Core", "WebViewManager", "SetMargins", 4);
 	Cute_Core_WebViewManager_SetVisible_addr = il2cpp_symbols::get_method_pointer(ASSEMBLY_NAME, "Cute.Core", "WebViewManager", "SetVisible", 1);
@@ -449,7 +595,8 @@ static void InitAddress()
 static void HookMethods()
 {
 	ADD_HOOK(Cute_Core_WebViewManager_Awake, "Cute.Core.WebViewManager::Awake at %p\n");
-	ADD_HOOK(Cute_Core_WebViewManager_InitCustomFontFileInfo, "Cute.Core.WebViewManager::InitCustomFontFileInfo at %p\n");
+	ADD_HOOK(Cute_Core_WebViewManager_GoBack, "Cute.Core.WebViewManager::GoBack at %p\n");
+	MH_DisableHook(Cute_Core_WebViewManager_GoBack_addr);
 	ADD_HOOK(Cute_Core_WebViewManager_OpenWeb, "Cute.Core.WebViewManager::OpenWeb at %p\n");
 	ADD_HOOK(Cute_Core_WebViewManager_SetMargins, "Cute.Core.WebViewManager::SetMargins at %p\n");
 	ADD_HOOK(Cute_Core_WebViewManager_SetVisible, "Cute.Core.WebViewManager::SetVisible at %p\n");
@@ -466,6 +613,8 @@ namespace Cute
 	namespace Core
 	{
 		wil::com_ptr<ICoreWebView2Controller> WebViewManager::webviewController;
+
+		unordered_map<wstring, wstring> WebViewManager::customFontMap;
 
 		WebViewManager WebViewManager::Instance()
 		{
