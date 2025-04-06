@@ -6121,83 +6121,43 @@ namespace
 		reinterpret_cast<decltype(set_anti_aliasing_hook)*>(set_anti_aliasing_orig)(config::anti_aliasing);
 	}
 
-	void* rendertexture_set_anti_aliasing_orig = nullptr;
-	void rendertexture_set_anti_aliasing_hook(Il2CppObject* _this, int level)
-	{
-		if (config::anti_aliasing < 1)
-		{
-			if (config::anti_aliasing < 0)
-			{
-				reinterpret_cast<decltype(rendertexture_set_anti_aliasing_hook)*>(rendertexture_set_anti_aliasing_orig)(_this, level);
-			}
-			else
-			{
-				reinterpret_cast<decltype(rendertexture_set_anti_aliasing_hook)*>(rendertexture_set_anti_aliasing_orig)(_this, 1);
-			}
-			return;
-		}
-
-		reinterpret_cast<decltype(rendertexture_set_anti_aliasing_hook)*>(rendertexture_set_anti_aliasing_orig)(_this, config::anti_aliasing);
-	}
-
-	void* set_shadowResolution_orig = nullptr;
-	void set_shadowResolution_hook(int level)
-	{
-		reinterpret_cast<decltype(set_shadowResolution_hook)*>(set_shadowResolution_orig)(3);
-	}
-
 	void* set_anisotropicFiltering_orig = nullptr;
 	void set_anisotropicFiltering_hook(int mode)
 	{
 		reinterpret_cast<decltype(set_anisotropicFiltering_hook)*>(set_anisotropicFiltering_orig)(config::anisotropic_filtering);
 	}
 
-	void* set_shadows_orig = nullptr;
-	void set_shadows_hook(int quality)
-	{
-		reinterpret_cast<decltype(set_shadows_hook)*>(set_shadows_orig)(2);
-	}
-
-	void* set_softVegetation_orig = nullptr;
-	void set_softVegetation_hook(bool enable)
-	{
-		reinterpret_cast<decltype(set_softVegetation_hook)*>(set_softVegetation_orig)(true);
-	}
-
-	void* set_realtimeReflectionProbes_orig = nullptr;
-	void set_realtimeReflectionProbes_hook(bool enable)
-	{
-		reinterpret_cast<decltype(set_realtimeReflectionProbes_hook)*>(set_realtimeReflectionProbes_orig)(true);
-	}
-
-	void* Light_set_shadowResolution_orig = nullptr;
-	void Light_set_shadowResolution_hook(Il2CppObject* _this, int level)
-	{
-		reinterpret_cast<decltype(Light_set_shadowResolution_hook)*>(Light_set_shadowResolution_orig)(_this, 3);
-	}
-
 	void* apply_graphics_quality_orig = nullptr;
 	void apply_graphics_quality_hook(Il2CppObject* _this, int quality, bool force)
 	{
 		reinterpret_cast<decltype(apply_graphics_quality_hook)*>(apply_graphics_quality_orig)(_this, config::graphics_quality, true);
-		if (config::graphics_quality >= 3)
-		{
-			set_anti_aliasing_hook(8);
-			set_shadowResolution_hook(3);
-			set_shadows_hook(2);
-			set_softVegetation_hook(true);
-			set_realtimeReflectionProbes_hook(true);
-		}
 	}
+
+	void* GraphicSettings_Get3DAntiAliasingLevel_orig = nullptr;
+	int GraphicSettings_Get3DAntiAliasingLevel_hook(Il2CppObject* self, bool allowMSAA)
+	{
+		if (config::anti_aliasing < 0)
+		{
+			return reinterpret_cast<decltype(GraphicSettings_Get3DAntiAliasingLevel_hook)*>(GraphicSettings_Get3DAntiAliasingLevel_orig)(self, allowMSAA);
+		}
+
+		if (!allowMSAA)
+		{
+			return 1;
+		}
+
+		return config::anti_aliasing;
+	}
+
 	void* GraphicSettings_GetVirtualResolution_orig = nullptr;
 	UnityEngine::Vector2Int GraphicSettings_GetVirtualResolution_hook(Il2CppObject* _this)
 	{
 		if (config::freeform_window)
 		{
-			int width = UnityEngine::Screen::width();
-			int height = UnityEngine::Screen::height();
+			int width = UnityEngine::Screen::width() * config::resolution_3d_scale;
+			int height = UnityEngine::Screen::height() * config::resolution_3d_scale;
 
-			auto GallopScreen = il2cpp_symbols::get_class("umamusume.dll", "Gallop", "Screen");
+			/*auto GallopScreen = il2cpp_symbols::get_class("umamusume.dll", "Gallop", "Screen");
 
 			auto NUMBER1920_Field = il2cpp_class_get_field_from_name_wrap(GallopScreen, "NUMBER1920");
 
@@ -6214,7 +6174,8 @@ namespace
 				return UnityEngine::Vector2Int{ number1080, number1920 };
 			}
 
-			return UnityEngine::Vector2Int{ number1920, number1080 };
+			return UnityEngine::Vector2Int{ number1920, number1080 };*/
+			return UnityEngine::Vector2Int{ width, height };
 		}
 
 		return reinterpret_cast<decltype(GraphicSettings_GetVirtualResolution_hook)*>(GraphicSettings_GetVirtualResolution_orig)(_this);
@@ -6225,8 +6186,8 @@ namespace
 	{
 		if (config::freeform_window)
 		{
-			int width = UnityEngine::Screen::width();
-			int height = UnityEngine::Screen::height();
+			int width = UnityEngine::Screen::width() * config::resolution_3d_scale;
+			int height = UnityEngine::Screen::height() * config::resolution_3d_scale;
 
 			/*auto GallopScreen = il2cpp_symbols::get_class("umamusume.dll", "Gallop", "Screen");
 
@@ -6271,17 +6232,6 @@ namespace
 		resolution.m_X *= config::resolution_3d_scale;
 		resolution.m_Y *= config::resolution_3d_scale;
 		return resolution;
-	}
-
-	void* PathResolver_GetLocalPath_orig = nullptr;
-	Il2CppString* PathResolver_GetLocalPath_hook(Il2CppObject* _this, int kind, Il2CppString* hname)
-	{
-		if (config::replace_assets.find(hname->chars) != config::replace_assets.end())
-		{
-			auto& replaceAsset = config::replace_assets.at(hname->chars);
-			return il2cpp_string_new16(replaceAsset.path.data());
-		}
-		return reinterpret_cast<decltype(PathResolver_GetLocalPath_hook)*>(PathResolver_GetLocalPath_orig)(_this, kind, hname);
 	}
 
 	void* Renderer_get_material_orig = nullptr;
@@ -9002,9 +8952,9 @@ namespace
 					GetOptionItemOnOff("allow_delete_cookie", LocalifySettings::GetText("allow_delete_cookie")),
 				GetOptionItemOnOff("dump_msgpack", LocalifySettings::GetText("dump_msgpack")),
 				GetOptionItemOnOff("dump_msgpack_request", LocalifySettings::GetText("dump_msgpack_request")),
-				Game::CurrentGameRegion == Game::Region::KOR ? 
+				Game::CurrentGameRegion == Game::Region::KOR ?
 					GetOptionItemOnOff("use_third_party_news", LocalifySettings::GetText("use_third_party_news")) : nullptr,
-				Game::CurrentGameRegion == Game::Region::KOR ? 
+				Game::CurrentGameRegion == Game::Region::KOR ?
 					GetOptionItemInfo(LocalifySettings::GetText("use_third_party_news_info")) : nullptr,
 #ifdef EXPERIMENTS
 				GetOptionItemOnOff("unlock_live_chara", LocalifySettings::GetText("unlock_live_chara")),
@@ -10267,8 +10217,6 @@ namespace
 		return cloned;
 	}
 
-	Il2CppObject* currentOptionObj = nullptr;
-
 	void* resources_load_orig = nullptr;
 	Il2CppObject* resources_load_hook(Il2CppString* path, Il2CppObject* type)
 	{
@@ -10302,127 +10250,6 @@ namespace
 			auto object = reinterpret_cast<decltype(resources_load_hook)*>(resources_load_orig)(path, type);
 			auto fontAssetField = il2cpp_class_get_field_from_name_wrap(object->klass, "m_defaultFontAsset");
 			il2cpp_field_set_value(object, fontAssetField, GetCustomTMPFont());
-			return object;
-		}
-
-		if (wName.ends_with(L"dialogoptionhome"))
-		{
-			auto object = reinterpret_cast<decltype(resources_load_hook)*>(resources_load_orig)(path, type);
-
-			if (object != currentOptionObj)
-			{
-				currentOptionObj = object;
-			}
-			else
-			{
-				return object;
-			}
-
-			auto getComponents = il2cpp_class_get_method_from_name_type<Il2CppArraySize_t<Il2CppObject*> *(*)(Il2CppObject*, Il2CppType*, bool, bool, bool, bool, Il2CppObject*)>(object->klass, "GetComponentsInternal", 6)->methodPointer;
-
-			il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, bool)>(object->klass, "SetActive", 1)->methodPointer(object, true);
-
-
-			auto array = getComponents(object, reinterpret_cast<Il2CppType*>(GetRuntimeType(
-				"umamusume.dll", "Gallop", "PartsOptionPageBasicSetting")), true, true, false, false, nullptr);
-
-			if (array)
-			{
-				for (int i = 0; i < array->max_length; i++)
-				{
-					auto obj = array->vector[i];
-
-					if (obj && obj->klass->name == "PartsOptionPageBasicSetting"s)
-					{
-						/*auto _notityObjListField = il2cpp_class_get_field_from_name_wrap(obj->klass, "_notityObjList");
-						Il2CppObject* _notityObjList;
-						il2cpp_field_get_value(obj, _notityObjListField, &_notityObjList);
-
-						if (_notityObjList)
-						{
-							il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*)>(_notityObjList->klass, "Clear", 0)->methodPointer(_notityObjList);
-						}*/
-
-						/*auto _fpsObjListField = il2cpp_class_get_field_from_name_wrap(obj->klass, "_fpsObjList");
-						Il2CppObject* _fpsObjList;
-						il2cpp_field_get_value(obj, _fpsObjListField, &_fpsObjList);
-
-						if (_fpsObjList)
-						{
-							il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*)>(_fpsObjList->klass, "Clear", 0)->methodPointer(_fpsObjList);
-						}*/
-
-						auto gameObject = il2cpp_class_get_method_from_name_type<Il2CppObject * (*)(Il2CppObject*)>(obj->klass, "get_gameObject", 0)->methodPointer(obj);
-
-						auto rectTransformArray = getComponents(gameObject, reinterpret_cast<Il2CppType*>(GetRuntimeType(
-							"UnityEngine.CoreModule.dll", "UnityEngine", "RectTransform")), true, true, false, false, nullptr);
-
-						for (int j = 0; j < rectTransformArray->max_length; j++)
-						{
-							auto rectTransform = rectTransformArray->vector[j];
-
-							if (rectTransform && UnityEngine::Object::Name(rectTransform)->chars == L"Content"s)
-							{
-								// InitOptionLayout(rectTransform);
-								break;
-							}
-						}
-					}
-				}
-			}
-
-			return object;
-		}
-
-
-		if (wName.ends_with(L"dialogoptionlivetheater"))
-		{
-			auto object = reinterpret_cast<decltype(resources_load_hook)*>(resources_load_orig)(path, type);
-
-			if (object != currentOptionObj)
-			{
-				currentOptionObj = object;
-			}
-			else
-			{
-				return object;
-			}
-
-			auto getComponents = il2cpp_class_get_method_from_name_type<Il2CppArraySize_t<Il2CppObject*> *(*)(Il2CppObject*, Il2CppType*, bool, bool, bool, bool, Il2CppObject*)>(object->klass, "GetComponentsInternal", 6)->methodPointer;
-
-			il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, bool)>(object->klass, "SetActive", 1)->methodPointer(object, true);
-
-
-			auto array = getComponents(object, reinterpret_cast<Il2CppType*>(GetRuntimeType(
-				"umamusume.dll", "Gallop", "PartsOptionPageLive")), true, true, false, false, nullptr);
-
-			if (array)
-			{
-				for (int i = 0; i < array->max_length; i++)
-				{
-					auto obj = array->vector[i];
-
-					if (obj && obj->klass->name == "PartsOptionPageLive"s)
-					{
-						auto gameObject = il2cpp_class_get_method_from_name_type<Il2CppObject * (*)(Il2CppObject*)>(obj->klass, "get_gameObject", 0)->methodPointer(obj);
-
-						auto rectTransformArray = getComponents(gameObject, reinterpret_cast<Il2CppType*>(GetRuntimeType(
-							"UnityEngine.CoreModule.dll", "UnityEngine", "RectTransform")), true, true, false, false, nullptr);
-
-						for (int j = 0; j < rectTransformArray->max_length; j++)
-						{
-							auto rectTransform = rectTransformArray->vector[j];
-
-							if (rectTransform && UnityEngine::Object::Name(rectTransform)->chars == L"Content"s)
-							{
-								// InitOptionLayout(rectTransform);
-								break;
-							}
-						}
-					}
-				}
-			}
-
 			return object;
 		}
 
@@ -10710,27 +10537,6 @@ namespace
 		if (!config::freeform_window)
 		{
 			reinterpret_cast<decltype(Screen_set_orientation_hook)*>(Screen_set_orientation_orig)(
-				orientation);
-		}
-	}
-
-	void* Screen_RequestOrientation_orig = nullptr;
-
-	void Screen_RequestOrientation_hook(UnityEngine::ScreenOrientation orientation)
-	{
-		if (config::freeform_window)
-		{
-			reinterpret_cast<decltype(Screen_RequestOrientation_hook)*>(Screen_RequestOrientation_orig)(UnityEngine::ScreenOrientation::AutoRotation);
-
-			auto hWnd = GetHWND();
-
-			long style = GetWindowLongW(hWnd, GWL_STYLE);
-			style |= WS_MAXIMIZEBOX;
-			SetWindowLongPtrW(hWnd, GWL_STYLE, style);
-		}
-		else
-		{
-			reinterpret_cast<decltype(Screen_RequestOrientation_hook)*>(Screen_RequestOrientation_orig)(
 				orientation);
 		}
 	}
@@ -12225,8 +12031,10 @@ namespace
 					activity.GetAssets().SetLargeText(name.data());
 					activity.GetAssets().SetSmallImage("umamusume");
 					activity.SetType(discord::ActivityType::Watching);
+					activity.GetTimestamps().SetStart(
+						(chrono::duration_cast<chrono::milliseconds>(chrono::system_clock::now().time_since_epoch()).count() - (static_cast<int64_t>(totalTime * 1000))));
 					activity.GetTimestamps().SetEnd(
-						(chrono::duration_cast<chrono::milliseconds>(chrono::system_clock::now().time_since_epoch()).count() + (static_cast<int64_t>(totalTime) * 1000)) - (static_cast<int64_t>(currentTime) * 1000));
+						(chrono::duration_cast<chrono::milliseconds>(chrono::system_clock::now().time_since_epoch()).count() - (static_cast<int64_t>(totalTime * 1000))) + (static_cast<int64_t>(currentTime * 1000)));
 					discord->ActivityManager().UpdateActivity(activity, [](discord::Result res) {});
 				}
 			}
@@ -12270,6 +12078,7 @@ namespace
 						activity.GetAssets().SetLargeImage("umamusume");
 						activity.SetDetails(detail.data());
 						activity.GetTimestamps().SetStart(startTime);
+						activity.GetTimestamps().SetEnd(0);
 						activity.SetType(discord::ActivityType::Playing);
 						discord->ActivityManager().UpdateActivity(activity, [](discord::Result res) {});
 					}
@@ -12875,26 +12684,19 @@ namespace
 
 		auto set_anti_aliasing_addr = il2cpp_resolve_icall("UnityEngine.QualitySettings::set_antiAliasing(System.Int32)");
 
-		auto rendertexture_set_anti_aliasing_addr = il2cpp_resolve_icall("UnityEngine.RenderTexture::set_antiAliasing(System.Int32)");
-
 		auto set_vSyncCount_addr = il2cpp_resolve_icall("UnityEngine.QualitySettings::set_vSyncCount()");
 
-		auto set_shadowResolution_addr = il2cpp_resolve_icall("UnityEngine.QualitySettings::set_shadowResolution(UnityEngine.ShadowResolution)");
-
 		auto set_anisotropicFiltering_addr = il2cpp_resolve_icall("UnityEngine.QualitySettings::set_anisotropicFiltering(UnityEngine.AnisotropicFiltering)");
-
-		auto set_shadows_addr = il2cpp_resolve_icall("UnityEngine.QualitySettings::set_shadows(UnityEngine.ShadowQuality)");
-
-		auto set_softVegetation_addr = il2cpp_resolve_icall("UnityEngine.QualitySettings::set_softVegetation(System.Boolean)");
-
-		auto set_realtimeReflectionProbes_addr = il2cpp_resolve_icall("UnityEngine.QualitySettings::set_realtimeReflectionProbes(System.Boolean)");
-
-		auto Light_set_shadowResolution_addr = il2cpp_resolve_icall("UnityEngine.Light::set_shadowResolution(UnityEngine.Light,UnityEngine.Rendering.LightShadowResolution)");
 
 		auto apply_graphics_quality_addr = il2cpp_symbols::get_method_pointer(
 			"umamusume.dll",
 			"Gallop",
 			"GraphicSettings", "ApplyGraphicsQuality", 2);
+
+		auto GraphicSettings_Get3DAntiAliasingLevel_addr = il2cpp_symbols::get_method_pointer(
+			"umamusume.dll",
+			"Gallop",
+			"GraphicSettings", "Get3DAntiAliasingLevel", 1);
 
 		auto GraphicSettings_GetVirtualResolution3D_addr = il2cpp_symbols::get_method_pointer(
 			"umamusume.dll",
@@ -12922,10 +12724,6 @@ namespace
 
 		auto PartsEpisodeList_SetupStoryExtraEpisodeList_addr = il2cpp_symbols::get_method_pointer(
 			"umamusume.dll", "Gallop", "PartsEpisodeList", "SetupStoryExtraEpisodeList", 4);
-
-		auto PathResolver_GetLocalPath_addr = il2cpp_symbols::get_method_pointer(
-			"_Cyan.dll", "Cyan.LocalFile", "PathResolver",
-			"GetLocalPath", 2);
 
 		auto FrameRateController_GetLayerFrameRate_addr = il2cpp_symbols::get_method_pointer("umamusume.dll", "Gallop", "FrameRateController", "GetLayerFrameRate", 1);
 
@@ -12987,8 +12785,6 @@ namespace
 
 		// ADD_HOOK(GallopUtil_GotoTitleOnError, "Gallop.GallopUtil.GotoTitleOnError() at %p\n");
 
-		ADD_HOOK(set_shadowResolution, "UnityEngine.QualitySettings.set_shadowResolution(ShadowResolution) at %p\n");
-
 		if (Game::CurrentGameRegion == Game::Region::KOR)
 		{
 			ADD_HOOK(DownloadHandler_InternalGetByteArray, "UnityEngine.Networking.DownloadHandler::InternalGetByteArray at %p\n");
@@ -13012,38 +12808,25 @@ namespace
 			set_vSyncCount_hook(config::vsync_count);
 		}
 
-		ADD_HOOK(set_shadows, "UnityEngine.QualitySettings.set_shadows(UnityEngine.ShadowQuality) at %p\n");
-
-		ADD_HOOK(set_softVegetation, "UnityEngine.QualitySettings.set_softVegetation(System.Boolean) at %p\n");
-
-		ADD_HOOK(set_realtimeReflectionProbes, "UnityEngine.QualitySettings.set_realtimeReflectionProbes(System.Boolean) at %p\n");
-
-		ADD_HOOK(Light_set_shadowResolution, "UnityEngine.Light.set_shadowResolution(UnityEngine.Rendering.LightShadowResolution) at %p\n");
-
 		// TODO Gallop.NowLoading::ShowCustomWipeFlash
 		ADD_HOOK(NowLoading_Show, "Gallop.NowLoading::Show at %p\n");
 
 		ADD_HOOK(NowLoading_Hide, "Gallop.NowLoading::Hide at %p\n");
 
-		// ADD_HOOK(PathResolver_GetLocalPath, "Cyan.Loader.PathResolver::GetLocalPath at %p\n");
-
-		ADD_HOOK(get_preferred_width, "UnityEngine.TextGenerator::GetPreferredWidth at %p\n");
+		ADD_HOOK(load_zekken_composite_resource, "Gallop.ModelLoader::LoadZekkenCompositeResource at %p\n");
 
 		if (Game::CurrentGameRegion != Game::Region::KOR)
 		{
 			ADD_HOOK(an_text_fix_data, "AnimateToUnity.AnText::_FixData at %p\n");
 			ADD_HOOK(an_text_set_material_to_textmesh, "AnimateToUnity.AnText::_SetMaterialToTextMesh at %p\n");
-		}
 
-		ADD_HOOK(load_zekken_composite_resource, "Gallop.ModelLoader::LoadZekkenCompositeResource at %p\n");
+			// ADD_HOOK(get_preferred_width, "UnityEngine.TextGenerator::GetPreferredWidth at %p\n");
 
-		// hook UnityEngine.TextGenerator::PopulateWithErrors to modify text
-		ADD_HOOK(populate_with_errors, "UnityEngine.TextGenerator::PopulateWithErrors at %p\n");
+			// hook UnityEngine.TextGenerator::PopulateWithErrors to modify text
+			ADD_HOOK(populate_with_errors, "UnityEngine.TextGenerator::PopulateWithErrors at %p\n");
 
-		// ADD_HOOK(text_get_text, "UnityEngine.UI.Text::get_text at %p\n");
+			// ADD_HOOK(text_get_text, "UnityEngine.UI.Text::get_text at %p\n");
 
-		if (Game::CurrentGameRegion != Game::Region::KOR)
-		{
 			ADD_HOOK(textcommon_SetTextWithLineHeadWrap, "Gallop.TextCommon::SetTextWithLineHeadWrap at %p\n");
 			ADD_HOOK(textcommon_SetTextWithLineHeadWrapWithColorTag, "Gallop.TextCommon::SetTextWithLineHeadWrapWithColorTag at %p\n");
 			ADD_HOOK(textcommon_SetSystemTextWithLineHeadWrap, "Gallop.TextCommon::SetSystemTextWithLineHeadWrap at %p\n");
@@ -13174,15 +12957,6 @@ namespace
 				il2cpp_field_static_set_value(_originalScreenHeight_Field, &height);
 			}
 
-			auto SCREEN_ORIENTATION_CATEGORIES_Field = il2cpp_class_get_field_from_name_wrap(GallopScreen, "SCREEN_ORIENTATION_CATEGORIES");
-			Il2CppObject* SCREEN_ORIENTATION_CATEGORIES;
-			il2cpp_field_static_get_value(SCREEN_ORIENTATION_CATEGORIES_Field, &SCREEN_ORIENTATION_CATEGORIES);
-
-			if (SCREEN_ORIENTATION_CATEGORIES)
-			{
-				// il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*)>(SCREEN_ORIENTATION_CATEGORIES->klass, "Clear", 0)->methodPointer(SCREEN_ORIENTATION_CATEGORIES);
-			}
-
 			auto Camera_set_orthographicSize_addr = il2cpp_resolve_icall("UnityEngine.Camera::set_orthographicSize(System.Single)");
 
 			auto RectTransform_get_rect_Injected_addr = il2cpp_resolve_icall("UnityEngine.RectTransform::get_rect_Injected(UnityEngine.Rect&)");
@@ -13190,8 +12964,6 @@ namespace
 			auto WaitDeviceOrientation_addr = il2cpp_symbols::get_method_pointer(
 				"umamusume.dll",
 				"Gallop", "Screen", "WaitDeviceOrientation", 1);
-
-			auto Screen_RequestOrientation_addr = il2cpp_resolve_icall("UnityEngine.Screen::RequestOrientation(UnityEngine.ScreenOrientation)");
 
 			auto DeviceOrientationGuide_Show_addr = il2cpp_symbols::get_method_pointer(
 				"umamusume.dll",
@@ -13201,10 +12973,9 @@ namespace
 				"Cute.Cri.Assembly.dll", "Cute.Cri", "MoviePlayerForUI", "AdjustScreenSize", 2);
 
 			ADD_HOOK(Camera_set_orthographicSize, "UnityEngine.Camera::set_orthographicSize at %p\n");
-			ADD_HOOK(RectTransform_get_rect_Injected, "UnityEngine.RectTransform::get_rect_Injected at %p\n");
+			// ADD_HOOK(RectTransform_get_rect_Injected, "UnityEngine.RectTransform::get_rect_Injected at %p\n");
 
 			// ADD_HOOK(WaitDeviceOrientation, "Gallop.Screen::WaitDeviceOrientation at %p\n");
-			ADD_HOOK(Screen_RequestOrientation, "UnityEngine.Screen::RequestOrientation at %p\n");
 			ADD_HOOK(DeviceOrientationGuide_Show, "DeviceOrientationGuide::Show at %p\n");
 			ADD_HOOK(MoviePlayerForUI_AdjustScreenSize, "MoviePlayerForUI::AdjustScreenSize at %p\n");
 		}
@@ -13221,14 +12992,14 @@ namespace
 
 		if (config::resolution_3d_scale != 1.0f || config::freeform_window)
 		{
-			ADD_HOOK(GraphicSettings_GetVirtualResolution3D, "Gallop.GraphicSettings.GetVirtualResolution3D at %p\n");
-			ADD_HOOK(GraphicSettings_GetVirtualResolution, "Gallop.GraphicSettings.GetVirtualResolution at %p\n");
+			ADD_HOOK(GraphicSettings_GetVirtualResolution3D, "Gallop.GraphicSettings::GetVirtualResolution3D at %p\n");
+			ADD_HOOK(GraphicSettings_GetVirtualResolution, "Gallop.GraphicSettings::GetVirtualResolution at %p\n");
 		}
 
 		if (config::anti_aliasing != -1)
 		{
-			ADD_HOOK(set_anti_aliasing, "UnityEngine.QualitySettings.set_antiAliasing(int) at %p\n");
-			// ADD_HOOK(rendertexture_set_anti_aliasing, "UnityEngine.RenderTexture.set_antiAliasing(int) at %p\n");
+			ADD_HOOK(set_anti_aliasing, "UnityEngine.QualitySettings::set_antiAliasing at %p\n");
+			ADD_HOOK(GraphicSettings_Get3DAntiAliasingLevel, "Gallop.GraphicSettings::Get3DAntiAliasingLevel at %p\n");
 		}
 
 		if (config::unlock_live_chara)
@@ -13245,92 +13016,6 @@ namespace
 				wcout << dll << endl;
 			}
 		}
-
-		auto delegate = CreateDelegateWithClassStatic(
-			GetGenericClass(
-				GetRuntimeType("mscorlib.dll", "System", "Action`2"),
-				GetRuntimeType("UnityEngine.CoreModule.dll", "UnityEngine.Rendering", "ScriptableRenderContext"),
-				GetRuntimeType("UnityEngine.CoreModule.dll", "UnityEngine", "Camera")
-			),
-			*[](void*, void* context, Il2CppObject* camera)
-			{
-				if (config::anti_aliasing < 0)
-				{
-					return;
-				}
-
-				auto s_CamerasField = il2cpp_class_get_field_from_name_wrap(
-					il2cpp_symbols::get_class("UnityEngine.CoreModule.dll", "UnityEngine.Rendering", "RenderPipelineManager"),
-					"s_Cameras");
-
-				Il2CppArraySize_t<Il2CppObject*>* s_Cameras;
-
-				if (Game::CurrentGameRegion == Game::Region::KOR)
-				{
-					il2cpp_field_static_get_value(s_CamerasField, &s_Cameras);
-				}
-				else
-				{
-					Il2CppObject* cameraList;
-					il2cpp_field_static_get_value(s_CamerasField, &cameraList);
-
-					if (!cameraList)
-					{
-						return;
-					}
-
-					FieldInfo* itemsField = il2cpp_class_get_field_from_name_wrap(cameraList->klass, "_items");
-					il2cpp_field_get_value(cameraList, itemsField, &s_Cameras);
-				}
-
-				if (!s_Cameras)
-				{
-					return;
-				}
-
-				for (int i = 0; i < s_Cameras->max_length; i++)
-				{
-					auto camera = s_Cameras->vector[i];
-					if (camera)
-					{
-						auto name = UnityEngine::Object::Name(camera)->chars;
-
-						if (!name)
-						{
-							continue;
-						}
-
-						if (name == L"BGCamera"s ||
-							name == L"UICamera"s ||
-							// name == L"ViewerCamera"s ||
-							// name == L"TimelineCamera"s ||
-							// name == L"CutInCamera"s ||
-							name == L"ShortStoryCamera"s ||
-							wstring(name).find(L"Camera") == wstring::npos)
-						{
-							continue;
-						}
-
-						if (!il2cpp_class_get_method_from_name_type<bool (*)(Il2CppObject*)>(camera->klass, "get_allowMSAA", 0)->methodPointer(camera))
-						{
-							continue;
-						}
-
-						auto gameObject = UnityEngine::Behaviour{ camera }.gameObject();
-
-						auto cameraData = gameObject.GetComponent(GetRuntimeType("umamusume.dll", "Gallop.RenderPipeline", "CameraData"));
-
-						if (cameraData && !il2cpp_class_get_method_from_name_type<bool (*)(Il2CppObject*)>(cameraData->klass, "get_IsUIRendering", 0)->methodPointer(cameraData))
-						{
-							il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, int)>(cameraData->klass, "set_RenderingAntiAliasing", 1)->methodPointer(cameraData, config::anti_aliasing);
-							il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, bool)>(cameraData->klass, "set_IsCreateAntialiasTexture", 1)->methodPointer(cameraData, true);
-						}
-					}
-				}
-			}
-		);
-
-		il2cpp_symbols::get_method_pointer<void (*)(Il2CppDelegate*)>("UnityEngine.CoreModule.dll", "UnityEngine.Rendering", "RenderPipelineManager", "add_beginCameraRendering", 1)(&delegate->delegate);
 
 		const auto nameArray = reinterpret_cast<Il2CppArraySize_t<Il2CppString*>*(*)()>(il2cpp_resolve_icall("UnityEngine.QualitySettings::get_names()"))();
 		reinterpret_cast<void(*)(int)>(il2cpp_resolve_icall("UnityEngine.QualitySettings::SetQualityLevel()"))(nameArray->max_length - 1);
@@ -13476,36 +13161,36 @@ namespace
 
 		ADD_HOOK(resources_load, "UnityEngine.Resources::Load at %p\n");
 
-		// if (!config::runtime::replaceAssets.empty())
-		// {
-		ADD_HOOK(AssetBundleRequest_GetResult, "UnityEngine.AssetBundleRequest::GetResult at %p\n");
+		if (!config::replace_assetbundle_file_paths.empty())
+		{
+			ADD_HOOK(AssetBundleRequest_GetResult, "UnityEngine.AssetBundleRequest::GetResult at %p\n");
 
-		ADD_HOOK(GameObject_GetComponent, "UnityEngine.GameObject::GetComponent at %p\n");
+			ADD_HOOK(GameObject_GetComponent, "UnityEngine.GameObject::GetComponent at %p\n");
 
-		ADD_HOOK(Sprite_get_texture, "UnityEngine.Sprite::get_texture at %p\n");
+			ADD_HOOK(Sprite_get_texture, "UnityEngine.Sprite::get_texture at %p\n");
 
-		ADD_HOOK(Renderer_get_material, "UnityEngine.Renderer::get_material at %p\n");
+			ADD_HOOK(Renderer_get_material, "UnityEngine.Renderer::get_material at %p\n");
 
-		ADD_HOOK(Renderer_get_materials, "UnityEngine.Renderer::get_materials at %p\n");
+			ADD_HOOK(Renderer_get_materials, "UnityEngine.Renderer::get_materials at %p\n");
 
-		ADD_HOOK(Renderer_get_sharedMaterial, "UnityEngine.Renderer::get_sharedMaterial at %p\n");
+			ADD_HOOK(Renderer_get_sharedMaterial, "UnityEngine.Renderer::get_sharedMaterial at %p\n");
 
-		ADD_HOOK(Renderer_get_sharedMaterials, "UnityEngine.Renderer::get_sharedMaterials at %p\n");
+			ADD_HOOK(Renderer_get_sharedMaterials, "UnityEngine.Renderer::get_sharedMaterials at %p\n");
 
-		ADD_HOOK(Renderer_set_material, "UnityEngine.Renderer::set_material at %p\n");
+			ADD_HOOK(Renderer_set_material, "UnityEngine.Renderer::set_material at %p\n");
 
-		ADD_HOOK(Renderer_set_materials, "UnityEngine.Renderer::set_materials at %p\n");
+			ADD_HOOK(Renderer_set_materials, "UnityEngine.Renderer::set_materials at %p\n");
 
-		ADD_HOOK(Material_get_mainTexture, "UnityEngine.Material::get_mainTexture at %p\n");
+			// ADD_HOOK(Material_get_mainTexture, "UnityEngine.Material::get_mainTexture at %p\n");
 
-		ADD_HOOK(Material_set_mainTexture, "UnityEngine.Material::set_mainTexture at %p\n");
+			//ADD_HOOK(Material_set_mainTexture, "UnityEngine.Material::set_mainTexture at %p\n");
 
-		ADD_HOOK(Material_GetTextureImpl, "UnityEngine.Material::GetTextureImpl at %p\n");
+			ADD_HOOK(Material_GetTextureImpl, "UnityEngine.Material::GetTextureImpl at %p\n");
 
-		ADD_HOOK(Material_SetTextureImpl, "UnityEngine.Material::SetTextureImpl at %p\n");
+			ADD_HOOK(Material_SetTextureImpl, "UnityEngine.Material::SetTextureImpl at %p\n");
 
-		ADD_HOOK(CharaPropRendererAccessor_SetTexture, "Gallop.CharaPropRendererAccessor::SetTexture at %p\n");
-		// }
+			ADD_HOOK(CharaPropRendererAccessor_SetTexture, "Gallop.CharaPropRendererAccessor::SetTexture at %p\n");
+		}
 
 		if (config::dump_entries)
 		{
@@ -13550,12 +13235,10 @@ namespace
 				ADD_HOOK(SetResolution, "UnityEngine.Screen.SetResolution(int, int, FullScreenMode, int) at %p\n");
 			}
 			ADD_HOOK(SetResolution_Injected, "UnityEngine.Screen.SetResolution_Injected(int, int, FullScreenMode, RefreshRate) at %p\n");
-			// ADD_HOOK(UIManager_ChangeResizeUIForPC, "Gallop.UIManager::ChangeResizeUIForPC at %p\n");
 		}
 
 		if (config::unlock_size || config::freeform_window)
 		{
-			// remove fixed 1080p render resolution
 			ADD_HOOK(gallop_get_screenheight, "Gallop.Screen::get_Height at %p\n");
 			ADD_HOOK(gallop_get_screenwidth, "Gallop.Screen::get_Width at %p\n");
 
@@ -13763,7 +13446,7 @@ namespace
 
 				auto uiManager = Gallop::UIManager::Instance();
 
-				if (config::resolution_3d_scale != 1.0f)
+				/*if (config::resolution_3d_scale != 1.0f)
 				{
 					auto graphicSettings = GetSingletonInstance(il2cpp_symbols::get_class("umamusume.dll", "Gallop", "GraphicSettings"));
 
@@ -13777,18 +13460,18 @@ namespace
 
 						il2cpp_field_set_value(graphicSettings, _resolutionScale2DField, &config::resolution_3d_scale);
 					}
-				}
+				}*/
 
-				if (config::graphics_quality > -1)
+				/*if (config::graphics_quality > -1)
 				{
 					auto graphicSettings = GetSingletonInstance(il2cpp_symbols::get_class("umamusume.dll", "Gallop", "GraphicSettings"));
 					if (graphicSettings)
 					{
 						apply_graphics_quality_hook(graphicSettings, config::graphics_quality, true);
 					}
-				}
+				}*/
 
-				auto graphicSettings = GetSingletonInstance(il2cpp_symbols::get_class("umamusume.dll", "Gallop", "GraphicSettings"));
+				// auto graphicSettings = GetSingletonInstance(il2cpp_symbols::get_class("umamusume.dll", "Gallop", "GraphicSettings"));
 
 				// if (graphicSettings)
 				// {

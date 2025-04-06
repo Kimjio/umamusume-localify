@@ -107,16 +107,9 @@ static void ChangeResizeUIForPC_hook(Il2CppObject* _this, int width, int height)
 		return;
 	}
 
-	Il2CppArraySize_t<Il2CppObject*>* scalers;
-	if (Game::CurrentGameRegion == Game::Region::KOR)
-	{
-		scalers = UnityEngine::Object::FindObjectsByType(
-			GetRuntimeType("UnityEngine.UI.dll", "UnityEngine.UI", "CanvasScaler"), UnityEngine::FindObjectsInactive::Include, UnityEngine::FindObjectsSortMode::None);
-	}
-	else
-	{
-		scalers = UnityEngine::Object::FindObjectsOfType(GetRuntimeType("UnityEngine.UI.dll", "UnityEngine.UI", "CanvasScaler"), true);
-	}
+	Il2CppArraySize_t<Il2CppObject*>* scalers = UnityEngine::Object::FindObjectsByType(
+		GetRuntimeType("UnityEngine.UI.dll", "UnityEngine.UI", "CanvasScaler"), 
+		UnityEngine::FindObjectsInactive::Include, UnityEngine::FindObjectsSortMode::None);
 
 	// auto scalers = UIManager_GetCanvasScalerList(_this);
 	for (int i = 0; i < scalers->max_length; i++)

@@ -7,6 +7,12 @@
 
 Il2CppClass* ScreenClass = nullptr;
 
+void* get_Width_addr = nullptr;
+void* get_Width_orig = nullptr;
+
+void* get_Height_addr = nullptr;
+void* get_Height_orig = nullptr;
+
 void* get_OriginalScreenWidth_addr = nullptr;
 void* get_OriginalScreenWidth_orig = nullptr;
 
@@ -102,6 +108,8 @@ static Il2CppObject* ChangeScreenOrientationPortraitAsync_hook()
 static void InitAddress()
 {
 	ScreenClass = il2cpp_symbols::get_class(ASSEMBLY_NAME, "Gallop", "Screen");
+	get_Width_addr = il2cpp_symbols::get_method_pointer(ASSEMBLY_NAME, "Gallop", "Screen", "get_Width", 0);
+	get_Height_addr = il2cpp_symbols::get_method_pointer(ASSEMBLY_NAME, "Gallop", "Screen", "get_Height", 0);
 	get_OriginalScreenWidth_addr = il2cpp_symbols::get_method_pointer(ASSEMBLY_NAME, "Gallop", "Screen", "get_OriginalScreenWidth", 0);
 	set_OriginalScreenWidth_addr = il2cpp_symbols::get_method_pointer(ASSEMBLY_NAME, "Gallop", "Screen", "set_OriginalScreenWidth", 1);
 	get_OriginalScreenHeight_addr = il2cpp_symbols::get_method_pointer(ASSEMBLY_NAME, "Gallop", "Screen", "get_OriginalScreenHeight", 0);
@@ -113,6 +121,14 @@ static void InitAddress()
 
 static void HookMethods()
 {
+
+	if (config::unlock_size || config::freeform_window)
+	{
+		// remove fixed 1080p render resolution
+		// ADD_HOOK(get_Width, "Gallop.Screen::get_Width at %p\n");
+		// ADD_HOOK(get_Height, "Gallop.Screen::get_Height at %p\n");
+	}
+
 	if (config::freeform_window)
 	{
 		ADD_HOOK(get_OriginalScreenWidth, "Gallop.Screen::get_OriginalScreenWidth at %p\n");
