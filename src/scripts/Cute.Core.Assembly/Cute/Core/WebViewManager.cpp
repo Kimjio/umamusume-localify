@@ -60,8 +60,6 @@ wstring CurrentUrlString;
 
 static void Cute_Core_WebViewManager_Awake_hook(Il2CppObject* self)
 {
-	cout << "Cute_Core_WebViewManager_Awake_hook " << endl;
-	PrintStackTrace();
 	reinterpret_cast<decltype(Cute_Core_WebViewManager_Awake_hook)*>(Cute_Core_WebViewManager_Awake_orig)(self);
 	auto path = UnityEngine::Application::persistentDataPath()->chars;
 
@@ -526,7 +524,6 @@ static void Cute_Core_WebViewManager_GoBack_hook(Il2CppObject* self)
 	auto obj = GetSingletonInstance(Cute_Core_WebViewManager);
 	if (obj && self == obj)
 	{
-		PrintStackTrace();
 		if (webview)
 		{
 			webview->GoBack();

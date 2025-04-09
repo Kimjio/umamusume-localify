@@ -14,6 +14,7 @@ typedef _Return_type_success_(return >= 0) LONG NTSTATUS;
 #define STATUS_SECTION_PROTECTION        ((NTSTATUS)0xC000004EL)
 #define STATUS_INVALID_PAGE_PROTECTION   ((NTSTATUS)0xC0000045L)
 #define STATUS_PROCEDURE_NOT_FOUND       ((NTSTATUS)0xC000007AL)
+#define STATUS_NOT_FOUND                 ((NTSTATUS)0xC0000225L)
 
 #define SEC_NO_CHANGE 0x00400000
 
@@ -30,6 +31,8 @@ typedef struct _UNICODE_STRING
     USHORT MaximumLength;
     PWSTR  Buffer;
 } UNICODE_STRING, * PUNICODE_STRING;
+
+#define RTL_CONSTANT_STRING(s) { sizeof(s) - sizeof((s)[0]), sizeof(s), s }
 
 typedef struct _OBJECT_ATTRIBUTES
 {
@@ -52,6 +55,14 @@ typedef enum _MEMORY_INFORMATION_CLASS
     MemoryBasicInformation
 } MEMORY_INFORMATION_CLASS, * PMEMORY_INFORMATION_CLASS;
 
+typedef struct _FILE_BASIC_INFORMATION
+{
+    LARGE_INTEGER CreationTime;
+    LARGE_INTEGER LastAccessTime;
+    LARGE_INTEGER LastWriteTime;
+    LARGE_INTEGER ChangeTime;
+    ULONG FileAttributes;
+} FILE_BASIC_INFORMATION, * PFILE_BASIC_INFORMATION;
 
 EXTERN_C
 NTSTATUS
@@ -125,4 +136,23 @@ PIMAGE_NT_HEADERS
 NTAPI
 RtlImageNtHeader(
     _In_ PVOID BaseAddress
+);
+
+
+EXTERN_C
+NTSTATUS
+NTAPI
+NtQueryAttributesFile(
+    _In_ POBJECT_ATTRIBUTES ObjectAttributes,
+    _Out_ PFILE_BASIC_INFORMATION FileInformation
+);
+
+EXTERN_C
+NTSTATUS
+NTAPI
+LdrLoadDll(
+    _In_opt_ PWSTR DllPath,
+    _In_opt_ PULONG DllCharacteristics,
+    _In_ PUNICODE_STRING DllName,
+    _Out_ PVOID* DllHandle
 );

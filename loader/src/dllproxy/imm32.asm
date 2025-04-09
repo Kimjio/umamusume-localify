@@ -1,0 +1,685 @@
+.code
+
+extern ImmCallImeConsoleIME_Original:QWORD
+extern ImmIMPGetIMEA_Original:QWORD
+extern ImmIMPGetIMEW_Original:QWORD
+extern ImmIMPQueryIMEA_Original:QWORD
+extern ImmIMPQueryIMEW_Original:QWORD
+extern ImmIMPSetIMEA_Original:QWORD
+extern ImmIMPSetIMEW_Original:QWORD
+extern ImmPutImeMenuItemsIntoMappedFile_Original:QWORD
+extern ImmRegisterClient_Original:QWORD
+extern ImmSendIMEMessageExA_Original:QWORD
+extern ImmSendIMEMessageExW_Original:QWORD
+extern ImmSetActiveContextConsoleIME_Original:QWORD
+extern ImmSystemHandler_Original:QWORD
+extern ImmWINNLSEnableIME_Original:QWORD
+extern ImmWINNLSGetEnableStatus_Original:QWORD
+extern ImmWINNLSGetIMEHotkey_Original:QWORD
+extern CtfImmAppCompatEnableIMEonProtectedCode_Original:QWORD
+extern CtfImmCoUninitialize_Original:QWORD
+extern CtfImmDispatchDefImeMessage_Original:QWORD
+extern CtfImmEnterCoInitCountSkipMode_Original:QWORD
+extern CtfImmGenerateMessage_Original:QWORD
+extern CtfImmGetCompatibleKeyboardLayout_Original:QWORD
+extern CtfImmGetGlobalIMEStatus_Original:QWORD
+extern CtfImmGetGuidAtom_Original:QWORD
+extern CtfImmGetIMEFileName_Original:QWORD
+extern CtfImmGetTMAEFlags_Original:QWORD
+extern CtfImmHideToolbarWnd_Original:QWORD
+extern CtfImmIsCiceroEnabled_Original:QWORD
+extern CtfImmIsCiceroStartedInThread_Original:QWORD
+extern CtfImmIsComStartedInThread_Original:QWORD
+extern CtfImmIsGuidMapEnable_Original:QWORD
+extern CtfImmIsTextFrameServiceDisabled_Original:QWORD
+extern CtfImmLastEnabledWndDestroy_Original:QWORD
+extern CtfImmLeaveCoInitCountSkipMode_Original:QWORD
+extern CtfImmNotify_Original:QWORD
+extern CtfImmRestoreToolbarWnd_Original:QWORD
+extern CtfImmSetAppCompatFlags_Original:QWORD
+extern CtfImmSetCiceroStartInThread_Original:QWORD
+extern CtfImmSetDefaultRemoteKeyboardLayout_Original:QWORD
+extern CtfImmTIMActivate_Original:QWORD
+extern GetKeyboardLayoutCP_Original:QWORD
+extern ImmActivateLayout_Original:QWORD
+extern ImmAssociateContext_Original:QWORD
+extern ImmAssociateContextEx_Original:QWORD
+extern ImmConfigureIMEA_Original:QWORD
+extern ImmConfigureIMEW_Original:QWORD
+extern ImmCreateContext_Original:QWORD
+extern ImmCreateIMCC_Original:QWORD
+extern ImmCreateSoftKeyboard_Original:QWORD
+extern ImmDestroyContext_Original:QWORD
+extern ImmDestroyIMCC_Original:QWORD
+extern ImmDestroySoftKeyboard_Original:QWORD
+extern ImmDisableIME_Original:QWORD
+extern ImmDisableIme_Original:QWORD
+extern ImmDisableLegacyIME_Original:QWORD
+extern ImmDisableTextFrameService_Original:QWORD
+extern ImmEnumInputContext_Original:QWORD
+extern ImmEnumRegisterWordA_Original:QWORD
+extern ImmEnumRegisterWordW_Original:QWORD
+extern ImmEscapeA_Original:QWORD
+extern ImmEscapeW_Original:QWORD
+extern ImmFreeLayout_Original:QWORD
+extern ImmGenerateMessage_Original:QWORD
+extern ImmGetAppCompatFlags_Original:QWORD
+extern ImmGetCandidateListA_Original:QWORD
+extern ImmGetCandidateListCountA_Original:QWORD
+extern ImmGetCandidateListCountW_Original:QWORD
+extern ImmGetCandidateListW_Original:QWORD
+extern ImmGetCandidateWindow_Original:QWORD
+extern ImmGetCompositionFontA_Original:QWORD
+extern ImmGetCompositionFontW_Original:QWORD
+extern ImmGetCompositionStringA_Original:QWORD
+extern ImmGetCompositionStringW_Original:QWORD
+extern ImmGetCompositionWindow_Original:QWORD
+extern ImmGetContext_Original:QWORD
+extern ImmGetConversionListA_Original:QWORD
+extern ImmGetConversionListW_Original:QWORD
+extern ImmGetConversionStatus_Original:QWORD
+extern ImmGetDefaultIMEWnd_Original:QWORD
+extern ImmGetDescriptionA_Original:QWORD
+extern ImmGetDescriptionW_Original:QWORD
+extern ImmGetGuideLineA_Original:QWORD
+extern ImmGetGuideLineW_Original:QWORD
+extern ImmGetHotKey_Original:QWORD
+extern ImmGetIMCCLockCount_Original:QWORD
+extern ImmGetIMCCSize_Original:QWORD
+extern ImmGetIMCLockCount_Original:QWORD
+extern ImmGetIMEFileNameA_Original:QWORD
+extern ImmGetIMEFileNameW_Original:QWORD
+extern ImmGetImeInfoEx_Original:QWORD
+extern ImmGetImeMenuItemsA_Original:QWORD
+extern ImmGetImeMenuItemsW_Original:QWORD
+extern ImmGetOpenStatus_Original:QWORD
+extern ImmGetProperty_Original:QWORD
+extern ImmGetRegisterWordStyleA_Original:QWORD
+extern ImmGetRegisterWordStyleW_Original:QWORD
+extern ImmGetStatusWindowPos_Original:QWORD
+extern ImmGetVirtualKey_Original:QWORD
+extern ImmInstallIMEA_Original:QWORD
+extern ImmInstallIMEW_Original:QWORD
+extern ImmIsIME_Original:QWORD
+extern ImmIsUIMessageA_Original:QWORD
+extern ImmIsUIMessageW_Original:QWORD
+extern ImmLoadIME_Original:QWORD
+extern ImmLoadLayout_Original:QWORD
+extern ImmLockClientImc_Original:QWORD
+extern ImmLockIMC_Original:QWORD
+extern ImmLockIMCC_Original:QWORD
+extern ImmLockImeDpi_Original:QWORD
+extern ImmNotifyIME_Original:QWORD
+extern ImmProcessKey_Original:QWORD
+extern ImmReSizeIMCC_Original:QWORD
+extern ImmRegisterWordA_Original:QWORD
+extern ImmRegisterWordW_Original:QWORD
+extern ImmReleaseContext_Original:QWORD
+extern ImmRequestMessageA_Original:QWORD
+extern ImmRequestMessageW_Original:QWORD
+extern ImmSetActiveContext_Original:QWORD
+extern ImmSetCandidateWindow_Original:QWORD
+extern ImmSetCompositionFontA_Original:QWORD
+extern ImmSetCompositionFontW_Original:QWORD
+extern ImmSetCompositionStringA_Original:QWORD
+extern ImmSetCompositionStringW_Original:QWORD
+extern ImmSetCompositionWindow_Original:QWORD
+extern ImmSetConversionStatus_Original:QWORD
+extern ImmSetHotKey_Original:QWORD
+extern ImmSetOpenStatus_Original:QWORD
+extern ImmSetStatusWindowPos_Original:QWORD
+extern ImmShowSoftKeyboard_Original:QWORD
+extern ImmSimulateHotKey_Original:QWORD
+extern ImmTranslateMessage_Original:QWORD
+extern ImmUnlockClientImc_Original:QWORD
+extern ImmUnlockIMC_Original:QWORD
+extern ImmUnlockIMCC_Original:QWORD
+extern ImmUnlockImeDpi_Original:QWORD
+extern ImmUnregisterWordA_Original:QWORD
+extern ImmUnregisterWordW_Original:QWORD
+
+ImmCallImeConsoleIME_EXPORT proc
+  jmp QWORD ptr ImmCallImeConsoleIME_Original
+ImmCallImeConsoleIME_EXPORT endp
+
+ImmIMPGetIMEA_EXPORT proc
+  jmp QWORD ptr ImmIMPGetIMEA_Original
+ImmIMPGetIMEA_EXPORT endp
+
+ImmIMPGetIMEW_EXPORT proc
+  jmp QWORD ptr ImmIMPGetIMEW_Original
+ImmIMPGetIMEW_EXPORT endp
+
+ImmIMPQueryIMEA_EXPORT proc
+  jmp QWORD ptr ImmIMPQueryIMEA_Original
+ImmIMPQueryIMEA_EXPORT endp
+
+ImmIMPQueryIMEW_EXPORT proc
+  jmp QWORD ptr ImmIMPQueryIMEW_Original
+ImmIMPQueryIMEW_EXPORT endp
+
+ImmIMPSetIMEA_EXPORT proc
+  jmp QWORD ptr ImmIMPSetIMEA_Original
+ImmIMPSetIMEA_EXPORT endp
+
+ImmIMPSetIMEW_EXPORT proc
+  jmp QWORD ptr ImmIMPSetIMEW_Original
+ImmIMPSetIMEW_EXPORT endp
+
+ImmPutImeMenuItemsIntoMappedFile_EXPORT proc
+  jmp QWORD ptr ImmPutImeMenuItemsIntoMappedFile_Original
+ImmPutImeMenuItemsIntoMappedFile_EXPORT endp
+
+ImmRegisterClient_EXPORT proc
+  jmp QWORD ptr ImmRegisterClient_Original
+ImmRegisterClient_EXPORT endp
+
+ImmSendIMEMessageExA_EXPORT proc
+  jmp QWORD ptr ImmSendIMEMessageExA_Original
+ImmSendIMEMessageExA_EXPORT endp
+
+ImmSendIMEMessageExW_EXPORT proc
+  jmp QWORD ptr ImmSendIMEMessageExW_Original
+ImmSendIMEMessageExW_EXPORT endp
+
+ImmSetActiveContextConsoleIME_EXPORT proc
+  jmp QWORD ptr ImmSetActiveContextConsoleIME_Original
+ImmSetActiveContextConsoleIME_EXPORT endp
+
+ImmSystemHandler_EXPORT proc
+  jmp QWORD ptr ImmSystemHandler_Original
+ImmSystemHandler_EXPORT endp
+
+ImmWINNLSEnableIME_EXPORT proc
+  jmp QWORD ptr ImmWINNLSEnableIME_Original
+ImmWINNLSEnableIME_EXPORT endp
+
+ImmWINNLSGetEnableStatus_EXPORT proc
+  jmp QWORD ptr ImmWINNLSGetEnableStatus_Original
+ImmWINNLSGetEnableStatus_EXPORT endp
+
+ImmWINNLSGetIMEHotkey_EXPORT proc
+  jmp QWORD ptr ImmWINNLSGetIMEHotkey_Original
+ImmWINNLSGetIMEHotkey_EXPORT endp
+
+CtfImmAppCompatEnableIMEonProtectedCode_EXPORT proc
+  jmp QWORD ptr CtfImmAppCompatEnableIMEonProtectedCode_Original
+CtfImmAppCompatEnableIMEonProtectedCode_EXPORT endp
+
+CtfImmCoUninitialize_EXPORT proc
+  jmp QWORD ptr CtfImmCoUninitialize_Original
+CtfImmCoUninitialize_EXPORT endp
+
+CtfImmDispatchDefImeMessage_EXPORT proc
+  jmp QWORD ptr CtfImmDispatchDefImeMessage_Original
+CtfImmDispatchDefImeMessage_EXPORT endp
+
+CtfImmEnterCoInitCountSkipMode_EXPORT proc
+  jmp QWORD ptr CtfImmEnterCoInitCountSkipMode_Original
+CtfImmEnterCoInitCountSkipMode_EXPORT endp
+
+CtfImmGenerateMessage_EXPORT proc
+  jmp QWORD ptr CtfImmGenerateMessage_Original
+CtfImmGenerateMessage_EXPORT endp
+
+CtfImmGetCompatibleKeyboardLayout_EXPORT proc
+  jmp QWORD ptr CtfImmGetCompatibleKeyboardLayout_Original
+CtfImmGetCompatibleKeyboardLayout_EXPORT endp
+
+CtfImmGetGlobalIMEStatus_EXPORT proc
+  jmp QWORD ptr CtfImmGetGlobalIMEStatus_Original
+CtfImmGetGlobalIMEStatus_EXPORT endp
+
+CtfImmGetGuidAtom_EXPORT proc
+  jmp QWORD ptr CtfImmGetGuidAtom_Original
+CtfImmGetGuidAtom_EXPORT endp
+
+CtfImmGetIMEFileName_EXPORT proc
+  jmp QWORD ptr CtfImmGetIMEFileName_Original
+CtfImmGetIMEFileName_EXPORT endp
+
+CtfImmGetTMAEFlags_EXPORT proc
+  jmp QWORD ptr CtfImmGetTMAEFlags_Original
+CtfImmGetTMAEFlags_EXPORT endp
+
+CtfImmHideToolbarWnd_EXPORT proc
+  jmp QWORD ptr CtfImmHideToolbarWnd_Original
+CtfImmHideToolbarWnd_EXPORT endp
+
+CtfImmIsCiceroEnabled_EXPORT proc
+  jmp QWORD ptr CtfImmIsCiceroEnabled_Original
+CtfImmIsCiceroEnabled_EXPORT endp
+
+CtfImmIsCiceroStartedInThread_EXPORT proc
+  jmp QWORD ptr CtfImmIsCiceroStartedInThread_Original
+CtfImmIsCiceroStartedInThread_EXPORT endp
+
+CtfImmIsComStartedInThread_EXPORT proc
+  jmp QWORD ptr CtfImmIsComStartedInThread_Original
+CtfImmIsComStartedInThread_EXPORT endp
+
+CtfImmIsGuidMapEnable_EXPORT proc
+  jmp QWORD ptr CtfImmIsGuidMapEnable_Original
+CtfImmIsGuidMapEnable_EXPORT endp
+
+CtfImmIsTextFrameServiceDisabled_EXPORT proc
+  jmp QWORD ptr CtfImmIsTextFrameServiceDisabled_Original
+CtfImmIsTextFrameServiceDisabled_EXPORT endp
+
+CtfImmLastEnabledWndDestroy_EXPORT proc
+  jmp QWORD ptr CtfImmLastEnabledWndDestroy_Original
+CtfImmLastEnabledWndDestroy_EXPORT endp
+
+CtfImmLeaveCoInitCountSkipMode_EXPORT proc
+  jmp QWORD ptr CtfImmLeaveCoInitCountSkipMode_Original
+CtfImmLeaveCoInitCountSkipMode_EXPORT endp
+
+CtfImmNotify_EXPORT proc
+  jmp QWORD ptr CtfImmNotify_Original
+CtfImmNotify_EXPORT endp
+
+CtfImmRestoreToolbarWnd_EXPORT proc
+  jmp QWORD ptr CtfImmRestoreToolbarWnd_Original
+CtfImmRestoreToolbarWnd_EXPORT endp
+
+CtfImmSetAppCompatFlags_EXPORT proc
+  jmp QWORD ptr CtfImmSetAppCompatFlags_Original
+CtfImmSetAppCompatFlags_EXPORT endp
+
+CtfImmSetCiceroStartInThread_EXPORT proc
+  jmp QWORD ptr CtfImmSetCiceroStartInThread_Original
+CtfImmSetCiceroStartInThread_EXPORT endp
+
+CtfImmSetDefaultRemoteKeyboardLayout_EXPORT proc
+  jmp QWORD ptr CtfImmSetDefaultRemoteKeyboardLayout_Original
+CtfImmSetDefaultRemoteKeyboardLayout_EXPORT endp
+
+CtfImmTIMActivate_EXPORT proc
+  jmp QWORD ptr CtfImmTIMActivate_Original
+CtfImmTIMActivate_EXPORT endp
+
+GetKeyboardLayoutCP_EXPORT proc
+  jmp QWORD ptr GetKeyboardLayoutCP_Original
+GetKeyboardLayoutCP_EXPORT endp
+
+ImmActivateLayout_EXPORT proc
+  jmp QWORD ptr ImmActivateLayout_Original
+ImmActivateLayout_EXPORT endp
+
+ImmAssociateContext_EXPORT proc
+  jmp QWORD ptr ImmAssociateContext_Original
+ImmAssociateContext_EXPORT endp
+
+ImmAssociateContextEx_EXPORT proc
+  jmp QWORD ptr ImmAssociateContextEx_Original
+ImmAssociateContextEx_EXPORT endp
+
+ImmConfigureIMEA_EXPORT proc
+  jmp QWORD ptr ImmConfigureIMEA_Original
+ImmConfigureIMEA_EXPORT endp
+
+ImmConfigureIMEW_EXPORT proc
+  jmp QWORD ptr ImmConfigureIMEW_Original
+ImmConfigureIMEW_EXPORT endp
+
+ImmCreateContext_EXPORT proc
+  jmp QWORD ptr ImmCreateContext_Original
+ImmCreateContext_EXPORT endp
+
+ImmCreateIMCC_EXPORT proc
+  jmp QWORD ptr ImmCreateIMCC_Original
+ImmCreateIMCC_EXPORT endp
+
+ImmCreateSoftKeyboard_EXPORT proc
+  jmp QWORD ptr ImmCreateSoftKeyboard_Original
+ImmCreateSoftKeyboard_EXPORT endp
+
+ImmDestroyContext_EXPORT proc
+  jmp QWORD ptr ImmDestroyContext_Original
+ImmDestroyContext_EXPORT endp
+
+ImmDestroyIMCC_EXPORT proc
+  jmp QWORD ptr ImmDestroyIMCC_Original
+ImmDestroyIMCC_EXPORT endp
+
+ImmDestroySoftKeyboard_EXPORT proc
+  jmp QWORD ptr ImmDestroySoftKeyboard_Original
+ImmDestroySoftKeyboard_EXPORT endp
+
+ImmDisableIME_EXPORT proc
+  jmp QWORD ptr ImmDisableIME_Original
+ImmDisableIME_EXPORT endp
+
+ImmDisableLegacyIME_EXPORT proc
+  jmp QWORD ptr ImmDisableLegacyIME_Original
+ImmDisableLegacyIME_EXPORT endp
+
+ImmDisableTextFrameService_EXPORT proc
+  jmp QWORD ptr ImmDisableTextFrameService_Original
+ImmDisableTextFrameService_EXPORT endp
+
+ImmEnumInputContext_EXPORT proc
+  jmp QWORD ptr ImmEnumInputContext_Original
+ImmEnumInputContext_EXPORT endp
+
+ImmEnumRegisterWordA_EXPORT proc
+  jmp QWORD ptr ImmEnumRegisterWordA_Original
+ImmEnumRegisterWordA_EXPORT endp
+
+ImmEnumRegisterWordW_EXPORT proc
+  jmp QWORD ptr ImmEnumRegisterWordW_Original
+ImmEnumRegisterWordW_EXPORT endp
+
+ImmEscapeA_EXPORT proc
+  jmp QWORD ptr ImmEscapeA_Original
+ImmEscapeA_EXPORT endp
+
+ImmEscapeW_EXPORT proc
+  jmp QWORD ptr ImmEscapeW_Original
+ImmEscapeW_EXPORT endp
+
+ImmFreeLayout_EXPORT proc
+  jmp QWORD ptr ImmFreeLayout_Original
+ImmFreeLayout_EXPORT endp
+
+ImmGenerateMessage_EXPORT proc
+  jmp QWORD ptr ImmGenerateMessage_Original
+ImmGenerateMessage_EXPORT endp
+
+ImmGetAppCompatFlags_EXPORT proc
+  jmp QWORD ptr ImmGetAppCompatFlags_Original
+ImmGetAppCompatFlags_EXPORT endp
+
+ImmGetCandidateListA_EXPORT proc
+  jmp QWORD ptr ImmGetCandidateListA_Original
+ImmGetCandidateListA_EXPORT endp
+
+ImmGetCandidateListCountA_EXPORT proc
+  jmp QWORD ptr ImmGetCandidateListCountA_Original
+ImmGetCandidateListCountA_EXPORT endp
+
+ImmGetCandidateListCountW_EXPORT proc
+  jmp QWORD ptr ImmGetCandidateListCountW_Original
+ImmGetCandidateListCountW_EXPORT endp
+
+ImmGetCandidateListW_EXPORT proc
+  jmp QWORD ptr ImmGetCandidateListW_Original
+ImmGetCandidateListW_EXPORT endp
+
+ImmGetCandidateWindow_EXPORT proc
+  jmp QWORD ptr ImmGetCandidateWindow_Original
+ImmGetCandidateWindow_EXPORT endp
+
+ImmGetCompositionFontA_EXPORT proc
+  jmp QWORD ptr ImmGetCompositionFontA_Original
+ImmGetCompositionFontA_EXPORT endp
+
+ImmGetCompositionFontW_EXPORT proc
+  jmp QWORD ptr ImmGetCompositionFontW_Original
+ImmGetCompositionFontW_EXPORT endp
+
+ImmGetCompositionStringA_EXPORT proc
+  jmp QWORD ptr ImmGetCompositionStringA_Original
+ImmGetCompositionStringA_EXPORT endp
+
+ImmGetCompositionStringW_EXPORT proc
+  jmp QWORD ptr ImmGetCompositionStringW_Original
+ImmGetCompositionStringW_EXPORT endp
+
+ImmGetCompositionWindow_EXPORT proc
+  jmp QWORD ptr ImmGetCompositionWindow_Original
+ImmGetCompositionWindow_EXPORT endp
+
+ImmGetContext_EXPORT proc
+  jmp QWORD ptr ImmGetContext_Original
+ImmGetContext_EXPORT endp
+
+ImmGetConversionListA_EXPORT proc
+  jmp QWORD ptr ImmGetConversionListA_Original
+ImmGetConversionListA_EXPORT endp
+
+ImmGetConversionListW_EXPORT proc
+  jmp QWORD ptr ImmGetConversionListW_Original
+ImmGetConversionListW_EXPORT endp
+
+ImmGetConversionStatus_EXPORT proc
+  jmp QWORD ptr ImmGetConversionStatus_Original
+ImmGetConversionStatus_EXPORT endp
+
+ImmGetDefaultIMEWnd_EXPORT proc
+  jmp QWORD ptr ImmGetDefaultIMEWnd_Original
+ImmGetDefaultIMEWnd_EXPORT endp
+
+ImmGetDescriptionA_EXPORT proc
+  jmp QWORD ptr ImmGetDescriptionA_Original
+ImmGetDescriptionA_EXPORT endp
+
+ImmGetDescriptionW_EXPORT proc
+  jmp QWORD ptr ImmGetDescriptionW_Original
+ImmGetDescriptionW_EXPORT endp
+
+ImmGetGuideLineA_EXPORT proc
+  jmp QWORD ptr ImmGetGuideLineA_Original
+ImmGetGuideLineA_EXPORT endp
+
+ImmGetGuideLineW_EXPORT proc
+  jmp QWORD ptr ImmGetGuideLineW_Original
+ImmGetGuideLineW_EXPORT endp
+
+ImmGetHotKey_EXPORT proc
+  jmp QWORD ptr ImmGetHotKey_Original
+ImmGetHotKey_EXPORT endp
+
+ImmGetIMCCLockCount_EXPORT proc
+  jmp QWORD ptr ImmGetIMCCLockCount_Original
+ImmGetIMCCLockCount_EXPORT endp
+
+ImmGetIMCCSize_EXPORT proc
+  jmp QWORD ptr ImmGetIMCCSize_Original
+ImmGetIMCCSize_EXPORT endp
+
+ImmGetIMCLockCount_EXPORT proc
+  jmp QWORD ptr ImmGetIMCLockCount_Original
+ImmGetIMCLockCount_EXPORT endp
+
+ImmGetIMEFileNameA_EXPORT proc
+  jmp QWORD ptr ImmGetIMEFileNameA_Original
+ImmGetIMEFileNameA_EXPORT endp
+
+ImmGetIMEFileNameW_EXPORT proc
+  jmp QWORD ptr ImmGetIMEFileNameW_Original
+ImmGetIMEFileNameW_EXPORT endp
+
+ImmGetImeInfoEx_EXPORT proc
+  jmp QWORD ptr ImmGetImeInfoEx_Original
+ImmGetImeInfoEx_EXPORT endp
+
+ImmGetImeMenuItemsA_EXPORT proc
+  jmp QWORD ptr ImmGetImeMenuItemsA_Original
+ImmGetImeMenuItemsA_EXPORT endp
+
+ImmGetImeMenuItemsW_EXPORT proc
+  jmp QWORD ptr ImmGetImeMenuItemsW_Original
+ImmGetImeMenuItemsW_EXPORT endp
+
+ImmGetOpenStatus_EXPORT proc
+  jmp QWORD ptr ImmGetOpenStatus_Original
+ImmGetOpenStatus_EXPORT endp
+
+ImmGetProperty_EXPORT proc
+  jmp QWORD ptr ImmGetProperty_Original
+ImmGetProperty_EXPORT endp
+
+ImmGetRegisterWordStyleA_EXPORT proc
+  jmp QWORD ptr ImmGetRegisterWordStyleA_Original
+ImmGetRegisterWordStyleA_EXPORT endp
+
+ImmGetRegisterWordStyleW_EXPORT proc
+  jmp QWORD ptr ImmGetRegisterWordStyleW_Original
+ImmGetRegisterWordStyleW_EXPORT endp
+
+ImmGetStatusWindowPos_EXPORT proc
+  jmp QWORD ptr ImmGetStatusWindowPos_Original
+ImmGetStatusWindowPos_EXPORT endp
+
+ImmGetVirtualKey_EXPORT proc
+  jmp QWORD ptr ImmGetVirtualKey_Original
+ImmGetVirtualKey_EXPORT endp
+
+ImmInstallIMEA_EXPORT proc
+  jmp QWORD ptr ImmInstallIMEA_Original
+ImmInstallIMEA_EXPORT endp
+
+ImmInstallIMEW_EXPORT proc
+  jmp QWORD ptr ImmInstallIMEW_Original
+ImmInstallIMEW_EXPORT endp
+
+ImmIsIME_EXPORT proc
+  jmp QWORD ptr ImmIsIME_Original
+ImmIsIME_EXPORT endp
+
+ImmIsUIMessageA_EXPORT proc
+  jmp QWORD ptr ImmIsUIMessageA_Original
+ImmIsUIMessageA_EXPORT endp
+
+ImmIsUIMessageW_EXPORT proc
+  jmp QWORD ptr ImmIsUIMessageW_Original
+ImmIsUIMessageW_EXPORT endp
+
+ImmLoadIME_EXPORT proc
+  jmp QWORD ptr ImmLoadIME_Original
+ImmLoadIME_EXPORT endp
+
+ImmLoadLayout_EXPORT proc
+  jmp QWORD ptr ImmLoadLayout_Original
+ImmLoadLayout_EXPORT endp
+
+ImmLockClientImc_EXPORT proc
+  jmp QWORD ptr ImmLockClientImc_Original
+ImmLockClientImc_EXPORT endp
+
+ImmLockIMC_EXPORT proc
+  jmp QWORD ptr ImmLockIMC_Original
+ImmLockIMC_EXPORT endp
+
+ImmLockIMCC_EXPORT proc
+  jmp QWORD ptr ImmLockIMCC_Original
+ImmLockIMCC_EXPORT endp
+
+ImmLockImeDpi_EXPORT proc
+  jmp QWORD ptr ImmLockImeDpi_Original
+ImmLockImeDpi_EXPORT endp
+
+ImmNotifyIME_EXPORT proc
+  jmp QWORD ptr ImmNotifyIME_Original
+ImmNotifyIME_EXPORT endp
+
+ImmProcessKey_EXPORT proc
+  jmp QWORD ptr ImmProcessKey_Original
+ImmProcessKey_EXPORT endp
+
+ImmReSizeIMCC_EXPORT proc
+  jmp QWORD ptr ImmReSizeIMCC_Original
+ImmReSizeIMCC_EXPORT endp
+
+ImmRegisterWordA_EXPORT proc
+  jmp QWORD ptr ImmRegisterWordA_Original
+ImmRegisterWordA_EXPORT endp
+
+ImmRegisterWordW_EXPORT proc
+  jmp QWORD ptr ImmRegisterWordW_Original
+ImmRegisterWordW_EXPORT endp
+
+ImmReleaseContext_EXPORT proc
+  jmp QWORD ptr ImmReleaseContext_Original
+ImmReleaseContext_EXPORT endp
+
+ImmRequestMessageA_EXPORT proc
+  jmp QWORD ptr ImmRequestMessageA_Original
+ImmRequestMessageA_EXPORT endp
+
+ImmRequestMessageW_EXPORT proc
+  jmp QWORD ptr ImmRequestMessageW_Original
+ImmRequestMessageW_EXPORT endp
+
+ImmSetActiveContext_EXPORT proc
+  jmp QWORD ptr ImmSetActiveContext_Original
+ImmSetActiveContext_EXPORT endp
+
+ImmSetCandidateWindow_EXPORT proc
+  jmp QWORD ptr ImmSetCandidateWindow_Original
+ImmSetCandidateWindow_EXPORT endp
+
+ImmSetCompositionFontA_EXPORT proc
+  jmp QWORD ptr ImmSetCompositionFontA_Original
+ImmSetCompositionFontA_EXPORT endp
+
+ImmSetCompositionFontW_EXPORT proc
+  jmp QWORD ptr ImmSetCompositionFontW_Original
+ImmSetCompositionFontW_EXPORT endp
+
+ImmSetCompositionStringA_EXPORT proc
+  jmp QWORD ptr ImmSetCompositionStringA_Original
+ImmSetCompositionStringA_EXPORT endp
+
+ImmSetCompositionStringW_EXPORT proc
+  jmp QWORD ptr ImmSetCompositionStringW_Original
+ImmSetCompositionStringW_EXPORT endp
+
+ImmSetCompositionWindow_EXPORT proc
+  jmp QWORD ptr ImmSetCompositionWindow_Original
+ImmSetCompositionWindow_EXPORT endp
+
+ImmSetConversionStatus_EXPORT proc
+  jmp QWORD ptr ImmSetConversionStatus_Original
+ImmSetConversionStatus_EXPORT endp
+
+ImmSetHotKey_EXPORT proc
+  jmp QWORD ptr ImmSetHotKey_Original
+ImmSetHotKey_EXPORT endp
+
+ImmSetOpenStatus_EXPORT proc
+  jmp QWORD ptr ImmSetOpenStatus_Original
+ImmSetOpenStatus_EXPORT endp
+
+ImmSetStatusWindowPos_EXPORT proc
+  jmp QWORD ptr ImmSetStatusWindowPos_Original
+ImmSetStatusWindowPos_EXPORT endp
+
+ImmShowSoftKeyboard_EXPORT proc
+  jmp QWORD ptr ImmShowSoftKeyboard_Original
+ImmShowSoftKeyboard_EXPORT endp
+
+ImmSimulateHotKey_EXPORT proc
+  jmp QWORD ptr ImmSimulateHotKey_Original
+ImmSimulateHotKey_EXPORT endp
+
+ImmTranslateMessage_EXPORT proc
+  jmp QWORD ptr ImmTranslateMessage_Original
+ImmTranslateMessage_EXPORT endp
+
+ImmUnlockClientImc_EXPORT proc
+  jmp QWORD ptr ImmUnlockClientImc_Original
+ImmUnlockClientImc_EXPORT endp
+
+ImmUnlockIMC_EXPORT proc
+  jmp QWORD ptr ImmUnlockIMC_Original
+ImmUnlockIMC_EXPORT endp
+
+ImmUnlockIMCC_EXPORT proc
+  jmp QWORD ptr ImmUnlockIMCC_Original
+ImmUnlockIMCC_EXPORT endp
+
+ImmUnlockImeDpi_EXPORT proc
+  jmp QWORD ptr ImmUnlockImeDpi_Original
+ImmUnlockImeDpi_EXPORT endp
+
+ImmUnregisterWordA_EXPORT proc
+  jmp QWORD ptr ImmUnregisterWordA_Original
+ImmUnregisterWordA_EXPORT endp
+
+ImmUnregisterWordW_EXPORT proc
+  jmp QWORD ptr ImmUnregisterWordW_Original
+ImmUnregisterWordW_EXPORT endp
+
+end

@@ -45,8 +45,6 @@ static Il2CppObject* Internal_AddComponentWithType_hook(Il2CppObject* _this, Il2
 	if (string(component->klass->namespaze).find("Gallop") != string::npos &&
 		string(component->klass->name).find("CameraData") != string::npos)
 	{
-		wcout << L"Internal_AddComponentWithType " << component->klass->name << endl;
-		PrintStackTrace();
 		il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, int)>(component->klass, "set_RenderingAntiAliasing", 1)->methodPointer(component, 8);
 		il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, bool)>(component->klass, "set_IsCreateAntialiasTexture", 1)->methodPointer(component, true);
 	}

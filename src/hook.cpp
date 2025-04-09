@@ -962,53 +962,12 @@ namespace
 	int __stdcall UnityMain_hook(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPWSTR lpCmdLine, int nShowCmd)
 	{
 		::hInstance = hInstance;
-		// Windows::Foundation::Initialize(RO_INIT_MULTITHREADED);
-		return reinterpret_cast<decltype(UnityMain_hook)*>(UnityMain_orig)(hInstance, hPrevInstance, lpCmdLine, nShowCmd);
-	}
-
-	extern "C" __declspec(dllexport) int __stdcall UnityMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPWSTR lpCmdLine, int nShowCmd)
-	{
-		wstring module_name;
-		module_name.resize(MAX_PATH);
-		module_name.resize(GetModuleFileNameW(GetModuleHandleW(L"UnityPlayer.dll"), module_name.data(), MAX_PATH));
-
-		filesystem::path module_path(module_name);
-
-		wstring szISOLang;
-		szISOLang.resize(5);
-		szISOLang.resize(static_cast<size_t>(GetLocaleInfoW(LOCALE_USER_DEFAULT, LOCALE_SISO639LANGNAME, szISOLang.data(), szISOLang.size()) - 1));
-
-		if (module_path.parent_path() == filesystem::current_path())
-		{
-			if (szISOLang == L"ko")
-			{
-				MessageBoxW(nullptr, L"기존 UnityPlayer.dll을 찾을 수 없습니다.", L"오류", MB_ICONERROR);
-			}
-			else
-			{
-				MessageBoxW(nullptr, L"Don't overwrite the existing UnityPlayer.dll.", L"Error", MB_ICONERROR);
-			}
-
-			return 1;
-		}
 
 		filesystem::path path = filesystem::current_path().append(L"UnityPlayer.dll");
-
-		try
-		{
-			filesystem::copy_file(path, L"umamusume.exe.local\\UnityPlayer.orig.dll", filesystem::copy_options::update_existing);
-		}
-		catch (...)
-		{
-		}
-
 		il2cpp_symbols::load_symbols(path);
 
-		auto unity = LoadLibraryW(L"UnityPlayer.orig.dll");
-
-		UnityMain_orig = GetProcAddress(unity, "UnityMain");
-
-		return UnityMain_hook(hInstance, hPrevInstance, lpCmdLine, nShowCmd);
+		// Windows::Foundation::Initialize(RO_INIT_MULTITHREADED);
+		return reinterpret_cast<decltype(UnityMain_hook)*>(UnityMain_orig)(hInstance, hPrevInstance, lpCmdLine, nShowCmd);
 	}
 
 	IUnityInterfaces* unityInterfaces;
@@ -2726,8 +2685,9 @@ namespace
 	{
 		try
 		{
-			auto uiManager = Gallop::UIManager::Instance();
-			il2cpp_symbols::get_method_pointer<void (*)(Il2CppObject*, Il2CppDelegate*)>("umamusume.dll", "Gallop", "MonoBehaviourExtension", "WaitForEndFrame", 2)(uiManager, CreateDelegateStatic(fn));
+			// auto uiManager = Gallop::UIManager::Instance();
+			auto gameSystem = GetSingletonInstance(il2cpp_symbols::get_class("umamusume.dll", "Gallop", "GameSystem"));
+			il2cpp_symbols::get_method_pointer<void (*)(Il2CppObject*, Il2CppDelegate*)>("umamusume.dll", "Gallop", "MonoBehaviourExtension", "WaitForEndFrame", 2)(gameSystem, CreateDelegateStatic(fn));
 		}
 		catch (const Il2CppExceptionWrapper& e)
 		{
@@ -2740,9 +2700,10 @@ namespace
 	{
 		try
 		{
-			auto uiManager = Gallop::UIManager::Instance();
+			// auto uiManager = Gallop::UIManager::Instance();
 			auto delegate = &CreateUnityAction(target, fn)->delegate;
-			il2cpp_symbols::get_method_pointer<void (*)(Il2CppObject*, Il2CppDelegate*)>("umamusume.dll", "Gallop", "MonoBehaviourExtension", "WaitForEndFrame", 2)(uiManager, delegate);
+			auto gameSystem = GetSingletonInstance(il2cpp_symbols::get_class("umamusume.dll", "Gallop", "GameSystem"));
+			il2cpp_symbols::get_method_pointer<void (*)(Il2CppObject*, Il2CppDelegate*)>("umamusume.dll", "Gallop", "MonoBehaviourExtension", "WaitForEndFrame", 2)(gameSystem, delegate);
 		}
 		catch (const Il2CppExceptionWrapper& e)
 		{
@@ -5194,67 +5155,67 @@ namespace
 
 		if (uMsg == WM_KEYDOWN)
 		{
-			if (wParam == VK_F2)
-			{
-				MH_CreateHook(il2cpp_init, il2cpp_init_hook, &il2cpp_init_orig);
-				auto result = MH_EnableHook(il2cpp_init);
+			//if (wParam == VK_F2)
+			//{
+			//	MH_CreateHook(il2cpp_init, il2cpp_init_hook, &il2cpp_init_orig);
+			//	auto result = MH_EnableHook(il2cpp_init);
 
-				if (result != MH_OK)
-				{
-					cout << "WARN: il2cpp_init Failed: " << MH_StatusToString(result) << " LastError: " << GetLastError() << endl << endl;
-				}
+			//	if (result != MH_OK)
+			//	{
+			//		cout << "WARN: il2cpp_init Failed: " << MH_StatusToString(result) << " LastError: " << GetLastError() << endl << endl;
+			//	}
 
-				// SOMETING TEST
-				auto details = UnityEngine::Object::FindObjectsByType(GetRuntimeType("umamusume.dll", "Gallop", "DialogTrainedCharacterDetail"),
-					UnityEngine::FindObjectsInactive::Exclude, UnityEngine::FindObjectsSortMode::None);
+			//	// SOMETING TEST
+			//	auto details = UnityEngine::Object::FindObjectsByType(GetRuntimeType("umamusume.dll", "Gallop", "DialogTrainedCharacterDetail"),
+			//		UnityEngine::FindObjectsInactive::Exclude, UnityEngine::FindObjectsSortMode::None);
 
-				if (details->max_length)
-				{
-					auto detail = details->vector[0];
-					cout << detail->klass->name << endl;
+			//	if (details->max_length)
+			//	{
+			//		auto detail = details->vector[0];
+			//		cout << detail->klass->name << endl;
 
-					/*auto _scrollRootRectField = il2cpp_class_get_field_from_name_wrap(detail->klass, "_scrollRootRect");
-					Il2CppObject* _scrollRootRect;
-					il2cpp_field_get_value(detail, _scrollRootRectField, &_scrollRootRect);
+			//		/*auto _scrollRootRectField = il2cpp_class_get_field_from_name_wrap(detail->klass, "_scrollRootRect");
+			//		Il2CppObject* _scrollRootRect;
+			//		il2cpp_field_get_value(detail, _scrollRootRectField, &_scrollRootRect);
 
-					auto _successionToggleRootField = il2cpp_class_get_field_from_name_wrap(detail->klass, "_successionToggleRoot");
-					Il2CppObject* _successionToggleRoot;
-					il2cpp_field_get_value(detail, _successionToggleRootField, &_successionToggleRoot);
+			//		auto _successionToggleRootField = il2cpp_class_get_field_from_name_wrap(detail->klass, "_successionToggleRoot");
+			//		Il2CppObject* _successionToggleRoot;
+			//		il2cpp_field_get_value(detail, _successionToggleRootField, &_successionToggleRoot);
 
-					auto transform = static_cast<UnityEngine::RectTransform>(UnityEngine::GameObject(_successionToggleRoot).transform());
+			//		auto transform = static_cast<UnityEngine::RectTransform>(UnityEngine::GameObject(_successionToggleRoot).transform());
 
-					auto rect = transform.rect();
-					auto sizeDelta = transform.sizeDelta();
+			//		auto rect = transform.rect();
+			//		auto sizeDelta = transform.sizeDelta();
 
-					cout << "RECT: " << rect.x << " " << rect.y << " " << rect.width << " " << rect.height << endl;
-					cout << "sizeDelta: " << sizeDelta.x << " " << sizeDelta.y << endl;*/
+			//		cout << "RECT: " << rect.x << " " << rect.y << " " << rect.width << " " << rect.height << endl;
+			//		cout << "sizeDelta: " << sizeDelta.x << " " << sizeDelta.y << endl;*/
 
-					// UnityEngine::RectTransform(_scrollRootRect).sizeDelta({ 0, rect.height });
+			//		// UnityEngine::RectTransform(_scrollRootRect).sizeDelta({ 0, rect.height });
 
-					/*auto dialogCommon = GetFrontDialog();
-					auto _currentDialogObject = il2cpp_class_get_method_from_name_type<Il2CppObject * (*)(Il2CppObject*)>(dialogCommon->klass, "get_CurrentDialogObj", 0)->methodPointer(dialogCommon);
-					auto rootRectTransform = UnityEngine::RectTransform(il2cpp_class_get_method_from_name_type<Il2CppObject * (*)(Il2CppObject*)>(_currentDialogObject->klass, "get_BaseRectTransform", 0)->methodPointer(_currentDialogObject));
+			//		/*auto dialogCommon = GetFrontDialog();
+			//		auto _currentDialogObject = il2cpp_class_get_method_from_name_type<Il2CppObject * (*)(Il2CppObject*)>(dialogCommon->klass, "get_CurrentDialogObj", 0)->methodPointer(dialogCommon);
+			//		auto rootRectTransform = UnityEngine::RectTransform(il2cpp_class_get_method_from_name_type<Il2CppObject * (*)(Il2CppObject*)>(_currentDialogObject->klass, "get_BaseRectTransform", 0)->methodPointer(_currentDialogObject));
 
-					rootRectTransform.sizeDelta({ 0, rootRectTransform.rect().height + rect.height });*/
+			//		rootRectTransform.sizeDelta({ 0, rootRectTransform.rect().height + rect.height });*/
 
 
-					auto Big = UnityEngine::GameObject::Find(il2cpp_string_new("Big"));
+			//		auto Big = UnityEngine::GameObject::Find(il2cpp_string_new("Big"));
 
-					if (Big)
-					{
-						auto cloned = UnityEngine::GameObject(Object_Internal_CloneSingle_hook(Big));
+			//		if (Big)
+			//		{
+			//			auto cloned = UnityEngine::GameObject(Object_Internal_CloneSingle_hook(Big));
 
-						auto transform = static_cast<UnityEngine::RectTransform>(cloned.transform());
+			//			auto transform = static_cast<UnityEngine::RectTransform>(cloned.transform());
 
-						auto rect = transform.rect();
-						auto sizeDelta = transform.sizeDelta();
+			//			auto rect = transform.rect();
+			//			auto sizeDelta = transform.sizeDelta();
 
-						cout << "RECT: " << rect.x << " " << rect.y << " " << rect.width << " " << rect.height << endl;
-						cout << "sizeDelta: " << sizeDelta.x << " " << sizeDelta.y << endl;
-						transform.sizeDelta({ sizeDelta.x, 5000 });
-					}
-				}
-			}
+			//			cout << "RECT: " << rect.x << " " << rect.y << " " << rect.width << " " << rect.height << endl;
+			//			cout << "sizeDelta: " << sizeDelta.x << " " << sizeDelta.y << endl;
+			//			transform.sizeDelta({ sizeDelta.x, 5000 });
+			//		}
+			//	}
+			//}
 
 			if (PressDialogButton(wParam))
 			{
@@ -14361,11 +14322,11 @@ void init_hook()
 	MH_CreateHook(LoadLibraryW, load_library_w_hook, &load_library_w_orig);
 	MH_EnableHook(LoadLibraryW);
 
-	/*auto UnityPlayer = GetModuleHandleW(L"UnityPlayer.dll");
+	auto UnityPlayer = GetModuleHandleW(L"UnityPlayer.dll");
 	auto UnityMain_addr = GetProcAddress(UnityPlayer, "UnityMain");
 
 	MH_CreateHook(UnityMain_addr, UnityMain_hook, &UnityMain_orig);
-	MH_EnableHook(UnityMain_addr);*/
+	MH_EnableHook(UnityMain_addr);
 
 	fullScreenFl = config::auto_fullscreen && !config::freeform_window;
 

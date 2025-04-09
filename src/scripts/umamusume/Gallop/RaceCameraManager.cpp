@@ -16,7 +16,6 @@ void* ChangeOrientationCoroutine_orig = nullptr;
 static Il2CppObject* ChangeOrientationCoroutine_hook(Il2CppObject* _this, Gallop::LowResolutionCameraUtil::DrawDirection direction, bool isFade,
 	Il2CppDelegate_t<void (*)(Gallop::LowResolutionCameraUtil::DrawDirection, bool)>* onChangeResolution)
 {
-	cout << "ChangeOrientationCoroutine" << endl;
 	Gallop::LowResolutionCameraUtil::DrawDirection newDirection = direction;
 
 #ifdef _MSC_VER
