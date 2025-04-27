@@ -39,12 +39,12 @@ STATIC
 
 namespace UnityEngine
 {
-	Il2CppArraySize_t<Il2CppObject*>* Object::FindObjectsByType(Il2CppObject* type, FindObjectsInactive findObjectsInactive, FindObjectsSortMode sortMode)
+	Il2CppArraySize_t<Il2CppObject*>* Object::FindObjectsByType(Il2CppReflectionType* type, FindObjectsInactive findObjectsInactive, FindObjectsSortMode sortMode)
 	{
 		return reinterpret_cast<decltype(FindObjectsByType)*>(FindObjectsByType_addr)(type, findObjectsInactive, sortMode);
 	}
 
-	Il2CppArraySize_t<Il2CppObject*>* Object::FindObjectsOfType(Il2CppObject* type, bool includeInactive)
+	Il2CppArraySize_t<Il2CppObject*>* Object::FindObjectsOfType(Il2CppReflectionType* type, bool includeInactive)
 	{
 		return reinterpret_cast<decltype(FindObjectsOfType)*>(FindObjectsOfType_addr)(type, includeInactive);
 	}

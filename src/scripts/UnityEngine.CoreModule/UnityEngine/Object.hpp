@@ -18,8 +18,8 @@ namespace UnityEngine
 	class Object
 	{
 	public:
-		static Il2CppArraySize_t<Il2CppObject*>* FindObjectsByType(Il2CppObject* type, FindObjectsInactive findObjectsInactive, FindObjectsSortMode sortMode);
-		static Il2CppArraySize_t<Il2CppObject*>* FindObjectsOfType(Il2CppObject* type, bool includeInactive);
+		static Il2CppArraySize_t<Il2CppObject*>* FindObjectsByType(Il2CppReflectionType* type, FindObjectsInactive findObjectsInactive, FindObjectsSortMode sortMode);
+		static Il2CppArraySize_t<Il2CppObject*>* FindObjectsOfType(Il2CppReflectionType* type, bool includeInactive);
 		static Il2CppObject* Internal_CloneSingleWithParent(Il2CppObject* data, Il2CppObject* parent, bool worldPositionStays);
 		static Il2CppObject* Internal_CloneSingle(Il2CppObject* data);
 		static void DontDestroyOnLoad(Il2CppObject* obj);

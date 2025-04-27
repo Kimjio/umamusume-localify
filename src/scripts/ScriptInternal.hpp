@@ -27,8 +27,8 @@ inline void PrintStackTrace()
 	std::wcout << trace()->chars << std::endl;
 }
 
-template<typename... Ts, typename = Il2CppObject*>
-inline Il2CppClass* GetGenericClass(Il2CppObject* baseRuntimeType, Ts... runtimeTypes)
+template<typename... Ts, typename = Il2CppReflectionType*>
+inline Il2CppClass* GetGenericClass(Il2CppReflectionType* baseRuntimeType, Ts... runtimeTypes)
 {
 	auto typeArray = reinterpret_cast<Il2CppArraySize*>(il2cpp_array_new(il2cpp_symbols::get_class("mscorlib.dll", "System", "Type"), sizeof...(runtimeTypes)));
 
@@ -39,22 +39,22 @@ inline Il2CppClass* GetGenericClass(Il2CppObject* baseRuntimeType, Ts... runtime
 		i++;
 	}
 
-	auto runtimeType = il2cpp_class_get_method_from_name_type<Il2CppReflectionRuntimeType * (*)(Il2CppObject*, Il2CppArraySize*)>(baseRuntimeType->klass, "MakeGenericType", 1)->methodPointer(baseRuntimeType, typeArray);
+	auto runtimeType = il2cpp_class_get_method_from_name_type<Il2CppReflectionRuntimeType * (*)(Il2CppReflectionType*, Il2CppArraySize*)>(baseRuntimeType->object.klass, "MakeGenericType", 1)->methodPointer(baseRuntimeType, typeArray);
 	auto newType = runtimeType->type.type;
 
 	return il2cpp_class_from_type(newType);
 }
 
-template<typename... Ts, typename = Il2CppObject*>
-inline Il2CppClass* GetArrayClass(Il2CppObject* runtimeType)
+template<typename... Ts, typename = Il2CppReflectionType*>
+inline Il2CppClass* GetArrayClass(Il2CppReflectionType* runtimeType)
 {
-	auto arrayRuntimeType = il2cpp_class_get_method_from_name_type<Il2CppReflectionRuntimeType * (*)(Il2CppObject*)>(runtimeType->klass, "MakeArrayType", 0)->methodPointer(runtimeType);
+	auto arrayRuntimeType = il2cpp_class_get_method_from_name_type<Il2CppReflectionRuntimeType * (*)(Il2CppReflectionType*)>(runtimeType->object.klass, "MakeArrayType", 0)->methodPointer(runtimeType);
 	auto newType = arrayRuntimeType->type.type;
 
 	return il2cpp_class_from_type(newType);
 }
 
-template<typename... Ts, typename = Il2CppObject*>
+template<typename... Ts, typename = Il2CppReflectionType*>
 inline const MethodInfo* GetGenericMethod(const MethodInfo* baseMethodInfo, Ts... runtimeTypes)
 {
 	auto runtimeMethodInfo = il2cpp_method_get_object(baseMethodInfo, nullptr);
@@ -582,24 +582,24 @@ inline Il2CppObject* GetSingletonInstanceByMethod(Il2CppClass* klass)
 	return nullptr;
 }
 
-inline Il2CppObject* GetRuntimeType(const char* assemblyName, const char* namespaze, const char* klassName)
+inline Il2CppReflectionType* GetRuntimeType(const char* assemblyName, const char* namespaze, const char* klassName)
 {
-	return il2cpp_type_get_object(il2cpp_class_get_type(il2cpp_symbols::get_class(assemblyName, namespaze, klassName)));
+	return reinterpret_cast<Il2CppReflectionType*>(il2cpp_type_get_object(il2cpp_class_get_type(il2cpp_symbols::get_class(assemblyName, namespaze, klassName))));
 }
 
-inline Il2CppObject* GetRuntimeType(Il2CppClass* klass)
+inline Il2CppReflectionType* GetRuntimeType(Il2CppClass* klass)
 {
-	return il2cpp_type_get_object(il2cpp_class_get_type(klass));
+	return reinterpret_cast<Il2CppReflectionType*>(il2cpp_type_get_object(il2cpp_class_get_type(klass)));
 }
 
-inline Il2CppObject* ParseEnum(Il2CppObject* runtimeType, const wstring& name)
+inline Il2CppObject* ParseEnum(Il2CppReflectionType* runtimeType, const wstring& name)
 {
-	return il2cpp_symbols::get_method_pointer<Il2CppObject * (*)(Il2CppObject*, Il2CppString*)>("mscorlib.dll", "System", "Enum", "Parse", 2)(runtimeType, il2cpp_string_new16(name.data()));
+	return il2cpp_symbols::get_method_pointer<Il2CppObject * (*)(Il2CppReflectionType*, Il2CppString*)>("mscorlib.dll", "System", "Enum", "Parse", 2)(runtimeType, il2cpp_string_new16(name.data()));
 }
 
-inline Il2CppString* GetEnumName(Il2CppObject* runtimeType, int id)
+inline Il2CppString* GetEnumName(Il2CppReflectionType* runtimeType, int id)
 {
-	return il2cpp_symbols::get_method_pointer<Il2CppString * (*)(Il2CppObject*, Il2CppObject*)>("mscorlib.dll", "System", "Enum", "GetName", 2)(runtimeType, il2cpp_value_box(il2cpp_defaults.int32_class, &id));
+	return il2cpp_symbols::get_method_pointer<Il2CppString * (*)(Il2CppReflectionType*, Il2CppObject*)>("mscorlib.dll", "System", "Enum", "GetName", 2)(runtimeType, il2cpp_value_box(il2cpp_defaults.int32_class, &id));
 }
 
 inline uint64_t GetEnumValue(Il2CppObject* runtimeEnum)

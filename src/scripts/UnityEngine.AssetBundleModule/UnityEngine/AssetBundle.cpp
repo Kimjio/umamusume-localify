@@ -5,6 +5,9 @@
 #include "scripts/UnityEngine.CoreModule/UnityEngine/Object.hpp"
 #include "scripts/UnityEngine.CoreModule/UnityEngine/Shader.hpp"
 #include "scripts/UnityEngine.CoreModule/UnityEngine/Material.hpp"
+#include "scripts/UnityEngine.CoreModule/UnityEngine/Vector2.hpp"
+#include "scripts/UnityEngine.CoreModule/UnityEngine/Vector4.hpp"
+#include "scripts/UnityEngine.CoreModule/UnityEngine/Rect.hpp"
 
 #include "config/config.hpp"
 #include "string_utils.hpp"
@@ -22,6 +25,11 @@ void* GetAllAssetNames_addr = nullptr;
 
 void* Unload_addr = nullptr;
 void* Unload_orig = nullptr;
+
+Il2CppClass* AtlasReferenceClass;
+Il2CppClass* GameObjectClass;
+Il2CppClass* MaterialClass;
+Il2CppClass* FontClass;
 
 static void ReplaceMaterialTextureProperty(Il2CppObject* material, Il2CppString* property)
 {
@@ -515,7 +523,7 @@ static void ReplaceGameObjectTextures(Il2CppObject* gameObject, bool isChild)
 		{
 			auto obj =
 				il2cpp_symbols::get_method_pointer<Il2CppObject * (*)(Il2CppObject*, long index)>("mscorlib.dll", "System", "Array", "GetValue", 1)(array, i);
-			
+
 			if (!obj) continue;
 
 			if (string(obj->klass->name).find("MeshRenderer") != string::npos)
@@ -611,6 +619,65 @@ static void ReplaceGameObjectTextures(Il2CppObject* gameObject, bool isChild)
 	}
 }
 
+static void ReplaceAtlasReferenceSprites(Il2CppObject* atlasReference)
+{
+	auto spritesField = il2cpp_class_get_field_from_name(atlasReference->klass, "sprites");
+	Il2CppArraySize_t<Il2CppObject*>* sprites;
+	il2cpp_field_get_value(atlasReference, spritesField, &sprites);
+
+	if (sprites)
+	{
+		wstringstream pathStream(UnityEngine::Object::Name(atlasReference)->chars);
+		wstring segment;
+		vector<wstring> splited;
+		while (getline(pathStream, segment, L'.'))
+		{
+			splited.emplace_back(segment);
+		}
+
+		auto& atlasName = splited.front();
+
+		auto atlas = GetReplacementAssets(
+			il2cpp_string_new16((L"_" + atlasName).data()),
+			GetRuntimeType(AtlasReferenceClass));
+
+		if (!atlas)
+		{
+			return;
+		}
+
+		il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*)>(atlas->klass, "OnEnable", 0)->methodPointer(atlas);
+
+		auto newSprites = il2cpp_array_new(il2cpp_symbols::get_class("UnityEngine.CoreModule.dll", "UnityEngine", "Sprite"), sprites->max_length);
+
+		for (int i = 0; i < sprites->max_length; i++)
+		{
+			auto sprite = sprites->vector[i];
+			if (sprite)
+			{
+				auto uobject_name = UnityEngine::Object::Name(sprite);
+				if (!wstring(uobject_name->chars).empty())
+				{
+					auto newSprite = il2cpp_class_get_method_from_name_type<Il2CppObject * (*)(Il2CppObject*, Il2CppString*)>(atlas->klass, "GetSprite", 1)->methodPointer(atlas, uobject_name);
+					Il2CppObject* createdSprite = nullptr;
+
+					if (newSprite)
+					{
+						il2cpp_array_setref_type(newSprites, Il2CppObject*, i, newSprite);
+					}
+					else
+					{
+						il2cpp_array_setref_type(newSprites, Il2CppObject*, i, sprite);
+					}
+				}
+			}
+		}
+
+		il2cpp_field_set_value(atlasReference, spritesField, newSprites);
+		il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*)>(atlasReference->klass, "OnEnable", 0)->methodPointer(atlasReference);
+	}
+}
+
 static void ReplaceFontTexture(Il2CppObject* font)
 {
 	if (!UnityEngine::Object::IsNativeObjectAlive(font))
@@ -626,9 +693,9 @@ static void ReplaceFontTexture(Il2CppObject* font)
 	}
 }
 
-static Il2CppObject* LoadAsset_Internal_hook(Il2CppObject* self, Il2CppString* name, Il2CppObject* type);
+static Il2CppObject* LoadAsset_Internal_hook(Il2CppObject* self, Il2CppString* name, Il2CppReflectionType* type);
 
-static Il2CppObject* GetReplacementAssets(Il2CppString* name, Il2CppObject* type)
+static Il2CppObject* GetReplacementAssets(Il2CppString* name, Il2CppReflectionType* type)
 {
 	for (auto it = config::runtime::replaceAssets.begin(); it != config::runtime::replaceAssets.end(); it++)
 	{
@@ -642,9 +709,9 @@ static Il2CppObject* GetReplacementAssets(Il2CppString* name, Il2CppObject* type
 	return nullptr;
 }
 
-static Il2CppObject* LoadAssetAsync_Internal_hook(Il2CppObject* self, Il2CppString* name, Il2CppObject* type);
+static Il2CppObject* LoadAssetAsync_Internal_hook(Il2CppObject* self, Il2CppString* name, Il2CppReflectionType* type);
 
-static Il2CppObject* GetReplacementAssetsAsync(Il2CppString* name, Il2CppObject* type)
+static Il2CppObject* GetReplacementAssetsAsync(Il2CppString* name, Il2CppReflectionType* type)
 {
 	for (auto it = config::runtime::replaceAssets.begin(); it != config::runtime::replaceAssets.end(); it++)
 	{
@@ -682,7 +749,7 @@ static Il2CppObject* LoadFromFile_Internal_hook(Il2CppString* path, uint32_t crc
 	return assetBundle;
 }
 
-static Il2CppObject* LoadAsset_Internal_hook(Il2CppObject* self, Il2CppString* name, Il2CppObject* type)
+static Il2CppObject* LoadAsset_Internal_hook(Il2CppObject* self, Il2CppString* name, Il2CppReflectionType* type)
 {
 	wstringstream pathStream(name->chars);
 	wstring segment;
@@ -698,7 +765,12 @@ static Il2CppObject* LoadAsset_Internal_hook(Il2CppObject* self, Il2CppString* n
 			return item.find(fileName) != wstring::npos;
 		}) != config::runtime::replaceAssetNames.end())
 	{
-		return GetReplacementAssets(il2cpp_string_new16(fileName.data()), type);
+		auto result = GetReplacementAssets(il2cpp_string_new16(fileName.data()), type);
+
+		if (result)
+		{
+			return result;
+		}
 	}
 	auto obj = reinterpret_cast<decltype(LoadAsset_Internal_hook)*>(LoadAsset_Internal_orig)(self, name, type);
 
@@ -709,17 +781,22 @@ static Il2CppObject* LoadAsset_Internal_hook(Il2CppObject* self, Il2CppString* n
 		return nullptr;
 	}
 
-	if (obj->klass->name == "GameObject"s)
+	if (obj->klass == AtlasReferenceClass)
+	{
+		ReplaceAtlasReferenceSprites(obj);
+	}
+
+	if (obj->klass == GameObjectClass)
 	{
 		ReplaceGameObjectTextures(obj);
 	}
 
-	if (obj->klass->name == "Material"s)
+	if (obj->klass == MaterialClass)
 	{
 		ReplaceMaterialTexture(obj);
 	}
 
-	if (obj->klass->name == "Font"s)
+	if (obj->klass == FontClass)
 	{
 		ReplaceFontTexture(obj);
 	}
@@ -727,7 +804,7 @@ static Il2CppObject* LoadAsset_Internal_hook(Il2CppObject* self, Il2CppString* n
 	return obj;
 }
 
-static Il2CppObject* LoadAssetAsync_Internal_hook(Il2CppObject* self, Il2CppString* name, Il2CppObject* type)
+static Il2CppObject* LoadAssetAsync_Internal_hook(Il2CppObject* self, Il2CppString* name, Il2CppReflectionType* type)
 {
 	wstringstream pathStream(name->chars);
 	wstring segment;
@@ -769,6 +846,11 @@ static void InitAddress()
 	LoadAssetAsync_Internal_addr = il2cpp_resolve_icall("UnityEngine.AssetBundle::LoadAssetAsync_Internal(System.String,System.Type)");
 	GetAllAssetNames_addr = il2cpp_resolve_icall("UnityEngine.AssetBundle::GetAllAssetNames()");
 	Unload_addr = il2cpp_resolve_icall("UnityEngine.AssetBundle::Unload()");
+
+	AtlasReferenceClass = il2cpp_symbols::get_class("Cute.UI.Assembly.dll", "Cute.UI", "AtlasReference");
+	GameObjectClass = il2cpp_symbols::get_class("UnityEngine.CoreModule.dll", "UnityEngine", "GameObject");
+	MaterialClass = il2cpp_symbols::get_class("UnityEngine.CoreModule.dll", "UnityEngine", "Material");
+	FontClass = il2cpp_symbols::get_class("UnityEngine.TextRenderingModule.dll", "UnityEngine", "Font");
 }
 
 static void HookMethods()
@@ -793,19 +875,19 @@ namespace UnityEngine
 		return AssetBundle{ obj };
 	}
 
-	Il2CppObject* AssetBundle::LoadAsset(Il2CppString* name, Il2CppObject* runtimeType)
+	Il2CppObject* AssetBundle::LoadAsset(Il2CppString* name, Il2CppReflectionType* runtimeType)
 	{
 		return reinterpret_cast<decltype(LoadAsset_Internal_hook)*>(LoadAsset_Internal_orig)(instance, name, runtimeType);
 	}
 
-	Il2CppObject* AssetBundle::LoadAssetAsync(Il2CppString* name, Il2CppObject* runtimeType)
+	Il2CppObject* AssetBundle::LoadAssetAsync(Il2CppString* name, Il2CppReflectionType* runtimeType)
 	{
 		return reinterpret_cast<decltype(LoadAssetAsync_Internal_hook)*>(LoadAssetAsync_Internal_orig)(instance, name, runtimeType);
 	}
 
 	Il2CppArraySize_t<Il2CppString*>* AssetBundle::GetAllAssetNames()
 	{
-		return reinterpret_cast<Il2CppArraySize_t<Il2CppString*>* (*)(Il2CppObject*)>(GetAllAssetNames_addr)(instance);
+		return reinterpret_cast<Il2CppArraySize_t<Il2CppString*>*(*)(Il2CppObject*)>(GetAllAssetNames_addr)(instance);
 	}
 
 	void AssetBundle::Unload(bool unloadAllLoadedObjects)

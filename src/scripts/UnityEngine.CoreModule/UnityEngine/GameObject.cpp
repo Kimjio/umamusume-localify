@@ -125,14 +125,14 @@ namespace UnityEngine
 		reinterpret_cast<decltype(Internal_CreateGameObject)*>(Internal_CreateGameObject_addr)(self, name);
 	}
 
-	Il2CppObject* GameObject::Internal_AddComponentWithType(Il2CppObject* runtimeType)
+	Il2CppObject* GameObject::Internal_AddComponentWithType(Il2CppReflectionType* runtimeType)
 	{
-		return reinterpret_cast<Il2CppObject * (*)(Il2CppObject*, Il2CppObject*)>(Internal_AddComponentWithType_addr)(instance, runtimeType);
+		return reinterpret_cast<Il2CppObject * (*)(Il2CppObject*, Il2CppReflectionType*)>(Internal_AddComponentWithType_addr)(instance, runtimeType);
 	}
 
-	Il2CppObject* GameObject::GetComponent(Il2CppObject* runtimeType)
+	Il2CppObject* GameObject::GetComponent(Il2CppReflectionType* runtimeType)
 	{
-		return reinterpret_cast<Il2CppObject * (*)(Il2CppObject*, Il2CppObject*)>(GetComponent_addr)(instance, runtimeType);
+		return reinterpret_cast<Il2CppObject * (*)(Il2CppObject*, Il2CppReflectionType*)>(GetComponent_addr)(instance, runtimeType);
 	}
 
 	Il2CppObject* GameObject::GetComponentByName(Il2CppString* name)
