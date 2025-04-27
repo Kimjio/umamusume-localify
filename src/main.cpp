@@ -273,7 +273,8 @@ BOOL WINAPI DllMain(HINSTANCE, DWORD reason, LPVOID)
 			Game::CurrentGameRegion = Game::Region::JPN;
 		}
 
-		if (Game::CurrentGameRegion != Game::Region::JPN)
+		if (Game::CurrentGameRegion != Game::Region::JPN &&
+			Game::CurrentGameRegion != Game::Region::ENG)
 		{
 			wstringstream subKeyStream;
 
