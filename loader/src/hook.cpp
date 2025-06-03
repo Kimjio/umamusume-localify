@@ -6,6 +6,8 @@
 #include <algorithm>
 #include <vector>
 
+#include <filesystem>
+
 #include "MINT.h"
 
 using namespace std;
@@ -101,16 +103,7 @@ FindFirstFileA_hook(
 vector<string> expectedDlls = {
 	"baselib.dll",
 	"GameAssembly.dll",
-	"UnityPlayer.dll",
-	"baselib.dll",
-	"cri_ware_unity.dll",
-	"criafx_mcdsp.dll",
-	"CySpringPlugin.dll",
-	"FirebaseCppApp-11_6_0.dll",
-	"lib_burst_generated.dll",
-	"libnative.dll",
-	"cri_lips_unity.dll",
-	"cri_mana_vpx.dll",
+	"UnityPlayer.dll"
 };
 
 void* FindNextFileA_orig = nullptr;
@@ -164,6 +157,12 @@ bool init_hook()
 
 	mh_inited = true;
 
+	filesystem::path path = "umamusume_Data\\Plugins\\x86_64";
+	for (const auto& entry : filesystem::directory_iterator(path))
+	{
+		expectedDlls.emplace_back(entry.path().filename().string());
+	}
+
 	MH_CreateHook(PathFileExistsW, PathFileExistsW_hook, &PathFileExistsW_orig);
 	MH_EnableHook(PathFileExistsW);
 
@@ -176,7 +175,7 @@ bool init_hook()
 	MH_CreateHook(FindNextFileA, FindNextFileA_hook, &FindNextFileA_orig);
 	MH_EnableHook(FindNextFileA);
 
-	MH_CreateHook(GetModuleHandleW, GetModuleHandleW_hook, &GetModuleHandleW_orig);
+    MH_CreateHook(GetModuleHandleW, GetModuleHandleW_hook, &GetModuleHandleW_orig);
 	MH_EnableHook(GetModuleHandleW);
 
 	MH_CreateHook(NtCreateFile, NtCreateFile_hook, &NtCreateFile_orig);
