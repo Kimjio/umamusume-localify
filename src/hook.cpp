@@ -11248,11 +11248,11 @@ namespace
 		reinterpret_cast<decltype(Certification_initDmmPlatformData_hook)*>(Certification_initDmmPlatformData_orig)();
 
 		if (!Gallop::TitleViewController::viewerId.empty() && !Gallop::TitleViewController::onetimeToken.empty())
-							{
+		{
 			il2cpp_symbols::get_method_pointer<void (*)(Il2CppString*)>("umamusume.dll", "Gallop", "Certification", "set_dmmViewerId", 1)(il2cpp_string_new(Gallop::TitleViewController::viewerId.data()));
 			il2cpp_symbols::get_method_pointer<void (*)(Il2CppString*)>("umamusume.dll", "Gallop", "Certification", "set_dmmOnetimeToken", 1)(il2cpp_string_new(Gallop::TitleViewController::onetimeToken.data()));
-							}
-							}
+		}
+	}
 
 	void* LiveTheaterCharaSelect_CheckSwapChara_orig = nullptr;
 
@@ -12820,7 +12820,7 @@ namespace
 				else
 				{
 					last_display_width = get_system_width(display);
-					last_display_height = get_system_height(display);
+					last_display_height = ceil(last_display_width / ratio_16_9);
 				}
 			}
 
