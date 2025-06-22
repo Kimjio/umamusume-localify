@@ -678,6 +678,51 @@ inline wstring GetTextIdNameById(int id)
 	return GetEnumName(GetRuntimeType("umamusume.dll", "Gallop", "TextId"), id)->chars;
 }
 
+inline Il2CppObject* GetCurrentViewController()
+{
+	auto sceneManager = GetSingletonInstance(il2cpp_symbols::get_class("umamusume.dll", "Gallop", "SceneManager"));
+
+	if (!sceneManager)
+	{
+		return nullptr;
+	}
+
+	auto GetCurrentViewController = il2cpp_symbols::find_method<Il2CppObject * (*)(Il2CppObject*)>("umamusume.dll", "Gallop", "SceneManager", [](const MethodInfo* info)
+		{
+			if (Game::CurrentGameRegion == Game::Region::KOR)
+			{
+				auto info2020 = reinterpret_cast<const MethodInfo2020*>(info);
+				return info2020->name == "GetCurrentViewController"s && !info2020->is_generic;
+			}
+
+			return info->name == "GetCurrentViewController"s && !info->is_generic;
+		});
+
+	return GetCurrentViewController(sceneManager);
+}
+
+inline Il2CppObject* GetCurrentHubViewChildController()
+{
+	auto viewController = GetCurrentViewController();
+
+	if (!viewController)
+	{
+		return nullptr;
+	}
+
+	if (viewController->klass->parent->klass->name == "HubViewControllerBase"s)
+	{
+		return il2cpp_class_get_method_from_name_type<Il2CppObject * (*)(Il2CppObject*)>(viewController->klass, "get_ChildCurrentController", 0)->methodPointer(viewController);
+	}
+
+	return nullptr;
+}
+
+inline Il2CppObject* GetFrontDialog()
+{
+	return il2cpp_symbols::get_method_pointer<Il2CppObject * (*)()>("umamusume.dll", "Gallop", "DialogManager", "GetForeFrontDialog", IgnoreNumberOfArguments)();
+}
+
 #ifdef _MSC_VER
 inline HWND GetHWND()
 {

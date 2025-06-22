@@ -9,7 +9,7 @@ using namespace std;
 
 namespace LocalifySettings
 {
-	const wchar_t* GetText(string id)
+	inline const wchar_t* GetText(string id)
 	{
 		bool isKor = Game::CurrentGameRegion == Game::Region::KOR || config::localify_settings_force_korean;
 

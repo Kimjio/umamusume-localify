@@ -40,7 +40,7 @@ namespace SystemMediaTransportControlsManager
 
 	inline int musicId = 0;
 
-	void Initialze(HWND hWnd)
+	inline void Initialze(HWND hWnd)
 	{
 		winrt::com_ptr<ABI::Windows::Media::ISystemMediaTransportControls> abiInstance;
 		winrt::get_activation_factory<ISystemMediaTransportControlsInterop>(RuntimeClass_Windows_Media_SystemMediaTransportControls)->GetForWindow(hWnd, __uuidof(abiInstance), abiInstance.put_void());
@@ -53,7 +53,7 @@ namespace SystemMediaTransportControlsManager
 		updater.Update();
 	}
 
-	void CreateShortcutForSMTC(const wchar_t* fileName)
+	inline void CreateShortcutForSMTC(const wchar_t* fileName)
 	{
 		HRESULT hres;
 		IShellLinkW* psl = nullptr;
@@ -94,7 +94,7 @@ namespace SystemMediaTransportControlsManager
 		}
 	}
 
-	void UpdateMetadata(int music_id = musicId)
+	inline void UpdateMetadata(int music_id = musicId)
 	{
 		if (music_id == 0)
 		{

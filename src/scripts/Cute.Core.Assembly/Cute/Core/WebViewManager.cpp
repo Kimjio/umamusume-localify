@@ -3,6 +3,7 @@
 #include "WebViewManager.hpp"
 #include "../../../mscorlib/System/Collections/Generic/Dictionary.hpp"
 #include "../../../UnityEngine.CoreModule/UnityEngine/Application.hpp"
+#include "../../../UnityEngine.CoreModule/UnityEngine/Screen.hpp"
 
 #include <WebView2.h>
 #include <wrl.h>
@@ -547,14 +548,34 @@ static void Cute_Core_WebViewManager_SetMargins_hook(Il2CppObject* self, int lef
 
 	GetClientRect(GetHWND(), &webViewBounds);
 
-	webViewBounds.left += static_cast<LONG>(leftMargin);
-	webViewBounds.top += static_cast<LONG>(topMargin);
-	webViewBounds.right -= static_cast<LONG>(rightMargin);
-	webViewBounds.bottom -= static_cast<LONG>(bottomMargin);
+	float scale = 1;
+
+	if (!config::freeform_window)
+	{
+		auto GallopScreen = il2cpp_symbols::get_class("umamusume.dll", "Gallop", "Screen");
+		auto _originalScreenWidth_Field = il2cpp_class_get_field_from_name_wrap(GallopScreen, "_originalScreenWidth");
+
+		int originalScreenWidth;
+
+		il2cpp_field_static_get_value(_originalScreenWidth_Field, &originalScreenWidth);
+
+		int width = UnityEngine::Screen::width();
+		scale = originalScreenWidth / static_cast<float>(width);
+	}
+
+	webViewBounds.left += static_cast<LONG>(leftMargin / scale);
+	webViewBounds.top += static_cast<LONG>(topMargin / scale);
+	webViewBounds.right -= static_cast<LONG>(rightMargin / scale);
+	webViewBounds.bottom -= static_cast<LONG>(bottomMargin / scale);
 
 	if (Cute::Core::WebViewManager::webviewController)
 	{
 		Cute::Core::WebViewManager::webviewController->put_Bounds(webViewBounds);
+
+		ICoreWebView2* webview;
+		Cute::Core::WebViewManager::webviewController->get_CoreWebView2(&webview);
+
+		webview->ExecuteScript(L"document.documentElement.style.zoom = (window.innerWidth || window.screen.width) / 528", Callback<ICoreWebView2ExecuteScriptCompletedHandler>([](HRESULT errorCode, LPCWSTR result) { return S_OK; }).Get());
 	}
 }
 
