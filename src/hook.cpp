@@ -13070,6 +13070,8 @@ namespace
 				//}
 				if (sceneName == L"Title")
 				{
+					TaskbarManager::SetProgressValue(0, 0);
+					TaskbarManager::SetProgressState(TBPF_NOPROGRESS);
 					StartTickFrame();
 				}
 

@@ -35,10 +35,13 @@ static void UncheaterInit_setUserName_hook(Il2CppString* username)
 
 static void InitAddress()
 {
-	UncheaterInit_Init_addr = il2cpp_symbols::get_method_pointer(ASSEMBLY_NAME, "", "UncheaterInit", "Init", 1);
-	UncheaterInit_InitializeUncheaterSDK_addr = il2cpp_symbols::get_method_pointer(ASSEMBLY_NAME, "", "UncheaterInit", "InitializeUncheaterSDK", 0);
-	UncheaterInit_CheckUncheaterSystem_addr = il2cpp_symbols::get_method_pointer(ASSEMBLY_NAME, "", "UncheaterInit", "CheckUncheaterSystem", 0);
-	UncheaterInit_setUserName_addr = il2cpp_symbols::get_method_pointer(ASSEMBLY_NAME, "", "UncheaterInit", "setUserName", 1);
+	if (Game::CurrentGameRegion == Game::Region::KOR)
+	{
+		UncheaterInit_Init_addr = il2cpp_symbols::get_method_pointer(ASSEMBLY_NAME, "", "UncheaterInit", "Init", 1);
+		UncheaterInit_InitializeUncheaterSDK_addr = il2cpp_symbols::get_method_pointer(ASSEMBLY_NAME, "", "UncheaterInit", "InitializeUncheaterSDK", 0);
+		UncheaterInit_CheckUncheaterSystem_addr = il2cpp_symbols::get_method_pointer(ASSEMBLY_NAME, "", "UncheaterInit", "CheckUncheaterSystem", 0);
+		UncheaterInit_setUserName_addr = il2cpp_symbols::get_method_pointer(ASSEMBLY_NAME, "", "UncheaterInit", "setUserName", 1);
+	}
 }
 
 static void HookMethods()
