@@ -183,12 +183,6 @@ namespace
 		reinterpret_cast<decltype(InitializeApplication_hook)*>(InitializeApplication_orig)();
 	}
 
-	void* UncheaterInit_Init_orig;
-
-	void UncheaterInit_Init_hook(Il2CppObject* self, Il2CppObject* system)
-	{
-	}
-
 	void* UpdateDispatcher_Initialize_orig = nullptr;
 	void UpdateDispatcher_Initialize_hook()
 	{
@@ -12830,15 +12824,10 @@ namespace
 
 		if (Game::CurrentGameRegion == Game::Region::KOR)
 		{
-			auto UncheaterInit_Init_addr = il2cpp_symbols::get_method_pointer(
-				"umamusume.dll",
-				"", "UncheaterInit", "Init", 1);
-
 			/*auto SplashViewController_KakaoStart_addr = il2cpp_symbols::get_method_pointer(
 				"umamusume.dll",
 				"Gallop", "SplashViewController", "KakaoStart", 0);*/
 
-			ADD_HOOK(UncheaterInit_Init, "UncheaterInit::Init at %p\n");
 			// ADD_HOOK(SplashViewController_KakaoStart, "SplashViewController::KakaoStart at %p\n");
 		}
 
