@@ -89,6 +89,7 @@ workspace "umamusume-localify-loader"
 	links {
 		"Shlwapi",
 		"ntdll",
+		"user32",
 	}
 
 	includedirs {

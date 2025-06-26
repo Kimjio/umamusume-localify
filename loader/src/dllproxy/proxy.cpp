@@ -2,6 +2,48 @@
 
 extern "C"
 {
+	void* CreateInterface_Original = nullptr;
+	void* Breakpad_SteamMiniDumpInit_Original = nullptr;
+	void* Breakpad_SteamSendMiniDump_Original = nullptr;
+	void* Breakpad_SteamSetAppID_Original = nullptr;
+	void* Breakpad_SteamSetSteamID_Original = nullptr;
+	void* Breakpad_SteamWriteMiniDumpSetComment_Original = nullptr;
+	void* Breakpad_SteamWriteMiniDumpUsingExceptionInfoWithBuildId_Original = nullptr;
+	void* Steam_BConnected_Original = nullptr;
+	void* Steam_BGetCallback_Original = nullptr;
+	void* Steam_BLoggedOn_Original = nullptr;
+	void* Steam_BReleaseSteamPipe_Original = nullptr;
+	void* Steam_ConnectToGlobalUser_Original = nullptr;
+	void* Steam_CreateGlobalUser_Original = nullptr;
+	void* Steam_CreateLocalUser_Original = nullptr;
+	void* Steam_CreateSteamPipe_Original = nullptr;
+	void* Steam_FreeLastCallback_Original = nullptr;
+	void* Steam_GSBLoggedOn_Original = nullptr;
+	void* Steam_GSBSecure_Original = nullptr;
+	void* Steam_GSGetSteam2GetEncryptionKeyToSendToNewClient_Original = nullptr;
+	void* Steam_GSGetSteamID_Original = nullptr;
+	void* Steam_GSLogOff_Original = nullptr;
+	void* Steam_GSLogOn_Original = nullptr;
+	void* Steam_GSRemoveUserConnect_Original = nullptr;
+	void* Steam_GSSendSteam2UserConnect_Original = nullptr;
+	void* Steam_GSSendSteam3UserConnect_Original = nullptr;
+	void* Steam_GSSendUserDisconnect_Original = nullptr;
+	void* Steam_GSSendUserStatusResponse_Original = nullptr;
+	void* Steam_GSSetServerType_Original = nullptr;
+	void* Steam_GSSetSpawnCount_Original = nullptr;
+	void* Steam_GSUpdateStatus_Original = nullptr;
+	void* Steam_GetAPICallResult_Original = nullptr;
+	void* Steam_GetGSHandle_Original = nullptr;
+	void* Steam_InitiateGameConnection_Original = nullptr;
+	void* Steam_IsKnownInterface_Original = nullptr;
+	void* Steam_LogOff_Original = nullptr;
+	void* Steam_LogOn_Original = nullptr;
+	void* Steam_NotifyMissingInterface_Original = nullptr;
+	void* Steam_ReleaseThreadLocalMemory_Original = nullptr;
+	void* Steam_ReleaseUser_Original = nullptr;
+	void* Steam_SetLocalIPBinding_Original = nullptr;
+	void* Steam_TerminateGameConnection_Original = nullptr;
+
 	void* ImmCallImeConsoleIME_Original = nullptr;
 	void* ImmIMPGetIMEA_Original = nullptr;
 	void* ImmIMPGetIMEW_Original = nullptr;

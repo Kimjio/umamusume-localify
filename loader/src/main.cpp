@@ -1,9 +1,10 @@
 #include <stdinclude.hpp>
 
-extern bool init_hook();
+#include <Shlwapi.h>
+extern bool init_hook(filesystem::path module_path);
 extern void uninit_hook();
 
-int __stdcall DllMain(HINSTANCE, DWORD reason, LPVOID)
+int __stdcall DllMain(HINSTANCE module, DWORD reason, LPVOID)
 {
 	if (reason == DLL_PROCESS_ATTACH)
 	{
@@ -15,19 +16,23 @@ int __stdcall DllMain(HINSTANCE, DWORD reason, LPVOID)
 		filesystem::path module_path(module_name);
 
 		// check name
-		if (module_path.filename() != L"umamusume.exe")
-			return 1;
+		if (module_path.filename() != "umamusume.exe" &&
+			module_path.filename() != "UmamusumePrettyDerby_Jpn.exe" &&
+			module_path.filename() != "UmamusumePrettyDerby.exe")
+		{
+			return TRUE;
+		}
 
 		std::filesystem::current_path(
 			module_path.parent_path()
 		);
 
-		init_hook();
+		init_hook(module_path);
 	}
 	else if (reason == DLL_PROCESS_DETACH)
 	{
 		uninit_hook();
 	}
 
-	return 1;
+	return TRUE;
 }

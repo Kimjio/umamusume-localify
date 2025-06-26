@@ -75,8 +75,14 @@ namespace SystemMediaTransportControlsManager
 		{
 			IPersistFile* ppf = nullptr;
 
+			wstring module_name;
+			module_name.resize(MAX_PATH);
+			module_name.resize(GetModuleFileNameW(nullptr, module_name.data(), MAX_PATH));
+
+			filesystem::path module_path(module_name);
+
 			// Set the path to the shortcut target and add the description. 
-			psl->SetPath(filesystem::current_path().append(L"umamusume.exe").wstring().data());
+			psl->SetPath(filesystem::current_path().append(module_path.filename().wstring()).wstring().data());
 			psl->SetWorkingDirectory(filesystem::current_path().wstring().data());
 			psl->SetDescription(fileName);
 

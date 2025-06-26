@@ -16,5 +16,13 @@ namespace Game {
         ENG,
     };
 
+    enum class Store {
+        Google,
+        Steam,
+        // Ex. OneStore, MyCard...
+        Other,
+    };
+
     inline auto CurrentGameRegion = Region::UNKNOWN;
+    inline auto CurrentGameStore = Store::Other;
 }

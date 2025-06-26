@@ -156,7 +156,21 @@ static void LoadAssets()
 		}
 	}
 
-	auto enumerator = il2cpp_class_get_method_from_name_type<Il2CppObject* (*)(Il2CppObject*)>(BootSystem->klass, "BootCoroutine", 0)->methodPointer(BootSystem);
+	Il2CppObject* enumerator = nullptr;
+
+	auto BootCoroutine = il2cpp_class_get_method_from_name_type<Il2CppObject * (*)(Il2CppObject*, bool)>(BootSystem->klass, "BootCoroutine", 1);
+	if (BootCoroutine)
+	{
+		auto gameSystem = GetSingletonInstance(il2cpp_symbols::get_class("umamusume.dll", "Gallop", "GameSystem"));
+		auto _systemStateField = il2cpp_class_get_field_from_name_wrap(gameSystem->klass, "_systemState");
+		uint64_t _systemState = 0;
+		il2cpp_field_get_value(gameSystem, _systemStateField, &_systemState);
+		enumerator = BootCoroutine->methodPointer(BootSystem, _systemState == 0);
+	}
+	else
+	{
+		enumerator = il2cpp_class_get_method_from_name_type<Il2CppObject * (*)(Il2CppObject*)>(BootSystem->klass, "BootCoroutine", 0)->methodPointer(BootSystem);
+	}
 	reinterpret_cast<Il2CppObject* (*)(Il2CppObject* self, Il2CppObject* enumerator)>(StartCoroutineManaged2_orig)(BootSystem, enumerator);
 #pragma endregion
 }
@@ -176,7 +190,18 @@ static Il2CppObject* StartCoroutineManaged2_hook(Il2CppObject* self, Il2CppObjec
 			{
 				auto gameSystem = GetSingletonInstance(il2cpp_symbols::get_class("umamusume.dll", "Gallop", "GameSystem"));
 
-				reinterpret_cast<decltype(StartCoroutineManaged2_hook)*>(StartCoroutineManaged2_orig)(gameSystem, il2cpp_class_get_method_from_name_type<Il2CppObject * (*)(Il2CppObject*)>(gameSystem->klass, "InitializeGame", 0)->methodPointer(gameSystem));
+				auto InitializeGame = il2cpp_class_get_method_from_name_type<Il2CppObject * (*)(Il2CppObject*, Il2CppObject*)>(gameSystem->klass, "InitializeGame", 1);
+
+				if (!InitializeGame)
+				{
+					auto InitializeGame = il2cpp_class_get_method_from_name_type<Il2CppObject * (*)(Il2CppObject*)>(gameSystem->klass, "InitializeGame", 0);
+					reinterpret_cast<decltype(StartCoroutineManaged2_hook)*>(StartCoroutineManaged2_orig)(gameSystem, InitializeGame->methodPointer(gameSystem));
+				}
+				else
+				{
+					reinterpret_cast<decltype(StartCoroutineManaged2_hook)*>(StartCoroutineManaged2_orig)(gameSystem, InitializeGame->methodPointer(gameSystem, nullptr));
+				}
+
 
 				auto callback = CreateDelegateWithClassStatic(il2cpp_symbols::get_class("DOTween.dll", "DG.Tweening", "TweenCallback"), *([]()
 					{

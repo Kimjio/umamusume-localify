@@ -8,6 +8,8 @@
 
 #include <filesystem>
 
+#include <Windows.h>
+
 #include "MINT.h"
 
 using namespace std;
@@ -15,6 +17,7 @@ using namespace std;
 namespace
 {
 	bool mh_inited = false;
+	string module_name;
 }
 
 void* NtCreateFile_orig = nullptr;
@@ -39,6 +42,7 @@ NtCreateFile_hook(
 		UNICODE_STRING newName = RTL_CONSTANT_STRING(L"\\??\\C:\\Windows\\System32\\VERSION.dll");
 		ObjectAttributes->ObjectName = &newName;
 	}
+
 	return reinterpret_cast<decltype(NtCreateFile)*>(NtCreateFile_orig)(FileHandle, DesiredAccess, ObjectAttributes, IoStatusBlock, AllocationSize, FileAttributes, ShareAccess, CreateDisposition, CreateOptions, EaBuffer, EaLength);
 }
 
@@ -50,11 +54,14 @@ NtQueryAttributesFile_hook(
 	_Out_ PFILE_BASIC_INFORMATION FileInformation
 )
 {
-	if (wstring(reinterpret_cast<wchar_t*>(ObjectAttributes->ObjectName->Buffer)).find(L".Local") != wstring::npos ||
-		wstring(reinterpret_cast<wchar_t*>(ObjectAttributes->ObjectName->Buffer)).find(L".local") != wstring::npos)
+	if (ObjectAttributes)
 	{
-		// Block DotLocal files to load system DLLs
-		return STATUS_NOT_FOUND;
+		if (wstring(reinterpret_cast<wchar_t*>(ObjectAttributes->ObjectName->Buffer)).find(L".Local") != wstring::npos ||
+			wstring(reinterpret_cast<wchar_t*>(ObjectAttributes->ObjectName->Buffer)).find(L".local") != wstring::npos)
+		{
+			// Block DotLocal files to load system DLLs
+			return STATUS_NOT_FOUND;
+		}
 	}
 
 	return reinterpret_cast<decltype(NtQueryAttributesFile)*>(NtQueryAttributesFile_orig)(ObjectAttributes, FileInformation);
@@ -63,7 +70,8 @@ NtQueryAttributesFile_hook(
 void* PathFileExistsW_orig = nullptr;
 BOOL PathFileExistsW_hook(_In_ LPCWSTR pszPath)
 {
-	if (wstring(pszPath).find(L".local") != wstring::npos)
+	if (wstring(pszPath).find(L".local") != wstring::npos ||
+		wstring(pszPath).find(L".Local") != wstring::npos)
 	{
 		// Bypass DotLocal directory
 		SetLastError(ERROR_FILE_NOT_FOUND);
@@ -71,6 +79,24 @@ BOOL PathFileExistsW_hook(_In_ LPCWSTR pszPath)
 	}
 
 	return reinterpret_cast<decltype(PathFileExistsW)*>(PathFileExistsW_orig)(pszPath);
+}
+
+void* GetFileAttributesW_orig = nullptr;
+DWORD
+WINAPI
+GetFileAttributesW_hook(
+	_In_ LPCWSTR lpFileName
+)
+{
+	if (wstring(lpFileName).find(L".local") != wstring::npos ||
+		wstring(lpFileName).find(L".Local") != wstring::npos)
+	{
+		// Bypass DotLocal directory
+		SetLastError(ERROR_FILE_NOT_FOUND);
+		return INVALID_FILE_ATTRIBUTES;
+	}
+
+	return reinterpret_cast<decltype(GetFileAttributesW)*>(GetFileAttributesW_orig)(lpFileName);
 }
 
 
@@ -92,7 +118,7 @@ FindFirstFileA_hook(
 		currentRootFindHandle = result;
 	}
 
-	if (filesystem::current_path().string() + "\\umamusume_Data\\\\Plugins\\\\x86_64\\\\\\*" == lpFileName)
+	if (filesystem::current_path().string() + "\\" + module_name + "_Data\\\\Plugins\\\\x86_64\\\\\\ * " == lpFileName)
 	{
 		currentPluginsFindHandle = result;
 	}
@@ -147,7 +173,12 @@ GetModuleHandleW_hook(
 	return reinterpret_cast<decltype(GetModuleHandleW)*>(GetModuleHandleW_orig)(lpModuleName);
 }
 
-bool init_hook()
+void SomethingMagic()
+{
+	IsGUIThread(TRUE);
+}
+
+bool init_hook(filesystem::path module_path)
 {
 	if (mh_inited)
 		return false;
@@ -157,17 +188,25 @@ bool init_hook()
 
 	mh_inited = true;
 
-	filesystem::path path = "umamusume_Data\\Plugins\\x86_64";
+	module_name = module_path.filename().replace_extension().string();
+	filesystem::path path = module_name.append("_Data\\Plugins\\x86_64");
+
 	for (const auto& entry : filesystem::directory_iterator(path))
 	{
 		expectedDlls.emplace_back(entry.path().filename().string());
 	}
 
-	MH_CreateHook(PathFileExistsW, PathFileExistsW_hook, &PathFileExistsW_orig);
-	MH_EnableHook(PathFileExistsW);
+	auto GetFileAttributesW_addr = GetProcAddress(GetModuleHandleW(L"KernelBase.dll"), "GetFileAttributesW");
+	MH_CreateHook(GetFileAttributesW_addr, GetFileAttributesW_hook, &GetFileAttributesW_orig);
+	MH_EnableHook(GetFileAttributesW_addr);
 
-	MH_CreateHook(NtQueryAttributesFile, NtQueryAttributesFile_hook, &NtQueryAttributesFile_orig);
-	MH_EnableHook(NtQueryAttributesFile);
+	auto PathFileExistsW_addr = GetProcAddress(GetModuleHandleW(L"KernelBase.dll"), "PathFileExistsW");
+	MH_CreateHook(PathFileExistsW_addr, PathFileExistsW_hook, &PathFileExistsW_orig);
+	MH_EnableHook(PathFileExistsW_addr);
+
+	auto NtQueryAttributesFile_addr = GetProcAddress(GetModuleHandleW(L"ntdll.dll"), "NtQueryAttributesFile");
+	MH_CreateHook(NtQueryAttributesFile_addr, NtQueryAttributesFile_hook, &NtQueryAttributesFile_orig);
+	MH_EnableHook(NtQueryAttributesFile_addr);
 
 	MH_CreateHook(FindFirstFileA, FindFirstFileA_hook, &FindFirstFileA_orig);
 	MH_EnableHook(FindFirstFileA);
@@ -175,7 +214,7 @@ bool init_hook()
 	MH_CreateHook(FindNextFileA, FindNextFileA_hook, &FindNextFileA_orig);
 	MH_EnableHook(FindNextFileA);
 
-    MH_CreateHook(GetModuleHandleW, GetModuleHandleW_hook, &GetModuleHandleW_orig);
+	MH_CreateHook(GetModuleHandleW, GetModuleHandleW_hook, &GetModuleHandleW_orig);
 	MH_EnableHook(GetModuleHandleW);
 
 	MH_CreateHook(NtCreateFile, NtCreateFile_hook, &NtCreateFile_orig);

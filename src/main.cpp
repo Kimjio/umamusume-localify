@@ -193,7 +193,9 @@ BOOL WINAPI DllMain(HINSTANCE, DWORD reason, LPVOID)
 		filesystem::path module_path(module_name);
 
 		// check name
-		if (module_path.filename() != "umamusume.exe")
+		if (module_path.filename() != "umamusume.exe" && 
+			module_path.filename() != "UmamusumePrettyDerby_Jpn.exe" && 
+			module_path.filename() != "UmamusumePrettyDerby.exe")
 		{
 			return TRUE;
 		}
@@ -271,6 +273,17 @@ BOOL WINAPI DllMain(HINSTANCE, DWORD reason, LPVOID)
 		else
 		{
 			Game::CurrentGameRegion = Game::Region::JPN;
+
+			if (product == L"UmamusumePrettyDerby_Jpn")
+			{
+				Game::CurrentGameStore = Game::Store::Steam;
+			}
+
+			if (module_path.filename() == "UmamusumePrettyDerby.exe")
+			{
+				Game::CurrentGameRegion = Game::Region::ENG;
+				Game::CurrentGameStore = Game::Store::Steam;
+			}
 		}
 
 		if (Game::CurrentGameRegion != Game::Region::JPN &&

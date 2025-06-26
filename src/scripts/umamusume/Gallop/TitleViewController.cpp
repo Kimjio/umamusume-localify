@@ -448,7 +448,10 @@ static void InitAddress()
 
 static void HookMethods()
 {
-	ADD_HOOK(TitleViewController_OnClickPushStart, "Gallop.TitleViewController::OnClickPushStart at %p\n");
+	if (Game::CurrentGameStore != Game::Store::Steam)
+	{
+		ADD_HOOK(TitleViewController_OnClickPushStart, "Gallop.TitleViewController::OnClickPushStart at %p\n");
+	}
 	ADD_HOOK(TitleViewController_UpdateView, "Gallop.TitleViewController::UpdateView at %p\n");
 }
 

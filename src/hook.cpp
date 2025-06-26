@@ -960,8 +960,8 @@ namespace
 	{
 		::hInstance = hInstance;
 
-		filesystem::path path = filesystem::current_path().append(L"UnityPlayer.dll");
-		il2cpp_symbols::load_symbols(path);
+		// filesystem::path path = filesystem::current_path().append(L"UnityPlayer.dll");
+		// il2cpp_symbols::load_symbols(path);
 
 		// Windows::Foundation::Initialize(RO_INIT_MULTITHREADED);
 		return reinterpret_cast<decltype(UnityMain_hook)*>(UnityMain_orig)(hInstance, hPrevInstance, lpCmdLine, nShowCmd);
@@ -1077,9 +1077,10 @@ namespace
 
 		if (lpLibFileName == L"GameAssembly.dll"s)
 		{
+			filesystem::path path = filesystem::current_path().append(L"UnityPlayer.dll");
+			il2cpp_symbols::load_symbols(path);
 
 			const auto il2cpp = reinterpret_cast<decltype(LoadLibraryW)*>(load_library_w_orig)(lpLibFileName);
-
 			/*std::ofstream out("./GameAssembly.decrypted.dll", std::ios_base::binary);
 			MODULEINFO info;
 			if (out && GetModuleInformation(GetCurrentProcess(), il2cpp, &info, sizeof(info)))
@@ -12298,7 +12299,10 @@ namespace
 
 #pragma endregion
 
-		ADD_HOOK(Certification_initDmmPlatformData, "Gallop.Certification::initDmmPlatformData at %p\n");
+		if (Game::CurrentGameStore != Game::Store::Steam)
+		{
+			ADD_HOOK(Certification_initDmmPlatformData, "Gallop.Certification::initDmmPlatformData at %p\n");
+		}
 
 		ADD_HOOK(Object_Internal_CloneSingleWithParent, "UnityEngine.Object::Internal_CloneSingleWithParent at %p\n");
 
@@ -12403,7 +12407,7 @@ namespace
 				"umamusume.dll",
 				"Gallop", "SplashViewController", "KakaoStart", 0);*/
 
-			// ADD_HOOK(SplashViewController_KakaoStart, "SplashViewController::KakaoStart at %p\n");
+				// ADD_HOOK(SplashViewController_KakaoStart, "SplashViewController::KakaoStart at %p\n");
 		}
 
 		if (config::unlock_size || config::freeform_window)
@@ -13622,7 +13626,10 @@ ShowWindow_hook(
 		MessageBoxW(hWnd, config::json_parse_error_msg.data(), L"Umamusume Localify", MB_OK | MB_ICONWARNING);
 	}
 
-	oldWndProcPtr = reinterpret_cast<WNDPROC>(SetWindowLongPtrW(hWnd, GWLP_WNDPROC, reinterpret_cast<LONG_PTR>(WndProc)));
+	if (Game::CurrentGameStore != Game::Store::Steam)
+	{
+		oldWndProcPtr = reinterpret_cast<WNDPROC>(SetWindowLongPtrW(hWnd, GWLP_WNDPROC, reinterpret_cast<LONG_PTR>(WndProc)));
+	}
 
 	currentHWnd = hWnd;
 
