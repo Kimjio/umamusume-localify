@@ -22,6 +22,14 @@ void* set_sizeDelta_Injected_addr = nullptr;
 
 void* get_sizeDelta_Injected_addr = nullptr;
 
+void* set_offsetMin_addr = nullptr;
+
+void* get_offsetMin_addr = nullptr;
+
+void* set_offsetMax_addr = nullptr;
+
+void* get_offsetMax_addr = nullptr;
+
 void* get_rect_Injected_addr = nullptr;
 
 static void InitAddress()
@@ -36,6 +44,10 @@ static void InitAddress()
 	get_pivot_Injected_addr = il2cpp_resolve_icall("UnityEngine.RectTransform::get_pivot_Injected()");
 	set_sizeDelta_Injected_addr = il2cpp_resolve_icall("UnityEngine.RectTransform::set_sizeDelta_Injected()");
 	get_sizeDelta_Injected_addr = il2cpp_resolve_icall("UnityEngine.RectTransform::get_sizeDelta_Injected()");
+	set_offsetMin_addr = il2cpp_symbols::get_method_pointer(ASSEMBLY_NAME, "UnityEngine", "RectTransform", "set_offsetMin", 1);
+	get_offsetMin_addr = il2cpp_symbols::get_method_pointer(ASSEMBLY_NAME, "UnityEngine", "RectTransform", "get_offsetMin", 0);
+	set_offsetMax_addr = il2cpp_symbols::get_method_pointer(ASSEMBLY_NAME, "UnityEngine", "RectTransform", "set_offsetMax", 1);
+	get_offsetMax_addr = il2cpp_symbols::get_method_pointer(ASSEMBLY_NAME, "UnityEngine", "RectTransform", "get_offsetMax", 0);
 	get_rect_Injected_addr = il2cpp_resolve_icall("UnityEngine.RectTransform::get_rect_Injected()");
 }
 
@@ -103,6 +115,30 @@ namespace UnityEngine
 	{
 		Vector2 vector;
 		reinterpret_cast<void (*)(Il2CppObject*, Vector2*)>(get_sizeDelta_Injected_addr)(instance, &vector);
+		return vector;
+	}
+
+	void RectTransform::offsetMin(Vector2 value)
+	{
+		reinterpret_cast<void (*)(Il2CppObject*, Vector2*)>(set_offsetMin_addr)(instance, &value);
+	}
+
+	Vector2 RectTransform::offsetMin()
+	{
+		Vector2 vector;
+		reinterpret_cast<void (*)(Il2CppObject*, Vector2*)>(get_offsetMin_addr)(instance, &vector);
+		return vector;
+	}
+
+	void RectTransform::offsetMax(Vector2 value)
+	{
+		reinterpret_cast<void (*)(Il2CppObject*, Vector2*)>(set_offsetMax_addr)(instance, &value);
+	}
+
+	Vector2 RectTransform::offsetMax()
+	{
+		Vector2 vector;
+		reinterpret_cast<void (*)(Il2CppObject*, Vector2*)>(get_offsetMax_addr)(instance, &vector);
 		return vector;
 	}
 

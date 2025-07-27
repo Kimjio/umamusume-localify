@@ -653,7 +653,7 @@ namespace Unity
 			return false;
 		}
 
-		if (Game::CurrentGameRegion == Game::Region::JPN)
+		if (Game::CurrentUnityVersion == Game::UnityVersion::Unity22)
 		{
 			return reinterpret_cast<bool (*)(const char* loaderPath)>(GetProcAddress(module, "main_LoadOpenXRLibrary"))(wide_u8(loaderPath).data());
 		}
@@ -688,7 +688,7 @@ namespace Unity
 			return;
 		}
 
-		if (Game::CurrentGameRegion == Game::Region::JPN)
+		if (Game::CurrentUnityVersion == Game::UnityVersion::Unity22)
 		{
 			auto engineVersionString = string(engineVersion);
 
@@ -779,7 +779,7 @@ namespace Unity
 			return;
 		}
 
-		if (Game::CurrentGameRegion == Game::Region::JPN)
+		if (Game::CurrentUnityVersion == Game::UnityVersion::Unity22)
 		{
 			return;
 		}

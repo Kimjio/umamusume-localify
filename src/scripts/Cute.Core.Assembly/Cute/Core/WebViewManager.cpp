@@ -4,6 +4,10 @@
 #include "../../../mscorlib/System/Collections/Generic/Dictionary.hpp"
 #include "../../../UnityEngine.CoreModule/UnityEngine/Application.hpp"
 #include "../../../UnityEngine.CoreModule/UnityEngine/Screen.hpp"
+#include "../../../UnityEngine.CoreModule/UnityEngine/Rect.hpp"
+#include "../../../UnityEngine.CoreModule/UnityEngine/RectTransform.hpp"
+#include "../../../umamusume/Gallop/Screen.hpp"
+#include "../../../umamusume/Gallop/UIManager.hpp"
 
 #include <WebView2.h>
 #include <wrl.h>
@@ -552,15 +556,18 @@ static void Cute_Core_WebViewManager_SetMargins_hook(Il2CppObject* self, int lef
 
 	if (!config::freeform_window)
 	{
-		auto GallopScreen = il2cpp_symbols::get_class("umamusume.dll", "Gallop", "Screen");
-		auto _originalScreenWidth_Field = il2cpp_class_get_field_from_name_wrap(GallopScreen, "_originalScreenWidth");
+		if (!Gallop::Screen::IsSplitWindow())
+		{
+			auto GallopScreen = il2cpp_symbols::get_class("umamusume.dll", "Gallop", "Screen");
+			auto _originalScreenWidth_Field = il2cpp_class_get_field_from_name_wrap(GallopScreen, "_originalScreenWidth");
 
-		int originalScreenWidth;
+			int originalScreenWidth;
 
-		il2cpp_field_static_get_value(_originalScreenWidth_Field, &originalScreenWidth);
+			il2cpp_field_static_get_value(_originalScreenWidth_Field, &originalScreenWidth);
 
-		int width = UnityEngine::Screen::width();
-		scale = originalScreenWidth / static_cast<float>(width);
+			int width = UnityEngine::Screen::width();
+			scale = originalScreenWidth / static_cast<float>(width);
+		}
 	}
 
 	webViewBounds.left += static_cast<LONG>(leftMargin / scale);
@@ -655,6 +662,11 @@ namespace Cute
 		void WebViewManager::SetVisible(bool visible)
 		{
 			reinterpret_cast<decltype(Cute_Core_WebViewManager_SetVisible_hook)*>(Cute_Core_WebViewManager_SetVisible_addr)(instance, visible);
+		}
+
+		void WebViewManager::SetMargins(int leftMargin, int topMargin, int rightMargin, int bottomMargin)
+		{
+			reinterpret_cast<decltype(Cute_Core_WebViewManager_SetMargins_hook)*>(Cute_Core_WebViewManager_SetMargins_addr)(instance, leftMargin, topMargin, rightMargin, bottomMargin);
 		}
 
 		Il2CppDelegate* WebViewManager::Callback()

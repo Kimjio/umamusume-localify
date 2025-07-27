@@ -18,6 +18,8 @@ void* get_UITexture_addr = nullptr;
 
 void* get_CommonHeaderTitle_addr = nullptr;
 
+void* get_SteamUIManager_addr = nullptr;
+
 void* SetCameraSizeByOrientation_addr = nullptr;
 
 void* CheckUIToFrameBufferBlitInstance_addr = nullptr;
@@ -238,6 +240,7 @@ static void InitAddress()
 	ShowNotification_addr = il2cpp_symbols::get_method_pointer(ASSEMBLY_NAME, "Gallop", "UIManager", "ShowNotification", 1);
 	get_UITexture_addr = il2cpp_symbols::get_method_pointer(ASSEMBLY_NAME, "Gallop", "UIManager", "get_UITexture", 0);
 	get_CommonHeaderTitle_addr = il2cpp_symbols::get_method_pointer(ASSEMBLY_NAME, "Gallop", "UIManager", "get_CommonHeaderTitle", 0);
+	get_SteamUIManager_addr = il2cpp_symbols::get_method_pointer(ASSEMBLY_NAME, "Gallop", "UIManager", "get_SteamUIManager", 0);
 	SetCameraSizeByOrientation_addr = il2cpp_symbols::get_method_pointer(ASSEMBLY_NAME, "Gallop", "UIManager", "SetCameraSizeByOrientation", 1);
 	CheckUIToFrameBufferBlitInstance_addr = il2cpp_symbols::get_method_pointer(ASSEMBLY_NAME, "Gallop", "UIManager", "CheckUIToFrameBufferBlitInstance", 0);
 	AdjustSafeArea_addr = il2cpp_symbols::get_method_pointer(ASSEMBLY_NAME, "Gallop", "UIManager", "AdjustSafeArea", 0);
@@ -391,6 +394,24 @@ namespace Gallop
 		return _mainCanvas;
 	}
 
+	Il2CppObject* UIManager::_gameCanvas()
+	{
+		auto _gameCanvasField = il2cpp_class_get_field_from_name_wrap(instance->klass, "_gameCanvas");
+		Il2CppObject* _gameCanvas;
+		il2cpp_field_get_value(instance, _gameCanvasField, &_gameCanvas);
+
+		return _gameCanvas;
+	}
+
+	Il2CppObject* UIManager::_systemCanvas()
+	{
+		auto _systemCanvasField = il2cpp_class_get_field_from_name_wrap(instance->klass, "_systemCanvas");
+		Il2CppObject* _systemCanvas;
+		il2cpp_field_get_value(instance, _systemCanvasField, &_systemCanvas);
+
+		return _systemCanvas;
+	}
+
 	Il2CppObject* UIManager::UITexture()
 	{
 		return reinterpret_cast<Il2CppObject * (*)(Il2CppObject*)>(get_UITexture_addr)(instance);
@@ -405,6 +426,11 @@ namespace Gallop
 	Il2CppObject* UIManager::CommonHeaderTitle()
 	{
 		return reinterpret_cast<Il2CppObject * (*)(Il2CppObject*)>(get_CommonHeaderTitle_addr)(instance);
+	}
+
+	Il2CppObject* UIManager::SteamUIManager()
+	{
+		return reinterpret_cast<Il2CppObject * (*)(Il2CppObject*)>(get_SteamUIManager_addr)(instance);
 	}
 
 	void UIManager::ShowNotification(Il2CppString* text)

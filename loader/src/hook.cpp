@@ -16,7 +16,6 @@ using namespace std;
 
 namespace
 {
-	bool mh_inited = false;
 	string module_name;
 }
 
@@ -156,37 +155,80 @@ FindNextFileA_hook(
 	return result;
 }
 
-void* GetModuleHandleW_orig = nullptr;
+void* LoadLibraryExW_orig = nullptr;
 HMODULE
 WINAPI
-GetModuleHandleW_hook(
-	_In_opt_ LPCWSTR lpModuleName
+LoadLibraryExW_hook(
+	_In_ LPCWSTR lpLibFileName,
+	_Reserved_ HANDLE hFile,
+	_In_ DWORD dwFlags
 )
 {
-	if (lpModuleName)
+	if (wstring(lpLibFileName).find(L"UnityPlayer.dll") != wstring::npos)
 	{
-		if (lpModuleName == L"version.dll"s)
-		{
-			return LoadLibraryW(L"C:\\Windows\\System32\\VERSION.dll");
-		}
+		auto version = reinterpret_cast<decltype(LoadLibraryExW)*>(LoadLibraryExW_orig)(L"localify.dll", hFile, dwFlags);
+		wstring module_name;
+		module_name.resize(MAX_PATH);
+		module_name.resize(GetModuleFileNameW(version, module_name.data(), MAX_PATH));
 	}
-	return reinterpret_cast<decltype(GetModuleHandleW)*>(GetModuleHandleW_orig)(lpModuleName);
+	return reinterpret_cast<decltype(LoadLibraryExW)*>(LoadLibraryExW_orig)(lpLibFileName, hFile, dwFlags);
 }
 
-void SomethingMagic()
+void* CreateProcessW_orig = nullptr;
+BOOL
+WINAPI
+CreateProcessW_hook(
+	_In_opt_ LPCWSTR lpApplicationName,
+	_Inout_opt_ LPWSTR lpCommandLine,
+	_In_opt_ LPSECURITY_ATTRIBUTES lpProcessAttributes,
+	_In_opt_ LPSECURITY_ATTRIBUTES lpThreadAttributes,
+	_In_ BOOL bInheritHandles,
+	_In_ DWORD dwCreationFlags,
+	_In_opt_ LPVOID lpEnvironment,
+	_In_opt_ LPCWSTR lpCurrentDirectory,
+	_In_ LPSTARTUPINFOW lpStartupInfo,
+	_Out_ LPPROCESS_INFORMATION lpProcessInformation
+)
 {
-	IsGUIThread(TRUE);
+	return reinterpret_cast<decltype(CreateProcessW)*>(CreateProcessW_orig)(
+		lpApplicationName,
+		lpCommandLine,
+		lpProcessAttributes,
+		lpThreadAttributes,
+		bInheritHandles,
+		dwCreationFlags,
+		lpEnvironment,
+		lpCurrentDirectory,
+		lpStartupInfo,
+		lpProcessInformation
+		);
 }
 
-bool init_hook(filesystem::path module_path)
+void init_hook(filesystem::path module_path)
 {
-	if (mh_inited)
-		return false;
+	if (MH_Initialize() != MH_OK) return;
 
-	if (MH_Initialize() != MH_OK)
-		return false;
+	auto PathFileExistsW_addr = GetProcAddress(GetModuleHandleW(L"KernelBase.dll"), "PathFileExistsW");
+	MH_CreateHook(PathFileExistsW_addr, PathFileExistsW_hook, &PathFileExistsW_orig);
+	MH_EnableHook(PathFileExistsW_addr);
 
-	mh_inited = true;
+	auto GetFileAttributesW_addr = GetProcAddress(GetModuleHandleW(L"KernelBase.dll"), "GetFileAttributesW");
+	MH_CreateHook(GetFileAttributesW_addr, GetFileAttributesW_hook, &GetFileAttributesW_orig);
+	MH_EnableHook(GetFileAttributesW_addr);
+
+	auto NtQueryAttributesFile_addr = GetProcAddress(GetModuleHandleW(L"ntdll.dll"), "NtQueryAttributesFile");
+	MH_CreateHook(NtQueryAttributesFile_addr, NtQueryAttributesFile_hook, &NtQueryAttributesFile_orig);
+	MH_EnableHook(NtQueryAttributesFile_addr);
+
+	auto LoadLibraryExW_addr = GetProcAddress(GetModuleHandleW(L"KernelBase.dll"), "LoadLibraryExW");
+	MH_CreateHook(LoadLibraryExW_addr, LoadLibraryExW_hook, &LoadLibraryExW_orig);
+	MH_EnableHook(LoadLibraryExW_addr);
+
+	auto CreateProcessW_addr = GetProcAddress(GetModuleHandleW(L"kernel32.dll"), "CreateProcessW");
+	MH_CreateHook(CreateProcessW_addr, CreateProcessW_hook, &CreateProcessW_orig);
+	MH_EnableHook(CreateProcessW_addr);
+
+	hook::proxy init{};
 
 	module_name = module_path.filename().replace_extension().string();
 	filesystem::path path = module_name.append("_Data\\Plugins\\x86_64");
@@ -196,40 +238,20 @@ bool init_hook(filesystem::path module_path)
 		expectedDlls.emplace_back(entry.path().filename().string());
 	}
 
-	auto GetFileAttributesW_addr = GetProcAddress(GetModuleHandleW(L"KernelBase.dll"), "GetFileAttributesW");
-	MH_CreateHook(GetFileAttributesW_addr, GetFileAttributesW_hook, &GetFileAttributesW_orig);
-	MH_EnableHook(GetFileAttributesW_addr);
-
-	auto PathFileExistsW_addr = GetProcAddress(GetModuleHandleW(L"KernelBase.dll"), "PathFileExistsW");
-	MH_CreateHook(PathFileExistsW_addr, PathFileExistsW_hook, &PathFileExistsW_orig);
-	MH_EnableHook(PathFileExistsW_addr);
-
-	auto NtQueryAttributesFile_addr = GetProcAddress(GetModuleHandleW(L"ntdll.dll"), "NtQueryAttributesFile");
-	MH_CreateHook(NtQueryAttributesFile_addr, NtQueryAttributesFile_hook, &NtQueryAttributesFile_orig);
-	MH_EnableHook(NtQueryAttributesFile_addr);
-
 	MH_CreateHook(FindFirstFileA, FindFirstFileA_hook, &FindFirstFileA_orig);
 	MH_EnableHook(FindFirstFileA);
 
 	MH_CreateHook(FindNextFileA, FindNextFileA_hook, &FindNextFileA_orig);
 	MH_EnableHook(FindNextFileA);
 
-	MH_CreateHook(GetModuleHandleW, GetModuleHandleW_hook, &GetModuleHandleW_orig);
-	MH_EnableHook(GetModuleHandleW);
-
 	MH_CreateHook(NtCreateFile, NtCreateFile_hook, &NtCreateFile_orig);
 	MH_EnableHook(NtCreateFile);
 
-	hook::proxy init{};
-
-	return true;
+	IsGUIThread(FALSE);
 }
 
 void uninit_hook()
 {
-	if (!mh_inited)
-		return;
-
 	MH_DisableHook(MH_ALL_HOOKS);
 	MH_Uninitialize();
 }

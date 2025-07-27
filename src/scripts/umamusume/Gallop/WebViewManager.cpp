@@ -1,8 +1,13 @@
 #include "../umamusume.hpp"
 #include "../../ScriptInternal.hpp"
 #include "WebViewManager.hpp"
+#include "Screen.hpp"
+#include "UIManager.hpp"
 #include "../../UnityEngine.CoreModule/UnityEngine/Application.hpp"
+#include "../../UnityEngine.CoreModule/UnityEngine/Vector2.hpp"
 #include "../../UnityEngine.CoreModule/UnityEngine/Vector4.hpp"
+#include "../../UnityEngine.CoreModule/UnityEngine/RectTransform.hpp"
+#include "../../UnityEngine.CoreModule/UnityEngine/Screen.hpp"
 #include "../../Cute.Core.Assembly/Cute/Core/WebViewManager.hpp"
 
 #include <WebView2.h>
@@ -36,6 +41,7 @@ void* Gallop_WebViewManager_SetCustomFont_orig = nullptr;
 void* Gallop_WebViewManager_OpenWebView_addr = nullptr;
 
 void* Gallop_WebViewManager_SetMargin_addr = nullptr;
+void* Gallop_WebViewManager_SetMargin_orig = nullptr;
 
 void* Gallop_WebViewManager_get_CuteWebView_addr = nullptr;
 
@@ -143,7 +149,7 @@ static void OpenWebViewDialog(Il2CppString* url, Il2CppString* headerTextArg, ui
 		Il2CppString * message,
 		Il2CppDelegate * onClickCenterButton,
 		unsigned long closeTextId, int dialogFormType)>(il2cpp_class_get_method_from_name(data->klass, "SetSimpleOneButtonMessage", 5)->methodPointer)
-			(data, headerTextArg, nullptr, onClose, closeTextId, 9);
+		(data, headerTextArg, nullptr, onClose, closeTextId, 9);
 
 	auto webViewManager = GetSingletonInstance(
 		il2cpp_symbols::get_class(ASSEMBLY_NAME, "Gallop", "WebViewManager"));
@@ -482,9 +488,9 @@ static void Gallop_WebViewManager_SetCustomFont_hook(Il2CppObject* self, Gallop:
 
 		if (!Cute::Core::WebViewManager::customFontMap.contains(splited.back()))
 		{
-			auto LocalFile = il2cpp_symbols::get_method_pointer<Il2CppObject* (*)()>(ASSEMBLY_NAME, "Gallop", "AssetManager", "get_LocalFile", 0)();
-			auto pathAllowUnknown = il2cpp_class_get_method_from_name_type<Il2CppString* (*)(Il2CppObject*, Il2CppString*)>(LocalFile->klass, "GetPathAllowUnknown", 1)->methodPointer(LocalFile, filePath);
-	
+			auto LocalFile = il2cpp_symbols::get_method_pointer<Il2CppObject * (*)()>(ASSEMBLY_NAME, "Gallop", "AssetManager", "get_LocalFile", 0)();
+			auto pathAllowUnknown = il2cpp_class_get_method_from_name_type<Il2CppString * (*)(Il2CppObject*, Il2CppString*)>(LocalFile->klass, "GetPathAllowUnknown", 1)->methodPointer(LocalFile, filePath);
+
 			if (filesystem::exists(wstring(pathAllowUnknown->chars)))
 			{
 				Cute::Core::WebViewManager::customFontMap.emplace(splited.back(), pathAllowUnknown->chars);
@@ -839,6 +845,138 @@ static void Gallop_WebViewManager_OpenPurchaseItemDetail_hook(Il2CppObject* self
 	webViewManager.Open(productUrl, data);
 }
 
+static void Gallop_WebViewManager_SetMargin_hook(Il2CppObject* self, UnityEngine::Rect offsetRect)
+{
+	auto instance = Gallop::WebViewManager(self);
+	auto _currentWebViewDialog = instance._currentWebViewDialog();
+	if (!_currentWebViewDialog)
+	{
+		return;
+	}
+	auto webViewRect = UnityEngine::RectTransform(il2cpp_class_get_method_from_name_type<Il2CppObject * (*)(Il2CppObject*)>(_currentWebViewDialog->klass, "GetWebViewRect", 0)->methodPointer(_currentWebViewDialog));
+	if (!webViewRect)
+	{
+		return;
+	}
+	webViewRect.gameObject().SetActive(true);
+
+	auto rectWebView = webViewRect.rect();
+
+	auto _systemCanvas = Gallop::UIManager::Instance()._systemCanvas();
+	float scaleFactor = il2cpp_class_get_method_from_name_type<float (*)(Il2CppObject*)>(_systemCanvas->klass, "get_scaleFactor", 0)->methodPointer(_systemCanvas);
+
+	Il2CppObject* gameCanvas;
+	UnityEngine::Rect leftRect;
+	UnityEngine::Rect evacuationRect;
+	UnityEngine::Rect _bandMenuRect;
+
+	bool IsSplitWindow = false;
+
+	if (Game::CurrentGameStore == Game::Store::Steam)
+	{
+		IsSplitWindow = Gallop::Screen::IsSplitWindow();
+
+		auto SteamUIManager = Gallop::UIManager::Instance().SteamUIManager();
+
+		if (IsSplitWindow)
+		{
+			gameCanvas = il2cpp_class_get_method_from_name_type<Il2CppObject * (*)(Il2CppObject*)>(SteamUIManager->klass, "get_GameCanvas", 0)->methodPointer(SteamUIManager);
+			auto leftCanvas = il2cpp_class_get_method_from_name_type<Il2CppObject * (*)(Il2CppObject*)>(SteamUIManager->klass, "get_LeftCanvas", 0)->methodPointer(SteamUIManager);
+			auto evacuationCanvas = il2cpp_class_get_method_from_name_type<Il2CppObject * (*)(Il2CppObject*)>(SteamUIManager->klass, "get_EvacuationCanvas", 0)->methodPointer(SteamUIManager);
+
+			auto _bandMenuField = il2cpp_class_get_field_from_name(SteamUIManager->klass, "_bandMenu");
+			Il2CppObject* _bandMenu;
+			il2cpp_field_get_value(SteamUIManager, _bandMenuField, &_bandMenu);
+
+			auto leftRectTransform = static_cast<UnityEngine::RectTransform>(UnityEngine::Behaviour(leftCanvas).transform());
+			leftRect = leftRectTransform.rect();
+
+			auto evacuationRectTransform = static_cast<UnityEngine::RectTransform>(UnityEngine::Behaviour(evacuationCanvas).transform());
+			evacuationRect = evacuationRectTransform.rect();
+
+			auto _bandMenuRectTransform = static_cast<UnityEngine::RectTransform>(UnityEngine::Behaviour(_bandMenu).gameObject().Find(il2cpp_string_new("BandBg")).transform());
+			_bandMenuRect = _bandMenuRectTransform.rect();
+		}
+		else
+		{
+			gameCanvas = Gallop::UIManager::Instance()._gameCanvas();
+		}
+	}
+	else
+	{
+		gameCanvas = Gallop::UIManager::Instance()._gameCanvas();
+	}
+
+	auto rectTransform = static_cast<UnityEngine::RectTransform>(UnityEngine::Behaviour(gameCanvas).transform());
+	auto rect = rectTransform.rect();
+
+	int num = 50;
+	Vector2 vector;
+
+	if (Game::CurrentGameStore == Game::Store::Steam && !IsSplitWindow)
+	{
+		scaleFactor = (float)Gallop::Screen::Height() / Gallop::Screen::OriginalScreenHeight();
+	}
+
+	vector = UnityEngine::Vector2{ (float)(Gallop::Screen::Width() / 2), (float)(Gallop::Screen::Height() / 2) + (float)num * scaleFactor };
+
+	float num2 = rectWebView.width * scaleFactor;
+	float num3 = rectWebView.height * scaleFactor;
+
+	Vector2 vector2 = UnityEngine::Vector2{ vector.x - num2 / 2.0f + offsetRect.xMin() * scaleFactor, vector.y + num3 / 2.0f + offsetRect.yMax() * scaleFactor };
+	Vector2 vector3 = UnityEngine::Vector2{ vector.x + num2 / 2.0f + offsetRect.xMax() * scaleFactor, vector.y - num3 / 2.0f + offsetRect.yMin() * scaleFactor };
+
+	float num4;
+	float num5;
+
+	if (Game::CurrentGameStore == Game::Store::Steam)
+	{
+		if (IsSplitWindow)
+		{
+			num4 = (float)UnityEngine::Screen::width();
+			num5 = (float)UnityEngine::Screen::height();
+		}
+		else
+		{
+			num4 = (float)Gallop::Screen::OriginalScreenHeight();
+			num5 = (float)Gallop::Screen::OriginalScreenWidth();
+		}
+	}
+	else
+	{
+		num4 = (float)Gallop::Screen::OriginalScreenWidth();
+		num5 = (float)Gallop::Screen::OriginalScreenHeight();
+	}
+
+	float num6 = num4 / (float)Gallop::Screen::Width();
+	float num7 = num5 / (float)Gallop::Screen::Height();
+
+	if (Game::CurrentGameStore == Game::Store::Steam && IsSplitWindow)
+	{
+		auto mainRect = static_cast<UnityEngine::RectTransform>(UnityEngine::Behaviour(Gallop::UIManager::Instance()._mainCanvas()).transform()).rect();
+
+		float wRatio = num4 / 1920;
+
+		auto margin = ((mainRect.width * num7) - (rectWebView.width * num7)) / 2;
+
+		instance.CuteWebView().SetMargins(
+			((int)leftRect.width * wRatio) + (margin), // l
+			(int)(((float)rect.height - vector2.y) * num7), // t
+			((evacuationRect.width * wRatio) + (_bandMenuRect.width * wRatio)) + (margin), // r
+			(int)(vector3.y * num7) // b
+		);
+	}
+	else
+	{
+		instance.CuteWebView().SetMargins(
+			(int)(vector2.x * num6), // l
+			(int)(((float)Gallop::Screen::Height() - vector2.y) * num7), // t
+			(int)(((float)Gallop::Screen::Width() - vector3.x) * num6), // r
+			(int)(vector3.y * num7) // b
+		);
+	}
+}
+
 static void InitAddress()
 {
 	Gallop_WebViewManager_cctor_addr = il2cpp_symbols::get_method_pointer(ASSEMBLY_NAME, "Gallop", "WebViewManager", ".cctor", 0);
@@ -916,7 +1054,7 @@ static void HookMethods()
 	ADD_HOOK(Gallop_WebViewManager_GetGachaURLProperty, "Gallop.WebViewManager::GetGachaURLProperty at %p\n");
 	ADD_HOOK(Gallop_WebViewManager_GetGachaUrl, "Gallop.WebViewManager::GetGachaUrl at %p\n");
 	ADD_HOOK(Gallop_WebViewManager_GetProductUrl, "Gallop.WebViewManager::GetProductUrl at %p\n");
-
+	ADD_HOOK(Gallop_WebViewManager_SetMargin, "Gallop.WebViewManager::SetMargin at %p\n");
 
 	if (Game::CurrentGameRegion == Game::Region::KOR)
 	{

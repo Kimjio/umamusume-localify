@@ -74,7 +74,7 @@ workspace "umamusume-localify"
 	dependencies.projects()
 
 	project "umamusume-localify"
-	targetname "version"
+	targetname "localify"
 
 	language "C++"
 	kind "SharedLib"
@@ -94,6 +94,7 @@ workspace "umamusume-localify"
 		"WinINet",
 		"ntdll",
 		"RuntimeObject",
+		"Version",
 		"./deps/discord_game_sdk/discord_game_sdk.dll.lib"
 	}
 

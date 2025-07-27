@@ -16,6 +16,12 @@ namespace Gallop
 
 		static void OriginalScreenHeight(int value);
 
+		static int Width();
+
+		static int Height();
+
+		static bool IsSplitWindow();
+
 		static Il2CppObject* ChangeScreenOrientation(UnityEngine::ScreenOrientation targetOrientation, bool isForce);
 
 		static Il2CppObject* ChangeScreenOrientationLandscapeAsync();

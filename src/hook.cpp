@@ -150,6 +150,8 @@ namespace
 
 	bool mh_inited = false;
 
+	string module_name;
+
 	void dump_bytes(void* pos)
 	{
 		if (pos)
@@ -209,11 +211,11 @@ namespace
 		il2cpp_symbols::init_defaults();
 		il2cpp_symbols::call_init_callbacks();
 
-		auto InitializeApplication = il2cpp_symbols::get_method_pointer("umamusume.dll", "Gallop", "GameSystem", "InitializeApplication", IgnoreNumberOfArguments);
+		auto InitializeApplication = il2cpp_symbols::get_method_pointer("umamusume.dll", "Gallop", "GameSystem", "InitializeApplication", 0);
 		MH_CreateHook(InitializeApplication, InitializeApplication_hook, &InitializeApplication_orig);
 		MH_EnableHook(InitializeApplication);
 
-		auto UpdateDispatcher_Initialize_addr = il2cpp_symbols::get_method_pointer("Cute.Core.Assembly.dll", "Cute.Core", "UpdateDispatcher", "Initialize", IgnoreNumberOfArguments);
+		auto UpdateDispatcher_Initialize_addr = il2cpp_symbols::get_method_pointer("Cute.Core.Assembly.dll", "Cute.Core", "UpdateDispatcher", "Initialize", 0);
 		MH_CreateHook(UpdateDispatcher_Initialize_addr, UpdateDispatcher_Initialize_hook, &UpdateDispatcher_Initialize_orig);
 		MH_EnableHook(UpdateDispatcher_Initialize_addr);
 
@@ -895,6 +897,18 @@ namespace
 		return manager;
 	}
 
+	void* UnityMain_orig = nullptr;
+	int __stdcall UnityMain_hook(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPWSTR lpCmdLine, int nShowCmd)
+	{
+		::hInstance = hInstance;
+
+		filesystem::path path = filesystem::current_path().append(L"UnityPlayer.dll");
+		il2cpp_symbols::load_symbols(path);
+
+		// Windows::Foundation::Initialize(RO_INIT_MULTITHREADED);
+		return reinterpret_cast<decltype(UnityMain_hook)*>(UnityMain_orig)(hInstance, hPrevInstance, lpCmdLine, nShowCmd);
+	}
+
 	void* load_library_ex_w_orig = nullptr;
 	HMODULE
 		WINAPI
@@ -904,18 +918,30 @@ namespace
 			_In_ DWORD dwFlags
 		)
 	{
-		if (wstring(lpLibFileName).find(L"KakaoGame.dll") != wstring::npos)
+		if (!config::allow_delete_cookie && Game::CurrentGameRegion == Game::Region::KOR)
 		{
-			auto KakaoGame = reinterpret_cast<decltype(LoadLibraryExW)*>(load_library_ex_w_orig)(lpLibFileName, hFile, dwFlags);
+			if (wstring(lpLibFileName).find(L"KakaoGame.dll") != wstring::npos)
+			{
+				auto KakaoGame = reinterpret_cast<decltype(LoadLibraryExW)*>(load_library_ex_w_orig)(lpLibFileName, hFile, dwFlags);
 
-			auto cef = GetModuleHandleW(L"libcef.dll");
+				auto cef = GetModuleHandleW(L"libcef.dll");
 
-			const auto cef_cookie_manager_get_global_manager_addr = reinterpret_cast<decltype(cef_cookie_manager_get_global_manager)>(GetProcAddress(cef, "cef_cookie_manager_get_global_manager"));
+				const auto cef_cookie_manager_get_global_manager_addr = reinterpret_cast<decltype(cef_cookie_manager_get_global_manager)>(GetProcAddress(cef, "cef_cookie_manager_get_global_manager"));
 
-			MH_CreateHook(cef_cookie_manager_get_global_manager_addr, cef_cookie_manager_get_global_manager_hook, &cef_cookie_manager_get_global_manager_orig);
-			MH_EnableHook(cef_cookie_manager_get_global_manager_addr);
+				MH_CreateHook(cef_cookie_manager_get_global_manager_addr, cef_cookie_manager_get_global_manager_hook, &cef_cookie_manager_get_global_manager_orig);
+				MH_EnableHook(cef_cookie_manager_get_global_manager_addr);
 
-			return KakaoGame;
+				return KakaoGame;
+			}
+		}
+
+		if (wstring(lpLibFileName).find(L"UnityPlayer.dll") != wstring::npos)
+		{
+			auto UnityPlayer = reinterpret_cast<decltype(LoadLibraryExW)*>(load_library_ex_w_orig)(lpLibFileName, hFile, dwFlags);
+
+			auto UnityMain_addr = GetProcAddress(UnityPlayer, "UnityMain");
+			MH_CreateHook(UnityMain_addr, UnityMain_hook, &UnityMain_orig);
+			MH_EnableHook(UnityMain_addr);
 		}
 
 		return reinterpret_cast<decltype(LoadLibraryExW)*>(load_library_ex_w_orig)(lpLibFileName, hFile, dwFlags);
@@ -953,18 +979,6 @@ namespace
 			)), NULL);
 
 		return hWndFound;
-	}
-
-	void* UnityMain_orig = nullptr;
-	int __stdcall UnityMain_hook(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPWSTR lpCmdLine, int nShowCmd)
-	{
-		::hInstance = hInstance;
-
-		// filesystem::path path = filesystem::current_path().append(L"UnityPlayer.dll");
-		// il2cpp_symbols::load_symbols(path);
-
-		// Windows::Foundation::Initialize(RO_INIT_MULTITHREADED);
-		return reinterpret_cast<decltype(UnityMain_hook)*>(UnityMain_orig)(hInstance, hPrevInstance, lpCmdLine, nShowCmd);
 	}
 
 	IUnityInterfaces* unityInterfaces;
@@ -5091,22 +5105,35 @@ namespace
 	{
 		if (uMsg == WM_XBUTTONDOWN && GET_KEYSTATE_WPARAM(wParam) == MK_XBUTTON1)
 		{
-			array<INPUT, 2> inputs = {
-				INPUT
-				{
-					INPUT_KEYBOARD,
-					.ki = KEYBDINPUT{ VK_ESCAPE }
-				},
-				INPUT
-				{
-					INPUT_KEYBOARD,
-					.ki = KEYBDINPUT{ VK_ESCAPE, .dwFlags = KEYEVENTF_KEYUP }
-				}
-			};
+			auto backKeyInputManager = GetSingletonInstance(il2cpp_symbols::get_class("umamusume.dll", "Gallop", "BackKeyInputManager"));
+			auto ExecuteBackKeyAction = il2cpp_class_get_method_from_name_type<void(*)(Il2CppObject*)>(backKeyInputManager->klass, "ExecuteBackKeyAction", 0);
 
-			SendInput(inputs.size(), inputs.data(), sizeof(INPUT));
+			if (ExecuteBackKeyAction)
+			{
+				ExecuteBackKeyAction->methodPointer(backKeyInputManager);
+			}
+			else
+			{
+				array<INPUT, 2> inputs = {
+					INPUT
+					{
+						INPUT_KEYBOARD,
+						.ki = KEYBDINPUT{ VK_ESCAPE }
+					},
+					INPUT
+					{
+						INPUT_KEYBOARD,
+						.ki = KEYBDINPUT{ VK_ESCAPE, .dwFlags = KEYEVENTF_KEYUP }
+					}
+				};
+
+				SendInput(inputs.size(), inputs.data(), sizeof(INPUT));
+			}
+
 			return TRUE;
 		}
+
+		bool isSteam = Game::CurrentGameStore == Game::Store::Steam;
 
 		if (uMsg == WM_KEYDOWN)
 		{
@@ -5312,7 +5339,7 @@ namespace
 						r.height = r.width / config::runtime::ratioHorizontal;
 					}
 
-					if (Game::CurrentGameRegion == Game::Region::KOR)
+					if (Game::CurrentUnityVersion != Game::UnityVersion::Unity22)
 					{
 						reinterpret_cast<decltype(SetResolution_hook)*>(SetResolution_orig)(r.width, r.height, fullScreenFl ? 1 : 3, 0);
 					}
@@ -5325,6 +5352,7 @@ namespace
 				return TRUE;
 
 			}
+
 			if (config::max_fps > -1 && wParam == 'F' && altDown)
 			{
 				config::runtime::useDefaultFPS = !config::runtime::useDefaultFPS;
@@ -5420,7 +5448,6 @@ namespace
 			}
 			case SIZE_MINIMIZED:
 			{
-
 				auto _isWindowDraggingField = il2cpp_class_get_field_from_name_wrap(StandaloneWindowResize->klass, "_isWindowDragging");
 				bool _isWindowDragging = true;
 				il2cpp_field_static_set_value(_isWindowDraggingField, &_isWindowDragging);
@@ -5582,7 +5609,7 @@ namespace
 		{
 			RECT* rect = reinterpret_cast<RECT*>(lParam);
 
-			float ratio = Gallop::StandaloneWindowResize::IsVirt() ? config::runtime::ratioVertical : config::runtime::ratioHorizontal;
+			float ratio = (Gallop::StandaloneWindowResize::IsVirt() && !isSteam) ? config::runtime::ratioVertical : config::runtime::ratioHorizontal;
 
 			auto StandaloneWindowResize = il2cpp_symbols::get_class("umamusume.dll", "Gallop", "StandaloneWindowResize");
 
@@ -5683,7 +5710,7 @@ namespace
 			if (uiManager)
 			{
 				bool isVirt = width < height;
-				if (config::unlock_size)
+				if (config::unlock_size || isSteam)
 				{
 					uiManager.ChangeResizeUIForPC(isVirt ? min(last_display_width, last_display_height) : max(last_display_width, last_display_height),
 						isVirt ? max(last_display_width, last_display_height) : min(last_display_width, last_display_height));
@@ -5743,7 +5770,14 @@ namespace
 		auto hWnd = GetHWND();
 
 		long style = GetWindowLongW(hWnd, GWL_STYLE);
-		style |= WS_MAXIMIZEBOX;
+		if (Game::CurrentGameStore == Game::Store::Steam && !config::freeform_window)
+		{
+			style &= ~WS_MAXIMIZEBOX;
+		}
+		else
+		{
+			style |= WS_MAXIMIZEBOX;
+		}
 		SetWindowLongPtrW(hWnd, GWL_STYLE, style);
 	}
 
@@ -5799,6 +5833,17 @@ namespace
 		}
 
 		reinterpret_cast<decltype(GallopFrameBuffer_Initialize_hook)*>(GallopFrameBuffer_Initialize_orig)(_this, parent);
+	}
+
+	void GallopFrameBuffer_Initialize_hook2(Il2CppObject* _this, Il2CppObject* parent, bool copyUIFrameBuffer)
+	{
+		auto value = find(frameBuffers.begin(), frameBuffers.end(), _this);
+		if (value == frameBuffers.end())
+		{
+			frameBuffers.emplace_back(_this);
+		}
+
+		reinterpret_cast<decltype(GallopFrameBuffer_Initialize_hook2)*>(GallopFrameBuffer_Initialize_orig)(_this, parent, copyUIFrameBuffer);
 	}
 
 	void* GallopFrameBuffer_Release_orig = nullptr;
@@ -11993,7 +12038,7 @@ namespace
 		// the string one looks like will not be called by elsewhere
 		auto localize_get_addr = il2cpp_symbols::find_method("umamusume.dll", "Gallop", "Localize", [](const MethodInfo* method)
 			{
-				if (Game::CurrentGameRegion == Game::Region::JPN)
+				if (Game::CurrentUnityVersion == Game::UnityVersion::Unity22)
 				{
 					return method->name == "Get"s &&
 						(*method->parameters)->type == IL2CPP_TYPE_VALUETYPE;
@@ -12050,6 +12095,10 @@ namespace
 
 		auto GallopFrameBuffer_Initialize_addr = il2cpp_symbols::get_method_pointer(
 			"umamusume.dll", "Gallop", "GallopFrameBuffer", "Initialize", 1
+		);
+
+		auto GallopFrameBuffer_Initialize2_addr = il2cpp_symbols::get_method_pointer(
+			"umamusume.dll", "Gallop", "GallopFrameBuffer", "Initialize", 2
 		);
 
 		auto GallopFrameBuffer_Release_addr = il2cpp_symbols::get_method_pointer(
@@ -12436,14 +12485,22 @@ namespace
 
 		if (config::unlock_size || config::freeform_window)
 		{
+			if (!GallopFrameBuffer_Initialize_addr)
+			{
+				GallopFrameBuffer_Initialize_addr = GallopFrameBuffer_Initialize2_addr;
+			}
 			ADD_HOOK(GallopFrameBuffer_Initialize, "Gallop.GallopFrameBuffer::Initialize at %p\n");
 			ADD_HOOK(GallopFrameBuffer_Release, "Gallop.GallopFrameBuffer::Release at %p\n");
 			ADD_HOOK(GallopFrameBuffer_ResizeRenderTexture, "Gallop.GallopFrameBuffer::ResizeRenderTexture at %p\n");
 		}
+		
+		if (config::freeform_window || Game::CurrentGameStore == Game::Store::Steam)
+		{
+			ADD_HOOK(StandaloneWindowResize_DisableMaximizebox, "Gallop.StandaloneWindowResize::DisableMaximizebox at %p\n");
+		}
 
 		if (config::freeform_window)
 		{
-			ADD_HOOK(StandaloneWindowResize_DisableMaximizebox, "Gallop.StandaloneWindowResize::DisableMaximizebox at %p\n");
 			ADD_HOOK(StandaloneWindowResize_ReshapeAspectRatio, "Gallop.StandaloneWindowResize::ReshapeAspectRatio at %p\n");
 			ADD_HOOK(StandaloneWindowResize_KeepAspectRatio, "Gallop.StandaloneWindowResize::KeepAspectRatio at %p\n");
 			ADD_HOOK(Screen_SetResolution, "Gallop.Screen::SetResolution at %p\n");
@@ -13511,7 +13568,7 @@ SetWindowLongPtrW_hook(
 	{
 		if ((config::unlock_size || config::freeform_window) && config::initial_width > 72 && config::initial_height > 72)
 		{
-			if (Game::CurrentGameRegion == Game::Region::KOR)
+			if (Game::CurrentUnityVersion != Game::UnityVersion::Unity22)
 			{
 				if (config::initial_width < config::initial_height)
 				{
@@ -13569,7 +13626,7 @@ SetWindowLongPtrA_hook(
 	{
 		if ((config::unlock_size || config::freeform_window) && config::initial_width > 72 && config::initial_height > 72)
 		{
-			if (Game::CurrentGameRegion == Game::Region::KOR)
+			if (Game::CurrentUnityVersion != Game::UnityVersion::Unity22)
 			{
 				if (config::initial_width < config::initial_height)
 				{
@@ -13626,10 +13683,7 @@ ShowWindow_hook(
 		MessageBoxW(hWnd, config::json_parse_error_msg.data(), L"Umamusume Localify", MB_OK | MB_ICONWARNING);
 	}
 
-	if (Game::CurrentGameStore != Game::Store::Steam)
-	{
-		oldWndProcPtr = reinterpret_cast<WNDPROC>(SetWindowLongPtrW(hWnd, GWLP_WNDPROC, reinterpret_cast<LONG_PTR>(WndProc)));
-	}
+	oldWndProcPtr = reinterpret_cast<WNDPROC>(SetWindowLongPtrW(hWnd, GWLP_WNDPROC, reinterpret_cast<LONG_PTR>(WndProc)));
 
 	currentHWnd = hWnd;
 
@@ -13851,14 +13905,14 @@ FindFirstFileExW_hook(
 	return result;
 }
 
-void init_hook()
+void init_hook(filesystem::path module_path)
 {
-	if (mh_inited)
+	if (MH_Initialize() != MH_OK)
 	{
 		return;
 	}
 
-	if (MH_Initialize() != MH_OK)
+	if (mh_inited)
 	{
 		return;
 	}
@@ -13885,20 +13939,21 @@ void init_hook()
 	MH_CreateHook(FindNextFileW, FindNextFileW_hook, &FindNextFileW_orig);
 	MH_EnableHook(FindNextFileW);
 
-	if (!config::allow_delete_cookie && Game::CurrentGameRegion == Game::Region::KOR)
-	{
-		MH_CreateHook(LoadLibraryExW, load_library_ex_w_hook, &load_library_ex_w_orig);
-		MH_EnableHook(LoadLibraryExW);
-	}
+	auto LoadLibraryExW_addr = GetProcAddress(GetModuleHandleW(L"KernelBase.dll"), "LoadLibraryExW");
+	MH_CreateHook(LoadLibraryExW, load_library_ex_w_hook, &load_library_ex_w_orig);
+	MH_EnableHook(LoadLibraryExW);
 
-	MH_CreateHook(LoadLibraryW, load_library_w_hook, &load_library_w_orig);
-	MH_EnableHook(LoadLibraryW);
+	auto LoadLibraryW_addr = GetProcAddress(GetModuleHandleW(L"KernelBase.dll"), "LoadLibraryW");
+	MH_CreateHook(LoadLibraryW_addr, load_library_w_hook, &load_library_w_orig);
+	MH_EnableHook(LoadLibraryW_addr);
 
 	auto UnityPlayer = GetModuleHandleW(L"UnityPlayer.dll");
-	auto UnityMain_addr = GetProcAddress(UnityPlayer, "UnityMain");
-
-	MH_CreateHook(UnityMain_addr, UnityMain_hook, &UnityMain_orig);
-	MH_EnableHook(UnityMain_addr);
+	if (UnityPlayer)
+	{
+		auto UnityMain_addr = GetProcAddress(UnityPlayer, "UnityMain");
+		MH_CreateHook(UnityMain_addr, UnityMain_hook, &UnityMain_orig);
+		MH_EnableHook(UnityMain_addr);
+	}
 
 	fullScreenFl = config::auto_fullscreen && !config::freeform_window;
 

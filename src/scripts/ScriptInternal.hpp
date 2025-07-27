@@ -104,7 +104,7 @@ static void InvokeDelegateConstructor(Il2CppDelegate* delegate, Il2CppObject* ta
 template<typename... T, typename R>
 inline Il2CppMulticastDelegate* CreateDelegateWithClass(Il2CppClass* klass, Il2CppObject* target, R(*fn)(Il2CppObject*, T...))
 {
-	if (Game::CurrentGameRegion == Game::Region::JPN)
+	if (Game::CurrentUnityVersion == Game::UnityVersion::Unity22)
 	{
 		auto delegate = reinterpret_cast<Il2CppMulticastDelegate*>(il2cpp_object_new(klass));
 		delegate->delegate.method_ptr = reinterpret_cast<Il2CppMethodPointer>(fn);
@@ -174,7 +174,7 @@ inline Il2CppDelegate* CreateDelegate(Il2CppObject* target, R(*fn)(Il2CppObject*
 {
 	const auto delegateClass = il2cpp_symbols::get_class("mscorlib.dll", "System", "Action");
 
-	if (Game::CurrentGameRegion == Game::Region::JPN)
+	if (Game::CurrentUnityVersion == Game::UnityVersion::Unity22)
 	{
 		auto delegate = reinterpret_cast<Il2CppDelegate*>(il2cpp_object_new(delegateClass));
 		delegate->method_ptr = reinterpret_cast<Il2CppMethodPointer>(fn);
@@ -240,7 +240,7 @@ inline Il2CppMulticastDelegate* CreateUnityAction(Il2CppObject* target, R(*fn)(I
 {
 	const auto delegateClass = il2cpp_symbols::get_class("UnityEngine.CoreModule.dll", "UnityEngine.Events", "UnityAction");
 
-	if (Game::CurrentGameRegion == Game::Region::JPN)
+	if (Game::CurrentUnityVersion == Game::UnityVersion::Unity22)
 	{
 		auto delegate = reinterpret_cast<Il2CppMulticastDelegate*>(il2cpp_object_new(delegateClass));
 		delegate->delegate.method_ptr = reinterpret_cast<Il2CppMethodPointer>(fn);
@@ -310,7 +310,7 @@ inline Il2CppMulticastDelegate* CreateUnityAction(Il2CppObject* target, R(*fn)(I
 template<typename... T, typename R>
 inline Il2CppReflectionMethod* GetRuntimeMethodInfo(R(*fn)(void*, T...))
 {
-	if (Game::CurrentGameRegion == Game::Region::JPN)
+	if (Game::CurrentUnityVersion == Game::UnityVersion::Unity22)
 	{
 		MethodInfo* methodInfo = new MethodInfo{};
 		methodInfo->name = "AnonymousMethod";
@@ -349,7 +349,7 @@ inline Il2CppReflectionMethod* GetRuntimeMethodInfo(R(*fn)(void*, T...))
 template<typename... T, typename R>
 inline Il2CppMulticastDelegate* CreateDelegateWithClassStatic(Il2CppClass* klass, R(*fn)(void*, T...))
 {
-	if (Game::CurrentGameRegion == Game::Region::JPN)
+	if (Game::CurrentUnityVersion == Game::UnityVersion::Unity22)
 	{
 		auto delegate = reinterpret_cast<Il2CppMulticastDelegate*>(il2cpp_object_new(klass));
 		delegate->delegate.method_ptr = reinterpret_cast<Il2CppMethodPointer>(fn);
@@ -419,7 +419,7 @@ inline Il2CppDelegate* CreateDelegateStatic(R(*fn)(void*, T...))
 {
 	const auto delegateClass = il2cpp_symbols::get_class("mscorlib.dll", "System", "Action");
 
-	if (Game::CurrentGameRegion == Game::Region::JPN)
+	if (Game::CurrentUnityVersion == Game::UnityVersion::Unity22)
 	{
 		auto delegate = reinterpret_cast<Il2CppDelegate*>(il2cpp_object_new(delegateClass));
 		delegate->method_ptr = reinterpret_cast<Il2CppMethodPointer>(fn);
@@ -483,7 +483,7 @@ inline Il2CppMulticastDelegate* CreateUnityActionStatic(R(*fn)(void*, T...))
 {
 	const auto delegateClass = il2cpp_symbols::get_class("UnityEngine.CoreModule.dll", "UnityEngine.Events", "UnityAction");
 
-	if (Game::CurrentGameRegion == Game::Region::JPN)
+	if (Game::CurrentUnityVersion == Game::UnityVersion::Unity22)
 	{
 		auto delegate = reinterpret_cast<Il2CppMulticastDelegate*>(il2cpp_object_new(delegateClass));
 		delegate->delegate.method_ptr = reinterpret_cast<Il2CppMethodPointer>(fn);
@@ -689,7 +689,7 @@ inline Il2CppObject* GetCurrentViewController()
 
 	auto GetCurrentViewController = il2cpp_symbols::find_method<Il2CppObject * (*)(Il2CppObject*)>("umamusume.dll", "Gallop", "SceneManager", [](const MethodInfo* info)
 		{
-			if (Game::CurrentGameRegion == Game::Region::KOR)
+			if (Game::CurrentUnityVersion != Game::UnityVersion::Unity22)
 			{
 				auto info2020 = reinterpret_cast<const MethodInfo2020*>(info);
 				return info2020->name == "GetCurrentViewController"s && !info2020->is_generic;

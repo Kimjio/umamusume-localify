@@ -1,5 +1,7 @@
 #include "il2cpp_symbols.hpp"
 
+#include <winver.h>
+
 #define DO_API(r, n, p) r (*n) p
 #include "il2cpp-api-functions_unified.h"
 #undef DO_API
@@ -135,17 +137,55 @@ namespace il2cpp_symbols
 			return;
 		}
 
+		auto bufSize = GetFileVersionInfoSizeW(path.wstring().data(), nullptr);
+
+		vector<BYTE> versionInfoBuffer(bufSize);
+
+		GetFileVersionInfoW(path.wstring().data(), 0, bufSize, versionInfoBuffer.data());
+
+		UINT versionInfoSize = 0;
+		VS_FIXEDFILEINFO* pVSFileInfo = nullptr;
+		PWSTR versionInfo = nullptr;
+
+		VerQueryValueW(versionInfoBuffer.data(), L"\\", reinterpret_cast<void**>(&pVSFileInfo), &versionInfoSize);
+		
+		if (!pVSFileInfo)
+		{
+			return;
+		}
+		
+		auto major = HIWORD(pVSFileInfo->dwProductVersionMS);
+
+		switch (major)
+		{
+		case 2019:
+			Game::CurrentUnityVersion = Game::UnityVersion::Unity19;
+			break;
+		case 2020:
+			Game::CurrentUnityVersion = Game::UnityVersion::Unity20;
+			break;
+		case 2022:
+			Game::CurrentUnityVersion = Game::UnityVersion::Unity22;
+			break;
+		default:
+			break;
+		}
+
 		int startRva;
 
-		if (Game::CurrentGameRegion == Game::Region::KOR)
+		if (Game::CurrentUnityVersion == Game::UnityVersion::Unity20)
 		{
 			// 2020.3.47f
 			startRva = 0x8984d4;
 		}
-		else
+		else if (Game::CurrentUnityVersion == Game::UnityVersion::Unity22)
 		{
 			// 2022.3.20f
 			startRva = 0x7834A2;
+		}
+		else
+		{
+			return;
 		}
 
 		int rva = startRva;
@@ -176,7 +216,7 @@ namespace il2cpp_symbols
 #define IL2CPP_ENABLE_PROFILER 0
 			// DO_API_NO_RETURN is not obfuscated
 #define DO_API_NO_RETURN(r, n, p) symbol_names.emplace_back("_"#n)
-			if (Game::CurrentGameRegion == Game::Region::KOR)
+			if (Game::CurrentUnityVersion == Game::UnityVersion::Unity20)
 			{
 #include "il2cpp-api-functions_2020.h"
 			}
@@ -221,7 +261,7 @@ namespace il2cpp_symbols
 					rapidjson::StringRef(real_name),
 					config::fn_map.GetAllocator());
 
-				if (Game::CurrentGameRegion == Game::Region::KOR)
+				if (Game::CurrentUnityVersion == Game::UnityVersion::Unity20)
 				{
 					rva += rva == startRva ? 0x35 : 0x30;
 				}
@@ -260,7 +300,7 @@ namespace il2cpp_symbols
 	void init_functions(HMODULE game_module)
 	{
 #define DO_API(r, n, p) n = reinterpret_cast<decltype(n)>(GetProcAddress(game_module, il2cpp_fn_name(#n).data()))
-		if (Game::CurrentGameRegion == Game::Region::KOR)
+		if (Game::CurrentUnityVersion == Game::UnityVersion::Unity20)
 		{
 #include "il2cpp-api-functions_2020.h"
 		}
@@ -375,7 +415,7 @@ namespace il2cpp_symbols
 			Il2CppArgumentException);
 		DEFAULTS_INIT_TYPE(marshalbyrefobject_class, "System", "MarshalByRefObject",
 			Il2CppMarshalByRefObject);
-		if (Game::CurrentGameRegion == Game::Region::JPN)
+		if (Game::CurrentUnityVersion == Game::UnityVersion::Unity22)
 		{
 			DEFAULTS_GEN_INIT_TYPE(il2cpp_com_object_class, "System", "__Il2CppComObject", Il2CppComObject);
 		}
@@ -418,7 +458,7 @@ namespace il2cpp_symbols
 		DEFAULTS_INIT_OPTIONAL(uint32_shared_enum, "System", "UInt32Enum");
 		DEFAULTS_INIT_OPTIONAL(uint64_shared_enum, "System", "UInt64Enum");
 
-		if (Game::CurrentGameRegion == Game::Region::JPN)
+		if (Game::CurrentUnityVersion == Game::UnityVersion::Unity22)
 		{
 			DEFAULTS_GEN_INIT_OPTIONAL(il2cpp_fully_shared_type, "Unity.IL2CPP.Metadata", "__Il2CppFullySharedGenericType");
 			DEFAULTS_GEN_INIT_OPTIONAL(il2cpp_fully_shared_struct_type, "Unity.IL2CPP.Metadata", "__Il2CppFullySharedGenericStructType");

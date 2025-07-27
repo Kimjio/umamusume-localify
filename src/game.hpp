@@ -23,6 +23,15 @@ namespace Game {
         Other,
     };
 
+    enum class UnityVersion
+    {
+        Unity19,
+        Unity20,
+        Unity22,
+		Unknown,
+    };
+
     inline auto CurrentGameRegion = Region::UNKNOWN;
     inline auto CurrentGameStore = Store::Other;
+	inline auto CurrentUnityVersion = UnityVersion::Unknown;
 }

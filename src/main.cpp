@@ -2,7 +2,7 @@
 
 #include "config/config.hpp"
 
-extern void init_hook();
+extern void init_hook(filesystem::path module_path);
 extern void uninit_hook();
 
 namespace
@@ -272,8 +272,6 @@ BOOL WINAPI DllMain(HINSTANCE, DWORD reason, LPVOID)
 		}
 		else
 		{
-			Game::CurrentGameRegion = Game::Region::JPN;
-
 			if (product == L"UmamusumePrettyDerby_Jpn")
 			{
 				Game::CurrentGameStore = Game::Store::Steam;
@@ -283,6 +281,10 @@ BOOL WINAPI DllMain(HINSTANCE, DWORD reason, LPVOID)
 			{
 				Game::CurrentGameRegion = Game::Region::ENG;
 				Game::CurrentGameStore = Game::Store::Steam;
+			}
+			else
+			{
+				Game::CurrentGameRegion = Game::Region::JPN;
 			}
 		}
 
@@ -302,7 +304,7 @@ BOOL WINAPI DllMain(HINSTANCE, DWORD reason, LPVOID)
 			config::runtime::allowStart = data > 0;
 		}
 
-		init_hook();
+		init_hook(module_path);
 
 		thread init_thread([]() {
 			logger::init_logger();

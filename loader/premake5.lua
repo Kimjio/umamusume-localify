@@ -71,7 +71,7 @@ workspace "umamusume-localify-loader"
 	dependencies.projects()
 
 	project "umamusume-localify-loader"
-	targetname "imm32"
+	targetname "loader"
 
 	language "C++"
 	kind "SharedLib"

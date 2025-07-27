@@ -34,6 +34,11 @@ namespace proxy
 {
 	version_init::version_init()
 	{
+		if (!filesystem::exists(L"version.dll"))
+		{
+			return;
+		}
+
 		std::wstring dll_path;
 		dll_path.resize(MAX_PATH);
 		dll_path.resize(GetSystemDirectoryW(dll_path.data(), MAX_PATH));

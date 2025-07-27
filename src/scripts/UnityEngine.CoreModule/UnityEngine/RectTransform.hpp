@@ -20,6 +20,10 @@ namespace UnityEngine
 		Vector2 pivot();
 		void sizeDelta(Vector2 value);
 		Vector2 sizeDelta();
+		void offsetMin(Vector2 value);
+		Vector2 offsetMin();
+		void offsetMax(Vector2 value);
+		Vector2 offsetMax();
 		Rect rect();
 
 		using Transform::Transform;

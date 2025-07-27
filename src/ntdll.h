@@ -24,6 +24,15 @@ typedef _Return_type_success_(return >= 0) LONG NTSTATUS;
 
 #define NtCurrentProcess()  ((HANDLE)(LONG_PTR)-1)
 
+typedef struct _IO_STATUS_BLOCK
+{
+    union
+    {
+        NTSTATUS Status;
+        PVOID Pointer;
+    };
+    ULONG_PTR Information;
+} IO_STATUS_BLOCK, * PIO_STATUS_BLOCK;
 
 typedef struct _UNICODE_STRING
 {

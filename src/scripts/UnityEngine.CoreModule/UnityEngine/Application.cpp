@@ -29,24 +29,6 @@ void* get_internetReachability_addr = nullptr;
 
 static void Quit_hook(int exitCode)
 {
-#ifdef _MSC_VER
-	if (Game::CurrentGameRegion == Game::Region::KOR)
-	{
-		auto StackTrace = il2cpp_symbols::get_class("mscorlib.dll", "System.Diagnostics", "StackFrame");
-		auto trace = il2cpp_object_new(StackTrace);
-		il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, int, bool)>(trace->klass, ".ctor", 2)->methodPointer(trace, 0, false);
-
-		auto methodRef = il2cpp_class_get_method_from_name_type<Il2CppReflectionMethod * (*)(Il2CppObject*)>(trace->klass, "GetMethod", 0)->methodPointer(trace);
-
-		auto method = reinterpret_cast<const MethodInfo2020*>(il2cpp_method_get_from_reflection(methodRef));
-
-		if (string(method->klass->name).find("Boot") != string::npos)
-		{
-			return;
-		}
-	}
-#endif
-
 	UnityEngine::Application::Exit(exitCode);
 }
 

@@ -58,6 +58,11 @@ namespace DesktopNotificationManagerCompat
 			return IIDFromString(L"{A42CD370-8D06-4E3C-BC45-32A61F9E375B}", lpiid);
 		}
 
+		if (Game::CurrentGameRegion == Game::Region::ENG)
+		{
+			return IIDFromString(L"{A42CD370-8D06-4E3C-BC45-32A61F9E375C}", lpiid);
+		}
+
 		return IIDFromString(L"{A42CD370-8D06-4E3C-BC45-32A61F9E375A}", lpiid);
 	}
 

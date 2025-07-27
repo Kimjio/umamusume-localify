@@ -25,6 +25,8 @@ namespace Cute
 
 			void SetVisible(bool visible);
 
+			void SetMargins(int leftMargin, int topMargin, int rightMargin, int bottomMargin);
+
 			Il2CppDelegate* Callback();
 
 			UnityEngine::Vector4 marginNow();

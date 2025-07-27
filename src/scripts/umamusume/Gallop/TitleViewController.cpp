@@ -369,6 +369,16 @@ DWORD WINAPI WebViewThread(LPVOID)
 	return msg.wParam;
 }
 
+static void PlaySfxUiDecideL01()
+{
+	const auto AudioManager = GetSingletonInstance(il2cpp_symbols::get_class("umamusume.dll", "Gallop", "AudioManager"));
+
+	Cute::Cri::AudioPlayback res{};
+	il2cpp_class_get_method_from_name_type<Il2CppObject* (*)(Cute::Cri::AudioPlayback*, Il2CppObject*, uint64_t, bool, float, Il2CppObject*,
+		float, float, float, float, float, float, float, float, float, bool, float, uint64_t, int
+		)>(AudioManager->klass, "PlaySe", 17)->methodPointer(&res, AudioManager, 200000000L, 0, 0.0, 0L, 0.0, 10.0, 100.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0, 1.0, 0, INT_MAX);
+}
+
 static void TitleViewController_OnClickPushStart_hook(Il2CppObject* self)
 {
 	const auto dmmId = il2cpp_symbols::get_method_pointer<Il2CppString * (*)()>("umamusume.dll", "Gallop", "Certification", "get_dmmViewerId", IgnoreNumberOfArguments)();
@@ -376,12 +386,15 @@ static void TitleViewController_OnClickPushStart_hook(Il2CppObject* self)
 
 	if ((dmmId && !wstring(dmmId->chars).empty() &&
 		dmmOnetimeToken && !wstring(dmmOnetimeToken->chars).empty()) ||
-		Game::CurrentGameRegion != Game::Region::JPN)
+		Game::CurrentGameRegion != Game::Region::JPN ||
+		Game::CurrentGameStore == Game::Store::Steam)
 	{
 		auto readDisclaimer = il2cpp_symbols::get_method_pointer<int (*)(Il2CppString*, int)>("UnityEngine.CoreModule.dll", "UnityEngine", "PlayerPrefs", "GetInt", 2)(il2cpp_string_new("ReadDisclaimer"), 0);
 
 		if (!readDisclaimer)
 		{
+			PlaySfxUiDecideL01();
+
 			auto localizeextension_text = il2cpp_symbols::get_method_pointer<Il2CppString * (*)(int id)>(
 				"umamusume.dll", "Gallop", "LocalizeExtention", "Text", 1
 			);
@@ -403,14 +416,7 @@ static void TitleViewController_OnClickPushStart_hook(Il2CppObject* self)
 	}
 	else
 	{
-		const auto AudioManager = GetSingletonInstance(il2cpp_symbols::get_class("umamusume.dll", "Gallop", "AudioManager"));
-
-		// il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*)>(AudioManager->klass, "PlaySe_UIDecide", 0)->methodPointer(AudioManager);
-
-		Cute::Cri::AudioPlayback res{};
-		il2cpp_class_get_method_from_name_type<Il2CppObject* (*)(Cute::Cri::AudioPlayback*, Il2CppObject*, uint64_t, bool, float, Il2CppObject*,
-			float, float, float, float, float, float, float, float, float, bool, float, uint64_t, int
-			)>(AudioManager->klass, "PlaySe", 17)->methodPointer(&res, AudioManager, 200000000L, 0, 0.0, 0L, 0.0, 10.0, 100.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0, 1.0, 0, INT_MAX);
+		PlaySfxUiDecideL01();
 
 		if (!isLoginWebViewOpen)
 		{
@@ -448,10 +454,7 @@ static void InitAddress()
 
 static void HookMethods()
 {
-	if (Game::CurrentGameStore != Game::Store::Steam)
-	{
-		ADD_HOOK(TitleViewController_OnClickPushStart, "Gallop.TitleViewController::OnClickPushStart at %p\n");
-	}
+	ADD_HOOK(TitleViewController_OnClickPushStart, "Gallop.TitleViewController::OnClickPushStart at %p\n");
 	ADD_HOOK(TitleViewController_UpdateView, "Gallop.TitleViewController::UpdateView at %p\n");
 }
 

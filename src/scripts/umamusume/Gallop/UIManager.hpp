@@ -33,9 +33,15 @@ namespace Gallop
 
 		Il2CppObject* _mainCanvas();
 
+		Il2CppObject* _gameCanvas();
+
+		Il2CppObject* _systemCanvas();
+
 		Il2CppObject* UITexture();
 
 		Il2CppObject* CommonHeaderTitle();
+
+		Il2CppObject* SteamUIManager();
 
 		void UITexture(Il2CppObject* value);
 
