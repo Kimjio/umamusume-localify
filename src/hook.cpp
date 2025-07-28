@@ -10658,47 +10658,10 @@ namespace
 		il2cpp_field_get_value(movieInfo, widthField, &width);
 		il2cpp_field_get_value(movieInfo, heightField, &height);
 
-		// auto ratio = floorf(static_cast<float>(width) / height * 100) / 100;
-		auto ratio1 = static_cast<float>(width) / static_cast<float>(height);
-
 		if (!Gallop::StandaloneWindowResize::IsVirt())
 		{
-			int rWidth;
-			int rHeight;
-
-			auto GallopScreen = il2cpp_symbols::get_class("umamusume.dll", "Gallop", "Screen");
-
-			auto NUMBER1920_Field = il2cpp_class_get_field_from_name_wrap(GallopScreen, "NUMBER1920");
-
-			auto NUMBER1080_Field = il2cpp_class_get_field_from_name_wrap(GallopScreen, "NUMBER1080");
-
-			int number1920;
-			int number1080;
-
-			il2cpp_field_static_get_value(NUMBER1920_Field, &number1920);
-			il2cpp_field_static_get_value(NUMBER1080_Field, &number1080);
-
-			rWidth = number1920;
-			rHeight = number1080;
-
-			/*if (roundf(ratio_horizontal * (max(1.0f, rHeight * config::runtime::ratioVertical) * (config::freeform_window ? config::freeform_ui_scale_landscape : config::ui_scale))) == dispRectWH.y)
-			{
-				dispRectWH.y = rWidth;
-				dispRectWH.x = rHeight;
-			}
-			else
-			{*/
-			float scale = min(config::freeform_ui_scale_landscape, max(1.0f, rWidth / config::runtime::ratioHorizontal) * config::freeform_ui_scale_landscape);
-
-			if (roundf(dispRectWH.y * scale) != rHeight)
-			{
-				dispRectWH.x = dispRectWH.y * ratio_16_9;
-			}
-			else
-			{
-				dispRectWH.x = dispRectWH.y * ratio1;
-			}
-			// }
+			auto ratio1 = static_cast<float>(width) / static_cast<float>(height);
+			dispRectWH.x = dispRectWH.y * ratio1;
 		}
 
 		reinterpret_cast<decltype(MoviePlayerForUI_AdjustScreenSize_hook)*>(MoviePlayerForUI_AdjustScreenSize_orig)(_this, dispRectWH, isPanScan);
