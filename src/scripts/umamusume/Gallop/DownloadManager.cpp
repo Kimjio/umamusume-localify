@@ -24,39 +24,57 @@ void* BackgroundDownloadProgressUI_SetProgress_orig = nullptr;
 
 static void DownloadProgressUIGame_Show_hook(Il2CppObject* self)
 {
-	TaskbarManager::SetProgressState(TBPF_NORMAL);
+	if (config::taskbar_show_progress_on_download)
+	{
+		TaskbarManager::SetProgressState(TBPF_NORMAL);
+	}
 	reinterpret_cast<decltype(DownloadProgressUIGame_Show_hook)*>(DownloadProgressUIGame_Show_orig)(self);
 }
 
 static void DownloadProgressUIGame_Hide_hook(Il2CppObject* self, bool isDelay)
 {
-	TaskbarManager::SetProgressState(TBPF_NOPROGRESS);
+	if (config::taskbar_show_progress_on_download)
+	{
+		TaskbarManager::SetProgressState(TBPF_NOPROGRESS);
+	}
 	reinterpret_cast<decltype(DownloadProgressUIGame_Hide_hook)*>(DownloadProgressUIGame_Hide_orig)(self, isDelay);
 }
 
 static void DownloadProgressUIGame_SetProgress_hook(Il2CppObject* self, float progress)
 {
-	TaskbarManager::SetProgressState(TBPF_NORMAL);
-	TaskbarManager::SetProgressValue(progress * 10000, 10000);
+	if (config::taskbar_show_progress_on_download)
+	{
+		TaskbarManager::SetProgressState(TBPF_NORMAL);
+		TaskbarManager::SetProgressValue(progress * 10000, 10000);
+	}
 	reinterpret_cast<decltype(DownloadProgressUIGame_SetProgress_hook)*>(DownloadProgressUIGame_SetProgress_orig)(self, progress);
 }
 
 static void BackgroundDownloadProgressUI_Show_hook(Il2CppObject* self)
 {
-	TaskbarManager::SetProgressState(TBPF_NORMAL);
+	if (config::taskbar_show_progress_on_download)
+	{
+		TaskbarManager::SetProgressState(TBPF_NORMAL);
+	}
 	reinterpret_cast<decltype(BackgroundDownloadProgressUI_Show_hook)*>(BackgroundDownloadProgressUI_Show_orig)(self);
 }
 
 static void BackgroundDownloadProgressUI_Hide_hook(Il2CppObject* self, bool isDelay)
 {
-	TaskbarManager::SetProgressState(TBPF_NOPROGRESS);
+	if (config::taskbar_show_progress_on_download)
+	{
+		TaskbarManager::SetProgressState(TBPF_NOPROGRESS);
+	}
 	reinterpret_cast<decltype(BackgroundDownloadProgressUI_Hide_hook)*>(BackgroundDownloadProgressUI_Hide_orig)(self, isDelay);
 }
 
 static void BackgroundDownloadProgressUI_SetProgress_hook(Il2CppObject* self, float progress)
 {
-	TaskbarManager::SetProgressState(TBPF_NORMAL);
-	TaskbarManager::SetProgressValue(progress * 10000, 10000);
+	if (config::taskbar_show_progress_on_download)
+	{
+		TaskbarManager::SetProgressState(TBPF_NORMAL);
+		TaskbarManager::SetProgressValue(progress * 10000, 10000);
+	}
 	reinterpret_cast<decltype(BackgroundDownloadProgressUI_SetProgress_hook)*>(BackgroundDownloadProgressUI_SetProgress_orig)(self, progress);
 }
 

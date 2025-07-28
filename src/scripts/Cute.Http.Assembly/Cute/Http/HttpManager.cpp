@@ -24,7 +24,7 @@ static void HttpManager_Cute_Core_IUpdatable_FastUpdate_hook(Il2CppObject* self)
 
 		if (!isDone && timeOutTime <= realtimeSinceStartup)
 		{
-			if (TaskbarManager::currentState == TBPF_NORMAL)
+			if (config::taskbar_show_progress_on_connecting && TaskbarManager::currentState == TBPF_NORMAL)
 			{
 				// Operation timed out
 				TaskbarManager::SetProgressState(TBPF_ERROR);

@@ -75,6 +75,8 @@ namespace config
 	int msgpack_notifier_connection_timeout_ms = 1000;
 	bool msgpack_notifier_print_error = false;
 	bool use_third_party_news = false;
+	bool taskbar_show_progress_on_download = true;
+	bool taskbar_show_progress_on_connecting = true;
 
 	wstring text_id_dict;
 
@@ -398,6 +400,10 @@ if (document.HasMember(L##_name_) && document[L##_name_].Is##_type_())\
 			GetValue("notificationRp", Bool, notification_rp);
 
 			GetValue("notificationJobs", Bool, notification_jobs);
+
+			GetValue("taskbarShowProgressOnDownload", Bool, taskbar_show_progress_on_download);
+
+			GetValue("taskbarShowProgressOnConnecting", Bool, taskbar_show_progress_on_connecting);
 
 			GetValue("msgpackNotifier", Bool, msgpack_notifier);
 

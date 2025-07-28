@@ -8,7 +8,10 @@ void* DownloadErrorProcessor_ExecDownloadErrorProcess_addr = nullptr;
 void* DownloadErrorProcessor_ExecDownloadErrorProcess_orig = nullptr;
 
 static void DownloadErrorProcessor_ExecDownloadErrorProcess_hook(Il2CppObject* error, Il2CppDelegate* onRetry, Il2CppDelegate* onGotoTitle) {
-	TaskbarManager::SetProgressState(TBPF_ERROR);
+	if (config::taskbar_show_progress_on_download)
+	{
+		TaskbarManager::SetProgressState(TBPF_ERROR);
+	}
 	reinterpret_cast<decltype(DownloadErrorProcessor_ExecDownloadErrorProcess_hook)*>(DownloadErrorProcessor_ExecDownloadErrorProcess_orig)(error, onRetry, onGotoTitle);
 }
 

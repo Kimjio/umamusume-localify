@@ -8387,6 +8387,10 @@ namespace
 
 				AddOrSet(configDocument, L"freeFormUiScaleLandscape", static_cast<int>(roundf(GetOptionSliderValue("ui_scale_landscape") * 100)) / 100.0f);
 
+				AddOrSet(configDocument, L"taskbarShowProgressOnDownload", GetOptionItemOnOffIsOn("taskbar_show_progress_on_download"));
+
+				AddOrSet(configDocument, L"taskbarShowProgressOnConnecting", GetOptionItemOnOffIsOn("taskbar_show_progress_on_connecting"));
+
 				config::graphics_quality = configDocument[L"graphicsQuality"].GetInt();
 
 				config::anti_aliasing = configDocument[L"antiAliasing"].GetInt();
@@ -8478,6 +8482,10 @@ namespace
 				{
 					DesktopNotificationManagerCompat::RemoveFromScheduleByGroup(L"Jobs");
 				}
+
+				config::taskbar_show_progress_on_download = configDocument[L"taskbarShowProgressOnDownload"].GetBool();
+
+				config::taskbar_show_progress_on_connecting = configDocument[L"taskbarShowProgressOnConnecting"].GetBool();
 
 				config::dump_msgpack = configDocument[L"dumpMsgPack"].GetBool();
 
@@ -8636,6 +8644,8 @@ namespace
 		bool freeFormWindow = false;
 		float freeFormUiScalePortrait = 0;
 		float freeFormUiScaleLandscape = 0;
+		bool taskbarShowProgressOnDownload = true;
+		bool taskbarShowProgressOnConnecting = true;
 
 		if (config::read_config())
 		{
@@ -8777,6 +8787,16 @@ namespace
 			{
 				freeFormUiScaleLandscape = configDocument[L"freeFormUiScaleLandscape"].GetFloat();
 			}
+
+			if (configDocument.HasMember(L"taskbarShowProgressOnDownload"))
+			{
+				taskbarShowProgressOnDownload = configDocument[L"taskbarShowProgressOnDownload"].GetBool();
+			}
+
+			if (configDocument.HasMember(L"taskbarShowProgressOnConnecting"))
+			{
+				taskbarShowProgressOnConnecting = configDocument[L"taskbarShowProgressOnConnecting"].GetBool();
+			}
 		}
 
 		vector<string> graphicsQualityOptions = GetGraphicsQualityOptions();
@@ -8914,6 +8934,9 @@ namespace
 				isJobsExist ? GetOptionItemOnOff("notification_jobs", localize_get_hook(GetTextIdByName(L"Jobs600005"))->chars) : nullptr,
 				GetOptionItemButton("show_notification", LocalifySettings::GetText("show_notification")),
 				GetOptionItemAttention(localize_get_hook(GetTextIdByName(L"Outgame0297"))->chars),
+				GetOptionItemTitle(LocalifySettings::GetText("taskbar")),
+				GetOptionItemOnOff("taskbar_show_progress_on_download", LocalifySettings::GetText("taskbar_show_progress_on_download")),
+				GetOptionItemOnOff("taskbar_show_progress_on_connecting", LocalifySettings::GetText("taskbar_show_progress_on_connecting")),
 				GetOptionItemTitle(LocalifySettings::GetText("settings_title")),
 				Game::CurrentGameRegion == Game::Region::JPN ?
 					GetOptionItemButton("clear_webview_cache", LocalifySettings::GetText("clear_webview_cache")) :
@@ -9184,6 +9207,14 @@ namespace
 					SetTextCommonOutlineColor(textCommon, color.data());
 					SetNotificationOutlineColor(color.data());
 					});
+			}));
+
+		SetOptionItemOnOffAction("taskbar_show_progress_on_download", taskbarShowProgressOnDownload, *([](Il2CppObject*, bool isOn)
+			{
+			}));
+
+		SetOptionItemOnOffAction("taskbar_show_progress_on_connecting", taskbarShowProgressOnConnecting, *([](Il2CppObject*, bool isOn)
+			{
 			}));
 
 		SetOptionItemButtonAction("toggle_vr", *([](Il2CppObject*)

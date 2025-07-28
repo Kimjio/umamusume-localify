@@ -433,15 +433,18 @@ static void TitleViewController_UpdateView_hook(Il2CppObject* self)
 	reinterpret_cast<decltype(TitleViewController_UpdateView_hook)*>(TitleViewController_UpdateView_orig)(self);
 	auto bootProgress = il2cpp_symbols::get_method_pointer<float (*)()>("umamusume.dll", "Gallop", "MainGameInitializer", "GetBootProgress", 0)();
 
-	if (bootProgress > -1)
+	if (config::taskbar_show_progress_on_download)
 	{
-		if (bootProgress == 1)
+		if (bootProgress > -1)
 		{
-			TaskbarManager::SetProgressState(TBPF_NOPROGRESS);
-		}
-		else
-		{
-			TaskbarManager::SetProgressValue(bootProgress * 100, 100);
+			if (bootProgress == 1)
+			{
+				TaskbarManager::SetProgressState(TBPF_NOPROGRESS);
+			}
+			else
+			{
+				TaskbarManager::SetProgressValue(bootProgress * 100, 100);
+			}
 		}
 	}
 }

@@ -8,15 +8,18 @@ void* DownloadView_UpdateView_addr = nullptr;
 void* DownloadView_UpdateView_orig = nullptr;
 
 static void DownloadView_UpdateView_hook(Il2CppObject* self, float downloadSize, float allDownloadSize) {
-	float progress = downloadSize / allDownloadSize;
-	if (progress == 1.0f)
+	if (config::taskbar_show_progress_on_download)
 	{
-		TaskbarManager::SetProgressState(TBPF_NOPROGRESS);
-	}
-	else
-	{
-		TaskbarManager::SetProgressState(TBPF_NORMAL);
-		TaskbarManager::SetProgressValue(static_cast<ULONGLONG>(progress * 10000), 10000);
+		float progress = downloadSize / allDownloadSize;
+		if (progress == 1.0f)
+		{
+			TaskbarManager::SetProgressState(TBPF_NOPROGRESS);
+		}
+		else
+		{
+			TaskbarManager::SetProgressState(TBPF_NORMAL);
+			TaskbarManager::SetProgressValue(static_cast<ULONGLONG>(progress * 10000), 10000);
+		}
 	}
 	reinterpret_cast<void(*)(Il2CppObject*, float, float)>(DownloadView_UpdateView_orig)(self, downloadSize, allDownloadSize);
 }

@@ -12,7 +12,7 @@ void* Connecting_Hide_orig = nullptr;
 
 static void Connecting_Show_hook(Il2CppObject* self)
 {
-	if (TaskbarManager::currentState == TBPF_NOPROGRESS)
+	if (config::taskbar_show_progress_on_connecting && TaskbarManager::currentState == TBPF_NOPROGRESS)
 	{
 		TaskbarManager::SetProgressState(TBPF_INDETERMINATE);
 	}
@@ -22,7 +22,7 @@ static void Connecting_Show_hook(Il2CppObject* self)
 
 static void Connecting_Hide_hook(Il2CppObject* self)
 {
-	if (TaskbarManager::currentState == TBPF_INDETERMINATE)
+	if (config::taskbar_show_progress_on_connecting && TaskbarManager::currentState == TBPF_INDETERMINATE)
 	{
 		TaskbarManager::SetProgressState(TBPF_NOPROGRESS);
 	}

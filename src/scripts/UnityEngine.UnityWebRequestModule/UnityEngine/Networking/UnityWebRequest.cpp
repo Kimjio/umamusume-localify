@@ -13,7 +13,7 @@ static Il2CppString* UnityWebRequest_get_error_hook(Il2CppObject* self)
 
 	if (error != nullptr)
 	{
-		if (TaskbarManager::currentState == TBPF_NORMAL)
+		if (config::taskbar_show_progress_on_connecting && TaskbarManager::currentState == TBPF_NORMAL)
 		{
 			TaskbarManager::SetProgressState(TBPF_ERROR);
 		}

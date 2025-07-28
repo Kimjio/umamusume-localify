@@ -409,6 +409,45 @@ namespace LocalifySettings
 			return L"アプリ内お知らせの代わりにサードパーティのお知らせを使用します";
 		}
 
+		if (id == "taskbar")
+		{
+			if (isKor)
+			{
+				return L"작업 표시줄";
+			}
+			if (isEng)
+			{
+				return L"Taskbar";
+			}
+			return L"タスクバー";
+		}
+
+		if (id == "taskbar_show_progress_on_download")
+		{
+			if (isKor)
+			{
+				return L"다운로드 진행률 표시";
+			}
+			if (isEng)
+			{
+				return L"Show download progress";
+			}
+			return L"ダウンロードの進行状況を表示";
+		}
+
+		if (id == "taskbar_show_progress_on_connecting")
+		{
+			if (isKor)
+			{
+				return L"Connecting 진행률 표시";
+			}
+			if (isEng)
+			{
+				return L"Show Connecting progress";
+			}
+			return L"Connectingの進捗状況を表示";
+		}
+
 		if (id == "experiments")
 		{
 			return L"Experiments";
