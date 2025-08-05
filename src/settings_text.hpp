@@ -448,6 +448,19 @@ namespace LocalifySettings
 			return L"Connectingの進捗状況を表示";
 		}
 
+		if (id == "persistent_data_path")
+		{
+			if (isKor)
+			{
+				return L"로컬 데이터 경로";
+			}
+			if (isEng)
+			{
+				return L"Local data path";
+			}
+			return L"ローカルデータパス";
+		}
+
 		if (id == "experiments")
 		{
 			return L"Experiments";

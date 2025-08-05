@@ -185,6 +185,27 @@ namespace
 			il2cpp_field_static_set_value(persistentDataPathField, UnityEngine::Application::persistentDataPath());
 		}
 
+		if (!config::persistent_data_path.empty())
+		{
+			auto CuteCoreDevice = il2cpp_symbols::get_class("Cute.Core.Assembly.dll", "Cute.Core", "Device");
+			auto persistentDataPathField = il2cpp_class_get_field_from_name_wrap(CuteCoreDevice, "persistentDataPath");
+			if (PathIsRelativeW(config::persistent_data_path.data()))
+			{
+				config::persistent_data_path.insert(0, filesystem::current_path().wstring().append(L"/"));
+			}
+			if (filesystem::exists(config::persistent_data_path))
+			{
+				if (filesystem::is_directory(config::persistent_data_path))
+				{
+					il2cpp_field_static_set_value(persistentDataPathField, il2cpp_string_new16(config::persistent_data_path.data()));
+				}
+			}
+			else if (filesystem::create_directories(config::persistent_data_path))
+			{
+				il2cpp_field_static_set_value(persistentDataPathField, il2cpp_string_new16(config::persistent_data_path.data()));
+			}
+		}
+
 		patch_game_assembly();
 
 		reinterpret_cast<decltype(InitializeApplication_hook)*>(InitializeApplication_orig)();
@@ -7046,11 +7067,16 @@ namespace
 		return optionItemAttention;
 	}
 
-	Il2CppObject* GetOptionItemInfo(const wchar_t* text)
+	Il2CppObject* GetOptionItemInfo(const char* name, const wchar_t* text)
 	{
 		auto object = resources_load_hook(il2cpp_string_new("ui/parts/outgame/option/partsoptioniteminfo"), GetRuntimeType("UnityEngine.CoreModule.dll", "UnityEngine", "GameObject"));
 
 		auto optionItemInfo = il2cpp_symbols::get_method_pointer<Il2CppObject * (*)(Il2CppObject*)>("UnityEngine.CoreModule.dll", "UnityEngine", "Object", "Internal_CloneSingle", 1)(object);
+
+		if (name)
+		{
+			UnityEngine::Object::Name(optionItemInfo, il2cpp_string_new((name + "_info"s).data()));
+		}
 
 		auto getComponents = il2cpp_class_get_method_from_name_type<Il2CppArraySize_t<Il2CppObject*> *(*)(Il2CppObject*, Il2CppReflectionType*, bool, bool, bool, bool, Il2CppObject*)>(optionItemInfo->klass, "GetComponentsInternal", 6)->methodPointer;
 		auto array = getComponents(optionItemInfo, GetRuntimeType(
@@ -8813,6 +8839,11 @@ namespace
 			wcout << ex.ex->message->chars << endl;
 		}
 
+		auto CuteCoreDevice = il2cpp_symbols::get_class("Cute.Core.Assembly.dll", "Cute.Core", "Device");
+		auto persistentDataPathField = il2cpp_class_get_field_from_name_wrap(CuteCoreDevice, "persistentDataPath");
+		Il2CppString* persistentDataPath;
+		il2cpp_field_static_get_value(persistentDataPathField, &persistentDataPath);
+
 		AddToLayout(m_Content,
 			{
 				GetOptionItemTitle(LocalifySettings::GetText("graphics")),
@@ -8938,6 +8969,8 @@ namespace
 				GetOptionItemOnOff("taskbar_show_progress_on_download", LocalifySettings::GetText("taskbar_show_progress_on_download")),
 				GetOptionItemOnOff("taskbar_show_progress_on_connecting", LocalifySettings::GetText("taskbar_show_progress_on_connecting")),
 				GetOptionItemTitle(LocalifySettings::GetText("settings_title")),
+				GetOptionItemSimpleWithButton("persistent_data_path", LocalifySettings::GetText("persistent_data_path"), localize_get_hook(GetTextIdByName(L"Circle0206"))->chars),
+				GetOptionItemInfo("persistent_data_path_detail", persistentDataPath->chars),
 				Game::CurrentGameRegion == Game::Region::JPN ?
 					GetOptionItemButton("clear_webview_cache", LocalifySettings::GetText("clear_webview_cache")) :
 					GetOptionItemOnOff("allow_delete_cookie", LocalifySettings::GetText("allow_delete_cookie")),
@@ -8946,10 +8979,10 @@ namespace
 				Game::CurrentGameRegion == Game::Region::KOR ?
 					GetOptionItemOnOff("use_third_party_news", LocalifySettings::GetText("use_third_party_news")) : nullptr,
 				Game::CurrentGameRegion == Game::Region::KOR ?
-					GetOptionItemInfo(LocalifySettings::GetText("use_third_party_news_info")) : nullptr,
+					GetOptionItemInfo(nullptr, LocalifySettings::GetText("use_third_party_news_info")) : nullptr,
 #ifdef EXPERIMENTS
 				GetOptionItemOnOff("unlock_live_chara", LocalifySettings::GetText("unlock_live_chara")),
-				GetOptionItemInfo(LocalifySettings::GetText("unlock_live_chara_info")),
+				GetOptionItemInfo(nullptr, LocalifySettings::GetText("unlock_live_chara_info")),
 #endif
 				GetOptionItemButton("github", L"GitHub"),
 				GetOptionItemTitle(LocalifySettings::GetText("experiments")),
@@ -9310,6 +9343,28 @@ namespace
 
 				il2cpp_symbols::get_method_pointer<Il2CppObject* (*)(Il2CppObject*)>(
 					"umamusume.dll", "Gallop", "DialogManager", "PushDialog", 1)(dialogData);
+			}));
+
+		SetOptionItemButtonAction("persistent_data_path", *([](Il2CppObject*)
+			{
+				auto CuteCoreDevice = il2cpp_symbols::get_class("Cute.Core.Assembly.dll", "Cute.Core", "Device");
+				auto persistentDataPathField = il2cpp_class_get_field_from_name_wrap(CuteCoreDevice, "persistentDataPath");
+				Il2CppString* persistentDataPath;
+				il2cpp_field_static_get_value(persistentDataPathField, &persistentDataPath);
+
+				auto result = il2cpp_symbols::get_method_pointer<Il2CppArraySize_t<Il2CppString*>* (*)(Il2CppString*, Il2CppString*, bool)>("Plugins.dll", "SFB", "StandaloneFileBrowser", "OpenFolderPanel", 3)(nullptr, persistentDataPath, false);
+
+				if (result && result->max_length > 0)
+				{
+					auto path = result->vector[0];
+					if (path)
+					{
+						wstring pathW = path->chars;
+						AddOrSetString(config::config_document, L"persistentDataPath", pathW.data());
+						auto textCommon = GetTextCommon("persistent_data_path_detail_info");
+						SetTextCommonText(textCommon, pathW.data());
+					}
+				}
 			}));
 
 		if (Game::CurrentGameRegion != Game::Region::KOR)
@@ -12487,7 +12542,7 @@ namespace
 			ADD_HOOK(GallopFrameBuffer_Release, "Gallop.GallopFrameBuffer::Release at %p\n");
 			ADD_HOOK(GallopFrameBuffer_ResizeRenderTexture, "Gallop.GallopFrameBuffer::ResizeRenderTexture at %p\n");
 		}
-		
+
 		if (config::freeform_window || Game::CurrentGameStore == Game::Store::Steam)
 		{
 			ADD_HOOK(StandaloneWindowResize_DisableMaximizebox, "Gallop.StandaloneWindowResize::DisableMaximizebox at %p\n");

@@ -90,6 +90,8 @@ namespace config
 	wstring web_icon_sprite_version;
 	wstring web_font_path;
 
+	wstring persistent_data_path;
+
 	bool has_json_parse_error = false;
 	wstring json_parse_error_msg;
 
@@ -414,6 +416,8 @@ if (document.HasMember(L##_name_) && document[L##_name_].Is##_type_())\
 			GetValue("msgpackNotifierConnectionTimeoutMs", Int, msgpack_notifier_connection_timeout_ms);
 
 			GetValue("msgpackNotifierPrintError", Bool, msgpack_notifier_print_error);
+
+			GetValue("persistentDataPath", String, persistent_data_path);
 
 			GetValue("dicts", Array, auto array,
 				for (auto it = array.Begin(); it != array.End(); it++)

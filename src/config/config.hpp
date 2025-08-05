@@ -122,6 +122,8 @@ namespace config
 	extern wstring web_icon_sprite_version;
 	extern wstring web_font_path;
 
+	extern wstring persistent_data_path;
+
 	extern bool has_json_parse_error;
 	extern wstring json_parse_error_msg;
 
