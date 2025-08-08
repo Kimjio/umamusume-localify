@@ -10,6 +10,7 @@
 #include <filesystem>
 
 #include "il2cpp-object-internals.h"
+#include "codegen/il2cpp-codegen-metadata.h"
 
 template<typename T>
 struct MethodInfo_t

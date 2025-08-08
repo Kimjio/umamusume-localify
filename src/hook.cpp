@@ -241,7 +241,11 @@ namespace
 		MH_EnableHook(UpdateDispatcher_Initialize_addr);
 
 		il2cpp_runtime_class_init(il2cpp_symbols::get_class("UnityEngine.SubsystemsModule.dll", "UnityEngine", "SubsystemManager"));
-		il2cpp_runtime_class_init(il2cpp_symbols::get_class("UnityEngine.SubsystemsModule.dll", "UnityEngine.SubsystemsImplementation", "SubsystemDescriptorStore"));
+
+		if (Game::CurrentUnityVersion != Game::UnityVersion::Unity19)
+		{
+			il2cpp_runtime_class_init(il2cpp_symbols::get_class("UnityEngine.SubsystemsModule.dll", "UnityEngine.SubsystemsImplementation", "SubsystemDescriptorStore"));
+		}
 		//il2cpp_runtime_class_init(il2cpp_symbols::get_class("UnityEngine.CoreModule.dll", "UnityEngine", "BeforeRenderHelper"));
 
 		if (Game::CurrentGameRegion == Game::Region::KOR)
@@ -446,6 +450,7 @@ namespace
 		il2cpp_field_get_value(notification, _LabelField, &_Label);
 
 		il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, int)>(_Label->klass, "set_OutlineColor", 1)->methodPointer(_Label, GetEnumValue(ParseEnum(GetRuntimeType("umamusume.dll", "Gallop", "OutlineColorType"), color)));
+		il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*)>(_Label->klass, "RebuildOutline", 0)->methodPointer(_Label);
 	}
 
 	void SetNotificationBackgroundAlpha(float alpha)
@@ -973,7 +978,18 @@ namespace
 		auto title = config::custom_title_name;
 		if (title.empty())
 		{
-			title = L"umamusume";
+			if (Game::CurrentGameRegion == Game::Region::ENG)
+			{
+				title = L"Umamusume";
+			}
+			else if (Game::CurrentGameRegion == Game::Region::JPN && Game::CurrentGameStore == Game::Store::Steam)
+			{
+				title = L"UmamusumePrettyDerby_Jpn";
+			}
+			else
+			{
+				title = L"umamusume";
+			}
 		}
 
 		static HWND hWndFound;
@@ -1172,8 +1188,15 @@ namespace
 
 			patch_after_criware();
 
-			auto productName = il2cpp_resolve_icall_type<Il2CppString * (*)()>("UnityEngine.Application::get_productName")()->chars;
-			SetDllDirectoryW((productName + L"_Data\\Plugins\\x86_64\\"s).data());
+			wstring module_name;
+			module_name.resize(MAX_PATH);
+			module_name.resize(GetModuleFileNameW(nullptr, module_name.data(), MAX_PATH));
+
+			filesystem::path module_path(module_name);
+
+			wstring name = module_path.filename().replace_extension();
+
+			SetDllDirectoryW((name + L"_Data\\Plugins\\x86_64\\"s).data());
 
 			// use original function beacuse we have unhooked that
 			auto criware = reinterpret_cast<decltype(LoadLibraryW)*>(load_library_w_orig)(lpLibFileName);
@@ -1229,7 +1252,11 @@ namespace
 
 			if (!config::replace_assets.empty())
 			{
-				auto CriMana_SetFileNew_addr = GetProcAddress(criware, "CRIWARE8778888A");
+				auto CriMana_SetFileNew_addr = GetProcAddress(criware, "CRIWARE310ABCEC");
+				if (!CriMana_SetFileNew_addr)
+				{
+					CriMana_SetFileNew_addr = GetProcAddress(criware, "CRIWAREDA7020AB");
+				}
 
 				if (!CriMana_SetFileNew_addr)
 				{
@@ -1244,7 +1271,11 @@ namespace
 				MH_CreateHook(CriMana_SetFileNew_addr, CriMana_SetFileNew_hook, &CriMana_SetFileNew_orig);
 				MH_EnableHook(CriMana_SetFileNew_addr);
 
-				auto CriMana_SetFileAppend_addr = GetProcAddress(criware, "CRIWAREE7861E0D");
+				auto CriMana_SetFileAppend_addr = GetProcAddress(criware, "CRIWAREB83D23AD");
+				if (!CriMana_SetFileAppend_addr)
+				{
+					CriMana_SetFileAppend_addr = GetProcAddress(criware, "CRIWAREE7861E0D");
+				}
 
 				if (!CriMana_SetFileAppend_addr)
 				{
@@ -6893,7 +6924,15 @@ namespace
 
 	void SetTextCommonTextWithCustomTag(Il2CppObject* textCommon, const wchar_t* text)
 	{
-		il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, Il2CppString*, float, int)>(textCommon->klass, "SetTextWithCustomTag", 3)->methodPointer(textCommon, il2cpp_string_new16(text), 1, 0);
+		auto SetTextWithCustomTag = il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, Il2CppString*, float, int)>(textCommon->klass, "SetTextWithCustomTag", 3);
+		if (SetTextWithCustomTag)
+		{
+			SetTextWithCustomTag->methodPointer(textCommon, il2cpp_string_new16(text), 1, 0);
+		}
+		else
+		{
+			il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, Il2CppString*, float)>(textCommon->klass, "SetTextWithCustomTag", 2)->methodPointer(textCommon, il2cpp_string_new16(text), 1);
+		}
 
 		auto textIdStrField = il2cpp_class_get_field_from_name_wrap(textCommon->klass, "m_textid_str");
 		il2cpp_field_set_value(textCommon, textIdStrField, nullptr);
@@ -7035,7 +7074,7 @@ namespace
 
 	void SetOptionItemButtonAction(const char* name, void (*onClick)(Il2CppObject*))
 	{
-		auto optionItemButton = reinterpret_cast<Il2CppObject * (*)(Il2CppString*)>(il2cpp_resolve_icall("UnityEngine.GameObject::Find()"))(il2cpp_string_new(name));
+		auto optionItemButton = UnityEngine::GameObject::Find(il2cpp_string_new(name)).NativeObject();
 
 		if (optionItemButton)
 		{
@@ -7168,7 +7207,7 @@ namespace
 
 	Il2CppObject* GetOptionItemSimpleWithButtonTextCommon(const char* name)
 	{
-		auto gameObject = reinterpret_cast<Il2CppObject * (*)(Il2CppString*)>(il2cpp_resolve_icall("UnityEngine.GameObject::Find()"))(il2cpp_string_new((name + "_simple"s).data()));
+		auto gameObject = UnityEngine::GameObject::Find(il2cpp_string_new((name + "_simple"s).data())).NativeObject();
 
 		if (gameObject)
 		{
@@ -7183,7 +7222,7 @@ namespace
 
 	Il2CppObject* GetToggleCommon(const char* name)
 	{
-		auto toggleObject = reinterpret_cast<Il2CppObject * (*)(Il2CppString*)>(il2cpp_resolve_icall("UnityEngine.GameObject::Find()"))(il2cpp_string_new(name));
+		auto toggleObject = UnityEngine::GameObject::Find(il2cpp_string_new(name)).NativeObject();
 
 		if (toggleObject)
 		{
@@ -7215,7 +7254,7 @@ namespace
 
 	Il2CppObject* GetToggleGroupCommon(const char* name)
 	{
-		auto toggleGroupCommon = reinterpret_cast<Il2CppObject * (*)(Il2CppString*)>(il2cpp_resolve_icall("UnityEngine.GameObject::Find()"))(il2cpp_string_new(name));
+		auto toggleGroupCommon = UnityEngine::GameObject::Find(il2cpp_string_new(name)).NativeObject();
 
 		if (toggleGroupCommon)
 		{
@@ -7226,7 +7265,7 @@ namespace
 
 	int GetToggleGroupCommonValue(const char* name)
 	{
-		auto gameObject = reinterpret_cast<Il2CppObject * (*)(Il2CppString*)>(il2cpp_resolve_icall("UnityEngine.GameObject::Find()"))(il2cpp_string_new(name));
+		auto gameObject = UnityEngine::GameObject::Find(il2cpp_string_new(name)).NativeObject();
 
 		if (gameObject)
 		{
@@ -7327,7 +7366,7 @@ namespace
 
 	float GetOptionSliderValue(const char* name)
 	{
-		auto optionSlider = reinterpret_cast<Il2CppObject * (*)(Il2CppString*)>(il2cpp_resolve_icall("UnityEngine.GameObject::Find()"))(il2cpp_string_new(name));
+		auto optionSlider = UnityEngine::GameObject::Find(il2cpp_string_new(name)).NativeObject();
 
 		if (optionSlider)
 		{
@@ -7344,7 +7383,7 @@ namespace
 
 	Il2CppObject* GetOptionSlider(const char* name)
 	{
-		auto optionSlider = reinterpret_cast<Il2CppObject * (*)(Il2CppString*)>(il2cpp_resolve_icall("UnityEngine.GameObject::Find()"))(il2cpp_string_new(name));
+		auto optionSlider = UnityEngine::GameObject::Find(il2cpp_string_new(name)).NativeObject();
 
 		if (optionSlider)
 		{
@@ -9352,7 +9391,7 @@ namespace
 				Il2CppString* persistentDataPath;
 				il2cpp_field_static_get_value(persistentDataPathField, &persistentDataPath);
 
-				auto result = il2cpp_symbols::get_method_pointer<Il2CppArraySize_t<Il2CppString*>* (*)(Il2CppString*, Il2CppString*, bool)>("Plugins.dll", "SFB", "StandaloneFileBrowser", "OpenFolderPanel", 3)(nullptr, persistentDataPath, false);
+				auto result = il2cpp_symbols::get_method_pointer<Il2CppArraySize_t<Il2CppString*>*(*)(Il2CppString*, Il2CppString*, bool)>("Plugins.dll", "SFB", "StandaloneFileBrowser", "OpenFolderPanel", 3)(nullptr, persistentDataPath, false);
 
 				if (result && result->max_length > 0)
 				{
@@ -10052,7 +10091,7 @@ namespace
 	{
 		auto cloned = reinterpret_cast<decltype(Object_Internal_CloneSingleWithParent_hook)*>(Object_Internal_CloneSingleWithParent_orig)(data, parent, worldPositionStays);
 
-		if (wstring(UnityEngine::Object::Name(cloned)->chars).find(L"ProfileTopView") != wstring::npos && Game::CurrentGameRegion == Game::Region::KOR)
+		if (Game::CurrentGameRegion == Game::Region::KOR && wstring(UnityEngine::Object::Name(cloned)->chars).find(L"ProfileTopView") != wstring::npos)
 		{
 			static Il2CppDelegate* updateViewerIdText;
 			updateViewerIdText = &CreateDelegateWithClassStatic(il2cpp_symbols::get_class("DOTween.dll", "DG.Tweening", "TweenCallback"), *([](void*)
@@ -10071,15 +10110,28 @@ namespace
 		{
 			auto getComponents = il2cpp_class_get_method_from_name_type<Il2CppArraySize_t<Il2CppObject*> *(*)(Il2CppObject*, Il2CppType*, bool, bool, bool, bool, Il2CppObject*)>(cloned->klass, "GetComponentsInternal", 6)->methodPointer;
 			auto rectTransformArray = getComponents(cloned, reinterpret_cast<Il2CppType*>(GetRuntimeType(
-				"UnityEngine.CoreModule.dll", "UnityEngine", "RectTransform")), true, true, false, false, nullptr);
+				"UnityEngine.CoreModule.dll", "UnityEngine", "RectTransform")), true, true, true, false, nullptr);
 
 			for (int i = 0; i < rectTransformArray->max_length; i++)
 			{
 				auto rectTransform = rectTransformArray->vector[i];
 
-				if (rectTransform && wide_u8(UnityEngine::Object::Name(rectTransform)->chars) == "Content")
+				if (rectTransform && UnityEngine::Object::Name(rectTransform)->chars == L"PartsOptionPageBasicSetting"s)
 				{
-					InitOptionLayout(rectTransform);
+					UnityEngine::RectTransform(rectTransform).gameObject().SetActive(true);
+					auto PartsOptionPageBasicSetting = UnityEngine::RectTransform(rectTransform).gameObject().NativeObject();
+					auto rectTransformArray1 = getComponents(PartsOptionPageBasicSetting, reinterpret_cast<Il2CppType*>(GetRuntimeType(
+						"UnityEngine.CoreModule.dll", "UnityEngine", "RectTransform")), true, true, false, false, nullptr);
+
+					for (int j = 0; j < rectTransformArray1->max_length; j++)
+					{
+						auto rectTransform1 = rectTransformArray1->vector[j];
+						if (rectTransform1 && UnityEngine::Object::Name(rectTransform1)->chars == L"Content"s)
+						{
+							InitOptionLayout(rectTransform1);
+							break;
+						}
+					}
 					break;
 				}
 			}
@@ -10097,7 +10149,7 @@ namespace
 			{
 				auto rectTransform = rectTransformArray->vector[i];
 
-				if (rectTransform && wide_u8(UnityEngine::Object::Name(rectTransform)->chars) == "Content")
+				if (rectTransform && UnityEngine::Object::Name(rectTransform)->chars == L"Content"s)
 				{
 					InitOptionLayout(rectTransform);
 					break;
@@ -11824,34 +11876,38 @@ namespace
 							auto topUi = il2cpp_class_get_method_from_name_type<Il2CppObject * (*)(Il2CppObject*, int)>(hubViewController->klass, "GetTopUI", 1)->methodPointer(hubViewController, 10);
 							if (topUi)
 							{
-								auto data = il2cpp_class_get_method_from_name_type<Il2CppObject * (*)(Il2CppObject*)>(topUi->klass, "get_TempSetListPlayingData", 0)->methodPointer(topUi);
-
-								auto IsPlayingField = il2cpp_class_get_field_from_name_wrap(data->klass, "IsPlaying");
-								bool IsPlaying;
-								il2cpp_field_get_value(data, IsPlayingField, &IsPlaying);
-
-								hasSetList = IsPlaying;
-
-								if (IsPlaying)
+								auto get_TempSetListPlayingData = il2cpp_class_get_method_from_name_type<Il2CppObject * (*)(Il2CppObject*)>(topUi->klass, "get_TempSetListPlayingData", 0);
+								if (get_TempSetListPlayingData)
 								{
-									SystemMediaTransportControlsManager::instance.PlaybackStatus(winrt::Windows::Media::MediaPlaybackStatus::Playing);
+									auto data = get_TempSetListPlayingData->methodPointer(topUi);
 
-									auto SetListIndexField = il2cpp_class_get_field_from_name_wrap(data->klass, "SetListIndex");
-									int SetListIndex;
-									il2cpp_field_get_value(data, SetListIndexField, &SetListIndex);
+									auto IsPlayingField = il2cpp_class_get_field_from_name_wrap(data->klass, "IsPlaying");
+									bool IsPlaying;
+									il2cpp_field_get_value(data, IsPlayingField, &IsPlaying);
 
-									int MusicListCount = il2cpp_class_get_method_from_name_type<int (*)(Il2CppObject*)>(data->klass, "GetMusicListCount", 0)->methodPointer(data);
+									hasSetList = IsPlaying;
 
-									SystemMediaTransportControlsManager::instance.IsPreviousEnabled(SetListIndex > 0);
-									SystemMediaTransportControlsManager::instance.IsNextEnabled(SetListIndex < MusicListCount - 1);
+									if (IsPlaying)
+									{
+										SystemMediaTransportControlsManager::instance.PlaybackStatus(winrt::Windows::Media::MediaPlaybackStatus::Playing);
 
-									auto musicData = il2cpp_class_get_method_from_name_type<Il2CppObject * (*)(Il2CppObject*)>(data->klass, "GetMasterSetListMusicData", 0)->methodPointer(data);
+										auto SetListIndexField = il2cpp_class_get_field_from_name_wrap(data->klass, "SetListIndex");
+										int SetListIndex;
+										il2cpp_field_get_value(data, SetListIndexField, &SetListIndex);
 
-									auto MusicIdField = il2cpp_class_get_field_from_name_wrap(musicData->klass, "MusicId");
-									int MusicId;
-									il2cpp_field_get_value(musicData, MusicIdField, &MusicId);
+										int MusicListCount = il2cpp_class_get_method_from_name_type<int (*)(Il2CppObject*)>(data->klass, "GetMusicListCount", 0)->methodPointer(data);
 
-									SystemMediaTransportControlsManager::UpdateMetadata(MusicId);
+										SystemMediaTransportControlsManager::instance.IsPreviousEnabled(SetListIndex > 0);
+										SystemMediaTransportControlsManager::instance.IsNextEnabled(SetListIndex < MusicListCount - 1);
+
+										auto musicData = il2cpp_class_get_method_from_name_type<Il2CppObject * (*)(Il2CppObject*)>(data->klass, "GetMasterSetListMusicData", 0)->methodPointer(data);
+
+										auto MusicIdField = il2cpp_class_get_field_from_name_wrap(musicData->klass, "MusicId");
+										int MusicId;
+										il2cpp_field_get_value(musicData, MusicIdField, &MusicId);
+
+										SystemMediaTransportControlsManager::UpdateMetadata(MusicId);
+									}
 								}
 							}
 						}
@@ -11913,10 +11969,10 @@ namespace
 
 		try
 		{
-			auto uiManager = Gallop::UIManager::Instance();
-			if (uiManager)
+			auto GameSystem = GetSingletonInstance(il2cpp_symbols::get_class("umamusume.dll", "Gallop", "GameSystem"));
+			if (GameSystem)
 			{
-				il2cpp_symbols::get_method_pointer<void (*)(Il2CppObject*, Il2CppDelegate*)>("umamusume.dll", "Gallop", "MonoBehaviourExtension", "WaitForEndFrame", 2)(uiManager, tickFrameDelegate);
+				il2cpp_symbols::get_method_pointer<void (*)(Il2CppObject*, Il2CppDelegate*)>("umamusume.dll", "Gallop", "MonoBehaviourExtension", "WaitForEndFrame", 2)(GameSystem, tickFrameDelegate);
 			}
 		}
 		catch (const Il2CppExceptionWrapper& e)
@@ -12694,6 +12750,7 @@ namespace
 		il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, int)>(_Label->klass, "set_FontColor", 1)->methodPointer(_Label, GetEnumValue(ParseEnum(GetRuntimeType("umamusume.dll", "Gallop", "FontColorType"), config::character_system_text_caption_font_color.data())));
 		il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, int)>(_Label->klass, "set_OutlineSize", 1)->methodPointer(_Label, GetEnumValue(ParseEnum(GetRuntimeType("umamusume.dll", "Gallop", "OutlineSizeType"), config::character_system_text_caption_outline_size.data())));
 		il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, int)>(_Label->klass, "set_OutlineColor", 1)->methodPointer(_Label, GetEnumValue(ParseEnum(GetRuntimeType("umamusume.dll", "Gallop", "OutlineColorType"), config::character_system_text_caption_outline_color.data())));
+		il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*)>(_Label->klass, "RebuildOutline", 0)->methodPointer(_Label);
 
 		auto background = il2cpp_symbols::get_method_pointer<Il2CppObject * (*)(Il2CppObject*, Il2CppReflectionType*, bool)>("UnityEngine.CoreModule.dll", "UnityEngine", "GameObject", "GetComponentInChildren", 2)(instantiated, GetRuntimeType("umamusume.dll", "Gallop", "ImageCommon"), true);
 		il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, float)>(background->klass, "SetAlpha", 1)->methodPointer(background, config::character_system_text_caption_background_alpha);
@@ -12726,7 +12783,26 @@ namespace
 	{
 		auto amuid = wstring(UnityEngine::Application::companyName()->chars) + L".Gallop";
 
-		DesktopNotificationManagerCompat::RegisterAumidAndComServer(amuid.data(), LocalifySettings::GetText("title"));
+		if (Game::CurrentGameRegion == Game::Region::ENG)
+		{
+			amuid += L".Eng";
+		}
+
+		wstring title;
+		if (Game::CurrentGameRegion == Game::Region::KOR)
+		{
+			title = L"우마무스메";
+		}
+		else if (Game::CurrentGameRegion == Game::Region::ENG)
+		{
+			title = L"Umamusume";
+		}
+		else
+		{
+			title = L"ウマ娘";
+		}
+
+		DesktopNotificationManagerCompat::RegisterAumidAndComServer(amuid.data(), title.data());
 
 		DesktopNotificationManagerCompat::RegisterActivator();
 
@@ -12762,6 +12838,11 @@ namespace
 		auto AssetBundleRequest_GetResult_addr = il2cpp_resolve_icall("UnityEngine.AssetBundleRequest::GetResult()");
 
 		auto resources_load_addr = il2cpp_resolve_icall("UnityEngine.ResourcesAPIInternal::Load()");
+
+		if (!resources_load_addr)
+		{
+			resources_load_addr = il2cpp_resolve_icall("UnityEngine.Resources::Load()");
+		}
 
 		auto Sprite_get_texture_addr = il2cpp_resolve_icall("UnityEngine.Sprite::get_texture(UnityEngine.Sprite)");
 
@@ -13059,6 +13140,8 @@ namespace
 			startTime = chrono::duration_cast<chrono::milliseconds>(chrono::system_clock::now().time_since_epoch()).count();
 		}
 
+		StartTickFrame();
+
 		auto sceneManagerClass = il2cpp_symbols::get_class("UnityEngine.CoreModule.dll", "UnityEngine.SceneManagement", "SceneManager");
 
 		auto activeSceneChangedField = il2cpp_class_get_field_from_name_wrap(sceneManagerClass, "activeSceneChanged");
@@ -13073,6 +13156,17 @@ namespace
 					style |= WS_MAXIMIZEBOX;
 					SetWindowLongPtrW(hWnd, GWL_STYLE, style);
 				}
+
+				auto active = il2cpp_symbols::get_method_pointer<UnityEngine::SceneManagement::Scene(*)()>("UnityEngine.CoreModule.dll", "UnityEngine.SceneManagement", "SceneManager", "GetActiveScene", IgnoreNumberOfArguments)();
+
+				auto handleName = il2cpp_symbols::get_method_pointer<Il2CppString * (*)(int)>("UnityEngine.CoreModule.dll", "UnityEngine.SceneManagement", "Scene", "GetNameInternal", 1)(active.handle);
+
+				if (!handleName)
+				{
+					return;
+				}
+
+				wstring sceneName = handleName->chars;
 
 				isPortraitBeforeFullscreen = false;
 
@@ -13124,15 +13218,6 @@ namespace
 						// }
 					// }
 
-				auto active = il2cpp_symbols::get_method_pointer<UnityEngine::SceneManagement::Scene(*)()>("UnityEngine.CoreModule.dll", "UnityEngine.SceneManagement", "SceneManager", "GetActiveScene", IgnoreNumberOfArguments)();
-
-				auto handleName = il2cpp_symbols::get_method_pointer<Il2CppString * (*)(int)>("UnityEngine.CoreModule.dll", "UnityEngine.SceneManagement", "Scene", "GetNameInternal", 1)(active.handle);
-
-				if (!handleName)
-				{
-					return;
-				}
-
 				/*Il2CppArraySize_t<Il2CppObject*>* CriWareInitializerList;
 				CriWareInitializerList = UnityEngine::Object::FindObjectsByType(
 					GetRuntimeType("CriMw.CriWare.Runtime.dll", "CriWare", "CriWareInitializer"), UnityEngine::FindObjectsInactive::Include, UnityEngine::FindObjectsSortMode::None);
@@ -13164,8 +13249,6 @@ namespace
 					}
 				}*/
 
-				wstring sceneName = handleName->chars;
-
 				//if (sceneName == L"Race")
 				//{
 				//	auto delayCallback = &CreateDelegateWithClassStatic(il2cpp_symbols::get_class("DOTween.dll", "DG.Tweening", "TweenCallback"), *([](void*)
@@ -13182,7 +13265,6 @@ namespace
 				{
 					TaskbarManager::SetProgressValue(0, 0);
 					TaskbarManager::SetProgressState(TBPF_NOPROGRESS);
-					StartTickFrame();
 				}
 
 				if (sceneName == L"OutGame" && Game::CurrentGameRegion == Game::Region::KOR)
@@ -13450,7 +13532,7 @@ namespace
 
 		try
 		{
-			SystemMediaTransportControlsManager::CreateShortcutForSMTC(LocalifySettings::GetText("title"));
+			SystemMediaTransportControlsManager::CreateShortcutForSMTC(title.data());
 			SystemMediaTransportControlsManager::Initialze(GetHWND());
 
 			auto& smtc = SystemMediaTransportControlsManager::instance;
@@ -13989,8 +14071,8 @@ void init_hook(filesystem::path module_path)
 	MH_EnableHook(FindNextFileW);
 
 	auto LoadLibraryExW_addr = GetProcAddress(GetModuleHandleW(L"KernelBase.dll"), "LoadLibraryExW");
-	MH_CreateHook(LoadLibraryExW, load_library_ex_w_hook, &load_library_ex_w_orig);
-	MH_EnableHook(LoadLibraryExW);
+	//MH_CreateHook(LoadLibraryExW, load_library_ex_w_hook, &load_library_ex_w_orig);
+	//MH_EnableHook(LoadLibraryExW);
 
 	auto LoadLibraryW_addr = GetProcAddress(GetModuleHandleW(L"KernelBase.dll"), "LoadLibraryW");
 	MH_CreateHook(LoadLibraryW_addr, load_library_w_hook, &load_library_w_orig);

@@ -608,9 +608,24 @@ namespace DesktopNotificationManagerCompat
 		}
 	};
 
+	class DECLSPEC_UUID("A42CD370-8D06-4E3C-BC45-32A61F9E375C") NotificationActivator3 WrlSealed
+		: public RuntimeClass<RuntimeClassFlags<ClassicCom>, INotificationActivationCallback>
+	{
+	public:
+		virtual HRESULT STDMETHODCALLTYPE Activate(
+			_In_ LPCWSTR appUserModelId,
+			_In_ LPCWSTR invokedArgs,
+			_In_reads_(dataCount) const NOTIFICATION_USER_INPUT_DATA * data,
+			ULONG dataCount) override
+		{
+			return S_OK;
+		}
+	};
+
 	// Flag class as COM creatable
 	CoCreatableClass(NotificationActivator);
 	CoCreatableClass(NotificationActivator2);
+	CoCreatableClass(NotificationActivator3);
 }
 
 DesktopNotificationHistoryCompat::DesktopNotificationHistoryCompat(const wchar_t* aumid, ComPtr<ABI::IToastNotificationHistory> history)

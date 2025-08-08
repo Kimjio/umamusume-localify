@@ -21,8 +21,6 @@ namespace UnityEngine
 
 		static GameObject Find(Il2CppString* name);
 
-		Il2CppObject* GetComponentByName(Il2CppString* name);
-
 		Il2CppObject* GetComponent(Il2CppReflectionType* runtimeType);
 
 		Il2CppObject* AddComponent(Il2CppReflectionType* runtimeType)

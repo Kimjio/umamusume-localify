@@ -274,18 +274,9 @@ void init_sqlite3()
 
 	filesystem::path module_path(module_name);
 
-	wifstream appinfo(module_path.parent_path().append(module_path.filename().replace_extension().string().append("_Data\\app.info"s).data()));
-	appinfo.imbue(locale(".UTF-8"));
+	wstring name = module_path.filename().replace_extension();
 
-	wstring company;
-	getline(appinfo, company);
-
-	wstring product;
-	getline(appinfo, product);
-
-	appinfo.close();
-
-	SetDllDirectoryW((product + L"_Data\\Plugins\\x86_64\\"s).data());
+	SetDllDirectoryW((name + L"_Data\\Plugins\\x86_64\\"s).data());
 	libnative = LoadLibraryW(L"libnative.dll");
 	SetDllDirectoryW(nullptr);
 #endif

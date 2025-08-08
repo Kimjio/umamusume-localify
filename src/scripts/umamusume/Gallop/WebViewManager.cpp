@@ -52,6 +52,9 @@ void* Gallop_WebViewManager_OpenErrorDialog_addr = nullptr;
 void* Gallop_WebViewManager_GetGachaUrl_addr = nullptr;
 void* Gallop_WebViewManager_GetGachaUrl_orig = nullptr;
 
+void* Gallop_WebViewManager_GetGachaUrl1_addr = nullptr;
+void* Gallop_WebViewManager_GetGachaUrl1_orig = nullptr;
+
 void* Gallop_WebViewManager_GetProductUrl_addr = nullptr;
 void* Gallop_WebViewManager_GetProductUrl_orig = nullptr;
 
@@ -530,6 +533,14 @@ static Il2CppString* Gallop_WebViewManager_GetGachaUrl_hook(int gachaId, int ste
 	return res;
 }
 
+static Il2CppString* Gallop_WebViewManager_GetGachaUrl1_hook(int gachaId)
+{
+	auto serverUrl = il2cpp_symbols::get_method_pointer<Il2CppString * (*)()>(ASSEMBLY_NAME, "Gallop", "GameDefine", "get_ApplicationServerUrl", 0)();
+	auto res = il2cpp_symbols::get_method_pointer<Il2CppString * (*)(Il2CppString*, Il2CppString*, Il2CppString*)>("mscorlib.dll", "System", "String", "Concat", 3)(serverUrl, il2cpp_string_new("/contents/v/index.html#/gacha"),
+		Gallop::WebViewManager::GetGachaURLProperty(gachaId));
+	return res;
+}
+
 static Il2CppString* Gallop_WebViewManager_GetProductUrl_hook(int productMasterId)
 {
 	auto serverUrl = il2cpp_symbols::get_method_pointer<Il2CppString * (*)()>(ASSEMBLY_NAME, "Gallop", "GameDefine", "get_ApplicationServerUrl", 0)();
@@ -989,6 +1000,7 @@ static void InitAddress()
 	Gallop_WebViewManager_SetErrorCallback_addr = il2cpp_symbols::get_method_pointer(ASSEMBLY_NAME, "Gallop", "WebViewManager", "SetErrorCallback", 0);
 	Gallop_WebViewManager_OpenErrorDialog_addr = il2cpp_symbols::get_method_pointer(ASSEMBLY_NAME, "Gallop", "WebViewManager", "OpenErrorDialog", 0);
 	Gallop_WebViewManager_GetGachaUrl_addr = il2cpp_symbols::get_method_pointer(ASSEMBLY_NAME, "Gallop", "WebViewManager", "GetGachaUrl", 2);
+	Gallop_WebViewManager_GetGachaUrl1_addr = il2cpp_symbols::get_method_pointer(ASSEMBLY_NAME, "Gallop", "WebViewManager", "GetGachaUrl", 1);
 	Gallop_WebViewManager_GetProductUrl_addr = il2cpp_symbols::get_method_pointer(ASSEMBLY_NAME, "Gallop", "WebViewManager", "GetProductUrl", 1);
 	Gallop_WebViewManager_SettingUIEffectOnOpen_addr = il2cpp_symbols::get_method_pointer(ASSEMBLY_NAME, "Gallop", "WebViewManager", "SettingUIEffectOnOpen", 0);
 	Gallop_WebViewManager_SettingUIEffectOnClose_addr = il2cpp_symbols::get_method_pointer(ASSEMBLY_NAME, "Gallop", "WebViewManager", "SettingUIEffectOnClose", 0);
@@ -1004,7 +1016,7 @@ static void InitAddress()
 	Gallop_WebViewManager__errorCallback = il2cpp_class_get_field_from_name_wrap(il2cpp_symbols::get_class(ASSEMBLY_NAME, "Gallop", "WebViewManager"), "_errorCallback");
 	Gallop_WebViewManager__fontFilePaths = il2cpp_class_get_field_from_name_wrap(il2cpp_symbols::get_class(ASSEMBLY_NAME, "Gallop", "WebViewManager"), "_fontFilePaths");
 
-	if (Game::CurrentGameRegion == Game::Region::KOR)
+	if (Game::CurrentUnityVersion != Game::UnityVersion::Unity22)
 	{
 		Gallop_WebViewManager_WebViewInfo = il2cpp_class_from_type(reinterpret_cast<const MethodInfo2020*>(Gallop_WebViewManager_TryGetWebViewInfo)->parameters[1].parameter_type);
 	}
@@ -1029,9 +1041,16 @@ static void InitAddress()
 		DialogTitleMenu_OnSelectMenu_KaKaoNotLogin_addr = il2cpp_symbols::find_method(
 			ASSEMBLY_NAME, "Gallop", "DialogTitleMenu", [](const MethodInfo* method)
 			{
-				auto method2020 = reinterpret_cast<const MethodInfo2020*>(method);
-				return method2020->name == "OnSelectMenu"s &&
-					il2cpp_type_get_name(method2020->parameters->parameter_type) ==
+				if (Game::CurrentUnityVersion != Game::UnityVersion::Unity22)
+				{
+					auto method2020 = reinterpret_cast<const MethodInfo2020*>(method);
+					return method2020->name == "OnSelectMenu"s &&
+						il2cpp_type_get_name(method2020->parameters->parameter_type) ==
+						"Gallop.DialogTitleMenu.KaKaoNotLoginMenu"s;
+				}
+				
+				return method->name == "OnSelectMenu"s &&
+					il2cpp_type_get_name(method->parameters[0]) ==
 					"Gallop.DialogTitleMenu.KaKaoNotLoginMenu"s;
 			});
 
@@ -1053,6 +1072,7 @@ static void HookMethods()
 	ADD_HOOK(Gallop_WebViewManager_SetCustomFont, "Gallop.WebViewManager::SetCustomFont at %p\n");
 	ADD_HOOK(Gallop_WebViewManager_GetGachaURLProperty, "Gallop.WebViewManager::GetGachaURLProperty at %p\n");
 	ADD_HOOK(Gallop_WebViewManager_GetGachaUrl, "Gallop.WebViewManager::GetGachaUrl at %p\n");
+	ADD_HOOK(Gallop_WebViewManager_GetGachaUrl1, "Gallop.WebViewManager::GetGachaUrl1 at %p\n");
 	ADD_HOOK(Gallop_WebViewManager_GetProductUrl, "Gallop.WebViewManager::GetProductUrl at %p\n");
 	ADD_HOOK(Gallop_WebViewManager_SetMargin, "Gallop.WebViewManager::SetMargin at %p\n");
 

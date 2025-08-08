@@ -16,8 +16,6 @@ void* TryGetComponentFastPath_orig = nullptr;
 
 void* GetComponent_addr = nullptr;
 
-void* GetComponentByName_addr = nullptr;
-
 void* GameObject_get_transform_addr = nullptr;
 
 void* get_tag_addr = nullptr;
@@ -84,7 +82,6 @@ static void InitAddress()
 	Internal_AddComponentWithType_addr = il2cpp_resolve_icall("UnityEngine.GameObject::Internal_AddComponentWithType()");
 	TryGetComponentFastPath_addr = il2cpp_resolve_icall("UnityEngine.GameObject::TryGetComponentFastPath()");
 	GetComponent_addr = il2cpp_resolve_icall("UnityEngine.GameObject::GetComponent()");
-	GetComponentByName_addr = il2cpp_resolve_icall("UnityEngine.GameObject::GetComponentByName()");
 	GameObject_get_transform_addr = il2cpp_resolve_icall("UnityEngine.GameObject::get_transform()");
 	get_tag_addr = il2cpp_resolve_icall("UnityEngine.GameObject::get_tag()");
 	set_tag_addr = il2cpp_resolve_icall("UnityEngine.GameObject::set_tag()");
@@ -133,11 +130,6 @@ namespace UnityEngine
 	Il2CppObject* GameObject::GetComponent(Il2CppReflectionType* runtimeType)
 	{
 		return reinterpret_cast<Il2CppObject * (*)(Il2CppObject*, Il2CppReflectionType*)>(GetComponent_addr)(instance, runtimeType);
-	}
-
-	Il2CppObject* GameObject::GetComponentByName(Il2CppString* name)
-	{
-		return reinterpret_cast<Il2CppObject * (*)(Il2CppObject*, Il2CppString*)>(GetComponentByName_addr)(instance, name);
 	}
 
 	Transform GameObject::transform()

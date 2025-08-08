@@ -16,6 +16,7 @@ void* StartCoroutineManaged2_addr = nullptr;
 void* StartCoroutineManaged2_orig = nullptr;
 
 static Il2CppObject* BootSystem;
+static bool font_asset_loaded = false;
 static bool replace_assetbundle_file_path_loaded = false;
 static bool replace_assetbundle_file_paths_loaded = false;
 
@@ -28,7 +29,7 @@ static void LoadAssets()
 
 	auto text = il2cpp_class_get_method_from_name_type<Il2CppObject * (*)(Il2CppObject*)>(_currentDialogObj->klass, "get_Text", 0)->methodPointer(_currentDialogObj);
 #pragma region LOAD_ASSETBUNDLE
-	if (!config::runtime::fontAssets && !config::font_assetbundle_path.empty() && config::replace_to_custom_font)
+	if (!config::runtime::fontAssets && !config::font_assetbundle_path.empty() && config::replace_to_custom_font && !font_asset_loaded)
 	{
 		wstring assetbundlePath = config::font_assetbundle_path;
 		if (PathIsRelativeW(assetbundlePath.data()))
@@ -36,29 +37,49 @@ static void LoadAssets()
 			assetbundlePath.insert(0, filesystem::current_path().wstring().append(L"/"));
 		}
 
-		wstringstream ss;
-		ss << L"Loading font asset: " << assetbundlePath << L"... ";
-		wcout << ss.str();
-		il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, Il2CppString*)>(text->klass, "set_text", 1)->methodPointer(text, il2cpp_string_new16(ss.str().data()));
 
-		std::thread([text, assetbundlePath]()
-			{
-				Sleep(100);
+		if (filesystem::exists(assetbundlePath))
+		{
+			wstringstream ss;
+			ss << L"Loading font asset: " << assetbundlePath << L"... ";
+			wcout << ss.str();
+			il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, Il2CppString*)>(text->klass, "set_text", 1)->methodPointer(text, il2cpp_string_new16(ss.str().data()));
 
-				auto t = il2cpp_thread_attach(il2cpp_domain_get());
-				config::runtime::fontAssets = UnityEngine::AssetBundle::LoadFromFile(il2cpp_string_new_utf16(assetbundlePath.data(), assetbundlePath.length()));
-				il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*)>(text->klass, "FontTextureChanged", 0)->methodPointer(text);
-
-				if (!config::runtime::fontAssets && filesystem::exists(assetbundlePath))
+			std::thread([text, assetbundlePath]()
 				{
-					wcout << L"Asset founded but not loaded. Maybe Asset BuildTarget is not for Windows" << endl;
-				}
+					Sleep(100);
 
-				wcout << L"OK: " << config::runtime::fontAssets << endl;
+					auto t = il2cpp_thread_attach(il2cpp_domain_get());
+					config::runtime::fontAssets = UnityEngine::AssetBundle::LoadFromFile(il2cpp_string_new_utf16(assetbundlePath.data(), assetbundlePath.length()));
+					il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*)>(text->klass, "FontTextureChanged", 0)->methodPointer(text);
 
-				LoadAssets();
-				il2cpp_thread_detach(t);
-			}).detach();
+					if (!config::runtime::fontAssets)
+					{
+						if (filesystem::exists(assetbundlePath))
+						{
+							wcout << L"Asset founded but not loaded. Maybe Asset BuildTarget is not for Windows" << endl;
+						}
+						else
+						{
+							wcout << endl;
+						}
+					}
+					else
+					{
+						wcout << L"OK: " << config::runtime::fontAssets << endl;
+					}
+
+					font_asset_loaded = true;
+
+					LoadAssets();
+					il2cpp_thread_detach(t);
+				}).detach();
+		}
+		else
+		{
+			font_asset_loaded = true;
+			LoadAssets();
+		}
 		return;
 	}
 
@@ -70,33 +91,48 @@ static void LoadAssets()
 			assetbundlePath.insert(0, filesystem::current_path().wstring().append(L"/"));
 		}
 
-		wstringstream ss;
-		ss << L"Loading replacement AssetBundle: " << assetbundlePath << L"... ";
-		wcout << ss.str();
-		il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, Il2CppString*)>(text->klass, "set_text", 1)->methodPointer(text, il2cpp_string_new16(ss.str().data()));
+		if (filesystem::exists(assetbundlePath))
+		{
+			wstringstream ss;
+			ss << L"Loading replacement AssetBundle: " << assetbundlePath << L"... ";
+			wcout << ss.str();
+			il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, Il2CppString*)>(text->klass, "set_text", 1)->methodPointer(text, il2cpp_string_new16(ss.str().data()));
 
-		std::thread([text, assetbundlePath]()
-			{
-				Sleep(100);
-
-				auto t = il2cpp_thread_attach(il2cpp_domain_get());
-				auto assets = UnityEngine::AssetBundle::LoadFromFile(il2cpp_string_new_utf16(assetbundlePath.data(), assetbundlePath.length()));
-
-				if (!assets && filesystem::exists(assetbundlePath))
+			std::thread([text, assetbundlePath]()
 				{
-					wcout << L"Replacement AssetBundle founded but not loaded. Maybe Asset BuildTarget is not for Windows" << endl;
-				}
-				else
-				{
-					wcout << L"OK: " << assets.NativeObject() << endl;
-					config::runtime::replaceAssets.emplace_back(assets);
-				}
+					Sleep(100);
 
-				replace_assetbundle_file_path_loaded = true;
+					auto t = il2cpp_thread_attach(il2cpp_domain_get());
+					auto assets = UnityEngine::AssetBundle::LoadFromFile(il2cpp_string_new_utf16(assetbundlePath.data(), assetbundlePath.length()));
 
-				LoadAssets();
-				il2cpp_thread_detach(t);
-			}).detach();
+					if (!assets)
+					{
+						if (filesystem::exists(assetbundlePath))
+						{
+							wcout << L"Replacement AssetBundle founded but not loaded. Maybe Asset BuildTarget is not for Windows" << endl;
+						}
+						else
+						{
+							wcout << endl;
+						}
+					}
+					else
+					{
+						wcout << L"OK: " << assets.NativeObject() << endl;
+						config::runtime::replaceAssets.emplace_back(assets);
+					}
+
+					replace_assetbundle_file_path_loaded = true;
+
+					LoadAssets();
+					il2cpp_thread_detach(t);
+				}).detach();
+		}
+		else
+		{
+			replace_assetbundle_file_path_loaded = true;
+			LoadAssets();
+		}
 		return;
 	}
 
@@ -111,34 +147,44 @@ static void LoadAssets()
 				assetbundlePath.insert(0, filesystem::current_path().wstring().append(L"/"));
 			}
 
-			wstringstream ss;
-			ss << L"Loading replacement AssetBundle: " << assetbundlePath << L"... ";
-			wcout << ss.str();
-			il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, Il2CppString*)>(text->klass, "set_text", 1)->methodPointer(text, il2cpp_string_new16(ss.str().data()));
+			if (filesystem::exists(assetbundlePath))
+			{
+				wstringstream ss;
+				ss << L"Loading replacement AssetBundle: " << assetbundlePath << L"... ";
+				wcout << ss.str();
+				il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, Il2CppString*)>(text->klass, "set_text", 1)->methodPointer(text, il2cpp_string_new16(ss.str().data()));
 
-			std::thread([text, assetbundlePath]()
-				{
-					Sleep(100);
-
-					auto t = il2cpp_thread_attach(il2cpp_domain_get());
-					auto assets = UnityEngine::AssetBundle::LoadFromFile(il2cpp_string_new_utf16(assetbundlePath.data(), assetbundlePath.length()));
-
-					if (!assets && filesystem::exists(assetbundlePath))
+				std::thread([text, assetbundlePath]()
 					{
-						wcout << L"Replacement AssetBundle founded but not loaded. Maybe Asset BuildTarget is not for Windows" << endl;
-					}
-					else if (assets)
-					{
-						wcout << L"OK: " << assets.NativeObject() << endl;
-						config::runtime::replaceAssets.emplace_back(assets);
-					}
+						Sleep(100);
 
-					it++;
+						auto t = il2cpp_thread_attach(il2cpp_domain_get());
+						auto assets = UnityEngine::AssetBundle::LoadFromFile(il2cpp_string_new_utf16(assetbundlePath.data(), assetbundlePath.length()));
 
-					LoadAssets();
-					il2cpp_thread_detach(t);
-				}).detach();
-			return;
+						if (!assets)
+						{
+							if (filesystem::exists(assetbundlePath))
+							{
+								wcout << L"Replacement AssetBundle founded but not loaded. Maybe Asset BuildTarget is not for Windows" << endl;
+							}
+							else
+							{
+								wcout << endl;
+							}
+						}
+						else
+						{
+							wcout << L"OK: " << assets.NativeObject() << endl;
+							config::runtime::replaceAssets.emplace_back(assets);
+						}
+
+						it++;
+
+						LoadAssets();
+						il2cpp_thread_detach(t);
+					}).detach();
+				return;
+			}
 		}
 
 		replace_assetbundle_file_paths_loaded = true;
@@ -148,30 +194,19 @@ static void LoadAssets()
 	{
 		for (auto it = config::runtime::replaceAssets.begin(); it != config::runtime::replaceAssets.end(); it++)
 		{
-			auto names = UnityEngine::AssetBundle{ *it }.GetAllAssetNames();
-			for (int i = 0; i < names->max_length; i++)
+			if (*it)
 			{
-				config::runtime::replaceAssetNames.emplace_back(names->vector[i]->chars);
+				auto names = UnityEngine::AssetBundle{ *it }.GetAllAssetNames();
+				for (int i = 0; i < names->max_length; i++)
+				{
+					config::runtime::replaceAssetNames.emplace_back(names->vector[i]->chars);
+				}
 			}
 		}
 	}
 
-	Il2CppObject* enumerator = nullptr;
-
-	auto BootCoroutine = il2cpp_class_get_method_from_name_type<Il2CppObject * (*)(Il2CppObject*, bool)>(BootSystem->klass, "BootCoroutine", 1);
-	if (BootCoroutine)
-	{
-		auto gameSystem = GetSingletonInstance(il2cpp_symbols::get_class("umamusume.dll", "Gallop", "GameSystem"));
-		auto _systemStateField = il2cpp_class_get_field_from_name_wrap(gameSystem->klass, "_systemState");
-		uint64_t _systemState = 0;
-		il2cpp_field_get_value(gameSystem, _systemStateField, &_systemState);
-		enumerator = BootCoroutine->methodPointer(BootSystem, _systemState == 0);
-	}
-	else
-	{
-		enumerator = il2cpp_class_get_method_from_name_type<Il2CppObject * (*)(Il2CppObject*)>(BootSystem->klass, "BootCoroutine", 0)->methodPointer(BootSystem);
-	}
-	reinterpret_cast<Il2CppObject* (*)(Il2CppObject* self, Il2CppObject* enumerator)>(StartCoroutineManaged2_orig)(BootSystem, enumerator);
+	auto gameSystem = GetSingletonInstance(il2cpp_symbols::get_class("umamusume.dll", "Gallop", "GameSystem"));
+	il2cpp_symbols::get_method_pointer<void (*)(Il2CppObject*)>("umamusume.dll", "Gallop", "GameSystem", "SoftwareReset", 0)(gameSystem);
 #pragma endregion
 }
 

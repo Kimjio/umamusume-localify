@@ -30,7 +30,7 @@ static void PaymentUtility_OpenBuyJewelDialog_hook(Il2CppObject* self, Il2CppDel
 	il2cpp_field_set_value(self, PaymentUtility__autoScrollIdListField, autoScrollIdList);
 	il2cpp_field_set_value(self, PaymentUtility__removeAllOnFinishField, &removeAllOnFinish);
 
-	auto OnComplete = CreateDelegateWithClassStatic(il2cpp_symbols::get_class("mscorlib.dll", "System", "Action"), *[]() 
+	auto OnComplete = CreateDelegateWithClassStatic(il2cpp_symbols::get_class("mscorlib.dll", "System", "Action"), *[]()
 		{
 			auto paymentUtility = Gallop::PaymentUtility::Instance();
 			Gallop::PaymentUtility::Instance().OpenBuyJewelDialog(_evacuationCanvas);

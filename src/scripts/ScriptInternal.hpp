@@ -101,6 +101,18 @@ static void InvokeDelegateConstructor(Il2CppDelegate* delegate, Il2CppObject* ta
 	ctor->invoker_method(ctor->methodPointer, ctor, delegate, ctorArgs, nullptr);
 }
 
+static void InvokeDelegateConstructor2020(Il2CppDelegate2020* delegate, Il2CppObject* target, const MethodInfo2020* method)
+{
+	const MethodInfo2020* ctor = reinterpret_cast<const MethodInfo2020*>(il2cpp_class_get_method_from_name(delegate->object.klass, ".ctor", 2));
+
+	if (!ctor) {
+		return;
+	}
+
+	void* ctorArgs[2] = { target, reinterpret_cast<void*>(&method) };
+	ctor->invoker_method(ctor->methodPointer, reinterpret_cast<const MethodInfo*>(ctor), delegate, ctorArgs);
+}
+
 template<typename... T, typename R>
 inline Il2CppMulticastDelegate* CreateDelegateWithClass(Il2CppClass* klass, Il2CppObject* target, R(*fn)(Il2CppObject*, T...))
 {
@@ -156,7 +168,7 @@ inline Il2CppMulticastDelegate* CreateDelegateWithClass(Il2CppClass* klass, Il2C
 		delegate->delegate.method = reinterpret_cast<const MethodInfo2020*>(il2cpp_method_get_object(
 			reinterpret_cast<const MethodInfo*>(methodInfo), methodInfo->klass));
 
-		// InvokeDelegateConstructor(reinterpret_cast<Il2CppDelegate*>(&delegate->delegate), target, reinterpret_cast<const MethodInfo*>(methodInfo));
+		InvokeDelegateConstructor2020(&delegate->delegate, target, methodInfo);
 
 		delegate->delegates = il2cpp_array_new(klass, 1);
 		il2cpp_array_setref(delegate->delegates, 0, &delegate->delegate);
@@ -225,7 +237,7 @@ inline Il2CppDelegate* CreateDelegate(Il2CppObject* target, R(*fn)(Il2CppObject*
 		delegate->method = reinterpret_cast<const MethodInfo2020*>(il2cpp_method_get_object(
 			reinterpret_cast<const MethodInfo*>(methodInfo), methodInfo->klass));
 
-		// InvokeDelegateConstructor(reinterpret_cast<Il2CppDelegate*>(delegate), target, reinterpret_cast<const MethodInfo*>(methodInfo));
+		InvokeDelegateConstructor2020(delegate, target, methodInfo);
 
 		auto object = reinterpret_cast<Il2CppObject*>(delegate);
 
@@ -294,7 +306,7 @@ inline Il2CppMulticastDelegate* CreateUnityAction(Il2CppObject* target, R(*fn)(I
 		delegate->delegate.method = reinterpret_cast<const MethodInfo2020*>(il2cpp_method_get_object(
 			reinterpret_cast<const MethodInfo*>(methodInfo), methodInfo->klass));
 
-		// InvokeDelegateConstructor(reinterpret_cast<Il2CppDelegate*>(&delegate->delegate), target, reinterpret_cast<const MethodInfo*>(methodInfo));
+		InvokeDelegateConstructor2020(&delegate->delegate, target, methodInfo);
 
 		delegate->delegates = il2cpp_array_new(delegateClass, 1);
 		il2cpp_array_setref(delegate->delegates, 0, &delegate->delegate);
@@ -347,7 +359,7 @@ inline Il2CppReflectionMethod* GetRuntimeMethodInfo(R(*fn)(void*, T...))
 }
 
 template<typename... T, typename R>
-inline Il2CppMulticastDelegate* CreateDelegateWithClassStatic(Il2CppClass* klass, R(*fn)(void*, T...))
+inline Il2CppMulticastDelegate* CreateDelegateWithClassStatic(Il2CppClass* klass, R(*fn)(T...))
 {
 	if (Game::CurrentUnityVersion == Game::UnityVersion::Unity22)
 	{
@@ -399,7 +411,7 @@ inline Il2CppMulticastDelegate* CreateDelegateWithClassStatic(Il2CppClass* klass
 		delegate->delegate.method = reinterpret_cast<const MethodInfo2020*>(il2cpp_method_get_object(
 			reinterpret_cast<const MethodInfo*>(methodInfo), methodInfo->klass));
 
-		// InvokeDelegateConstructor(reinterpret_cast<Il2CppDelegate*>(&delegate->delegate), nullptr, reinterpret_cast<const MethodInfo*>(methodInfo));
+		InvokeDelegateConstructor2020(&delegate->delegate, nullptr, methodInfo);
 
 		delegate->delegates = il2cpp_array_new(klass, 1);
 		il2cpp_array_setref(delegate->delegates, 0, &delegate->delegate);
@@ -466,7 +478,7 @@ inline Il2CppDelegate* CreateDelegateStatic(R(*fn)(void*, T...))
 		delegate->method = reinterpret_cast<const MethodInfo2020*>(il2cpp_method_get_object(
 			reinterpret_cast<const MethodInfo*>(methodInfo), methodInfo->klass));
 
-		// InvokeDelegateConstructor(reinterpret_cast<Il2CppDelegate*>(delegate), nullptr, reinterpret_cast<const MethodInfo*>(methodInfo));
+		InvokeDelegateConstructor2020(delegate, nullptr, methodInfo);
 
 		return reinterpret_cast<Il2CppDelegate*>(delegate);
 	}
@@ -533,7 +545,7 @@ inline Il2CppMulticastDelegate* CreateUnityActionStatic(R(*fn)(void*, T...))
 		delegate->delegate.method = reinterpret_cast<const MethodInfo2020*>(il2cpp_method_get_object(
 			reinterpret_cast<const MethodInfo*>(methodInfo), methodInfo->klass));
 
-		// InvokeDelegateConstructor(reinterpret_cast<Il2CppDelegate*>(&delegate->delegate), nullptr, reinterpret_cast<const MethodInfo*>(methodInfo));
+		InvokeDelegateConstructor2020(&delegate->delegate, nullptr, methodInfo);
 
 		delegate->delegates = il2cpp_array_new(delegateClass, 1);
 		il2cpp_array_setref(delegate->delegates, 0, &delegate->delegate);
