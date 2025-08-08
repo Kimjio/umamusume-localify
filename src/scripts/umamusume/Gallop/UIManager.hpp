@@ -65,6 +65,8 @@ namespace Gallop
 
 		void UnlockAllCanvas();
 
+		void ChangeResolution();
+
 		Il2CppObject* WaitResizeUI(bool isPortrait, bool isShowOrientationGuide = false);
 
 		Il2CppArraySize_t<Il2CppObject*>* GetCanvasScalerList();

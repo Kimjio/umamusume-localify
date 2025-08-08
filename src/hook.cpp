@@ -111,6 +111,8 @@
 #include "scripts/umamusume/Gallop/LowResolutionCameraUtil.hpp"
 #include "scripts/umamusume/Gallop/WebViewManager.hpp"
 #include "scripts/umamusume/Gallop/TitleViewController.hpp"
+#include "scripts/umamusume/Gallop/Screen.hpp"
+#include "scripts/umamusume/Gallop/GameSystem.hpp"
 #ifdef _MSC_VER
 #include "scripts/umamusume/Gallop/StandaloneWindowResize.hpp"
 #endif
@@ -1933,6 +1935,8 @@ namespace
 
 	constexpr float ratio_16_9 = 1.778f;
 	constexpr float ratio_9_16 = 0.563f;
+	constexpr float ratio_4_3 = 1.333f;
+	constexpr float ratio_3_4 = 0.75f;
 
 	int last_display_width = 0, last_display_height = 0;
 	int last_virt_window_width = 0, last_virt_window_height = 0;
@@ -1962,6 +1966,11 @@ namespace
 		if (!config::freeform_window)
 		{
 			int w = max(last_display_width, last_display_height), h = min(last_display_width, last_display_height);
+
+			if (Gallop::Screen::IsSplitWindow())
+			{
+				return h * ratio_4_3;
+			}
 
 			return Gallop::StandaloneWindowResize::IsVirt() ? w : h;
 		}
@@ -2715,7 +2724,7 @@ namespace
 		try
 		{
 			// auto uiManager = Gallop::UIManager::Instance();
-			auto gameSystem = GetSingletonInstance(il2cpp_symbols::get_class("umamusume.dll", "Gallop", "GameSystem"));
+			auto gameSystem = Gallop::GameSystem::Instance();
 			il2cpp_symbols::get_method_pointer<void (*)(Il2CppObject*, Il2CppDelegate*)>("umamusume.dll", "Gallop", "MonoBehaviourExtension", "WaitForEndFrame", 2)(gameSystem, CreateDelegateStatic(fn));
 		}
 		catch (const Il2CppExceptionWrapper& e)
@@ -2731,7 +2740,7 @@ namespace
 		{
 			// auto uiManager = Gallop::UIManager::Instance();
 			auto delegate = &CreateUnityAction(target, fn)->delegate;
-			auto gameSystem = GetSingletonInstance(il2cpp_symbols::get_class("umamusume.dll", "Gallop", "GameSystem"));
+			auto gameSystem = Gallop::GameSystem::Instance();
 			il2cpp_symbols::get_method_pointer<void (*)(Il2CppObject*, Il2CppDelegate*)>("umamusume.dll", "Gallop", "MonoBehaviourExtension", "WaitForEndFrame", 2)(gameSystem, delegate);
 		}
 		catch (const Il2CppExceptionWrapper& e)
@@ -2838,7 +2847,7 @@ namespace
 
 						bool isPortrait = contentWidth < contentHeight;
 
-						il2cpp_symbols::get_method_pointer<void (*)(bool)>("umamusume.dll", "Gallop", "StandaloneWindowResize", "set_IsVirt", 1)(isPortrait);
+						Gallop::StandaloneWindowResize::IsVirt(isPortrait);
 
 						auto GallopScreen = il2cpp_symbols::get_class("umamusume.dll", "Gallop", "Screen");
 
@@ -3317,7 +3326,7 @@ namespace
 	{
 		reinterpret_cast<decltype(RectTransform_get_rect_Injected_hook)*>(RectTransform_get_rect_Injected_orig)(_this, rect);
 
-		if (il2cpp_symbols::get_method_pointer<bool (*)()>("umamusume.dll", "Gallop", "GameSystem", "IsExecutingSoftwareReset", IgnoreNumberOfArguments)())
+		if (Gallop::GameSystem::IsExecutingSoftwareReset())
 		{
 			if (isRequestChangeResolution || config::freeform_window && Gallop::StandaloneWindowResize::IsVirt())
 			{
@@ -4451,6 +4460,11 @@ namespace
 
 	bool StepTrainingItem(WPARAM wParam)
 	{
+		if (Game::CurrentGameStore == Game::Store::Steam)
+		{
+			return false;
+		}
+
 		bool keydownNumber = 0 < (wParam - 48) && (wParam - 48) <= 9;
 		if (!(wParam == VK_LEFT || wParam == VK_RIGHT || wParam == VK_RETURN || keydownNumber))
 		{
@@ -5314,95 +5328,98 @@ namespace
 		if (uMsg == WM_SYSKEYDOWN)
 		{
 			bool altDown = (lParam & (static_cast<long long>(1) << 29)) != 0;
-			if ((config::auto_fullscreen || config::unlock_size || config::freeform_window) &&
-				wParam == VK_RETURN &&
-				altDown &&
-				!altEnterPressed)
+			if (Game::CurrentGameStore != Game::Store::Steam || config::freeform_window)
 			{
-				altEnterPressed = true;
-
-				UnityEngine::Resolution r;
-				get_resolution(&r);
-
-				auto display = display_get_main();
-
-				auto rendering_ratio = static_cast<float>(get_rendering_width(display)) / static_cast<float>(get_rendering_height(display));
-				rendering_ratio *= 1000;
-				rendering_ratio = roundf(rendering_ratio) / 1000;
-
-				auto system_ratio = static_cast<float>(get_system_width(display)) / static_cast<float>(get_system_height(display));
-				system_ratio *= 1000;
-				system_ratio = roundf(system_ratio) / 1000;
-
-				if ((!Gallop::StandaloneWindowResize::IsVirt() && rendering_ratio == system_ratio) ||
-					config::freeform_window)
+				if ((config::auto_fullscreen || config::unlock_size || config::freeform_window) &&
+					wParam == VK_RETURN &&
+					altDown &&
+					!altEnterPressed)
 				{
-					if (!fullScreenFlOverride)
+					altEnterPressed = true;
+
+					UnityEngine::Resolution r;
+					get_resolution(&r);
+
+					auto display = display_get_main();
+
+					auto rendering_ratio = static_cast<float>(get_rendering_width(display)) / static_cast<float>(get_rendering_height(display));
+					rendering_ratio *= 1000;
+					rendering_ratio = roundf(rendering_ratio) / 1000;
+
+					auto system_ratio = static_cast<float>(get_system_width(display)) / static_cast<float>(get_system_height(display));
+					system_ratio *= 1000;
+					system_ratio = roundf(system_ratio) / 1000;
+
+					if ((!Gallop::StandaloneWindowResize::IsVirt() && rendering_ratio == system_ratio) ||
+						config::freeform_window)
 					{
-						fullScreenFlOverride = true;
-					}
-					fullScreenFl = !fullScreenFl;
-					if (config::unlock_size || config::freeform_window)
-					{
-						if (!fullScreenFl)
+						if (!fullScreenFlOverride)
 						{
-							if (isPortraitBeforeFullscreen)
+							fullScreenFlOverride = true;
+						}
+						fullScreenFl = !fullScreenFl;
+						if (config::unlock_size || config::freeform_window)
+						{
+							if (!fullScreenFl)
 							{
-								r.width = last_virt_window_width;
-								r.height = last_virt_window_height;
-								if (r.width > r.height)
+								if (isPortraitBeforeFullscreen)
 								{
-									r.width = last_virt_window_height;
-									r.height = last_virt_window_width;
+									r.width = last_virt_window_width;
+									r.height = last_virt_window_height;
+									if (r.width > r.height)
+									{
+										r.width = last_virt_window_height;
+										r.height = last_virt_window_width;
+									}
+								}
+								else
+								{
+									r.width = last_hriz_window_height;
+									r.height = last_hriz_window_width;
+									if (r.width < r.height)
+									{
+										r.width = last_hriz_window_width;
+										r.height = last_hriz_window_height;
+									}
 								}
 							}
 							else
 							{
-								r.width = last_hriz_window_height;
-								r.height = last_hriz_window_width;
-								if (r.width < r.height)
+								RECT windowRect;
+								GetClientRect(hWnd, &windowRect);
+								if (get_rendering_width(display) > get_rendering_height(display))
 								{
-									r.width = last_hriz_window_width;
-									r.height = last_hriz_window_height;
+									isPortraitBeforeFullscreen = false;
+									last_hriz_window_width = windowRect.right - windowRect.left;
+									last_hriz_window_height = windowRect.bottom - windowRect.top;
+								}
+								else
+								{
+									isPortraitBeforeFullscreen = true;
+									last_virt_window_width = windowRect.right - windowRect.left;
+									last_virt_window_height = windowRect.bottom - windowRect.top;
 								}
 							}
+						}
+						else if (!fullScreenFl)
+						{
+							r.width *= 0.825f;
+							r.height = r.width / config::runtime::ratioHorizontal;
+						}
+
+						if (Game::CurrentUnityVersion != Game::UnityVersion::Unity22)
+						{
+							reinterpret_cast<decltype(SetResolution_hook)*>(SetResolution_orig)(r.width, r.height, fullScreenFl ? 1 : 3, 0);
 						}
 						else
 						{
-							RECT windowRect;
-							GetClientRect(hWnd, &windowRect);
-							if (get_rendering_width(display) > get_rendering_height(display))
-							{
-								isPortraitBeforeFullscreen = false;
-								last_hriz_window_width = windowRect.right - windowRect.left;
-								last_hriz_window_height = windowRect.bottom - windowRect.top;
-							}
-							else
-							{
-								isPortraitBeforeFullscreen = true;
-								last_virt_window_width = windowRect.right - windowRect.left;
-								last_virt_window_height = windowRect.bottom - windowRect.top;
-							}
+							auto refreshRate = RefreshRate{ 0, 1 };
+							reinterpret_cast<decltype(SetResolution_Injected_hook)*>(SetResolution_Injected_orig)(r.width, r.height, fullScreenFl ? 1 : 3, &refreshRate);
 						}
 					}
-					else if (!fullScreenFl)
-					{
-						r.width *= 0.825f;
-						r.height = r.width / config::runtime::ratioHorizontal;
-					}
+					return TRUE;
 
-					if (Game::CurrentUnityVersion != Game::UnityVersion::Unity22)
-					{
-						reinterpret_cast<decltype(SetResolution_hook)*>(SetResolution_orig)(r.width, r.height, fullScreenFl ? 1 : 3, 0);
-					}
-					else
-					{
-						auto refreshRate = RefreshRate{ 0, 1 };
-						reinterpret_cast<decltype(SetResolution_Injected_hook)*>(SetResolution_Injected_orig)(r.width, r.height, fullScreenFl ? 1 : 3, &refreshRate);
-					}
 				}
-				return TRUE;
-
 			}
 
 			if (config::max_fps > -1 && wParam == 'F' && altDown)
@@ -5646,6 +5663,9 @@ namespace
 				float _aspectRatio = contentWidth / contentHeight;
 				il2cpp_field_static_set_value(_aspectRatioField, &_aspectRatio);
 
+				auto uiManager = Gallop::UIManager::Instance();
+				uiManager.ChangeResolution();
+
 				ResizeWebView();
 			}
 
@@ -5757,7 +5777,6 @@ namespace
 			float _aspectRatio = static_cast<float>(width) / static_cast<float>(height);
 			il2cpp_field_static_set_value(_aspectRatioField, &_aspectRatio);
 
-
 			auto uiManager = Gallop::UIManager::Instance();
 			if (uiManager)
 			{
@@ -5784,6 +5803,8 @@ namespace
 				"umamusume.dll", "Gallop",
 				"StandaloneWindowResize", "DisableMaximizebox", IgnoreNumberOfArguments
 			)();
+
+			uiManager.ChangeResolution();
 
 			ResizeWebView();
 
@@ -5869,7 +5890,13 @@ namespace
 
 	UnityEngine::Vector3 GallopInput_mousePosition_hook()
 	{
-		return il2cpp_symbols::get_method_pointer<UnityEngine::Vector3(*)()>("UnityEngine.InputLegacyModule.dll", "UnityEngine", "Input", "get_mousePosition", IgnoreNumberOfArguments)();
+		auto position = il2cpp_symbols::get_method_pointer<UnityEngine::Vector3(*)()>("UnityEngine.InputLegacyModule.dll", "UnityEngine", "Input", "get_mousePosition", IgnoreNumberOfArguments)();
+
+		if (Game::CurrentGameStore == Game::Store::Steam)
+		{
+			return position * Gallop::Screen::Height() / static_cast<float>(UnityEngine::Screen::height());
+		}
+		return position;
 	}
 
 	vector<Il2CppObject*> frameBuffers;
@@ -5887,7 +5914,9 @@ namespace
 		reinterpret_cast<decltype(GallopFrameBuffer_Initialize_hook)*>(GallopFrameBuffer_Initialize_orig)(_this, parent);
 	}
 
-	void GallopFrameBuffer_Initialize_hook2(Il2CppObject* _this, Il2CppObject* parent, bool copyUIFrameBuffer)
+	void* GallopFrameBuffer_Initialize2_orig = nullptr;
+
+	void GallopFrameBuffer_Initialize2_hook(Il2CppObject* _this, Il2CppObject* parent, bool copyUIFrameBuffer)
 	{
 		auto value = find(frameBuffers.begin(), frameBuffers.end(), _this);
 		if (value == frameBuffers.end())
@@ -5895,7 +5924,7 @@ namespace
 			frameBuffers.emplace_back(_this);
 		}
 
-		reinterpret_cast<decltype(GallopFrameBuffer_Initialize_hook2)*>(GallopFrameBuffer_Initialize_orig)(_this, parent, copyUIFrameBuffer);
+		reinterpret_cast<decltype(GallopFrameBuffer_Initialize2_hook)*>(GallopFrameBuffer_Initialize2_orig)(_this, parent, copyUIFrameBuffer);
 	}
 
 	void* GallopFrameBuffer_Release_orig = nullptr;
@@ -6038,6 +6067,12 @@ namespace
 	{
 		reinterpret_cast<decltype(TextMeshProUguiCommon_Awake_hook)*>(TextMeshProUguiCommon_Awake_orig)(_this);
 		auto customFont = GetCustomTMPFont();
+
+		if (!customFont)
+		{
+			return;
+		}
+
 		auto customFontMaterialField = il2cpp_class_get_field_from_name_wrap(customFont->klass, "material");
 		Il2CppObject* customFontMaterial;
 		il2cpp_field_get_value(customFont, customFontMaterialField, &customFontMaterial);
@@ -11969,7 +12004,7 @@ namespace
 
 		try
 		{
-			auto GameSystem = GetSingletonInstance(il2cpp_symbols::get_class("umamusume.dll", "Gallop", "GameSystem"));
+			auto GameSystem = Gallop::GameSystem::Instance();
 			if (GameSystem)
 			{
 				il2cpp_symbols::get_method_pointer<void (*)(Il2CppObject*, Il2CppDelegate*)>("umamusume.dll", "Gallop", "MonoBehaviourExtension", "WaitForEndFrame", 2)(GameSystem, tickFrameDelegate);
@@ -12195,7 +12230,7 @@ namespace
 		);
 
 		auto GallopInput_mousePosition_addr = il2cpp_symbols::get_method_pointer(
-			"umamusume.dll", "Gallop", "GallopInput", "mousePosition", IgnoreNumberOfArguments
+			"umamusume.dll", "Gallop", "GallopInput", "mousePosition", 0
 		);
 
 		auto GallopFrameBuffer_Initialize_addr = il2cpp_symbols::get_method_pointer(
@@ -12590,13 +12625,11 @@ namespace
 
 		if (config::unlock_size || config::freeform_window)
 		{
-			if (!GallopFrameBuffer_Initialize_addr)
-			{
-				GallopFrameBuffer_Initialize_addr = GallopFrameBuffer_Initialize2_addr;
-			}
 			ADD_HOOK(GallopFrameBuffer_Initialize, "Gallop.GallopFrameBuffer::Initialize at %p\n");
+			ADD_HOOK(GallopFrameBuffer_Initialize2, "Gallop.GallopFrameBuffer::Initialize2 at %p\n");
 			ADD_HOOK(GallopFrameBuffer_Release, "Gallop.GallopFrameBuffer::Release at %p\n");
 			ADD_HOOK(GallopFrameBuffer_ResizeRenderTexture, "Gallop.GallopFrameBuffer::ResizeRenderTexture at %p\n");
+			ADD_HOOK(GallopInput_mousePosition, "Gallop.GallopInput::mousePosition at %p\n");
 		}
 
 		if (config::freeform_window || Game::CurrentGameStore == Game::Store::Steam)
@@ -12610,7 +12643,6 @@ namespace
 			ADD_HOOK(StandaloneWindowResize_KeepAspectRatio, "Gallop.StandaloneWindowResize::KeepAspectRatio at %p\n");
 			ADD_HOOK(Screen_SetResolution, "Gallop.Screen::SetResolution at %p\n");
 			ADD_HOOK(Screen_IsCurrentOrientation, "Gallop.Screen::IsCurrentOrientation at %p\n");
-			ADD_HOOK(GallopInput_mousePosition, "Gallop.GallopInput::mousePosition at %p\n");
 
 			auto StandaloneWindowResize = il2cpp_symbols::get_class("umamusume.dll", "Gallop", "StandaloneWindowResize");
 			il2cpp_class_get_method_from_name_type<void (*)(bool)>(StandaloneWindowResize, "set_IsPreventReShape", 1)->methodPointer(true);
@@ -12943,17 +12975,20 @@ namespace
 
 		if (config::auto_fullscreen || config::unlock_size || config::freeform_window)
 		{
-			if (SetResolution_addr)
+			if (Game::CurrentGameStore != Game::Store::Steam || config::freeform_window)
 			{
-				ADD_HOOK(SetResolution, "UnityEngine.Screen.SetResolution(int, int, FullScreenMode, int) at %p\n");
+				if (SetResolution_addr)
+				{
+					ADD_HOOK(SetResolution, "UnityEngine.Screen.SetResolution(int, int, FullScreenMode, int) at %p\n");
+				}
+				ADD_HOOK(SetResolution_Injected, "UnityEngine.Screen.SetResolution_Injected(int, int, FullScreenMode, RefreshRate) at %p\n");
 			}
-			ADD_HOOK(SetResolution_Injected, "UnityEngine.Screen.SetResolution_Injected(int, int, FullScreenMode, RefreshRate) at %p\n");
 		}
 
 		if (config::unlock_size || config::freeform_window)
 		{
-			ADD_HOOK(gallop_get_screenheight, "Gallop.Screen::get_Height at %p\n");
 			ADD_HOOK(gallop_get_screenwidth, "Gallop.Screen::get_Width at %p\n");
+			ADD_HOOK(gallop_get_screenheight, "Gallop.Screen::get_Height at %p\n");
 
 			auto display = display_get_main();
 			if (config::initial_width > 72 && config::initial_height > 72)

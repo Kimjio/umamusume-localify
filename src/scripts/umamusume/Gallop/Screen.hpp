@@ -22,6 +22,8 @@ namespace Gallop
 
 		static bool IsSplitWindow();
 
+		static bool IsVertical();
+
 		static Il2CppObject* ChangeScreenOrientation(UnityEngine::ScreenOrientation targetOrientation, bool isForce);
 
 		static Il2CppObject* ChangeScreenOrientationLandscapeAsync();

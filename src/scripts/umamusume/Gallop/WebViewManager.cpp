@@ -391,6 +391,14 @@ static Il2CppString* Gallop_WebViewManager_GetUrl_hook(Il2CppObject* self, Gallo
 
 	auto serverUrl = il2cpp_symbols::get_method_pointer<Il2CppString * (*)()>(ASSEMBLY_NAME, "Gallop", "GameDefine", "get_ApplicationServerUrl", 0)();
 
+	if (Game::CurrentGameRegion == Game::Region::ENG &&
+		Game::CurrentGameStore == Game::Store::Steam)
+	{
+		auto newUrl = wstring(serverUrl->chars);
+		replaceAll(newUrl, L"api", L"webview");
+		serverUrl = il2cpp_string_new16(newUrl.data());
+	}
+
 	return il2cpp_symbols::get_method_pointer<Il2CppString * (*)(Il2CppString*, Il2CppString*, Il2CppString*)>("mscorlib.dll", "System", "String", "Concat", 3)(serverUrl, il2cpp_string_new(path.data()), url);
 }
 
@@ -926,10 +934,10 @@ static void Gallop_WebViewManager_SetMargin_hook(Il2CppObject* self, UnityEngine
 
 	if (Game::CurrentGameStore == Game::Store::Steam && !IsSplitWindow)
 	{
-		scaleFactor = (float)Gallop::Screen::Height() / Gallop::Screen::OriginalScreenHeight();
+		scaleFactor = Gallop::Screen::OriginalScreenWidth() / static_cast<float>(Gallop::Screen::OriginalScreenHeight());
 	}
 
-	vector = UnityEngine::Vector2{ (float)(Gallop::Screen::Width() / 2), (float)(Gallop::Screen::Height() / 2) + (float)num * scaleFactor };
+	vector = UnityEngine::Vector2{ static_cast<float>(Gallop::Screen::Width()) / 2, static_cast<float>(Gallop::Screen::Height()) / 2 + static_cast<float>(num) * scaleFactor };
 
 	float num2 = rectWebView.width * scaleFactor;
 	float num3 = rectWebView.height * scaleFactor;
@@ -944,46 +952,45 @@ static void Gallop_WebViewManager_SetMargin_hook(Il2CppObject* self, UnityEngine
 	{
 		if (IsSplitWindow)
 		{
-			num4 = (float)UnityEngine::Screen::width();
-			num5 = (float)UnityEngine::Screen::height();
+			num4 = static_cast<float>(UnityEngine::Screen::width());
+			num5 = static_cast<float>(UnityEngine::Screen::height());
 		}
 		else
 		{
-			num4 = (float)Gallop::Screen::OriginalScreenHeight();
-			num5 = (float)Gallop::Screen::OriginalScreenWidth();
+			num4 = static_cast<float>(Gallop::Screen::OriginalScreenHeight());
+			num5 = static_cast<float>(Gallop::Screen::OriginalScreenWidth());
 		}
 	}
 	else
 	{
-		num4 = (float)Gallop::Screen::OriginalScreenWidth();
-		num5 = (float)Gallop::Screen::OriginalScreenHeight();
+		num4 = static_cast<float>(Gallop::Screen::OriginalScreenWidth());
+		num5 = static_cast<float>(Gallop::Screen::OriginalScreenHeight());
 	}
-
-	float num6 = num4 / (float)Gallop::Screen::Width();
-	float num7 = num5 / (float)Gallop::Screen::Height();
+	float num6 = num4 / static_cast<float>(Gallop::Screen::Width());
+	float num7 = num5 / static_cast<float>(Gallop::Screen::Height());
 
 	if (Game::CurrentGameStore == Game::Store::Steam && IsSplitWindow)
 	{
 		auto mainRect = static_cast<UnityEngine::RectTransform>(UnityEngine::Behaviour(Gallop::UIManager::Instance()._mainCanvas()).transform()).rect();
 
-		float wRatio = num4 / 1920;
+		float wRatio = num4 / 1920.0f;
 
 		auto margin = ((mainRect.width * num7) - (rectWebView.width * num7)) / 2;
 
 		instance.CuteWebView().SetMargins(
-			((int)leftRect.width * wRatio) + (margin), // l
-			(int)(((float)rect.height - vector2.y) * num7), // t
+			(static_cast<int>(leftRect.width) * wRatio) + (margin), // l
+			static_cast<int>((static_cast<float>(rect.height) - vector2.y) * num7), // t
 			((evacuationRect.width * wRatio) + (_bandMenuRect.width * wRatio)) + (margin), // r
-			(int)(vector3.y * num7) // b
+			static_cast<int>(vector3.y * num7) // b
 		);
 	}
 	else
 	{
 		instance.CuteWebView().SetMargins(
-			(int)(vector2.x * num6), // l
-			(int)(((float)Gallop::Screen::Height() - vector2.y) * num7), // t
-			(int)(((float)Gallop::Screen::Width() - vector3.x) * num6), // r
-			(int)(vector3.y * num7) // b
+			static_cast<int>(ceilf(vector2.x * num6)), // l
+			static_cast<int>(ceilf((static_cast<float>(Gallop::Screen::Height()) - vector2.y) * num7)), // t
+			static_cast<int>(ceilf((static_cast<float>(Gallop::Screen::Width()) - vector3.x) * num6)), // r
+			static_cast<int>(ceilf(vector3.y * num7)) // b
 		);
 	}
 }

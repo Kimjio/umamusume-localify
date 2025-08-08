@@ -41,6 +41,11 @@ namespace UnityEngine
 {
 	Il2CppArraySize_t<Il2CppObject*>* Object::FindObjectsByType(Il2CppReflectionType* type, FindObjectsInactive findObjectsInactive, FindObjectsSortMode sortMode)
 	{
+		if (!FindObjectsByType_addr)
+		{
+			return FindObjectsOfType(type, findObjectsInactive == FindObjectsInactive::Include);
+		}
+
 		return reinterpret_cast<decltype(FindObjectsByType)*>(FindObjectsByType_addr)(type, findObjectsInactive, sortMode);
 	}
 

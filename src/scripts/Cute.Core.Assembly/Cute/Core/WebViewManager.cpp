@@ -565,15 +565,14 @@ static void Cute_Core_WebViewManager_SetMargins_hook(Il2CppObject* self, int lef
 
 			il2cpp_field_static_get_value(_originalScreenWidth_Field, &originalScreenWidth);
 
-			int width = UnityEngine::Screen::width();
-			scale = originalScreenWidth / static_cast<float>(width);
+			scale = originalScreenWidth / static_cast<float>(UnityEngine::Screen::width());
 		}
 	}
 
-	webViewBounds.left += static_cast<LONG>(leftMargin / scale);
-	webViewBounds.top += static_cast<LONG>(topMargin / scale);
-	webViewBounds.right -= static_cast<LONG>(rightMargin / scale);
-	webViewBounds.bottom -= static_cast<LONG>(bottomMargin / scale);
+	webViewBounds.left += static_cast<LONG>(ceilf(leftMargin / scale));
+	webViewBounds.top += static_cast<LONG>(ceilf(topMargin / scale));
+	webViewBounds.right -= static_cast<LONG>(ceilf(rightMargin / scale));
+	webViewBounds.bottom -= static_cast<LONG>(ceilf(bottomMargin / scale));
 
 	if (Cute::Core::WebViewManager::webviewController)
 	{

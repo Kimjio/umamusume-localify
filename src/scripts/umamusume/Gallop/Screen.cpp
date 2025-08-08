@@ -117,6 +117,7 @@ static void InitAddress()
 	get_OriginalScreenHeight_addr = il2cpp_symbols::get_method_pointer(ASSEMBLY_NAME, "Gallop", "Screen", "get_OriginalScreenHeight", 0);
 	set_OriginalScreenHeight_addr = il2cpp_symbols::get_method_pointer(ASSEMBLY_NAME, "Gallop", "Screen", "set_OriginalScreenHeight", 1);
 	get_IsSplitWindow_addr = il2cpp_symbols::get_method_pointer(ASSEMBLY_NAME, "Gallop", "Screen", "get_IsSplitWindow", 0);
+	get_IsVertical_addr = il2cpp_symbols::get_method_pointer(ASSEMBLY_NAME, "Gallop", "Screen", "get_IsVertical", 0);
 	ChangeScreenOrientation_addr = il2cpp_symbols::get_method_pointer(ASSEMBLY_NAME, "Gallop", "Screen", "ChangeScreenOrientation", 2);
 	ChangeScreenOrientationLandscapeAsync_addr = il2cpp_symbols::get_method_pointer(ASSEMBLY_NAME, "Gallop", "Screen", "ChangeScreenOrientationLandscapeAsync", 0);
 	ChangeScreenOrientationPortraitAsync_addr = il2cpp_symbols::get_method_pointer(ASSEMBLY_NAME, "Gallop", "Screen", "ChangeScreenOrientationPortraitAsync", 0);
@@ -191,6 +192,11 @@ namespace Gallop
 
 
 		return reinterpret_cast<bool (*)()>(get_IsSplitWindow_addr)();
+	}
+
+	bool Screen::IsVertical()
+	{
+		return reinterpret_cast<bool (*)()>(get_IsVertical_addr)();
 	}
 
 	Il2CppObject* Screen::ChangeScreenOrientation(UnityEngine::ScreenOrientation targetOrientation, bool isForce)

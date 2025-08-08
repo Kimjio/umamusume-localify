@@ -15,5 +15,10 @@ namespace UnityEngine
 		{
 			return Vector3(x * d, y * d, z * d);
 		}
+
+		Vector3 operator/(float d) const noexcept
+		{
+			return Vector3(x / d, y / d, z / d);
+		}
 	};
 }

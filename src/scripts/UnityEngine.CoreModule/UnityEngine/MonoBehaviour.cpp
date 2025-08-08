@@ -9,6 +9,8 @@
 
 #include "scripts/UnityEngine.AssetBundleModule/UnityEngine/AssetBundle.hpp"
 #include "scripts/umamusume/Gallop/UIManager.hpp"
+#include "scripts/umamusume/Gallop/GameSystem.hpp"
+#include "scripts/umamusume/Gallop/StandaloneWindowResize.hpp"
 
 #include "config/config.hpp"
 
@@ -205,8 +207,7 @@ static void LoadAssets()
 		}
 	}
 
-	auto gameSystem = GetSingletonInstance(il2cpp_symbols::get_class("umamusume.dll", "Gallop", "GameSystem"));
-	il2cpp_symbols::get_method_pointer<void (*)(Il2CppObject*)>("umamusume.dll", "Gallop", "GameSystem", "SoftwareReset", 0)(gameSystem);
+	Gallop::GameSystem::Instance().SoftwareReset();
 #pragma endregion
 }
 
@@ -223,20 +224,8 @@ static Il2CppObject* StartCoroutineManaged2_hook(Il2CppObject* self, Il2CppObjec
 
 		auto onComplete = *[]()
 			{
-				auto gameSystem = GetSingletonInstance(il2cpp_symbols::get_class("umamusume.dll", "Gallop", "GameSystem"));
-
-				auto InitializeGame = il2cpp_class_get_method_from_name_type<Il2CppObject * (*)(Il2CppObject*, Il2CppObject*)>(gameSystem->klass, "InitializeGame", 1);
-
-				if (!InitializeGame)
-				{
-					auto InitializeGame = il2cpp_class_get_method_from_name_type<Il2CppObject * (*)(Il2CppObject*)>(gameSystem->klass, "InitializeGame", 0);
-					reinterpret_cast<decltype(StartCoroutineManaged2_hook)*>(StartCoroutineManaged2_orig)(gameSystem, InitializeGame->methodPointer(gameSystem));
-				}
-				else
-				{
-					reinterpret_cast<decltype(StartCoroutineManaged2_hook)*>(StartCoroutineManaged2_orig)(gameSystem, InitializeGame->methodPointer(gameSystem, nullptr));
-				}
-
+				auto GameSystem = Gallop::GameSystem::Instance();
+				reinterpret_cast<decltype(StartCoroutineManaged2_hook)*>(StartCoroutineManaged2_orig)(GameSystem, GameSystem.InitializeGame(nullptr));
 
 				auto callback = CreateDelegateWithClassStatic(il2cpp_symbols::get_class("DOTween.dll", "DG.Tweening", "TweenCallback"), *([]()
 					{
@@ -348,6 +337,10 @@ static Il2CppObject* StartCoroutineManaged2_hook(Il2CppObject* self, Il2CppObjec
 
 		return reinterpret_cast<decltype(StartCoroutineManaged2_hook)*>(StartCoroutineManaged2_orig)(self, newEnumerator);
 	}*/
+	if (string(enumerator->klass->name).find("SoftwareResetAsync") != string::npos)
+	{
+		Gallop::StandaloneWindowResize::IsVirt(false);
+	}
 
 	if (config::freeform_window && string(enumerator->klass->name).find("ChangeOrientation") != string::npos)
 	{
