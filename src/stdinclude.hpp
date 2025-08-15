@@ -30,7 +30,7 @@
 
 #include "game.hpp"
 
-#define _EXPERIMENTS
+#include "experiments.h"
 
 #include "il2cpp/il2cpp_symbols.hpp"
 #include "il2cpp/il2cpp-api-functions.hpp"

@@ -21,7 +21,7 @@
 
 #include "il2cpp/il2cpp_symbols.hpp"
 
-#define _EXPERIMENTS
+#include "experiments.h"
 
 typedef rapidjson::GenericDocument<rapidjson::UTF16<>> WDocument;
 typedef rapidjson::GenericValue<rapidjson::UTF16<>> WValue;

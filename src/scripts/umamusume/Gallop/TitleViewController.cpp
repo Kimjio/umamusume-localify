@@ -374,9 +374,18 @@ static void PlaySfxUiDecideL01()
 	const auto AudioManager = GetSingletonInstance(il2cpp_symbols::get_class("umamusume.dll", "Gallop", "AudioManager"));
 
 	Cute::Cri::AudioPlayback res{};
+
+	if (auto legacy = il2cpp_class_get_method_from_name_type<Il2CppObject * (*)(Cute::Cri::AudioPlayback*, Il2CppObject*, uint64_t, bool, float, Il2CppObject*,
+		float, float, float, float, float, float, bool, float, uint64_t, int
+		)>(AudioManager->klass, "PlaySe", 14))
+	{
+		legacy->methodPointer(&res, AudioManager, 200000000L, false, 0.0, nullptr, 0.0, 10.0, 100.0, 0.0, 0.0, 1.0, false, 1.0, 0, INT_MAX);
+		return;
+	}
+
 	il2cpp_class_get_method_from_name_type<Il2CppObject* (*)(Cute::Cri::AudioPlayback*, Il2CppObject*, uint64_t, bool, float, Il2CppObject*,
 		float, float, float, float, float, float, float, float, float, bool, float, uint64_t, int
-		)>(AudioManager->klass, "PlaySe", 17)->methodPointer(&res, AudioManager, 200000000L, 0, 0.0, 0L, 0.0, 10.0, 100.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0, 1.0, 0, INT_MAX);
+		)>(AudioManager->klass, "PlaySe", 17)->methodPointer(&res, AudioManager, 200000000L, false, 0.0, nullptr, 0.0, 10.0, 100.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, false, 1.0, 0, INT_MAX);
 }
 
 static void TitleViewController_OnClickPushStart_hook(Il2CppObject* self)
@@ -399,16 +408,47 @@ static void TitleViewController_OnClickPushStart_hook(Il2CppObject* self)
 				"umamusume.dll", "Gallop", "LocalizeExtention", "Text", 1
 			);
 
-			il2cpp_symbols::get_method_pointer<Il2CppObject* (*)(Il2CppString*, Il2CppString*, Il2CppString*, uint64_t, Il2CppDelegate*, Il2CppDelegate*, bool, bool, Il2CppString*)>
-				("umamusume.dll", "Gallop", "DialogSimpleCheckNoWarning", "OpenMiddleOneButton", 9)(localizeextension_text(GetTextIdByName(L"Common0081")), il2cpp_string_new16(
-					(LocalifySettings::GetText("initial_disclaimer_1") + wstring(localizeextension_text(GetTextIdByName(L"Common187002"))->chars) + LocalifySettings::GetText("initial_disclaimer_2")).data()),
-					localizeextension_text(GetTextIdByName(L"Common187002")), GetTextIdByName(L"Common0007"),
-					CreateDelegateStatic(*[](void*, Il2CppObject* dialog)
-						{
-							il2cpp_symbols::get_method_pointer<void (*)(Il2CppObject*)>("umamusume.dll", "Gallop", "DialogCommon", "Close", 0)(GetFrontDialog());
-							il2cpp_symbols::get_method_pointer<void (*)(Il2CppString*, int)>("UnityEngine.CoreModule.dll", "UnityEngine", "PlayerPrefs", "SetInt", 2)(il2cpp_string_new("ReadDisclaimer"), 1);
-							il2cpp_symbols::get_method_pointer<void (*)()>("UnityEngine.CoreModule.dll", "UnityEngine", "PlayerPrefs", "Save", IgnoreNumberOfArguments)();
-						}), nullptr, false, true, nullptr);
+			if (il2cpp_symbols::get_class("umamusume.dll", "Gallop", "DialogSimpleCheckNoWarning"))
+			{
+				il2cpp_symbols::get_method_pointer<Il2CppObject* (*)(Il2CppString*, Il2CppString*, Il2CppString*, uint64_t, Il2CppDelegate*, Il2CppDelegate*, bool, bool, Il2CppString*)>
+					("umamusume.dll", "Gallop", "DialogSimpleCheckNoWarning", "OpenMiddleOneButton", 9)(localizeextension_text(GetTextIdByName(L"Common0081")), il2cpp_string_new16(
+						(LocalifySettings::GetText("initial_disclaimer_1") + wstring(localizeextension_text(GetTextIdByName(L"Common187002"))->chars) + LocalifySettings::GetText("initial_disclaimer_2")).data()),
+						localizeextension_text(GetTextIdByName(L"Common187002")), GetTextIdByName(L"Common0007"),
+						CreateDelegateStatic(*[](void*, Il2CppObject* dialog)
+							{
+								il2cpp_symbols::get_method_pointer<void (*)(Il2CppObject*)>("umamusume.dll", "Gallop", "DialogCommon", "Close", 0)(GetFrontDialog());
+								il2cpp_symbols::get_method_pointer<void (*)(Il2CppString*, int)>("UnityEngine.CoreModule.dll", "UnityEngine", "PlayerPrefs", "SetInt", 2)(il2cpp_string_new("ReadDisclaimer"), 1);
+								il2cpp_symbols::get_method_pointer<void (*)()>("UnityEngine.CoreModule.dll", "UnityEngine", "PlayerPrefs", "Save", IgnoreNumberOfArguments)();
+							}), nullptr, false, true, nullptr);
+			}
+			else
+			{
+				auto dialogData = il2cpp_object_new(
+					il2cpp_symbols::get_class("umamusume.dll", "Gallop", "DialogCommon/Data"));
+				il2cpp_runtime_object_init(dialogData);
+
+				dialogData = reinterpret_cast<Il2CppObject * (*)(Il2CppObject * thisObj,
+					ULONG headerTextId,
+					Il2CppString * message,
+					Il2CppDelegate * onClose,
+					ULONG closeTextId)>(
+						il2cpp_class_get_method_from_name(dialogData->klass, "SetSimpleOneButtonMessage",
+							4)->methodPointer
+						)(dialogData, GetTextIdByName(L"Common0081"), il2cpp_string_new16(
+							(LocalifySettings::GetText("initial_disclaimer_1") + wstring(localizeextension_text(GetTextIdByName(L"Common0150"))->chars) + LocalifySettings::GetText("initial_disclaimer_2")).data()), 
+							CreateDelegateStatic(*[](void*, Il2CppObject* dialog)
+								{
+									il2cpp_symbols::get_method_pointer<void (*)(Il2CppObject*)>("umamusume.dll", "Gallop", "DialogCommon", "Close", 0)(GetFrontDialog());
+									il2cpp_symbols::get_method_pointer<void (*)(Il2CppString*, int)>("UnityEngine.CoreModule.dll", "UnityEngine", "PlayerPrefs", "SetInt", 2)(il2cpp_string_new("ReadDisclaimer"), 1);
+									il2cpp_symbols::get_method_pointer<void (*)()>("UnityEngine.CoreModule.dll", "UnityEngine", "PlayerPrefs", "Save", IgnoreNumberOfArguments)();
+								}), GetTextIdByName(L"Common0150"));
+
+				auto AutoCloseField = il2cpp_class_get_field_from_name_wrap(dialogData->klass, "AutoClose");
+				bool AutoClose = false;
+
+				il2cpp_field_set_value(dialogData, AutoCloseField, &AutoClose);
+				il2cpp_symbols::get_method_pointer<Il2CppObject* (*)(Il2CppObject* data)>("umamusume.dll", "Gallop", "DialogManager", "PushDialog", 1)(dialogData);
+			}
 			return;
 		}
 

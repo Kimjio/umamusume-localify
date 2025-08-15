@@ -167,9 +167,7 @@ namespace MsgPackModify
 			auto chara_id = name.substr(32, 4);
 			auto body_type = name.substr(37, 2);
 
-			// stringstream ss;
-			// ss << setw(1) << setfill('0') << stoi(body_type) + 1;
-			metaDressIds.emplace_back(stoi(chara_id + body_type));
+			metaDressIds.emplace_back(stoi(chara_id + body_type) + 1);
 		}
 
 		sqlite3_finalize(mstmt1);

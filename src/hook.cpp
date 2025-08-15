@@ -3,6 +3,7 @@
 #include <stdinclude.hpp>
 
 #include <Shlobj.h>
+#include <ShObjIdl.h>
 
 #include <rapidjson/rapidjson.h>
 #include <rapidjson/error/en.h>
@@ -7712,6 +7713,131 @@ namespace
 		}
 	}
 
+	class CDialogEventHandler : public IFileDialogEvents
+	{
+	public:
+		// IUnknown methods
+		IFACEMETHODIMP QueryInterface(REFIID riid, void** ppv)
+		{
+			static const QITAB qit[] = {
+				QITABENT(CDialogEventHandler, IFileDialogEvents),
+				{ 0 },
+			};
+			return QISearch(this, qit, riid, ppv);
+		}
+
+		IFACEMETHODIMP_(ULONG) AddRef()
+		{
+			return InterlockedIncrement(&_cRef);
+		}
+
+		IFACEMETHODIMP_(ULONG) Release()
+		{
+			long cRef = InterlockedDecrement(&_cRef);
+			if (!cRef)
+				delete this;
+			return cRef;
+		}
+
+		// IFileDialogEvents methods
+		IFACEMETHODIMP OnFileOk(IFileDialog*) { return S_OK; };
+		IFACEMETHODIMP OnFolderChange(IFileDialog*) { return S_OK; };
+		IFACEMETHODIMP OnFolderChanging(IFileDialog*, IShellItem*) { return S_OK; };
+		IFACEMETHODIMP OnHelp(IFileDialog*) { return S_OK; };
+		IFACEMETHODIMP OnSelectionChange(IFileDialog*) { return S_OK; };
+		IFACEMETHODIMP OnShareViolation(IFileDialog*, IShellItem*, FDE_SHAREVIOLATION_RESPONSE*) { return S_OK; };
+		IFACEMETHODIMP OnTypeChange(IFileDialog* pfd) { return S_OK; };
+		IFACEMETHODIMP OnOverwrite(IFileDialog*, IShellItem*, FDE_OVERWRITE_RESPONSE*) { return S_OK; };
+
+		// IFileDialogControlEvents methods
+		IFACEMETHODIMP OnItemSelected(IFileDialogCustomize* pfdc, DWORD dwIDCtl, DWORD dwIDItem) { return S_OK; };
+		IFACEMETHODIMP OnButtonClicked(IFileDialogCustomize*, DWORD) { return S_OK; };
+		IFACEMETHODIMP OnCheckButtonToggled(IFileDialogCustomize*, DWORD, BOOL) { return S_OK; };
+		IFACEMETHODIMP OnControlActivating(IFileDialogCustomize*, DWORD) { return S_OK; };
+
+		CDialogEventHandler() : _cRef(1) {};
+	private:
+		~CDialogEventHandler() {};
+		long _cRef;
+	};
+
+	// Instance creation helper
+	HRESULT CDialogEventHandler_CreateInstance(REFIID riid, void** ppv)
+	{
+		*ppv = NULL;
+		CDialogEventHandler* pDialogEventHandler = new (std::nothrow) CDialogEventHandler();
+		HRESULT hr = pDialogEventHandler ? S_OK : E_OUTOFMEMORY;
+		if (SUCCEEDED(hr))
+		{
+			hr = pDialogEventHandler->QueryInterface(riid, ppv);
+			pDialogEventHandler->Release();
+		}
+		return hr;
+	}
+
+	PWSTR FolderOpen()
+	{
+		PWSTR pszFilePath = NULL;
+		// CoCreate the File Open Dialog object.
+		IFileDialog* pfd = NULL;
+		HRESULT hr = CoCreateInstance(CLSID_FileOpenDialog,
+			NULL,
+			CLSCTX_INPROC_SERVER,
+			IID_PPV_ARGS(&pfd));
+		if (SUCCEEDED(hr))
+		{
+			// Create an event handling object, and hook it up to the dialog.
+			wil::com_ptr<IFileDialogEvents> pfde;
+			hr = CDialogEventHandler_CreateInstance(IID_PPV_ARGS(&pfde));
+			if (SUCCEEDED(hr))
+			{
+				// Hook up the event handler.
+				DWORD dwCookie;
+				hr = pfd->Advise(pfde.get(), &dwCookie);
+				if (SUCCEEDED(hr))
+				{
+					// Set the options on the dialog.
+					DWORD dwFlags;
+
+					// Before setting, always get the options first in order 
+					// not to override existing options.
+					hr = pfd->GetOptions(&dwFlags);
+					if (SUCCEEDED(hr))
+					{
+						// In this case, get shell items only for file system items.
+						hr = pfd->SetOptions(dwFlags | FOS_PICKFOLDERS | FOS_FILEMUSTEXIST | FOS_FORCEFILESYSTEM);
+						if (SUCCEEDED(hr))
+						{
+							// Show the dialog
+							hr = pfd->Show(NULL);
+							if (SUCCEEDED(hr))
+							{
+								// Obtain the result once the user clicks 
+								// the 'Open' button.
+								// The result is an IShellItem object.
+								IShellItem* psiResult;
+								hr = pfd->GetResult(&psiResult);
+								if (SUCCEEDED(hr))
+								{
+									// We are just going to print out the 
+									// name of the file for sample sake.
+									hr = psiResult->GetDisplayName(SIGDN_FILESYSPATH,
+										&pszFilePath);
+									psiResult->Release();
+								}
+							}
+						}
+					}
+					// Unhook the event handler.
+					pfd->Unadvise(dwCookie);
+				}
+				pfde->Release();
+			}
+			pfd->Release();
+		}
+		return pszFilePath;
+	}
+
 	Il2CppObject* selectOptionDialog;
 
 	function<void(int)> optionSelected;
@@ -9426,18 +9552,14 @@ namespace
 				Il2CppString* persistentDataPath;
 				il2cpp_field_static_get_value(persistentDataPathField, &persistentDataPath);
 
-				auto result = il2cpp_symbols::get_method_pointer<Il2CppArraySize_t<Il2CppString*>*(*)(Il2CppString*, Il2CppString*, bool)>("Plugins.dll", "SFB", "StandaloneFileBrowser", "OpenFolderPanel", 3)(nullptr, persistentDataPath, false);
+				auto result = FolderOpen();
 
-				if (result && result->max_length > 0)
+				if (result)
 				{
-					auto path = result->vector[0];
-					if (path)
-					{
-						wstring pathW = path->chars;
-						AddOrSetString(config::config_document, L"persistentDataPath", pathW.data());
-						auto textCommon = GetTextCommon("persistent_data_path_detail_info");
-						SetTextCommonText(textCommon, pathW.data());
-					}
+					wstring pathW = result;
+					AddOrSetString(config::config_document, L"persistentDataPath", pathW.data());
+					auto textCommon = GetTextCommon("persistent_data_path_detail_info");
+					SetTextCommonText(textCommon, pathW.data());
 				}
 			}));
 
@@ -10718,6 +10840,29 @@ namespace
 		}
 	}
 
+	void* NowLoading_Show3_orig = nullptr;
+
+	void NowLoading_Show3_hook(Il2CppObject* _this, int type, Il2CppDelegate* onComplete, Il2CppObject* overrideDuration)
+	{
+		// NowLoadingOrientation
+		if (type == 2 && (config::freeform_window || !config::ui_loading_show_orientation_guide))
+		{
+			// NowLoadingTips
+			type = 0;
+		}
+		if (!config::hide_now_loading)
+		{
+			reinterpret_cast<decltype(NowLoading_Show3_hook)*>(NowLoading_Show3_orig)(
+				_this,
+				type,
+				onComplete, overrideDuration);
+		}
+		if (onComplete && config::hide_now_loading)
+		{
+			reinterpret_cast<void (*)(Il2CppObject*)>(onComplete->method_ptr)(onComplete->target);
+		}
+	}
+
 	void* NowLoading_Hide_orig = nullptr;
 
 	void NowLoading_Hide_hook(Il2CppObject* _this, Il2CppDelegate* onComplete, Il2CppObject* overrideDuration, int easeType, Il2CppDelegate* onUnloadCustomEffectResourcesComplete)
@@ -10725,6 +10870,20 @@ namespace
 		if (!config::hide_now_loading)
 		{
 			reinterpret_cast<decltype(NowLoading_Hide_hook)*>(NowLoading_Hide_orig)(_this, onComplete, overrideDuration, easeType, onUnloadCustomEffectResourcesComplete);
+		}
+		if (onComplete && config::hide_now_loading)
+		{
+			reinterpret_cast<void (*)(Il2CppObject*)>(onComplete->method_ptr)(onComplete->target);
+		}
+	}
+
+	void* NowLoading_Hide1_orig = nullptr;
+
+	void NowLoading_Hide1_hook(Il2CppObject* _this, Il2CppDelegate* onComplete)
+	{
+		if (!config::hide_now_loading)
+		{
+			reinterpret_cast<decltype(NowLoading_Hide1_hook)*>(NowLoading_Hide1_orig)(_this, onComplete);
 		}
 		if (onComplete && config::hide_now_loading)
 		{
@@ -13151,11 +13310,18 @@ namespace
 
 		if (!config::unlock_live_chara)
 		{
-			auto path = wide_u8(il2cpp_symbols::get_method_pointer<Il2CppString * (*)()>("Cute.Core.Assembly.dll", "Cute.Core", "Device", "GetPersistentDataPath", IgnoreNumberOfArguments)()->chars);
-
-			if (filesystem::exists(path + R"(\master\master_orig.mdb)"))
+			try
 			{
-				filesystem::remove_all(path + R"(\master)");
+				auto path = wide_u8(il2cpp_symbols::get_method_pointer<Il2CppString * (*)()>("Cute.Core.Assembly.dll", "Cute.Core", "Device", "GetPersistentDataPath", 0)()->chars);
+
+				if (filesystem::exists(path + R"(\master\master_orig.mdb)"))
+				{
+					filesystem::remove_all(path + R"(\master)");
+				}
+			}
+			catch (const exception& ex)
+			{
+				wcerr << L"Failed to remove master_orig.mdb: " << ex.what() << endl;
 			}
 		}
 
@@ -13458,6 +13624,11 @@ namespace
 
 						auto UserCharaClass = il2cpp_symbols::get_class("umamusume.Http.dll", "Gallop", "UserChara");
 
+						if (!UserCharaClass)
+						{
+							UserCharaClass = il2cpp_symbols::get_class("umamusume.dll", "Gallop", "UserChara");
+						}
+
 						for (auto& chara : charaList)
 						{
 							auto userChara = il2cpp_object_new(UserCharaClass);
@@ -13475,8 +13646,11 @@ namespace
 							il2cpp_field_set_value(userChara, love_point_field, &love_point);
 
 							auto love_point_pool_field = il2cpp_class_get_field_from_name_wrap(userChara->klass, "love_point_pool");
-							int love_point_pool = chara["love_point_pool"].int32_value();
-							il2cpp_field_set_value(userChara, love_point_pool_field, &love_point_pool);
+							if (love_point_pool_field)
+							{
+								int love_point_pool = chara["love_point_pool"].int32_value();
+								il2cpp_field_set_value(userChara, love_point_pool_field, &love_point_pool);
+							}
 
 							auto fan_field = il2cpp_class_get_field_from_name_wrap(userChara->klass, "fan");
 							uint64_t fan = chara["fan"].uint64_value();
