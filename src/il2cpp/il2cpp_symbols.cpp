@@ -148,13 +148,14 @@ namespace il2cpp_symbols
 		PWSTR versionInfo = nullptr;
 
 		VerQueryValueW(versionInfoBuffer.data(), L"\\", reinterpret_cast<void**>(&pVSFileInfo), &versionInfoSize);
-		
+
 		if (!pVSFileInfo)
 		{
 			return;
 		}
-		
+
 		auto major = HIWORD(pVSFileInfo->dwProductVersionMS);
+		auto patch = HIWORD(pVSFileInfo->dwProductVersionLS);
 
 		switch (major)
 		{
@@ -180,8 +181,17 @@ namespace il2cpp_symbols
 		}
 		else if (Game::CurrentUnityVersion == Game::UnityVersion::Unity22)
 		{
-			// 2022.3.20f
-			startRva = 0x7834A2;
+			switch (patch)
+			{
+			case 62:
+				// 2022.3.62f
+				startRva = 0x782C12;
+				break;
+			default:
+				// 2022.3.20f
+				startRva = 0x7834A2;
+				break;
+			}
 		}
 		else
 		{
@@ -211,6 +221,7 @@ namespace il2cpp_symbols
 			vector<const char*> symbol_names;
 
 #define DO_API(r, n, p) symbol_names.emplace_back(#n)
+#define DO_API_NEW(r, n, p) if (patch >= 62) symbol_names.emplace_back(#n)
 			// PROFILER is only used in debug builds
 #undef IL2CPP_ENABLE_PROFILER
 #define IL2CPP_ENABLE_PROFILER 0
@@ -228,6 +239,7 @@ namespace il2cpp_symbols
 #undef IL2CPP_ENABLE_PROFILER
 #define IL2CPP_ENABLE_PROFILER !IL2CPP_TINY
 #undef DO_API
+#undef DO_API_NEW
 
 			for (auto name : symbol_names)
 			{
@@ -286,7 +298,6 @@ namespace il2cpp_symbols
 	void init(HMODULE game_module)
 	{
 		init_functions(game_module);
-		//il2cpp_domain = il2cpp_domain_get();
 	}
 
 	void call_init_callbacks()

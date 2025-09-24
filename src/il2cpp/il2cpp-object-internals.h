@@ -121,6 +121,11 @@ typedef struct Il2CppString
     Il2CppObject object;
     int32_t length;                             ///< Length of string *excluding* the trailing null (which is included in 'chars').
     Il2CppChar chars[IL2CPP_ZERO_LEN_ARRAY];
+
+    operator Il2CppChar*()
+    {
+		return chars;
+    }
 } Il2CppString;
 
 #if IL2CPP_COMPILER_MSVC
