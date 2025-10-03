@@ -32,6 +32,8 @@
 #include <propkey.h>
 #include <propvarutil.h>
 
+#include <fstream>
+
 #include <WebView2.h>
 #include <WebView2EnvironmentOptions.h>
 
@@ -177,6 +179,32 @@ namespace
 		printf("\n\n");
 	}
 
+	void DecryptManifestDB()
+	{
+		auto CuteCoreDevice = il2cpp_symbols::get_class("Cute.Core.Assembly.dll", "Cute.Core", "Device");
+		Il2CppString* persistentDataPath = il2cpp_class_get_method_from_name_type<Il2CppString*(*)()>(CuteCoreDevice, "GetPersistentDataPath", 0)->methodPointer();
+
+		wstring path = persistentDataPath->chars + L"/meta"s;
+
+		ifstream file{ path, ios::binary };
+		string magic = string(16, '\0');
+		file.read(magic.data(), 16);
+
+		if (magic != "SQLite format 3")
+		{
+			sqlite3* db;
+			sqlite3_open(wide_u8(path).data(), &db);
+
+			sqlite3mc_config(db, "cipher", CODEC_TYPE_CHACHA20);
+
+			auto key = vector<char>{ 0x6D, 0x5B, 0x65, 0x33, 0x63, 0x36, 0x63, 0x25, 0x54, 0x71, 0x2D, 0x73, 0x50, 0x53, 0x63, 0x38, 0x6D, 0x34, 0x37, 0x7B, 0x35, 0x63, 0x70, 0x23, 0x37, 0x34, 0x53, 0x29, 0x73, 0x43, 0x36, 0x33 };
+			sqlite3_key(db, key.data(), key.size());
+			sqlite3_rekey(db, nullptr, 0);
+
+			sqlite3_close(db);
+		}
+	}
+
 	void* InitializeApplication_orig = nullptr;
 	void InitializeApplication_hook()
 	{
@@ -208,6 +236,8 @@ namespace
 				il2cpp_field_static_set_value(persistentDataPathField, il2cpp_string_new16(config::persistent_data_path.data()));
 			}
 		}
+
+		DecryptManifestDB();
 
 		patch_game_assembly();
 
@@ -1730,6 +1760,12 @@ namespace
 		}
 
 		return reinterpret_cast<decltype(sqlite3_finalize_hook)*>(sqlite3_finalize_orig)(pStmt);
+	}
+
+	int sqlite3_key_hook(sqlite3* db, const void* pKey, int nKey)
+	{
+		// no-op
+		return SQLITE_OK;
 	}
 
 	const unsigned char* sqlite3_column_text_hook(sqlite3_stmt* pStmt, int i)
@@ -12724,6 +12760,8 @@ namespace
 		ADD_HOOK(get_modified_string, "GallopUtil_GetModifiedString at %p\n");
 
 		ADD_HOOK(update, "DG.Tweening.Core.TweenManager::Update at %p\n");
+
+		ADD_HOOK(sqlite3_key, "Plugin::sqlite3_key at %p\n");
 
 		if (!config::replace_text_db_path.empty())
 		{
