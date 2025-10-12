@@ -1,6 +1,9 @@
 #include "il2cpp_symbols.hpp"
 
 #include <winver.h>
+#include <wincrypt.h>
+
+#include "Signature.h"
 
 #define DO_API(r, n, p) r (*n) p
 #include "il2cpp-api-functions_unified.h"
@@ -130,6 +133,99 @@ namespace il2cpp_symbols
 
 	std::vector<std::function<void()>> init_callbacks;
 
+	static bool HasValidCert(filesystem::path path)
+	{
+		HCERTSTORE hStore = nullptr;
+		HCRYPTMSG hMsg = nullptr;
+		BOOL fResult;
+		DWORD dwEncoding, dwContentType, dwFormatType;
+		DWORD dwSignerInfo;
+		CERT_INFO CertInfo{};
+
+		fResult = CryptQueryObject(CERT_QUERY_OBJECT_FILE,
+			path.wstring().data(),
+			CERT_QUERY_CONTENT_FLAG_PKCS7_SIGNED_EMBED,
+			CERT_QUERY_FORMAT_FLAG_BINARY,
+			0,
+			&dwEncoding,
+			&dwContentType,
+			&dwFormatType,
+			&hStore,
+			&hMsg,
+			nullptr);
+
+		if (fResult)
+		{
+			// Get signer information size.
+			fResult = CryptMsgGetParam(hMsg,
+				CMSG_SIGNER_INFO_PARAM,
+				0,
+				nullptr,
+				&dwSignerInfo);
+
+			if (fResult)
+			{
+				// Allocate memory for signer information.
+				PCMSG_SIGNER_INFO pSignerInfo = reinterpret_cast<PCMSG_SIGNER_INFO>(LocalAlloc(LPTR, dwSignerInfo));
+				if (pSignerInfo)
+				{
+					// Get Signer Information.
+					fResult = CryptMsgGetParam(hMsg,
+						CMSG_SIGNER_INFO_PARAM,
+						0,
+						(PVOID)pSignerInfo,
+						&dwSignerInfo);
+
+					if (fResult)
+					{
+						// Search for the signer certificate in the temporary
+						// certificate store.
+						CertInfo.Issuer = pSignerInfo->Issuer;
+						CertInfo.SerialNumber = pSignerInfo->SerialNumber;
+
+						PCCERT_CONTEXT pCertContext = CertFindCertificateInStore(hStore,
+							X509_ASN_ENCODING | PKCS_7_ASN_ENCODING,
+							0,
+							CERT_FIND_SUBJECT_CERT,
+							(PVOID)&CertInfo,
+							nullptr);
+
+						if (pCertContext)
+						{
+							DWORD dwData;
+
+							// Get Subject name size.
+							if (dwData = CertGetNameStringW(pCertContext,
+								CERT_NAME_SIMPLE_DISPLAY_TYPE,
+								0,
+								nullptr,
+								nullptr,
+								0))
+							{
+								// Allocate memory for subject name.
+								wstring subjectName;
+								subjectName.resize(dwData * sizeof(wchar_t));
+
+								// Get subject name.
+								if (CertGetNameStringW(pCertContext,
+									CERT_NAME_SIMPLE_DISPLAY_TYPE,
+									0,
+									nullptr,
+									subjectName.data(),
+									dwData))
+								{
+									return subjectName.starts_with(L"Unity Technologies");
+								}
+							}
+						}
+					}
+				}
+			}
+		}
+
+		return false;
+	}
+
 	void load_symbols(filesystem::path& path)
 	{
 		if (!config::fn_map.IsNull())
@@ -172,33 +268,11 @@ namespace il2cpp_symbols
 			break;
 		}
 
-		int startRva;
-
-		if (Game::CurrentUnityVersion == Game::UnityVersion::Unity20)
+		if (!HasValidCert(path))
 		{
-			// 2020.3.47f
-			startRva = 0x8984d4;
-		}
-		else if (Game::CurrentUnityVersion == Game::UnityVersion::Unity22)
-		{
-			switch (patch)
-			{
-			case 62:
-				// 2022.3.62f
-				startRva = 0x782C12;
-				break;
-			default:
-				// 2022.3.20f
-				startRva = 0x7834A2;
-				break;
-			}
-		}
-		else
-		{
+			// Modified UnityPlayer
 			return;
 		}
-
-		int rva = startRva;
 
 		try
 		{
@@ -214,9 +288,21 @@ namespace il2cpp_symbols
 			MEMORY_BASIC_INFORMATION memInfo;
 			VirtualQuery(view, &memInfo, sizeof(memInfo));
 
+			int startOffset = SigScanOffset("\x48\x83\xC4\x28\xC3\x48\x89\x5C\x24\x00\x48\x8d\x15", "xxxxxxxxx?xxx", memInfo);
+			int nextOffset = SigScanOffset("\x48\x8d\x15", "xxx", memInfo, startOffset);
+
+			int firstGap = nextOffset - startOffset;
+
+			int nextOffset2 = SigScanOffset("\x48\x8d\x15", "xxx", memInfo, nextOffset);
+
+			int gap = nextOffset2 - nextOffset;
+
 			stringstream stream{ string(reinterpret_cast<char*>(view), memInfo.RegionSize) };
 
 			auto base = pe_bliss::pe_base(stream, pe_bliss::pe_properties_64(), false);
+
+			int startRva = base.file_offset_to_rva(startOffset);
+			int rva = startRva;
 
 			vector<const char*> symbol_names;
 
@@ -273,14 +359,7 @@ namespace il2cpp_symbols
 					rapidjson::StringRef(real_name),
 					config::fn_map.GetAllocator());
 
-				if (Game::CurrentUnityVersion == Game::UnityVersion::Unity20)
-				{
-					rva += rva == startRva ? 0x35 : 0x30;
-				}
-				else
-				{
-					rva += rva == startRva ? 0x28 : 0x26;
-				}
+				rva += rva == startRva ? firstGap : gap;
 			}
 
 			UnmapViewOfFile(view);

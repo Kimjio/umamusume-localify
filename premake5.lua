@@ -95,6 +95,7 @@ workspace "umamusume-localify"
 		"ntdll",
 		"RuntimeObject",
 		"Version",
+		"Crypt32",
 		"./deps/discord_game_sdk/discord_game_sdk.dll.lib"
 	}
 
