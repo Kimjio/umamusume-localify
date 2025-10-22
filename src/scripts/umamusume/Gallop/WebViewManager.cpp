@@ -3,6 +3,7 @@
 #include "WebViewManager.hpp"
 #include "Screen.hpp"
 #include "UIManager.hpp"
+#include "DialogCommon.hpp"
 #include "../../UnityEngine.CoreModule/UnityEngine/Application.hpp"
 #include "../../UnityEngine.CoreModule/UnityEngine/Vector2.hpp"
 #include "../../UnityEngine.CoreModule/UnityEngine/Vector4.hpp"
@@ -26,140 +27,133 @@ using namespace Microsoft::WRL;
 using namespace Microsoft::WRL::Wrappers;
 using namespace Windows::Foundation;
 
-void* Gallop_WebViewManager_cctor_addr = nullptr;
-void* Gallop_WebViewManager_cctor_orig = nullptr;
+namespace
+{
+	void* Gallop_WebViewManager_cctor_addr = nullptr;
+	void* Gallop_WebViewManager_cctor_orig = nullptr;
 
-void* Gallop_WebViewManager_GetUrl_addr = nullptr;
-void* Gallop_WebViewManager_GetUrl_orig = nullptr;
+	void* Gallop_WebViewManager_GetUrl_addr = nullptr;
+	void* Gallop_WebViewManager_GetUrl_orig = nullptr;
 
-void* Gallop_WebViewManager_Open_addr = nullptr;
-void* Gallop_WebViewManager_Open_orig = nullptr;
+	void* Gallop_WebViewManager_Open_addr = nullptr;
+	void* Gallop_WebViewManager_Open_orig = nullptr;
 
-void* Gallop_WebViewManager_SetCustomFont_addr = nullptr;
-void* Gallop_WebViewManager_SetCustomFont_orig = nullptr;
+	void* Gallop_WebViewManager_SetCustomFont_addr = nullptr;
+	void* Gallop_WebViewManager_SetCustomFont_orig = nullptr;
 
-void* Gallop_WebViewManager_OpenWebView_addr = nullptr;
+	void* Gallop_WebViewManager_OpenWebView_addr = nullptr;
 
-void* Gallop_WebViewManager_SetMargin_addr = nullptr;
-void* Gallop_WebViewManager_SetMargin_orig = nullptr;
+	void* Gallop_WebViewManager_SetMargin_addr = nullptr;
+	void* Gallop_WebViewManager_SetMargin_orig = nullptr;
 
-void* Gallop_WebViewManager_get_CuteWebView_addr = nullptr;
+	void* Gallop_WebViewManager_get_CuteWebView_addr = nullptr;
 
-void* Gallop_WebViewManager_SetErrorCallback_addr = nullptr;
+	void* Gallop_WebViewManager_SetErrorCallback_addr = nullptr;
 
-void* Gallop_WebViewManager_OpenErrorDialog_addr = nullptr;
+	void* Gallop_WebViewManager_OpenErrorDialog_addr = nullptr;
 
-void* Gallop_WebViewManager_GetGachaUrl_addr = nullptr;
-void* Gallop_WebViewManager_GetGachaUrl_orig = nullptr;
+	void* Gallop_WebViewManager_GetGachaUrl_addr = nullptr;
+	void* Gallop_WebViewManager_GetGachaUrl_orig = nullptr;
 
-void* Gallop_WebViewManager_GetGachaUrl1_addr = nullptr;
-void* Gallop_WebViewManager_GetGachaUrl1_orig = nullptr;
+	void* Gallop_WebViewManager_GetGachaUrl1_addr = nullptr;
+	void* Gallop_WebViewManager_GetGachaUrl1_orig = nullptr;
 
-void* Gallop_WebViewManager_GetProductUrl_addr = nullptr;
-void* Gallop_WebViewManager_GetProductUrl_orig = nullptr;
+	void* Gallop_WebViewManager_GetProductUrl_addr = nullptr;
+	void* Gallop_WebViewManager_GetProductUrl_orig = nullptr;
 
-void* Gallop_WebViewManager_SettingUIEffectOnOpen_addr = nullptr;
+	void* Gallop_WebViewManager_SettingUIEffectOnOpen_addr = nullptr;
 
-void* Gallop_WebViewManager_SettingUIEffectOnClose_addr = nullptr;
+	void* Gallop_WebViewManager_SettingUIEffectOnClose_addr = nullptr;
 
-void* Gallop_WebViewManager_GetGachaURLProperty_addr = nullptr;
-void* Gallop_WebViewManager_GetGachaURLProperty_orig = nullptr;
+	void* Gallop_WebViewManager_GetGachaURLProperty_addr = nullptr;
+	void* Gallop_WebViewManager_GetGachaURLProperty_orig = nullptr;
 
-void* Gallop_WebViewManager_GetProductURLProperty_addr = nullptr;
+	void* Gallop_WebViewManager_GetProductURLProperty_addr = nullptr;
 
-const MethodInfo* Gallop_WebViewManager_TryGetWebViewInfo = nullptr;
-void* Gallop_WebViewManager_TryGetWebViewInfo_addr = nullptr;
+	const MethodInfo* Gallop_WebViewManager_TryGetWebViewInfo = nullptr;
+	void* Gallop_WebViewManager_TryGetWebViewInfo_addr = nullptr;
 
-Il2CppClass* Gallop_WebViewManager_WebViewInfo = nullptr;
+	Il2CppClass* Gallop_WebViewManager_WebViewInfo = nullptr;
 
-FieldInfo* Gallop_WebViewManager__currentWebViewDialog = nullptr;
+	FieldInfo* Gallop_WebViewManager__currentWebViewDialog = nullptr;
 
-FieldInfo* Gallop_WebViewManager__errorCallback = nullptr;
+	FieldInfo* Gallop_WebViewManager__errorCallback = nullptr;
 
-FieldInfo* Gallop_WebViewManager__fontFilePaths = nullptr;
+	FieldInfo* Gallop_WebViewManager__fontFilePaths = nullptr;
 
-void* Gallop_WebViewManager_WebViewInfo_ctor_addr = nullptr;
+	void* Gallop_WebViewManager_WebViewInfo_ctor_addr = nullptr;
 
-FieldInfo* Gallop_WebViewManager_WebViewInfo__url = nullptr;
+	FieldInfo* Gallop_WebViewManager_WebViewInfo__url = nullptr;
 
-FieldInfo* Gallop_WebViewManager_WebViewInfo__isVueJs = nullptr;
+	FieldInfo* Gallop_WebViewManager_WebViewInfo__isVueJs = nullptr;
 
-void* Gallop_WebViewManager_OpenGachaDetail_addr = nullptr;
-void* Gallop_WebViewManager_OpenGachaDetail_orig = nullptr;
+	void* Gallop_WebViewManager_OpenGachaDetail_addr = nullptr;
+	void* Gallop_WebViewManager_OpenGachaDetail_orig = nullptr;
 
-void* Gallop_WebViewManager_OpenPurchaseItemDetail_addr = nullptr;
-void* Gallop_WebViewManager_OpenPurchaseItemDetail_orig = nullptr;
+	void* Gallop_WebViewManager_OpenPurchaseItemDetail_addr = nullptr;
+	void* Gallop_WebViewManager_OpenPurchaseItemDetail_orig = nullptr;
 
-void* DialogHomeMenuMain_SetupTrainer_callback = nullptr;
+	void* DialogHomeMenuMain_SetupTrainer_callback = nullptr;
 
-void* DialogHomeMenuMain_SetupTrainer_addr = nullptr;
-void* DialogHomeMenuMain_SetupTrainer_orig = nullptr;
+	void* DialogHomeMenuMain_SetupTrainer_addr = nullptr;
+	void* DialogHomeMenuMain_SetupTrainer_orig = nullptr;
 
-void* DialogHomeMenuMain_SetupOther_callback = nullptr;
+	void* DialogHomeMenuMain_SetupOther_callback = nullptr;
 
-void* DialogHomeMenuMain_SetupOther_addr = nullptr;
-void* DialogHomeMenuMain_SetupOther_orig = nullptr;
+	void* DialogHomeMenuMain_SetupOther_addr = nullptr;
+	void* DialogHomeMenuMain_SetupOther_orig = nullptr;
 
-void* DialogHomeMenuSupport_OnSelectMenu_addr = nullptr;
-void* DialogHomeMenuSupport_OnSelectMenu_orig = nullptr;
+	void* DialogHomeMenuSupport_OnSelectMenu_addr = nullptr;
+	void* DialogHomeMenuSupport_OnSelectMenu_orig = nullptr;
 
-void* DialogTitleMenu_OnSelectMenu_addr = nullptr;
-void* DialogTitleMenu_OnSelectMenu_orig = nullptr;
+	void* DialogTitleMenu_OnSelectMenu_addr = nullptr;
+	void* DialogTitleMenu_OnSelectMenu_orig = nullptr;
 
-void* DialogTitleMenu_OnSelectMenu_KaKaoNotLogin_addr = nullptr;
-void* DialogTitleMenu_OnSelectMenu_KaKaoNotLogin_orig = nullptr;
+	void* DialogTitleMenu_OnSelectMenu_KaKaoNotLogin_addr = nullptr;
+	void* DialogTitleMenu_OnSelectMenu_KaKaoNotLogin_orig = nullptr;
 
-void* DialogTutorialGuide_OnPushHelpButton_addr = nullptr;
-void* DialogTutorialGuide_OnPushHelpButton_orig = nullptr;
+	void* DialogTutorialGuide_OnPushHelpButton_addr = nullptr;
+	void* DialogTutorialGuide_OnPushHelpButton_orig = nullptr;
 
-void* DialogSingleModeTopMenu_Setup_help_callback = nullptr;
+	void* DialogSingleModeTopMenu_Setup_help_callback = nullptr;
 
-void* DialogSingleModeTopMenu_Setup_guide_callback = nullptr;
+	void* DialogSingleModeTopMenu_Setup_guide_callback = nullptr;
 
-void* DialogSingleModeTopMenu_Setup_addr = nullptr;
-void* DialogSingleModeTopMenu_Setup_orig = nullptr;
+	void* DialogSingleModeTopMenu_Setup_addr = nullptr;
+	void* DialogSingleModeTopMenu_Setup_orig = nullptr;
 
-void* ChampionsInfoWebViewButton_OnClick_addr = nullptr;
-void* ChampionsInfoWebViewButton_OnClick_orig = nullptr;
+	void* ChampionsInfoWebViewButton_OnClick_addr = nullptr;
+	void* ChampionsInfoWebViewButton_OnClick_orig = nullptr;
 
-void* StoryEventTopViewController_OnClickHelpButton_addr = nullptr;
-void* StoryEventTopViewController_OnClickHelpButton_orig = nullptr;
+	void* StoryEventTopViewController_OnClickHelpButton_addr = nullptr;
+	void* StoryEventTopViewController_OnClickHelpButton_orig = nullptr;
 
-void* PartsNewsButton_Setup_callback = nullptr;
+	void* PartsNewsButton_Setup_callback = nullptr;
 
-void* PartsNewsButton_Setup_addr = nullptr;
-void* PartsNewsButton_Setup_orig = nullptr;
+	void* PartsNewsButton_Setup_addr = nullptr;
+	void* PartsNewsButton_Setup_orig = nullptr;
 
-void* BannerUI_OnClickBannerItem_addr = nullptr;
-void* BannerUI_OnClickBannerItem_orig = nullptr;
+	void* BannerUI_OnClickBannerItem_addr = nullptr;
+	void* BannerUI_OnClickBannerItem_orig = nullptr;
 
-void* KakaoManager_OnKakaoShowInAppWebView_addr = nullptr;
-void* KakaoManager_OnKakaoShowInAppWebView_orig = nullptr;
+	void* KakaoManager_OnKakaoShowInAppWebView_addr = nullptr;
+	void* KakaoManager_OnKakaoShowInAppWebView_orig = nullptr;
 
-bool _isShowWebView = false;
+	bool _isShowWebView = false;
+}
 
 extern wil::com_ptr<ICoreWebView2Controller> webviewController;
 extern wil::com_ptr<ICoreWebView2> webview;
 
 static void OpenWebViewDialog(Il2CppString* url, Il2CppString* headerTextArg, uint64_t closeTextId,
 	Il2CppDelegate* onClose = nullptr) {
-	auto data = il2cpp_object_new(
-		il2cpp_symbols::get_class(ASSEMBLY_NAME, "Gallop", "DialogCommon/Data"));
-	il2cpp_runtime_object_init(data);
-
-	data = reinterpret_cast<Il2CppObject * (*)(Il2CppObject * self,
-		Il2CppString * headerTextArg,
-		Il2CppString * message,
-		Il2CppDelegate * onClickCenterButton,
-		unsigned long closeTextId, int dialogFormType)>(il2cpp_class_get_method_from_name(data->klass, "SetSimpleOneButtonMessage", 5)->methodPointer)
-		(data, headerTextArg, nullptr, onClose, closeTextId, 9);
+	auto data = Gallop::DialogCommon::Data();
+	data.SetSimpleOneButtonMessage(headerTextArg, nullptr, onClose, closeTextId, Gallop::DialogCommonBase::FormType::BIG_ONE_BUTTON);
 
 	auto webViewManager = GetSingletonInstance(
 		il2cpp_symbols::get_class(ASSEMBLY_NAME, "Gallop", "WebViewManager"));
-	reinterpret_cast<void (*)(Il2CppObject*, Il2CppString*, Il2CppObject*, Il2CppDelegate*,
-		Il2CppDelegate*, bool)>(il2cpp_class_get_method_from_name(
-			webViewManager->klass, "Open", 5)->methodPointer)(webViewManager, url, data,
-				nullptr, nullptr, false);
+	il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, Il2CppString*, Il2CppObject*, Il2CppDelegate*, Il2CppDelegate*, bool)>
+		(webViewManager->klass, "Open", 5)->methodPointer(webViewManager, url, data, nullptr, nullptr, false);
 }
 
 static Il2CppString* LocalizeExtention_Text(uint64_t id)
@@ -169,7 +163,8 @@ static Il2CppString* LocalizeExtention_Text(uint64_t id)
 	)(id);
 }
 
-static void OpenNewsDialog() {
+static void OpenNewsDialog()
+{
 	if (config::use_third_party_news)
 	{
 		OpenWebViewDialog(il2cpp_string_new("https://m.cafe.daum.net/umamusume-kor/Z4os"),
@@ -186,14 +181,16 @@ static void OpenNewsDialog() {
 	}
 }
 
-static void OpenHelpDialog() {
+static void OpenHelpDialog()
+{
 	auto webViewManager = GetSingletonInstance(
 		il2cpp_symbols::get_class(ASSEMBLY_NAME, "Gallop", "WebViewManager"));
 	reinterpret_cast<void (*)(Il2CppObject*)>(il2cpp_class_get_method_from_name(
 		webViewManager->klass, "OpenHelp", 0)->methodPointer)(webViewManager);
 }
 
-static void OpenStoryEventHelpDialog() {
+static void OpenStoryEventHelpDialog()
+{
 	auto webViewManager = GetSingletonInstance(
 		il2cpp_symbols::get_class(ASSEMBLY_NAME, "Gallop", "WebViewManager"));
 	reinterpret_cast<void (*)(Il2CppObject*)>(il2cpp_class_get_method_from_name(
@@ -202,10 +199,12 @@ static void OpenStoryEventHelpDialog() {
 
 static string GetOqupieToken()
 {
-	if (Game::CurrentGameRegion != Game::Region::KOR) {
+	if (Game::CurrentGameRegion != Game::Region::KOR)
+	{
 		cout << "GetOqupieToken: Not korean version... returning empty string." << endl;
 		return "";
 	}
+
 	const auto oqupieAccessKey = "a66427394118bc5e";
 	const auto jwtToken = "f2c9ea20a25a94b7885d75f220cfcbcf";
 
@@ -837,16 +836,8 @@ static void Gallop_WebViewManager_OpenGachaDetail_hook(Il2CppObject* self, int g
 {
 	auto webViewManager = Gallop::WebViewManager(self);
 
-	auto data = il2cpp_object_new(
-		il2cpp_symbols::get_class(ASSEMBLY_NAME, "Gallop", "DialogCommon/Data"));
-	il2cpp_runtime_object_init(data);
-
-	data = reinterpret_cast<Il2CppObject * (*)(Il2CppObject * self,
-		Il2CppString * headerTextArg,
-		Il2CppString * message,
-		Il2CppDelegate * onClickCenterButton,
-		unsigned long closeTextId, int dialogFormType)>(il2cpp_class_get_method_from_name(data->klass, "SetSimpleOneButtonMessage", 5)->methodPointer)
-		(data, LocalizeExtention_Text(GetTextIdByName(L"Gacha0010")), nullptr, onClose, GetTextIdByName(L"Common0007"), 9);
+	auto data = Gallop::DialogCommon::Data();
+	data.SetSimpleOneButtonMessage(LocalizeExtention_Text(GetTextIdByName(L"Gacha0010")), nullptr, onClose, GetTextIdByName(L"Common0007"), Gallop::DialogCommonBase::FormType::BIG_ONE_BUTTON);
 
 	auto gachaUrl = Gallop::WebViewManager::GetGachaUrl(gachaId);
 
@@ -891,21 +882,21 @@ static void Gallop_WebViewManager_SetMargin_hook(Il2CppObject* self, UnityEngine
 
 	bool IsSplitWindow = false;
 
-	if (Game::CurrentGameStore == Game::Store::Steam)
+	if (!config::freeform_window)
 	{
 		IsSplitWindow = Gallop::Screen::IsSplitWindow();
 
-		auto SteamUIManager = Gallop::UIManager::Instance().SteamUIManager();
-
 		if (IsSplitWindow)
 		{
-			gameCanvas = il2cpp_class_get_method_from_name_type<Il2CppObject * (*)(Il2CppObject*)>(SteamUIManager->klass, "get_GameCanvas", 0)->methodPointer(SteamUIManager);
-			auto leftCanvas = il2cpp_class_get_method_from_name_type<Il2CppObject * (*)(Il2CppObject*)>(SteamUIManager->klass, "get_LeftCanvas", 0)->methodPointer(SteamUIManager);
-			auto evacuationCanvas = il2cpp_class_get_method_from_name_type<Il2CppObject * (*)(Il2CppObject*)>(SteamUIManager->klass, "get_EvacuationCanvas", 0)->methodPointer(SteamUIManager);
+			auto LandscapeUIManager = Gallop::UIManager::Instance().LandscapeUIManager();
 
-			auto _bandMenuField = il2cpp_class_get_field_from_name(SteamUIManager->klass, "_bandMenu");
+			gameCanvas = il2cpp_class_get_method_from_name_type<Il2CppObject * (*)(Il2CppObject*)>(LandscapeUIManager->klass, "get_GameCanvas", 0)->methodPointer(LandscapeUIManager);
+			auto leftCanvas = il2cpp_class_get_method_from_name_type<Il2CppObject * (*)(Il2CppObject*)>(LandscapeUIManager->klass, "get_LeftCanvas", 0)->methodPointer(LandscapeUIManager);
+			auto evacuationCanvas = il2cpp_class_get_method_from_name_type<Il2CppObject * (*)(Il2CppObject*)>(LandscapeUIManager->klass, "get_EvacuationCanvas", 0)->methodPointer(LandscapeUIManager);
+
+			auto _bandMenuField = il2cpp_class_get_field_from_name(LandscapeUIManager->klass, "_bandMenu");
 			Il2CppObject* _bandMenu;
-			il2cpp_field_get_value(SteamUIManager, _bandMenuField, &_bandMenu);
+			il2cpp_field_get_value(LandscapeUIManager, _bandMenuField, &_bandMenu);
 
 			auto leftRectTransform = static_cast<UnityEngine::RectTransform>(UnityEngine::Behaviour(leftCanvas).transform());
 			leftRect = leftRectTransform.rect();
@@ -932,9 +923,12 @@ static void Gallop_WebViewManager_SetMargin_hook(Il2CppObject* self, UnityEngine
 	int num = 50;
 	Vector2 vector;
 
-	if (Game::CurrentGameStore == Game::Store::Steam && !IsSplitWindow)
+	if (Gallop::Screen::IsLandscapeMode())
 	{
-		scaleFactor = Gallop::Screen::OriginalScreenWidth() / static_cast<float>(Gallop::Screen::OriginalScreenHeight());
+		if (!IsSplitWindow && !config::freeform_window)
+		{
+			scaleFactor = Gallop::Screen::OriginalScreenWidth() / static_cast<float>(Gallop::Screen::OriginalScreenHeight());
+		}
 	}
 
 	vector = UnityEngine::Vector2{ static_cast<float>(Gallop::Screen::Width()) / 2, static_cast<float>(Gallop::Screen::Height()) / 2 + static_cast<float>(num) * scaleFactor };
@@ -948,7 +942,7 @@ static void Gallop_WebViewManager_SetMargin_hook(Il2CppObject* self, UnityEngine
 	float num4;
 	float num5;
 
-	if (Game::CurrentGameStore == Game::Store::Steam)
+	if (Gallop::Screen::IsLandscapeMode() && !config::freeform_window)
 	{
 		if (IsSplitWindow)
 		{
@@ -969,7 +963,7 @@ static void Gallop_WebViewManager_SetMargin_hook(Il2CppObject* self, UnityEngine
 	float num6 = num4 / static_cast<float>(Gallop::Screen::Width());
 	float num7 = num5 / static_cast<float>(Gallop::Screen::Height());
 
-	if (Game::CurrentGameStore == Game::Store::Steam && IsSplitWindow)
+	if (Gallop::Screen::IsLandscapeMode() && IsSplitWindow && !config::freeform_window)
 	{
 		auto mainRect = static_cast<UnityEngine::RectTransform>(UnityEngine::Behaviour(Gallop::UIManager::Instance()._mainCanvas()).transform()).rect();
 
@@ -1055,7 +1049,7 @@ static void InitAddress()
 						il2cpp_type_get_name(method2020->parameters->parameter_type) ==
 						"Gallop.DialogTitleMenu.KaKaoNotLoginMenu"s;
 				}
-				
+
 				return method->name == "OnSelectMenu"s &&
 					il2cpp_type_get_name(method->parameters[0]) ==
 					"Gallop.DialogTitleMenu.KaKaoNotLoginMenu"s;

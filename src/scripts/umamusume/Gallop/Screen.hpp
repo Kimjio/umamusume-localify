@@ -20,6 +20,8 @@ namespace Gallop
 
 		static int Height();
 
+		static bool IsLandscapeMode();
+
 		static bool IsSplitWindow();
 
 		static bool IsVertical();
@@ -28,6 +30,14 @@ namespace Gallop
 
 		static Il2CppObject* ChangeScreenOrientationLandscapeAsync();
 
+		static Il2CppObject* ChangeScreenOrientationLandscapeAsyncDefault();
+
+		static Il2CppObject* ChangeScreenOrientationLandscapeAsyncLandscapeMode();
+
 		static Il2CppObject* ChangeScreenOrientationPortraitAsync();
+
+		static Il2CppObject* ChangeScreenOrientationPortraitAsyncDefault();
+
+		static Il2CppObject* ChangeScreenOrientationPortraitAsyncLandscapeMode();
 	};
 }

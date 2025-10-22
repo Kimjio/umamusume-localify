@@ -18,6 +18,8 @@ void* get_companyName_addr = nullptr;
 
 void* get_productName_addr = nullptr;
 
+	void* get_streamingAssetsPath_addr = nullptr;
+
 void* get_persistentDataPath_addr = nullptr;
 
 void* set_targetFrameRate_addr = nullptr;
@@ -44,6 +46,7 @@ static void InitAddress()
 	get_unityVersion_addr = il2cpp_resolve_icall("UnityEngine.Application::get_unityVersion()");
 	get_companyName_addr = il2cpp_resolve_icall("UnityEngine.Application::get_companyName()");
 	get_productName_addr = il2cpp_resolve_icall("UnityEngine.Application::get_productName()");
+	get_streamingAssetsPath_addr = il2cpp_resolve_icall("UnityEngine.Application::get_streamingAssetsPath()");
 	get_persistentDataPath_addr = il2cpp_resolve_icall("UnityEngine.Application::get_persistentDataPath()");
 	set_targetFrameRate_addr = il2cpp_resolve_icall("UnityEngine.Application::set_targetFrameRate(System.Int32)");
 	get_targetFrameRate_addr = il2cpp_resolve_icall("UnityEngine.Application::get_targetFrameRate()");
@@ -91,6 +94,11 @@ namespace UnityEngine
 	Il2CppString* Application::productName()
 	{
 		return reinterpret_cast<Il2CppString * (*)()>(get_productName_addr)();
+	}
+
+	Il2CppString* Application::streamingAssetsPath()
+	{
+		return reinterpret_cast<Il2CppString * (*)()>(get_streamingAssetsPath_addr)();
 	}
 
 	Il2CppString* Application::persistentDataPath()

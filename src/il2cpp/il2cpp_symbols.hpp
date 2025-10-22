@@ -149,6 +149,13 @@ namespace il2cpp_symbols
 			argsCount));
 	}
 
+	Il2CppMethodPointer get_method_pointer(Il2CppClass* klass, const char* name, int argsCount);
+
+	template<typename T>
+	T get_method_pointer(Il2CppClass* klass, const char* name, int argsCount) {
+		return reinterpret_cast<T>(get_method_pointer(klass, name, argsCount));
+	}
+
 	const MethodInfo* get_method(const char* assemblyName, const char* namespaze,
 		const char* klassName, const char* name, int argsCount);
 

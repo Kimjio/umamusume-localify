@@ -1,6 +1,13 @@
 #include "../../ScriptInternal.hpp"
 #include "TitleViewController.hpp"
+#include "DialogCommon.hpp"
+#include "DialogManager.hpp"
+#include "Screen.hpp"
+#include "UIManager.hpp"
 #include "../../Cute.Cri.Assembly/Cute/Cri/AudioPlayback.hpp"
+#include "../../UnityEngine.CoreModule/UnityEngine/RectTransform.hpp"
+#include "../../Plugins/CodeStage/AntiCheat/ObscuredTypes/ObscuredInt.hpp"
+#include "../../Plugins/CodeStage/AntiCheat/ObscuredTypes/ObscuredLong.hpp"
 
 #include "game.hpp"
 #include "settings_text.hpp"
@@ -15,7 +22,7 @@
 #include <WebView2.h>
 #include <WebView2EnvironmentOptions.h>
 
-#include <rapidjson/rapidjson.h>
+#include <rapidjson/document.h>
 #include <rapidjson/error/en.h>
 
 #include "stdinclude.hpp"
@@ -25,19 +32,22 @@
 using namespace Microsoft::WRL;
 using namespace Microsoft::WRL::Wrappers;
 
-void* TitleViewController_OnClickPushStart_addr = nullptr;
-void* TitleViewController_OnClickPushStart_orig = nullptr;
-
-void* TitleViewController_UpdateView_addr = nullptr;
-void* TitleViewController_UpdateView_orig = nullptr;
-
 namespace
 {
+	void* TitleViewController_OnClickPushStart_addr = nullptr;
+	void* TitleViewController_OnClickPushStart_orig = nullptr;
+
+	void* TitleViewController_UpdateView_addr = nullptr;
+	void* TitleViewController_UpdateView_orig = nullptr;
+
+	void* TitleViewController_InitializeView_addr = nullptr;
+	void* TitleViewController_InitializeView_orig = nullptr;
+
 	wil::com_ptr<ICoreWebView2Controller> webviewController;
 	wil::com_ptr<ICoreWebView2> webview;
-}
 
-bool isLoginWebViewOpen = false;
+	bool isLoginWebViewOpen = false;
+}
 
 static string GetGameArgs(wstring sessionId, wstring secureId)
 {
@@ -101,29 +111,14 @@ static string GetGameArgs(wstring sessionId, wstring secureId)
 	}
 	else if (document.HasMember("error") && document["error"].IsString())
 	{
-		thread([](const char* error)
-			{
-				auto t = il2cpp_thread_attach(il2cpp_domain_get());
+		auto t = il2cpp_thread_attach(il2cpp_domain_get());
 
-				auto dialogData = il2cpp_object_new(
-					il2cpp_symbols::get_class("umamusume.dll", "Gallop", "DialogCommon/Data"));
-				il2cpp_runtime_object_init(dialogData);
+		auto dialogData = Gallop::DialogCommon::Data();
+		dialogData.SetSimpleOneButtonMessage(GetTextIdByName(L"Error0014"), il2cpp_string_new(document["error"].GetString()), nullptr, GetTextIdByName(L"Common0007"));
 
-				dialogData = reinterpret_cast<Il2CppObject * (*)(Il2CppObject * thisObj,
-					ULONG headerTextId,
-					Il2CppString * message,
-					Il2CppDelegate * onClose,
-					ULONG closeTextId)>(
-						il2cpp_class_get_method_from_name(dialogData->klass, "SetSimpleOneButtonMessage",
-							4)->methodPointer
-						)(dialogData, GetTextIdByName(L"Error0014"), il2cpp_string_new(error), nullptr, GetTextIdByName(L"Common0007"));
+		Gallop::DialogManager::PushDialog(dialogData);
 
-				il2cpp_symbols::get_method_pointer<Il2CppObject* (*)(Il2CppObject* data)>("umamusume.dll", "Gallop", "DialogManager", "PushDialog", 1)(dialogData);
-
-				il2cpp_thread_detach(t);
-			},
-			document["error"].GetString()
-		).detach();
+		il2cpp_thread_detach(t);
 	}
 
 	return "";
@@ -163,8 +158,8 @@ DWORD WINAPI WebViewThread(LPVOID)
 	wcex.lpfnWndProc = WebViewWndProc;
 	wcex.cbClsExtra = 0;
 	wcex.cbWndExtra = 0;
-	wcex.hInstance = hInstance;
-	wcex.hIcon = LoadIconW(hInstance, reinterpret_cast<LPWSTR>(IDI_APP_ICON));
+	wcex.hInstance = GetModuleHandleW(nullptr);
+	wcex.hIcon = LoadIconW(wcex.hInstance, reinterpret_cast<LPWSTR>(IDI_APP_ICON));
 	wcex.hCursor = LoadCursorW(NULL, IDC_ARROW);
 	wcex.hbrBackground = reinterpret_cast<HBRUSH>(COLOR_WINDOW + 1);
 	wcex.lpszMenuName = NULL;
@@ -179,7 +174,7 @@ DWORD WINAPI WebViewThread(LPVOID)
 		WS_OVERLAPPEDWINDOW ^ WS_MAXIMIZEBOX ^ WS_MINIMIZEBOX,
 		CW_USEDEFAULT, CW_USEDEFAULT,
 		900, 900,
-		nullptr, NULL, hInstance, NULL);
+		nullptr, NULL, wcex.hInstance, NULL);
 
 	ShowWindow(hWnd, SW_SHOWDEFAULT);
 	UpdateWindow(hWnd);
@@ -423,31 +418,23 @@ static void TitleViewController_OnClickPushStart_hook(Il2CppObject* self)
 			}
 			else
 			{
-				auto dialogData = il2cpp_object_new(
-					il2cpp_symbols::get_class("umamusume.dll", "Gallop", "DialogCommon/Data"));
-				il2cpp_runtime_object_init(dialogData);
+				auto dialogData = Gallop::DialogCommon::Data();
+				dialogData.SetSimpleOneButtonMessage(
+					GetTextIdByName(L"Common0081"), 
+					il2cpp_string_new16(
+						(LocalifySettings::GetText("initial_disclaimer_1") + wstring(localizeextension_text(GetTextIdByName(L"Common0150"))->chars) + LocalifySettings::GetText("initial_disclaimer_2")).data()),
+					CreateDelegateStatic(*[](void*, Il2CppObject* dialog)
+						{
+							Gallop::DialogCommon(GetFrontDialog()).Close();
+							il2cpp_symbols::get_method_pointer<void (*)(Il2CppString*, int)>("UnityEngine.CoreModule.dll", "UnityEngine", "PlayerPrefs", "SetInt", 2)(il2cpp_string_new("ReadDisclaimer"), 1);
+							il2cpp_symbols::get_method_pointer<void (*)()>("UnityEngine.CoreModule.dll", "UnityEngine", "PlayerPrefs", "Save", IgnoreNumberOfArguments)();
+						}),
+					GetTextIdByName(L"Common0150")
+				);
 
-				dialogData = reinterpret_cast<Il2CppObject * (*)(Il2CppObject * thisObj,
-					ULONG headerTextId,
-					Il2CppString * message,
-					Il2CppDelegate * onClose,
-					ULONG closeTextId)>(
-						il2cpp_class_get_method_from_name(dialogData->klass, "SetSimpleOneButtonMessage",
-							4)->methodPointer
-						)(dialogData, GetTextIdByName(L"Common0081"), il2cpp_string_new16(
-							(LocalifySettings::GetText("initial_disclaimer_1") + wstring(localizeextension_text(GetTextIdByName(L"Common0150"))->chars) + LocalifySettings::GetText("initial_disclaimer_2")).data()), 
-							CreateDelegateStatic(*[](void*, Il2CppObject* dialog)
-								{
-									il2cpp_symbols::get_method_pointer<void (*)(Il2CppObject*)>("umamusume.dll", "Gallop", "DialogCommon", "Close", 0)(GetFrontDialog());
-									il2cpp_symbols::get_method_pointer<void (*)(Il2CppString*, int)>("UnityEngine.CoreModule.dll", "UnityEngine", "PlayerPrefs", "SetInt", 2)(il2cpp_string_new("ReadDisclaimer"), 1);
-									il2cpp_symbols::get_method_pointer<void (*)()>("UnityEngine.CoreModule.dll", "UnityEngine", "PlayerPrefs", "Save", IgnoreNumberOfArguments)();
-								}), GetTextIdByName(L"Common0150"));
+				dialogData.AutoClose(false);
 
-				auto AutoCloseField = il2cpp_class_get_field_from_name_wrap(dialogData->klass, "AutoClose");
-				bool AutoClose = false;
-
-				il2cpp_field_set_value(dialogData, AutoCloseField, &AutoClose);
-				il2cpp_symbols::get_method_pointer<Il2CppObject* (*)(Il2CppObject* data)>("umamusume.dll", "Gallop", "DialogManager", "PushDialog", 1)(dialogData);
+				Gallop::DialogManager::PushDialog(dialogData);
 			}
 			return;
 		}
@@ -489,16 +476,86 @@ static void TitleViewController_UpdateView_hook(Il2CppObject* self)
 	}
 }
 
+static Il2CppObject* TitleViewController_InitializeView_hook(Il2CppObject* self)
+{
+	auto res = reinterpret_cast<decltype(TitleViewController_InitializeView_hook)*>(TitleViewController_InitializeView_orig)(self);
+
+	if (!Gallop::Screen::IsLandscapeMode())
+	{
+		return res;
+	}
+
+	auto viewBase = il2cpp_class_get_method_from_name_type<Il2CppObject * (*)(Il2CppObject*)>(self->klass, "GetViewBase", 0)->methodPointer(self);
+	auto TitleLogoTransformField = il2cpp_class_get_field_from_name_wrap(viewBase->klass, "TitleLogoTransform");
+	Il2CppObject* TitleLogoTransform;
+	il2cpp_field_get_value(viewBase, TitleLogoTransformField, &TitleLogoTransform);
+
+	auto ProgressRootObjectField = il2cpp_class_get_field_from_name(viewBase->klass, "ProgressRootObject");
+	Il2CppObject* ProgressRootObject;
+	il2cpp_field_get_value(viewBase, ProgressRootObjectField, &ProgressRootObject);
+
+	auto StartTapObiectField = il2cpp_class_get_field_from_name(viewBase->klass, "StartTapObiect");
+	Il2CppObject* StartTapObiect;
+	il2cpp_field_get_value(viewBase, StartTapObiectField, &StartTapObiect);
+
+	auto transform = UnityEngine::RectTransform(TitleLogoTransform);
+	auto sizeDelta = transform.sizeDelta();
+	auto anchoredPosition = transform.anchoredPosition();
+	Gallop::UIManager::Instance().StartCoroutineManaged2(res);
+
+	UnityEngine::GameObject(ProgressRootObject).transform().localScale({ 1.0f, 1.0f, 1.0f });
+	UnityEngine::GameObject(StartTapObiect).transform().localScale({ 1.0f, 1.0f, 1.0f });
+
+	auto SaveDataManager = GetSingletonInstance(il2cpp_symbols::get_class("umamusume.dll", "Gallop", "SaveDataManager"));
+	auto SaveLoader = il2cpp_class_get_method_from_name_type<Il2CppObject * (*)(Il2CppObject*)>(SaveDataManager->klass, "get_SaveLoader", 0)->methodPointer(SaveDataManager);
+	auto CampaignTitleLogoChangeId = il2cpp_class_get_method_from_name_type<CodeStage::AntiCheat::ObscuredTypes::ObscuredInt(*)(Il2CppObject*)>(SaveLoader->klass, "get_CampaignTitleLogoChangeId", 0)->methodPointer(SaveLoader);
+
+	if (CampaignTitleLogoChangeId.GetDecrypted() > 0)
+	{
+		if (Game::CurrentGameRegion == Game::Region::ENG)
+		{
+			transform.sizeDelta(Vector2{ 1200.0f, 600.0f });
+			transform.anchoredPosition(Vector2{ -56.0f, 410.0f });
+		}
+		else
+		{
+			transform.sizeDelta(Vector2{ 744.0f, 632.0f });
+			transform.anchoredPosition(Vector2{ -14.0f, 610.0f });
+		}
+	}
+	else
+	{
+		if (Game::CurrentGameRegion == Game::Region::ENG)
+		{
+			transform.sizeDelta(Vector2{ 1440.0f, 360.0f });
+			transform.anchoredPosition(Vector2{ 0.0f, 400.0f });
+		}
+		else
+		{
+			transform.sizeDelta(sizeDelta);
+			transform.anchoredPosition(anchoredPosition);
+		}
+	}
+
+	return il2cpp_symbols::get_method_pointer<Il2CppObject * (*)(Il2CppDelegate*)>("umamusume.dll", "Gallop", "MonoBehaviourExtension", "WaitForEndFrameAsync", 1)(nullptr);
+}
+
 static void InitAddress()
 {
 	TitleViewController_OnClickPushStart_addr = il2cpp_symbols::get_method_pointer("umamusume.dll", "Gallop", "TitleViewController", "OnClickPushStart", 0);
 	TitleViewController_UpdateView_addr = il2cpp_symbols::get_method_pointer("umamusume.dll", "Gallop", "TitleViewController", "UpdateView", 0);
+	TitleViewController_InitializeView_addr = il2cpp_symbols::get_method_pointer("umamusume.dll", "Gallop", "TitleViewController", "InitializeView", 0);
 }
 
 static void HookMethods()
 {
 	ADD_HOOK(TitleViewController_OnClickPushStart, "Gallop.TitleViewController::OnClickPushStart at %p\n");
 	ADD_HOOK(TitleViewController_UpdateView, "Gallop.TitleViewController::UpdateView at %p\n");
+
+	if (config::freeform_window)
+	{
+		ADD_HOOK(TitleViewController_InitializeView, "Gallop.TitleViewController::InitializeView at %p\n");
+	}
 }
 
 STATIC

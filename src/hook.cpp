@@ -5,9 +5,6 @@
 #include <Shlobj.h>
 #include <ShObjIdl.h>
 
-#include <rapidjson/rapidjson.h>
-#include <rapidjson/error/en.h>
-
 #include <array>
 
 #include <algorithm>
@@ -135,8 +132,6 @@ using namespace Microsoft::WRL::Wrappers;
 using namespace Windows::Foundation;
 using namespace ABI::Windows::Data::Xml::Dom;
 
-HINSTANCE hInstance;
-
 namespace
 {
 	wstring GotoTitleError =
@@ -182,15 +177,21 @@ namespace
 	void DecryptManifestDB()
 	{
 		auto CuteCoreDevice = il2cpp_symbols::get_class("Cute.Core.Assembly.dll", "Cute.Core", "Device");
-		Il2CppString* persistentDataPath = il2cpp_class_get_method_from_name_type<Il2CppString*(*)()>(CuteCoreDevice, "GetPersistentDataPath", 0)->methodPointer();
+		Il2CppString* persistentDataPath = il2cpp_class_get_method_from_name_type<Il2CppString * (*)()>(CuteCoreDevice, "GetPersistentDataPath", 0)->methodPointer();
 
 		wstring path = persistentDataPath->chars + L"/meta"s;
+
+		if (!filesystem::exists(path))
+		{
+			return;
+		}
 
 		ifstream file{ path, ios::binary };
 		string magic = string(16, '\0');
 		file.read(magic.data(), 16);
+		file.close();
 
-		if (magic != "SQLite format 3")
+		if (!magic.starts_with("SQLite format 3"))
 		{
 			sqlite3* db;
 			sqlite3_open(wide_u8(path).data(), &db);
@@ -262,6 +263,11 @@ namespace
 
 	void init_il2cpp()
 	{
+		if (config::dump_il2cpp)
+		{
+			il2cpp_dump();
+		}
+
 		il2cpp_symbols::init_defaults();
 		il2cpp_symbols::call_init_callbacks();
 
@@ -956,18 +962,6 @@ namespace
 		return manager;
 	}
 
-	void* UnityMain_orig = nullptr;
-	int __stdcall UnityMain_hook(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPWSTR lpCmdLine, int nShowCmd)
-	{
-		::hInstance = hInstance;
-
-		filesystem::path path = filesystem::current_path().append(L"UnityPlayer.dll");
-		il2cpp_symbols::load_symbols(path);
-
-		// Windows::Foundation::Initialize(RO_INIT_MULTITHREADED);
-		return reinterpret_cast<decltype(UnityMain_hook)*>(UnityMain_orig)(hInstance, hPrevInstance, lpCmdLine, nShowCmd);
-	}
-
 	void* load_library_ex_w_orig = nullptr;
 	HMODULE
 		WINAPI
@@ -992,15 +986,6 @@ namespace
 
 				return KakaoGame;
 			}
-		}
-
-		if (wstring(lpLibFileName).find(L"UnityPlayer.dll") != wstring::npos)
-		{
-			auto UnityPlayer = reinterpret_cast<decltype(LoadLibraryExW)*>(load_library_ex_w_orig)(lpLibFileName, hFile, dwFlags);
-
-			auto UnityMain_addr = GetProcAddress(UnityPlayer, "UnityMain");
-			MH_CreateHook(UnityMain_addr, UnityMain_hook, &UnityMain_orig);
-			MH_EnableHook(UnityMain_addr);
 		}
 
 		return reinterpret_cast<decltype(LoadLibraryExW)*>(load_library_ex_w_orig)(lpLibFileName, hFile, dwFlags);
@@ -1369,11 +1354,6 @@ namespace
 			return tmpFont ? tmpFont : GetCustomTMPFontFallback();
 		}
 		return GetCustomTMPFontFallback();
-	}
-
-	string GetUnityVersion()
-	{
-		return wide_u8(UnityEngine::Application::unityVersion()->chars);
 	}
 
 	void* populate_with_errors_orig = nullptr;
@@ -1970,9 +1950,9 @@ namespace
 
 	int (*get_rendering_height)(Il2CppObject* _this);
 
-	constexpr float ratio_16_9 = 1.778f;
-	constexpr float ratio_9_16 = 0.563f;
-	constexpr float ratio_4_3 = 1.333f;
+	constexpr float ratio_16_9 = 1.7777f;
+	constexpr float ratio_9_16 = 0.5625f;
+	constexpr float ratio_4_3 = 1.3333f;
 	constexpr float ratio_3_4 = 0.75f;
 
 	int last_display_width = 0, last_display_height = 0;
@@ -2143,7 +2123,6 @@ namespace
 		Il2CppArraySize_t<Il2CppObject*>* miniDirectors;
 		miniDirectors = UnityEngine::Object::FindObjectsByType(
 			GetRuntimeType("umamusume.dll", "Gallop", "MiniDirector"), UnityEngine::FindObjectsInactive::Include, UnityEngine::FindObjectsSortMode::None);
-
 
 		if (miniDirectors)
 		{
@@ -12271,7 +12250,7 @@ namespace
 					wstring textIdName = GetTextIdNameById(i);
 					text_id_static_entries.emplace_back(textIdName, str->chars);
 					if (local::get_localized_string(textIdName) == nullptr ||
-						local::get_localized_string(textIdName)->chars == str->chars)
+						wstring(local::get_localized_string(textIdName)->chars) == str->chars)
 					{
 						text_id_not_matched_entries.emplace_back(textIdName, str->chars);
 					}
@@ -12305,6 +12284,518 @@ namespace
 		}
 	}
 
+	void* LiveTempData_CreateLiveSettingScreenModeCached_orig = nullptr;
+	void LiveTempData_CreateLiveSettingScreenModeCached_hook(Il2CppObject* self)
+	{
+		reinterpret_cast<decltype(LiveTempData_CreateLiveSettingScreenModeCached_hook)*>(LiveTempData_CreateLiveSettingScreenModeCached_orig)(self);
+
+		auto _screenModeDicField = il2cpp_class_get_field_from_name_wrap(self->klass, "_cachedLiveScreenModeDic");
+		Il2CppObject* _screenModeDic;
+		il2cpp_field_get_value(self, _screenModeDicField, &_screenModeDic);
+
+		auto entriesField = il2cpp_class_get_field_from_name_wrap(_screenModeDic->klass, "_entries");
+		if (!entriesField)
+		{
+			entriesField = il2cpp_class_get_field_from_name_wrap(_screenModeDic->klass, "entries");
+		}
+
+		Il2CppArraySize_t<System::Collections::Generic::Dictionary<int, int>::Entry>* entries;
+		il2cpp_field_get_value(_screenModeDic, entriesField, &entries);
+
+		vector<int> musicIds;
+
+		if (entries)
+		{
+			for (int i = 0; i < entries->max_length; i++)
+			{
+				auto entry = entries->vector[i];
+
+				if (entry.key)
+				{
+					musicIds.emplace_back(entry.key);
+				}
+			}
+		}
+
+		il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*)>(_screenModeDic->klass, "Clear", 0)->methodPointer(_screenModeDic);
+
+		for (auto musicId : musicIds)
+		{
+			il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, int, int)>(_screenModeDic->klass, "Add", 2)->methodPointer(_screenModeDic, musicId, 0);
+		}
+	}
+
+	void* TempData_ctor_orig = nullptr;
+	void TempData_ctor_hook(Il2CppObject* self)
+	{
+		reinterpret_cast<decltype(TempData_ctor_hook)*>(TempData_ctor_orig)(self);
+
+		auto LiveDataField = il2cpp_class_get_field_from_name_wrap(self->klass, "LiveData");
+		Il2CppObject* LiveData;
+		il2cpp_field_get_value(self, LiveDataField, &LiveData);
+
+		auto _screenModeDicField = il2cpp_class_get_field_from_name_wrap(LiveData->klass, "_cachedLiveScreenModeDic");
+		Il2CppObject* _screenModeDic;
+		il2cpp_field_get_value(LiveData, _screenModeDicField, &_screenModeDic);
+
+		auto entriesField = il2cpp_class_get_field_from_name_wrap(_screenModeDic->klass, "_entries");
+		if (!entriesField)
+		{
+			entriesField = il2cpp_class_get_field_from_name_wrap(_screenModeDic->klass, "entries");
+		}
+
+		Il2CppArraySize_t<System::Collections::Generic::Dictionary<int, int>::Entry>* entries;
+		il2cpp_field_get_value(_screenModeDic, entriesField, &entries);
+
+		vector<int> musicIds;
+
+		if (entries)
+		{
+			for (int i = 0; i < entries->max_length; i++)
+			{
+				auto entry = entries->vector[i];
+
+				if (entry.key)
+				{
+					musicIds.emplace_back(entry.key);
+				}
+			}
+		}
+
+		il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*)>(_screenModeDic->klass, "Clear", 0)->methodPointer(_screenModeDic);
+
+		for (auto musicId : musicIds)
+		{
+			il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, int, int)>(_screenModeDic->klass, "Add", 2)->methodPointer(_screenModeDic, musicId, 0);
+		}
+	}
+
+	void* LiveTempData_ctor_orig = nullptr;
+	void LiveTempData_ctor_hook(Il2CppObject* self)
+	{
+		reinterpret_cast<decltype(LiveTempData_ctor_hook)*>(LiveTempData_ctor_orig)(self);
+
+		auto _screenModeDicField = il2cpp_class_get_field_from_name_wrap(self->klass, "_cachedLiveScreenModeDic");
+		Il2CppObject* _screenModeDic;
+		il2cpp_field_get_value(self, _screenModeDicField, &_screenModeDic);
+
+		auto entriesField = il2cpp_class_get_field_from_name_wrap(_screenModeDic->klass, "_entries");
+		if (!entriesField)
+		{
+			entriesField = il2cpp_class_get_field_from_name_wrap(_screenModeDic->klass, "entries");
+		}
+
+		Il2CppArraySize_t<System::Collections::Generic::Dictionary<int, int>::Entry>* entries;
+		il2cpp_field_get_value(_screenModeDic, entriesField, &entries);
+
+		vector<int> musicIds;
+
+		if (entries)
+		{
+			for (int i = 0; i < entries->max_length; i++)
+			{
+				auto entry = entries->vector[i];
+
+				if (entry.key)
+				{
+					musicIds.emplace_back(entry.key);
+				}
+			}
+		}
+
+		il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*)>(_screenModeDic->klass, "Clear", 0)->methodPointer(_screenModeDic);
+
+		for (auto musicId : musicIds)
+		{
+			il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, int, int)>(_screenModeDic->klass, "Add", 2)->methodPointer(_screenModeDic, musicId, 0);
+		}
+	}
+
+	void* Director_get_IsScreenModeFullPortrait_orig = nullptr;
+	bool Director_get_IsScreenModeFullPortrait_hook(Il2CppObject* self)
+	{
+		return false;
+	}
+
+	void* CollectRaidBgCutinHelper_InstantiateTimeline_orig = nullptr;
+	bool CollectRaidBgCutinHelper_InstantiateTimeline_hook(Il2CppObject* self, Il2CppString* path, Il2CppObject* parent, Il2CppObject* renderTexture, float fovFactor)
+	{
+		if (renderTexture)
+		{
+			auto width = il2cpp_class_get_method_from_name_type<int (*)(Il2CppObject*)>(renderTexture->klass, "get_width", 0)->methodPointer(renderTexture);
+			auto height = il2cpp_class_get_method_from_name_type<int (*)(Il2CppObject*)>(renderTexture->klass, "get_height", 0)->methodPointer(renderTexture);
+
+			auto ratio = static_cast<float>(width) / static_cast<float>(height);
+
+			auto newWidth = UnityEngine::Screen::height();
+			auto newHeight = static_cast<int>(static_cast<float>(newWidth) / ratio);
+
+			il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, int)>(renderTexture->klass, "set_width", 1)->methodPointer(renderTexture, newWidth);
+			il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, int)>(renderTexture->klass, "set_height", 1)->methodPointer(renderTexture, newHeight);
+		}
+
+		return reinterpret_cast<decltype(CollectRaidBgCutinHelper_InstantiateTimeline_hook)*>(CollectRaidBgCutinHelper_InstantiateTimeline_orig)(self, path, parent, renderTexture, fovFactor);
+	}
+
+	void* Header_Initialize_orig = nullptr;
+	void Header_Initialize_hook(Il2CppObject* self)
+	{
+		reinterpret_cast<decltype(Header_Initialize_hook)*>(Header_Initialize_orig)(self);
+
+		if (config::freeform_window && Gallop::Screen::IsLandscapeMode())
+		{
+			auto _menuButtonField = il2cpp_class_get_field_from_name_wrap(self->klass, "_menuButton");
+			Il2CppObject* _menuButton;
+			il2cpp_field_get_value(self, _menuButtonField, &_menuButton);
+
+			UnityEngine::MonoBehaviour(_menuButton).gameObject().SetActive(true);
+
+			il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, Il2CppDelegate*)>(_menuButton->klass, "SetOnClick", 1)->methodPointer(_menuButton,
+				&CreateUnityAction(self, *[](Il2CppObject* self)
+					{
+						il2cpp_symbols::get_method_pointer<void (*)(Il2CppObject*, Il2CppObject*, Gallop::DialogCommon::DispStackType, Gallop::DialogCommonBase::FormType)>("umamusume.dll", "Gallop", "DialogHomeMenuMain", "Open", 4)(nullptr, nullptr, Gallop::DialogCommon::DispStackType::DialogOnDialog, Gallop::DialogCommonBase::FormType::BIG_ONE_BUTTON);
+					})->delegate);
+		}
+	}
+
+	void* DialogHomeMenuMain_ChangeView_orig = nullptr;
+	void DialogHomeMenuMain_ChangeView_hook(Il2CppObject* self, uint64_t viewId)
+	{
+		reinterpret_cast<decltype(DialogHomeMenuMain_ChangeView_hook)*>(DialogHomeMenuMain_ChangeView_orig)(self, viewId);
+
+		if (!Gallop::Screen::IsLandscapeMode())
+		{
+			return;
+		}
+
+		auto _menuDialogField = il2cpp_class_get_field_from_name(self->klass, "_menuDialog");
+		Il2CppObject* _menuDialog;
+		il2cpp_field_static_get_value(_menuDialogField, &_menuDialog);
+
+		if (_menuDialog)
+		{
+			auto dialogCommon = UnityEngine::GameObject(_menuDialog).GetComponent(GetRuntimeType("umamusume.dll", "Gallop", "DialogCommon"));
+			il2cpp_symbols::get_method_pointer<void (*)(Il2CppObject*, Il2CppDelegate*)>("umamusume.dll", "Gallop", "DialogManager", "PopDialog", 2)(dialogCommon, nullptr);
+			_menuDialog = nullptr;
+			il2cpp_field_static_set_value(_menuDialogField, _menuDialog);
+		}
+	}
+
+	void* DialogHomeMenuMain_ChangeView2_orig = nullptr;
+	void DialogHomeMenuMain_ChangeView2_hook(Il2CppObject* self, uint64_t viewId, Il2CppObject* viewInfo)
+	{
+		reinterpret_cast<decltype(DialogHomeMenuMain_ChangeView2_hook)*>(DialogHomeMenuMain_ChangeView2_orig)(self, viewId, viewInfo);
+
+		if (!Gallop::Screen::IsLandscapeMode())
+		{
+			return;
+		}
+
+		auto _menuDialogField = il2cpp_class_get_field_from_name(self->klass, "_menuDialog");
+		Il2CppObject* _menuDialog;
+		il2cpp_field_static_get_value(_menuDialogField, &_menuDialog);
+
+		if (_menuDialog)
+		{
+			auto dialogCommon = UnityEngine::GameObject(_menuDialog).GetComponent(GetRuntimeType("umamusume.dll", "Gallop", "DialogCommon"));
+			il2cpp_symbols::get_method_pointer<void (*)(Il2CppObject*, Il2CppDelegate*)>("umamusume.dll", "Gallop", "DialogManager", "PopDialog", 2)(dialogCommon, nullptr);
+			_menuDialog = nullptr;
+			il2cpp_field_static_set_value(_menuDialogField, _menuDialog);
+		}
+	}
+
+	void* PartsSingleModeCommonFooter_Setup_orig = nullptr;
+	void PartsSingleModeCommonFooter_Setup_hook(Il2CppObject* self)
+	{
+		reinterpret_cast<decltype(PartsSingleModeCommonFooter_Setup_hook)*>(PartsSingleModeCommonFooter_Setup_orig)(self);
+
+		if (config::freeform_window && Gallop::Screen::IsLandscapeMode())
+		{
+			auto _logButtonField = il2cpp_class_get_field_from_name_wrap(self->klass, "_logButton");
+			Il2CppObject* _logButton;
+			il2cpp_field_get_value(self, _logButtonField, &_logButton);
+
+			UnityEngine::MonoBehaviour(_logButton).gameObject().SetActive(true);
+
+			il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, Il2CppDelegate*)>(_logButton->klass, "SetOnClick", 1)->methodPointer(_logButton,
+				&CreateUnityAction(self, *[](Il2CppObject* self)
+					{
+						il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*)>(self->klass, "OnClickLog", 0)->methodPointer(self);
+					})->delegate);
+		}
+	}
+
+	void* DialogSingleModeTopMenu_Setup_orig = nullptr;
+	void DialogSingleModeTopMenu_Setup_hook(Il2CppObject* self)
+	{
+		reinterpret_cast<decltype(DialogSingleModeTopMenu_Setup_hook)*>(DialogSingleModeTopMenu_Setup_orig)(self);
+
+		if (config::freeform_window && Gallop::Screen::IsLandscapeMode())
+		{
+			auto _infoButtonField = il2cpp_class_get_field_from_name_wrap(self->klass, "_infoButton");
+			Il2CppObject* _infoButton;
+			il2cpp_field_get_value(self, _infoButtonField, &_infoButton);
+
+			UnityEngine::MonoBehaviour(_infoButton).gameObject().SetActive(true);
+
+			il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, Il2CppDelegate*)>(_infoButton->klass, "SetOnClick", 1)->methodPointer(_infoButton,
+				&CreateUnityAction(self, *[](Il2CppObject* self)
+					{
+						il2cpp_symbols::get_method_pointer<void (*)(Gallop::DialogCommon::DispStackType, Gallop::DialogCommonBase::FormType)>("umamusume.dll", "Gallop", "DialogSingleModeStartConfirmEntry", "OpenPlayingSingleMode", 2)(Gallop::DialogCommon::DispStackType::DialogOnDialog, Gallop::DialogCommonBase::FormType::BIG_ONE_BUTTON);
+					})->delegate);
+		}
+	}
+
+	void* DialogSingleModeTopMenu_Setup1_orig = nullptr;
+	void DialogSingleModeTopMenu_Setup1_hook(Il2CppObject* self, uint64_t dialogType)
+	{
+		reinterpret_cast<decltype(DialogSingleModeTopMenu_Setup1_hook)*>(DialogSingleModeTopMenu_Setup1_orig)(self, dialogType);
+
+		if (config::freeform_window && Gallop::Screen::IsLandscapeMode())
+		{
+			auto _infoButtonField = il2cpp_class_get_field_from_name_wrap(self->klass, "_infoButton");
+			Il2CppObject* _infoButton;
+			il2cpp_field_get_value(self, _infoButtonField, &_infoButton);
+
+			UnityEngine::MonoBehaviour(_infoButton).gameObject().SetActive(true);
+
+			il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, Il2CppDelegate*)>(_infoButton->klass, "SetOnClick", 1)->methodPointer(_infoButton,
+				&CreateUnityAction(self, *[](Il2CppObject* self)
+					{
+						il2cpp_symbols::get_method_pointer<void (*)(Gallop::DialogCommon::DispStackType, Gallop::DialogCommonBase::FormType)>("umamusume.dll", "Gallop", "DialogSingleModeStartConfirmEntry", "OpenPlayingSingleMode", 2)(Gallop::DialogCommon::DispStackType::DialogOnDialog, Gallop::DialogCommonBase::FormType::BIG_ONE_BUTTON);
+					})->delegate);
+		}
+	}
+
+	void* DialogSingleModeTopMenu_SetupButtonPositions_orig = nullptr;
+	void DialogSingleModeTopMenu_SetupButtonPositions_hook(Il2CppObject* self)
+	{
+		if (config::freeform_window && Gallop::Screen::IsLandscapeMode())
+		{
+			return;
+		}
+
+		reinterpret_cast<decltype(DialogSingleModeTopMenu_SetupButtonPositions_hook)*>(DialogSingleModeTopMenu_SetupButtonPositions_orig)(self);
+	}
+
+	void* SingleModeRaceEntryViewController_SetupBottomButtons_orig = nullptr;
+	void SingleModeRaceEntryViewController_SetupBottomButtons_hook(Il2CppObject* self, uint64_t degree)
+	{
+		reinterpret_cast<decltype(SingleModeRaceEntryViewController_SetupBottomButtons_hook)*>(SingleModeRaceEntryViewController_SetupBottomButtons_orig)(self, degree);
+
+		if (config::freeform_window && Gallop::Screen::IsLandscapeMode())
+		{
+			auto _viewField = il2cpp_class_get_field_from_name(self->klass, "_view");
+			Il2CppObject* _view;
+			il2cpp_field_get_value(self, _viewField, &_view);
+
+			auto ReserveListButton = il2cpp_class_get_method_from_name_type<Il2CppObject * (*)(Il2CppObject*)>(_view->klass, "get_ReserveListButton", 0)->methodPointer(_view);
+
+			UnityEngine::MonoBehaviour(ReserveListButton).gameObject().SetActive(true);
+
+			il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, Il2CppDelegate*)>(ReserveListButton->klass, "SetOnClick", 1)->methodPointer(ReserveListButton,
+				&CreateUnityAction(self, *[](Il2CppObject* self)
+					{
+						il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*)>(self->klass, "OnClickReserveListButton", 0)->methodPointer(self);
+					})->delegate);
+		}
+	}
+
+	void* StaticVariableDefine_Circle_CircleChat_STAMP_ANCHORED_POS_AFTER_orig = nullptr;
+	Vector3 StaticVariableDefine_Circle_CircleChat_STAMP_ANCHORED_POS_AFTER_hook()
+	{
+		auto klass = il2cpp_symbols::get_class("umamusume.dll", "Gallop", "StaticVariableDefine/Circle/CircleChat");
+		auto field = il2cpp_class_get_field_from_name(klass, "STAMP_ANCHORED_POS_AFTER_BASE");
+		Vector3 value;
+
+		il2cpp_field_static_get_value(field, &value);
+
+		return value;
+	}
+
+	void* StaticVariableDefine_Circle_CircleChat_INPUT_LOCAL_POS_AFTER_orig = nullptr;
+	Vector3 StaticVariableDefine_Circle_CircleChat_INPUT_LOCAL_POS_AFTER_hook()
+	{
+		auto klass = il2cpp_symbols::get_class("umamusume.dll", "Gallop", "StaticVariableDefine/Circle/CircleChat");
+		auto field = il2cpp_class_get_field_from_name(klass, "INPUT_LOCAL_POS_AFTER_BASE");
+		Vector3 value;
+
+		il2cpp_field_static_get_value(field, &value);
+
+		return value;
+	}
+
+	void* StaticVariableDefine_Circle_CircleChat_INPUT_ANCHORED_POS_AFTER_orig = nullptr;
+	Vector3 StaticVariableDefine_Circle_CircleChat_INPUT_ANCHORED_POS_AFTER_hook()
+	{
+		auto klass = il2cpp_symbols::get_class("umamusume.dll", "Gallop", "StaticVariableDefine/Circle/CircleChat");
+		auto field = il2cpp_class_get_field_from_name(klass, "INPUT_ANCHORED_POS_AFTER_BASE");
+		Vector3 value;
+
+		il2cpp_field_static_get_value(field, &value);
+
+		return value;
+	}
+
+	void* StaticVariableDefine_Circle_CircleChat_INPUT_SIZE_DELTA_POS_AFTER_orig = nullptr;
+	Vector3 StaticVariableDefine_Circle_CircleChat_INPUT_SIZE_DELTA_POS_AFTER_hook()
+	{
+		auto klass = il2cpp_symbols::get_class("umamusume.dll", "Gallop", "StaticVariableDefine/Circle/CircleChat");
+		auto field = il2cpp_class_get_field_from_name(klass, "INPUT_SIZE_DELTA_POS_AFTER_BASE");
+		Vector3 value;
+
+		il2cpp_field_static_get_value(field, &value);
+
+		return value;
+	}
+
+	void* ResourcePath_GetPreInTitleMoviePath_orig = nullptr;
+	Il2CppString* ResourcePath_GetPreInTitleMoviePath_hook()
+	{
+		auto GameDefine = il2cpp_symbols::get_class("umamusume.dll", "Gallop", "GameDefine");
+		auto PREIN_TITLE_OP_VERSION_Field = il2cpp_class_get_field_from_name(GameDefine, "PREIN_TITLE_OP_VERSION");
+		uint64_t PREIN_TITLE_OP_VERSION;
+		il2cpp_field_static_get_value(PREIN_TITLE_OP_VERSION_Field, &PREIN_TITLE_OP_VERSION);
+
+		auto ResourcePath = il2cpp_symbols::get_class("umamusume.dll", "Gallop", "ResourcePath");
+
+		auto _stringBuilderField = il2cpp_class_get_field_from_name(ResourcePath, "_stringBuilder");
+		Il2CppObject* _stringBuilder;
+		il2cpp_field_static_get_value(_stringBuilderField, &_stringBuilder);
+		il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, int)>(_stringBuilder->klass, "set_Length", 1)->methodPointer(_stringBuilder, 0);
+
+		auto boxedOpVersion = il2cpp_value_box(il2cpp_defaults.int32_class, &PREIN_TITLE_OP_VERSION);
+
+		Il2CppString* titleMovieFormat = nullptr;
+
+		auto TITLE_MOVIE_FORMAT_DEFAULT_Field = il2cpp_class_get_field_from_name(ResourcePath, "TITLE_MOVIE_FORMAT_DEFAULT");
+
+		if (TITLE_MOVIE_FORMAT_DEFAULT_Field)
+		{
+			Il2CppString* TITLE_MOVIE_FORMAT_DEFAULT;
+			il2cpp_field_static_get_value(TITLE_MOVIE_FORMAT_DEFAULT_Field, &TITLE_MOVIE_FORMAT_DEFAULT);
+
+			auto TITLE_MOVIE_FORMAT_LANDSCAPE_Field = il2cpp_class_get_field_from_name(ResourcePath, "TITLE_MOVIE_FORMAT_LANDSCAPE");
+			Il2CppString* TITLE_MOVIE_FORMAT_LANDSCAPE;
+			il2cpp_field_static_get_value(TITLE_MOVIE_FORMAT_LANDSCAPE_Field, &TITLE_MOVIE_FORMAT_LANDSCAPE);
+
+			if (UnityEngine::Screen::width() > UnityEngine::Screen::height())
+			{
+				titleMovieFormat = TITLE_MOVIE_FORMAT_LANDSCAPE;
+			}
+			else
+			{
+				titleMovieFormat = TITLE_MOVIE_FORMAT_DEFAULT;
+			}
+		}
+		else
+		{
+			auto TITLE_MOVIE_FORMAT_Field = il2cpp_class_get_field_from_name(ResourcePath, "TITLE_MOVIE_FORMAT");
+			Il2CppString* TITLE_MOVIE_FORMAT;
+			il2cpp_field_static_get_value(TITLE_MOVIE_FORMAT_Field, &TITLE_MOVIE_FORMAT);
+
+			titleMovieFormat = TITLE_MOVIE_FORMAT;
+
+			if (UnityEngine::Screen::width() > UnityEngine::Screen::height())
+			{
+				auto streamingAssetsPath = UnityEngine::Application::streamingAssetsPath()->chars;
+
+				il2cpp_class_get_method_from_name_type<Il2CppObject* (*)(Il2CppObject*, Il2CppString*, Il2CppObject*)>(_stringBuilder->klass, "AppendFormat", 2)->methodPointer(_stringBuilder, titleMovieFormat, boxedOpVersion);
+				auto titleMovie = il2cpp_class_get_method_from_name_type<Il2CppString * (*)(Il2CppObject*)>(_stringBuilder->klass, "ToString", 0)->methodPointer(_stringBuilder)->chars;
+				il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, int)>(_stringBuilder->klass, "set_Length", 1)->methodPointer(_stringBuilder, 0);
+
+				if (filesystem::exists(streamingAssetsPath + L"/PreinResource/Movie/m/"s + titleMovie + L"_landscape.usm"))
+				{
+					titleMovieFormat = il2cpp_string_new("Title/title_movie_{0:D2}_landscape");
+				}
+				else
+				{
+					titleMovieFormat = TITLE_MOVIE_FORMAT;
+				}
+			}
+			else
+			{
+				titleMovieFormat = TITLE_MOVIE_FORMAT;
+			}
+		}
+
+		il2cpp_class_get_method_from_name_type<Il2CppObject* (*)(Il2CppObject*, Il2CppString*, Il2CppObject*)>(_stringBuilder->klass, "AppendFormat", 2)->methodPointer(_stringBuilder, titleMovieFormat, boxedOpVersion);
+
+		return il2cpp_class_get_method_from_name_type<Il2CppString * (*)(Il2CppObject*)>(_stringBuilder->klass, "ToString", 0)->methodPointer(_stringBuilder);
+	}
+
+	void* ResourcePath_GetLatestAssetBundleTitleMoviePath_orig = nullptr;
+	Il2CppString* ResourcePath_GetLatestAssetBundleTitleMoviePath_hook()
+	{
+		auto SaveDataManager = GetSingletonInstance(il2cpp_symbols::get_class("umamusume.dll", "Gallop", "SaveDataManager"));
+		auto SaveLoader = il2cpp_class_get_method_from_name_type<Il2CppObject * (*)(Il2CppObject*)>(SaveDataManager->klass, "get_SaveLoader", 0)->methodPointer(SaveDataManager);
+		int NewOpProgress = il2cpp_class_get_method_from_name_type<int (*)(Il2CppObject*)>(SaveLoader->klass, "get_NewOpProgress", 0)->methodPointer(SaveLoader);
+
+		auto ResourcePath = il2cpp_symbols::get_class("umamusume.dll", "Gallop", "ResourcePath");
+
+		auto _stringBuilderField = il2cpp_class_get_field_from_name(ResourcePath, "_stringBuilder");
+		Il2CppObject* _stringBuilder;
+		il2cpp_field_static_get_value(_stringBuilderField, &_stringBuilder);
+		il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, int)>(_stringBuilder->klass, "set_Length", 1)->methodPointer(_stringBuilder, 0);
+
+		auto boxedOpVersion = il2cpp_value_box(il2cpp_defaults.int32_class, &NewOpProgress);
+
+		Il2CppString* titleMovieFormat = nullptr;
+
+		auto ASSET_BUNDLE_TITLE_MOVIE_FORMAT_Field = il2cpp_class_get_field_from_name(ResourcePath, "ASSET_BUNDLE_TITLE_MOVIE_FORMAT");
+		Il2CppString* ASSET_BUNDLE_TITLE_MOVIE_FORMAT;
+		il2cpp_field_static_get_value(ASSET_BUNDLE_TITLE_MOVIE_FORMAT_Field, &ASSET_BUNDLE_TITLE_MOVIE_FORMAT);
+
+		titleMovieFormat = ASSET_BUNDLE_TITLE_MOVIE_FORMAT;
+
+		if (UnityEngine::Screen::width() > UnityEngine::Screen::height())
+		{
+			auto streamingAssetsPath = UnityEngine::Application::streamingAssetsPath()->chars;
+
+			il2cpp_class_get_method_from_name_type<Il2CppObject* (*)(Il2CppObject*, Il2CppString*, Il2CppObject*)>(_stringBuilder->klass, "AppendFormat", 2)->methodPointer(_stringBuilder, titleMovieFormat, boxedOpVersion);
+			auto titleMovie = il2cpp_class_get_method_from_name_type<Il2CppString * (*)(Il2CppObject*)>(_stringBuilder->klass, "ToString", 0)->methodPointer(_stringBuilder)->chars;
+			il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, int)>(_stringBuilder->klass, "set_Length", 1)->methodPointer(_stringBuilder, 0);
+
+			if (filesystem::exists(streamingAssetsPath + L"/PreinResource/Movie/m/"s + titleMovie + L"_landscape.usm"))
+			{
+				titleMovieFormat = il2cpp_string_new("Title/title_movie_{0:D2}_landscape");
+			}
+			else
+			{
+				titleMovieFormat = ASSET_BUNDLE_TITLE_MOVIE_FORMAT;
+			}
+		}
+		else
+		{
+			titleMovieFormat = ASSET_BUNDLE_TITLE_MOVIE_FORMAT;
+		}
+
+		il2cpp_class_get_method_from_name_type<Il2CppObject* (*)(Il2CppObject*, Il2CppString*, Il2CppObject*)>(_stringBuilder->klass, "AppendFormat", 2)->methodPointer(_stringBuilder, titleMovieFormat, boxedOpVersion);
+
+		return il2cpp_class_get_method_from_name_type<Il2CppString * (*)(Il2CppObject*)>(_stringBuilder->klass, "ToString", 0)->methodPointer(_stringBuilder);
+	}
+
+	void* CircleChat_Initialize_orig = nullptr;
+	void CircleChat_Initialize_hook(Il2CppObject* self)
+	{
+		reinterpret_cast<decltype(CircleChat_Initialize_hook)*>(CircleChat_Initialize_orig)(self);
+
+		if (config::freeform_window && Gallop::Screen::IsLandscapeMode())
+		{
+			auto _itemRequestButtonField = il2cpp_class_get_field_from_name(self->klass, "_itemRequestButton");
+			Il2CppObject* _itemRequestButton;
+			il2cpp_field_get_value(self, _itemRequestButtonField, &_itemRequestButton);
+
+			UnityEngine::MonoBehaviour(_itemRequestButton).gameObject().SetActive(true);
+
+			il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, Il2CppDelegate*)>(_itemRequestButton->klass, "SetOnClick", 1)->methodPointer(_itemRequestButton,
+				&CreateUnityAction(self, *[](Il2CppObject* self)
+					{
+						il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*)>(self->klass, "OnClickItemRequest", 0)->methodPointer(self);
+					})->delegate);
+		}
+	}
+
 	void patch_game_assembly()
 	{
 		if (Game::CurrentGameRegion == Game::Region::KOR)
@@ -12327,11 +12818,6 @@ namespace
 		}
 
 		printf("Trying to patch GameAssembly.dll...\n");
-
-		if (config::dump_il2cpp)
-		{
-			il2cpp_dump();
-		}
 
 #pragma region HOOK_MACRO
 #define ADD_HOOK(_name_, _fmt_) \
@@ -12476,14 +12962,6 @@ namespace
 		auto story_race_textasset_load_addr = il2cpp_symbols::get_method_pointer("umamusume.dll", "Gallop", "StoryRaceTextAsset", "Load", 0);
 
 		auto get_modified_string_addr = il2cpp_symbols::get_method_pointer("umamusume.dll", "Gallop", "GallopUtil", "GetModifiedString", IgnoreNumberOfArguments);
-
-		auto canvas_scaler_setres_addr = il2cpp_symbols::get_method_pointer(
-			"UnityEngine.UI.dll", "UnityEngine.UI",
-			"CanvasScaler", "set_referenceResolution", 1
-		);
-
-		auto UIManager_UpdateCanvasScaler_addr = il2cpp_symbols::get_method_pointer(
-			"umamusume.dll", "Gallop", "UIManager", "UpdateCanvasScaler", 1);
 
 		set_scale_factor = il2cpp_symbols::get_method_pointer<void(*)(void*, float)>(
 			"UnityEngine.UI.dll", "UnityEngine.UI",
@@ -12679,6 +13157,54 @@ namespace
 
 		auto LiveTheaterCharaSelect_CheckSwapChara_addr = il2cpp_symbols::get_method_pointer("umamusume.dll", "Gallop", "LiveTheaterCharaSelect", "CheckSwapChara", 7);
 
+		auto GallopStandaloneInputModule_SetPointerPosition_addr = il2cpp_symbols::get_method_pointer("umamusume.dll", "UnityEngine.EventSystems", "GallopStandaloneInputModule", "SetPointerPosition", 0);
+
+		auto GallopStandaloneInputModule_ProcessTouchEvents_addr = il2cpp_symbols::get_method_pointer("umamusume.dll", "UnityEngine.EventSystems", "GallopStandaloneInputModule", "ProcessTouchEvents", 0);
+
+		auto DialogLiveStartConfirm_PushDialog_addr = il2cpp_symbols::get_method_pointer("umamusume.dll", "Gallop", "DialogLiveStartConfirmFullPortrait", "PushDialog", 3);
+
+		auto Director_get_IsScreenModeFullPortrait_addr = il2cpp_symbols::get_method_pointer("umamusume.dll", "Gallop.Live", "Director", "get_IsScreenModeFullPortrait", 0);
+
+		auto CollectRaidBgCutinHelper_InstantiateTimeline_addr = il2cpp_symbols::get_method_pointer("umamusume.dll", "Gallop", "CollectRaidBgCutinHelper", "InstantiateTimeline", 4);
+
+		auto LiveTempData_CreateLiveSettingScreenModeCached_addr = il2cpp_symbols::get_method_pointer("umamusume.dll", "Gallop", "TempData/LiveTempData", "CreateLiveSettingScreenModeCached", 0);
+
+		auto TempData_ctor_addr = il2cpp_symbols::get_method_pointer("umamusume.dll", "Gallop", "TempData", ".ctor", 0);
+
+		auto LiveTempData_ctor_addr = il2cpp_symbols::get_method_pointer("umamusume.dll", "Gallop", "TempData/LiveTempData", ".ctor", 0);
+
+		auto Header_Initialize_addr = il2cpp_symbols::get_method_pointer("umamusume.dll", "Gallop", "Header", "Initialize", 0);
+
+		auto PartsSingleModeCommonFooter_Setup_addr = il2cpp_symbols::get_method_pointer("umamusume.dll", "Gallop", "PartsSingleModeCommonFooter", "Setup", 0);
+
+		auto DialogSingleModeTopMenu_Setup_addr = il2cpp_symbols::get_method_pointer("umamusume.dll", "Gallop", "DialogSingleModeTopMenu", "Setup", 0);
+
+		auto DialogSingleModeTopMenu_Setup1_addr = il2cpp_symbols::get_method_pointer("umamusume.dll", "Gallop", "DialogSingleModeTopMenu", "Setup", 1);
+
+		auto DialogSingleModeTopMenu_SetupButtonPositions_addr = il2cpp_symbols::get_method_pointer("umamusume.dll", "Gallop", "DialogSingleModeTopMenu", "SetupButtonPositions", 0);
+
+		auto SingleModeRaceEntryViewController_SetupBottomButtons_addr = il2cpp_symbols::get_method_pointer("umamusume.dll", "Gallop", "SingleModeRaceEntryViewController", "SetupBottomButtons", 1);
+
+		auto StaticVariableDefine_Circle_CircleChat_STAMP_ANCHORED_POS_AFTER_addr = il2cpp_symbols::get_method_pointer("umamusume.dll", "Gallop", "StaticVariableDefine/Circle/CircleChat", "get_STAMP_ANCHORED_POS_AFTER", 0);
+
+		auto StaticVariableDefine_Circle_CircleChat_INPUT_LOCAL_POS_AFTER_addr = il2cpp_symbols::get_method_pointer("umamusume.dll", "Gallop", "StaticVariableDefine/Circle/CircleChat", "get_INPUT_LOCAL_POS_AFTER", 0);
+
+		auto StaticVariableDefine_Circle_CircleChat_INPUT_ANCHORED_POS_AFTER_addr = il2cpp_symbols::get_method_pointer("umamusume.dll", "Gallop", "StaticVariableDefine/Circle/CircleChat", "get_INPUT_ANCHORED_POS_AFTER", 0);
+
+		auto StaticVariableDefine_Circle_CircleChat_INPUT_SIZE_DELTA_POS_AFTER_addr = il2cpp_symbols::get_method_pointer("umamusume.dll", "Gallop", "StaticVariableDefine/Circle/CircleChat", "get_INPUT_SIZE_DELTA_POS_AFTER", 0);
+
+		auto CircleChat_Initialize_addr = il2cpp_symbols::get_method_pointer("umamusume.dll", "Gallop", "CircleChat", "Initialize", 0);
+
+		auto ResourcePath_GetPreInTitleMoviePath_addr = il2cpp_symbols::get_method_pointer("umamusume.dll", "Gallop", "ResourcePath", "GetPreInTitleMoviePath", 0);
+
+		auto ResourcePath_GetLatestAssetBundleTitleMoviePath_addr = il2cpp_symbols::get_method_pointer("umamusume.dll", "Gallop", "ResourcePath", "GetLatestAssetBundleTitleMoviePath", 0);
+
+		auto DialogHomeMenuMain_ChangeView_addr = il2cpp_symbols::get_method_pointer("umamusume.dll", "Gallop", "DialogHomeMenuMain", "ChangeView", 1);
+
+		auto DialogHomeMenuMain_ChangeView2_addr = il2cpp_symbols::get_method_pointer("umamusume.dll", "Gallop", "DialogHomeMenuMain", "ChangeView", 2);
+
+		auto SceneManager_BootView_addr = il2cpp_symbols::get_method_pointer("umamusume.dll", "Gallop", "SceneManager", "BootView", 0);
+
 		auto load_scene_internal_addr = il2cpp_resolve_icall("UnityEngine.SceneManagement.SceneManager::LoadSceneAsyncNameIndexInternal_Injected(System.String,System.Int32,UnityEngine.SceneManagement.LoadSceneParameters&,System.bool)");
 
 #pragma endregion
@@ -12688,9 +13214,21 @@ namespace
 			ADD_HOOK(Certification_initDmmPlatformData, "Gallop.Certification::initDmmPlatformData at %p\n");
 		}
 
-		ADD_HOOK(Object_Internal_CloneSingleWithParent, "UnityEngine.Object::Internal_CloneSingleWithParent at %p\n");
+		// ADD_HOOK(TempData_ctor, "Gallop.TempData::.ctor at %p\n");
 
-		ADD_HOOK(Object_Internal_CloneSingle, "UnityEngine.Object::Internal_CloneSingle at %p\n");
+		// ADD_HOOK(LiveTempData_CreateLiveSettingScreenModeCached, "Gallop.TempData.LiveTempData::CreateLiveSettingScreenModeCached at %p\n");
+
+		// ADD_HOOK(LiveTempData_get_CachedLiveScreenModeDic, "Gallop.TempData.LiveTempData::get_CachedLiveScreenModeDic at %p\n");
+
+		// ADD_HOOK(Director_get_IsScreenModeFullPortrait, "Gallop.Live.Director::get_IsScreenModeFullPortrait at %p\n");
+
+		// ADD_HOOK(DialogLiveStartConfirm_PushDialog, "Gallop.DialogLiveStartConfirm::PushDialog at %p\n");
+
+		// ADD_HOOK(GallopStandaloneInputModule_SetPointerPosition, "UnityEngine.EventSystems.GallopStandaloneInputModule::SetPointerPosition at %p\n");
+
+		// ADD_HOOK(GallopStandaloneInputModule_ProcessTouchEvents, "UnityEngine.EventSystems.GallopStandaloneInputModule::ProcessTouchEvents at %p\n");
+
+		ADD_HOOK(Object_Internal_CloneSingleWithParent, "UnityEngine.Object::Internal_CloneSingleWithParent at %p\n");
 
 		ADD_HOOK(PartsEpisodeList_SetupStoryExtraEpisodeList, "Gallop.PartsEpisodeList::SetupStoryExtraEpisodeList at %p\n");
 
@@ -12796,12 +13334,6 @@ namespace
 				// ADD_HOOK(SplashViewController_KakaoStart, "SplashViewController::KakaoStart at %p\n");
 		}
 
-		if (config::unlock_size || config::freeform_window)
-		{
-			// ADD_HOOK(canvas_scaler_setres, "UnityEngine.UI.CanvasScaler::set_referenceResolution at %p\n");
-			// ADD_HOOK(UIManager_UpdateCanvasScaler, "Gallop.UIManager::UpdateCanvasScaler at %p\n");
-		}
-
 		if (config::replace_to_builtin_font || config::replace_to_custom_font)
 		{
 			ADD_HOOK(on_populate, "Gallop.TextCommon::OnPopulateMesh at %p\n");
@@ -12841,6 +13373,22 @@ namespace
 			ADD_HOOK(Screen_SetResolution, "Gallop.Screen::SetResolution at %p\n");
 			ADD_HOOK(Screen_IsCurrentOrientation, "Gallop.Screen::IsCurrentOrientation at %p\n");
 
+			ADD_HOOK(DialogSingleModeTopMenu_SetupButtonPositions, "Gallop.DialogSingleModeTopMenu::SetupButtonPositions at %p\n");
+			ADD_HOOK(DialogSingleModeTopMenu_Setup, "Gallop.DialogSingleModeTopMenu::Setup at %p\n");
+			ADD_HOOK(DialogSingleModeTopMenu_Setup1, "Gallop.DialogSingleModeTopMenu::Setup1 at %p\n");
+			ADD_HOOK(PartsSingleModeCommonFooter_Setup, "Gallop.PartsSingleModeCommonFooter::Setup at %p\n");
+			ADD_HOOK(Header_Initialize, "Gallop.Header::Initialize at %p\n");
+			ADD_HOOK(SingleModeRaceEntryViewController_SetupBottomButtons, "Gallop.SingleModeRaceEntryViewController::SetupBottomButtons at %p\n");
+			ADD_HOOK(CircleChat_Initialize, "Gallop.CircleChat::Initialize at %p\n");
+			ADD_HOOK(StaticVariableDefine_Circle_CircleChat_STAMP_ANCHORED_POS_AFTER, "Gallop.StaticVariableDefine.Circle.CircleChat::get_STAMP_ANCHORED_POS_AFTER at %p\n");
+			ADD_HOOK(StaticVariableDefine_Circle_CircleChat_INPUT_LOCAL_POS_AFTER, "Gallop.StaticVariableDefine.Circle.CircleChat::get_INPUT_LOCAL_POS_AFTER at %p\n");
+			ADD_HOOK(StaticVariableDefine_Circle_CircleChat_INPUT_ANCHORED_POS_AFTER, "Gallop.StaticVariableDefine.Circle.CircleChat::get_INPUT_ANCHORED_POS_AFTER at %p\n");
+			ADD_HOOK(StaticVariableDefine_Circle_CircleChat_INPUT_SIZE_DELTA_POS_AFTER, "Gallop.StaticVariableDefine.Circle.CircleChat::get_INPUT_SIZE_DELTA_POS_AFTER at %p\n");
+			ADD_HOOK(ResourcePath_GetPreInTitleMoviePath, "Gallop.ResourcePath::GetPreInTitleMoviePath at %p\n");
+			ADD_HOOK(ResourcePath_GetLatestAssetBundleTitleMoviePath, "Gallop.ResourcePath::GetLatestAssetBundleTitleMoviePath at %p\n");
+			ADD_HOOK(DialogHomeMenuMain_ChangeView, "Gallop.DialogHomeMenuMain::ChangeView at %p\n");
+			ADD_HOOK(DialogHomeMenuMain_ChangeView2, "Gallop.DialogHomeMenuMain::ChangeView2 at %p\n");
+
 			auto StandaloneWindowResize = il2cpp_symbols::get_class("umamusume.dll", "Gallop", "StandaloneWindowResize");
 			il2cpp_class_get_method_from_name_type<void (*)(bool)>(StandaloneWindowResize, "set_IsPreventReShape", 1)->methodPointer(true);
 
@@ -12874,10 +13422,6 @@ namespace
 				il2cpp_field_static_set_value(_originalScreenHeight_Field, &height);
 			}
 
-			auto Camera_set_orthographicSize_addr = il2cpp_resolve_icall("UnityEngine.Camera::set_orthographicSize(System.Single)");
-
-			auto RectTransform_get_rect_Injected_addr = il2cpp_resolve_icall("UnityEngine.RectTransform::get_rect_Injected(UnityEngine.Rect&)");
-
 			auto WaitDeviceOrientation_addr = il2cpp_symbols::get_method_pointer(
 				"umamusume.dll",
 				"Gallop", "Screen", "WaitDeviceOrientation", 1);
@@ -12888,9 +13432,6 @@ namespace
 
 			auto MoviePlayerForUI_AdjustScreenSize_addr = il2cpp_symbols::get_method_pointer(
 				"Cute.Cri.Assembly.dll", "Cute.Cri", "MoviePlayerForUI", "AdjustScreenSize", 2);
-
-			ADD_HOOK(Camera_set_orthographicSize, "UnityEngine.Camera::set_orthographicSize at %p\n");
-			// ADD_HOOK(RectTransform_get_rect_Injected, "UnityEngine.RectTransform::get_rect_Injected at %p\n");
 
 			// ADD_HOOK(WaitDeviceOrientation, "Gallop.Screen::WaitDeviceOrientation at %p\n");
 			ADD_HOOK(DeviceOrientationGuide_Show, "DeviceOrientationGuide::Show at %p\n");
@@ -13172,15 +13713,12 @@ namespace
 
 		if (config::auto_fullscreen || config::unlock_size || config::freeform_window)
 		{
-			if (Game::CurrentGameStore != Game::Store::Steam || config::freeform_window)
-			{
 				if (SetResolution_addr)
 				{
 					ADD_HOOK(SetResolution, "UnityEngine.Screen.SetResolution(int, int, FullScreenMode, int) at %p\n");
 				}
 				ADD_HOOK(SetResolution_Injected, "UnityEngine.Screen.SetResolution_Injected(int, int, FullScreenMode, RefreshRate) at %p\n");
 			}
-		}
 
 		if (config::unlock_size || config::freeform_window)
 		{
@@ -13363,14 +13901,6 @@ namespace
 			}
 		}
 
-		// auto uiManager = Gallop::UIManager::Instance();
-		// auto camera = uiManager._bgCamera();
-		// auto gameObject = UnityEngine::Behaviour(camera).gameObject();
-		/*il2cpp_resolve_icall_type<Il2CppString* (*)(Il2CppObject*, int)>("UnityEngine.Camera::set_stereoTargetEye()")(camera, 3);
-		il2cpp_resolve_icall_type<Il2CppString* (*)(Il2CppObject*, float)>("UnityEngine.Camera::set_stereoConvergence()")(camera, 10);
-		il2cpp_resolve_icall_type<Il2CppString* (*)(Il2CppObject*, float)>("UnityEngine.Camera::set_stereoSeparation()")(camera, 0.022);
-		il2cpp_resolve_icall_type<void (*)(Il2CppObject*, float)>("UnityEngine.Camera::set_fieldOfView()")(camera, 60);*/
-
 		fullScreenFl = UnityEngine::Screen::fullScreen();
 
 		if (config::discord_rich_presence)
@@ -13473,7 +14003,7 @@ namespace
 
 					if (useDecrypter)
 					{
-						auto decrypterConfigField = il2cpp_class_get_field_from_name_wrap(obj->klass, "decrypterConfig");
+						auto decrypterConfigField = il2cpp_class_get_field_from_name_wrap(obj->klass, "DecrypterConfig");
 						Il2CppObject* decrypterConfig;
 						il2cpp_field_get_value(obj, decrypterConfigField, &decrypterConfig);
 
@@ -13484,6 +14014,7 @@ namespace
 							il2cpp_field_get_value(decrypterConfig, keyField, &key);
 
 							cout << "key: " << wide_u8(key->chars) << endl;
+							cout << "key length: " << (key ? il2cpp_string_length(key) : 0) << endl;
 						}
 					}
 				}*/
@@ -13500,6 +14031,7 @@ namespace
 				//	// Delay 50ms
 				//	il2cpp_symbols::get_method_pointer<Il2CppObject* (*)(float, Il2CppDelegate*, bool)>("DOTween.dll", "DG.Tweening", "DOVirtual", "DelayedCall", 3)(0.05, delayCallback, true);
 				//}
+
 				if (sceneName == L"Title")
 				{
 					TaskbarManager::SetProgressValue(0, 0);
@@ -13579,23 +14111,6 @@ namespace
 									});
 								il2cpp_field_set_value(system, pUncSendCommandVa_Field, fn);
 							}
-						}
-					}
-
-					if (config::freeform_window && Game::CurrentGameRegion == Game::Region::KOR)
-					{
-						static bool initialResize = false;
-
-						if (!initialResize) {
-							initialResize = true;
-
-							auto hWnd = GetHWND();
-
-							RECT windowRect;
-							GetWindowRect(hWnd, &windowRect);
-							int windowWidth = windowRect.right - windowRect.left,
-								windowHeight = windowRect.bottom - windowRect.top;
-							ResizeWindow(hWnd, windowWidth, windowHeight);
 						}
 					}
 
@@ -13779,7 +14294,15 @@ namespace
 
 		try
 		{
-			SystemMediaTransportControlsManager::CreateShortcutForSMTC(title.data());
+			wstring newTitle = title;
+
+			if (Game::CurrentGameRegion == Game::Region::JPN &&
+				Game::CurrentGameStore == Game::Store::Steam)
+			{
+				newTitle.append(L" (Steam)");
+			}
+
+			SystemMediaTransportControlsManager::CreateShortcutForSMTC(newTitle.data());
 			SystemMediaTransportControlsManager::Initialze(GetHWND());
 
 			auto& smtc = SystemMediaTransportControlsManager::instance;
@@ -14318,20 +14841,12 @@ void init_hook(filesystem::path module_path)
 	MH_EnableHook(FindNextFileW);
 
 	auto LoadLibraryExW_addr = GetProcAddress(GetModuleHandleW(L"KernelBase.dll"), "LoadLibraryExW");
-	//MH_CreateHook(LoadLibraryExW, load_library_ex_w_hook, &load_library_ex_w_orig);
-	//MH_EnableHook(LoadLibraryExW);
+	MH_CreateHook(LoadLibraryExW_addr, load_library_ex_w_hook, &load_library_ex_w_orig);
+	MH_EnableHook(LoadLibraryExW_addr);
 
 	auto LoadLibraryW_addr = GetProcAddress(GetModuleHandleW(L"KernelBase.dll"), "LoadLibraryW");
 	MH_CreateHook(LoadLibraryW_addr, load_library_w_hook, &load_library_w_orig);
 	MH_EnableHook(LoadLibraryW_addr);
-
-	auto UnityPlayer = GetModuleHandleW(L"UnityPlayer.dll");
-	if (UnityPlayer)
-	{
-		auto UnityMain_addr = GetProcAddress(UnityPlayer, "UnityMain");
-		MH_CreateHook(UnityMain_addr, UnityMain_hook, &UnityMain_orig);
-		MH_EnableHook(UnityMain_addr);
-	}
 
 	fullScreenFl = config::auto_fullscreen && !config::freeform_window;
 

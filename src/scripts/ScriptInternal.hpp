@@ -23,14 +23,15 @@ static void __static__()
 
 inline void PrintStackTrace()
 {
-	Il2CppString* (*trace)() = il2cpp_symbols::get_method_pointer<Il2CppString * (*)()>("UnityEngine.CoreModule.dll", "UnityEngine", "StackTraceUtility", "ExtractStackTrace", 0);
+	// Il2CppString* (*trace)() = il2cpp_symbols::get_method_pointer<Il2CppString * (*)()>("UnityEngine.CoreModule.dll", "UnityEngine", "StackTraceUtility", "ExtractStackTrace", 0);
+	Il2CppString* (*trace)() = il2cpp_symbols::get_method_pointer<Il2CppString * (*)()>("mscorlib.dll", "System", "Environment", "get_StackTrace", 0);
 	std::wcout << trace()->chars << std::endl;
 }
 
 template<typename... Ts, typename = Il2CppReflectionType*>
 inline Il2CppClass* GetGenericClass(Il2CppReflectionType* baseRuntimeType, Ts... runtimeTypes)
 {
-	auto typeArray = reinterpret_cast<Il2CppArraySize*>(il2cpp_array_new(il2cpp_symbols::get_class("mscorlib.dll", "System", "Type"), sizeof...(runtimeTypes)));
+	auto typeArray = reinterpret_cast<Il2CppArraySize*>(il2cpp_array_new(il2cpp_defaults.systemtype_class, sizeof...(runtimeTypes)));
 
 	int i = 0;
 	for (const auto type : { runtimeTypes... })
@@ -208,7 +209,7 @@ inline Il2CppDelegate* CreateDelegate(Il2CppObject* target, R(*fn)(Il2CppObject*
 
 		delegate->method = reinterpret_cast<const MethodInfo*>(il2cpp_method_get_object(methodInfo, methodInfo->klass));
 
-		InvokeDelegateConstructor(delegate, nullptr, methodInfo);
+		InvokeDelegateConstructor(delegate, target, methodInfo);
 
 		auto object = reinterpret_cast<Il2CppObject*>(delegate);
 
@@ -711,6 +712,29 @@ inline Il2CppObject* GetCurrentViewController()
 		});
 
 	return GetCurrentViewController(sceneManager);
+}
+
+inline Il2CppObject* GetCurrentSceneController()
+{
+	auto sceneManager = GetSingletonInstance(il2cpp_symbols::get_class("umamusume.dll", "Gallop", "SceneManager"));
+
+	if (!sceneManager)
+	{
+		return nullptr;
+	}
+
+	auto GetCurrentSceneController = il2cpp_symbols::find_method<Il2CppObject * (*)(Il2CppObject*)>("umamusume.dll", "Gallop", "SceneManager", [](const MethodInfo* info)
+		{
+			if (Game::CurrentUnityVersion != Game::UnityVersion::Unity22)
+			{
+				auto info2020 = reinterpret_cast<const MethodInfo2020*>(info);
+				return info2020->name == "GetCurrentSceneController"s && !info2020->is_generic;
+			}
+
+			return info->name == "GetCurrentSceneController"s && !info->is_generic;
+		});
+
+	return GetCurrentSceneController(sceneManager);
 }
 
 inline Il2CppObject* GetCurrentHubViewChildController()

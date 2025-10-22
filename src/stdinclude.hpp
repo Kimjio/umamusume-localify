@@ -24,7 +24,6 @@
 #define RAPIDJSON_HAS_STDSTRING 1
 
 #include <rapidjson/document.h>
-#include <rapidjson/encodings.h>
 #include <rapidjson/istreamwrapper.h>
 #include <rapidjson/stringbuffer.h>
 
@@ -41,8 +40,6 @@ constexpr auto Cryptographer_KEY = "r!I@mt8e5i=";
 
 // Unity App icon
 constexpr auto IDI_APP_ICON = 103;
-
-extern HINSTANCE hInstance;
 
 namespace
 {

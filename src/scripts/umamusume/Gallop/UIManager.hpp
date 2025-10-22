@@ -41,7 +41,7 @@ namespace Gallop
 
 		Il2CppObject* CommonHeaderTitle();
 
-		Il2CppObject* SteamUIManager();
+		Il2CppObject* LandscapeUIManager();
 
 		void UITexture(Il2CppObject* value);
 
@@ -74,6 +74,8 @@ namespace Gallop
 		static float GetCameraSizeByOrientation(ScreenOrientation orientation);
 
 		static Vector2 DefaultResolution();
+
+		static bool IsLandscapeMode();
 
 #ifdef _MSC_VER
 		void ChangeResizeUIForPC(int width, int height);

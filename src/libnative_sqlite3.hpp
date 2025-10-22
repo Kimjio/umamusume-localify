@@ -103,7 +103,7 @@
 #define NOMINMAX
 #include <Windows.h>
 
-#define GET_PROC(name) reinterpret_cast<decltype(name)*>(name##_addr)
+#define CALL_PROC(name) if (name##_addr) return reinterpret_cast<decltype(name)*>(name##_addr)
 #define SET_PROC(name) name##_addr = reinterpret_cast<decltype(name)*>(GetProcAddress(libnative, #name))
 #endif
 
@@ -368,7 +368,7 @@ int sqlite3_bind_blob(
 
 	if (libnative)
 	{
-		return GET_PROC(sqlite3_bind_blob)(pStmt, i, zData, nData, xDel);
+		CALL_PROC(sqlite3_bind_blob)(pStmt, i, zData, nData, xDel);
 	}
 
 	return SQLITE_OK;
@@ -383,7 +383,7 @@ int sqlite3_bind_double(sqlite3_stmt* pStmt, int i, double rValue)
 
 	if (libnative)
 	{
-		return GET_PROC(sqlite3_bind_double)(pStmt, i, rValue);
+		CALL_PROC(sqlite3_bind_double)(pStmt, i, rValue);
 	}
 
 	return SQLITE_OK;
@@ -398,7 +398,7 @@ int sqlite3_bind_int(sqlite3_stmt* pStmt, int i, int iValue)
 
 	if (libnative)
 	{
-		return GET_PROC(sqlite3_bind_int)(pStmt, i, iValue);
+		CALL_PROC(sqlite3_bind_int)(pStmt, i, iValue);
 	}
 
 	return SQLITE_OK;
@@ -413,7 +413,7 @@ int sqlite3_bind_int64(sqlite3_stmt* pStmt, int i, sqlite_int64 iValue)
 
 	if (libnative)
 	{
-		return GET_PROC(sqlite3_bind_int64)(pStmt, i, iValue);
+		CALL_PROC(sqlite3_bind_int64)(pStmt, i, iValue);
 	}
 
 	return SQLITE_OK;
@@ -428,7 +428,7 @@ int sqlite3_bind_null(sqlite3_stmt* pStmt, int i)
 
 	if (libnative)
 	{
-		return GET_PROC(sqlite3_bind_null)(pStmt, i);
+		CALL_PROC(sqlite3_bind_null)(pStmt, i);
 	}
 
 	return SQLITE_OK;
@@ -449,7 +449,7 @@ int sqlite3_bind_text(
 
 	if (libnative)
 	{
-		return GET_PROC(sqlite3_bind_text)(pStmt, i, zData, nData, xDel);
+		CALL_PROC(sqlite3_bind_text)(pStmt, i, zData, nData, xDel);
 	}
 
 	return SQLITE_OK;
@@ -464,7 +464,7 @@ int sqlite3_close(sqlite3* db)
 
 	if (libnative)
 	{
-		return GET_PROC(sqlite3_close)(db);
+		CALL_PROC(sqlite3_close)(db);
 	}
 
 	return SQLITE_OK;
@@ -479,7 +479,7 @@ const void* sqlite3_column_blob(sqlite3_stmt* pStmt, int i)
 
 	if (libnative)
 	{
-		return GET_PROC(sqlite3_column_blob)(pStmt, i);
+		CALL_PROC(sqlite3_column_blob)(pStmt, i);
 	}
 
 	return SQLITE_OK;
@@ -494,7 +494,7 @@ int sqlite3_column_bytes(sqlite3_stmt* pStmt, int i)
 
 	if (libnative)
 	{
-		return GET_PROC(sqlite3_column_bytes)(pStmt, i);
+		CALL_PROC(sqlite3_column_bytes)(pStmt, i);
 	}
 
 	return SQLITE_OK;
@@ -509,7 +509,7 @@ double sqlite3_column_double(sqlite3_stmt* pStmt, int i)
 
 	if (libnative)
 	{
-		return GET_PROC(sqlite3_column_double)(pStmt, i);
+		CALL_PROC(sqlite3_column_double)(pStmt, i);
 	}
 
 	return SQLITE_OK;
@@ -524,7 +524,7 @@ int sqlite3_column_int(sqlite3_stmt* pStmt, int i)
 
 	if (libnative)
 	{
-		return GET_PROC(sqlite3_column_int)(pStmt, i);
+		CALL_PROC(sqlite3_column_int)(pStmt, i);
 	}
 
 	return SQLITE_OK;
@@ -539,7 +539,7 @@ sqlite_int64 sqlite3_column_int64(sqlite3_stmt* pStmt, int i)
 
 	if (libnative)
 	{
-		return GET_PROC(sqlite3_column_int64)(pStmt, i);
+		CALL_PROC(sqlite3_column_int64)(pStmt, i);
 	}
 
 	return SQLITE_OK;
@@ -554,7 +554,7 @@ const unsigned char* sqlite3_column_text(sqlite3_stmt* pStmt, int i)
 
 	if (libnative)
 	{
-		return GET_PROC(sqlite3_column_text)(pStmt, i);
+		CALL_PROC(sqlite3_column_text)(pStmt, i);
 	}
 
 	return SQLITE_OK;
@@ -569,7 +569,7 @@ int sqlite3_column_type(sqlite3_stmt* pStmt, int i)
 
 	if (libnative)
 	{
-		return GET_PROC(sqlite3_column_type)(pStmt, i);
+		CALL_PROC(sqlite3_column_type)(pStmt, i);
 	}
 
 	return SQLITE_OK;
@@ -590,7 +590,7 @@ int sqlite3_exec(
 
 	if (libnative)
 	{
-		return GET_PROC(sqlite3_exec)(db, zSql, xCallback, pArg, pzErrMsg);
+		CALL_PROC(sqlite3_exec)(db, zSql, xCallback, pArg, pzErrMsg);
 	}
 
 	return SQLITE_OK;
@@ -605,7 +605,7 @@ int sqlite3_finalize(sqlite3_stmt* pStmt)
 
 	if (libnative)
 	{
-		return GET_PROC(sqlite3_finalize)(pStmt);
+		CALL_PROC(sqlite3_finalize)(pStmt);
 	}
 
 	return SQLITE_OK;
@@ -620,7 +620,7 @@ int sqlite3_key(sqlite3* db, const void* zKey, int nKey)
 
 	if (libnative)
 	{
-		return GET_PROC(sqlite3_key)(db, zKey, nKey);
+		CALL_PROC(sqlite3_key)(db, zKey, nKey);
 	}
 
 	return SQLITE_OK;
@@ -635,7 +635,7 @@ int sqlite3_key_v2(sqlite3* db, const char* zDbName, const void* zKey, int nKey)
 
 	if (libnative)
 	{
-		return GET_PROC(sqlite3_key_v2)(db, zDbName, zKey, nKey);
+		CALL_PROC(sqlite3_key_v2)(db, zDbName, zKey, nKey);
 	}
 
 	return SQLITE_OK;
@@ -653,7 +653,7 @@ int sqlite3_open(
 
 	if (libnative)
 	{
-		return GET_PROC(sqlite3_open)(zFilename, ppDb);
+		CALL_PROC(sqlite3_open)(zFilename, ppDb);
 	}
 
 	return SQLITE_OK;
@@ -673,7 +673,7 @@ int sqlite3_open_v2(
 
 	if (libnative)
 	{
-		return GET_PROC(sqlite3_open_v2)(filename, ppDb, flags, zVfs);
+		CALL_PROC(sqlite3_open_v2)(filename, ppDb, flags, zVfs);
 	}
 
 	return SQLITE_OK;
@@ -694,7 +694,7 @@ int sqlite3_prepare_v2(
 
 	if (libnative)
 	{
-		return GET_PROC(sqlite3_prepare_v2)(db, zSql, nBytes, ppStmt, pzTail);
+		CALL_PROC(sqlite3_prepare_v2)(db, zSql, nBytes, ppStmt, pzTail);
 	}
 
 	return SQLITE_OK;
@@ -709,7 +709,7 @@ int sqlite3_rekey(sqlite3* db, const void* zKey, int nKey)
 
 	if (libnative)
 	{
-		return GET_PROC(sqlite3_rekey)(db, zKey, nKey);
+		CALL_PROC(sqlite3_rekey)(db, zKey, nKey);
 	}
 
 	return SQLITE_OK;
@@ -724,7 +724,7 @@ int sqlite3_rekey_v2(sqlite3* db, const char* zDbName, const void* zKey, int nKe
 
 	if (libnative)
 	{
-		return GET_PROC(sqlite3_rekey_v2)(db, zDbName, zKey, nKey);
+		CALL_PROC(sqlite3_rekey_v2)(db, zDbName, zKey, nKey);
 	}
 
 	return SQLITE_OK;
@@ -739,7 +739,7 @@ int sqlite3_reset(sqlite3_stmt* pStmt)
 
 	if (libnative)
 	{
-		return GET_PROC(sqlite3_reset)(pStmt);
+		CALL_PROC(sqlite3_reset)(pStmt);
 	}
 
 	return SQLITE_OK;
@@ -754,7 +754,7 @@ int sqlite3_step(sqlite3_stmt* pStmt)
 
 	if (libnative)
 	{
-		return GET_PROC(sqlite3_step)(pStmt);
+		CALL_PROC(sqlite3_step)(pStmt);
 	}
 
 	return SQLITE_OK;
@@ -769,7 +769,7 @@ int sqlite3_threadsafe(void)
 
 	if (libnative)
 	{
-		return GET_PROC(sqlite3_threadsafe)();
+		CALL_PROC(sqlite3_threadsafe)();
 	}
 
 	return SQLITE_OK;
@@ -784,7 +784,7 @@ sqlite3_vfs* sqlite3_vfs_find(const char* zVfs)
 
 	if (libnative)
 	{
-		return GET_PROC(sqlite3_vfs_find)(zVfs);
+		CALL_PROC(sqlite3_vfs_find)(zVfs);
 	}
 
 	return SQLITE_OK;
@@ -799,7 +799,7 @@ int sqlite3_vfs_register(sqlite3_vfs* pVfs, int makeDflt)
 
 	if (libnative)
 	{
-		return GET_PROC(sqlite3_vfs_register)(pVfs, makeDflt);
+		CALL_PROC(sqlite3_vfs_register)(pVfs, makeDflt);
 	}
 
 	return SQLITE_OK;
@@ -814,7 +814,7 @@ int sqlite3_vfs_unregister(sqlite3_vfs* pVfs)
 
 	if (libnative)
 	{
-		return GET_PROC(sqlite3_vfs_unregister)(pVfs);
+		CALL_PROC(sqlite3_vfs_unregister)(pVfs);
 	}
 
 	return SQLITE_OK;
@@ -829,7 +829,7 @@ int sqlite3_wal_checkpoint(sqlite3* db, const char* zDb)
 
 	if (libnative)
 	{
-		return GET_PROC(sqlite3_wal_checkpoint)(db, zDb);
+		CALL_PROC(sqlite3_wal_checkpoint)(db, zDb);
 	}
 
 	return SQLITE_OK;
@@ -850,7 +850,7 @@ int sqlite3_wal_checkpoint_v2(
 
 	if (libnative)
 	{
-		return GET_PROC(sqlite3_wal_checkpoint_v2)(db, zDb, eMode, pnLog, pnCkpt);
+		CALL_PROC(sqlite3_wal_checkpoint_v2)(db, zDb, eMode, pnLog, pnCkpt);
 	}
 
 	return SQLITE_OK;
@@ -865,7 +865,7 @@ unsigned char* sqlite3mc_codec_data(sqlite3* db, const char* zDbName, const char
 
 	if (libnative)
 	{
-		return GET_PROC(sqlite3mc_codec_data)(db, zDbName, paramName);
+		CALL_PROC(sqlite3mc_codec_data)(db, zDbName, paramName);
 	}
 
 	return nullptr;
@@ -880,7 +880,7 @@ int sqlite3mc_config(sqlite3* db, const char* paramName, int newValue)
 
 	if (libnative)
 	{
-		return GET_PROC(sqlite3mc_config)(db, paramName, newValue);
+		CALL_PROC(sqlite3mc_config)(db, paramName, newValue);
 	}
 
 	return SQLITE_OK;
@@ -895,7 +895,7 @@ int sqlite3mc_config_cipher(sqlite3* db, const char* cipherName, const char* par
 
 	if (libnative)
 	{
-		return GET_PROC(sqlite3mc_config_cipher)(db, cipherName, paramName, newValue);
+		CALL_PROC(sqlite3mc_config_cipher)(db, cipherName, paramName, newValue);
 	}
 
 	return SQLITE_OK;

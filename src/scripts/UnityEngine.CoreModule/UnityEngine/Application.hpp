@@ -12,6 +12,7 @@ namespace UnityEngine
 		static Il2CppString* unityVersion();
 		static Il2CppString* companyName();
 		static Il2CppString* productName();
+		static Il2CppString* streamingAssetsPath();
 		static Il2CppString* persistentDataPath();
 		static void targetFrameRate(int value);
 		static int targetFrameRate();

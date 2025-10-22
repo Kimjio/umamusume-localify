@@ -1,5 +1,10 @@
 #include "il2cpp_symbols.hpp"
 
+#define RAPIDJSON_HAS_STDSTRING 1
+
+#include <rapidjson/encodings.h>
+#include <rapidjson/document.h>
+
 #include <winver.h>
 #include <wincrypt.h>
 
@@ -10,11 +15,6 @@
 #undef DO_API
 
 Il2CppDefaults il2cpp_defaults;
-
-//char* il2cpp_array_addr_with_size(void* array, int32_t size, uintptr_t idx)
-//{
-//	return reinterpret_cast<char*>(array) + kIl2CppSizeOfArray + size * idx;
-//}
 
 Il2CppString* il2cpp_string_new16(const wchar_t* value)
 {
@@ -587,6 +587,19 @@ namespace il2cpp_symbols
 						return method->methodPointer;
 					}
 				}
+			}
+		}
+		return nullptr;
+	}
+
+	Il2CppMethodPointer get_method_pointer(Il2CppClass* klass, const char* name, int argsCount)
+	{
+		if (klass)
+		{
+			auto method = il2cpp_class_get_method_from_name(klass, name, argsCount);
+			if (method)
+			{
+				return method->methodPointer;
 			}
 		}
 		return nullptr;

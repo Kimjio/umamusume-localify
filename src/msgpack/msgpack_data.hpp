@@ -17,8 +17,6 @@
 
 #include "masterdb/masterdb.hpp"
 
-#include "string_utils.hpp"
-
 #include "notification/DesktopNotificationManagerCompat.h"
 
 #include "scripts/ScriptInternal.hpp"
