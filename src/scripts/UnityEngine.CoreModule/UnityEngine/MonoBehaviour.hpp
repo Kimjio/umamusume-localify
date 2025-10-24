@@ -11,6 +11,8 @@ namespace UnityEngine
 	public:
 		Coroutine StartCoroutineManaged2(Il2CppObject* enumerator);
 
+		void StopCoroutineManaged(Coroutine routine);
+
 		using Behaviour::Behaviour;
 	};
 }

@@ -36,6 +36,7 @@ namespace config
 	wstring custom_title_name;
 	unordered_map<wstring, ReplaceAsset> replace_assets;
 	wstring replace_assetbundle_file_path;
+	wstring replace_atlas_assetbundle_file_path;
 	vector<wstring> replace_assetbundle_file_paths;
 	wstring replace_text_db_path;
 	bool character_system_text_caption = false;
@@ -108,6 +109,7 @@ namespace config
 		float ratioHorizontal = 1.7777778f;
 		bool allowStart = true;
 		Il2CppObject* fontAssets = nullptr;
+		Il2CppObject* replaceAtlas = nullptr;
 		vector<Il2CppObject*> replaceAssets;
 		vector<wstring> replaceAssetNames;
 	}
@@ -264,6 +266,8 @@ if (document.HasMember(L##_name_) && document[L##_name_].Is##_type_())\
 					);
 
 			GetValue("replaceAssetBundleFilePath", String, replace_assetbundle_file_path);
+
+			GetValue("replaceAtlasAssetBundleFilePath", String, replace_atlas_assetbundle_file_path);
 
 			GetValue("replaceAssetBundleFilePaths", Array, auto array,
 				for (auto it = array.Begin(); it != array.End(); it++)

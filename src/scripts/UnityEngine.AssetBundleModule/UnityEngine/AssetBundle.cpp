@@ -14,24 +14,27 @@
 
 namespace
 {
-void* LoadFromFile_Internal_addr = nullptr;
-void* LoadFromFile_Internal_orig = nullptr;
+	void* LoadFromFile_Internal_addr = nullptr;
+	void* LoadFromFile_Internal_orig = nullptr;
 
-void* LoadAsset_Internal_addr = nullptr;
-void* LoadAsset_Internal_orig = nullptr;
+	void* LoadFromStreamInternal_addr = nullptr;
+	void* LoadFromStreamInternal_orig = nullptr;
 
-void* LoadAssetAsync_Internal_addr = nullptr;
-void* LoadAssetAsync_Internal_orig = nullptr;
+	void* LoadAsset_Internal_addr = nullptr;
+	void* LoadAsset_Internal_orig = nullptr;
 
-void* GetAllAssetNames_addr = nullptr;
+	void* LoadAssetAsync_Internal_addr = nullptr;
+	void* LoadAssetAsync_Internal_orig = nullptr;
 
-void* Unload_addr = nullptr;
-void* Unload_orig = nullptr;
+	void* GetAllAssetNames_addr = nullptr;
 
-Il2CppClass* AtlasReferenceClass;
-Il2CppClass* GameObjectClass;
-Il2CppClass* MaterialClass;
-Il2CppClass* FontClass;
+	void* Unload_addr = nullptr;
+	void* Unload_orig = nullptr;
+
+	Il2CppClass* AtlasReferenceClass;
+	Il2CppClass* GameObjectClass;
+	Il2CppClass* MaterialClass;
+	Il2CppClass* FontClass;
 }
 
 static void ReplaceMaterialTextureProperty(Il2CppObject* material, Il2CppString* property)
@@ -640,7 +643,7 @@ static void ReplaceAtlasReferenceSprites(Il2CppObject* atlasReference)
 
 		auto& atlasName = splited.front();
 
-		auto atlas = GetReplacementAssets(
+		auto atlas = GetReplacementAtlasAssets(
 			il2cpp_string_new16((L"_" + atlasName).data()),
 			GetRuntimeType(AtlasReferenceClass));
 
@@ -662,7 +665,6 @@ static void ReplaceAtlasReferenceSprites(Il2CppObject* atlasReference)
 				if (!wstring(uobject_name->chars).empty())
 				{
 					auto newSprite = il2cpp_class_get_method_from_name_type<Il2CppObject * (*)(Il2CppObject*, Il2CppString*)>(atlas->klass, "GetSprite", 1)->methodPointer(atlas, uobject_name);
-					Il2CppObject* createdSprite = nullptr;
 
 					if (newSprite)
 					{
@@ -712,6 +714,20 @@ static Il2CppObject* GetReplacementAssets(Il2CppString* name, Il2CppReflectionTy
 	return nullptr;
 }
 
+static Il2CppObject* GetReplacementAtlasAssets(Il2CppString* name, Il2CppReflectionType* type)
+{
+	if (config::runtime::replaceAtlas)
+	{
+		auto assets = reinterpret_cast<decltype(LoadAsset_Internal_hook)*>(LoadAsset_Internal_orig)(config::runtime::replaceAtlas, name, type);
+		if (assets)
+		{
+			return assets;
+		}
+	}
+
+	return nullptr;
+}
+
 static Il2CppObject* LoadAssetAsync_Internal_hook(Il2CppObject* self, Il2CppString* name, Il2CppReflectionType* type);
 
 static Il2CppObject* GetReplacementAssetsAsync(Il2CppString* name, Il2CppReflectionType* type)
@@ -727,7 +743,6 @@ static Il2CppObject* GetReplacementAssetsAsync(Il2CppString* name, Il2CppReflect
 
 	return nullptr;
 }
-
 
 static Il2CppObject* LoadFromFile_Internal_hook(Il2CppString* path, uint32_t crc, uint64_t offset)
 {
@@ -750,6 +765,11 @@ static Il2CppObject* LoadFromFile_Internal_hook(Il2CppString* path, uint32_t crc
 
 	auto assetBundle = reinterpret_cast<decltype(LoadFromFile_Internal_hook)*>(LoadFromFile_Internal_orig)(path, crc, offset);
 	return assetBundle;
+}
+
+static Il2CppObject* LoadFromStreamInternal_hook(Il2CppObject* stream, uint32_t crc, uint32_t managedReadBufferSize)
+{
+	return reinterpret_cast<decltype(LoadFromStreamInternal_hook)*>(LoadFromStreamInternal_orig)(stream, crc, managedReadBufferSize);
 }
 
 static Il2CppObject* LoadAsset_Internal_hook(Il2CppObject* self, Il2CppString* name, Il2CppReflectionType* type)
@@ -843,6 +863,7 @@ static void Unload_hook(Il2CppObject* self, bool unloadAllLoadedObjects)
 static void InitAddress()
 {
 	LoadFromFile_Internal_addr = il2cpp_resolve_icall("UnityEngine.AssetBundle::LoadFromFile_Internal(System.String,System.UInt32,System.UInt64)");
+	LoadFromStreamInternal_addr = il2cpp_resolve_icall("UnityEngine.AssetBundle::LoadFromStreamInternal()");
 	LoadAsset_Internal_addr = il2cpp_resolve_icall("UnityEngine.AssetBundle::LoadAsset_Internal(System.String,System.Type)");
 	LoadAssetAsync_Internal_addr = il2cpp_resolve_icall("UnityEngine.AssetBundle::LoadAssetAsync_Internal(System.String,System.Type)");
 	GetAllAssetNames_addr = il2cpp_resolve_icall("UnityEngine.AssetBundle::GetAllAssetNames()");
@@ -857,6 +878,7 @@ static void InitAddress()
 static void HookMethods()
 {
 	ADD_HOOK(LoadFromFile_Internal, "UnityEngine.AssetBundle::LoadFromFile_Internal at %p\n");
+	// ADD_HOOK(LoadFromStreamInternal, "UnityEngine.AssetBundle::LoadFromStreamInternal at %p\n");
 	ADD_HOOK(LoadAsset_Internal, "UnityEngine.AssetBundle::LoadAsset_Internal at %p\n");
 	ADD_HOOK(LoadAssetAsync_Internal, "UnityEngine.AssetBundle::LoadAssetAsync_Internal at %p\n");
 	ADD_HOOK(Unload, "UnityEngine.AssetBundle::Unload at %p\n");

@@ -11,9 +11,8 @@
 
 #define RAPIDJSON_HAS_STDSTRING 1
 
-#include <rapidjson/rapidjson.h>
-#include <rapidjson/document.h>
 #include <rapidjson/encodings.h>
+#include <rapidjson/document.h>
 #include <rapidjson/istreamwrapper.h>
 #include <rapidjson/stringbuffer.h>
 #include <rapidjson/prettywriter.h>
@@ -68,6 +67,7 @@ namespace config
 	extern wstring custom_title_name;
 	extern unordered_map<wstring, ReplaceAsset> replace_assets;
 	extern wstring replace_assetbundle_file_path;
+	extern wstring replace_atlas_assetbundle_file_path;
 	extern vector<wstring> replace_assetbundle_file_paths;
 	extern wstring replace_text_db_path;
 	extern bool character_system_text_caption;
@@ -140,6 +140,7 @@ namespace config
 		extern float ratioHorizontal;
 		extern bool allowStart;
 		extern Il2CppObject* fontAssets;
+		extern Il2CppObject* replaceAtlas;
 		extern vector<Il2CppObject*> replaceAssets;
 		extern vector<wstring> replaceAssetNames;
 	}

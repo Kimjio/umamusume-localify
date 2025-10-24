@@ -11,18 +11,23 @@
 #include "scripts/umamusume/Gallop/UIManager.hpp"
 #include "scripts/umamusume/Gallop/GameSystem.hpp"
 #include "scripts/umamusume/Gallop/StandaloneWindowResize.hpp"
+#include "scripts/umamusume/Gallop/DialogCommon.hpp"
+#include "scripts/umamusume/Gallop/DialogManager.hpp"
 
 #include "config/config.hpp"
 
 namespace
 {
-void* StartCoroutineManaged2_addr = nullptr;
-void* StartCoroutineManaged2_orig = nullptr;
+	void* StartCoroutineManaged2_addr = nullptr;
+	void* StartCoroutineManaged2_orig = nullptr;
 
-static Il2CppObject* BootSystem;
-static bool font_asset_loaded = false;
-static bool replace_assetbundle_file_path_loaded = false;
-static bool replace_assetbundle_file_paths_loaded = false;
+	void* StopCoroutineManaged_addr = nullptr;
+
+	static Il2CppObject* BootSystem;
+	static bool font_asset_loaded = false;
+	static bool replace_assetbundle_file_path_loaded = false;
+	static bool replace_atlas_assetbundle_file_path_loaded = false;
+	static bool replace_assetbundle_file_paths_loaded = false;
 }
 
 static void LoadAssets()
@@ -141,6 +146,59 @@ static void LoadAssets()
 		return;
 	}
 
+	if (!config::replace_atlas_assetbundle_file_path.empty() && !replace_atlas_assetbundle_file_path_loaded)
+	{
+		wstring assetbundlePath = config::replace_atlas_assetbundle_file_path;
+		if (PathIsRelativeW(assetbundlePath.data()))
+		{
+			assetbundlePath.insert(0, filesystem::current_path().wstring().append(L"/"));
+		}
+
+		if (filesystem::exists(assetbundlePath))
+		{
+			wstringstream ss;
+			ss << L"Loading replacement atlas AssetBundle: " << assetbundlePath << L"... ";
+			wcout << ss.str();
+			il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, Il2CppString*)>(text->klass, "set_text", 1)->methodPointer(text, il2cpp_string_new16(ss.str().data()));
+
+			std::thread([text, assetbundlePath]()
+				{
+					Sleep(100);
+
+					auto t = il2cpp_thread_attach(il2cpp_domain_get());
+					auto assets = UnityEngine::AssetBundle::LoadFromFile(il2cpp_string_new_utf16(assetbundlePath.data(), assetbundlePath.length()));
+
+					if (!assets)
+					{
+						if (filesystem::exists(assetbundlePath))
+						{
+							wcout << L"Replacement atlas AssetBundle founded but not loaded. Maybe Asset BuildTarget is not for Windows" << endl;
+						}
+						else
+						{
+							wcout << endl;
+						}
+					}
+					else
+					{
+						wcout << L"OK: " << assets.NativeObject() << endl;
+						config::runtime::replaceAtlas = assets;
+					}
+
+					replace_atlas_assetbundle_file_path_loaded = true;
+
+					LoadAssets();
+					il2cpp_thread_detach(t);
+				}).detach();
+		}
+		else
+		{
+			replace_atlas_assetbundle_file_path_loaded = true;
+			LoadAssets();
+		}
+		return;
+	}
+
 	if (!config::replace_assetbundle_file_paths.empty() && !replace_assetbundle_file_paths_loaded)
 	{
 		static auto it = config::replace_assetbundle_file_paths.begin();
@@ -253,76 +311,40 @@ static Il2CppObject* StartCoroutineManaged2_hook(Il2CppObject* self, Il2CppObjec
 						il2cpp_class_get_method_from_name_type<void (*)(bool)>(bgManager->klass, "SetBgCameraEnable", 1)->methodPointer(true);
 
 
-						if (!config::runtime::allowStart)
-						{
-							auto dialogData = il2cpp_object_new(
-								il2cpp_symbols::get_class("umamusume.dll", "Gallop",
-									"DialogCommon/Data"));
-							il2cpp_runtime_object_init(dialogData);
-
-							auto text = il2cpp_symbols::get_method_pointer<Il2CppString * (*)(unsigned long)>(
-								"umamusume.dll", "Gallop", "LocalizeExtention", "Text", 1
-							);
-
-							dialogData = reinterpret_cast<Il2CppObject * (*)(Il2CppObject * thisObj,
-								Il2CppString * headerTextArg,
-								Il2CppString * message)>(
-									il2cpp_class_get_method_from_name(dialogData->klass,
-										"SetSimpleNoButtonMessage",
-										2)->methodPointer
-									)(dialogData,
-										text(GetEnumValue(ParseEnum(GetRuntimeType("umamusume.dll", "Gallop", "TextId"), L"Common0071"))),
-										text(GetEnumValue(ParseEnum(GetRuntimeType("umamusume.dll", "Gallop", "TextId"), L"Error0032"))));
-
-							auto AutoCloseField = il2cpp_class_get_field_from_name_wrap(dialogData->klass, "AutoClose");
-							bool AutoClose = false;
-
-							il2cpp_field_set_value(dialogData, AutoCloseField, &AutoClose);
-
-							il2cpp_symbols::get_method_pointer<Il2CppObject* (*)(Il2CppObject*, bool)>(
-								"umamusume.dll", "Gallop", "DialogManager", "PushSystemDialog", 2)(
-									dialogData, true);
-
-							return;
-						}
-
-						auto dialogData = il2cpp_object_new(
-							il2cpp_symbols::get_class("umamusume.dll", "Gallop",
-								"DialogCommon/Data"));
-						il2cpp_runtime_object_init(dialogData);
+						auto dialogData = Gallop::DialogCommon::Data();
+						dialogData.AutoClose(false);
 
 						auto text = il2cpp_symbols::get_method_pointer<Il2CppString * (*)(unsigned long)>(
 							"umamusume.dll", "Gallop", "LocalizeExtention", "Text", 1
 						);
 
-						dialogData = reinterpret_cast<Il2CppObject * (*)(Il2CppObject * thisObj,
-							Il2CppString * headerTextArg,
-							Il2CppString * message)>(
-								il2cpp_class_get_method_from_name(dialogData->klass,
-									"SetSimpleNoButtonMessage",
-									2)->methodPointer
-								)(dialogData,
-									il2cpp_string_new(""),
-									il2cpp_string_new("Loading...")
-									);
+						if (!config::runtime::allowStart)
+						{
+							dialogData.SetSimpleNoButtonMessage(
+								text(GetEnumValue(ParseEnum(GetRuntimeType("umamusume.dll", "Gallop", "TextId"), L"Common0071"))),
+								text(GetEnumValue(ParseEnum(GetRuntimeType("umamusume.dll", "Gallop", "TextId"), L"Error0032")))
+							);
 
-						il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, Il2CppDelegate*)>(dialogData->klass, "AddOpenCallback", 1)->methodPointer(dialogData,
-							&CreateDelegateWithClassStatic(
-								GetGenericClass(
-									GetRuntimeType(il2cpp_symbols::get_class("mscorlib.dll", "System", "Action`1")),
-									GetRuntimeType(il2cpp_symbols::get_class("umamusume.dll", "Gallop", "DialogCommon"))), *[]()
-								{
-									LoadAssets();
-								})->delegate);
+							Gallop::DialogManager::PushSystemDialog(dialogData, true);
+						}
+						else
+						{
+							dialogData.SetSimpleNoButtonMessage(il2cpp_string_new(""), il2cpp_string_new("Loading..."));
 
-						auto AutoCloseField = il2cpp_class_get_field_from_name_wrap(dialogData->klass, "AutoClose");
-						bool AutoClose = false;
+							dialogData.AddOpenCallback(
+								&CreateDelegateWithClassStatic(
+									GetGenericClass(
+										GetRuntimeType(il2cpp_symbols::get_class("mscorlib.dll", "System", "Action`1")),
+										GetRuntimeType(il2cpp_symbols::get_class("umamusume.dll", "Gallop", "DialogCommon"))),
+									*[]()
+									{
+										LoadAssets();
+									}
+								)->delegate
+							);
+						}
 
-						il2cpp_field_set_value(dialogData, AutoCloseField, &AutoClose);
-
-						il2cpp_symbols::get_method_pointer<Il2CppObject* (*)(Il2CppObject*, bool)>(
-							"umamusume.dll", "Gallop", "DialogManager", "PushSystemDialog", 2)(
-								dialogData, true);
+						Gallop::DialogManager::PushSystemDialog(dialogData, true);
 					})
 				);
 
@@ -360,6 +382,7 @@ static Il2CppObject* StartCoroutineManaged2_hook(Il2CppObject* self, Il2CppObjec
 static void InitAddress()
 {
 	StartCoroutineManaged2_addr = il2cpp_resolve_icall("UnityEngine.MonoBehaviour::StartCoroutineManaged2()");
+	StopCoroutineManaged_addr = il2cpp_resolve_icall("UnityEngine.MonoBehaviour::StopCoroutineManaged()");
 }
 
 static void HookMethods()
@@ -379,5 +402,10 @@ namespace UnityEngine
 	{
 		auto object = reinterpret_cast<Il2CppObject * (*)(Il2CppObject*, Il2CppObject*)>(StartCoroutineManaged2_addr)(instance, enumerator);
 		return Coroutine(object);
+	}
+
+	void MonoBehaviour::StopCoroutineManaged(Coroutine coroutine)
+	{
+		reinterpret_cast<void (*)(Il2CppObject*, Il2CppObject*)>(StopCoroutineManaged_addr)(instance, coroutine);
 	}
 }
