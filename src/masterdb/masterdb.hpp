@@ -83,11 +83,27 @@ namespace MasterDB
 		vector<string> pairs;
 
 		auto query = R"(SELECT t.text FROM champions_schedule c LEFT OUTER JOIN text_data t on t.category = 206 AND t."index" = c.id GROUP BY c.resource_id)"s;
-		sqlite3_stmt* stmt;
+		sqlite3_stmt* stmt = nullptr;
+		sqlite3_stmt* replacementStmt = nullptr;
+
+		if (replacementMasterDB)
+		{
+			sqlite3_prepare_v2(replacementMasterDB, query.data(), query.size(), &replacementStmt, nullptr);
+		}
+		
 		sqlite3_prepare_v2(masterDB, query.data(), query.size(), &stmt, nullptr);
 
 		while (sqlite3_step(stmt) == SQLITE_ROW)
 		{
+			if (replacementStmt)
+			{
+				if (sqlite3_step(replacementStmt) == SQLITE_ROW)
+				{
+					pairs.emplace_back(reinterpret_cast<const char*>(sqlite3_column_text(replacementStmt, 0)));
+					continue;
+				}
+			}
+
 			pairs.emplace_back(reinterpret_cast<const char*>(sqlite3_column_text(stmt, 0)));
 		}
 
