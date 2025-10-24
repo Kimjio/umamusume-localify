@@ -2,9 +2,12 @@
 #include "../../ScriptInternal.hpp"
 #include "Behaviour.hpp"
 
-void* get_enabled_addr = nullptr;
+namespace
+{
+	void* get_enabled_addr = nullptr;
 
-void* set_enabled_addr = nullptr;
+	void* set_enabled_addr = nullptr;
+}
 
 static void InitAddress()
 {

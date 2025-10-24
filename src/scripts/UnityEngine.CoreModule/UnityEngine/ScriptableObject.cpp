@@ -2,13 +2,16 @@
 #include "../../ScriptInternal.hpp"
 #include "ScriptableObject.hpp"
 
-void* CreateScriptableObject_addr = nullptr;
+namespace
+{
+	void* CreateScriptableObject_addr = nullptr;
 
-void* CreateScriptableObject_orig = nullptr;
+	void* CreateScriptableObject_orig = nullptr;
 
-void* CreateScriptableObjectInstanceFromType_addr = nullptr;
+	void* CreateScriptableObjectInstanceFromType_addr = nullptr;
 
-void* CreateScriptableObjectInstanceFromType_orig = nullptr;
+	void* CreateScriptableObjectInstanceFromType_orig = nullptr;
+}
 
 static void CreateScriptableObject_hook(Il2CppObject* self)
 {

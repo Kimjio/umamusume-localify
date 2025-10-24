@@ -4,8 +4,11 @@
 
 #include "taskbar/TaskbarManager.hpp"
 
-void* UnityWebRequest_get_error_orig = nullptr;
-void* UnityWebRequest_get_error_addr = nullptr;
+namespace
+{
+	void* UnityWebRequest_get_error_orig = nullptr;
+	void* UnityWebRequest_get_error_addr = nullptr;
+}
 
 static Il2CppString* UnityWebRequest_get_error_hook(Il2CppObject* self)
 {

@@ -8,10 +8,13 @@
 
 #include "config/config.hpp"
 
-void* SetupOrientation_addr = nullptr;
+namespace
+{
+	void* SetupOrientation_addr = nullptr;
 
-void* ChangeOrientationCoroutine_addr = nullptr;
-void* ChangeOrientationCoroutine_orig = nullptr;
+	void* ChangeOrientationCoroutine_addr = nullptr;
+	void* ChangeOrientationCoroutine_orig = nullptr;
+}
 
 static Il2CppObject* ChangeOrientationCoroutine_hook(Il2CppObject* _this, Gallop::LowResolutionCameraUtil::DrawDirection direction, bool isFade,
 	Il2CppDelegate_t<void (*)(Gallop::LowResolutionCameraUtil::DrawDirection, bool)>* onChangeResolution)
@@ -37,7 +40,7 @@ static void HookMethods()
 {
 	if (config::freeform_window)
 	{
-		ADD_HOOK(ChangeOrientationCoroutine, "Gallop.Screen::set_OriginalScreenWidth at %p\n");
+		ADD_HOOK(ChangeOrientationCoroutine, "Gallop.RaceCameraManager::ChangeOrientationCoroutine at %p\n");
 	}
 }
 

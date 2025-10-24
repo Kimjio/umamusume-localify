@@ -2,11 +2,14 @@
 #include "../../ScriptInternal.hpp"
 #include "Shader.hpp"
 
-void* PropertyToID_addr = nullptr;
+namespace
+{
+	void* PropertyToID_addr = nullptr;
 
-void* GetGlobalTextureImpl_addr = nullptr;
+	void* GetGlobalTextureImpl_addr = nullptr;
 
-void* SetGlobalTextureImpl_addr = nullptr;
+	void* SetGlobalTextureImpl_addr = nullptr;
+}
 
 static void InitAddress()
 {

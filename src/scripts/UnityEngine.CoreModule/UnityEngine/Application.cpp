@@ -7,27 +7,30 @@
 
 #include <filesystem>
 
-void* Quit_addr = nullptr;
-void* Quit_orig = nullptr;
+namespace
+{
+	void* Quit_addr = nullptr;
+	void* Quit_orig = nullptr;
 
-void* OpenURL_addr = nullptr;
+	void* OpenURL_addr = nullptr;
 
-void* get_unityVersion_addr = nullptr;
+	void* get_unityVersion_addr = nullptr;
 
-void* get_companyName_addr = nullptr;
+	void* get_companyName_addr = nullptr;
 
-void* get_productName_addr = nullptr;
+	void* get_productName_addr = nullptr;
 
 	void* get_streamingAssetsPath_addr = nullptr;
 
-void* get_persistentDataPath_addr = nullptr;
+	void* get_persistentDataPath_addr = nullptr;
 
-void* set_targetFrameRate_addr = nullptr;
-void* set_targetFrameRate_orig = nullptr;
+	void* set_targetFrameRate_addr = nullptr;
+	void* set_targetFrameRate_orig = nullptr;
 
-void* get_targetFrameRate_addr = nullptr;
+	void* get_targetFrameRate_addr = nullptr;
 
-void* get_internetReachability_addr = nullptr;
+	void* get_internetReachability_addr = nullptr;
+}
 
 static void Quit_hook(int exitCode)
 {

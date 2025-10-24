@@ -4,8 +4,11 @@
 
 #include "taskbar/TaskbarManager.hpp"
 
-void* DownloadErrorProcessor_ExecDownloadErrorProcess_addr = nullptr;
-void* DownloadErrorProcessor_ExecDownloadErrorProcess_orig = nullptr;
+namespace
+{
+	void* DownloadErrorProcessor_ExecDownloadErrorProcess_addr = nullptr;
+	void* DownloadErrorProcessor_ExecDownloadErrorProcess_orig = nullptr;
+}
 
 static void DownloadErrorProcessor_ExecDownloadErrorProcess_hook(Il2CppObject* error, Il2CppDelegate* onRetry, Il2CppDelegate* onGotoTitle) {
 	if (config::taskbar_show_progress_on_download)

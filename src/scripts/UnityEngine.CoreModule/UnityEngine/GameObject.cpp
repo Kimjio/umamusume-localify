@@ -2,6 +2,8 @@
 #include "../../ScriptInternal.hpp"
 #include "GameObject.hpp"
 
+namespace
+{
 void* Internal_CreateGameObject_addr = nullptr;
 
 void* Internal_CreateGameObject_orig = nullptr;
@@ -25,6 +27,8 @@ void* set_tag_addr = nullptr;
 void* SetActive_addr = nullptr;
 
 void* Find_addr = nullptr;
+
+}
 
 static void Internal_CreateGameObject_hook(Il2CppObject* _this, Il2CppString* name)
 {

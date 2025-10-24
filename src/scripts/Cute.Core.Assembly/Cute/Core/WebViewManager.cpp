@@ -19,7 +19,6 @@
 
 #define RAPIDJSON_HAS_STDSTRING 1
 
-#include <rapidjson/rapidjson.h>
 #include <rapidjson/document.h>
 #include <rapidjson/writer.h>
 #include <rapidjson/stringbuffer.h>
@@ -30,38 +29,41 @@ using namespace Microsoft::WRL;
 using namespace Microsoft::WRL::Wrappers;
 using namespace Windows::Foundation;
 
-Il2CppClass* Cute_Core_WebViewManager = nullptr;
+namespace
+{
+	Il2CppClass* Cute_Core_WebViewManager = nullptr;
 
-void* Cute_Core_WebViewManager_Awake_addr = nullptr;
-void* Cute_Core_WebViewManager_Awake_orig = nullptr;
+	void* Cute_Core_WebViewManager_Awake_addr = nullptr;
+	void* Cute_Core_WebViewManager_Awake_orig = nullptr;
 
-void* Cute_Core_WebViewManager_OpenWeb_addr = nullptr;
-void* Cute_Core_WebViewManager_OpenWeb_orig = nullptr;
+	void* Cute_Core_WebViewManager_OpenWeb_addr = nullptr;
+	void* Cute_Core_WebViewManager_OpenWeb_orig = nullptr;
 
-void* Cute_Core_WebViewManager_SetMargins_addr = nullptr;
-void* Cute_Core_WebViewManager_SetMargins_orig = nullptr;
+	void* Cute_Core_WebViewManager_SetMargins_addr = nullptr;
+	void* Cute_Core_WebViewManager_SetMargins_orig = nullptr;
 
-void* Cute_Core_WebViewManager_EvaluateJS_addr = nullptr;
-void* Cute_Core_WebViewManager_EvaluateJS_orig = nullptr;
+	void* Cute_Core_WebViewManager_EvaluateJS_addr = nullptr;
+	void* Cute_Core_WebViewManager_EvaluateJS_orig = nullptr;
 
-void* Cute_Core_WebViewManager_CanGoBack_addr = nullptr;
-void* Cute_Core_WebViewManager_CanGoBack_orig = nullptr;
+	void* Cute_Core_WebViewManager_CanGoBack_addr = nullptr;
+	void* Cute_Core_WebViewManager_CanGoBack_orig = nullptr;
 
-void* Cute_Core_WebViewManager_GoBack_addr = nullptr;
-void* Cute_Core_WebViewManager_GoBack_orig = nullptr;
+	void* Cute_Core_WebViewManager_GoBack_addr = nullptr;
+	void* Cute_Core_WebViewManager_GoBack_orig = nullptr;
 
-void* Cute_Core_WebViewManager_SetVisible_addr = nullptr;
-void* Cute_Core_WebViewManager_SetVisible_orig = nullptr;
+	void* Cute_Core_WebViewManager_SetVisible_addr = nullptr;
+	void* Cute_Core_WebViewManager_SetVisible_orig = nullptr;
 
-void* Cute_Core_WebViewManager_Callback_addr = nullptr;
+	void* Cute_Core_WebViewManager_Callback_addr = nullptr;
 
-FieldInfo* Cute_Core_WebViewManager_marginNow = nullptr;
+	FieldInfo* Cute_Core_WebViewManager_marginNow = nullptr;
 
-RECT webViewBounds{};
+	RECT webViewBounds{};
+
+	wstring CurrentUrlString;
+}
 
 wil::com_ptr<ICoreWebView2> webview;
-
-wstring CurrentUrlString;
 
 static void Cute_Core_WebViewManager_Awake_hook(Il2CppObject* self)
 {

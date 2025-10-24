@@ -4,8 +4,11 @@
 
 #include "taskbar/TaskbarManager.hpp"
 
-void* DownloadView_UpdateView_addr = nullptr;
-void* DownloadView_UpdateView_orig = nullptr;
+namespace
+{
+	void* DownloadView_UpdateView_addr = nullptr;
+	void* DownloadView_UpdateView_orig = nullptr;
+}
 
 static void DownloadView_UpdateView_hook(Il2CppObject* self, float downloadSize, float allDownloadSize) {
 	if (config::taskbar_show_progress_on_download)

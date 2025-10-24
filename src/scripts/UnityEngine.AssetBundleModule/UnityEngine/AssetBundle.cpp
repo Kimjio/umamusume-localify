@@ -12,6 +12,8 @@
 #include "config/config.hpp"
 #include "string_utils.hpp"
 
+namespace
+{
 void* LoadFromFile_Internal_addr = nullptr;
 void* LoadFromFile_Internal_orig = nullptr;
 
@@ -30,6 +32,7 @@ Il2CppClass* AtlasReferenceClass;
 Il2CppClass* GameObjectClass;
 Il2CppClass* MaterialClass;
 Il2CppClass* FontClass;
+}
 
 static void ReplaceMaterialTextureProperty(Il2CppObject* material, Il2CppString* property)
 {

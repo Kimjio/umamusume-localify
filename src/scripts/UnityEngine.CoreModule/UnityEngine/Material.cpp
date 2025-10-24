@@ -2,11 +2,14 @@
 #include "../../ScriptInternal.hpp"
 #include "Material.hpp"
 
-void* HasProperty_addr = nullptr;
+namespace
+{
+	void* HasProperty_addr = nullptr;
 
-void* GetTextureImpl_addr = nullptr;
+	void* GetTextureImpl_addr = nullptr;
 
-void* SetTextureImpl_addr = nullptr;
+	void* SetTextureImpl_addr = nullptr;
+}
 
 static void InitAddress()
 {

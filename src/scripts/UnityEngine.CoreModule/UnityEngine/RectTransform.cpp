@@ -2,35 +2,38 @@
 #include "../../ScriptInternal.hpp"
 #include "RectTransform.hpp"
 
-void* set_anchoredPosition_Injected_addr = nullptr;
+namespace
+{
+	void* set_anchoredPosition_Injected_addr = nullptr;
 
-void* get_anchoredPosition_Injected_addr = nullptr;
+	void* get_anchoredPosition_Injected_addr = nullptr;
 
-void* set_anchorMax_Injected_addr = nullptr;
+	void* set_anchorMax_Injected_addr = nullptr;
 
-void* get_anchorMax_Injected_addr = nullptr;
+	void* get_anchorMax_Injected_addr = nullptr;
 
-void* set_anchorMin_Injected_addr = nullptr;
+	void* set_anchorMin_Injected_addr = nullptr;
 
-void* get_anchorMin_Injected_addr = nullptr;
+	void* get_anchorMin_Injected_addr = nullptr;
 
-void* set_pivot_Injected_addr = nullptr;
+	void* set_pivot_Injected_addr = nullptr;
 
-void* get_pivot_Injected_addr = nullptr;
+	void* get_pivot_Injected_addr = nullptr;
 
-void* set_sizeDelta_Injected_addr = nullptr;
+	void* set_sizeDelta_Injected_addr = nullptr;
 
-void* get_sizeDelta_Injected_addr = nullptr;
+	void* get_sizeDelta_Injected_addr = nullptr;
 
-void* set_offsetMin_addr = nullptr;
+	void* set_offsetMin_addr = nullptr;
 
-void* get_offsetMin_addr = nullptr;
+	void* get_offsetMin_addr = nullptr;
 
-void* set_offsetMax_addr = nullptr;
+	void* set_offsetMax_addr = nullptr;
 
-void* get_offsetMax_addr = nullptr;
+	void* get_offsetMax_addr = nullptr;
 
-void* get_rect_Injected_addr = nullptr;
+	void* get_rect_Injected_addr = nullptr;
+}
 
 static void InitAddress()
 {

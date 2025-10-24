@@ -2,7 +2,10 @@
 #include "../../ScriptInternal.hpp"
 #include "Vector3.hpp"
 
-void* Vector3_Slerp_Injected_addr = nullptr;
+namespace
+{
+	void* Vector3_Slerp_Injected_addr = nullptr;
+}
 
 static void InitAddress()
 {

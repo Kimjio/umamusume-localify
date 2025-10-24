@@ -2,7 +2,10 @@
 #include "../../ScriptInternal.hpp"
 #include "Cryptographer.hpp"
 
-void* MakeMd5_addr = nullptr;
+namespace
+{
+	void* MakeMd5_addr = nullptr;
+}
 
 static void InitAddress()
 {

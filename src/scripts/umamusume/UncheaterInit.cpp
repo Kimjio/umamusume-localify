@@ -1,17 +1,20 @@
 #include "../ScriptInternal.hpp"
 #include "UncheaterInit.hpp"
 
-void* UncheaterInit_Init_addr = nullptr;
-void* UncheaterInit_Init_orig = nullptr;
+namespace
+{
+	void* UncheaterInit_Init_addr = nullptr;
+	void* UncheaterInit_Init_orig = nullptr;
 
-void* UncheaterInit_InitializeUncheaterSDK_addr = nullptr;
-void* UncheaterInit_InitializeUncheaterSDK_orig = nullptr;
+	void* UncheaterInit_InitializeUncheaterSDK_addr = nullptr;
+	void* UncheaterInit_InitializeUncheaterSDK_orig = nullptr;
 
-void* UncheaterInit_CheckUncheaterSystem_addr = nullptr;
-void* UncheaterInit_CheckUncheaterSystem_orig = nullptr;
+	void* UncheaterInit_CheckUncheaterSystem_addr = nullptr;
+	void* UncheaterInit_CheckUncheaterSystem_orig = nullptr;
 
-void* UncheaterInit_setUserName_addr = nullptr;
-void* UncheaterInit_setUserName_orig = nullptr;
+	void* UncheaterInit_setUserName_addr = nullptr;
+	void* UncheaterInit_setUserName_orig = nullptr;
+}
 
 static void UncheaterInit_Init_hook(Il2CppObject* self, Il2CppObject* system)
 {

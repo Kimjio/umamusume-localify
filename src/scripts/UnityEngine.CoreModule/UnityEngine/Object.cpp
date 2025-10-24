@@ -2,6 +2,8 @@
 #include "../../ScriptInternal.hpp"
 #include "Object.hpp"
 
+namespace
+{
 void* FindObjectsByType_addr = nullptr;
 
 void* FindObjectsOfType_addr = nullptr;
@@ -19,6 +21,7 @@ void* GetName_addr = nullptr;
 void* SetName_addr = nullptr;
 
 void* IsNativeObjectAlive_addr = nullptr;
+}
 
 static void InitAddress()
 {

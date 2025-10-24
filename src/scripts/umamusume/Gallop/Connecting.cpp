@@ -4,11 +4,14 @@
 
 #include "taskbar/TaskbarManager.hpp"
 
-void* Connecting_Show_addr = nullptr;
-void* Connecting_Show_orig = nullptr;
+namespace
+{
+	void* Connecting_Show_addr = nullptr;
+	void* Connecting_Show_orig = nullptr;
 
-void* Connecting_Hide_addr = nullptr;
-void* Connecting_Hide_orig = nullptr;
+	void* Connecting_Hide_addr = nullptr;
+	void* Connecting_Hide_orig = nullptr;
+}
 
 static void Connecting_Show_hook(Il2CppObject* self)
 {

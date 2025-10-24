@@ -2,13 +2,16 @@
 #include "../../ScriptInternal.hpp"
 #include "Debug.hpp"
 
-void* get_unityLogger = nullptr;
+namespace
+{
+	void* get_unityLogger = nullptr;
 
-void* Log_addr = nullptr;
+	void* Log_addr = nullptr;
 
-void* LogError_addr = nullptr;
+	void* LogError_addr = nullptr;
 
-void* LogWarning_addr = nullptr;
+	void* LogWarning_addr = nullptr;
+}
 
 static void InitAddress()
 {

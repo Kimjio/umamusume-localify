@@ -4,8 +4,11 @@
 
 #include "taskbar/TaskbarManager.hpp"
 
-void* HttpManager_Cute_Core_IUpdatable_FastUpdate_orig = nullptr;
-void* HttpManager_Cute_Core_IUpdatable_FastUpdate_addr = nullptr;
+namespace
+{
+	void* HttpManager_Cute_Core_IUpdatable_FastUpdate_orig = nullptr;
+	void* HttpManager_Cute_Core_IUpdatable_FastUpdate_addr = nullptr;
+}
 
 static void HttpManager_Cute_Core_IUpdatable_FastUpdate_hook(Il2CppObject* self)
 {

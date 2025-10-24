@@ -2,9 +2,12 @@
 #include "../../../ScriptInternal.hpp"
 #include "InputTracking.hpp"
 
-void* GetNodeStates_Internal_addr = nullptr;
-void* GetLocalPosition_Injected_addr = nullptr;
-void* GetLocalRotation_Injected_addr = nullptr;
+namespace
+{
+	void* GetNodeStates_Internal_addr = nullptr;
+	void* GetLocalPosition_Injected_addr = nullptr;
+	void* GetLocalRotation_Injected_addr = nullptr;
+}
 
 static void InitAddress()
 {

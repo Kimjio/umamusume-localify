@@ -2,12 +2,15 @@
 #include "../../ScriptInternal.hpp"
 #include "GameSystem.hpp"
 
-void* InitializeGame_addr = nullptr;
-void* InitializeGame1_addr = nullptr;
+namespace
+{
+	void* InitializeGame_addr = nullptr;
+	void* InitializeGame1_addr = nullptr;
 
-void* IsExecutingSoftwareReset_addr = nullptr;
+	void* IsExecutingSoftwareReset_addr = nullptr;
 
-void* SoftwareReset_addr = nullptr;
+	void* SoftwareReset_addr = nullptr;
+}
 
 static void InitAddress()
 {

@@ -2,8 +2,11 @@
 #include "../../ScriptInternal.hpp"
 #include "Component.hpp"
 
-void* get_transform_addr = nullptr;
-void* get_gameObject_addr = nullptr;
+namespace
+{
+	void* get_transform_addr = nullptr;
+	void* get_gameObject_addr = nullptr;
+}
 
 static void InitAddress()
 {

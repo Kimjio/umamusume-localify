@@ -2,22 +2,25 @@
 #include "../../ScriptInternal.hpp"
 #include "PaymentUtility.hpp"
 
-void* PaymentUtility_OpenBuyJewelDialog_1_addr = nullptr;
+namespace
+{
+	void* PaymentUtility_OpenBuyJewelDialog_1_addr = nullptr;
 
-void* PaymentUtility_OpenBuyJewelDialog_addr = nullptr;
-void* PaymentUtility_OpenBuyJewelDialog_orig = nullptr;
+	void* PaymentUtility_OpenBuyJewelDialog_addr = nullptr;
+	void* PaymentUtility_OpenBuyJewelDialog_orig = nullptr;
 
-void* PaymentUtility_SendRequestPaymentItemList_addr = nullptr;
+	void* PaymentUtility_SendRequestPaymentItemList_addr = nullptr;
 
-FieldInfo* PaymentUtility__finishBuyJewelCallbackForUserField;
+	FieldInfo* PaymentUtility__finishBuyJewelCallbackForUserField;
 
-FieldInfo* PaymentUtility__onCloseShopDialogField;
+	FieldInfo* PaymentUtility__onCloseShopDialogField;
 
-FieldInfo* PaymentUtility__checkOpenShopDialogField;
+	FieldInfo* PaymentUtility__checkOpenShopDialogField;
 
-FieldInfo* PaymentUtility__autoScrollIdListField;
+	FieldInfo* PaymentUtility__autoScrollIdListField;
 
-FieldInfo* PaymentUtility__removeAllOnFinishField;
+	FieldInfo* PaymentUtility__removeAllOnFinishField;
+}
 
 static void PaymentUtility_OpenBuyJewelDialog_hook(Il2CppObject* self, Il2CppDelegate* finish, bool removeAllOnFinish, Il2CppDelegate* onClose, Il2CppDelegate* checkOpenShopDialog, Il2CppObject* evacuationCanvas, Il2CppArraySize_t<int>* autoScrollIdList)
 {

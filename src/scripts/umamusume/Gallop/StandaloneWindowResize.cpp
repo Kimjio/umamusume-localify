@@ -6,9 +6,12 @@
 
 #include "config/config.hpp"
 
-void* get_IsVirt_addr = nullptr;
+namespace
+{
+	void* get_IsVirt_addr = nullptr;
 
-void* set_IsVirt_addr = nullptr;
+	void* set_IsVirt_addr = nullptr;
+}
 
 static void InitAddress()
 {

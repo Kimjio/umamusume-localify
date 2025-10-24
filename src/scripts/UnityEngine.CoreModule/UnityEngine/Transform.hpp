@@ -2,6 +2,7 @@
 #include "il2cpp/il2cpp_symbols.hpp"
 
 #include "Component.hpp"
+#include "Vector3.hpp"
 
 namespace UnityEngine
 {
@@ -26,6 +27,20 @@ namespace UnityEngine
 		{
 			return FindRelativeTransformWithPath(instance, name, false);
 		}
+
+		Vector3 InverseTransformPoint(Vector3 position);
+
+		Vector3 position();
+
+		void position(Vector3 value);
+
+		Vector3 localScale();
+
+		void localScale(Vector3 value);
+
+		int childCount();
+
+		Transform GetChild(int index);
 
 		using Component::Component;
 

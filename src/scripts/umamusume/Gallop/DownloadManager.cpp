@@ -4,23 +4,26 @@
 
 #include "taskbar/TaskbarManager.hpp"
 
-void* DownloadProgressUIGame_Show_addr = nullptr;
-void* DownloadProgressUIGame_Show_orig = nullptr;
+namespace
+{
+	void* DownloadProgressUIGame_Show_addr = nullptr;
+	void* DownloadProgressUIGame_Show_orig = nullptr;
 
-void* DownloadProgressUIGame_Hide_addr = nullptr;
-void* DownloadProgressUIGame_Hide_orig = nullptr;
+	void* DownloadProgressUIGame_Hide_addr = nullptr;
+	void* DownloadProgressUIGame_Hide_orig = nullptr;
 
-void* DownloadProgressUIGame_SetProgress_addr = nullptr;
-void* DownloadProgressUIGame_SetProgress_orig = nullptr;
+	void* DownloadProgressUIGame_SetProgress_addr = nullptr;
+	void* DownloadProgressUIGame_SetProgress_orig = nullptr;
 
-void* BackgroundDownloadProgressUI_Show_addr = nullptr;
-void* BackgroundDownloadProgressUI_Show_orig = nullptr;
+	void* BackgroundDownloadProgressUI_Show_addr = nullptr;
+	void* BackgroundDownloadProgressUI_Show_orig = nullptr;
 
-void* BackgroundDownloadProgressUI_Hide_addr = nullptr;
-void* BackgroundDownloadProgressUI_Hide_orig = nullptr;
+	void* BackgroundDownloadProgressUI_Hide_addr = nullptr;
+	void* BackgroundDownloadProgressUI_Hide_orig = nullptr;
 
-void* BackgroundDownloadProgressUI_SetProgress_addr = nullptr;
-void* BackgroundDownloadProgressUI_SetProgress_orig = nullptr;
+	void* BackgroundDownloadProgressUI_SetProgress_addr = nullptr;
+	void* BackgroundDownloadProgressUI_SetProgress_orig = nullptr;
+}
 
 static void DownloadProgressUIGame_Show_hook(Il2CppObject* self)
 {

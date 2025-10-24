@@ -9,9 +9,12 @@
 
 #include "config/config.hpp"
 
-void* MakeNotificationId_addr = nullptr;
-void* createFavIconFilePath_addr = nullptr;
-void* legacy_createFavIconFilePath_addr = nullptr;
+namespace
+{
+	void* MakeNotificationId_addr = nullptr;
+	void* createFavIconFilePath_addr = nullptr;
+	void* legacy_createFavIconFilePath_addr = nullptr;
+}
 
 static void InitAddress()
 {

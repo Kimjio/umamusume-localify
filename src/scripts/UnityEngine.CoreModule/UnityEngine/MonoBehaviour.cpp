@@ -14,6 +14,8 @@
 
 #include "config/config.hpp"
 
+namespace
+{
 void* StartCoroutineManaged2_addr = nullptr;
 void* StartCoroutineManaged2_orig = nullptr;
 
@@ -21,6 +23,7 @@ static Il2CppObject* BootSystem;
 static bool font_asset_loaded = false;
 static bool replace_assetbundle_file_path_loaded = false;
 static bool replace_assetbundle_file_paths_loaded = false;
+}
 
 static void LoadAssets()
 {

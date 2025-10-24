@@ -2,15 +2,18 @@
 #include "../../ScriptInternal.hpp"
 #include "Quaternion.hpp"
 
-void* Quaternion_FromToRotation_Injected_addr = nullptr;
+namespace
+{
+	void* Quaternion_FromToRotation_Injected_addr = nullptr;
 
-void* Quaternion_Inverse_Injected_addr = nullptr;
+	void* Quaternion_Inverse_Injected_addr = nullptr;
 
-void* Quaternion_Slerp_Injected_addr = nullptr;
+	void* Quaternion_Slerp_Injected_addr = nullptr;
 
-void* Quaternion_Lerp_Injected_addr = nullptr;
+	void* Quaternion_Lerp_Injected_addr = nullptr;
 
-void* Quaternion_Internal_FromEulerRad_Injected_addr = nullptr;
+	void* Quaternion_Internal_FromEulerRad_Injected_addr = nullptr;
+}
 
 static void InitAddress()
 {

@@ -2,7 +2,11 @@
 #include "../../ScriptInternal.hpp"
 #include "Coroutine.hpp"
 
+namespace
+{
 Il2CppClass* CoroutineClass = nullptr;
+
+}
 
 static void InitAddress()
 {

@@ -2,8 +2,11 @@
 #include "../../ScriptInternal.hpp"
 #include "PartsBuyJewelListItem.hpp"
 
-void* PartsBuyJewelListItem_Setup_addr = nullptr;
-void* PartsBuyJewelListItem_Setup_orig = nullptr;
+namespace
+{
+	void* PartsBuyJewelListItem_Setup_addr = nullptr;
+	void* PartsBuyJewelListItem_Setup_orig = nullptr;
+}
 
 static void PartsBuyJewelListItem_Setup_hook(Il2CppObject* self, Il2CppObject* purchaseItem, Il2CppDelegate* onComplete, Il2CppObject* evacuationCanvas)
 {
