@@ -2,32 +2,44 @@
 #include "../../ScriptInternal.hpp"
 #include "GameObject.hpp"
 
+#include "scripts/UnityEngine.AssetBundleModule/UnityEngine/AssetBundle.hpp"
+
 namespace
 {
-void* Internal_CreateGameObject_addr = nullptr;
+	void* Internal_CreateGameObject_addr = nullptr;
 
-void* Internal_CreateGameObject_orig = nullptr;
+	void* Internal_CreateGameObject_orig = nullptr;
 
-void* Internal_AddComponentWithType_addr = nullptr;
+	void* Internal_AddComponentWithType_addr = nullptr;
 
-void* Internal_AddComponentWithType_orig = nullptr;
+	void* Internal_AddComponentWithType_orig = nullptr;
 
-void* TryGetComponentFastPath_addr = nullptr;
+	void* GetComponentFastPath_addr = nullptr;
 
-void* TryGetComponentFastPath_orig = nullptr;
+	void* GetComponentFastPath_orig = nullptr;
 
-void* GetComponent_addr = nullptr;
+	void* TryGetComponentFastPath_addr = nullptr;
 
-void* GameObject_get_transform_addr = nullptr;
+	void* TryGetComponentFastPath_orig = nullptr;
 
-void* get_tag_addr = nullptr;
+	void* GetComponent_addr = nullptr;
 
-void* set_tag_addr = nullptr;
+	void* GetComponentInChildren_addr = nullptr;
 
-void* SetActive_addr = nullptr;
+	void* GetComponentsInternal_addr = nullptr;
 
-void* Find_addr = nullptr;
+	void* GameObject_get_transform_addr = nullptr;
 
+	void* get_tag_addr = nullptr;
+
+	void* set_tag_addr = nullptr;
+
+	void* SetActive_addr = nullptr;
+	void* SetActive_orig = nullptr;
+
+	void* Find_addr = nullptr;
+
+	Il2CppClass* FlashActionPlayerClass;
 }
 
 static void Internal_CreateGameObject_hook(Il2CppObject* _this, Il2CppString* name)
@@ -60,10 +72,53 @@ struct CastHelper
 	uintptr_t oneFurtherThanResultValue;
 };
 
+static void GetComponentFastPath_hook(Il2CppObject* self, Il2CppObject* runtimeType, uintptr_t oneFurtherThanResultValue)
+{
+	reinterpret_cast<decltype(GetComponentFastPath_hook)*>(GetComponentFastPath_orig)(self, runtimeType, oneFurtherThanResultValue);
+
+	auto helper = reinterpret_cast<CastHelper*>(oneFurtherThanResultValue - sizeof(Il2CppObject*));
+
+	if (helper->obj)
+	{
+		if (helper->obj->klass == FlashActionPlayerClass)
+		{
+			auto _flashPrefabPathField = il2cpp_class_get_field_from_name(helper->obj->klass, "_flashPrefabPath");
+			Il2CppString* _flashPrefabPath;
+			il2cpp_field_get_value(helper->obj, _flashPrefabPathField, &_flashPrefabPath);
+
+			if (_flashPrefabPath)
+			{
+				wstringstream pathStream(_flashPrefabPath->chars);
+				wstring segment;
+				vector<wstring> splited;
+				while (getline(pathStream, segment, L'/'))
+				{
+					splited.emplace_back(segment);
+				}
+
+				auto& fileName = splited.back();
+				if (find_if(config::runtime::replaceAssetNames.begin(), config::runtime::replaceAssetNames.end(), [fileName](const wstring& item)
+					{
+						return item.find(fileName) != wstring::npos;
+					}) != config::runtime::replaceAssetNames.end())
+				{
+					auto result = GetReplacementAssets(il2cpp_string_new16(fileName.data()), GetRuntimeType(self->klass));
+
+					if (result)
+					{
+						auto _flashPrefabField = il2cpp_class_get_field_from_name(helper->obj->klass, "_flashPrefab");
+						il2cpp_field_set_value(helper->obj, _flashPrefabField, result);
+					}
+				}
+			}
+		}
+	}
+}
+
 static void TryGetComponentFastPath_hook(Il2CppObject* self, Il2CppObject* runtimeType, uintptr_t oneFurtherThanResultValue)
 {
 	reinterpret_cast<decltype(TryGetComponentFastPath_hook)*>(TryGetComponentFastPath_orig)(self, runtimeType, oneFurtherThanResultValue);
-	
+
 	auto helper = reinterpret_cast<CastHelper*>(oneFurtherThanResultValue - sizeof(Il2CppObject*));
 
 	if (helper->obj)
@@ -84,19 +139,25 @@ static void InitAddress()
 {
 	Internal_CreateGameObject_addr = il2cpp_resolve_icall("UnityEngine.GameObject::Internal_CreateGameObject()");
 	Internal_AddComponentWithType_addr = il2cpp_resolve_icall("UnityEngine.GameObject::Internal_AddComponentWithType()");
+	GetComponentFastPath_addr = il2cpp_resolve_icall("UnityEngine.GameObject::GetComponentFastPath()");
 	TryGetComponentFastPath_addr = il2cpp_resolve_icall("UnityEngine.GameObject::TryGetComponentFastPath()");
 	GetComponent_addr = il2cpp_resolve_icall("UnityEngine.GameObject::GetComponent()");
+	GetComponentInChildren_addr = il2cpp_resolve_icall("UnityEngine.GameObject::GetComponentInChildren()");
+	GetComponentsInternal_addr = il2cpp_resolve_icall("UnityEngine.GameObject::GetComponentsInternal()");
 	GameObject_get_transform_addr = il2cpp_resolve_icall("UnityEngine.GameObject::get_transform()");
 	get_tag_addr = il2cpp_resolve_icall("UnityEngine.GameObject::get_tag()");
 	set_tag_addr = il2cpp_resolve_icall("UnityEngine.GameObject::set_tag()");
 	SetActive_addr = il2cpp_resolve_icall("UnityEngine.GameObject::SetActive()");
 	Find_addr = il2cpp_resolve_icall("UnityEngine.GameObject::Find()");
+
+	FlashActionPlayerClass = il2cpp_symbols::get_class("umamusume.dll", "Gallop", "FlashActionPlayer");
 }
 
 static void HookMethods()
 {
 	// ADD_HOOK(Internal_CreateGameObject, "UnityEngine.GameObject::Internal_CreateGameObject at %p\n");
 	// ADD_HOOK(Internal_AddComponentWithType, "UnityEngine.GameObject::Internal_AddComponentWithType at %p\n");
+	ADD_HOOK(GetComponentFastPath, "UnityEngine.GameObject::GetComponentFastPath at %p\n");
 	// ADD_HOOK(TryGetComponentFastPath, "UnityEngine.GameObject::TryGetComponentFastPath at %p\n");
 }
 
@@ -134,6 +195,16 @@ namespace UnityEngine
 	Il2CppObject* GameObject::GetComponent(Il2CppReflectionType* runtimeType)
 	{
 		return reinterpret_cast<Il2CppObject * (*)(Il2CppObject*, Il2CppReflectionType*)>(GetComponent_addr)(instance, runtimeType);
+	}
+
+	Il2CppObject* GameObject::GetComponentInChildren(Il2CppReflectionType* runtimeType, bool includeInactive)
+	{
+		return reinterpret_cast<Il2CppObject * (*)(Il2CppObject*, Il2CppReflectionType*, bool)>(GetComponentInChildren_addr)(instance, runtimeType, includeInactive);
+	}
+
+	Il2CppArraySize_t<Il2CppObject*>* GameObject::GetComponentsInternal(Il2CppReflectionType* runtimeType, bool useSearchTypeAsArrayReturnType, bool recursive, bool includeInactive, bool reverse, Il2CppObject** resultList)
+	{
+		return reinterpret_cast<Il2CppArraySize_t<Il2CppObject*>*(*)(Il2CppObject*, Il2CppReflectionType*, bool, bool, bool, bool, Il2CppObject**)>(GetComponentsInternal_addr)(instance, runtimeType, useSearchTypeAsArrayReturnType, recursive, includeInactive, reverse, resultList);
 	}
 
 	Transform GameObject::transform()
