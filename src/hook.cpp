@@ -105,6 +105,8 @@
 #include "scripts/UnityEngine.TextRenderingModule/UnityEngine/TextGenerationSettings.hpp"
 
 #include "scripts/umamusume/Gallop/DialogCommonBase.hpp"
+#include "scripts/umamusume/Gallop/DialogCommon.hpp"
+#include "scripts/umamusume/Gallop/DialogManager.hpp"
 #include "scripts/umamusume/Gallop/UIManager.hpp"
 #include "scripts/umamusume/Gallop/LiveViewController.hpp"
 #include "scripts/umamusume/Gallop/RaceCameraManager.hpp"
@@ -3839,23 +3841,8 @@ namespace
 			return;
 		}
 
-		auto dialogData = il2cpp_object_new(
-			il2cpp_symbols::get_class("umamusume.dll", "Gallop",
-				"DialogCommon/Data"));
-		il2cpp_runtime_object_init(dialogData);
-
-		dialogData = reinterpret_cast<Il2CppObject * (*)(Il2CppObject * thisObj,
-			Il2CppString * headerTextArg,
-			Il2CppString * message,
-			Il2CppDelegate * onRight,
-			uint64_t leftTextId,
-			uint64_t rightTextId,
-			Il2CppDelegate * onLeft,
-			int dialogFormType)>(
-				il2cpp_class_get_method_from_name(dialogData->klass,
-					"SetSimpleTwoButtonMessage",
-					7)->methodPointer
-				)(dialogData,
+		auto dialogData = Gallop::DialogCommon::Data();
+		dialogData.SetSimpleTwoButtonMessage(
 					localizeextension_text_hook(GetTextIdByName(L"Title0040")),
 					localizeextension_text_hook(GetTextIdByName(L"Title0041")),
 					CreateDelegateStatic(*[]()
@@ -3868,14 +3855,12 @@ namespace
 					CreateDelegateStatic(*[]()
 						{
 							isExitOpened = false;
-						}),
-					2);
+				})
+		);
 
 		isExitOpened = true;
 
-		il2cpp_symbols::get_method_pointer<Il2CppObject* (*)(Il2CppObject*, bool)>(
-			"umamusume.dll", "Gallop", "DialogManager", "PushSystemDialog", 2)(
-				dialogData, true);
+		Gallop::DialogManager::PushSystemDialog(dialogData, true);
 	}
 
 	void PressButton(Il2CppObject* button)
@@ -5094,23 +5079,8 @@ namespace
 				{
 					konamiCommandIndex = 0;
 
-					auto dialogData = il2cpp_object_new(
-						il2cpp_symbols::get_class("umamusume.dll", "Gallop",
-							"DialogCommon/Data"));
-					il2cpp_runtime_object_init(dialogData);
-
-					dialogData = reinterpret_cast<Il2CppObject * (*)(Il2CppObject * thisObj,
-						Il2CppString * headerTextArg,
-						Il2CppString * message,
-						Il2CppDelegate * onRight,
-						uint64_t leftTextId,
-						uint64_t rightTextId,
-						Il2CppDelegate * onLeft,
-						int dialogFormType)>(
-							il2cpp_class_get_method_from_name(dialogData->klass,
-								"SetSimpleTwoButtonMessage",
-								7)->methodPointer
-							)(dialogData,
+					auto dialogData = Gallop::DialogCommon::Data();
+					dialogData.SetSimpleTwoButtonMessage(
 								localizeextension_text_hook(GetTextIdByName(L"Title0002")),
 								localizeextension_text_hook(GetTextIdByName(L"Title0023")),
 								CreateDelegateStatic(*[]()
@@ -5127,40 +5097,28 @@ namespace
 										RegSetValueExW(hKey, L"AgreeOwnYourRisk", 0, REG_DWORD, reinterpret_cast<const BYTE*>(&data), sizeof(data));
 										RegCloseKey(hKey);
 
-										auto dialogData = il2cpp_object_new(
-											il2cpp_symbols::get_class("umamusume.dll", "Gallop", "DialogCommon/Data"));
-										il2cpp_runtime_object_init(dialogData);
-
-										dialogData = reinterpret_cast<Il2CppObject * (*)(Il2CppObject * thisObj,
-											ULONG headerTextId,
-											Il2CppString * message,
-											Il2CppDelegate * onClose,
-											ULONG closeTextId)>(
-												il2cpp_class_get_method_from_name(dialogData->klass, "SetSimpleOneButtonMessage",
-													4)->methodPointer
-												)(dialogData, GetTextIdByName(L"AccoutDataLink0061"), localize_get_hook(GetTextIdByName(L"Outgame0309")), nullptr, GetTextIdByName(L"Common0185"));
+								auto dialogData = Gallop::DialogCommon::Data();
+								dialogData.SetSimpleOneButtonMessage(GetTextIdByName(L"AccoutDataLink0061"), localize_get_hook(GetTextIdByName(L"Outgame0309")), nullptr, GetTextIdByName(L"Common0185"));
 
 										auto onDestroy = CreateDelegateStatic(*[]()
 											{
 												UnityEngine::Application::Exit(0);
 											});
 
-										il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, Il2CppDelegate*)>(dialogData->klass, "AddDestroyCallback", 1)->methodPointer(dialogData, onDestroy);
-										il2cpp_symbols::get_method_pointer<Il2CppObject* (*)(Il2CppObject* data)>("umamusume.dll", "Gallop", "DialogManager", "PushDialog", 1)(dialogData);
+								dialogData.AddDestroyCallback(onDestroy);
+								Gallop::DialogManager::PushDialog(dialogData);
 									}),
 								GetTextIdByName(L"Common0309"),
 								GetTextIdByName(L"Common0150"),
 								CreateDelegateStatic(*[]()
 									{
 										isKonamiOpened = false;
-									}),
-								2);
+							})
+					);
 
 					isKonamiOpened = true;
 
-					il2cpp_symbols::get_method_pointer<Il2CppObject* (*)(Il2CppObject*, bool)>(
-						"umamusume.dll", "Gallop", "DialogManager", "PushSystemDialog", 2)(
-							dialogData, true);
+					Gallop::DialogManager::PushSystemDialog(dialogData, true);
 				}
 				else
 				{
@@ -7692,7 +7650,7 @@ namespace
 		return radioButtonWithText;
 	}
 
-	Il2CppObject* settingsDialog;
+	Gallop::DialogCommon settingsDialog = nullptr;
 
 	template<typename T>
 	void AddOrSet(WDocument& document, wchar_t* name, T value)
@@ -7853,7 +7811,7 @@ namespace
 		return pszFilePath;
 	}
 
-	Il2CppObject* selectOptionDialog;
+	Gallop::DialogCommon selectOptionDialog = nullptr;
 
 	function<void(int)> optionSelected;
 
@@ -7861,44 +7819,23 @@ namespace
 	{
 		::optionSelected = optionSelected;
 
-		auto dialogData = il2cpp_object_new(
-			il2cpp_symbols::get_class("umamusume.dll", "Gallop", "DialogCommon/Data"));
-		il2cpp_runtime_object_init(dialogData);
-
 		auto onLeft = CreateDelegateStatic(*[](void*, Il2CppObject* dialog)
 			{
-				il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*)>(selectOptionDialog->klass, "Close", 0)->methodPointer(selectOptionDialog);
+				selectOptionDialog.Close();
 			});
 
 		auto onRight = CreateDelegateStatic(*[](void*, Il2CppObject* dialog)
 			{
-				il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*)>(selectOptionDialog->klass, "Close", 0)->methodPointer(selectOptionDialog);
+				selectOptionDialog.Close();
 				::optionSelected(GetToggleGroupCommonValue("option_toggle_group_content"));
 			});
 
-		dialogData = reinterpret_cast<Il2CppObject * (*)(Il2CppObject * thisObj,
-			Il2CppString * headerTextArg,
-			Il2CppString * message,
-			Il2CppDelegate * onRight,
-			ULONG leftTextId,
-			ULONG rightTextId,
-			Il2CppDelegate * onLeft,
-			int dialogFormType)>(
-				il2cpp_class_get_method_from_name(dialogData->klass, "SetSimpleTwoButtonMessage",
-					7)->methodPointer
-				)(dialogData, il2cpp_string_new16(title), nullptr, onRight, GetTextIdByName(L"Common0004"), GetTextIdByName(L"Common0003"), onLeft, 10);
+		auto dialogData = Gallop::DialogCommon::Data();
 
-		auto DispStackTypeField = il2cpp_class_get_field_from_name_wrap(dialogData->klass, "DispStackType");
-		int DispStackType = 2;
-		il2cpp_field_set_value(dialogData, DispStackTypeField, &DispStackType);
-
-		auto ObjParentTypeField = il2cpp_class_get_field_from_name_wrap(dialogData->klass, "ObjParentType");
-		int ObjParentType = 1;
-		il2cpp_field_set_value(dialogData, ObjParentTypeField, &ObjParentType);
-
-		auto AutoCloseField = il2cpp_class_get_field_from_name_wrap(dialogData->klass, "AutoClose");
-		bool AutoClose = false;
-		il2cpp_field_set_value(dialogData, AutoCloseField, &AutoClose);
+		dialogData.SetSimpleTwoButtonMessage(il2cpp_string_new16(title), nullptr, onRight, GetTextIdByName(L"Common0004"), GetTextIdByName(L"Common0003"), onLeft, Gallop::DialogCommonBase::FormType::BIG_TWO_BUTTON);
+		dialogData.DispStackType(Gallop::DialogCommon::DispStackType::DialogOnDialog);
+		dialogData.ObjParentType(Gallop::DialogCommon::Data::ObjectParentType::Base);
+		dialogData.AutoClose(false);
 
 		auto gameObject = CreateGameObject();
 		auto rootTransform = AddComponent(gameObject, GetRuntimeType("UnityEngine.CoreModule.dll", "UnityEngine", "RectTransform"));
@@ -7998,55 +7935,32 @@ namespace
 		il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, int)>(toggleGroupCommon->klass, "SetToggleOnFromNumber", 1)->methodPointer(toggleGroupCommon, selectedIndex);
 		il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*)>(toggleGroupCommon->klass, "Awake", 0)->methodPointer(toggleGroupCommon);
 
-		auto ContentsObjectField = il2cpp_class_get_field_from_name_wrap(dialogData->klass, "ContentsObject");
+		dialogData.ContentsObject(gameObject);
 
-		il2cpp_field_set_value(dialogData, ContentsObjectField, gameObject);
-
-		selectOptionDialog = il2cpp_symbols::get_method_pointer<Il2CppObject * (*)(Il2CppObject * data)>("umamusume.dll", "Gallop", "DialogManager", "PushDialog", 1)(dialogData);
+		selectOptionDialog = Gallop::DialogManager::Instance().PushDialog(dialogData);
 	}
 
 	void OpenSelectFontColorOption(const wchar_t* title, vector<string> options, int selectedIndex, function<void(int)> optionSelected)
 	{
 		::optionSelected = optionSelected;
 
-		auto dialogData = il2cpp_object_new(
-			il2cpp_symbols::get_class("umamusume.dll", "Gallop", "DialogCommon/Data"));
-		il2cpp_runtime_object_init(dialogData);
-
 		auto onLeft = CreateDelegateStatic(*[](void*, Il2CppObject* dialog)
 			{
-				il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*)>(selectOptionDialog->klass, "Close", 0)->methodPointer(selectOptionDialog);
+				selectOptionDialog.Close();
 			});
 
 		auto onRight = CreateDelegateStatic(*[](void*, Il2CppObject* dialog)
 			{
-				il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*)>(selectOptionDialog->klass, "Close", 0)->methodPointer(selectOptionDialog);
+				selectOptionDialog.Close();
 				::optionSelected(GetToggleGroupCommonValue("option_toggle_group_content"));
 			});
 
-		dialogData = reinterpret_cast<Il2CppObject * (*)(Il2CppObject * thisObj,
-			Il2CppString * headerTextArg,
-			Il2CppString * message,
-			Il2CppDelegate * onRight,
-			ULONG leftTextId,
-			ULONG rightTextId,
-			Il2CppDelegate * onLeft,
-			int dialogFormType)>(
-				il2cpp_class_get_method_from_name(dialogData->klass, "SetSimpleTwoButtonMessage",
-					7)->methodPointer
-				)(dialogData, il2cpp_string_new16(title), nullptr, onRight, GetTextIdByName(L"Common0004"), GetTextIdByName(L"Common0003"), onLeft, 10);
+		auto dialogData = Gallop::DialogCommon::Data();
 
-		auto DispStackTypeField = il2cpp_class_get_field_from_name_wrap(dialogData->klass, "DispStackType");
-		int DispStackType = 2;
-		il2cpp_field_set_value(dialogData, DispStackTypeField, &DispStackType);
-
-		auto ObjParentTypeField = il2cpp_class_get_field_from_name_wrap(dialogData->klass, "ObjParentType");
-		int ObjParentType = 1;
-		il2cpp_field_set_value(dialogData, ObjParentTypeField, &ObjParentType);
-
-		auto AutoCloseField = il2cpp_class_get_field_from_name_wrap(dialogData->klass, "AutoClose");
-		bool AutoClose = false;
-		il2cpp_field_set_value(dialogData, AutoCloseField, &AutoClose);
+		dialogData.SetSimpleTwoButtonMessage(il2cpp_string_new16(title), nullptr, onRight, GetTextIdByName(L"Common0004"), GetTextIdByName(L"Common0003"), onLeft, Gallop::DialogCommonBase::FormType::BIG_TWO_BUTTON);
+		dialogData.DispStackType(Gallop::DialogCommon::DispStackType::DialogOnDialog);
+		dialogData.ObjParentType(Gallop::DialogCommon::Data::ObjectParentType::Base);
+		dialogData.AutoClose(false);
 
 		auto gameObject = CreateGameObject();
 		auto rootTransform = AddComponent(gameObject, GetRuntimeType("UnityEngine.CoreModule.dll", "UnityEngine", "RectTransform"));
@@ -8149,55 +8063,32 @@ namespace
 		il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, int)>(toggleGroupCommon->klass, "SetToggleOnFromNumber", 1)->methodPointer(toggleGroupCommon, selectedIndex);
 		il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*)>(toggleGroupCommon->klass, "Awake", 0)->methodPointer(toggleGroupCommon);
 
-		auto ContentsObjectField = il2cpp_class_get_field_from_name_wrap(dialogData->klass, "ContentsObject");
+		dialogData.ContentsObject(gameObject);
 
-		il2cpp_field_set_value(dialogData, ContentsObjectField, gameObject);
-
-		selectOptionDialog = il2cpp_symbols::get_method_pointer<Il2CppObject * (*)(Il2CppObject * data)>("umamusume.dll", "Gallop", "DialogManager", "PushDialog", 1)(dialogData);
+		selectOptionDialog = Gallop::DialogManager::Instance().PushDialog(dialogData);
 	}
 
 	void OpenSelectOutlineSizeOption(const wchar_t* title, vector<string> options, int selectedIndex, function<void(int)> optionSelected)
 	{
 		::optionSelected = optionSelected;
 
-		auto dialogData = il2cpp_object_new(
-			il2cpp_symbols::get_class("umamusume.dll", "Gallop", "DialogCommon/Data"));
-		il2cpp_runtime_object_init(dialogData);
-
 		auto onLeft = CreateDelegateStatic(*[](void*, Il2CppObject* dialog)
 			{
-				il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*)>(selectOptionDialog->klass, "Close", 0)->methodPointer(selectOptionDialog);
+				selectOptionDialog.Close();
 			});
 
 		auto onRight = CreateDelegateStatic(*[](void*, Il2CppObject* dialog)
 			{
-				il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*)>(selectOptionDialog->klass, "Close", 0)->methodPointer(selectOptionDialog);
+				selectOptionDialog.Close();
 				::optionSelected(GetToggleGroupCommonValue("option_toggle_group_content"));
 			});
 
-		dialogData = reinterpret_cast<Il2CppObject * (*)(Il2CppObject * thisObj,
-			Il2CppString * headerTextArg,
-			Il2CppString * message,
-			Il2CppDelegate * onRight,
-			ULONG leftTextId,
-			ULONG rightTextId,
-			Il2CppDelegate * onLeft,
-			int dialogFormType)>(
-				il2cpp_class_get_method_from_name(dialogData->klass, "SetSimpleTwoButtonMessage",
-					7)->methodPointer
-				)(dialogData, il2cpp_string_new16(title), nullptr, onRight, GetTextIdByName(L"Common0004"), GetTextIdByName(L"Common0003"), onLeft, 10);
+		auto dialogData = Gallop::DialogCommon::Data();
 
-		auto DispStackTypeField = il2cpp_class_get_field_from_name_wrap(dialogData->klass, "DispStackType");
-		int DispStackType = 2;
-		il2cpp_field_set_value(dialogData, DispStackTypeField, &DispStackType);
-
-		auto ObjParentTypeField = il2cpp_class_get_field_from_name_wrap(dialogData->klass, "ObjParentType");
-		int ObjParentType = 1;
-		il2cpp_field_set_value(dialogData, ObjParentTypeField, &ObjParentType);
-
-		auto AutoCloseField = il2cpp_class_get_field_from_name_wrap(dialogData->klass, "AutoClose");
-		bool AutoClose = false;
-		il2cpp_field_set_value(dialogData, AutoCloseField, &AutoClose);
+		dialogData.SetSimpleTwoButtonMessage(il2cpp_string_new16(title), nullptr, onRight, GetTextIdByName(L"Common0004"), GetTextIdByName(L"Common0003"), onLeft, Gallop::DialogCommonBase::FormType::BIG_TWO_BUTTON);
+		dialogData.DispStackType(Gallop::DialogCommon::DispStackType::DialogOnDialog);
+		dialogData.ObjParentType(Gallop::DialogCommon::Data::ObjectParentType::Base);
+		dialogData.AutoClose(false);
 
 		auto gameObject = CreateGameObject();
 		auto rootTransform = AddComponent(gameObject, GetRuntimeType("UnityEngine.CoreModule.dll", "UnityEngine", "RectTransform"));
@@ -8302,55 +8193,32 @@ namespace
 		il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, int)>(toggleGroupCommon->klass, "SetToggleOnFromNumber", 1)->methodPointer(toggleGroupCommon, selectedIndex);
 		il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*)>(toggleGroupCommon->klass, "Awake", 0)->methodPointer(toggleGroupCommon);
 
-		auto ContentsObjectField = il2cpp_class_get_field_from_name_wrap(dialogData->klass, "ContentsObject");
+		dialogData.ContentsObject(gameObject);
 
-		il2cpp_field_set_value(dialogData, ContentsObjectField, gameObject);
-
-		selectOptionDialog = il2cpp_symbols::get_method_pointer<Il2CppObject * (*)(Il2CppObject * data)>("umamusume.dll", "Gallop", "DialogManager", "PushDialog", 1)(dialogData);
+		selectOptionDialog = Gallop::DialogManager::Instance().PushDialog(dialogData);
 	}
 
 	void OpenSelectOutlineColorOption(const wchar_t* title, vector<string> options, int selectedIndex, function<void(int)> optionSelected)
 	{
 		::optionSelected = optionSelected;
 
-		auto dialogData = il2cpp_object_new(
-			il2cpp_symbols::get_class("umamusume.dll", "Gallop", "DialogCommon/Data"));
-		il2cpp_runtime_object_init(dialogData);
-
 		auto onLeft = CreateDelegateStatic(*[](void*, Il2CppObject* dialog)
 			{
-				il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*)>(selectOptionDialog->klass, "Close", 0)->methodPointer(selectOptionDialog);
+				selectOptionDialog.Close();
 			});
 
 		auto onRight = CreateDelegateStatic(*[](void*, Il2CppObject* dialog)
 			{
-				il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*)>(selectOptionDialog->klass, "Close", 0)->methodPointer(selectOptionDialog);
+				selectOptionDialog.Close();
 				::optionSelected(GetToggleGroupCommonValue("option_toggle_group_content"));
 			});
 
-		dialogData = reinterpret_cast<Il2CppObject * (*)(Il2CppObject * thisObj,
-			Il2CppString * headerTextArg,
-			Il2CppString * message,
-			Il2CppDelegate * onRight,
-			ULONG leftTextId,
-			ULONG rightTextId,
-			Il2CppDelegate * onLeft,
-			int dialogFormType)>(
-				il2cpp_class_get_method_from_name(dialogData->klass, "SetSimpleTwoButtonMessage",
-					7)->methodPointer
-				)(dialogData, il2cpp_string_new16(title), nullptr, onRight, GetTextIdByName(L"Common0004"), GetTextIdByName(L"Common0003"), onLeft, 10);
+		auto dialogData = Gallop::DialogCommon::Data();
 
-		auto DispStackTypeField = il2cpp_class_get_field_from_name_wrap(dialogData->klass, "DispStackType");
-		int DispStackType = 2;
-		il2cpp_field_set_value(dialogData, DispStackTypeField, &DispStackType);
-
-		auto ObjParentTypeField = il2cpp_class_get_field_from_name_wrap(dialogData->klass, "ObjParentType");
-		int ObjParentType = 1;
-		il2cpp_field_set_value(dialogData, ObjParentTypeField, &ObjParentType);
-
-		auto AutoCloseField = il2cpp_class_get_field_from_name_wrap(dialogData->klass, "AutoClose");
-		bool AutoClose = false;
-		il2cpp_field_set_value(dialogData, AutoCloseField, &AutoClose);
+		dialogData.SetSimpleTwoButtonMessage(il2cpp_string_new16(title), nullptr, onRight, GetTextIdByName(L"Common0004"), GetTextIdByName(L"Common0003"), onLeft, Gallop::DialogCommonBase::FormType::BIG_TWO_BUTTON);
+		dialogData.DispStackType(Gallop::DialogCommon::DispStackType::DialogOnDialog);
+		dialogData.ObjParentType(Gallop::DialogCommon::Data::ObjectParentType::Base);
+		dialogData.AutoClose(false);
 
 		auto gameObject = CreateGameObject();
 		auto rootTransform = AddComponent(gameObject, GetRuntimeType("UnityEngine.CoreModule.dll", "UnityEngine", "RectTransform"));
@@ -8453,11 +8321,9 @@ namespace
 		il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, int)>(toggleGroupCommon->klass, "SetToggleOnFromNumber", 1)->methodPointer(toggleGroupCommon, selectedIndex);
 		il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*)>(toggleGroupCommon->klass, "Awake", 0)->methodPointer(toggleGroupCommon);
 
-		auto ContentsObjectField = il2cpp_class_get_field_from_name_wrap(dialogData->klass, "ContentsObject");
+		dialogData.ContentsObject(gameObject);
 
-		il2cpp_field_set_value(dialogData, ContentsObjectField, gameObject);
-
-		selectOptionDialog = il2cpp_symbols::get_method_pointer<Il2CppObject * (*)(Il2CppObject * data)>("umamusume.dll", "Gallop", "DialogManager", "PushDialog", 1)(dialogData);
+		selectOptionDialog = Gallop::DialogManager::Instance().PushDialog(dialogData);
 	}
 
 	vector<string> GetFontColorOptions()
@@ -8553,14 +8419,10 @@ namespace
 
 	void OpenSettings()
 	{
-		auto dialogData = il2cpp_object_new(
-			il2cpp_symbols::get_class("umamusume.dll", "Gallop", "DialogCommon/Data"));
-
-		il2cpp_runtime_object_init(dialogData);
-
 		auto onLeft = CreateDelegateStatic(*[](void*, Il2CppObject* dialog)
 			{
-				il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*)>(settingsDialog->klass, "Close", 0)->methodPointer(settingsDialog);
+				settingsDialog.Close();
+				settingsDialog = nullptr;
 
 				SetNotificationBackgroundAlpha(config::character_system_text_caption_background_alpha);
 				SetNotificationPosition(config::character_system_text_caption_position_x, config::character_system_text_caption_position_y);
@@ -8569,7 +8431,8 @@ namespace
 				SetNotificationOutlineColor(config::character_system_text_caption_outline_color);
 
 				config::rollback_config();
-			});
+			}
+		);
 
 		auto onRight = CreateDelegateStatic(*[](void*, Il2CppObject* dialog)
 			{
@@ -8739,52 +8602,27 @@ namespace
 #endif
 				config::write_config();
 
-				auto dialogData = il2cpp_object_new(
-					il2cpp_symbols::get_class("umamusume.dll", "Gallop", "DialogCommon/Data"));
-				il2cpp_runtime_object_init(dialogData);
-
-				dialogData = reinterpret_cast<Il2CppObject * (*)(Il2CppObject * thisObj,
-					ULONG headerTextId,
-					Il2CppString * message,
-					Il2CppDelegate * onClose,
-					ULONG closeTextId)>(
-						il2cpp_class_get_method_from_name(dialogData->klass, "SetSimpleOneButtonMessage",
-							4)->methodPointer
-						)(dialogData, GetTextIdByName(L"AccoutDataLink0061"), localize_get_hook(GetTextIdByName(L"Outgame0309")), nullptr, GetTextIdByName(L"Common0007"));
+				auto dialogData = Gallop::DialogCommon::Data();
+				dialogData.SetSimpleOneButtonMessage(GetTextIdByName(L"AccoutDataLink0061"), localize_get_hook(GetTextIdByName(L"Outgame0309")), nullptr, GetTextIdByName(L"Common0007"));
 
 				auto onDestroy = CreateDelegateStatic(*[]()
 					{
-						il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*)>(settingsDialog->klass, "Close", 0)->methodPointer(settingsDialog);
+						settingsDialog.Close();
 						settingsDialog = nullptr;
-					});
+					}
+				);
 
-				il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, Il2CppDelegate*)>(dialogData->klass, "AddDestroyCallback", 1)->methodPointer(dialogData, onDestroy);
-				il2cpp_symbols::get_method_pointer<Il2CppObject* (*)(Il2CppObject* data)>("umamusume.dll", "Gallop", "DialogManager", "PushDialog", 1)(dialogData);
-			});
+				dialogData.AddDestroyCallback(onDestroy);
+				Gallop::DialogManager::Instance().PushDialog(dialogData);
+			}
+		);
 
-		dialogData = reinterpret_cast<Il2CppObject * (*)(Il2CppObject * thisObj,
-			Il2CppString * headerTextArg,
-			Il2CppString * message,
-			Il2CppDelegate * onRight,
-			ULONG leftTextId,
-			ULONG rightTextId,
-			Il2CppDelegate * onLeft,
-			int dialogFormType)>(
-				il2cpp_class_get_method_from_name(dialogData->klass, "SetSimpleTwoButtonMessage",
-					7)->methodPointer
-				)(dialogData, il2cpp_string_new16(LocalifySettings::GetText("settings_title")), nullptr, onRight, GetTextIdByName(L"Common0004"), GetTextIdByName(L"Common0261"), onLeft, 10);
+		auto dialogData = Gallop::DialogCommon::Data();
 
-		auto DispStackTypeField = il2cpp_class_get_field_from_name_wrap(dialogData->klass, "DispStackType");
-		int DispStackType = 2;
-		il2cpp_field_set_value(dialogData, DispStackTypeField, &DispStackType);
-
-		auto ObjParentTypeField = il2cpp_class_get_field_from_name_wrap(dialogData->klass, "ObjParentType");
-		int ObjParentType = 1;
-		il2cpp_field_set_value(dialogData, ObjParentTypeField, &ObjParentType);
-
-		auto AutoCloseField = il2cpp_class_get_field_from_name_wrap(dialogData->klass, "AutoClose");
-		bool AutoClose = false;
-		il2cpp_field_set_value(dialogData, AutoCloseField, &AutoClose);
+		dialogData.SetSimpleTwoButtonMessage(il2cpp_string_new16(LocalifySettings::GetText("settings_title")), nullptr, onRight, GetTextIdByName(L"Common0004"), GetTextIdByName(L"Common0261"), onLeft, Gallop::DialogCommonBase::FormType::BIG_TWO_BUTTON);
+		dialogData.DispStackType(Gallop::DialogCommon::DispStackType::DialogOnDialog);
+		dialogData.ObjParentType(Gallop::DialogCommon::Data::ObjectParentType::Base);
+		dialogData.AutoClose(false);
 
 		auto gameObject = CreateGameObject();
 		auto rootTransform = AddComponent(gameObject, GetRuntimeType("UnityEngine.CoreModule.dll", "UnityEngine", "RectTransform"));
@@ -9528,37 +9366,22 @@ namespace
 
 		SetOptionItemButtonAction("github", *([](Il2CppObject*)
 			{
-				auto dialogData = il2cpp_object_new(
-					il2cpp_symbols::get_class("umamusume.dll", "Gallop",
-						"DialogCommon/Data"));
-				il2cpp_runtime_object_init(dialogData);
-
-				dialogData = reinterpret_cast<Il2CppObject * (*)(Il2CppObject * thisObj,
-					Il2CppString * headerTextArg,
-					Il2CppString * message,
-					Il2CppDelegate * onRight,
-					uint64_t leftTextId,
-					uint64_t rightTextId,
-					Il2CppDelegate * onLeft,
-					int dialogFormType)>(
-						il2cpp_class_get_method_from_name(dialogData->klass,
-							"SetSimpleTwoButtonMessage",
-							7)->methodPointer
-						)(dialogData,
+				auto dialogData = Gallop::DialogCommon::Data();
+				dialogData.SetSimpleTwoButtonMessage(
 							localizeextension_text_hook(GetTextIdByName(L"Common0009")),
 							localizeextension_text_hook(GetTextIdByName(L"Home0073")),
 							CreateDelegateStatic(*[]()
 								{
 									UnityEngine::Application::OpenURL(il2cpp_string_new("https://github.com/Kimjio/umamusume-localify"));
-								}),
+						}
+					),
 							GetTextIdByName(L"Common0004"),
-							GetTextIdByName(L"Common0003"),
-							nullptr,
-							2);
+					GetTextIdByName(L"Common0003")
+				);
 
-				il2cpp_symbols::get_method_pointer<Il2CppObject* (*)(Il2CppObject*)>(
-					"umamusume.dll", "Gallop", "DialogManager", "PushDialog", 1)(dialogData);
-			}));
+				Gallop::DialogManager::PushDialog(dialogData);
+			})
+		);
 
 		SetOptionItemButtonAction("persistent_data_path", *([](Il2CppObject*)
 			{
@@ -9576,29 +9399,15 @@ namespace
 					auto textCommon = GetTextCommon("persistent_data_path_detail_info");
 					SetTextCommonText(textCommon, pathW.data());
 				}
-			}));
+			})
+		);
 
 		if (Game::CurrentGameRegion != Game::Region::KOR)
 		{
 			SetOptionItemButtonAction("clear_webview_cache", *([](Il2CppObject*)
 				{
-					auto dialogData = il2cpp_object_new(
-						il2cpp_symbols::get_class("umamusume.dll", "Gallop",
-							"DialogCommon/Data"));
-					il2cpp_runtime_object_init(dialogData);
-
-					dialogData = reinterpret_cast<Il2CppObject * (*)(Il2CppObject * thisObj,
-						Il2CppString * headerTextArg,
-						Il2CppString * message,
-						Il2CppDelegate * onRight,
-						uint64_t leftTextId,
-						uint64_t rightTextId,
-						Il2CppDelegate * onLeft,
-						int dialogFormType)>(
-							il2cpp_class_get_method_from_name(dialogData->klass,
-								"SetSimpleTwoButtonMessage",
-								7)->methodPointer
-							)(dialogData,
+					auto dialogData = Gallop::DialogCommon::Data();
+					dialogData.SetSimpleTwoButtonMessage(
 								localizeextension_text_hook(GetTextIdByName(L"Race0652")),
 								il2cpp_string_new16(LocalifySettings::GetText("clear_webview_cache_confirm")),
 								CreateDelegateStatic(*[]()
@@ -9619,13 +9428,11 @@ namespace
 										}
 									}),
 								GetTextIdByName(L"Common0004"),
-								GetTextIdByName(L"Common0003"),
-								nullptr,
-								2);
-
-					il2cpp_symbols::get_method_pointer<Il2CppObject* (*)(Il2CppObject*)>(
-						"umamusume.dll", "Gallop", "DialogManager", "PushDialog", 1)(dialogData);
-				}));
+						GetTextIdByName(L"Common0003")
+					);
+					Gallop::DialogManager::PushDialog(dialogData);
+				})
+			);
 		}
 
 		auto contentSizeFitter = AddComponent(contentGameObject, GetRuntimeType("umamusume.dll", "Gallop", "LayoutGroupContentSizeFitter"));
@@ -9635,22 +9442,17 @@ namespace
 
 		il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*)>(contentSizeFitter->klass, "SetSize", 0)->methodPointer(contentSizeFitter);
 
-		auto ContentsObjectField = il2cpp_class_get_field_from_name_wrap(dialogData->klass, "ContentsObject");
+		dialogData.ContentsObject(gameObject);
 
-		il2cpp_field_set_value(dialogData, ContentsObjectField, gameObject);
-
-		settingsDialog = il2cpp_symbols::get_method_pointer<Il2CppObject * (*)(Il2CppObject * data)>("umamusume.dll", "Gallop", "DialogManager", "PushDialog", 1)(dialogData);
+		settingsDialog = Gallop::DialogManager::PushDialog(dialogData);
 	}
 
 	void OpenLiveSettings()
 	{
-		auto dialogData = il2cpp_object_new(
-			il2cpp_symbols::get_class("umamusume.dll", "Gallop", "DialogCommon/Data"));
-		il2cpp_runtime_object_init(dialogData);
-
 		auto onLeft = CreateDelegateStatic(*[](void*, Il2CppObject* dialog)
 			{
-				il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*)>(settingsDialog->klass, "Close", 0)->methodPointer(settingsDialog);
+				settingsDialog.Close();
+				settingsDialog = nullptr;
 
 				config::rollback_config();
 			});
@@ -9677,52 +9479,25 @@ namespace
 
 				config::write_config();
 
-				auto dialogData = il2cpp_object_new(
-					il2cpp_symbols::get_class("umamusume.dll", "Gallop", "DialogCommon/Data"));
-				il2cpp_runtime_object_init(dialogData);
-
-				dialogData = reinterpret_cast<Il2CppObject * (*)(Il2CppObject * thisObj,
-					ULONG headerTextId,
-					Il2CppString * message,
-					Il2CppDelegate * onClose,
-					ULONG closeTextId)>(
-						il2cpp_class_get_method_from_name(dialogData->klass, "SetSimpleOneButtonMessage",
-							4)->methodPointer
-						)(dialogData, GetTextIdByName(L"AccoutDataLink0061"), localize_get_hook(GetTextIdByName(L"Outgame0309")), nullptr, GetTextIdByName(L"Common0007"));
+				auto dialogData = Gallop::DialogCommon::Data();
+				dialogData.SetSimpleOneButtonMessage(GetTextIdByName(L"AccoutDataLink0061"), localize_get_hook(GetTextIdByName(L"Outgame0309")), nullptr, GetTextIdByName(L"Common0007"));
 
 				auto onDestroy = CreateDelegateStatic(*[]()
 					{
-						il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*)>(settingsDialog->klass, "Close", 0)->methodPointer(settingsDialog);
+						settingsDialog.Close();
 						settingsDialog = nullptr;
 					});
 
-				il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, Il2CppDelegate*)>(dialogData->klass, "AddDestroyCallback", 1)->methodPointer(dialogData, onDestroy);
-				il2cpp_symbols::get_method_pointer<Il2CppObject* (*)(Il2CppObject* data)>("umamusume.dll", "Gallop", "DialogManager", "PushDialog", 1)(dialogData);
+				dialogData.AddDestroyCallback(onDestroy);
+				Gallop::DialogManager::PushDialog(dialogData);
 			});
 
-		dialogData = reinterpret_cast<Il2CppObject * (*)(Il2CppObject * thisObj,
-			Il2CppString * headerTextArg,
-			Il2CppString * message,
-			Il2CppDelegate * onRight,
-			ULONG leftTextId,
-			ULONG rightTextId,
-			Il2CppDelegate * onLeft,
-			int dialogFormType)>(
-				il2cpp_class_get_method_from_name(dialogData->klass, "SetSimpleTwoButtonMessage",
-					7)->methodPointer
-				)(dialogData, il2cpp_string_new16(LocalifySettings::GetText("settings_title")), nullptr, onRight, GetTextIdByName(L"Common0004"), GetTextIdByName(L"Common0261"), onLeft, 10);
+		auto dialogData = Gallop::DialogCommon::Data();
 
-		auto DispStackTypeField = il2cpp_class_get_field_from_name_wrap(dialogData->klass, "DispStackType");
-		int DispStackType = 2;
-		il2cpp_field_set_value(dialogData, DispStackTypeField, &DispStackType);
-
-		auto ObjParentTypeField = il2cpp_class_get_field_from_name_wrap(dialogData->klass, "ObjParentType");
-		int ObjParentType = 1;
-		il2cpp_field_set_value(dialogData, ObjParentTypeField, &ObjParentType);
-
-		auto AutoCloseField = il2cpp_class_get_field_from_name_wrap(dialogData->klass, "AutoClose");
-		bool AutoClose = false;
-		il2cpp_field_set_value(dialogData, AutoCloseField, &AutoClose);
+		dialogData.SetSimpleTwoButtonMessage(il2cpp_string_new16(LocalifySettings::GetText("settings_title")), nullptr, onRight, GetTextIdByName(L"Common0004"), GetTextIdByName(L"Common0261"), onLeft, Gallop::DialogCommonBase::FormType::BIG_TWO_BUTTON);
+		dialogData.DispStackType(Gallop::DialogCommon::DispStackType::DialogOnDialog);
+		dialogData.ObjParentType(Gallop::DialogCommon::Data::ObjectParentType::Base);
+		dialogData.AutoClose(false);
 
 		auto gameObject = CreateGameObject();
 		auto rootTransform = AddComponent(gameObject, GetRuntimeType("UnityEngine.CoreModule.dll", "UnityEngine", "RectTransform"));
@@ -9894,11 +9669,9 @@ namespace
 
 		il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*)>(contentSizeFitter->klass, "SetSize", 0)->methodPointer(contentSizeFitter);
 
-		auto ContentsObjectField = il2cpp_class_get_field_from_name_wrap(dialogData->klass, "ContentsObject");
+		dialogData.ContentsObject(gameObject);
 
-		il2cpp_field_set_value(dialogData, ContentsObjectField, gameObject);
-
-		settingsDialog = il2cpp_symbols::get_method_pointer<Il2CppObject * (*)(Il2CppObject * data)>("umamusume.dll", "Gallop", "DialogManager", "PushDialog", 1)(dialogData);
+		settingsDialog = Gallop::DialogManager::PushDialog(dialogData);
 	}
 
 	void InitOptionLayout(Il2CppObject* parentRectTransform)
@@ -9979,20 +9752,10 @@ namespace
 
 							il2cpp_symbols::get_method_pointer<void (*)(Il2CppString*)>("UnityEngine.IMGUIModule.dll", "UnityEngine", "GUIUtility", "set_systemCopyBuffer", 1)(il2cpp_string_new16(to_wstring(viewerId).data()));
 
-							auto dialogData = il2cpp_object_new(
-								il2cpp_symbols::get_class("umamusume.dll", "Gallop", "DialogCommon/Data"));
-							il2cpp_runtime_object_init(dialogData);
+							auto dialogData = Gallop::DialogCommon::Data();
+							dialogData.SetSimpleOneButtonMessage(GetTextIdByName(L"Outgame0031"), il2cpp_string_new16(L"트레이너 ID를 복사했습니다."), nullptr, GetTextIdByName(L"Common0007"));
 
-							dialogData = reinterpret_cast<Il2CppObject * (*)(Il2CppObject * thisObj,
-								ULONG headerTextId,
-								Il2CppString * message,
-								Il2CppDelegate * onClose,
-								ULONG closeTextId)>(
-									il2cpp_class_get_method_from_name(dialogData->klass, "SetSimpleOneButtonMessage",
-										4)->methodPointer
-									)(dialogData, GetTextIdByName(L"Outgame0031"), il2cpp_string_new16(L"트레이너 ID를 복사했습니다."), nullptr, GetTextIdByName(L"Common0007"));
-
-							il2cpp_symbols::get_method_pointer<Il2CppObject* (*)(Il2CppObject* data)>("umamusume.dll", "Gallop", "DialogManager", "PushDialog", 1)(dialogData);
+							Gallop::DialogManager::PushDialog(dialogData);
 						};
 
 					auto playerIdCopyFn = *[](void*)
@@ -10001,101 +9764,20 @@ namespace
 							il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*)>(controller->klass, "OnClickCopyIdButton", 0)->methodPointer(controller);
 						};
 
-					auto dialogData = il2cpp_object_new(il2cpp_symbols::get_class("umamusume.dll", "Gallop", "DialogCommon/Data"));
-					il2cpp_runtime_object_init(dialogData);
-
-					dialogData =
-						il2cpp_class_get_method_from_name_type<Il2CppObject * (*)(Il2CppObject * thisObj,
-							Il2CppString * headerTextArg,
-							Il2CppString * message,
-							Il2CppDelegate * onRight,
-							uint64_t leftTextId,
-							uint64_t rightTextId,
-							Il2CppDelegate * onLeft,
-							int dialogFormType)>(dialogData->klass, "SetSimpleTwoButtonMessage", 7)->methodPointer
-							(dialogData,
+					auto dialogData = Gallop::DialogCommon::Data();
+					dialogData.SetSimpleTwoButtonMessage(
 								localizeextension_text_hook(GetTextIdByName(L"Outgame0031")),
 								il2cpp_string_new("트레이너 ID를 복사하시겠습니까?"),
-								CreateDelegateStatic(viewerIdCopyFn), GetTextIdByName(L"Outgame0002"), GetTextIdByName(L"Common0003"),
-								CreateDelegateStatic(playerIdCopyFn), 2);
+						CreateDelegateStatic(viewerIdCopyFn),
+						GetTextIdByName(L"Outgame0002"),
+						GetTextIdByName(L"Common0003"),
+						CreateDelegateStatic(playerIdCopyFn)
+					);
 
-					il2cpp_symbols::get_method_pointer<Il2CppObject* (*)(Il2CppObject* data)>("umamusume.dll", "Gallop", "DialogManager", "PushDialog", 1)(dialogData);
+					Gallop::DialogManager::PushDialog(dialogData);
 				};
 
 			il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, Il2CppDelegate*)>(CopyIdButton->klass, "SetOnClick", 1)->methodPointer(CopyIdButton, &CreateUnityActionStatic(fn)->delegate);
-			return true;
-		}
-		return false;
-	}
-
-	bool UpdateHomeMenuMainButton()
-	{
-		if (Game::CurrentGameRegion != Game::Region::KOR)
-		{
-			return true;
-		}
-
-		auto dialog = GetFrontDialog();
-		auto data = il2cpp_class_get_method_from_name_type<Il2CppObject * (*)(Il2CppObject*)>(dialog->klass, "get_DialogData", 0)->methodPointer(dialog);
-
-		auto ContentsObjectField = il2cpp_class_get_field_from_name_wrap(data->klass, "ContentsObject");
-		Il2CppObject* ContentsObject;
-		il2cpp_field_get_value(data, ContentsObjectField, &ContentsObject);
-
-		auto homeMenuMain = il2cpp_class_get_method_from_name_type<Il2CppObject * (*)(Il2CppObject*, Il2CppReflectionType*)>(ContentsObject->klass, "GetComponent", 1)->methodPointer(ContentsObject, GetRuntimeType("umamusume.dll", "Gallop", "DialogHomeMenuMain"));
-
-		if (homeMenuMain)
-		{
-			auto _serialButtonField = il2cpp_class_get_field_from_name_wrap(homeMenuMain->klass, "_serialButton");
-			Il2CppObject* _serialButton;
-			il2cpp_field_get_value(homeMenuMain, _serialButtonField, &_serialButton);
-
-			if (!GetButtonCommonOnClickDelegate(_serialButton))
-			{
-				return false;
-			}
-
-			auto fn = *[](void*)
-				{
-					auto gallopCpnFn = *[](void*)
-						{
-							il2cpp_symbols::get_method_pointer<void (*)()>("umamusume.dll", "Gallop", "DialogSerialInput", "CreateDialog", -1)();
-						};
-
-					auto kakaoCpnFn = *[](void*)
-						{
-							auto KakaoManager = il2cpp_symbols::get_class("umamusume.dll", "", "KakaoManager");
-							auto managerInstanceField = il2cpp_class_get_field_from_name_wrap(KakaoManager, "instance");
-
-							Il2CppObject* manager;
-							il2cpp_field_static_get_value(managerInstanceField, &manager);
-
-							il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, Il2CppDelegate*, Il2CppDelegate*)>(manager->klass, "OnKakaoShowCouponPopup", 2)->methodPointer(manager, nullptr, nullptr);
-						};
-
-					auto dialogData = il2cpp_object_new(il2cpp_symbols::get_class("umamusume.dll", "Gallop", "DialogCommon/Data"));
-					il2cpp_runtime_object_init(dialogData);
-
-					dialogData =
-						il2cpp_class_get_method_from_name_type<Il2CppObject * (*)(Il2CppObject * thisObj,
-							Il2CppString * headerTextArg,
-							Il2CppString * message,
-							Il2CppDelegate * onRight,
-							uint64_t leftTextId,
-							uint64_t rightTextId,
-							Il2CppDelegate * onLeft,
-							int dialogFormType)>(dialogData->klass, "SetSimpleTwoButtonMessage", 7)->methodPointer
-							(dialogData,
-								localizeextension_text_hook(GetTextIdByName(L"Menu0136")),
-								il2cpp_string_new("Kakao Games 쿠폰 입력 창을 열겠습니까?"),
-								CreateDelegateStatic(kakaoCpnFn), GetTextIdByName(L"Common0002"), GetTextIdByName(L"Common0003"),
-								CreateDelegateStatic(gallopCpnFn), 2);
-
-					il2cpp_symbols::get_method_pointer<Il2CppObject* (*)(Il2CppObject* data)>("umamusume.dll", "Gallop", "DialogManager", "PushDialog", 1)(dialogData);
-				};
-
-			il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, Il2CppDelegate*)>(_serialButton->klass, "SetOnClick", 1)->methodPointer(_serialButton, &CreateUnityActionStatic(fn)->delegate);
-
 			return true;
 		}
 		return false;
@@ -10458,38 +10140,6 @@ namespace
 
 			// Delay 50ms
 			il2cpp_symbols::get_method_pointer<Il2CppObject* (*)(float, Il2CppDelegate*, bool)>("DOTween.dll", "DG.Tweening", "DOVirtual", "DelayedCall", 3)(0.05, &updateScreenReferenceSize->delegate, true);
-		}
-
-		return cloned;
-	}
-
-	void* Object_Internal_CloneSingle_orig = nullptr;
-	Il2CppObject* Object_Internal_CloneSingle_hook(Il2CppObject* data)
-	{
-		auto cloned = reinterpret_cast<decltype(Object_Internal_CloneSingle_hook)*>(Object_Internal_CloneSingle_orig)(data);
-
-		if (wstring(UnityEngine::Object::Name(cloned)->chars).find(L"DialogHomeMenuMain") != wstring::npos && Game::CurrentGameRegion == Game::Region::KOR)
-		{
-			auto homeMenuMain = il2cpp_class_get_method_from_name_type<Il2CppObject * (*)(Il2CppObject*, Il2CppReflectionType*)>(cloned->klass, "GetComponent", 1)->methodPointer(cloned, GetRuntimeType("umamusume.dll", "Gallop", "DialogHomeMenuMain"));
-
-			auto _dataTransButtonField = il2cpp_class_get_field_from_name_wrap(homeMenuMain->klass, "_dataTransButton");
-			Il2CppObject* _dataTransButton;
-			il2cpp_field_get_value(homeMenuMain, _dataTransButtonField, &_dataTransButton);
-
-			auto gameObject = il2cpp_class_get_method_from_name_type<Il2CppObject * (*)(Il2CppObject*)>(_dataTransButton->klass, "get_gameObject", 0)->methodPointer(_dataTransButton);
-			il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, bool)>(gameObject->klass, "SetActive", 1)->methodPointer(gameObject, true);
-
-			static Il2CppDelegate* updateHomeMenuMainButton;
-			updateHomeMenuMainButton = &CreateDelegateWithClassStatic(il2cpp_symbols::get_class("DOTween.dll", "DG.Tweening", "TweenCallback"), *([](void*)
-				{
-					if (!UpdateHomeMenuMainButton())
-					{
-						il2cpp_symbols::get_method_pointer<Il2CppObject* (*)(float, Il2CppDelegate*, bool)>("DOTween.dll", "DG.Tweening", "DOVirtual", "DelayedCall", 3)(0.05, updateHomeMenuMainButton, true);
-					}
-				}))->delegate;
-
-			// Delay 50ms
-			il2cpp_symbols::get_method_pointer<Il2CppObject* (*)(float, Il2CppDelegate*, bool)>("DOTween.dll", "DG.Tweening", "DOVirtual", "DelayedCall", 3)(0.05, updateHomeMenuMainButton, true);
 		}
 
 		return cloned;
@@ -11047,39 +10697,6 @@ namespace
 		UnityEngine::Application::targetFrameRate(30);
 	}
 
-	Il2CppObject* errorDialog = nullptr;
-
-	void* DialogCommon_Close_orig = nullptr;
-	void DialogCommon_Close_hook(Il2CppObject* _this)
-	{
-		if (_this == errorDialog)
-		{
-			auto sceneManager = GetSingletonInstance(il2cpp_symbols::get_class("umamusume.dll", "Gallop", "SceneManager"));
-			if (sceneManager)
-			{
-				// Home 100
-				il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, int, Il2CppObject*, Il2CppObject*, Il2CppObject*, bool)>(sceneManager->klass, "ChangeView", 5)->methodPointer
-				(sceneManager, 100, nullptr, nullptr, nullptr, true);
-			}
-		}
-		reinterpret_cast<decltype(DialogCommon_Close_hook)*>(DialogCommon_Close_orig)(_this);
-	}
-
-	void* GallopUtil_GotoTitleOnError_orig = nullptr;
-	void GallopUtil_GotoTitleOnError_hook(Il2CppString* text)
-	{
-		// Bypass SoftwareReset
-		auto okText = GetTextIdByName(L"Common0009");
-		auto errorText = GetTextIdByName(L"Common0071");
-
-		auto dialogData = il2cpp_object_new(il2cpp_symbols::get_class("umamusume.dll", "Gallop", "DialogCommon/Data"));
-		il2cpp_runtime_object_init(dialogData);
-		dialogData =
-			il2cpp_class_get_method_from_name_type<Il2CppObject * (*)(Il2CppObject * _this, uint64_t headerTextId, Il2CppString * message, Il2CppObject * onClickCenterButton, uint64_t closeTextId)>(dialogData->klass, "SetSimpleOneButtonMessage", 4)->methodPointer
-			(dialogData, errorText, local::get_localized_string(il2cpp_string_new16(GotoTitleErrorJa.data())), nullptr, okText);
-		errorDialog = il2cpp_symbols::get_method_pointer<Il2CppObject * (*)(Il2CppObject * data, bool isEnableOutsideClick)>("umamusume.dll", "Gallop", "DialogManager", "PushSystemDialog", 2)(dialogData, true);
-	}
-
 	Il2CppDelegate* updateFriendSearchButton = nullptr;
 
 	bool UpdateFriendSearchButton()
@@ -11235,25 +10852,17 @@ namespace
 							il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*)>(controller->klass, "OnClickIDSearch", 0)->methodPointer(controller);
 						};
 
-					auto dialogData = il2cpp_object_new(il2cpp_symbols::get_class("umamusume.dll", "Gallop", "DialogCommon/Data"));
-					il2cpp_runtime_object_init(dialogData);
-
-					dialogData =
-						il2cpp_class_get_method_from_name_type<Il2CppObject * (*)(Il2CppObject * thisObj,
-							Il2CppString * headerTextArg,
-							Il2CppString * message,
-							Il2CppDelegate * onRight,
-							uint64_t leftTextId,
-							uint64_t rightTextId,
-							Il2CppDelegate * onLeft,
-							int dialogFormType)>(dialogData->klass, "SetSimpleTwoButtonMessage", 7)->methodPointer
-							(dialogData,
+					auto dialogData = Gallop::DialogCommon::Data();
+					dialogData.SetSimpleTwoButtonMessage(
 								localizeextension_text_hook(GetTextIdByName(L"Friend0039")),
 								il2cpp_string_new("트레이너 ID로 검색하시겠습니까?"),
-								CreateDelegateStatic(viewerIdSearchFn), GetTextIdByName(L"Outgame0002"), GetTextIdByName(L"Common0003"),
-								CreateDelegateStatic(playerIdSearchFn), 2);
+						CreateDelegateStatic(viewerIdSearchFn),
+						GetTextIdByName(L"Outgame0002"),
+						GetTextIdByName(L"Common0003"),
+						CreateDelegateStatic(playerIdSearchFn)
+					);
 
-					il2cpp_symbols::get_method_pointer<Il2CppObject* (*)(Il2CppObject* data)>("umamusume.dll", "Gallop", "DialogManager", "PushDialog", 1)(dialogData);
+					Gallop::DialogManager::PushDialog(dialogData);
 				};
 
 			il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, Il2CppDelegate*)>(ButtonIDSearch->klass, "SetOnClick", 1)->methodPointer(ButtonIDSearch, &CreateUnityActionStatic(fn)->delegate);
@@ -11428,25 +11037,17 @@ namespace
 										parentObj->klass, "PlayAnnounceVoice", 2)->methodPointer(parentObj, cueSheetName, cueName);
 								});
 
-							auto dialogData = il2cpp_object_new(il2cpp_symbols::get_class("umamusume.dll", "Gallop", "DialogCommon/Data"));
-							il2cpp_runtime_object_init(dialogData);
-
-							dialogData =
-								il2cpp_class_get_method_from_name_type<Il2CppObject * (*)(Il2CppObject * thisObj,
-									Il2CppString * headerTextArg,
-									Il2CppString * message,
-									Il2CppDelegate * onRight,
-									uint64_t leftTextId,
-									uint64_t rightTextId,
-									Il2CppDelegate * onLeft,
-									int dialogFormType)>(dialogData->klass, "SetSimpleTwoButtonMessage", 7)->methodPointer
-									(dialogData,
+							auto dialogData = Gallop::DialogCommon::Data();
+							dialogData.SetSimpleTwoButtonMessage(
 										localizeextension_text_hook(GetTextIdByName(L"StoryEvent0079")),
 										il2cpp_string_new("해당 스토리 이벤트는 개최 정보가 누락되어있습니다.\n\n웹 페이지를 보시겠습니까?"),
-										onRight, GetTextIdByName(L"Common0002"), GetTextIdByName(L"Common0001"),
-										onLeft, 2);
+								onRight,
+								GetTextIdByName(L"Common0002"),
+								GetTextIdByName(L"Common0001"),
+								onLeft
+							);
 
-							il2cpp_symbols::get_method_pointer<Il2CppObject* (*)(Il2CppObject* data)>("umamusume.dll", "Gallop", "DialogManager", "PushDialog", 1)(dialogData);
+							Gallop::DialogManager::PushDialog(dialogData);
 						}
 						else
 						{
@@ -13140,8 +12741,6 @@ namespace
 		auto DialogCircleItemDonate_Initialize_addr = il2cpp_symbols::get_method_pointer("umamusume.dll", "Gallop", "DialogCircleItemDonate", "Initialize", 2);
 
 		auto Object_Internal_CloneSingleWithParent_addr = il2cpp_resolve_icall("UnityEngine.Object::Internal_CloneSingleWithParent()");
-
-		auto Object_Internal_CloneSingle_addr = il2cpp_resolve_icall("UnityEngine.Object::Internal_CloneSingle()");
 
 		auto Input_get_mousePosition_Injected_addr = il2cpp_resolve_icall("UnityEngine.Input::get_mousePosition_Injected(UnityEngine.Vector3&)");
 

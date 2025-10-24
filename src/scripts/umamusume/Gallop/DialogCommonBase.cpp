@@ -1,16 +1,13 @@
 #pragma once
-#include "il2cpp/il2cpp_symbols.hpp"
-#include "LockableBehaviour.hpp"
 
 namespace Gallop
 {
-	class DialogCommonBase abstract : public LockableBehaviour
+	class DialogCommonBase
 	{
 	public:
-		enum class FormType
+		enum FormType
 		{
-			NONE = -1,
-			SMALL_NO_BUTTON = 0,
+			SMALL_NO_BUTTON,
 			SMALL_ONE_BUTTON,
 			SMALL_TWO_BUTTON,
 			SMALL_THREE_BUTTON,
@@ -26,7 +23,5 @@ namespace Gallop
 		};
 
 		void Close();
-
-		using LockableBehaviour::LockableBehaviour;
 	};
 }
