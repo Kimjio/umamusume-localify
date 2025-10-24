@@ -4,16 +4,19 @@
 
 #include "config/config.hpp"
 
-void* get_width_addr = nullptr;
+namespace
+{
+	void* get_width_addr = nullptr;
 
-void* get_height_addr = nullptr;
+	void* get_height_addr = nullptr;
 
-void* get_fullScreen_addr = nullptr;
+	void* get_fullScreen_addr = nullptr;
 
-void* get_currentResolution_Injected_addr = nullptr;
+	void* get_currentResolution_Injected_addr = nullptr;
 
-void* RequestOrientation_addr = nullptr;
-void* RequestOrientation_orig = nullptr;
+	void* RequestOrientation_addr = nullptr;
+	void* RequestOrientation_orig = nullptr;
+}
 
 static void RequestOrientation_hook(UnityEngine::ScreenOrientation orientation)
 {

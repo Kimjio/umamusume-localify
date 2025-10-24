@@ -2,7 +2,7 @@
 
 namespace UnityEngine
 {
-	enum ScreenOrientation {
+	enum class ScreenOrientation {
 		Unknown,
 		Portrait,
 		PortraitUpsideDown,

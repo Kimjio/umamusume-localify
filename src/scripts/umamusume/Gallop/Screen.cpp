@@ -222,17 +222,17 @@ namespace Gallop
 
 	bool Screen::IsLandscapeMode()
 	{
+		if (get_IsLandscapeMode_addr)
+		{
+			return reinterpret_cast<bool (*)()>(get_IsLandscapeMode_addr)();
+		}
+
 		if (Game::CurrentGameStore == Game::Store::Steam)
 		{
 			return true;
 		}
 
-		if (!get_IsLandscapeMode_addr)
-		{
-			return false;
-		}
-
-		return reinterpret_cast<bool (*)()>(get_IsLandscapeMode_addr)();
+		return false;
 	}
 
 	bool Screen::IsSplitWindow()

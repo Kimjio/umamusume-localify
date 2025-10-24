@@ -81,6 +81,7 @@
 
 #include "scripts/CriMw.CriWare.Runtime/CriWare/CriAtomEx.hpp"
 #include "scripts/CriMw.CriWare.Runtime/CriWare/CriAtomExPlayback.hpp"
+#include "scripts/CriMw.CriWare.Runtime/CriWare/CriMana/MovieInfo.hpp"
 
 #include "scripts/Cute.Cri.Assembly/Cute/Cri/AudioPlayback.hpp"
 #include "scripts/Cute.Cri.Assembly/Cute/Cri/MoviePlayerHandle.hpp"
@@ -102,7 +103,9 @@
 #include "scripts/UnityEngine.CoreModule/UnityEngine/Screen.hpp"
 #include "scripts/UnityEngine.CoreModule/UnityEngine/ScreenOrientation.hpp"
 #include "scripts/UnityEngine.CoreModule/UnityEngine/SceneManagement/Scene.hpp"
+#include "scripts/UnityEngine.CoreModule/UnityEngine/Rendering/RenderTargetIdentifier.hpp"
 #include "scripts/UnityEngine.TextRenderingModule/UnityEngine/TextGenerationSettings.hpp"
+#include "scripts/UnityEngine.InputLegacyModule/UnityEngine/Input.hpp"
 
 #include "scripts/umamusume/Gallop/DialogCommonBase.hpp"
 #include "scripts/umamusume/Gallop/DialogCommon.hpp"
@@ -1813,8 +1816,7 @@ namespace
 	void* CySpringUpdater_get_SpringUpdateMode_orig = nullptr;
 	int CySpringUpdater_get_SpringUpdateMode_hook(Il2CppObject* _this)
 	{
-		CySpringUpdater_set_SpringUpdateMode_hook(_this, config::cyspring_update_mode);
-		return reinterpret_cast<decltype(CySpringUpdater_get_SpringUpdateMode_hook)*>(CySpringUpdater_get_SpringUpdateMode_orig)(_this);
+		return config::cyspring_update_mode;
 	}
 
 	void* story_timeline_controller_play_orig;
@@ -1988,7 +1990,7 @@ namespace
 
 			if (Gallop::Screen::IsSplitWindow())
 			{
-				return h * ratio_4_3;
+				return h;
 			}
 
 			return Gallop::StandaloneWindowResize::IsVirt() ? w : h;
@@ -2004,64 +2006,76 @@ namespace
 		{
 			int w = max(last_display_width, last_display_height), h = min(last_display_width, last_display_height);
 
+			if (Gallop::Screen::IsSplitWindow())
+			{
+				return h * ratio_3_4;
+			}
+
 			return Gallop::StandaloneWindowResize::IsVirt() ? h : w;
 		}
 
 		return UnityEngine::Screen::width();
 	}
 
+	void* GallopStandaloneInputModule_SetPointerPosition_orig = nullptr;
+	void GallopStandaloneInputModule_SetPointerPosition_hook(Il2CppObject* self)
+	{
+		reinterpret_cast<decltype(GallopStandaloneInputModule_SetPointerPosition_hook)*>(GallopStandaloneInputModule_SetPointerPosition_orig)(self);
+		auto pointerEventDataField = il2cpp_class_get_field_from_name_wrap(self->klass, "pointerEventData");
+		Il2CppObject* pointerEventData;
+		il2cpp_field_get_value(self, pointerEventDataField, &pointerEventData);
+		il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, UnityEngine::Vector2)>(pointerEventData->klass, "set_position", 1)->methodPointer(pointerEventData, (UnityEngine::Input::mousePosition() * (Gallop::Screen::Width() / static_cast<float>(UnityEngine::Screen::width()))));
+	}
+
+	void* GallopStandaloneInputModule_ProcessTouchEvents_orig = nullptr;
+	bool GallopStandaloneInputModule_ProcessTouchEvents_hook(Il2CppObject* self)
+	{
+		// cout << "GallopStandaloneInputModule_ProcessTouchEvents_hook" << endl;
+		auto isTouchReactField = il2cpp_class_get_field_from_name_wrap(self->klass, "isTouchReact");
+		bool isTouchReact = true;
+		il2cpp_field_static_set_value(isTouchReactField, &isTouchReact);
+
+		auto input = il2cpp_class_get_method_from_name_type<Il2CppObject * (*)(Il2CppObject*)>(self->klass, "get_input", 0)->methodPointer(self);
+		auto touchCount = il2cpp_class_get_method_from_name_type<int (*)(Il2CppObject*)>(input->klass, "get_touchCount", 0)->methodPointer(input);
+		for (int i = 0; i < touchCount; i++)
+		{
+			auto touch = il2cpp_class_get_method_from_name_type<Il2CppObject * (*)(Il2CppObject*, int)>(input->klass, "GetTouch", 1)->methodPointer(input, i);
+			auto position = il2cpp_class_get_method_from_name_type<UnityEngine::Vector2(*)(Il2CppObject*)>(touch->klass, "get_position", 0)->methodPointer(touch);
+			if (!isnan(position.x) && !isnan(position.y))
+			{
+				if (!Gallop::Screen::IsSplitWindow())
+			{
+					auto m_PositionField = il2cpp_class_get_field_from_name_wrap(touch->klass, "m_Position");
+					position = position * ((float)Gallop::Screen::Width() / (float)UnityEngine::Screen::width());
+
+					il2cpp_field_set_value(touch, m_PositionField, &position);
+			}
+				auto type = il2cpp_class_get_method_from_name_type<uint64_t(*)(Il2CppObject*)>(touch->klass, "get_type", 0)->methodPointer(touch);
+				if (type != 1 /* TouchType.Indirect */)
+		{
+					bool pressed;
+					bool released;
+					auto touchPointerEventData = il2cpp_class_get_method_from_name_type<Il2CppObject * (*)(Il2CppObject*, Il2CppObject*, bool*, bool*)>(self->klass, "GetTouchPointerEventData", 3)->methodPointer(self, touch, &pressed, &released);
+					il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, Il2CppObject*, bool, bool)>(self->klass, "ProcessTouchPress", 3)->methodPointer(self, touchPointerEventData, pressed, released);
+					if (!released)
+			{
+						il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, Il2CppObject*)>(self->klass, "ProcessMove", 1)->methodPointer(self, touchPointerEventData);
+						il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, Il2CppObject*)>(self->klass, "ProcessDrag", 1)->methodPointer(self, touchPointerEventData);
+			}
+			else
+			{
+						il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, Il2CppObject*)>(self->klass, "RemovePointerData", 1)->methodPointer(self, touchPointerEventData);
+			}
+		}
+		}
+		}
+		isTouchReact = false;
+		il2cpp_field_static_set_value(isTouchReactField, &isTouchReact);
+		touchCount = il2cpp_class_get_method_from_name_type<int (*)(Il2CppObject*)>(input->klass, "get_touchCount", 0)->methodPointer(input);
+		return touchCount > 0;
+	}
+
 	void (*set_scale_factor)(void*, float);
-
-	void* canvas_scaler_setres_orig;
-	void canvas_scaler_setres_hook(Il2CppObject* _this, UnityEngine::Vector2 res)
-	{
-		int width = UnityEngine::Screen::width();
-		int height = UnityEngine::Screen::height();
-
-		res.x = width;
-		res.y = height;
-
-		if (config::freeform_window)
-		{
-			if (width < height)
-			{
-				float scale = min(config::freeform_ui_scale_portrait, max(1.0f, height * config::runtime::ratioVertical) * config::freeform_ui_scale_portrait);
-				set_scale_factor(_this, scale);
-			}
-			else
-			{
-				float scale = min(config::freeform_ui_scale_landscape, max(1.0f, width / config::runtime::ratioHorizontal) * config::freeform_ui_scale_landscape);
-				set_scale_factor(_this, scale);
-			}
-		}
-		else
-		{
-			// set scale factor to make ui bigger on hi-res screen
-			if (width < height)
-			{
-				float scale = min(config::ui_scale, max(1.0f, height * config::runtime::ratioVertical) * config::ui_scale);
-				set_scale_factor(_this, scale);
-			}
-			else
-			{
-				float scale = min(config::ui_scale, max(1.0f, width / config::runtime::ratioHorizontal) * config::ui_scale);
-				set_scale_factor(_this, scale);
-			}
-		}
-
-		reinterpret_cast<decltype(canvas_scaler_setres_hook)*>(canvas_scaler_setres_orig)(_this, res);
-	}
-
-	void* UIManager_UpdateCanvasScaler_orig = nullptr;
-
-	void UIManager_UpdateCanvasScaler_hook(Il2CppObject* canvasScaler)
-	{
-		auto display = display_get_main();
-		canvas_scaler_setres_hook(
-			canvasScaler, UnityEngine::Vector2{ static_cast<float>(get_system_width(display)), static_cast<float>(get_system_height(display)) });
-		reinterpret_cast<decltype(UIManager_UpdateCanvasScaler_hook)*>(
-			UIManager_UpdateCanvasScaler_orig)(canvasScaler);
-	}
 
 	void* BGManager_CalcBgScale_orig = nullptr;
 	float BGManager_CalcBgScale_hook(Il2CppObject* _this, int width, int height, int renderTextureWidth, int renderTextureHeight)
@@ -2618,8 +2632,9 @@ namespace
 
 										if (UnityEngine::Object::Name(parent)->chars == L"MainCanvas"s)
 										{
-											auto array1 = getComponents(parentGameObject, reinterpret_cast<Il2CppType*>(GetRuntimeType(
-												"umamusume.dll", "Gallop", "StoryMovieView")), true, true, false, false, nullptr);
+											if (auto klass = il2cpp_symbols::get_class("umamusume.dll", "Gallop", "StoryMovieView"))
+											{
+												auto array1 = getComponents(parentGameObject, reinterpret_cast<Il2CppType*>(GetRuntimeType(klass)), true, true, false, false, nullptr);
 
 											if (array1)
 											{
@@ -2633,6 +2648,7 @@ namespace
 
 													return;
 												}
+											}
 											}
 
 											auto array2 = getComponents(parentGameObject, reinterpret_cast<Il2CppType*>(GetRuntimeType(
@@ -3171,7 +3187,18 @@ namespace
 									}
 
 									Il2CppObject* _uiToFrameBufferRenderCameraData = uiManager._uiToFrameBufferRenderCameraData();
+
+									if (_uiToFrameBufferRenderCameraData)
+									{
 									il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, Il2CppObject*)>(_uiToFrameBufferRenderCameraData->klass, "set_ScreenTexture", 1)->methodPointer(_uiToFrameBufferRenderCameraData, renderTexture);
+									}
+
+									Il2CppObject* _uiCommandBuffer = uiManager._uiCommandBuffer();
+
+									if (_uiCommandBuffer)
+									{
+										il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, Il2CppObject*, UnityEngine::Rendering::RenderTargetIdentifier, Il2CppObject*)>(_uiCommandBuffer->klass, "Blit", 3)->methodPointer(_uiCommandBuffer, renderTexture, UnityEngine::Rendering::RenderTargetIdentifier(UnityEngine::Rendering::BuiltinRenderTextureType::CurrentActive), uiManager._blitToFrameMaterial());
+									}
 
 									Il2CppObject* _uiCamera = uiManager._uiCamera();
 									Il2CppObject* _bgCamera = uiManager._bgCamera();
@@ -3183,10 +3210,12 @@ namespace
 									{
 										il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, Il2CppObject*)>(_uiCamera->klass, "set_targetTexture", 1)->methodPointer(_uiCamera, renderTexture);
 									}
+
 									if (_bgCamera)
 									{
 										il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, Il2CppObject*)>(_bgCamera->klass, "set_targetTexture", 1)->methodPointer(_bgCamera, renderTexture);
 									}
+
 									if (_noImageEffectUICamera)
 									{
 										il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, Il2CppObject*)>(_noImageEffectUICamera->klass, "set_targetTexture", 1)->methodPointer(_noImageEffectUICamera, renderTexture);
@@ -3315,77 +3344,6 @@ namespace
 		}
 
 		return false;
-	}
-
-	void* Camera_set_orthographicSize_orig = nullptr;
-	void Camera_set_orthographicSize_hook(Il2CppObject* _this, float value)
-	{
-		if (wstring(UnityEngine::Object::Name(_this)->chars).find(L"UICamera") != wstring::npos)
-		{
-			auto callback = CreateDelegateWithClass(il2cpp_symbols::get_class("DOTween.dll", "DG.Tweening", "TweenCallback"), _this, *([](Il2CppObject* _this)
-				{
-					RemakeTextures();
-				}));
-
-			il2cpp_symbols::get_method_pointer<Il2CppObject* (*)(float, Il2CppDelegate*, bool)>("DOTween.dll", "DG.Tweening", "DOVirtual", "DelayedCall", 3)(0.1, &callback->delegate, true);
-
-			auto current = il2cpp_class_get_method_from_name_type<float (*)(Il2CppObject*)>(_this->klass, "get_orthographicSize", 0)->methodPointer(_this);
-			if (current == 5.0f)
-			{
-				return;
-			}
-			value = 5.0f;
-		}
-		reinterpret_cast<decltype(Camera_set_orthographicSize_hook)*>(Camera_set_orthographicSize_orig)(_this, value);
-	}
-
-	void* RectTransform_get_rect_Injected_orig = nullptr;
-	void RectTransform_get_rect_Injected_hook(Il2CppObject* _this, UnityEngine::Rect* rect)
-	{
-		reinterpret_cast<decltype(RectTransform_get_rect_Injected_hook)*>(RectTransform_get_rect_Injected_orig)(_this, rect);
-
-		if (Gallop::GameSystem::IsExecutingSoftwareReset())
-		{
-			if (isRequestChangeResolution || config::freeform_window && Gallop::StandaloneWindowResize::IsVirt())
-			{
-				float tmp = rect->height;
-				rect->height = rect->width;
-				rect->width = tmp;
-			}
-			return;
-		}
-
-		auto sceneManager = GetSingletonInstance(il2cpp_symbols::get_class("umamusume.dll", "Gallop", "SceneManager"));
-		if (sceneManager)
-		{
-			auto _changeViewEnumeratorField = il2cpp_class_get_field_from_name_wrap(sceneManager->klass, "_changeViewEnumerator");
-			Il2CppObject* _changeViewEnumerator;
-			il2cpp_field_get_value(sceneManager, _changeViewEnumeratorField, &_changeViewEnumerator);
-
-			if (_changeViewEnumerator)
-			{
-				auto current = il2cpp_class_get_method_from_name_type<Il2CppObject * (*)(Il2CppObject*)>(_changeViewEnumerator->klass, "System.Collections.IEnumerator.get_Current", 0)->methodPointer(_changeViewEnumerator);
-
-				if (current && string(current->klass->name).find("ChangeScreenOrientation") != string::npos)
-				{
-					auto scaler = il2cpp_class_get_method_from_name_type<Il2CppObject * (*)(Il2CppObject*, Il2CppReflectionType*)>(_this->klass, "GetComponent", 1)->methodPointer(_this, GetRuntimeType("UnityEngine.UI.dll", "UnityEngine.UI", "CanvasScaler"));
-
-					if (scaler)
-					{
-						if (isRequestChangeResolution && IsChangingResolution())
-						{
-							float tmp = rect->height;
-							rect->height = rect->width;
-							rect->width = tmp;
-						}
-						else
-						{
-							isRequestChangeResolution = false;
-						}
-					}
-				}
-			}
-		}
 	}
 
 	void SetResolution_hook(int width, int height, int fullscreenMode, int perferredRefreshRate)
@@ -4281,15 +4239,27 @@ namespace
 					{
 						auto leftArrowButton = il2cpp_class_get_method_from_name_type<Il2CppObject * (*)(Il2CppObject*)>(view->klass, "get_LeftArrowButton", 0)->methodPointer(view);
 
-						auto leftSkipArrowButton = il2cpp_class_get_method_from_name_type<Il2CppObject * (*)(Il2CppObject*)>(view->klass, "get_LeftSkipArrowButton", 0)->methodPointer(view);
+						Il2CppObject* leftSkipArrowButton = nullptr;
+
+						auto get_LeftSkipArrowButton = il2cpp_class_get_method_from_name_type<Il2CppObject * (*)(Il2CppObject*)>(view->klass, "get_LeftSkipArrowButton", 0);
+						if (get_LeftSkipArrowButton)
+						{
+							leftSkipArrowButton = get_LeftSkipArrowButton->methodPointer(view);
+						}
 
 						auto rightArrowButton = il2cpp_class_get_method_from_name_type<Il2CppObject * (*)(Il2CppObject*)>(view->klass, "get_RightArrowButton", 0)->methodPointer(view);
 
-						auto rightSkipArrowButton = il2cpp_class_get_method_from_name_type<Il2CppObject * (*)(Il2CppObject*)>(view->klass, "get_RightSkipArrowButton", 0)->methodPointer(view);
+						Il2CppObject* rightSkipArrowButton = nullptr;
+
+						auto get_RightSkipArrowButton = il2cpp_class_get_method_from_name_type<Il2CppObject * (*)(Il2CppObject*)>(view->klass, "get_RightSkipArrowButton", 0);
+						if (get_RightSkipArrowButton)
+						{
+							rightSkipArrowButton = get_RightSkipArrowButton->methodPointer(view);
+						}
 
 						if (wParam == VK_LEFT)
 						{
-							if (shiftKeyDown)
+							if (shiftKeyDown && leftSkipArrowButton)
 							{
 								PressButton(leftSkipArrowButton);
 							}
@@ -4303,7 +4273,7 @@ namespace
 
 						if (wParam == VK_RIGHT)
 						{
-							if (shiftKeyDown)
+							if (shiftKeyDown && rightSkipArrowButton)
 							{
 								PressButton(rightSkipArrowButton);
 							}
@@ -5135,11 +5105,11 @@ namespace
 		return false;
 	}
 
+	Il2CppObject* resources_load_hook(Il2CppString* path, Il2CppReflectionType* type);
+
 	bool isPortraitBeforeFullscreen = false;
 
 	WNDPROC oldWndProcPtr = nullptr;
-
-	Il2CppObject* Object_Internal_CloneSingle_hook(Il2CppObject* data);
 
 	LRESULT WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 	{
@@ -5173,7 +5143,7 @@ namespace
 			return TRUE;
 		}
 
-		bool isSteam = Game::CurrentGameStore == Game::Store::Steam;
+		bool isLandscape = Gallop::Screen::IsLandscapeMode();
 
 		if (uMsg == WM_KEYDOWN)
 		{
@@ -5655,7 +5625,7 @@ namespace
 		{
 			RECT* rect = reinterpret_cast<RECT*>(lParam);
 
-			float ratio = (Gallop::StandaloneWindowResize::IsVirt() && !isSteam) ? config::runtime::ratioVertical : config::runtime::ratioHorizontal;
+			float ratio = (Gallop::StandaloneWindowResize::IsVirt() && !isLandscape) ? config::runtime::ratioVertical : config::runtime::ratioHorizontal;
 
 			auto StandaloneWindowResize = il2cpp_symbols::get_class("umamusume.dll", "Gallop", "StandaloneWindowResize");
 
@@ -5755,7 +5725,7 @@ namespace
 			if (uiManager)
 			{
 				bool isVirt = width < height;
-				if (config::unlock_size || isSteam)
+				if (config::unlock_size || isLandscape)
 				{
 					uiManager.ChangeResizeUIForPC(isVirt ? min(last_display_width, last_display_height) : max(last_display_width, last_display_height),
 						isVirt ? max(last_display_width, last_display_height) : min(last_display_width, last_display_height));
@@ -5817,7 +5787,7 @@ namespace
 		auto hWnd = GetHWND();
 
 		long style = GetWindowLongW(hWnd, GWL_STYLE);
-		if (Game::CurrentGameStore == Game::Store::Steam && !config::freeform_window)
+		if (Gallop::Screen::IsLandscapeMode() && !config::freeform_window)
 		{
 			style &= ~WS_MAXIMIZEBOX;
 		}
@@ -5866,8 +5836,13 @@ namespace
 	{
 		auto position = il2cpp_symbols::get_method_pointer<UnityEngine::Vector3(*)()>("UnityEngine.InputLegacyModule.dll", "UnityEngine", "Input", "get_mousePosition", IgnoreNumberOfArguments)();
 
-		if (Game::CurrentGameStore == Game::Store::Steam)
+		if (!config::freeform_window)
 		{
+			if (Gallop::Screen::IsSplitWindow())
+			{
+			return position * Gallop::Screen::Height() / static_cast<float>(UnityEngine::Screen::height());
+		}
+
 			return position * Gallop::Screen::Height() / static_cast<float>(UnityEngine::Screen::height());
 		}
 		return position;
@@ -5920,7 +5895,7 @@ namespace
 	{
 		for (auto buffer : frameBuffers)
 		{
-			if (il2cpp_class_get_method_from_name_type<Il2CppObject * (*)(Il2CppObject*)>(buffer->klass, "get_ColorBuffer", 0)->methodPointer(buffer))
+			if (buffer && il2cpp_class_get_method_from_name_type<Il2CppObject * (*)(Il2CppObject*)>(buffer->klass, "get_ColorBuffer", 0)->methodPointer(buffer))
 			{
 				auto _drawPathField = il2cpp_class_get_field_from_name_wrap(buffer->klass, "_drawPass");
 				Il2CppObject* _drawPath;
@@ -6204,6 +6179,12 @@ namespace
 			}
 
 			return UnityEngine::Vector2Int{ number1920, number1080 };*/
+
+			if (Gallop::Screen::IsSplitWindow())
+			{
+				width = height * ratio_3_4;
+			}
+
 			return UnityEngine::Vector2Int{ width, height };
 		}
 
@@ -6239,6 +6220,12 @@ namespace
 			}
 
 			return UnityEngine::Vector2Int{ number1920, number1080 };*/
+
+			if (Gallop::Screen::IsSplitWindow())
+			{
+				width = height * ratio_3_4;
+			}
+
 			return UnityEngine::Vector2Int{ width, height };
 		}
 
@@ -6261,6 +6248,44 @@ namespace
 		resolution.m_X *= config::resolution_3d_scale;
 		resolution.m_Y *= config::resolution_3d_scale;
 		return resolution;
+	}
+
+
+	void* GraphicSettings_GetVirtualResolution3D2_orig = nullptr;
+	UnityEngine::Vector2Int GraphicSettings_GetVirtualResolution3D2_hook(Il2CppObject* _this, UnityEngine::Vector2Int resolution, bool isForcedWideAspect)
+	{
+		if (config::freeform_window)
+		{
+			int width = UnityEngine::Screen::width() * config::resolution_3d_scale;
+			int height = UnityEngine::Screen::height() * config::resolution_3d_scale;
+
+			if (Gallop::Screen::IsSplitWindow())
+			{
+				width = height * ratio_3_4;
+			}
+
+			return UnityEngine::Vector2Int{ width, height };
+		}
+
+		auto resolution2 = reinterpret_cast<decltype(GraphicSettings_GetVirtualResolution3D2_hook)*>(GraphicSettings_GetVirtualResolution3D2_orig)(_this, resolution, isForcedWideAspect);
+		if (config::unlock_size)
+		{
+			UnityEngine::Resolution res;
+			get_resolution(&res);
+			if (resolution2.m_X > resolution2.m_Y)
+			{
+				resolution2.m_X = res.width;
+				resolution2.m_Y = res.height;
+			}
+			else
+			{
+				resolution2.m_X = res.height;
+				resolution2.m_Y = res.width;
+			}
+		}
+		resolution2.m_X *= config::resolution_3d_scale;
+		resolution2.m_Y *= config::resolution_3d_scale;
+		return resolution2;
 	}
 
 	void* Renderer_get_material_orig = nullptr;
@@ -6858,8 +6883,6 @@ namespace
 		}
 		return obj;
 	}
-
-	Il2CppObject* resources_load_hook(Il2CppString* path, Il2CppReflectionType* type);
 
 	Il2CppArraySize_t<Il2CppObject*>* GetRectTransformArray(Il2CppObject* object)
 	{
@@ -10566,9 +10589,9 @@ namespace
 				targetOrientation);
 		}
 
-		auto arrayList = il2cpp_object_new(il2cpp_symbols::get_class("mscorlib.dll", "System.Collections", "ArrayList"));
-		il2cpp_runtime_object_init(arrayList);
-		return il2cpp_class_get_method_from_name_type<Il2CppObject * (*)(Il2CppObject*)>(arrayList->klass, "GetEnumerator", 0)->methodPointer(arrayList);
+		auto yield = il2cpp_object_new(il2cpp_symbols::get_class("UnityEngine.CoreModule.dll", "UnityEngine", "WaitWhile"));
+		il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, Il2CppDelegate*)>(yield->klass, ".ctor", 1)->methodPointer(yield, CreateDelegateStatic(*[]() { return false; }));
+		return yield;
 	}
 
 	void* SplashViewController_KakaoStart_orig;
@@ -10577,8 +10600,8 @@ namespace
 		// no-op
 	}
 
-	Il2CppObject* (*MoviePlayerBase_get_MovieInfo)(Il2CppObject* _this);
-	Il2CppObject* (*MovieManager_GetMovieInfo)(Il2CppObject* _this, Cute::Cri::MoviePlayerHandle playerHandle);
+	CriWare::CriMana::MovieInfo* (*MoviePlayerBase_get_MovieInfo)(Il2CppObject* _this);
+	CriWare::CriMana::MovieInfo* (*MovieManager_GetMovieInfo)(Il2CppObject* _this, Cute::Cri::MoviePlayerHandle playerHandle);
 
 	void* MovieManager_SetImageUvRect_orig = nullptr;
 
@@ -10590,12 +10613,7 @@ namespace
 			return;
 		}
 
-		auto widthField = il2cpp_class_get_field_from_name_wrap(movieInfo->klass, "width");
-		auto heightField = il2cpp_class_get_field_from_name_wrap(movieInfo->klass, "height");
-		unsigned int width, height;
-		il2cpp_field_get_value(movieInfo, widthField, &width);
-		il2cpp_field_get_value(movieInfo, heightField, &height);
-		if (width < height && !Gallop::StandaloneWindowResize::IsVirt())
+		if (movieInfo->width < movieInfo->height && !Gallop::StandaloneWindowResize::IsVirt())
 		{
 			int rWidth = UnityEngine::Screen::width();
 			int rHeight = UnityEngine::Screen::height();
@@ -10619,12 +10637,7 @@ namespace
 			return;
 		}
 
-		auto widthField = il2cpp_class_get_field_from_name_wrap(movieInfo->klass, "width");
-		auto heightField = il2cpp_class_get_field_from_name_wrap(movieInfo->klass, "height");
-		unsigned int width, height;
-		il2cpp_field_get_value(movieInfo, widthField, &width);
-		il2cpp_field_get_value(movieInfo, heightField, &height);
-		if (width < height && !Gallop::StandaloneWindowResize::IsVirt())
+		if (movieInfo->width < movieInfo->height && !Gallop::StandaloneWindowResize::IsVirt())
 		{
 			int rWidth = UnityEngine::Screen::width();
 			int rHeight = UnityEngine::Screen::height();
@@ -10640,28 +10653,21 @@ namespace
 
 	void* MoviePlayerForUI_AdjustScreenSize_orig = nullptr;
 
-	void MoviePlayerForUI_AdjustScreenSize_hook(Il2CppObject* _this, UnityEngine::Vector2 dispRectWH, bool isPanScan)
+	void MoviePlayerForUI_AdjustScreenSize_hook(Il2CppObject* self, UnityEngine::Vector2 dispRectWH, bool isPanScan)
 	{
-		auto movieInfo = MoviePlayerBase_get_MovieInfo(_this);
+		auto movieInfo = MoviePlayerBase_get_MovieInfo(self);
 		if (!movieInfo)
 		{
 			return;
 		}
 
-		auto widthField = il2cpp_class_get_field_from_name_wrap(movieInfo->klass, "width");
-		auto heightField = il2cpp_class_get_field_from_name_wrap(movieInfo->klass, "height");
-
-		unsigned int width, height;
-		il2cpp_field_get_value(movieInfo, widthField, &width);
-		il2cpp_field_get_value(movieInfo, heightField, &height);
-
-		if (!Gallop::StandaloneWindowResize::IsVirt())
+		if (movieInfo->width < movieInfo->height && !Gallop::StandaloneWindowResize::IsVirt())
 		{
-			auto ratio1 = static_cast<float>(width) / static_cast<float>(height);
+			auto ratio1 = static_cast<float>(movieInfo->width) / static_cast<float>(movieInfo->height);
 			dispRectWH.x = dispRectWH.y * ratio1;
 		}
 
-		reinterpret_cast<decltype(MoviePlayerForUI_AdjustScreenSize_hook)*>(MoviePlayerForUI_AdjustScreenSize_orig)(_this, dispRectWH, isPanScan);
+		reinterpret_cast<decltype(MoviePlayerForUI_AdjustScreenSize_hook)*>(MoviePlayerForUI_AdjustScreenSize_orig)(self, dispRectWH, isPanScan);
 	}
 
 	void* FrameRateController_GetLayerFrameRate_orig = nullptr;
@@ -12698,6 +12704,11 @@ namespace
 			"Gallop",
 			"GraphicSettings", "GetVirtualResolution3D", 1);
 
+		auto GraphicSettings_GetVirtualResolution3D2_addr = il2cpp_symbols::get_method_pointer(
+			"umamusume.dll",
+			"Gallop",
+			"GraphicSettings", "GetVirtualResolution3D", 2);
+
 		auto GraphicSettings_GetVirtualResolution_addr = il2cpp_symbols::get_method_pointer(
 			"umamusume.dll",
 			"Gallop",
@@ -12711,10 +12722,10 @@ namespace
 			"umamusume.dll",
 			"Gallop", "NowLoading", "Hide", 4);
 
-		MoviePlayerBase_get_MovieInfo = il2cpp_symbols::get_method_pointer<Il2CppObject * (*)(Il2CppObject*)>(
+		MoviePlayerBase_get_MovieInfo = il2cpp_symbols::get_method_pointer<CriWare::CriMana::MovieInfo * (*)(Il2CppObject*)>(
 			"Cute.Cri.Assembly.dll", "Cute.Cri", "MoviePlayerBase", "get_MovieInfo", 0);
 
-		MovieManager_GetMovieInfo = il2cpp_symbols::get_method_pointer<Il2CppObject * (*)(Il2CppObject*, Cute::Cri::MoviePlayerHandle)>(
+		MovieManager_GetMovieInfo = il2cpp_symbols::get_method_pointer<CriWare::CriMana::MovieInfo * (*)(Il2CppObject*, Cute::Cri::MoviePlayerHandle)>(
 			"Cute.Cri.Assembly.dll", "Cute.Cri", "MovieManager", "GetMovieInfo", 1);
 
 		auto PartsEpisodeList_SetupStoryExtraEpisodeList_addr = il2cpp_symbols::get_method_pointer(
@@ -13050,6 +13061,7 @@ namespace
 		if (config::resolution_3d_scale != 1.0f || config::freeform_window)
 		{
 			ADD_HOOK(GraphicSettings_GetVirtualResolution3D, "Gallop.GraphicSettings::GetVirtualResolution3D at %p\n");
+			ADD_HOOK(GraphicSettings_GetVirtualResolution3D2, "Gallop.GraphicSettings::GetVirtualResolution3D2 at %p\n");
 			ADD_HOOK(GraphicSettings_GetVirtualResolution, "Gallop.GraphicSettings::GetVirtualResolution at %p\n");
 		}
 
@@ -13590,7 +13602,6 @@ namespace
 				CriWareInitializerList = UnityEngine::Object::FindObjectsByType(
 					GetRuntimeType("CriMw.CriWare.Runtime.dll", "CriWare", "CriWareInitializer"), UnityEngine::FindObjectsInactive::Include, UnityEngine::FindObjectsSortMode::None);
 
-
 				if (CriWareInitializerList && CriWareInitializerList->max_length)
 				{
 					auto obj = CriWareInitializerList->vector[0];
@@ -13630,6 +13641,11 @@ namespace
 				//	// Delay 50ms
 				//	il2cpp_symbols::get_method_pointer<Il2CppObject* (*)(float, Il2CppDelegate*, bool)>("DOTween.dll", "DG.Tweening", "DOVirtual", "DelayedCall", 3)(0.05, delayCallback, true);
 				//}
+
+				if (sceneName == L"_Boot" && Game::CurrentGameStore == Game::Store::Steam)
+				{
+					Gallop::StandaloneWindowResize::IsVirt(!Gallop::Screen::IsLandscapeMode());
+				}
 
 				if (sceneName == L"Title")
 				{

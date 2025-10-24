@@ -25,6 +25,16 @@ namespace UnityEngine
 		static void DontDestroyOnLoad(Il2CppObject* obj);
 		static Il2CppString* Name(Il2CppObject* obj);
 		static void Name(Il2CppObject* obj, Il2CppString* name);
+		static void Destroy(Il2CppObject* obj, float t);
+		static void Destroy(Il2CppObject* obj)
+		{
+			Destroy(obj, 0.0f);
+		}
+		static void DestroyImmediate(Il2CppObject* obj, bool allowDestroyingAssets);
+		static void DestroyImmediate(Il2CppObject* obj)
+		{
+			DestroyImmediate(obj, false);
+		}
 		static bool IsNativeObjectAlive(Il2CppObject* obj);
 
 		Il2CppObject* NativeObject() const noexcept
@@ -34,7 +44,7 @@ namespace UnityEngine
 
 		explicit operator bool() const noexcept
 		{
-			return instance != nullptr;
+			return instance != nullptr && IsNativeObjectAlive(instance);
 		}
 
 		operator Il2CppObject* () const noexcept
@@ -45,6 +55,11 @@ namespace UnityEngine
 		operator Il2CppClass* () const noexcept
 		{
 			return instance->klass;
+		}
+
+		operator void* () const noexcept
+		{
+			return instance;
 		}
 
 		Object(Il2CppObject* instance)

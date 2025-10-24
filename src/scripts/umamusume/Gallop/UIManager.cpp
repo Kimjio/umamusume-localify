@@ -564,12 +564,17 @@ namespace Gallop
 
 	bool UIManager::IsLandscapeMode()
 	{
+		if (get_IsLandscapeMode_addr)
+		{
+			return reinterpret_cast<bool (*)()>(get_IsLandscapeMode_addr)();
+		}
+
 		if (Game::CurrentGameStore == Game::Store::Steam)
 		{
 			return true;
 		}
 
-		return reinterpret_cast<bool (*)()>(get_IsLandscapeMode_addr)();
+		return false;
 	}
 
 #ifdef _MSC_VER

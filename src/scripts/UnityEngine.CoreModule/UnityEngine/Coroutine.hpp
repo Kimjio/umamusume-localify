@@ -10,8 +10,9 @@ namespace UnityEngine
 	public:
 		Coroutine(Il2CppObject* object);
 
-	private:
-		Coroutine() {}
+		void ReleaseCoroutine();
+
+		static void ReleaseCoroutine(void* ptr);
 
 		void* m_Ptr;
 	};

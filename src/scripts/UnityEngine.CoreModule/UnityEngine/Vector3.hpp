@@ -1,4 +1,5 @@
 #pragma once
+#include "Vector2.hpp"
 
 namespace UnityEngine
 {
@@ -11,14 +12,19 @@ namespace UnityEngine
 
 		static Vector3 Slerp(Vector3 a, Vector3 b, float t);
 
-		Vector3 operator*(float d) const noexcept
+		Vector3 operator*(float v) const noexcept
 		{
-			return Vector3(x * d, y * d, z * d);
+			return Vector3(x * v, y * v, z * v);
 		}
 
-		Vector3 operator/(float d) const noexcept
+		Vector3 operator/(float v) const noexcept
 		{
-			return Vector3(x / d, y / d, z / d);
+			return Vector3(x / v, y / v, z / v);
+		}
+
+		operator Vector2() const
+		{
+			return Vector2{ x, y };
 		}
 	};
 }
