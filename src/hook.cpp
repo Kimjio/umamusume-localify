@@ -436,6 +436,7 @@ namespace
 		il2cpp_field_get_value(notification, _LabelField, &_Label);
 
 		il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, int)>(_Label->klass, "set_fontSize", 1)->methodPointer(_Label, size);
+		il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, int)>(_Label->klass, "set_resizeTextMaxSize", 1)->methodPointer(_Label, size);
 	}
 
 	void SetNotificationFontColor(wstring color)
@@ -8448,6 +8449,7 @@ namespace
 				settingsDialog = nullptr;
 
 				SetNotificationBackgroundAlpha(config::character_system_text_caption_background_alpha);
+				SetNotificationFontSize(config::character_system_text_caption_font_size);
 				SetNotificationPosition(config::character_system_text_caption_position_x, config::character_system_text_caption_position_y);
 				SetNotificationFontColor(config::character_system_text_caption_font_color);
 				SetNotificationOutlineSize(config::character_system_text_caption_outline_size);
@@ -8465,6 +8467,10 @@ namespace
 
 				AddOrSet(configDocument, L"characterSystemTextCaption", GetOptionItemOnOffIsOn("character_system_text_caption"));
 
+				AddOrSet(configDocument, L"characterSystemTextCaptionLineCharCount", static_cast<int>(GetOptionSliderValue("character_system_text_caption_line_char_count")));
+
+				AddOrSet(configDocument, L"characterSystemTextCaptionFontSize", static_cast<int>(GetOptionSliderValue("character_system_text_caption_font_size")));
+
 				AddOrSet(configDocument, L"characterSystemTextCaptionPositionX", GetOptionSliderValue("character_system_text_caption_position_x") / 10);
 
 				AddOrSet(configDocument, L"characterSystemTextCaptionPositionY", GetOptionSliderValue("character_system_text_caption_position_y") / 10);
@@ -8481,9 +8487,9 @@ namespace
 
 				AddOrSet(configDocument, L"cySpringUpdateMode", static_cast<int>(GetOptionSliderValue("cyspring_update_mode")));
 
-				AddOrSet(configDocument, L"uiAnimationScale", static_cast<int>(roundf(GetOptionSliderValue("ui_animation_scale") * 100)) / 100.0f);
+				AddOrSet(configDocument, L"uiAnimationScale", static_cast<int>(round(GetOptionSliderValue("ui_animation_scale") * 100)) / 100.0);
 
-				AddOrSet(configDocument, L"resolution3dScale", static_cast<int>(roundf(GetOptionSliderValue("resolution_3d_scale") * 100)) / 100.0f);
+				AddOrSet(configDocument, L"resolution3dScale", static_cast<int>(round(GetOptionSliderValue("resolution_3d_scale") * 100)) / 100.0);
 
 				AddOrSet(configDocument, L"notificationTp", GetOptionItemOnOffIsOn("notification_tp"));
 
@@ -8504,15 +8510,15 @@ namespace
 
 				AddOrSet(configDocument, L"unlockSizeUseSystemResolution", GetOptionItemOnOffIsOn("use_system_resolution"));
 
-				AddOrSet(configDocument, L"uiScale", static_cast<int>(roundf(GetOptionSliderValue("ui_scale") * 100)) / 100.0f);
+				AddOrSet(configDocument, L"uiScale", static_cast<int>(round(GetOptionSliderValue("ui_scale") * 100)) / 100.0);
 
 				AddOrSet(configDocument, L"autoFullscreen", GetOptionItemOnOffIsOn("auto_fullscreen"));
 
 				AddOrSet(configDocument, L"freeFormWindow", GetOptionItemOnOffIsOn("freeform_window"));
 
-				AddOrSet(configDocument, L"freeFormUiScalePortrait", static_cast<int>(roundf(GetOptionSliderValue("ui_scale_portrait") * 100)) / 100.0f);
+				AddOrSet(configDocument, L"freeFormUiScalePortrait", static_cast<int>(round(GetOptionSliderValue("ui_scale_portrait") * 100)) / 100.0);
 
-				AddOrSet(configDocument, L"freeFormUiScaleLandscape", static_cast<int>(roundf(GetOptionSliderValue("ui_scale_landscape") * 100)) / 100.0f);
+				AddOrSet(configDocument, L"freeFormUiScaleLandscape", static_cast<int>(round(GetOptionSliderValue("ui_scale_landscape") * 100)) / 100.0);
 
 				AddOrSet(configDocument, L"taskbarShowProgressOnDownload", GetOptionItemOnOffIsOn("taskbar_show_progress_on_download"));
 
@@ -8521,6 +8527,10 @@ namespace
 				config::graphics_quality = configDocument[L"graphicsQuality"].GetInt();
 
 				config::anti_aliasing = configDocument[L"antiAliasing"].GetInt();
+
+				config::character_system_text_caption_line_char_count = configDocument[L"characterSystemTextCaptionLineCharCount"].GetInt();
+
+				config::character_system_text_caption_font_size = configDocument[L"characterSystemTextCaptionFontSize"].GetInt();
 
 				config::character_system_text_caption_background_alpha = configDocument[L"characterSystemTextCaptionBackgroundAlpha"].GetFloat();
 
@@ -8725,6 +8735,8 @@ namespace
 		bool livePlaybackLoop = false;
 		bool championsLiveShowText = false;
 		int championsLiveYear = 2022;
+		int characterSystemTextCaptionLineCharCount = 0;
+		int characterSystemTextCaptionFontSize = 0;
 		float characterSystemTextCaptionPositionX = 0;
 		float characterSystemTextCaptionPositionY = 0;
 		float characterSystemTextCaptionBackgroundAlpha = 0;
@@ -8782,6 +8794,16 @@ namespace
 			if (configDocument.HasMember(L"championsLiveYear"))
 			{
 				championsLiveYear = configDocument[L"championsLiveYear"].GetInt();
+			}
+
+			if (configDocument.HasMember(L"characterSystemTextCaptionLineCharCount"))
+			{
+				characterSystemTextCaptionLineCharCount = configDocument[L"characterSystemTextCaptionLineCharCount"].GetInt();
+			}
+
+			if (configDocument.HasMember(L"characterSystemTextCaptionFontSize"))
+			{
+				characterSystemTextCaptionFontSize = configDocument[L"characterSystemTextCaptionFontSize"].GetInt();
 			}
 
 			if (configDocument.HasMember(L"characterSystemTextCaptionPositionX"))
@@ -8920,12 +8942,27 @@ namespace
 		Il2CppString* persistentDataPath;
 		il2cpp_field_static_get_value(persistentDataPathField, &persistentDataPath);
 
+		string championsResourceText;
+		int championsLiveResourceIndex = config::config_document[L"championsLiveResourceId"].GetInt() - 1;
+		auto championsResources = MasterDB::GetChampionsResources();
+
+		if (championsResources.size() <= championsLiveResourceIndex)
+		{
+			championsResourceText = wide_u8(LocalifySettings::GetText("unknown"));
+		}
+		else
+		{
+			championsResourceText = championsResources[championsLiveResourceIndex];
+		}
+
 		AddToLayout(m_Content,
 			{
 				GetOptionItemTitle(LocalifySettings::GetText("graphics")),
 				GetOptionItemSimpleWithButton("graphics_quality", (LocalifySettings::GetText("graphics_quality") + L": "s + u8_wide(graphicsQualityOptions[config::config_document[L"graphicsQuality"].GetInt() + 1])).data(),
 					localize_get_hook(GetTextIdByName(L"Circle0206"))->chars),
-				GetOptionSlider("anti_aliasing", LocalifySettings::GetText("anti_aliasing"), antiAliasing, 0, 4, true, *[](Il2CppObject* slider) {
+				GetOptionSlider("anti_aliasing", LocalifySettings::GetText("anti_aliasing"), antiAliasing, 0, 4, true,
+					*[](Il2CppObject* slider)
+					{
 					auto numText = GetOptionSliderNumText(slider);
 					auto value = GetOptionSliderValue(slider);
 
@@ -8947,10 +8984,13 @@ namespace
 						text_set_text(numText, il2cpp_string_new("x8"));
 						break;
 					}
-				}),
+					}
+				),
 				GetOptionSlider("ui_animation_scale", LocalifySettings::GetText("ui_animation_scale"), uiAnimationScale, 0.1, 10.0, false),
 				GetOptionSlider("resolution_3d_scale", LocalifySettings::GetText("resolution_3d_scale"), resolution3dScale, 0.1, 2.0, false),
-				GetOptionSlider("cyspring_update_mode", LocalifySettings::GetText("cyspring_update_mode"), cySpringUpdateMode, -1, 3, true, *[](Il2CppObject* slider) {
+				GetOptionSlider("cyspring_update_mode", LocalifySettings::GetText("cyspring_update_mode"), cySpringUpdateMode, -1, 3, true,
+					*[](Il2CppObject* slider)
+					{
 					auto numText = GetOptionSliderNumText(slider);
 					auto value = GetOptionSliderValue(slider);
 
@@ -8972,7 +9012,8 @@ namespace
 						text_set_text(numText, il2cpp_string_new("SkipFramePostAlways"));
 						break;
 					}
-				}),
+					}
+				),
 				GetOptionItemTitle(LocalifySettings::GetText("screen")),
 				GetOptionItemOnOff("unlock_size", LocalifySettings::GetText("unlock_size")),
 				GetOptionItemAttention(LocalifySettings::GetText("applied_after_restart")),
@@ -8987,15 +9028,39 @@ namespace
 				GetOptionItemOnOff("live_slider_always_show", LocalifySettings::GetText("live_slider_always_show")),
 				GetOptionItemOnOff("live_playback_loop", LocalifySettings::GetText("live_playback_loop")),
 				GetOptionItemOnOff("champions_live_show_text", LocalifySettings::GetText("champions_live_show_text")),
-				GetOptionItemSimpleWithButton("champions_live_resource_id", (LocalifySettings::GetText("champions_live_resource_id") + L": "s + u8_wide(MasterDB::GetChampionsResources()[config::config_document[L"championsLiveResourceId"].GetInt() - 1])).data(),
+				GetOptionItemSimpleWithButton("champions_live_resource_id", (LocalifySettings::GetText("champions_live_resource_id") + L": "s + u8_wide(championsResourceText)).data(),
 					localize_get_hook(GetTextIdByName(L"Circle0206"))->chars),
 				GetOptionItemSimpleWithButton("champions_live_year", (LocalifySettings::GetText("champions_live_year") + L": "s + u8_wide(to_string(championsLiveYear))).data(),
 					localize_get_hook(GetTextIdByName(L"Circle0206"))->chars),
 				GetOptionItemSimple(L""),
 				GetOptionItemTitle(LocalifySettings::GetText("character_system_text_caption")),
 				GetOptionItemOnOff("character_system_text_caption", LocalifySettings::GetText("character_system_text_caption")),
-				GetOptionSlider("character_system_text_caption_position_x", LocalifySettings::GetText("character_system_text_caption_position_x"), characterSystemTextCaptionPositionX * 10, -100, 100, true, *[](Il2CppObject* slider) {
+				GetOptionSlider("character_system_text_caption_line_char_count", LocalifySettings::GetText("character_system_text_caption_line_char_count"), characterSystemTextCaptionLineCharCount, 0, 100, true,
+					*[](Il2CppObject* slider)
+					{
 					auto numText = GetOptionSliderNumText(slider);
+						auto value = static_cast<int>(GetOptionSliderValue(slider));
+
+						text_set_text(numText, il2cpp_string_new(to_string(value).data()));
+					}
+				),
+				GetOptionSlider("character_system_text_caption_font_size", LocalifySettings::GetText("character_system_text_caption_font_size"), characterSystemTextCaptionFontSize, 0, 128, true,
+					*[](Il2CppObject* slider)
+					{
+						auto numText = GetOptionSliderNumText(slider);
+						auto value = static_cast<int>(GetOptionSliderValue(slider));
+
+						text_set_text(numText, il2cpp_string_new(to_string(value).data()));
+
+						SetNotificationFontSize(value);
+						SetNotificationDisplayTime(1);
+						ShowNotification(il2cpp_string_new16(LocalifySettings::GetText("sample_caption")));
+					}
+				),
+				GetOptionSlider("character_system_text_caption_position_x", LocalifySettings::GetText("character_system_text_caption_position_x"), characterSystemTextCaptionPositionX * 10, -100, 100, true,
+					*[](Il2CppObject* slider)
+					{
+						auto numText = GetOptionSliderNumText(slider);
 					auto value = GetOptionSliderValue(slider);
 					value = value / 10;
 
@@ -9004,8 +9069,11 @@ namespace
 					SetNotificationPosition(value, GetOptionSliderValue("character_system_text_caption_position_y") / 10);
 					SetNotificationDisplayTime(1);
 					ShowNotification(il2cpp_string_new16(LocalifySettings::GetText("sample_caption")));
-				}),
-				GetOptionSlider("character_system_text_caption_position_y", LocalifySettings::GetText("character_system_text_caption_position_y"), characterSystemTextCaptionPositionY * 10, -100, 100, true, *[](Il2CppObject* slider) {
+					}
+				),
+				GetOptionSlider("character_system_text_caption_position_y", LocalifySettings::GetText("character_system_text_caption_position_y"), characterSystemTextCaptionPositionY * 10, -100, 100, true,
+					*[](Il2CppObject* slider)
+					{
 					auto numText = GetOptionSliderNumText(slider);
 					auto value = GetOptionSliderValue(slider);
 					value = value / 10;
@@ -9015,8 +9083,11 @@ namespace
 					SetNotificationPosition(GetOptionSliderValue("character_system_text_caption_position_x") / 10, value);
 					SetNotificationDisplayTime(1);
 					ShowNotification(il2cpp_string_new16(LocalifySettings::GetText("sample_caption")));
-				}),
-				GetOptionSlider("character_system_text_caption_background_alpha", LocalifySettings::GetText("character_system_text_caption_background_alpha"), characterSystemTextCaptionBackgroundAlpha * 100, 0, 100, true, *[](Il2CppObject* slider) {
+					}
+				),
+				GetOptionSlider("character_system_text_caption_background_alpha", LocalifySettings::GetText("character_system_text_caption_background_alpha"), characterSystemTextCaptionBackgroundAlpha * 100, 0, 100, true,
+					*[](Il2CppObject* slider)
+					{
 					auto numText = GetOptionSliderNumText(slider);
 					auto value = GetOptionSliderValue(slider);
 					value = value / 100;
@@ -9026,7 +9097,8 @@ namespace
 					SetNotificationBackgroundAlpha(value);
 					SetNotificationDisplayTime(1);
 					ShowNotification(il2cpp_string_new16(LocalifySettings::GetText("sample_caption")));
-				}),
+					}
+				),
 				GetOptionItemSimpleWithButton("character_system_text_caption_font_color", (LocalifySettings::GetText("character_system_text_caption_font_color") + L": "s + config::config_document[L"characterSystemTextCaptionFontColor"].GetString()).data(),
 					localize_get_hook(GetTextIdByName(L"Circle0206"))->chars),
 				GetOptionItemSimpleWithButton("character_system_text_caption_outline_size", (LocalifySettings::GetText("character_system_text_caption_outline_size") + L": "s + config::config_document[L"characterSystemTextCaptionOutlineSize"].GetString()).data(),
@@ -9091,70 +9163,86 @@ namespace
 
 		SetOptionItemOnOffAction("character_system_text_caption", characterSystemTextCaption, *([](Il2CppObject*, bool isOn)
 			{
-			}));
+			})
+		);
 
 		SetOptionItemOnOffAction("live_slider_always_show", liveSliderAlwaysShow, *([](Il2CppObject*, bool isOn)
 			{
-			}));
+			})
+		);
 
 		SetOptionItemOnOffAction("live_playback_loop", livePlaybackLoop, *([](Il2CppObject*, bool isOn)
 			{
-			}));
+			})
+		);
 
 		SetOptionItemOnOffAction("champions_live_show_text", championsLiveShowText, *([](Il2CppObject*, bool isOn)
 			{
-			}));
+			})
+		);
 
 		SetOptionItemOnOffAction("notification_tp", notificationTp, *([](Il2CppObject*, bool isOn)
 			{
-			}));
+			})
+		);
 
 		SetOptionItemOnOffAction("notification_rp", notificationRp, *([](Il2CppObject*, bool isOn)
 			{
-			}));
+			})
+		);
 
 		SetOptionItemOnOffAction("notification_jobs", notificationJobs, *([](Il2CppObject*, bool isOn)
 			{
-			}));
+			})
+		);
 
 		SetOptionItemOnOffAction("dump_msgpack", dumpMsgPack, *([](Il2CppObject*, bool isOn)
 			{
-			}));
+			})
+		);
 
 		SetOptionItemOnOffAction("dump_msgpack_request", dumpMsgPackRequest, *([](Il2CppObject*, bool isOn)
 			{
-			}));
+			})
+		);
 
 		SetOptionItemOnOffAction("use_third_party_news", useThirdPartyNews, *([](Il2CppObject*, bool isOn)
 			{
-			}));
+			})
+		);
 
 		SetOptionItemOnOffAction("unlock_size", unlockSize, *([](Il2CppObject*, bool isOn)
 			{
-			}));
+			})
+		);
 
 		SetOptionItemOnOffAction("use_system_resolution", unlockSizeUseSystemResolution, *([](Il2CppObject*, bool isOn)
 			{
-			}));
+			})
+		);
 
 		SetOptionItemOnOffAction("auto_fullscreen", autoFullscreen, *([](Il2CppObject*, bool isOn)
 			{
-			}));
+			})
+		);
 
 		SetOptionItemOnOffAction("freeform_window", freeFormWindow, *([](Il2CppObject*, bool isOn)
 			{
-			}));
+			})
+		);
 
 		SetOptionItemOnOffAction("unlock_live_chara", unlockLiveChara, *([](Il2CppObject*, bool isOn)
 			{
-			}));
+			})
+		);
 
 		if (Game::CurrentGameRegion == Game::Region::KOR)
 		{
 			SetOptionItemOnOffAction("allow_delete_cookie", allowDeleteCookie, *([](Il2CppObject*, bool isOn)
 				{
 					// TODO
-				}));
+				})
+			);
 		}
 
 		SetOptionItemOnOffAction("on_off", false, *([](Il2CppObject*, bool isOn)
@@ -9164,7 +9252,8 @@ namespace
 				text << "Changed to " << (isOn ? "On" : "Off");
 
 				ShowUINotification(il2cpp_string_new(text.str().data()));
-			}));
+			})
+		);
 
 		SetOptionItemButtonAction("show_caption", *([](Il2CppObject*)
 			{
@@ -9177,7 +9266,8 @@ namespace
 				{
 					ShowUINotification(il2cpp_string_new16(LocalifySettings::GetText("setting_disabled")));
 				}
-			}));
+			})
+		);
 
 		SetOptionItemButtonAction("show_notification", *([](Il2CppObject*)
 			{
@@ -9188,27 +9278,36 @@ namespace
 				auto content = u8_wide(contentU8);
 
 				DesktopNotificationManagerCompat::ShowToastNotification(title.data(), content.data(), MsgPackData::GetIconPath(Gallop::LocalPushDefine::LocalPushType::Tp)->chars);
-			}));
+			})
+		);
 
 		SetOptionItemButtonAction("graphics_quality", *([](Il2CppObject*)
 			{
-				OpenSelectOption(LocalifySettings::GetText("graphics_quality"), GetGraphicsQualityOptions(), config::config_document[L"graphicsQuality"].GetInt() + 1, [](int value) {
+				OpenSelectOption(LocalifySettings::GetText("graphics_quality"), GetGraphicsQualityOptions(), config::config_document[L"graphicsQuality"].GetInt() + 1,
+					[](int value)
+					{
 					AddOrSet(config::config_document, L"graphicsQuality", value - 1);
 
 					auto textCommon = GetOptionItemSimpleWithButtonTextCommon("graphics_quality");
 					SetTextCommonText(textCommon, (LocalifySettings::GetText("graphics_quality") + L": "s + u8_wide(GetGraphicsQualityOptions()[config::config_document[L"graphicsQuality"].GetInt() + 1])).data());
-					});
-			}));
+					}
+				);
+			})
+		);
 
 		SetOptionItemButtonAction("champions_live_resource_id", *([](Il2CppObject*)
 			{
-				OpenSelectOption(LocalifySettings::GetText("champions_live_resource_id"), MasterDB::GetChampionsResources(), config::config_document[L"championsLiveResourceId"].GetInt() - 1, [](int value) {
+				OpenSelectOption(LocalifySettings::GetText("champions_live_resource_id"), MasterDB::GetChampionsResources(), config::config_document[L"championsLiveResourceId"].GetInt() - 1,
+					[](int value)
+					{
 					AddOrSet(config::config_document, L"championsLiveResourceId", value + 1);
 
 					auto textCommon = GetOptionItemSimpleWithButtonTextCommon("champions_live_resource_id");
 					SetTextCommonText(textCommon, (LocalifySettings::GetText("champions_live_resource_id") + L": "s + u8_wide(MasterDB::GetChampionsResources()[config::config_document[L"championsLiveResourceId"].GetInt() - 1])).data());
-					});
-			}));
+					}
+				);
+			})
+		);
 
 		SetOptionItemButtonAction("champions_live_year", *([](Il2CppObject*)
 			{
@@ -9223,13 +9322,17 @@ namespace
 					championsLiveYears.emplace_back(to_string(i));
 				}
 
-				OpenSelectOption(LocalifySettings::GetText("champions_live_year"), championsLiveYears, config::config_document[L"championsLiveYear"].GetInt() - 2022, [](int value) {
+				OpenSelectOption(LocalifySettings::GetText("champions_live_year"), championsLiveYears, config::config_document[L"championsLiveYear"].GetInt() - 2022,
+					[](int value)
+					{
 					AddOrSet(config::config_document, L"championsLiveYear", value + 2022);
 
 					auto textCommon = GetOptionItemSimpleWithButtonTextCommon("champions_live_year");
 					SetTextCommonText(textCommon, (LocalifySettings::GetText("champions_live_year") + L": "s + u8_wide(to_string(config::config_document[L"championsLiveYear"].GetInt()))).data());
-					});
-			}));
+					}
+				);
+			})
+		);
 
 		auto fontColorTextCommon = GetOptionItemSimpleWithButtonTextCommon("character_system_text_caption_font_color");
 		SetTextCommonOutlineColor(fontColorTextCommon, L"Brown");
@@ -9248,7 +9351,9 @@ namespace
 					index = found - options.begin();
 				}
 
-				OpenSelectFontColorOption(LocalifySettings::GetText("character_system_text_caption_font_color"), options, index, [](int value) {
+				OpenSelectFontColorOption(LocalifySettings::GetText("character_system_text_caption_font_color"), options, index,
+					[](int value)
+					{
 					auto options = GetFontColorOptions();
 					wstring color = u8_wide(options[value]);
 					AddOrSetString(config::config_document, L"characterSystemTextCaptionFontColor", color.data());
@@ -9257,8 +9362,10 @@ namespace
 					SetTextCommonText(textCommon, (LocalifySettings::GetText("character_system_text_caption_font_color") + L": "s + config::config_document[L"characterSystemTextCaptionFontColor"].GetString()).data());
 					SetTextCommonFontColor(textCommon, color.data());
 					SetNotificationFontColor(color.data());
-					});
-			}));
+					}
+				);
+			})
+		);
 
 		auto outlineSizeTextCommon = GetOptionItemSimpleWithButtonTextCommon("character_system_text_caption_outline_size");
 		SetTextCommonFontColor(outlineSizeTextCommon, L"White");
@@ -9278,7 +9385,9 @@ namespace
 					index = found - options.begin();
 				}
 
-				OpenSelectOutlineSizeOption(LocalifySettings::GetText("character_system_text_caption_outline_size"), options, index, [](int value) {
+				OpenSelectOutlineSizeOption(LocalifySettings::GetText("character_system_text_caption_outline_size"), options, index,
+					[](int value)
+					{
 					auto options = GetOutlineSizeOptions();
 					wstring color = u8_wide(options[value]);
 					AddOrSetString(config::config_document, L"characterSystemTextCaptionOutlineSize", color.data());
@@ -9287,8 +9396,10 @@ namespace
 					SetTextCommonText(textCommon, (LocalifySettings::GetText("character_system_text_caption_outline_size") + L": "s + config::config_document[L"characterSystemTextCaptionOutlineSize"].GetString()).data());
 					SetTextCommonOutlineSize(textCommon, color.data());
 					SetNotificationOutlineSize(color.data());
-					});
-			}));
+					}
+				);
+			})
+		);
 
 		auto outlineColorTextCommon = GetOptionItemSimpleWithButtonTextCommon("character_system_text_caption_outline_color");
 		SetTextCommonOutlineColor(outlineColorTextCommon,
@@ -9306,7 +9417,9 @@ namespace
 					index = found - options.begin();
 				}
 
-				OpenSelectOutlineColorOption(LocalifySettings::GetText("character_system_text_caption_outline_color"), options, index, [](int value) {
+				OpenSelectOutlineColorOption(LocalifySettings::GetText("character_system_text_caption_outline_color"), options, index,
+					[](int value)
+					{
 					auto options = GetOutlineColorOptions();
 					wstring color = u8_wide(options[value]);
 					AddOrSetString(config::config_document, L"characterSystemTextCaptionOutlineColor", color.data());
@@ -9315,16 +9428,20 @@ namespace
 					SetTextCommonText(textCommon, (LocalifySettings::GetText("character_system_text_caption_outline_color") + L": "s + config::config_document[L"characterSystemTextCaptionOutlineColor"].GetString()).data());
 					SetTextCommonOutlineColor(textCommon, color.data());
 					SetNotificationOutlineColor(color.data());
-					});
-			}));
+					}
+				);
+			})
+		);
 
 		SetOptionItemOnOffAction("taskbar_show_progress_on_download", taskbarShowProgressOnDownload, *([](Il2CppObject*, bool isOn)
 			{
-			}));
+			})
+		);
 
 		SetOptionItemOnOffAction("taskbar_show_progress_on_connecting", taskbarShowProgressOnConnecting, *([](Il2CppObject*, bool isOn)
 			{
-			}));
+			})
+		);
 
 		SetOptionItemButtonAction("toggle_vr", *([](Il2CppObject*)
 			{
@@ -9385,7 +9502,8 @@ namespace
 						Unity::OpenXR::Start();
 					}
 				}
-			}));
+			})
+		);
 
 		SetOptionItemButtonAction("github", *([](Il2CppObject*)
 			{
@@ -9624,13 +9742,26 @@ namespace
 			}
 		}
 
+		string championsResourceText;
+		int championsLiveResourceIndex = config::config_document[L"championsLiveResourceId"].GetInt() - 1;
+		auto championsResources = MasterDB::GetChampionsResources();
+
+		if (championsResources.size() <= championsLiveResourceIndex)
+		{
+			championsResourceText = wide_u8(LocalifySettings::GetText("unknown"));
+		}
+		else
+		{
+			championsResourceText = championsResources[championsLiveResourceIndex];
+		}
+
 		AddToLayout(m_Content,
 			{
 				GetOptionItemTitle(localize_get_hook(GetTextIdByName(L"Common0035"))->chars),
 				GetOptionItemOnOff("live_slider_always_show", LocalifySettings::GetText("live_slider_always_show")),
 				GetOptionItemOnOff("live_playback_loop", LocalifySettings::GetText("live_playback_loop")),
 				GetOptionItemOnOff("champions_live_show_text", LocalifySettings::GetText("champions_live_show_text")),
-				GetOptionItemSimpleWithButton("champions_live_resource_id", (LocalifySettings::GetText("champions_live_resource_id") + L": "s + u8_wide(MasterDB::GetChampionsResources()[config::config_document[L"championsLiveResourceId"].GetInt() - 1])).data(),
+				GetOptionItemSimpleWithButton("champions_live_resource_id", (LocalifySettings::GetText("champions_live_resource_id") + L": "s + u8_wide(championsResourceText)).data(),
 					localize_get_hook(GetTextIdByName(L"Circle0206"))->chars),
 				GetOptionItemSimpleWithButton("champions_live_year", (LocalifySettings::GetText("champions_live_year") + L": "s + u8_wide(to_string(championsLiveYear))).data(),
 					localize_get_hook(GetTextIdByName(L"Circle0206"))->chars),

@@ -105,6 +105,32 @@ namespace LocalifySettings
 			return L"キャラクターのダイアログテキストを\nキャプションで表示";
 		}
 
+		if (id == "character_system_text_caption_line_char_count")
+		{
+			if (isKor)
+			{
+				return L"줄당 글자 수";
+			}
+			if (isEng)
+			{
+				return L"Characters per line";
+			}
+			return L"一行あたりの文字数";
+		}
+
+		if (id == "character_system_text_caption_font_size")
+		{
+			if (isKor)
+			{
+				return L"폰트 크기";
+			}
+			if (isEng)
+			{
+				return L"Font size";
+			}
+			return L"フォントサイズ";
+		}
+
 		if (id == "character_system_text_caption_position_x")
 		{
 			if (isKor)
@@ -667,6 +693,19 @@ namespace LocalifySettings
 				return L"Umamusume";
 			}
 			return L"ウマ娘";
+		}
+
+		if (id == "unknown")
+		{
+			if (isKor)
+			{
+				return L"알수없음";
+			}
+			if (isEng)
+			{
+				return L"Unknown";
+			}
+			return L"不明";
 		}
 
 		return L"";
