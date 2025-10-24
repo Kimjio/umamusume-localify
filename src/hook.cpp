@@ -77,7 +77,9 @@
 #include "scripts/mscorlib/System/Enum.hpp"
 #include "scripts/mscorlib/System/Int32.hpp"
 #include "scripts/mscorlib/System/Nullable.hpp"
+#include "scripts/mscorlib/System/ValueTuple.hpp"
 #include "scripts/mscorlib/System/Collections/Generic/Dictionary.hpp"
+#include "scripts/mscorlib/System/Collections/Generic/List.hpp"
 
 #include "scripts/CriMw.CriWare.Runtime/CriWare/CriAtomEx.hpp"
 #include "scripts/CriMw.CriWare.Runtime/CriWare/CriAtomExPlayback.hpp"
@@ -2045,30 +2047,30 @@ namespace
 			if (!isnan(position.x) && !isnan(position.y))
 			{
 				if (!Gallop::Screen::IsSplitWindow())
-			{
+				{
 					auto m_PositionField = il2cpp_class_get_field_from_name_wrap(touch->klass, "m_Position");
 					position = position * ((float)Gallop::Screen::Width() / (float)UnityEngine::Screen::width());
 
 					il2cpp_field_set_value(touch, m_PositionField, &position);
-			}
+				}
 				auto type = il2cpp_class_get_method_from_name_type<uint64_t(*)(Il2CppObject*)>(touch->klass, "get_type", 0)->methodPointer(touch);
 				if (type != 1 /* TouchType.Indirect */)
-		{
+				{
 					bool pressed;
 					bool released;
 					auto touchPointerEventData = il2cpp_class_get_method_from_name_type<Il2CppObject * (*)(Il2CppObject*, Il2CppObject*, bool*, bool*)>(self->klass, "GetTouchPointerEventData", 3)->methodPointer(self, touch, &pressed, &released);
 					il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, Il2CppObject*, bool, bool)>(self->klass, "ProcessTouchPress", 3)->methodPointer(self, touchPointerEventData, pressed, released);
 					if (!released)
-			{
+					{
 						il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, Il2CppObject*)>(self->klass, "ProcessMove", 1)->methodPointer(self, touchPointerEventData);
 						il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, Il2CppObject*)>(self->klass, "ProcessDrag", 1)->methodPointer(self, touchPointerEventData);
-			}
-			else
-			{
+					}
+					else
+					{
 						il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, Il2CppObject*)>(self->klass, "RemovePointerData", 1)->methodPointer(self, touchPointerEventData);
+					}
+				}
 			}
-		}
-		}
 		}
 		isTouchReact = false;
 		il2cpp_field_static_set_value(isTouchReactField, &isTouchReact);
@@ -2637,19 +2639,19 @@ namespace
 											{
 												auto array1 = getComponents(parentGameObject, reinterpret_cast<Il2CppType*>(GetRuntimeType(klass)), true, true, false, false, nullptr);
 
-											if (array1)
-											{
-												if (array1->max_length > 0)
+												if (array1)
 												{
-													auto fullPlayer = il2cpp_object_new(il2cpp_symbols::get_class("umamusume.dll", "Gallop", "StoryFullMoviePlayer"));
-													auto _handleField = il2cpp_class_get_field_from_name_wrap(fullPlayer->klass, "_handle");
-													il2cpp_field_set_value(fullPlayer, _handleField, &entry.key);
+													if (array1->max_length > 0)
+													{
+														auto fullPlayer = il2cpp_object_new(il2cpp_symbols::get_class("umamusume.dll", "Gallop", "StoryFullMoviePlayer"));
+														auto _handleField = il2cpp_class_get_field_from_name_wrap(fullPlayer->klass, "_handle");
+														il2cpp_field_set_value(fullPlayer, _handleField, &entry.key);
 
-													il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, int)>(fullPlayer->klass, "AdjustMovieSize", 1)->methodPointer(fullPlayer, Gallop::StandaloneWindowResize::IsVirt() ? 0 : 1);
+														il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, int)>(fullPlayer->klass, "AdjustMovieSize", 1)->methodPointer(fullPlayer, Gallop::StandaloneWindowResize::IsVirt() ? 0 : 1);
 
-													return;
+														return;
+													}
 												}
-											}
 											}
 
 											auto array2 = getComponents(parentGameObject, reinterpret_cast<Il2CppType*>(GetRuntimeType(
@@ -3191,7 +3193,7 @@ namespace
 
 									if (_uiToFrameBufferRenderCameraData)
 									{
-									il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, Il2CppObject*)>(_uiToFrameBufferRenderCameraData->klass, "set_ScreenTexture", 1)->methodPointer(_uiToFrameBufferRenderCameraData, renderTexture);
+										il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, Il2CppObject*)>(_uiToFrameBufferRenderCameraData->klass, "set_ScreenTexture", 1)->methodPointer(_uiToFrameBufferRenderCameraData, renderTexture);
 									}
 
 									Il2CppObject* _uiCommandBuffer = uiManager._uiCommandBuffer();
@@ -3802,18 +3804,18 @@ namespace
 
 		auto dialogData = Gallop::DialogCommon::Data();
 		dialogData.SetSimpleTwoButtonMessage(
-					localizeextension_text_hook(GetTextIdByName(L"Title0040")),
-					localizeextension_text_hook(GetTextIdByName(L"Title0041")),
-					CreateDelegateStatic(*[]()
-						{
-							isExitOpened = false;
-							UnityEngine::Application::Exit(0);
-						}),
-					GetTextIdByName(L"Common0004"),
-					GetTextIdByName(L"Common0003"),
-					CreateDelegateStatic(*[]()
-						{
-							isExitOpened = false;
+			localizeextension_text_hook(GetTextIdByName(L"Title0040")),
+			localizeextension_text_hook(GetTextIdByName(L"Title0041")),
+			CreateDelegateStatic(*[]()
+				{
+					isExitOpened = false;
+					UnityEngine::Application::Exit(0);
+				}),
+			GetTextIdByName(L"Common0004"),
+			GetTextIdByName(L"Common0003"),
+			CreateDelegateStatic(*[]()
+				{
+					isExitOpened = false;
 				})
 		);
 
@@ -5052,38 +5054,38 @@ namespace
 
 					auto dialogData = Gallop::DialogCommon::Data();
 					dialogData.SetSimpleTwoButtonMessage(
-								localizeextension_text_hook(GetTextIdByName(L"Title0002")),
-								localizeextension_text_hook(GetTextIdByName(L"Title0023")),
-								CreateDelegateStatic(*[]()
-									{
-										wstringstream subKeyStream;
+						localizeextension_text_hook(GetTextIdByName(L"Title0002")),
+						localizeextension_text_hook(GetTextIdByName(L"Title0023")),
+						CreateDelegateStatic(*[]()
+							{
+								wstringstream subKeyStream;
 
-										subKeyStream << L"Software";
-										subKeyStream << L"\\" << UnityEngine::Application::companyName()->chars;
-										subKeyStream << L"\\" << UnityEngine::Application::productName()->chars;
+								subKeyStream << L"Software";
+								subKeyStream << L"\\" << UnityEngine::Application::companyName()->chars;
+								subKeyStream << L"\\" << UnityEngine::Application::productName()->chars;
 
-										DWORD data = 1;
-										HKEY hKey;
-										RegCreateKeyExW(HKEY_CURRENT_USER, subKeyStream.str().data(), 0, nullptr, 0, KEY_WRITE, 0, &hKey, nullptr);
-										RegSetValueExW(hKey, L"AgreeOwnYourRisk", 0, REG_DWORD, reinterpret_cast<const BYTE*>(&data), sizeof(data));
-										RegCloseKey(hKey);
+								DWORD data = 1;
+								HKEY hKey;
+								RegCreateKeyExW(HKEY_CURRENT_USER, subKeyStream.str().data(), 0, nullptr, 0, KEY_WRITE, 0, &hKey, nullptr);
+								RegSetValueExW(hKey, L"AgreeOwnYourRisk", 0, REG_DWORD, reinterpret_cast<const BYTE*>(&data), sizeof(data));
+								RegCloseKey(hKey);
 
 								auto dialogData = Gallop::DialogCommon::Data();
 								dialogData.SetSimpleOneButtonMessage(GetTextIdByName(L"AccoutDataLink0061"), localize_get_hook(GetTextIdByName(L"Outgame0309")), nullptr, GetTextIdByName(L"Common0185"));
 
-										auto onDestroy = CreateDelegateStatic(*[]()
-											{
-												UnityEngine::Application::Exit(0);
-											});
+								auto onDestroy = CreateDelegateStatic(*[]()
+									{
+										UnityEngine::Application::Exit(0);
+									});
 
 								dialogData.AddDestroyCallback(onDestroy);
 								Gallop::DialogManager::PushDialog(dialogData);
-									}),
-								GetTextIdByName(L"Common0309"),
-								GetTextIdByName(L"Common0150"),
-								CreateDelegateStatic(*[]()
-									{
-										isKonamiOpened = false;
+							}),
+						GetTextIdByName(L"Common0309"),
+						GetTextIdByName(L"Common0150"),
+						CreateDelegateStatic(*[]()
+							{
+								isKonamiOpened = false;
 							})
 					);
 
@@ -5104,6 +5106,629 @@ namespace
 		}
 
 		return false;
+	}
+
+	static int SetListMusicId = 0;
+
+	// Short: 0
+	// Game: 1
+	static int musicType = 0;
+
+	void StartCoroutinePlaySetList(Il2CppObject* dialogJukeboxRequestSong, Il2CppObject* JukeboxBgmSelector, Il2CppObject* itemInfoList)
+	{
+		auto ValueTuple3Class = GetGenericClass(GetRuntimeType("mscorlib.dll", "System", "ValueTuple`3"), GetRuntimeType("mscorlib.dll", "System", "Object"), GetRuntimeType("mscorlib.dll", "System", "Object"), GetRuntimeType("mscorlib.dll", "System", "Object"));
+		System::ValueTuple3<Il2CppObject*, Il2CppObject*, Il2CppObject*> tuple = { dialogJukeboxRequestSong, JukeboxBgmSelector, itemInfoList };
+
+		auto boxedTuple = il2cpp_value_box(ValueTuple3Class, &tuple);
+		auto WaitWhile = il2cpp_object_new(il2cpp_symbols::get_class("UnityEngine.CoreModule.dll", "UnityEngine", "WaitWhile"));
+		il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, Il2CppDelegate*)>(WaitWhile->klass, ".ctor", 1)->methodPointer(WaitWhile,
+			CreateDelegate(
+				boxedTuple,
+				*[](Il2CppObject* self)
+				{
+					auto tuple = *il2cpp_object_unbox_type<System::ValueTuple3<Il2CppObject*, Il2CppObject*, Il2CppObject*>*>(self);
+					auto dialogJukeboxRequestSong = tuple.Item1;
+					auto JukeboxBgmSelector = tuple.Item2;
+					auto itemInfoList = tuple.Item3;
+
+					auto AudioManager = GetSingletonInstance(il2cpp_symbols::get_class("umamusume.dll", "Gallop", "AudioManager"));
+					auto bgmPlayback = il2cpp_class_get_method_from_name_type<Cute::Cri::AudioPlayback(*)(Il2CppObject*)>(AudioManager->klass, "get_BgmPlayback", 0)->methodPointer(AudioManager);
+
+					auto req = il2cpp_class_get_method_from_name_type<Il2CppObject * (*)(Il2CppObject*)>(JukeboxBgmSelector->klass, "GetCurrentSetListRequestData", 0)->methodPointer(JukeboxBgmSelector);
+
+					if (!req)
+					{
+						return false;
+					}
+
+					auto CueName = bgmPlayback.cueName;
+					if (!il2cpp_class_get_method_from_name_type<bool (*)(Il2CppObject*, Il2CppString*)>(JukeboxBgmSelector->klass, "IsCueNameInSetList", 1)->methodPointer(JukeboxBgmSelector, CueName))
+					{
+						return false;
+					}
+
+					auto tempData = GetSingletonInstance(il2cpp_symbols::get_class("umamusume.dll", "Gallop", "TempData"));
+					auto get_JukeboxSetListPlayingInfo = il2cpp_class_get_method_from_name_type<Il2CppObject * (*)(Il2CppObject*)>(tempData->klass, "get_JukeboxSetListPlayingInfo", 0);
+					if (get_JukeboxSetListPlayingInfo)
+					{
+						auto JukeboxSetListPlayingInfo = get_JukeboxSetListPlayingInfo->methodPointer(tempData);
+
+						auto MusicData = il2cpp_class_get_method_from_name_type<Il2CppObject * (*)(Il2CppObject*)>(JukeboxSetListPlayingInfo->klass, "GetMasterSetListMusicData", 0)->methodPointer(JukeboxSetListPlayingInfo);
+						auto PlayLengthField = il2cpp_class_get_field_from_name(MusicData->klass, "PlayLength");
+						int PlayLength;
+						il2cpp_field_get_value(MusicData, PlayLengthField, &PlayLength);
+
+						auto bgmTime = il2cpp_symbols::get_method_pointer<long (*)(uint32_t)>("CriMw.CriWare.Runtime.dll", "CriWare", "CriAtomExPlayback", "criAtomExPlayback_GetTime", 1)(bgmPlayback.criAtomExPlayback.id);
+
+						auto nextMusicId = il2cpp_class_get_method_from_name_type<int (*)(Il2CppObject*)>(JukeboxSetListPlayingInfo->klass, "GetNextMusicId", 0)->methodPointer(JukeboxSetListPlayingInfo);
+						if (PlayLength <= bgmTime && SetListMusicId != nextMusicId)
+						{
+							SetListMusicId = nextMusicId;
+
+							auto callback = &CreateDelegateWithClass(il2cpp_symbols::get_class("DOTween.dll", "DG.Tweening", "TweenCallback"),
+								self,
+								*[](Il2CppObject* self)
+								{
+									auto tuple = *il2cpp_object_unbox_type<System::ValueTuple3<Il2CppObject*, Il2CppObject*, Il2CppObject*>*>(self);
+									auto dialogJukeboxRequestSong = tuple.Item1;
+									auto itemInfoList = tuple.Item3;
+
+									auto _songListField = il2cpp_class_get_field_from_name(dialogJukeboxRequestSong->klass, "_songList");
+									Il2CppObject* _songList;
+									il2cpp_field_get_value(dialogJukeboxRequestSong, _songListField, &_songList);
+									il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*)>(_songList->klass, "HideSelectUi", 0)->methodPointer(_songList);
+
+									auto _loopScrollField = il2cpp_class_get_field_from_name(_songList->klass, "_loopScroll");
+									Il2CppObject* _loopScroll;
+									il2cpp_field_get_value(_songList, _loopScrollField, &_loopScroll);
+
+									auto ItemList = il2cpp_class_get_method_from_name_type<Il2CppObject * (*)(Il2CppObject*)>(_loopScroll->klass, "get_ItemList", 0)->methodPointer(_loopScroll);
+
+									auto loopItemsField = il2cpp_class_get_field_from_name(ItemList->klass, "_items");
+									Il2CppArraySize_t<Il2CppObject*>* loopItemArray;
+									il2cpp_field_get_value(ItemList, loopItemsField, &loopItemArray);
+
+									if (loopItemArray)
+									{
+										for (int i = 0; i < loopItemArray->max_length; i++)
+										{
+											auto item = loopItemArray->vector[i];
+											if (item)
+											{
+												auto _infoListField = il2cpp_class_get_field_from_name(item->klass, "_infoList");
+												Il2CppObject* _infoList;
+												il2cpp_field_get_value(item, _infoListField, &_infoList);
+
+												if (_infoList)
+												{
+													auto itemsField = il2cpp_class_get_field_from_name(_infoList->klass, "_items");
+													Il2CppArraySize_t<Il2CppObject*>* itemArray;
+													il2cpp_field_get_value(_infoList, itemsField, &itemArray);
+
+													if (itemArray)
+													{
+														for (int j = 0; j < itemArray->max_length; j++)
+														{
+															auto info = itemArray->vector[j];
+															if (info)
+															{
+																auto Id = il2cpp_class_get_method_from_name_type<int (*)(Il2CppObject*)>(info->klass, "get_Id", 0)->methodPointer(info);
+
+																if (Id == SetListMusicId)
+																{
+																	il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, int)>(item->klass, "OnClickItem", 1)->methodPointer(item, j);
+																}
+															}
+														}
+													}
+												}
+											}
+										}
+									}
+
+									auto itemsField = il2cpp_class_get_field_from_name(itemInfoList->klass, "_items");
+									Il2CppArraySize_t<Il2CppObject*>* itemArray;
+									il2cpp_field_get_value(itemInfoList, itemsField, &itemArray);
+
+									if (itemArray)
+									{
+										for (int i = 0; i < itemArray->max_length; i++)
+										{
+											auto info = itemArray->vector[i];
+											if (info)
+											{
+												auto Id = il2cpp_class_get_method_from_name_type<int (*)(Il2CppObject*)>(info->klass, "get_Id", 0)->methodPointer(info);
+												auto IsSelect = Id == SetListMusicId;
+												il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, bool)>(info->klass, "set_IsSelect", 1)->methodPointer(info, IsSelect);
+
+												if (IsSelect)
+												{
+													il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, Il2CppObject*)>(_songList->klass, "set_SelectedInfo", 1)->methodPointer(_songList, info);
+												}
+											}
+										}
+									}
+
+									il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, int)>(dialogJukeboxRequestSong->klass, "SetupMusicInfo", 1)->methodPointer(dialogJukeboxRequestSong, SetListMusicId);
+									il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, int)>(dialogJukeboxRequestSong->klass, "SelectBgm", 1)->methodPointer(dialogJukeboxRequestSong, SetListMusicId);
+								}
+							)->delegate;
+
+							il2cpp_symbols::get_method_pointer<Il2CppObject* (*)(float, Il2CppDelegate*, bool)>("DOTween.dll", "DG.Tweening", "DOVirtual", "DelayedCall", 3)(3, callback, true);
+						}
+
+						auto IsPlayingField = il2cpp_class_get_field_from_name_wrap(JukeboxSetListPlayingInfo->klass, "IsPlaying");
+						bool IsPlaying = false;
+						il2cpp_field_get_value(JukeboxSetListPlayingInfo, IsPlayingField, &IsPlaying);
+
+						return IsPlaying;
+					}
+					return false;
+				}
+			)
+		);
+
+		UnityEngine::MonoBehaviour(dialogJukeboxRequestSong).StartCoroutineManaged2(WaitWhile);
+	}
+
+	void OpenMusicBoxSetList(Il2CppObject* dialogJukeboxRequestSong, Il2CppObject* JukeboxBgmSelector, Il2CppObject* itemInfoList)
+	{
+		System::Nullable<int> setListId = {};
+		auto tempData = GetSingletonInstance(il2cpp_symbols::get_class("umamusume.dll", "Gallop", "TempData"));
+		auto JukeboxSetListPlayingInfo = il2cpp_class_get_method_from_name_type<Il2CppObject * (*)(Il2CppObject*)>(tempData->klass, "get_JukeboxSetListPlayingInfo", 0)->methodPointer(tempData);
+
+		auto IsPlayingField = il2cpp_class_get_field_from_name_wrap(JukeboxSetListPlayingInfo->klass, "IsPlaying");
+		bool IsPlaying = false;
+		il2cpp_field_get_value(JukeboxSetListPlayingInfo, IsPlayingField, &IsPlaying);
+
+		il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, bool)>(dialogJukeboxRequestSong->klass, "SetupTrialListeningButton", 1)->methodPointer(dialogJukeboxRequestSong, IsPlaying);
+
+		if (IsPlaying)
+		{
+			auto SetListIdField = il2cpp_class_get_field_from_name_wrap(JukeboxSetListPlayingInfo->klass, "SetListId");
+			int SetListId = 0;
+			il2cpp_field_get_value(JukeboxSetListPlayingInfo, SetListIdField, &SetListId);
+			setListId.Value(SetListId);
+		}
+
+		auto ValueTuple3Class = GetGenericClass(GetRuntimeType("mscorlib.dll", "System", "ValueTuple`3"), GetRuntimeType("mscorlib.dll", "System", "Object"), GetRuntimeType("mscorlib.dll", "System", "Object"), GetRuntimeType("mscorlib.dll", "System", "Object"));
+		System::ValueTuple3<Il2CppObject*, Il2CppObject*, Il2CppObject*> tuple = { dialogJukeboxRequestSong, JukeboxBgmSelector, itemInfoList };
+
+		auto boxedTuple = il2cpp_value_box(ValueTuple3Class, &tuple);
+
+		auto DialogJukeboxSetListModel = il2cpp_object_new(
+			il2cpp_symbols::get_class("umamusume.dll", "Gallop", "DialogJukeboxSetListModel"));
+		il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, Il2CppDelegate*, System::Nullable<int>)>(DialogJukeboxSetListModel->klass, ".ctor", 2)->methodPointer(DialogJukeboxSetListModel,
+			CreateDelegate(boxedTuple,
+				*[](Il2CppObject* self, int setListId, int setListIndex, bool isRepeat)
+				{
+					auto tuple = *il2cpp_object_unbox_type<System::ValueTuple3<Il2CppObject*, Il2CppObject*, Il2CppObject*>*>(self);
+					auto dialogJukeboxRequestSong = tuple.Item1;
+					auto JukeboxBgmSelector = tuple.Item2;
+					il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, int, int, bool, Il2CppDelegate*)>(JukeboxBgmSelector->klass, "RequestSetList", 4)->methodPointer(JukeboxBgmSelector, setListId, setListIndex, isRepeat,
+						CreateDelegate(self, *[](Il2CppObject* self)
+							{
+								auto tuple = *il2cpp_object_unbox_type<System::ValueTuple3<Il2CppObject*, Il2CppObject*, Il2CppObject*>*>(self);
+								auto dialogJukeboxRequestSong = tuple.Item1;
+								auto JukeboxBgmSelector = tuple.Item2;
+								auto itemInfoList = tuple.Item3;
+
+								StartCoroutinePlaySetList(dialogJukeboxRequestSong, JukeboxBgmSelector, itemInfoList);
+
+								auto tempData = GetSingletonInstance(il2cpp_symbols::get_class("umamusume.dll", "Gallop", "TempData"));
+								auto JukeboxSetListPlayingInfo = il2cpp_class_get_method_from_name_type<Il2CppObject * (*)(Il2CppObject*)>(tempData->klass, "get_JukeboxSetListPlayingInfo", 0)->methodPointer(tempData);
+
+								SetListMusicId = il2cpp_class_get_method_from_name_type<int (*)(Il2CppObject*)>(JukeboxSetListPlayingInfo->klass, "GetMusicId", 0)->methodPointer(JukeboxSetListPlayingInfo);
+
+								auto _songListField = il2cpp_class_get_field_from_name(dialogJukeboxRequestSong->klass, "_songList");
+								Il2CppObject* _songList;
+								il2cpp_field_get_value(dialogJukeboxRequestSong, _songListField, &_songList);
+								il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*)>(_songList->klass, "HideSelectUi", 0)->methodPointer(_songList);
+
+								auto _loopScrollField = il2cpp_class_get_field_from_name(_songList->klass, "_loopScroll");
+								Il2CppObject* _loopScroll;
+								il2cpp_field_get_value(_songList, _loopScrollField, &_loopScroll);
+
+								auto ItemList = il2cpp_class_get_method_from_name_type<Il2CppObject * (*)(Il2CppObject*)>(_loopScroll->klass, "get_ItemList", 0)->methodPointer(_loopScroll);
+
+								auto loopItemsField = il2cpp_class_get_field_from_name(ItemList->klass, "_items");
+								Il2CppArraySize_t<Il2CppObject*>* loopItemArray;
+								il2cpp_field_get_value(ItemList, loopItemsField, &loopItemArray);
+
+								if (loopItemArray)
+								{
+									for (int i = 0; i < loopItemArray->max_length; i++)
+									{
+										auto item = loopItemArray->vector[i];
+										if (item)
+										{
+											auto _infoListField = il2cpp_class_get_field_from_name(item->klass, "_infoList");
+											Il2CppObject* _infoList;
+											il2cpp_field_get_value(item, _infoListField, &_infoList);
+
+											if (_infoList)
+											{
+												auto itemsField = il2cpp_class_get_field_from_name(_infoList->klass, "_items");
+												Il2CppArraySize_t<Il2CppObject*>* itemArray;
+												il2cpp_field_get_value(_infoList, itemsField, &itemArray);
+
+												if (itemArray)
+												{
+													for (int j = 0; j < itemArray->max_length; j++)
+													{
+														auto info = itemArray->vector[j];
+														if (info)
+														{
+															auto Id = il2cpp_class_get_method_from_name_type<int (*)(Il2CppObject*)>(info->klass, "get_Id", 0)->methodPointer(info);
+
+															if (Id == SetListMusicId)
+															{
+																il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, int)>(item->klass, "OnClickItem", 1)->methodPointer(item, j);
+															}
+														}
+													}
+												}
+											}
+										}
+									}
+								}
+
+								il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, int)>(dialogJukeboxRequestSong->klass, "SetupMusicInfo", 1)->methodPointer(dialogJukeboxRequestSong, SetListMusicId);
+								il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, int)>(dialogJukeboxRequestSong->klass, "SelectBgm", 1)->methodPointer(dialogJukeboxRequestSong, SetListMusicId);
+								il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, bool)>(dialogJukeboxRequestSong->klass, "SetupTrialListeningButton", 1)->methodPointer(dialogJukeboxRequestSong, true);
+
+								auto _isEnableTrialListeningField = il2cpp_class_get_field_from_name(dialogJukeboxRequestSong->klass, "_isEnableTrialListening");
+								bool _isEnableTrialListening = true;
+								il2cpp_field_set_value(dialogJukeboxRequestSong, _isEnableTrialListeningField, &_isEnableTrialListening);
+
+								Gallop::DialogCommon(GetFrontDialog()).Close();
+								Gallop::DialogCommon(GetFrontDialog()).Close();
+
+								auto itemsField = il2cpp_class_get_field_from_name(itemInfoList->klass, "_items");
+								Il2CppArraySize_t<Il2CppObject*>* itemArray;
+								il2cpp_field_get_value(itemInfoList, itemsField, &itemArray);
+
+								if (itemArray)
+								{
+									for (int i = 0; i < itemArray->max_length; i++)
+									{
+										auto info = itemArray->vector[i];
+										if (info)
+										{
+											auto Id = il2cpp_class_get_method_from_name_type<int (*)(Il2CppObject*)>(info->klass, "get_Id", 0)->methodPointer(info);
+											auto IsSelect = Id == SetListMusicId;
+											il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, bool)>(info->klass, "set_IsSelect", 1)->methodPointer(info, IsSelect);
+
+											if (IsSelect)
+											{
+												il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, Il2CppObject*)>(_songList->klass, "set_SelectedInfo", 1)->methodPointer(_songList, info);
+											}
+										}
+									}
+								}
+							}
+						));
+				}
+			), setListId);
+
+		il2cpp_symbols::get_method_pointer<void (*)(Il2CppObject*, bool)>("umamusume.dll", "Gallop", "DialogJukeboxSetList", "Open", 2)(DialogJukeboxSetListModel, false);
+	}
+
+	static GameObject* jukeboxObject;
+	void OpenMusicBox()
+	{
+		if (!Gallop::Screen::IsLandscapeMode())
+		{
+			return;
+		}
+
+		auto JukeboxHomeTopUIClass = GetRuntimeType("umamusume.dll", "Gallop", "JukeboxHomeTopUI");
+
+		if (!jukeboxObject)
+		{
+			jukeboxObject = new GameObject();
+			UnityEngine::Object::DontDestroyOnLoad(*jukeboxObject);
+		}
+
+		auto jukeboxUi = jukeboxObject->GetComponent(JukeboxHomeTopUIClass);
+
+		if (!jukeboxUi)
+		{
+			jukeboxUi = jukeboxObject->AddComponent(JukeboxHomeTopUIClass);
+
+			auto _isLandscapeUIField = il2cpp_class_get_field_from_name(jukeboxUi->klass, "_isLandscapeUI");
+
+			if (!_isLandscapeUIField)
+			{
+				_isLandscapeUIField = il2cpp_class_get_field_from_name(jukeboxUi->klass, "IsSteamUI");
+				if (!_isLandscapeUIField)
+				{
+					return;
+				}
+			}
+
+			bool _isLandscapeUI = true;
+			il2cpp_field_set_value(jukeboxUi, _isLandscapeUIField, &_isLandscapeUI);
+
+			il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*)>(jukeboxUi->klass, "InitializeJukeboxBgmSelector", 0)->methodPointer(jukeboxUi);
+
+			auto JukeboxBgmSelector = il2cpp_class_get_method_from_name_type<Il2CppObject * (*)(Il2CppObject*)>(jukeboxUi->klass, "get_JukeboxBgmSelector", 0)->methodPointer(jukeboxUi);
+
+			if (JukeboxBgmSelector)
+			{
+				auto IsLandscapeUIField = il2cpp_class_get_field_from_name(JukeboxBgmSelector->klass, "IsLandscapeUI");
+
+				if (!IsLandscapeUIField)
+				{
+					IsLandscapeUIField = il2cpp_class_get_field_from_name(JukeboxBgmSelector->klass, "IsSteamUI");
+					if (!IsLandscapeUIField)
+					{
+						return;
+					}
+				}
+
+				bool IsLandscapeUI = true;
+				il2cpp_field_set_value(JukeboxBgmSelector, IsLandscapeUIField, &IsLandscapeUI);
+			}
+		}
+
+		try
+		{
+			auto JukeboxBgmSelector = il2cpp_class_get_method_from_name_type<Il2CppObject * (*)(Il2CppObject*)>(jukeboxUi->klass, "get_JukeboxBgmSelector", 0)->methodPointer(jukeboxUi);
+			if (JukeboxBgmSelector)
+			{
+				auto serverTimeStamp = il2cpp_symbols::get_method_pointer<int64_t(*)()>("umamusume.dll", "Gallop", "TimeUtil", "GetServerTimeStamp", 0)();
+				il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, int64_t)>(JukeboxBgmSelector->klass, "InitializeBgmList", 1)->methodPointer(JukeboxBgmSelector, serverTimeStamp);
+				auto JukeboxBgmDic = il2cpp_class_get_method_from_name_type<Il2CppObject * (*)(Il2CppObject*)>(JukeboxBgmSelector->klass, "get_JukeboxBgmDic", 0)->methodPointer(JukeboxBgmSelector);
+				auto get_Keys = il2cpp_class_get_method_from_name_type<Il2CppObject * (*)(Il2CppObject*, const MethodInfo*)>(JukeboxBgmDic->klass, "get_Keys", 0);
+				auto Keys = get_Keys->methodPointer(JukeboxBgmDic, reinterpret_cast<const MethodInfo*>(get_Keys));
+				auto get_Count = il2cpp_class_get_method_from_name_type<int (*)(Il2CppObject*, const MethodInfo*)>(Keys->klass, "get_Count", 0);
+				auto bgmList = il2cpp_object_new(GetGenericClass(GetRuntimeType("mscorlib.dll", "System.Collections.Generic", "List`1"), GetRuntimeType(il2cpp_defaults.int32_class)));
+				void* iter = nullptr;
+				while (const MethodInfo* method = il2cpp_class_get_methods(bgmList->klass, &iter))
+				{
+					if (Game::CurrentUnityVersion == Game::UnityVersion::Unity22)
+					{
+						if (method->parameters_count && method->name == ".ctor"s && method->parameters[0]->type == Il2CppTypeEnum::IL2CPP_TYPE_GENERICINST)
+						{
+							reinterpret_cast<void (*)(Il2CppObject*, Il2CppObject*, const MethodInfo*)>(method->methodPointer)(bgmList, Keys, method);
+							break;
+						}
+					}
+					else
+					{
+						auto method2020 = reinterpret_cast<const MethodInfo2020*>(method);
+						if (method2020->parameters_count && method2020->name == ".ctor"s && method2020->parameters[0].parameter_type->type == Il2CppTypeEnum::IL2CPP_TYPE_GENERICINST)
+						{
+							reinterpret_cast<void (*)(Il2CppObject*, Il2CppObject*, const MethodInfo2020*)>(method2020->methodPointer)(bgmList, Keys, method2020);
+							break;
+						}
+					}
+				}
+
+				auto LoadAndInstantiatePrefab = il2cpp_symbols::get_method("umamusume.dll", "Gallop", "DialogInnerBase", "LoadAndInstantiatePrefab", 1);
+				auto LoadAndInstantiatePrefabGeneric = GetGenericMethod(LoadAndInstantiatePrefab, GetRuntimeType("umamusume.dll", "Gallop", "DialogJukeboxRequestSong"));
+				auto dialogJukeboxRequestSong = reinterpret_cast<Il2CppObject * (*)(Il2CppString*, const MethodInfo*)>(LoadAndInstantiatePrefabGeneric->methodPointer)(il2cpp_string_new("UI/Parts/Home/Jukebox/DialogJukeboxRequestSong"), LoadAndInstantiatePrefabGeneric);
+
+				Gallop::DialogCommon::Data data = il2cpp_class_get_method_from_name_type<Il2CppObject * (*)(Il2CppObject*)>(dialogJukeboxRequestSong->klass, "CreateDialogData", 0)->methodPointer(dialogJukeboxRequestSong);
+				data.Title(localizeextension_text_hook(GetTextIdByName(L"Outgame424008")));
+				auto dialogHash = data.DialogHash();
+
+				auto _isSplitWindowField = il2cpp_class_get_field_from_name(dialogJukeboxRequestSong->klass, "_isSplitWindow");
+				bool _isSplitWindow = true;
+				il2cpp_field_set_value(dialogJukeboxRequestSong, _isSplitWindowField, &_isSplitWindow);
+
+				data.RightButtonText(localizeextension_text_hook(GetTextIdByName(L"Home400101")));
+
+				auto _dialogDataField = il2cpp_class_get_field_from_name(dialogJukeboxRequestSong->klass, "_dialogData");
+				il2cpp_field_set_value(dialogJukeboxRequestSong, _dialogDataField, data);
+
+				auto ValueTuple2Class = GetGenericClass(GetRuntimeType("mscorlib.dll", "System", "ValueTuple`2"), GetRuntimeType("mscorlib.dll", "System", "Object"), GetRuntimeType("mscorlib.dll", "System", "Object"));
+				System::ValueTuple<Il2CppObject*, Il2CppObject*> tuple2 = { dialogJukeboxRequestSong, JukeboxBgmSelector };
+
+				auto boxed2 = il2cpp_value_box(ValueTuple2Class, &tuple2);
+
+				auto _startTrialListening = CreateDelegate(
+					boxed2,
+					*[](Il2CppObject* self, int musicId, bool isTrialListening, Il2CppDelegate* onComplete)
+					{
+						if (isTrialListening)
+						{
+							return;
+						}
+
+						auto tuple = *il2cpp_object_unbox_type<System::ValueTuple<Il2CppObject*, Il2CppObject*>*>(self);
+						auto dialogJukeboxRequestSong = tuple.Item1;
+						auto JukeboxBgmSelector = tuple.Item2;
+
+						auto _isSelectShortField = il2cpp_class_get_field_from_name(dialogJukeboxRequestSong->klass, "_isSelectShort");
+						bool _isSelectShort;
+						il2cpp_field_get_value(dialogJukeboxRequestSong, _isSelectShortField, &_isSelectShort);
+
+						musicType = _isSelectShort ? 0 : 1;
+
+						il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, int, bool, Il2CppDelegate*)>(JukeboxBgmSelector->klass, "RequestSong", 3)->methodPointer(JukeboxBgmSelector, musicId, _isSelectShort, nullptr);
+					}
+				);
+
+				auto _startTrialListeningField = il2cpp_class_get_field_from_name_wrap(dialogJukeboxRequestSong->klass, "_startTrialListening");
+				il2cpp_field_set_value(dialogJukeboxRequestSong, _startTrialListeningField, _startTrialListening);
+
+				auto _resetBgm = CreateDelegate(
+					boxed2,
+					*[](Il2CppObject* self, bool forceRestart)
+					{
+						auto tuple = *il2cpp_object_unbox_type<System::ValueTuple<Il2CppObject*, Il2CppObject*>*>(self);
+						auto JukeboxBgmSelector = tuple.Item2;
+						il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, int, bool, Il2CppDelegate*)>(JukeboxBgmSelector->klass, "RequestSong", 3)->methodPointer(JukeboxBgmSelector, 0, false, nullptr);
+
+					}
+				);
+
+				auto _resetBgmField = il2cpp_class_get_field_from_name_wrap(dialogJukeboxRequestSong->klass, "_resetBgm");
+				il2cpp_field_set_value(dialogJukeboxRequestSong, _resetBgmField, _resetBgm);
+
+				int musicId = il2cpp_class_get_method_from_name_type<int (*)(Il2CppObject*)>(JukeboxBgmSelector->klass, "get_CurrentBgmMusicId", 0)->methodPointer(JukeboxBgmSelector);
+				auto tempData = GetSingletonInstance(il2cpp_symbols::get_class("umamusume.dll", "Gallop", "TempData"));
+
+				bool IsPlaying = false;
+
+				auto get_JukeboxSetListPlayingInfo = il2cpp_class_get_method_from_name_type<Il2CppObject * (*)(Il2CppObject*)>(tempData->klass, "get_JukeboxSetListPlayingInfo", 0);
+				if (get_JukeboxSetListPlayingInfo)
+				{
+					auto JukeboxSetListPlayingInfo = get_JukeboxSetListPlayingInfo->methodPointer(tempData);
+
+					auto IsPlayingField = il2cpp_class_get_field_from_name_wrap(JukeboxSetListPlayingInfo->klass, "IsPlaying");
+					il2cpp_field_get_value(JukeboxSetListPlayingInfo, IsPlayingField, &IsPlaying);
+
+					if (IsPlaying)
+					{
+						musicId = il2cpp_class_get_method_from_name_type<int (*)(Il2CppObject*)>(JukeboxSetListPlayingInfo->klass, "GetMusicId", 0)->methodPointer(JukeboxSetListPlayingInfo);
+					}
+				}
+
+				if (musicId)
+				{
+					auto _isEnableTrialListeningField = il2cpp_class_get_field_from_name(dialogJukeboxRequestSong->klass, "_isEnableTrialListening");
+					bool _isEnableTrialListening = true;
+					il2cpp_field_set_value(dialogJukeboxRequestSong, _isEnableTrialListeningField, &_isEnableTrialListening);
+
+					il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, bool)>(dialogJukeboxRequestSong->klass, "SetupTrialListeningButton", 1)->methodPointer(dialogJukeboxRequestSong, true);
+				}
+
+				auto Contains = il2cpp_class_get_method_from_name_type<bool (*)(Il2CppObject*, int, const MethodInfo*)>(bgmList->klass, "Contains", 1);
+				bool containsMusic = Contains->methodPointer(bgmList, musicId, reinterpret_cast<const MethodInfo*>(Contains));
+
+				int num = containsMusic ? musicId : 1006;
+
+				auto LeftButtonCallBack = CreateDelegate(
+					dialogJukeboxRequestSong,
+					*[](Il2CppObject* self, Il2CppObject* dialogCommon)
+					{
+						il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*)>(dialogCommon->klass, "Close", 0)->methodPointer(dialogCommon);
+					});
+				data.LeftButtonCallBack(LeftButtonCallBack);
+
+				auto itemInfoList = il2cpp_object_new(GetGenericClass(GetRuntimeType("mscorlib.dll", "System.Collections.Generic", "List`1"), GetRuntimeType("umamusume.dll", "Gallop", "SelectListItem/Info")));
+				il2cpp_runtime_object_init(itemInfoList);
+
+				auto Add = il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, Il2CppObject*, const MethodInfo*)>(itemInfoList->klass, "Add", 1);
+
+				{
+					auto itemsField = il2cpp_class_get_field_from_name(bgmList->klass, "_items");
+					Il2CppArraySize_t<int>* itemArray;
+					il2cpp_field_get_value(bgmList, itemsField, &itemArray);
+
+					if (itemArray)
+					{
+						for (int i = 0; i < itemArray->max_length; i++)
+						{
+							auto bgmId = itemArray->vector[i];
+
+							auto itemInfo = il2cpp_object_new(il2cpp_symbols::get_class("umamusume.dll", "Gallop", "SelectListItem/Info"));
+
+							auto getPathFunc = CreateDelegate(dialogJukeboxRequestSong, *[](Il2CppObject* self, int id)
+								{
+									auto GetJacketPath = il2cpp_symbols::get_method_pointer<Il2CppString * (*)(int, uint64_t, bool)>("umamusume.dll", "Gallop", "ResourcePath", "GetJacketPath", 3);
+									if (GetJacketPath)
+									{
+										return GetJacketPath(id, 0, true);
+									}
+									return il2cpp_symbols::get_method_pointer<Il2CppString * (*)(int, uint64_t)>("umamusume.dll", "Gallop", "ResourcePath", "GetJacketPath", 2)(id, 0);
+								}
+							);
+
+							auto ctor = il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, int, Il2CppDelegate*, UnityEngine::Vector2, bool, bool, float, Il2CppDelegate*, Il2CppDelegate*, Il2CppDelegate*, bool)>(itemInfo->klass, ".ctor", 10);
+
+							if (ctor)
+							{
+								ctor->methodPointer
+								(itemInfo, bgmId,
+									getPathFunc,
+									{ 228.0f, 228.0f }, num == bgmId, true, 24.0f, nullptr,
+									CreateDelegate(dialogJukeboxRequestSong, *[](Il2CppObject* self, Il2CppObject* selectInfo, Il2CppObject* dialog)
+										{
+											auto Id = il2cpp_class_get_method_from_name_type<int (*)(Il2CppObject*)>(selectInfo->klass, "get_Id", 0)->methodPointer(selectInfo);
+											il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, int)>(self->klass, "SetupMusicInfo", 1)->methodPointer(self, Id);
+											il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, int)>(self->klass, "SelectBgm", 1)->methodPointer(self, Id);
+										}
+									), nullptr, true
+								);
+							}
+							else
+							{
+								il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, int, Il2CppDelegate*, UnityEngine::Vector2, bool, bool, float, Il2CppDelegate*, Il2CppDelegate*, bool)>(itemInfo->klass, ".ctor", 9)->methodPointer
+								(itemInfo, bgmId,
+									getPathFunc,
+									{ 228.0f, 228.0f }, num == bgmId, true, 24.0f, nullptr,
+									CreateDelegate(dialogJukeboxRequestSong, *[](Il2CppObject* self, Il2CppObject* selectInfo)
+										{
+											auto Id = il2cpp_class_get_method_from_name_type<int (*)(Il2CppObject*)>(selectInfo->klass, "get_Id", 0)->methodPointer(selectInfo);
+											il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, int)>(self->klass, "SetupMusicInfo", 1)->methodPointer(self, Id);
+											il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, int)>(self->klass, "SelectBgm", 1)->methodPointer(self, Id);
+										}
+									), true
+								);
+							}
+
+							Add->methodPointer(itemInfoList, itemInfo, reinterpret_cast<const MethodInfo*>(Add));
+						}
+					}
+				}
+
+				auto _songListField = il2cpp_class_get_field_from_name(dialogJukeboxRequestSong->klass, "_songList");
+				Il2CppObject* _songList;
+				il2cpp_field_get_value(dialogJukeboxRequestSong, _songListField, &_songList);
+
+				il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, Il2CppObject*, int)>(_songList->klass, "Create", 2)->methodPointer(_songList, itemInfoList, static_cast<int>(GetEnumValue(ParseEnum(GetRuntimeType("umamusume.dll", "Gallop", "ResourceManager/ResourceHash"), L"ViewHashBegin"))));
+
+				auto ValueTuple3Class = GetGenericClass(GetRuntimeType("mscorlib.dll", "System", "ValueTuple`3"), GetRuntimeType("mscorlib.dll", "System", "Object"), GetRuntimeType("mscorlib.dll", "System", "Object"), GetRuntimeType("mscorlib.dll", "System", "Object"));
+				System::ValueTuple3<Il2CppObject*, Il2CppObject*, Il2CppObject*> tuple = { dialogJukeboxRequestSong, JukeboxBgmSelector, itemInfoList };
+
+				auto boxed = il2cpp_value_box(ValueTuple3Class, &tuple);
+
+				auto RightButtonCallBack = CreateDelegate(
+					boxed,
+					*[](Il2CppObject* self, Il2CppObject* dialogCommon)
+					{
+						if (!il2cpp_symbols::get_class("umamusume.dll", "Gallop", "DialogJukeboxSetListModel"))
+						{
+							ShowUINotification(localizeextension_text_hook(GetTextIdByName(L"Error0025")));
+							return;
+						}
+						auto tuple = *il2cpp_object_unbox_type<System::ValueTuple3<Il2CppObject*, Il2CppObject*, Il2CppObject*>*>(self);
+						auto dialogJukeboxRequestSong = tuple.Item1;
+						auto JukeboxBgmSelector = tuple.Item2;
+						auto itemInfoList = tuple.Item3;
+						OpenMusicBoxSetList(dialogJukeboxRequestSong, JukeboxBgmSelector, itemInfoList);
+					}
+				);
+				data.RightButtonCallBack(RightButtonCallBack);
+
+				il2cpp_class_get_method_from_name_type<Il2CppObject* (*)(Il2CppObject*, int, int, uint64_t)>(dialogJukeboxRequestSong->klass, "Setup", 3)->methodPointer(dialogJukeboxRequestSong, num, musicType, dialogHash);
+
+				/*data.DestroyCallBack(
+					&CreateUnityActionStatic(*[](void*)
+						{
+							auto WaitReleaseUnusedAssets = il2cpp_symbols::get_method_pointer<Il2CppObject * (*)()>("umamusume.dll", "Gallop", "DialogJukeboxRequestSong", "WaitReleaseUnusedAssets", 0)();
+							UnityEngine::MonoBehaviour(GetSingletonInstance(il2cpp_symbols::get_class("umamusume.dll", "Gallop", "UpdateDispatcher"))).StartCoroutineManaged2(WaitReleaseUnusedAssets);
+						}
+					)->delegate
+				);*/
+
+				if (IsPlaying)
+				{
+					il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, bool)>(dialogJukeboxRequestSong->klass, "SetupTrialListeningButton", 1)->methodPointer(dialogJukeboxRequestSong, true);
+					StartCoroutinePlaySetList(dialogJukeboxRequestSong, JukeboxBgmSelector, itemInfoList);
+				}
+
+				Gallop::DialogManager::PushDialog(data);
+			}
+		}
+		catch (const Il2CppExceptionWrapper& e)
+		{
+			wcout << e.ex->message->chars << endl;
+		}
 	}
 
 	Il2CppObject* resources_load_hook(Il2CppString* path, Il2CppReflectionType* type);
@@ -5371,6 +5996,12 @@ namespace
 			{
 				config::runtime::useDefaultFPS = !config::runtime::useDefaultFPS;
 				UnityEngine::Application::targetFrameRate(30);
+				return TRUE;
+			}
+
+			if (config::freeform_window && wParam == 'J' && altDown)
+			{
+				OpenMusicBox();
 				return TRUE;
 			}
 		}
@@ -5841,8 +6472,8 @@ namespace
 		{
 			if (Gallop::Screen::IsSplitWindow())
 			{
-			return position * Gallop::Screen::Height() / static_cast<float>(UnityEngine::Screen::height());
-		}
+				return position * Gallop::Screen::Height() / static_cast<float>(UnityEngine::Screen::height());
+			}
 
 			return position * Gallop::Screen::Height() / static_cast<float>(UnityEngine::Screen::height());
 		}
@@ -8963,27 +9594,27 @@ namespace
 				GetOptionSlider("anti_aliasing", LocalifySettings::GetText("anti_aliasing"), antiAliasing, 0, 4, true,
 					*[](Il2CppObject* slider)
 					{
-					auto numText = GetOptionSliderNumText(slider);
-					auto value = GetOptionSliderValue(slider);
+						auto numText = GetOptionSliderNumText(slider);
+						auto value = GetOptionSliderValue(slider);
 
-					switch (static_cast<int>(value))
-					{
-					case 0:
-						text_set_text(numText, il2cpp_string_new("Default"));
-						break;
-					case 1:
-						text_set_text(numText, il2cpp_string_new("OFF"));
-						break;
-					case 2:
-						text_set_text(numText, il2cpp_string_new("x2"));
-						break;
-					case 3:
-						text_set_text(numText, il2cpp_string_new("x4"));
-						break;
-					case 4:
-						text_set_text(numText, il2cpp_string_new("x8"));
-						break;
-					}
+						switch (static_cast<int>(value))
+						{
+						case 0:
+							text_set_text(numText, il2cpp_string_new("Default"));
+							break;
+						case 1:
+							text_set_text(numText, il2cpp_string_new("OFF"));
+							break;
+						case 2:
+							text_set_text(numText, il2cpp_string_new("x2"));
+							break;
+						case 3:
+							text_set_text(numText, il2cpp_string_new("x4"));
+							break;
+						case 4:
+							text_set_text(numText, il2cpp_string_new("x8"));
+							break;
+						}
 					}
 				),
 				GetOptionSlider("ui_animation_scale", LocalifySettings::GetText("ui_animation_scale"), uiAnimationScale, 0.1, 10.0, false),
@@ -8991,27 +9622,27 @@ namespace
 				GetOptionSlider("cyspring_update_mode", LocalifySettings::GetText("cyspring_update_mode"), cySpringUpdateMode, -1, 3, true,
 					*[](Il2CppObject* slider)
 					{
-					auto numText = GetOptionSliderNumText(slider);
-					auto value = GetOptionSliderValue(slider);
+						auto numText = GetOptionSliderNumText(slider);
+						auto value = GetOptionSliderValue(slider);
 
-					switch (static_cast<int>(value))
-					{
-					case -1:
-						text_set_text(numText, il2cpp_string_new("Default"));
-						break;
-					case 0:
-						text_set_text(numText, il2cpp_string_new("ModeNormal"));
-						break;
-					case 1:
-						text_set_text(numText, il2cpp_string_new("Mode60FPS"));
-						break;
-					case 2:
-						text_set_text(numText, il2cpp_string_new("SkipFrame"));
-						break;
-					case 3:
-						text_set_text(numText, il2cpp_string_new("SkipFramePostAlways"));
-						break;
-					}
+						switch (static_cast<int>(value))
+						{
+						case -1:
+							text_set_text(numText, il2cpp_string_new("Default"));
+							break;
+						case 0:
+							text_set_text(numText, il2cpp_string_new("ModeNormal"));
+							break;
+						case 1:
+							text_set_text(numText, il2cpp_string_new("Mode60FPS"));
+							break;
+						case 2:
+							text_set_text(numText, il2cpp_string_new("SkipFrame"));
+							break;
+						case 3:
+							text_set_text(numText, il2cpp_string_new("SkipFramePostAlways"));
+							break;
+						}
 					}
 				),
 				GetOptionItemTitle(LocalifySettings::GetText("screen")),
@@ -9038,7 +9669,7 @@ namespace
 				GetOptionSlider("character_system_text_caption_line_char_count", LocalifySettings::GetText("character_system_text_caption_line_char_count"), characterSystemTextCaptionLineCharCount, 0, 100, true,
 					*[](Il2CppObject* slider)
 					{
-					auto numText = GetOptionSliderNumText(slider);
+						auto numText = GetOptionSliderNumText(slider);
 						auto value = static_cast<int>(GetOptionSliderValue(slider));
 
 						text_set_text(numText, il2cpp_string_new(to_string(value).data()));
@@ -9061,42 +9692,42 @@ namespace
 					*[](Il2CppObject* slider)
 					{
 						auto numText = GetOptionSliderNumText(slider);
-					auto value = GetOptionSliderValue(slider);
-					value = value / 10;
+						auto value = GetOptionSliderValue(slider);
+						value = value / 10;
 
-					text_set_text(numText, il2cpp_string_new(format("{:.2f}", value).data()));
+						text_set_text(numText, il2cpp_string_new(format("{:.2f}", value).data()));
 
-					SetNotificationPosition(value, GetOptionSliderValue("character_system_text_caption_position_y") / 10);
-					SetNotificationDisplayTime(1);
-					ShowNotification(il2cpp_string_new16(LocalifySettings::GetText("sample_caption")));
+						SetNotificationPosition(value, GetOptionSliderValue("character_system_text_caption_position_y") / 10);
+						SetNotificationDisplayTime(1);
+						ShowNotification(il2cpp_string_new16(LocalifySettings::GetText("sample_caption")));
 					}
 				),
 				GetOptionSlider("character_system_text_caption_position_y", LocalifySettings::GetText("character_system_text_caption_position_y"), characterSystemTextCaptionPositionY * 10, -100, 100, true,
 					*[](Il2CppObject* slider)
 					{
-					auto numText = GetOptionSliderNumText(slider);
-					auto value = GetOptionSliderValue(slider);
-					value = value / 10;
+						auto numText = GetOptionSliderNumText(slider);
+						auto value = GetOptionSliderValue(slider);
+						value = value / 10;
 
-					text_set_text(numText, il2cpp_string_new(format("{:.2f}", value).data()));
+						text_set_text(numText, il2cpp_string_new(format("{:.2f}", value).data()));
 
-					SetNotificationPosition(GetOptionSliderValue("character_system_text_caption_position_x") / 10, value);
-					SetNotificationDisplayTime(1);
-					ShowNotification(il2cpp_string_new16(LocalifySettings::GetText("sample_caption")));
+						SetNotificationPosition(GetOptionSliderValue("character_system_text_caption_position_x") / 10, value);
+						SetNotificationDisplayTime(1);
+						ShowNotification(il2cpp_string_new16(LocalifySettings::GetText("sample_caption")));
 					}
 				),
 				GetOptionSlider("character_system_text_caption_background_alpha", LocalifySettings::GetText("character_system_text_caption_background_alpha"), characterSystemTextCaptionBackgroundAlpha * 100, 0, 100, true,
 					*[](Il2CppObject* slider)
 					{
-					auto numText = GetOptionSliderNumText(slider);
-					auto value = GetOptionSliderValue(slider);
-					value = value / 100;
+						auto numText = GetOptionSliderNumText(slider);
+						auto value = GetOptionSliderValue(slider);
+						value = value / 100;
 
-					text_set_text(numText, il2cpp_string_new(format("{:.2f}", value).data()));
+						text_set_text(numText, il2cpp_string_new(format("{:.2f}", value).data()));
 
-					SetNotificationBackgroundAlpha(value);
-					SetNotificationDisplayTime(1);
-					ShowNotification(il2cpp_string_new16(LocalifySettings::GetText("sample_caption")));
+						SetNotificationBackgroundAlpha(value);
+						SetNotificationDisplayTime(1);
+						ShowNotification(il2cpp_string_new16(LocalifySettings::GetText("sample_caption")));
 					}
 				),
 				GetOptionItemSimpleWithButton("character_system_text_caption_font_color", (LocalifySettings::GetText("character_system_text_caption_font_color") + L": "s + config::config_document[L"characterSystemTextCaptionFontColor"].GetString()).data(),
@@ -9286,10 +9917,10 @@ namespace
 				OpenSelectOption(LocalifySettings::GetText("graphics_quality"), GetGraphicsQualityOptions(), config::config_document[L"graphicsQuality"].GetInt() + 1,
 					[](int value)
 					{
-					AddOrSet(config::config_document, L"graphicsQuality", value - 1);
+						AddOrSet(config::config_document, L"graphicsQuality", value - 1);
 
-					auto textCommon = GetOptionItemSimpleWithButtonTextCommon("graphics_quality");
-					SetTextCommonText(textCommon, (LocalifySettings::GetText("graphics_quality") + L": "s + u8_wide(GetGraphicsQualityOptions()[config::config_document[L"graphicsQuality"].GetInt() + 1])).data());
+						auto textCommon = GetOptionItemSimpleWithButtonTextCommon("graphics_quality");
+						SetTextCommonText(textCommon, (LocalifySettings::GetText("graphics_quality") + L": "s + u8_wide(GetGraphicsQualityOptions()[config::config_document[L"graphicsQuality"].GetInt() + 1])).data());
 					}
 				);
 			})
@@ -9300,10 +9931,10 @@ namespace
 				OpenSelectOption(LocalifySettings::GetText("champions_live_resource_id"), MasterDB::GetChampionsResources(), config::config_document[L"championsLiveResourceId"].GetInt() - 1,
 					[](int value)
 					{
-					AddOrSet(config::config_document, L"championsLiveResourceId", value + 1);
+						AddOrSet(config::config_document, L"championsLiveResourceId", value + 1);
 
-					auto textCommon = GetOptionItemSimpleWithButtonTextCommon("champions_live_resource_id");
-					SetTextCommonText(textCommon, (LocalifySettings::GetText("champions_live_resource_id") + L": "s + u8_wide(MasterDB::GetChampionsResources()[config::config_document[L"championsLiveResourceId"].GetInt() - 1])).data());
+						auto textCommon = GetOptionItemSimpleWithButtonTextCommon("champions_live_resource_id");
+						SetTextCommonText(textCommon, (LocalifySettings::GetText("champions_live_resource_id") + L": "s + u8_wide(MasterDB::GetChampionsResources()[config::config_document[L"championsLiveResourceId"].GetInt() - 1])).data());
 					}
 				);
 			})
@@ -9325,10 +9956,10 @@ namespace
 				OpenSelectOption(LocalifySettings::GetText("champions_live_year"), championsLiveYears, config::config_document[L"championsLiveYear"].GetInt() - 2022,
 					[](int value)
 					{
-					AddOrSet(config::config_document, L"championsLiveYear", value + 2022);
+						AddOrSet(config::config_document, L"championsLiveYear", value + 2022);
 
-					auto textCommon = GetOptionItemSimpleWithButtonTextCommon("champions_live_year");
-					SetTextCommonText(textCommon, (LocalifySettings::GetText("champions_live_year") + L": "s + u8_wide(to_string(config::config_document[L"championsLiveYear"].GetInt()))).data());
+						auto textCommon = GetOptionItemSimpleWithButtonTextCommon("champions_live_year");
+						SetTextCommonText(textCommon, (LocalifySettings::GetText("champions_live_year") + L": "s + u8_wide(to_string(config::config_document[L"championsLiveYear"].GetInt()))).data());
 					}
 				);
 			})
@@ -9354,14 +9985,14 @@ namespace
 				OpenSelectFontColorOption(LocalifySettings::GetText("character_system_text_caption_font_color"), options, index,
 					[](int value)
 					{
-					auto options = GetFontColorOptions();
-					wstring color = u8_wide(options[value]);
-					AddOrSetString(config::config_document, L"characterSystemTextCaptionFontColor", color.data());
+						auto options = GetFontColorOptions();
+						wstring color = u8_wide(options[value]);
+						AddOrSetString(config::config_document, L"characterSystemTextCaptionFontColor", color.data());
 
-					auto textCommon = GetOptionItemSimpleWithButtonTextCommon("character_system_text_caption_font_color");
-					SetTextCommonText(textCommon, (LocalifySettings::GetText("character_system_text_caption_font_color") + L": "s + config::config_document[L"characterSystemTextCaptionFontColor"].GetString()).data());
-					SetTextCommonFontColor(textCommon, color.data());
-					SetNotificationFontColor(color.data());
+						auto textCommon = GetOptionItemSimpleWithButtonTextCommon("character_system_text_caption_font_color");
+						SetTextCommonText(textCommon, (LocalifySettings::GetText("character_system_text_caption_font_color") + L": "s + config::config_document[L"characterSystemTextCaptionFontColor"].GetString()).data());
+						SetTextCommonFontColor(textCommon, color.data());
+						SetNotificationFontColor(color.data());
 					}
 				);
 			})
@@ -9388,14 +10019,14 @@ namespace
 				OpenSelectOutlineSizeOption(LocalifySettings::GetText("character_system_text_caption_outline_size"), options, index,
 					[](int value)
 					{
-					auto options = GetOutlineSizeOptions();
-					wstring color = u8_wide(options[value]);
-					AddOrSetString(config::config_document, L"characterSystemTextCaptionOutlineSize", color.data());
+						auto options = GetOutlineSizeOptions();
+						wstring color = u8_wide(options[value]);
+						AddOrSetString(config::config_document, L"characterSystemTextCaptionOutlineSize", color.data());
 
-					auto textCommon = GetOptionItemSimpleWithButtonTextCommon("character_system_text_caption_outline_size");
-					SetTextCommonText(textCommon, (LocalifySettings::GetText("character_system_text_caption_outline_size") + L": "s + config::config_document[L"characterSystemTextCaptionOutlineSize"].GetString()).data());
-					SetTextCommonOutlineSize(textCommon, color.data());
-					SetNotificationOutlineSize(color.data());
+						auto textCommon = GetOptionItemSimpleWithButtonTextCommon("character_system_text_caption_outline_size");
+						SetTextCommonText(textCommon, (LocalifySettings::GetText("character_system_text_caption_outline_size") + L": "s + config::config_document[L"characterSystemTextCaptionOutlineSize"].GetString()).data());
+						SetTextCommonOutlineSize(textCommon, color.data());
+						SetNotificationOutlineSize(color.data());
 					}
 				);
 			})
@@ -9420,14 +10051,14 @@ namespace
 				OpenSelectOutlineColorOption(LocalifySettings::GetText("character_system_text_caption_outline_color"), options, index,
 					[](int value)
 					{
-					auto options = GetOutlineColorOptions();
-					wstring color = u8_wide(options[value]);
-					AddOrSetString(config::config_document, L"characterSystemTextCaptionOutlineColor", color.data());
+						auto options = GetOutlineColorOptions();
+						wstring color = u8_wide(options[value]);
+						AddOrSetString(config::config_document, L"characterSystemTextCaptionOutlineColor", color.data());
 
-					auto textCommon = GetOptionItemSimpleWithButtonTextCommon("character_system_text_caption_outline_color");
-					SetTextCommonText(textCommon, (LocalifySettings::GetText("character_system_text_caption_outline_color") + L": "s + config::config_document[L"characterSystemTextCaptionOutlineColor"].GetString()).data());
-					SetTextCommonOutlineColor(textCommon, color.data());
-					SetNotificationOutlineColor(color.data());
+						auto textCommon = GetOptionItemSimpleWithButtonTextCommon("character_system_text_caption_outline_color");
+						SetTextCommonText(textCommon, (LocalifySettings::GetText("character_system_text_caption_outline_color") + L": "s + config::config_document[L"characterSystemTextCaptionOutlineColor"].GetString()).data());
+						SetTextCommonOutlineColor(textCommon, color.data());
+						SetNotificationOutlineColor(color.data());
 					}
 				);
 			})
@@ -9509,14 +10140,14 @@ namespace
 			{
 				auto dialogData = Gallop::DialogCommon::Data();
 				dialogData.SetSimpleTwoButtonMessage(
-							localizeextension_text_hook(GetTextIdByName(L"Common0009")),
-							localizeextension_text_hook(GetTextIdByName(L"Home0073")),
-							CreateDelegateStatic(*[]()
-								{
-									UnityEngine::Application::OpenURL(il2cpp_string_new("https://github.com/Kimjio/umamusume-localify"));
+					localizeextension_text_hook(GetTextIdByName(L"Common0009")),
+					localizeextension_text_hook(GetTextIdByName(L"Home0073")),
+					CreateDelegateStatic(*[]()
+						{
+							UnityEngine::Application::OpenURL(il2cpp_string_new("https://github.com/Kimjio/umamusume-localify"));
 						}
 					),
-							GetTextIdByName(L"Common0004"),
+					GetTextIdByName(L"Common0004"),
 					GetTextIdByName(L"Common0003")
 				);
 
@@ -9549,26 +10180,26 @@ namespace
 				{
 					auto dialogData = Gallop::DialogCommon::Data();
 					dialogData.SetSimpleTwoButtonMessage(
-								localizeextension_text_hook(GetTextIdByName(L"Race0652")),
-								il2cpp_string_new16(LocalifySettings::GetText("clear_webview_cache_confirm")),
-								CreateDelegateStatic(*[]()
-									{
-										PWSTR path;
-										SHGetKnownFolderPath(FOLDERID_LocalAppDataLow, 0, NULL, &path);
+						localizeextension_text_hook(GetTextIdByName(L"Race0652")),
+						il2cpp_string_new16(LocalifySettings::GetText("clear_webview_cache_confirm")),
+						CreateDelegateStatic(*[]()
+							{
+								PWSTR path;
+								SHGetKnownFolderPath(FOLDERID_LocalAppDataLow, 0, NULL, &path);
 
-										wstring combinedPath = wstring(path).append(L"\\DMMWebView2");
+								wstring combinedPath = wstring(path).append(L"\\DMMWebView2");
 
-										try
-										{
-											filesystem::remove_all(combinedPath);
-											ShowUINotification(il2cpp_string_new16(LocalifySettings::GetText("deleted")));
-										}
-										catch (exception& e)
-										{
-											cout << e.what() << endl;
-										}
-									}),
-								GetTextIdByName(L"Common0004"),
+								try
+								{
+									filesystem::remove_all(combinedPath);
+									ShowUINotification(il2cpp_string_new16(LocalifySettings::GetText("deleted")));
+								}
+								catch (exception& e)
+								{
+									cout << e.what() << endl;
+								}
+							}),
+						GetTextIdByName(L"Common0004"),
 						GetTextIdByName(L"Common0003")
 					);
 					Gallop::DialogManager::PushDialog(dialogData);
@@ -9920,8 +10551,8 @@ namespace
 
 					auto dialogData = Gallop::DialogCommon::Data();
 					dialogData.SetSimpleTwoButtonMessage(
-								localizeextension_text_hook(GetTextIdByName(L"Outgame0031")),
-								il2cpp_string_new("트레이너 ID를 복사하시겠습니까?"),
+						localizeextension_text_hook(GetTextIdByName(L"Outgame0031")),
+						il2cpp_string_new("트레이너 ID를 복사하시겠습니까?"),
 						CreateDelegateStatic(viewerIdCopyFn),
 						GetTextIdByName(L"Outgame0002"),
 						GetTextIdByName(L"Common0003"),
@@ -10991,8 +11622,8 @@ namespace
 
 					auto dialogData = Gallop::DialogCommon::Data();
 					dialogData.SetSimpleTwoButtonMessage(
-								localizeextension_text_hook(GetTextIdByName(L"Friend0039")),
-								il2cpp_string_new("트레이너 ID로 검색하시겠습니까?"),
+						localizeextension_text_hook(GetTextIdByName(L"Friend0039")),
+						il2cpp_string_new("트레이너 ID로 검색하시겠습니까?"),
 						CreateDelegateStatic(viewerIdSearchFn),
 						GetTextIdByName(L"Outgame0002"),
 						GetTextIdByName(L"Common0003"),
@@ -11176,8 +11807,8 @@ namespace
 
 							auto dialogData = Gallop::DialogCommon::Data();
 							dialogData.SetSimpleTwoButtonMessage(
-										localizeextension_text_hook(GetTextIdByName(L"StoryEvent0079")),
-										il2cpp_string_new("해당 스토리 이벤트는 개최 정보가 누락되어있습니다.\n\n웹 페이지를 보시겠습니까?"),
+								localizeextension_text_hook(GetTextIdByName(L"StoryEvent0079")),
+								il2cpp_string_new("해당 스토리 이벤트는 개최 정보가 누락되어있습니다.\n\n웹 페이지를 보시겠습니까?"),
 								onRight,
 								GetTextIdByName(L"Common0002"),
 								GetTextIdByName(L"Common0001"),
@@ -13455,12 +14086,12 @@ namespace
 
 		if (config::auto_fullscreen || config::unlock_size || config::freeform_window)
 		{
-				if (SetResolution_addr)
-				{
-					ADD_HOOK(SetResolution, "UnityEngine.Screen.SetResolution(int, int, FullScreenMode, int) at %p\n");
-				}
-				ADD_HOOK(SetResolution_Injected, "UnityEngine.Screen.SetResolution_Injected(int, int, FullScreenMode, RefreshRate) at %p\n");
+			if (SetResolution_addr)
+			{
+				ADD_HOOK(SetResolution, "UnityEngine.Screen.SetResolution(int, int, FullScreenMode, int) at %p\n");
 			}
+			ADD_HOOK(SetResolution_Injected, "UnityEngine.Screen.SetResolution_Injected(int, int, FullScreenMode, RefreshRate) at %p\n");
+		}
 
 		if (config::unlock_size || config::freeform_window)
 		{
