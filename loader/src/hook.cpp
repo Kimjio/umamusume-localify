@@ -204,6 +204,27 @@ CreateProcessW_hook(
 		);
 }
 
+void* CheckRemoteDebuggerPresent_orig = nullptr;
+BOOL
+WINAPI
+CheckRemoteDebuggerPresent_hook(
+	_In_ HANDLE hProcess,
+	_Out_ PBOOL pbDebuggerPresent
+)
+{
+	return FALSE;
+}
+
+void* IsDebuggerPresent_orig = nullptr;
+BOOL
+WINAPI
+IsDebuggerPresent_hook(
+	VOID
+)
+{
+	return FALSE;
+}
+
 void init_hook(filesystem::path module_path)
 {
 	if (MH_Initialize() != MH_OK) return;
@@ -227,6 +248,14 @@ void init_hook(filesystem::path module_path)
 	auto CreateProcessW_addr = GetProcAddress(GetModuleHandleW(L"kernel32.dll"), "CreateProcessW");
 	MH_CreateHook(CreateProcessW_addr, CreateProcessW_hook, &CreateProcessW_orig);
 	MH_EnableHook(CreateProcessW_addr);
+
+	auto CheckRemoteDebuggerPresent_addr = GetProcAddress(GetModuleHandleW(L"kernel32.dll"), "CheckRemoteDebuggerPresent");
+	MH_CreateHook(CheckRemoteDebuggerPresent_addr, CheckRemoteDebuggerPresent_hook, &CheckRemoteDebuggerPresent_orig);
+	MH_EnableHook(CheckRemoteDebuggerPresent_addr);
+
+	auto IsDebuggerPresent_addr = GetProcAddress(GetModuleHandleW(L"kernel32.dll"), "IsDebuggerPresent");
+	MH_CreateHook(IsDebuggerPresent_addr, IsDebuggerPresent_hook, &IsDebuggerPresent_orig);
+	MH_EnableHook(IsDebuggerPresent_addr);
 
 	hook::proxy init{};
 
