@@ -37,8 +37,6 @@
 #include <windows.ui.notifications.h>
 #include <winrt/Windows.Foundation.h>
 
-#include <WinTrust.h>
-
 #include "ntdll.h"
 
 #include "config/config.hpp"
@@ -1156,6 +1154,16 @@ namespace
 		{
 			filesystem::path path = filesystem::current_path().append(L"UnityPlayer.dll");
 			il2cpp_symbols::load_symbols(path);
+
+			if (!config::external_dlls_path.empty())
+			{
+				for (int i = 0; i < config::external_dlls_path.size(); i++)
+				{
+					wcout << L"Loading " << config::external_dlls_path[i] << L": ";
+					auto dll = LoadLibraryW(config::external_dlls_path[i].data());
+					wcout << dll << endl;
+				}
+			}
 
 			const auto il2cpp = reinterpret_cast<decltype(LoadLibraryW)*>(load_library_w_orig)(lpLibFileName);
 			/*std::ofstream out("./GameAssembly.decrypted.dll", std::ios_base::binary);
@@ -13836,16 +13844,6 @@ namespace
 		if (config::unlock_live_chara)
 		{
 			ADD_HOOK(LiveTheaterCharaSelect_CheckSwapChara, "Gallop.LiveTheaterCharaSelect::CheckSwapChara at %p\n");
-		}
-
-		if (!config::external_dlls_path.empty())
-		{
-			for (int i = 0; i < config::external_dlls_path.size(); i++)
-			{
-				wcout << L"Loading " << config::external_dlls_path[i] << L": ";
-				auto dll = LoadLibraryW(config::external_dlls_path[i].data());
-				wcout << dll << endl;
-			}
 		}
 
 		const auto nameArray = reinterpret_cast<Il2CppArraySize_t<Il2CppString*>*(*)()>(il2cpp_resolve_icall("UnityEngine.QualitySettings::get_names()"))();
