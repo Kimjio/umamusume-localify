@@ -29,6 +29,8 @@
 
 #include "taskbar/TaskbarManager.hpp"
 
+#include "string_utils.hpp"
+
 using namespace Microsoft::WRL;
 using namespace Microsoft::WRL::Wrappers;
 
@@ -47,21 +49,165 @@ namespace
 	wil::com_ptr<ICoreWebView2> webview;
 
 	bool isLoginWebViewOpen = false;
+
+	constexpr auto DMM_UA = L"DMMGamePlayer5-Win/5.4.17";
+	constexpr auto DMM_API = L"apidgp-gameplayer.games.dmm.com";
+	constexpr auto BASE_HEADER = L"Client-App: DMMGamePlayer5\nClient-version: 5.4.17";
+	const wchar_t* ACCEPT_TYPE[] = {L"application/json", nullptr};
 }
 
-static string GetGameArgs(wstring sessionId, wstring secureId)
+static void PrintParseError(rapidjson::Document& document)
 {
-	auto hInternet = InternetOpenW(L"DMMGamePlayer5/5.3.22", INTERNET_OPEN_TYPE_PRECONFIG, nullptr, nullptr, 0);
+	cout << "Response JSON parse error: " << GetParseError_En(document.GetParseError()) << " (" << document.GetErrorOffset() << ")" << endl;
+}
 
-	auto hConnect = InternetConnectW(hInternet, L"apidgp-gameplayer.games.dmm.com", INTERNET_DEFAULT_HTTPS_PORT, nullptr, nullptr, INTERNET_SERVICE_HTTP, 0, NULL);
+static void ShowErrorDialog(string error)
+{
+	auto t = il2cpp_thread_attach(il2cpp_domain_get());
 
-	LPCWSTR types[] = { L"application/json", NULL };
-	auto hReq = HttpOpenRequestW(hConnect, L"POST", L"/v5/launch/cl", nullptr, nullptr, types, INTERNET_FLAG_SECURE | INTERNET_FLAG_NO_COOKIES, NULL);
+	auto dialogData = Gallop::DialogCommon::Data();
+	dialogData.SetSimpleOneButtonMessage(GetTextIdByName(L"Error0014"), il2cpp_string_new(error.data()), nullptr, GetTextIdByName(L"Common0007"));
+
+	Gallop::DialogManager::PushDialog(dialogData);
+
+	il2cpp_thread_detach(t);
+}
+
+static string GetLoginUrl()
+{
+	auto hInternet = InternetOpenW(DMM_UA, INTERNET_OPEN_TYPE_PRECONFIG, nullptr, nullptr, 0);
+
+	auto hConnect = InternetConnectW(hInternet, DMM_API, INTERNET_DEFAULT_HTTPS_PORT, nullptr, nullptr, INTERNET_SERVICE_HTTP, 0, NULL);
+
+	auto hReq = HttpOpenRequestW(hConnect, L"POST", L"/v5/auth/login/url", nullptr, nullptr, ACCEPT_TYPE, INTERNET_FLAG_SECURE | INTERNET_FLAG_NO_COOKIES, NULL);
+
+	auto body = R"({"prompt":""})"s;
+	auto res = HttpSendRequestW(hReq, BASE_HEADER, 0, body.data(), body.size());
+
+	if (!res)
+	{
+		return "";
+	}
+
+	DWORD dwSize = 0;
+	DWORD dwSizeLen = sizeof(DWORD);
+
+	HttpQueryInfoW(hReq, HTTP_QUERY_CONTENT_LENGTH | HTTP_QUERY_FLAG_NUMBER, &dwSize, &dwSizeLen, 0);
+
+	char* buffer = new char[dwSize + 1];
+
+	DWORD dwBytesRead;
+	BOOL bRead = InternetReadFile(hReq, buffer, dwSize + 1, &dwBytesRead);
+
+	if (!bRead)
+	{
+		return "";
+	}
+	else
+	{
+		buffer[dwBytesRead] = 0;
+	}
+
+	InternetCloseHandle(hReq);
+	InternetCloseHandle(hConnect);
+	InternetCloseHandle(hInternet);
+
+	rapidjson::Document document;
+
+	document.Parse(buffer);
+	delete[] buffer;
+
+	if (document.HasParseError())
+	{
+		PrintParseError(document);
+		return "";
+	}
+
+	if (document.HasMember("result_code") && document["result_code"].GetInt() == 100)
+	{
+		return string(document["data"].GetObjectW()["url"].GetString());
+	}
+	else if (document.HasMember("error") && document["error"].IsString())
+	{
+		ShowErrorDialog(document["error"].GetString());
+	}
+
+	return "";
+}
+
+static string GetAccessToken(wstring code)
+{
+	auto hInternet = InternetOpenW(DMM_UA, INTERNET_OPEN_TYPE_PRECONFIG, nullptr, nullptr, 0);
+
+	auto hConnect = InternetConnectW(hInternet, DMM_API, INTERNET_DEFAULT_HTTPS_PORT, nullptr, nullptr, INTERNET_SERVICE_HTTP, 0, NULL);
+
+	auto hReq = HttpOpenRequestW(hConnect, L"POST", L"/v5/auth/accesstoken/issue", nullptr, nullptr, ACCEPT_TYPE, INTERNET_FLAG_SECURE | INTERNET_FLAG_NO_COOKIES, NULL);
+
+	auto body = R"({"code":")"s + wide_u8(code) + R"("})"s;
+	auto res = HttpSendRequestW(hReq, BASE_HEADER, 0, body.data(), body.size());
+
+	if (!res)
+	{
+		return "";
+	}
+
+	DWORD dwSize = 0;
+	DWORD dwSizeLen = sizeof(DWORD);
+
+	HttpQueryInfoW(hReq, HTTP_QUERY_CONTENT_LENGTH | HTTP_QUERY_FLAG_NUMBER, &dwSize, &dwSizeLen, 0);
+
+	char* buffer = new char[dwSize + 1];
+
+	DWORD dwBytesRead;
+	BOOL bRead = InternetReadFile(hReq, buffer, dwSize + 1, &dwBytesRead);
+
+	if (!bRead)
+	{
+		return "";
+	}
+	else
+	{
+		buffer[dwBytesRead] = 0;
+	}
+
+	InternetCloseHandle(hReq);
+	InternetCloseHandle(hConnect);
+	InternetCloseHandle(hInternet);
+
+	rapidjson::Document document;
+
+	document.Parse(buffer);
+	delete[] buffer;
+
+	if (document.HasParseError())
+	{
+		PrintParseError(document);
+		return "";
+	}
+
+	if (document.HasMember("result_code") && document["result_code"].GetInt() == 100)
+	{
+		return string(document["data"].GetObjectW()["access_token"].GetString());
+	}
+	else if (document.HasMember("error") && document["error"].IsString())
+	{
+		ShowErrorDialog(document["error"].GetString());
+	}
+
+	return "";
+}
+
+static string GetGameArgs(wstring actAuth)
+{
+	auto hInternet = InternetOpenW(DMM_UA, INTERNET_OPEN_TYPE_PRECONFIG, nullptr, nullptr, 0);
+
+	auto hConnect = InternetConnectW(hInternet, DMM_API, INTERNET_DEFAULT_HTTPS_PORT, nullptr, nullptr, INTERNET_SERVICE_HTTP, 0, NULL);
+
+	auto hReq = HttpOpenRequestW(hConnect, L"POST", L"/v5/r2/launch/cl", nullptr, nullptr, ACCEPT_TYPE, INTERNET_FLAG_SECURE | INTERNET_FLAG_NO_COOKIES, NULL);
 
 	wstringstream headerStream;
-	headerStream << L"Client-App: DMMGamePlayer5" << endl
-		<< L"Client-version: 5.3.22" << endl
-		<< L"Cookie: login_session_id=" << sessionId << L";login_secure_id=" << secureId << endl;
+	headerStream << BASE_HEADER << endl
+		<< L"ActAuth: " << actAuth << endl;
 
 	auto body = R"({"product_id":"umamusume","game_type":"GCL","launch_type":"LIB","game_os":"win","user_os":"win","mac_address":"null","hdd_serial":"null","motherboard":"null"})"s;
 	auto res = HttpSendRequestW(hReq, headerStream.str().data(), 0, body.data(), body.size());
@@ -101,7 +247,7 @@ static string GetGameArgs(wstring sessionId, wstring secureId)
 
 	if (document.HasParseError())
 	{
-		cout << "Response JSON parse error: " << GetParseError_En(document.GetParseError()) << " (" << document.GetErrorOffset() << ")" << endl;
+		PrintParseError(document);
 		return "";
 	}
 
@@ -111,20 +257,13 @@ static string GetGameArgs(wstring sessionId, wstring secureId)
 	}
 	else if (document.HasMember("error") && document["error"].IsString())
 	{
-		auto t = il2cpp_thread_attach(il2cpp_domain_get());
-
-		auto dialogData = Gallop::DialogCommon::Data();
-		dialogData.SetSimpleOneButtonMessage(GetTextIdByName(L"Error0014"), il2cpp_string_new(document["error"].GetString()), nullptr, GetTextIdByName(L"Common0007"));
-
-		Gallop::DialogManager::PushDialog(dialogData);
-
-		il2cpp_thread_detach(t);
+		ShowErrorDialog(document["error"].GetString());
 	}
 
 	return "";
 }
 
-LRESULT CALLBACK WebViewWndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
+static LRESULT CALLBACK WebViewWndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 {
 	switch (message)
 	{
@@ -147,8 +286,15 @@ LRESULT CALLBACK WebViewWndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM l
 	return NULL;
 }
 
-DWORD WINAPI WebViewThread(LPVOID)
+static DWORD WINAPI WebViewThread(LPVOID)
 {
+	wstring loginUrl = u8_wide(GetLoginUrl());
+
+	if (loginUrl.empty())
+	{
+		return 0;
+	}
+
 	IsGUIThread(TRUE);
 
 	WNDCLASSEX wcex = {};
@@ -183,8 +329,6 @@ DWORD WINAPI WebViewThread(LPVOID)
 #ifdef _DEBUG
 	envOptions->put_AdditionalBrowserArguments(L"--enable-logging --v=1");
 #endif
-
-	wstring loginUrl = L"https://accounts.dmm.com/service/login/password/=/";
 
 	PWSTR path;
 	SHGetKnownFolderPath(FOLDERID_LocalAppDataLow, 0, NULL, &path);
@@ -237,106 +381,69 @@ DWORD WINAPI WebViewThread(LPVOID)
 								args->get_Uri(&uri);
 								wstring source(uri.get());
 
-								if (source == L"https://www.dmm.com/")
+								if (source.starts_with(L"https://webdgp-gameplayer.games.dmm.com/login/success"))
 								{
 									args->put_Cancel(true);
+
+									wstringstream pathStream(source);
+									wstring segment;
+									vector<wstring> splited;
+									while (getline(pathStream, segment, L'='))
+									{
+										splited.emplace_back(segment);
+									}
 
 									ICoreWebView2_2* webView2;
 									webview->QueryInterface<ICoreWebView2_2>(&webView2);
 
-									ICoreWebView2CookieManager* cookieManager;
-									webView2->get_CookieManager(&cookieManager);
+									auto actAuth = GetAccessToken(splited.back());
 
-									cookieManager->GetCookies(L"https://accounts.dmm.com", Callback<ICoreWebView2GetCookiesCompletedHandler>(
-										[hWnd](
-											HRESULT result,
-											ICoreWebView2CookieList* cookieList)
+									auto gameArgs = GetGameArgs(u8_wide(actAuth));
+
+									if (!gameArgs.empty())
+									{
+										stringstream gameArgsStream(gameArgs);
+										string segment;
+										vector<string> split;
+										while (getline(gameArgsStream, segment, ' '))
 										{
-											UINT count;
-											cookieList->get_Count(&count);
+											split.emplace_back(segment);
+										}
 
+										stringstream singleArgStream1(split[0]);
+										vector<string> split1;
+										while (getline(singleArgStream1, segment, '='))
+										{
+											split1.emplace_back(segment);
+										}
 
-											wstring sessionId;
-											wstring secureId;
+										Gallop::TitleViewController::viewerId = string(split1.back());
 
+										split1.clear();
 
-											for (int i = 0; i < count; i++)
-											{
-												ICoreWebView2Cookie* cookie;
-												cookieList->GetValueAtIndex(i, &cookie);
+										stringstream singleArgStream2(split[1]);
+										while (getline(singleArgStream2, segment, '='))
+										{
+											split1.emplace_back(segment);
+										}
 
-												LPWSTR name;
-												cookie->get_Name(&name);
+										Gallop::TitleViewController::onetimeToken = string(split1.back());
 
-												LPWSTR value;
+										auto t = il2cpp_thread_attach(il2cpp_domain_get());
 
-												if (name == L"login_session_id"s)
-												{
-													cookie->get_Value(&value);
-													sessionId = value;
-												}
+										il2cpp_symbols::get_method_pointer<void (*)(Il2CppString*)>("umamusume.dll", "Gallop", "Certification", "set_dmmViewerId", 1)(il2cpp_string_new(Gallop::TitleViewController::viewerId.data()));
+										il2cpp_symbols::get_method_pointer<void (*)(Il2CppString*)>("umamusume.dll", "Gallop", "Certification", "set_dmmOnetimeToken", 1)(il2cpp_string_new(Gallop::TitleViewController::onetimeToken.data()));
 
-												if (name == L"login_secure_id"s)
-												{
-													cookie->get_Value(&value);
-													secureId = value;
-												}
+										isLoginWebViewOpen = false;
 
-												if (!sessionId.empty() && !secureId.empty())
-												{
-													break;
-												}
-											}
+										auto viewController = GetCurrentViewController();
+										il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*)>(viewController->klass, "OnClickPushStart", 0)->methodPointer(viewController);
 
-											auto gameArgs = GetGameArgs(sessionId, secureId);
+										il2cpp_thread_detach(t);
+									}
 
-											if (!gameArgs.empty())
-											{
-												stringstream gameArgsStream(gameArgs);
-												string segment;
-												vector<string> split;
-												while (getline(gameArgsStream, segment, ' '))
-												{
-													split.emplace_back(segment);
-												}
-
-												stringstream singleArgStream1(split[0]);
-												vector<string> split1;
-												while (getline(singleArgStream1, segment, '='))
-												{
-													split1.emplace_back(segment);
-												}
-
-												Gallop::TitleViewController::viewerId = string(split1.back());
-
-												split1.clear();
-
-												stringstream singleArgStream2(split[1]);
-												while (getline(singleArgStream2, segment, '='))
-												{
-													split1.emplace_back(segment);
-												}
-
-												Gallop::TitleViewController::onetimeToken = string(split1.back());
-
-												auto t = il2cpp_thread_attach(il2cpp_domain_get());
-
-												il2cpp_symbols::get_method_pointer<void (*)(Il2CppString*)>("umamusume.dll", "Gallop", "Certification", "set_dmmViewerId", 1)(il2cpp_string_new(Gallop::TitleViewController::viewerId.data()));
-												il2cpp_symbols::get_method_pointer<void (*)(Il2CppString*)>("umamusume.dll", "Gallop", "Certification", "set_dmmOnetimeToken", 1)(il2cpp_string_new(Gallop::TitleViewController::onetimeToken.data()));
-
-												isLoginWebViewOpen = false;
-
-												auto viewController = GetCurrentViewController();
-												il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*)>(viewController->klass, "OnClickPushStart", 0)->methodPointer(viewController);
-
-												il2cpp_thread_detach(t);
-											}
-
-											webviewController->Close();
-											PostMessageW(hWnd, WM_CLOSE, NULL, NULL);
-
-											return S_OK;
-										}).Get());
+									webviewController->Close();
+									PostMessageW(hWnd, WM_CLOSE, NULL, NULL);
 								}
 
 								if (source.substr(0, 5) != L"https")
@@ -420,7 +527,7 @@ static void TitleViewController_OnClickPushStart_hook(Il2CppObject* self)
 			{
 				auto dialogData = Gallop::DialogCommon::Data();
 				dialogData.SetSimpleOneButtonMessage(
-					GetTextIdByName(L"Common0081"), 
+					GetTextIdByName(L"Common0081"),
 					il2cpp_string_new16(
 						(LocalifySettings::GetText("initial_disclaimer_1") + wstring(localizeextension_text(GetTextIdByName(L"Common0150"))->chars) + LocalifySettings::GetText("initial_disclaimer_2")).data()),
 					CreateDelegateStatic(*[](void*, Il2CppObject* dialog)
