@@ -1,6 +1,5 @@
 .code
 
-extern Ordinal_2_Original:QWORD
 extern mciExecute_Original:QWORD
 extern CloseDriver_Original:QWORD
 extern DefDriverProc_Original:QWORD
@@ -181,10 +180,6 @@ extern waveOutSetPlaybackRate_Original:QWORD
 extern waveOutSetVolume_Original:QWORD
 extern waveOutUnprepareHeader_Original:QWORD
 extern waveOutWrite_Original:QWORD
-
-Ordinal_2_EXPORT proc
-  jmp QWORD ptr Ordinal_2_Original
-Ordinal_2_EXPORT endp
 
 mciExecute_EXPORT proc
   jmp QWORD ptr mciExecute_Original

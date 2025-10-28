@@ -1,4 +1,4 @@
-LIBRARY proxy.dll
+LIBRARY loader.dll
 EXPORTS
 	ImmCallImeConsoleIME=ImmCallImeConsoleIME_EXPORT
 	ImmIMPGetIMEA=ImmIMPGetIMEA_EXPORT
@@ -137,7 +137,6 @@ EXPORTS
 	ImmUnregisterWordA=ImmUnregisterWordA_EXPORT
 	ImmUnregisterWordW=ImmUnregisterWordW_EXPORT
 	
-	Ordinal_2=Ordinal_2_EXPORT
 	mciExecute=mciExecute_EXPORT
 	CloseDriver=CloseDriver_EXPORT
 	DefDriverProc=DefDriverProc_EXPORT

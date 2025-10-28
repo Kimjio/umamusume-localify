@@ -340,7 +340,6 @@ namespace hook
 			return;
 		}
 
-		Ordinal_2_Original = GetProcAddress(original_dll, "Ordinal_2");
 		mciExecute_Original = GetProcAddress(original_dll, "mciExecute");
 		CloseDriver_Original = GetProcAddress(original_dll, "CloseDriver");
 		DefDriverProc_Original = GetProcAddress(original_dll, "DefDriverProc");

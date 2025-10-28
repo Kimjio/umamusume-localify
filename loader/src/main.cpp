@@ -1,7 +1,5 @@
 #include <stdinclude.hpp>
 
-#include <Shlwapi.h>
-
 extern void init_hook(filesystem::path module_path);
 extern void uninit_hook();
 

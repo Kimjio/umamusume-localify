@@ -1,14 +1,8 @@
 #include <stdinclude.hpp>
 #include <Shlwapi.h>
-#include <WinTrust.h>
-#include <mscat.h>
 
 #include <algorithm>
 #include <vector>
-
-#include <filesystem>
-
-#include <Windows.h>
 
 #include "MINT.h"
 
@@ -17,32 +11,6 @@ using namespace std;
 namespace
 {
 	string module_name;
-}
-
-void* NtCreateFile_orig = nullptr;
-NTSTATUS
-NTAPI
-NtCreateFile_hook(
-	_Out_ PHANDLE FileHandle,
-	_In_ ACCESS_MASK DesiredAccess,
-	_In_ POBJECT_ATTRIBUTES ObjectAttributes,
-	_Out_ PIO_STATUS_BLOCK IoStatusBlock,
-	_In_opt_ PLARGE_INTEGER AllocationSize,
-	_In_ ULONG FileAttributes,
-	_In_ ULONG ShareAccess,
-	_In_ ULONG CreateDisposition,
-	_In_ ULONG CreateOptions,
-	_In_reads_bytes_opt_(EaLength) PVOID EaBuffer,
-	_In_ ULONG EaLength
-)
-{
-	if (wstring(ObjectAttributes->ObjectName->Buffer).find(L"VERSION.dll") != wstring::npos)
-	{
-		UNICODE_STRING newName = RTL_CONSTANT_STRING(L"\\??\\C:\\Windows\\System32\\VERSION.dll");
-		ObjectAttributes->ObjectName = &newName;
-	}
-
-	return reinterpret_cast<decltype(NtCreateFile)*>(NtCreateFile_orig)(FileHandle, DesiredAccess, ObjectAttributes, IoStatusBlock, AllocationSize, FileAttributes, ShareAccess, CreateDisposition, CreateOptions, EaBuffer, EaLength);
 }
 
 void* NtQueryAttributesFile_orig = nullptr;
@@ -164,7 +132,7 @@ LoadLibraryExW_hook(
 	_In_ DWORD dwFlags
 )
 {
-	if (wstring(lpLibFileName).find(L"UnityPlayer.dll") != wstring::npos)
+	if (lpLibFileName && wstring(lpLibFileName).find(L"UnityPlayer.dll") != wstring::npos)
 	{
 		auto version = reinterpret_cast<decltype(LoadLibraryExW)*>(LoadLibraryExW_orig)(L"localify.dll", hFile, dwFlags);
 		wstring module_name;
@@ -212,7 +180,8 @@ CheckRemoteDebuggerPresent_hook(
 	_Out_ PBOOL pbDebuggerPresent
 )
 {
-	return FALSE;
+	*pbDebuggerPresent = FALSE;
+	return TRUE;
 }
 
 void* IsDebuggerPresent_orig = nullptr;
@@ -245,10 +214,6 @@ void init_hook(filesystem::path module_path)
 	MH_CreateHook(LoadLibraryExW_addr, LoadLibraryExW_hook, &LoadLibraryExW_orig);
 	MH_EnableHook(LoadLibraryExW_addr);
 
-	auto CreateProcessW_addr = GetProcAddress(GetModuleHandleW(L"kernel32.dll"), "CreateProcessW");
-	MH_CreateHook(CreateProcessW_addr, CreateProcessW_hook, &CreateProcessW_orig);
-	MH_EnableHook(CreateProcessW_addr);
-
 	auto CheckRemoteDebuggerPresent_addr = GetProcAddress(GetModuleHandleW(L"kernel32.dll"), "CheckRemoteDebuggerPresent");
 	MH_CreateHook(CheckRemoteDebuggerPresent_addr, CheckRemoteDebuggerPresent_hook, &CheckRemoteDebuggerPresent_orig);
 	MH_EnableHook(CheckRemoteDebuggerPresent_addr);
@@ -272,11 +237,6 @@ void init_hook(filesystem::path module_path)
 
 	MH_CreateHook(FindNextFileA, FindNextFileA_hook, &FindNextFileA_orig);
 	MH_EnableHook(FindNextFileA);
-
-	MH_CreateHook(NtCreateFile, NtCreateFile_hook, &NtCreateFile_orig);
-	MH_EnableHook(NtCreateFile);
-
-	IsGUIThread(FALSE);
 }
 
 void uninit_hook()
