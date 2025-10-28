@@ -12616,11 +12616,18 @@ namespace
 		vector<pair<const wstring, const wstring>> text_id_static_entries;
 		vector<pair<const wstring, const wstring>> text_id_not_matched_entries;
 		// 0 is None
-		for (int i = 1;; i++)
+		for (uint64_t i = 1;; i++)
 		{
-			auto* str = reinterpret_cast<decltype(localize_get_hook)*>(localize_get_orig)(i);
+			auto textIdName = GetTextIdNameById(i);
 
-			if (str && *str->chars)
+			if (textIdName.empty())
+			{
+				break;
+			}
+
+			auto str = reinterpret_cast<decltype(localize_get_hook)*>(localize_get_orig)(i);
+
+			if (str)
 			{
 				if (config::static_entries_use_text_id_name)
 				{
@@ -12639,15 +12646,6 @@ namespace
 				else
 				{
 					logger::write_entry(i, str->chars);
-				}
-			}
-			else
-			{
-				// check next string, if it's still empty, then we are done!
-				auto* nextStr = reinterpret_cast<decltype(localize_get_hook)*>(localize_get_orig)(i + 1);
-				if (!(nextStr && *nextStr->chars))
-				{
-					break;
 				}
 			}
 		}

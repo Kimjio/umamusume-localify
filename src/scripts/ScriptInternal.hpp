@@ -688,7 +688,9 @@ inline uint64_t GetTextIdByName(const wstring& name)
 
 inline wstring GetTextIdNameById(int id)
 {
-	return GetEnumName(GetRuntimeType("umamusume.dll", "Gallop", "TextId"), id)->chars;
+	auto name = GetEnumName(GetRuntimeType("umamusume.dll", "Gallop", "TextId"), id);
+
+	return name ? name->chars : L"";
 }
 
 inline Il2CppObject* GetCurrentViewController()
