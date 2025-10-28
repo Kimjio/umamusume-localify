@@ -53,8 +53,8 @@ workspace "umamusume-localify"
 	editandcontinue "Off"
 	warnings "Off"
 	characterset "Unicode"
-	cppdialect "C++20"
-	cdialect "C17"
+	cppdialect "C++latest"
+	cdialect "C23"
 
 	flags {
 		"NoIncrementalLink",
@@ -105,8 +105,8 @@ workspace "umamusume-localify"
 	}
 
 	nuget {
-		"Microsoft.Web.WebView2:1.0.3065.39",
-		"Microsoft.Windows.ImplementationLibrary:1.0.240803.1"
+		"Microsoft.Web.WebView2:1.0.3537.50",
+		"Microsoft.Windows.ImplementationLibrary:1.0.250325.1"
 	}
 
 	dependencies.imports()

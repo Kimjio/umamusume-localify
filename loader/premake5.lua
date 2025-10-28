@@ -50,8 +50,8 @@ workspace "umamusume-localify-loader"
 	editandcontinue "Off"
 	warnings "Off"
 	characterset "Unicode"
-	cppdialect "C++20"
-	cdialect "C17"
+	cppdialect "C++latest"
+	cdialect "C23"
 
 	flags {
 		"NoIncrementalLink",
@@ -62,8 +62,8 @@ workspace "umamusume-localify-loader"
 	staticruntime "Off"
 
 	filter "configurations:Release"
-		optimize "Off"
-		buildoptions "/Oi /MD"
+		optimize "Full"
+		buildoptions "/Os"
 
 	filter "configurations:Debug"
 		optimize "Debug"

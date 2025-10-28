@@ -1,2 +1,2 @@
 @echo off
-utils\bin\premake5 %* vs2022
+utils\bin\premake5 %* vs2026
