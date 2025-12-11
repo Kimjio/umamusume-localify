@@ -262,9 +262,9 @@ int sqlite3_wal_checkpoint_v2(
 
 unsigned char* sqlite3mc_codec_data(sqlite3* db, const char* zDbName, const char* paramName);
 
-int sqlite3mc_config(sqlite3* db, const char* paramName, int newValue);
+int sqlite3mc_config(sqlite3* db, const char* paramName, int neU16Value);
 
-int sqlite3mc_config_cipher(sqlite3* db, const char* cipherName, const char* paramName, int newValue);
+int sqlite3mc_config_cipher(sqlite3* db, const char* cipherName, const char* paramName, int neU16Value);
 
 DEFINE_PROC(sqlite3_bind_blob);
 DEFINE_PROC(sqlite3_bind_double);
@@ -871,31 +871,31 @@ unsigned char* sqlite3mc_codec_data(sqlite3* db, const char* zDbName, const char
 	return nullptr;
 }
 
-int sqlite3mc_config(sqlite3* db, const char* paramName, int newValue)
+int sqlite3mc_config(sqlite3* db, const char* paramName, int neU16Value)
 {
 	if (sqlite3mc_config_orig)
 	{
-		return ORIG_SYM(sqlite3mc_config)(db, paramName, newValue);
+		return ORIG_SYM(sqlite3mc_config)(db, paramName, neU16Value);
 	}
 
 	if (libnative)
 	{
-		CALL_PROC(sqlite3mc_config)(db, paramName, newValue);
+		CALL_PROC(sqlite3mc_config)(db, paramName, neU16Value);
 	}
 
 	return SQLITE_OK;
 }
 
-int sqlite3mc_config_cipher(sqlite3* db, const char* cipherName, const char* paramName, int newValue)
+int sqlite3mc_config_cipher(sqlite3* db, const char* cipherName, const char* paramName, int neU16Value)
 {
 	if (sqlite3mc_config_cipher_orig)
 	{
-		return ORIG_SYM(sqlite3mc_config_cipher)(db, cipherName, paramName, newValue);
+		return ORIG_SYM(sqlite3mc_config_cipher)(db, cipherName, paramName, neU16Value);
 	}
 
 	if (libnative)
 	{
-		CALL_PROC(sqlite3mc_config_cipher)(db, cipherName, paramName, newValue);
+		CALL_PROC(sqlite3mc_config_cipher)(db, cipherName, paramName, neU16Value);
 	}
 
 	return SQLITE_OK;

@@ -7,7 +7,7 @@
 
 using namespace std;
 
-extern uint64_t GetTextIdByName(const wstring& name);
+extern uint64_t GetTextIdByName(const u16string& name);
 
 namespace
 {
@@ -15,7 +15,7 @@ namespace
 
 	string GetViewName(string viewId)
 	{
-		wstring textId;
+		u16string textId;
 		if (viewId == "Splash")
 		{
 
@@ -59,7 +59,7 @@ namespace
 		if (viewId == "Home" ||
 			viewId == "HomeHub")
 		{
-			textId = L"Home0036";
+			textId = u"Home0036";
 		}
 		if (viewId == "Live")
 		{
@@ -254,7 +254,7 @@ namespace
 			viewId == "CharacterNoteMain" ||
 			viewId == "CharacterNoteHub")
 		{
-			textId = L"Directory0001";
+			textId = u"Directory0001";
 		}
 		if (viewId == "CharacterCardLimitBreakCut")
 		{
@@ -262,11 +262,11 @@ namespace
 		}
 		if (viewId == "TipsComic")
 		{
-			textId = L"Outgame0072";
+			textId = u"Outgame0072";
 		}
 		if (viewId == "TipsChara")
 		{
-			textId = L"Outgame0093";
+			textId = u"Outgame0093";
 		}
 		if (viewId == "ProfileTop")
 		{
@@ -302,14 +302,14 @@ namespace
 		}
 		if (viewId == "PhotoLibrary")
 		{
-			textId = L"Outgame213009";
+			textId = u"Outgame213009";
 		}
 		if (viewId == "PhotoStudio" ||
 			viewId == "PhotoStudioPlayCut" ||
 			viewId == "PhotoStudioViewTop" ||
 			viewId == "PhotoStudioCharaViewer")
 		{
-			textId = L"Outgame352001";
+			textId = u"Outgame352001";
 		}
 		if (viewId == "Mission")
 		{
@@ -666,7 +666,7 @@ namespace
 
 		if (!textId.empty())
 		{
-			return wide_u8(localizeextension_text_hook(GetTextIdByName(textId))->chars).append(" ");
+			return u16_u8(localizeextension_text_hook(GetTextIdByName(textId))->chars).append(" ");
 		}
 
 		return "";
@@ -674,42 +674,42 @@ namespace
 
 	string GetSceneName(string sceneId)
 	{
-		wstring textId;
+		u16string textId;
 		if (sceneId == "Title")
 		{
 
 		}
 		if (sceneId == "Home")
 		{
-			textId = L"Home0036";
+			textId = u"Home0036";
 		}
 		if (sceneId == "Race")
 		{
-			textId = L"Outgame213036";
+			textId = u"Outgame213036";
 		}
 		if (sceneId == "Live")
 		{
-			textId = L"Common0035";
+			textId = u"Common0035";
 		}
 		if (sceneId == "LiveTheater")
 		{
-			textId = L"Home0037";
+			textId = u"Home0037";
 		}
 		if (sceneId == "Story" || sceneId == "StoryMovie")
 		{
-			textId = L"Home0066";
+			textId = u"Home0066";
 		}
 		if (sceneId == "Gacha")
 		{
-			textId = L"Gacha0004";
+			textId = u"Gacha0004";
 		}
 		if (sceneId == "Episode")
 		{
-			textId = L"Home0036";
+			textId = u"Home0036";
 		}
 		if (sceneId == "SingleMode")
 		{
-			textId = L"Common0273";
+			textId = u"Common0273";
 		}
 		if (sceneId == "OutGame")
 		{
@@ -717,19 +717,19 @@ namespace
 		}
 		if (sceneId == "Circle")
 		{
-			textId = L"Circle0321";
+			textId = u"Circle0321";
 		}
 		if (sceneId == "DailyRace")
 		{
-			textId = L"Race0043";
+			textId = u"Race0043";
 		}
 		if (sceneId == "LegendRace")
 		{
-			textId = L"Race0072";
+			textId = u"Race0072";
 		}
 		if (sceneId == "TeamStadium")
 		{
-			textId = L"Race0583";
+			textId = u"Race0583";
 		}
 		if (sceneId == "CraneGame")
 		{
@@ -737,7 +737,7 @@ namespace
 		}
 		if (sceneId == "Champions" || sceneId == "ChampionsLobby")
 		{
-			textId = L"Champions0034";
+			textId = u"Champions0034";
 		}
 		if (sceneId == "Tutorial")
 		{
@@ -745,27 +745,27 @@ namespace
 		}
 		if (sceneId == "StoryEvent")
 		{
-			textId = L"StoryEvent0018";
+			textId = u"StoryEvent0018";
 		}
 		if (sceneId == "ChallengeMatch")
 		{
-			textId = L"ChallengeMatch408005";
+			textId = u"ChallengeMatch408005";
 		}
 		if (sceneId == "RoomMatch")
 		{
-			textId = L"RoomMatch0001";
+			textId = u"RoomMatch0001";
 		}
 		if (sceneId == "PracticeRace")
 		{
-			textId = L"PracticeRace400101";
+			textId = u"PracticeRace400101";
 		}
 		if (sceneId == "TrainingChallenge")
 		{
-			textId = L"TrainingChallenge4180100";
+			textId = u"TrainingChallenge4180100";
 		}
 		if (sceneId == "TeamBuilding")
 		{
-			textId = L"TeamBuilding408033";
+			textId = u"TeamBuilding408033";
 		}
 		if (sceneId == "FanRaid")
 		{
@@ -777,11 +777,11 @@ namespace
 		}
 		if (sceneId == "CollectEventMap")
 		{
-			textId = L"CollectEvent508000";
+			textId = u"CollectEvent508000";
 		}
 		if (sceneId == "CollectRaid")
 		{
-			textId = L"CollectEvent508000";
+			textId = u"CollectEvent508000";
 		}
 		if (sceneId == "MapEvent")
 		{
@@ -798,7 +798,7 @@ namespace
 
 		if (!textId.empty())
 		{
-			return wide_u8(localizeextension_text_hook(GetTextIdByName(textId))->chars).append(" ");
+			return u16_u8(localizeextension_text_hook(GetTextIdByName(textId))->chars).append(" ");
 		}
 
 		return sceneId;

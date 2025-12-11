@@ -19,7 +19,7 @@ namespace Cute
 
 			static wil::com_ptr<ICoreWebView2Controller> webviewController;
 
-			static unordered_map<wstring, wstring> customFontMap;
+			static unordered_map<u16string, u16string> customFontMap;
 
 			void OpenWeb(Il2CppString* url);
 

@@ -16,9 +16,9 @@
 
 Il2CppDefaults il2cpp_defaults;
 
-Il2CppString* il2cpp_string_new16(const wchar_t* value)
+Il2CppString* il2cpp_string_new16(const Il2CppChar* value)
 {
-	return il2cpp_string_new_utf16(value, wcslen(value));
+	return il2cpp_string_new_utf16(value, std::char_traits<Il2CppChar>::length(value));
 }
 
 #include "config/config.hpp"
@@ -38,7 +38,7 @@ FieldInfo* il2cpp_class_get_field_from_name_wrap(Il2CppClass* klass, const char*
 
 	if (config::code_map.HasMember("!common"))
 	{
-		auto commonMap = config::code_map["!common"].GetObjectW();
+		auto commonMap = config::code_map["!common"].GetObj();
 		if (commonMap.HasMember(name))
 		{
 			auto field = il2cpp_class_get_field_from_name(klass, commonMap[name].GetString());
@@ -54,7 +54,7 @@ FieldInfo* il2cpp_class_get_field_from_name_wrap(Il2CppClass* klass, const char*
 		return il2cpp_class_get_field_from_name(klass, name);
 	}
 
-	auto classMap = config::code_map[className.data()].GetObjectW();
+	auto classMap = config::code_map[className.data()].GetObj();
 
 	if (classMap.HasMember(name))
 	{
@@ -83,7 +83,7 @@ FieldInfo* il2cpp_class_get_field_from_name_wrap(Il2CppClass* klass, const char*
 	if (classMap.HasMember("!extends"))
 	{
 		auto parentName = classMap["!extends"].GetString();
-		auto parentMap = config::code_map[parentName].GetObjectW();
+		auto parentMap = config::code_map[parentName].GetObj();
 		auto parentClass = klass->parent;
 
 		if (parentMap.HasMember((name + ".index"s).data()))

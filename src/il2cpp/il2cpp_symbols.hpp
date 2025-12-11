@@ -117,7 +117,7 @@ extern Il2CppDefaults il2cpp_defaults;
 
 constexpr int IgnoreNumberOfArguments = -1;
 
-Il2CppString* il2cpp_string_new16(const wchar_t* value);
+Il2CppString* il2cpp_string_new16(const Il2CppChar* value);
 
 FieldInfo* il2cpp_class_get_field_from_name_wrap(Il2CppClass* klass, const char* name);
 

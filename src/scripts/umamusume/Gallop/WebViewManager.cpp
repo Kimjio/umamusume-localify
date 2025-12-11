@@ -168,8 +168,8 @@ static void OpenNewsDialog()
 	if (config::use_third_party_news)
 	{
 		OpenWebViewDialog(il2cpp_string_new("https://m.cafe.daum.net/umamusume-kor/Z4os"),
-			LocalizeExtention_Text(GetTextIdByName(L"Common0081")),
-			GetTextIdByName(L"Common0007"));
+			LocalizeExtention_Text(GetTextIdByName(u"Common0081")),
+			GetTextIdByName(u"Common0007"));
 	}
 	else
 	{
@@ -220,24 +220,24 @@ static string GetOqupieToken()
 
 	auto deviceId = reinterpret_cast<Il2CppString * (*)()>(il2cpp_class_get_method_from_name(
 		SystemInfo, "get_deviceUniqueIdentifier", 0)->methodPointer)();
-	auto deviceIdU8 = wide_u8(deviceId->chars);
+	auto deviceIdU8 = u16_u8(deviceId->chars);
 
 	auto deviceModel = reinterpret_cast<Il2CppString * (*)()>(il2cpp_class_get_method_from_name(
 		SystemInfo, "get_deviceModel", 0)->methodPointer)();
-	auto deviceModelU8 = wide_u8(deviceModel->chars);
+	auto deviceModelU8 = u16_u8(deviceModel->chars);
 
 	auto systemMemorySize = reinterpret_cast<int (*)()>(il2cpp_class_get_method_from_name(
 		SystemInfo, "get_systemMemorySize", 0)->methodPointer)();
 
 	auto operatingSystem = reinterpret_cast<Il2CppString * (*)()>(il2cpp_class_get_method_from_name(
 		SystemInfo, "get_operatingSystem", 0)->methodPointer)();
-	auto operatingSystemU8 = wide_u8(operatingSystem->chars);
+	auto operatingSystemU8 = u16_u8(operatingSystem->chars);
 
 	auto manager = GetSingletonInstanceByMethod(il2cpp_symbols::get_class(ASSEMBLY_NAME, "", "KakaoManager"));
 	Il2CppString* playerId = reinterpret_cast<Il2CppString * (*)(
 		Il2CppObject*)>(il2cpp_class_get_method_from_name(manager->klass, "get_PlayerID",
 			0)->methodPointer)(manager);
-	auto playerIdU8 = wide_u8(playerId->chars);
+	auto playerIdU8 = u16_u8(playerId->chars);
 
 	auto AppVersionName = il2cpp_symbols::get_method_pointer<Il2CppString * (*)()>(ASSEMBLY_NAME, "Gallop", "DeviceHelper", "GetAppVersionName", 0)();
 
@@ -272,7 +272,7 @@ static string GetOqupieToken()
 	payload += R"(",)";
 
 	payload += R"("version_client":")";
-	payload += wide_u8(AppVersionName->chars).data();
+	payload += u16_u8(AppVersionName->chars).data();
 	payload += R"(",)";
 	payload += R"("exp":)";
 	auto nowSec = chrono::duration_cast<chrono::seconds>(
@@ -393,8 +393,8 @@ static Il2CppString* Gallop_WebViewManager_GetUrl_hook(Il2CppObject* self, Gallo
 	if (Game::CurrentGameRegion == Game::Region::ENG &&
 		Game::CurrentGameStore == Game::Store::Steam)
 	{
-		auto newUrl = wstring(serverUrl->chars);
-		replaceAll(newUrl, L"api", L"webview");
+		auto newUrl = u16string(serverUrl->chars);
+		replaceAll(newUrl, u"api", u"webview");
 		serverUrl = il2cpp_string_new16(newUrl.data());
 	}
 
@@ -488,10 +488,10 @@ static void Gallop_WebViewManager_SetCustomFont_hook(Il2CppObject* self, Gallop:
 	if (fontName < fontFilePaths->max_length)
 	{
 		auto filePath = fontFilePaths->vector[fontName];
-		wstringstream pathStream(filePath->chars);
-		wstring segment;
-		vector<wstring> splited;
-		while (getline(pathStream, segment, L'/'))
+		u16stringstream pathStream(filePath->chars);
+		u16string segment;
+		vector<u16string> splited;
+		while (getline(pathStream, segment, u'/'))
 		{
 			splited.emplace_back(segment);
 		}
@@ -501,7 +501,7 @@ static void Gallop_WebViewManager_SetCustomFont_hook(Il2CppObject* self, Gallop:
 			auto LocalFile = il2cpp_symbols::get_method_pointer<Il2CppObject * (*)()>(ASSEMBLY_NAME, "Gallop", "AssetManager", "get_LocalFile", 0)();
 			auto pathAllowUnknown = il2cpp_class_get_method_from_name_type<Il2CppString * (*)(Il2CppObject*, Il2CppString*)>(LocalFile->klass, "GetPathAllowUnknown", 1)->methodPointer(LocalFile, filePath);
 
-			if (filesystem::exists(wstring(pathAllowUnknown->chars)))
+			if (filesystem::exists(u16string(pathAllowUnknown->chars)))
 			{
 				Cute::Core::WebViewManager::customFontMap.emplace(splited.back(), pathAllowUnknown->chars);
 			}
@@ -571,8 +571,8 @@ static void DialogHomeMenuMain_SetupTrainer_hook(Il2CppObject* self, Il2CppObjec
 			auto newFn = *([]()
 				{
 					OpenWebViewDialog(il2cpp_string_new("https://guide.umms.kakaogames.com"),
-						LocalizeExtention_Text(GetTextIdByName(L"Menu900001")),
-						GetTextIdByName(L"Common0007"));
+						LocalizeExtention_Text(GetTextIdByName(u"Menu900001")),
+						GetTextIdByName(u"Common0007"));
 				});
 			MH_CreateHook(reinterpret_cast<void*>(guideCallback->method_ptr),
 				reinterpret_cast<void*>(newFn), &DialogHomeMenuMain_SetupTrainer_callback);
@@ -610,8 +610,8 @@ static void DialogHomeMenuSupport_OnSelectMenu_hook(int menu) {
 	case 0:
 	{
 		// FAQ
-		auto closeText = GetTextIdByName(L"Common0007");
-		auto faqText = GetTextIdByName(L"Menu0013");
+		auto closeText = GetTextIdByName(u"Common0007");
+		auto faqText = GetTextIdByName(u"Menu0013");
 		auto url = string(
 			" https://kakaogames.oqupie.com/portals/1576/categories/3438?jwt=").append(
 				GetOqupieToken());
@@ -622,8 +622,8 @@ static void DialogHomeMenuSupport_OnSelectMenu_hook(int menu) {
 	case 1:
 	{
 		// QNA
-		auto closeText = GetTextIdByName(L"Common0007");
-		auto qnaText = GetTextIdByName(L"Common0050");
+		auto closeText = GetTextIdByName(u"Common0007");
+		auto qnaText = GetTextIdByName(u"Common0050");
 		auto url = string("https://kakaogames.oqupie.com/portals/finder?jwt=").append(
 			GetOqupieToken());
 		OpenWebViewDialog(il2cpp_string_new(url.data()), LocalizeExtention_Text(qnaText),
@@ -633,8 +633,8 @@ static void DialogHomeMenuSupport_OnSelectMenu_hook(int menu) {
 	case 2:
 	{
 		// Term of service
-		auto closeText = GetTextIdByName(L"Common0007");
-		auto termOfService = GetTextIdByName(L"Outgame0082");
+		auto closeText = GetTextIdByName(u"Common0007");
+		auto termOfService = GetTextIdByName(u"Outgame0082");
 		OpenWebViewDialog(il2cpp_string_new(
 			"https://web-data-game.kakaocdn.net/real/www/html/terms/index.html?service=S0001&type=T001&country=kr&lang=ko"),
 			LocalizeExtention_Text(termOfService), closeText);
@@ -642,8 +642,8 @@ static void DialogHomeMenuSupport_OnSelectMenu_hook(int menu) {
 	case 3:
 	{
 		// Privacy policy
-		auto closeText = GetTextIdByName(L"Common0007");
-		auto privacyPolicy = GetTextIdByName(L"AccoutDataLink0087");
+		auto closeText = GetTextIdByName(u"Common0007");
+		auto privacyPolicy = GetTextIdByName(u"AccoutDataLink0087");
 		OpenWebViewDialog(il2cpp_string_new(
 			"https://web-data-game.kakaocdn.net/real/www/html/terms/index.html?service=S0001&type=T003&country=kr&lang=ko"),
 			LocalizeExtention_Text(privacyPolicy), closeText);
@@ -663,8 +663,8 @@ static void DialogTitleMenu_OnSelectMenu_hook(int menu)
 		return;
 	case 2:
 	{
-		auto closeText = GetTextIdByName(L"Common0007");
-		auto qnaText = GetTextIdByName(L"Common0050");
+		auto closeText = GetTextIdByName(u"Common0007");
+		auto qnaText = GetTextIdByName(u"Common0050");
 		auto url = string("https://kakaogames.oqupie.com/portals/finder?jwt=").append(
 			GetOqupieToken());
 		OpenWebViewDialog(il2cpp_string_new(url.data()), LocalizeExtention_Text(qnaText),
@@ -724,8 +724,8 @@ static void DialogSingleModeTopMenu_Setup_hook(Il2CppObject* self)
 		auto newFn = *([]()
 			{
 				OpenWebViewDialog(il2cpp_string_new("https://guide.umms.kakaogames.com"),
-					LocalizeExtention_Text(GetTextIdByName(L"Menu900001")),
-					GetTextIdByName(L"Common0007"));
+					LocalizeExtention_Text(GetTextIdByName(u"Menu900001")),
+					GetTextIdByName(u"Common0007"));
 			});
 		if (!DialogSingleModeTopMenu_Setup_guide_callback)
 		{
@@ -749,8 +749,8 @@ static void ChampionsInfoWebViewButton_OnClick_hook(Il2CppObject*)
 			1)->methodPointer
 		)(manager, il2cpp_string_new("kakaoUmaChampion"));
 
-	OpenWebViewDialog(url, LocalizeExtention_Text(GetTextIdByName(L"Common0161")),
-		GetTextIdByName(L"Common0007"));
+	OpenWebViewDialog(url, LocalizeExtention_Text(GetTextIdByName(u"Common0161")),
+		GetTextIdByName(u"Common0007"));
 }
 
 static void StoryEventTopViewController_OnClickHelpButton_hook(Il2CppObject*)
@@ -802,8 +802,8 @@ static void BannerUI_OnClickBannerItem_hook(Il2CppObject* self, Il2CppObject* bu
 	if (masterType == 6)
 	{
 		OpenWebViewDialog(il2cpp_string_new("https://m.cafe.daum.net/umamusume-kor/ZBhv"),
-			LocalizeExtention_Text(GetTextIdByName(L"Common0161")),
-			GetTextIdByName(L"Common0007"));
+			LocalizeExtention_Text(GetTextIdByName(u"Common0161")),
+			GetTextIdByName(u"Common0007"));
 		return;
 	}
 
@@ -812,7 +812,7 @@ static void BannerUI_OnClickBannerItem_hook(Il2CppObject* self, Il2CppObject* bu
 
 static void KakaoManager_OnKakaoShowInAppWebView_hook(Il2CppObject* self, Il2CppString* url, Il2CppDelegate* isSuccess)
 {
-	if (url->chars == L"https://m.cafe.daum.net/umamusume-kor/Z4os?boardType=notice"s) {
+	if (url->chars == u"https://m.cafe.daum.net/umamusume-kor/Z4os?boardType=notice"s) {
 		auto NewsDialogInfo = il2cpp_symbols::get_class(ASSEMBLY_NAME, "Gallop",
 			"HomeStartCheckSequence/NewsDialogInfo");
 		auto instance = il2cpp_object_new(NewsDialogInfo);
@@ -827,7 +827,7 @@ static void KakaoManager_OnKakaoShowInAppWebView_hook(Il2CppObject* self, Il2Cpp
 		return;
 	}
 
-	auto closeText = GetTextIdByName(L"Common0007");
+	auto closeText = GetTextIdByName(u"Common0007");
 
 	OpenWebViewDialog(url, il2cpp_string_new(""), closeText);
 }
@@ -837,7 +837,7 @@ static void Gallop_WebViewManager_OpenGachaDetail_hook(Il2CppObject* self, int g
 	auto webViewManager = Gallop::WebViewManager(self);
 
 	auto data = Gallop::DialogCommon::Data();
-	data.SetSimpleOneButtonMessage(LocalizeExtention_Text(GetTextIdByName(L"Gacha0010")), nullptr, onClose, GetTextIdByName(L"Common0007"), Gallop::DialogCommonBase::FormType::BIG_ONE_BUTTON);
+	data.SetSimpleOneButtonMessage(LocalizeExtention_Text(GetTextIdByName(u"Gacha0010")), nullptr, onClose, GetTextIdByName(u"Common0007"), Gallop::DialogCommonBase::FormType::BIG_ONE_BUTTON);
 
 	auto gachaUrl = Gallop::WebViewManager::GetGachaUrl(gachaId);
 

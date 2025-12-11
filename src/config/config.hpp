@@ -18,18 +18,28 @@
 #include <rapidjson/prettywriter.h>
 #include <rapidjson/error/en.h>
 
+#define IsObj IsObject
+
 #include "il2cpp/il2cpp_symbols.hpp"
 
 #include "experiments.h"
 
-typedef rapidjson::GenericDocument<rapidjson::UTF16<>> WDocument;
-typedef rapidjson::GenericValue<rapidjson::UTF16<>> WValue;
-typedef rapidjson::GenericStringBuffer<rapidjson::UTF16<>> WStringBuffer;
-
 using namespace std;
 
+using u16stringstream = basic_stringstream<char16_t, char_traits<char16_t>, allocator<char16_t>>;
+using u16istream = basic_istream<char16_t, char_traits<char16_t>>;
+using u16ifstream = basic_ifstream<char16_t, char_traits<char16_t>>;
+
+typedef rapidjson::BasicIStreamWrapper<u16istream> U16IStreamWrapper;
+
+typedef rapidjson::UTF16<char16_t> UTF16;
+typedef rapidjson::GenericDocument<UTF16> U16Document;
+typedef rapidjson::GenericValue<UTF16> U16Value;
+typedef rapidjson::GenericStringBuffer<UTF16> U16StringBuffer;
+typedef rapidjson::GenericObject<false, U16Value> U16Object;
+
 struct ReplaceAsset {
-	wstring path;
+	u16string path;
 	Il2CppObject* asset;
 };
 
@@ -55,27 +65,27 @@ namespace config
 	extern float resolution_3d_scale;
 	extern bool replace_to_builtin_font;
 	extern bool replace_to_custom_font;
-	extern wstring font_assetbundle_path;
-	extern wstring font_asset_name;
-	extern wstring tmpro_font_asset_name;
+	extern u16string font_assetbundle_path;
+	extern u16string font_asset_name;
+	extern u16string tmpro_font_asset_name;
 	extern bool auto_fullscreen;
 	extern int graphics_quality;
 	extern int anti_aliasing;
 	extern int anisotropic_filtering;
 	extern int vsync_count;
 	extern bool ui_loading_show_orientation_guide;
-	extern wstring custom_title_name;
-	extern unordered_map<wstring, ReplaceAsset> replace_assets;
-	extern wstring replace_assetbundle_file_path;
-	extern wstring replace_atlas_assetbundle_file_path;
-	extern vector<wstring> replace_assetbundle_file_paths;
-	extern wstring replace_text_db_path;
+	extern u16string custom_title_name;
+	extern unordered_map<u16string, ReplaceAsset> replace_assets;
+	extern u16string replace_assetbundle_file_path;
+	extern u16string replace_atlas_assetbundle_file_path;
+	extern vector<u16string> replace_assetbundle_file_paths;
+	extern u16string replace_text_db_path;
 	extern bool character_system_text_caption;
 	extern int character_system_text_caption_line_char_count;
 	extern int character_system_text_caption_font_size;
-	extern wstring character_system_text_caption_font_color;
-	extern wstring character_system_text_caption_outline_size;
-	extern wstring character_system_text_caption_outline_color;
+	extern u16string character_system_text_caption_font_color;
+	extern u16string character_system_text_caption_outline_size;
+	extern u16string character_system_text_caption_outline_color;
 	extern float character_system_text_caption_background_alpha;
 	extern float character_system_text_caption_position_x;
 	extern float character_system_text_caption_position_y;
@@ -103,14 +113,14 @@ namespace config
 	extern bool notification_jobs;
 	extern bool msgpack_notifier;
 	extern bool msgpack_notifier_request;
-	extern wstring msgpack_notifier_host;
+	extern u16string msgpack_notifier_host;
 	extern int msgpack_notifier_connection_timeout_ms;
 	extern bool msgpack_notifier_print_error;
 	extern bool use_third_party_news;
 	extern bool taskbar_show_progress_on_download;
 	extern bool taskbar_show_progress_on_connecting;
 
-	extern wstring text_id_dict;
+	extern u16string text_id_dict;
 
 	extern rapidjson::Document code_map;
 	extern rapidjson::Document fn_map;
@@ -118,20 +128,20 @@ namespace config
 	extern rapidjson::Document faq_index;
 	extern rapidjson::Document glossary_index;
 
-	extern wstring web_icon_sprite_path;
-	extern wstring web_icon_sprite_version;
-	extern wstring web_font_path;
+	extern u16string web_icon_sprite_path;
+	extern u16string web_icon_sprite_version;
+	extern u16string web_font_path;
 
-	extern wstring persistent_data_path;
+	extern u16string persistent_data_path;
 
 	extern bool has_json_parse_error;
-	extern wstring json_parse_error_msg;
+	extern u16string json_parse_error_msg;
 
-	extern vector<wstring> external_dlls_path;
-	extern vector<wstring> dicts;
+	extern vector<u16string> external_dlls_path;
+	extern vector<u16string> dicts;
 
-	extern WDocument config_document;
-	extern WDocument backup_document;
+	extern U16Document config_document;
+	extern U16Document backup_document;
 
 	namespace runtime
 	{
@@ -142,7 +152,7 @@ namespace config
 		extern Il2CppObject* fontAssets;
 		extern Il2CppObject* replaceAtlas;
 		extern vector<Il2CppObject*> replaceAssets;
-		extern vector<wstring> replaceAssetNames;
+		extern vector<u16string> replaceAssetNames;
 	}
 
 	void read_config_init();

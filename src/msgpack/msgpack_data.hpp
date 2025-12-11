@@ -82,8 +82,8 @@ namespace MsgPackData
 			return;
 		}
 
-		auto wPath = GetIconPath(localPushType);
-		wstring path = wPath->chars;
+		auto u16Path = GetIconPath(localPushType);
+		u16string path = u16Path->chars;
 		auto parentDir = filesystem::path(path).parent_path();
 
 		if (!filesystem::exists(parentDir))
@@ -149,7 +149,7 @@ namespace MsgPackData
 					DesktopNotificationManagerCompat::RemoveFromScheduleByTag(L"TP");
 					auto title = u8_wide(MasterDB::GetTextData(6, leader_chara_id));
 					auto content = u8_wide(MasterDB::GetTextData(184, leader_chara_id));
-					DesktopNotificationManagerCompat::AddScheduledToastNotification(title.data(), content.data(), L"TP", GetIconPath(Gallop::LocalPushDefine::LocalPushType::Tp)->chars, MsgPackData::tp_info["max_recovery_time"].int64_value() * 1000);
+					DesktopNotificationManagerCompat::AddScheduledToastNotification(title.data(), content.data(), L"TP", u16_wide(GetIconPath(Gallop::LocalPushDefine::LocalPushType::Tp)->chars).data(), MsgPackData::tp_info["max_recovery_time"].int64_value() * 1000);
 				}
 			}
 		}
@@ -177,7 +177,7 @@ namespace MsgPackData
 					DesktopNotificationManagerCompat::RemoveFromScheduleByTag(L"RP");
 					auto title = u8_wide(MasterDB::GetTextData(6, leader_chara_id));
 					auto content = u8_wide(MasterDB::GetTextData(185, leader_chara_id));
-					DesktopNotificationManagerCompat::AddScheduledToastNotification(title.data(), content.data(), L"RP", GetIconPath(Gallop::LocalPushDefine::LocalPushType::Rp)->chars, MsgPackData::rp_info["max_recovery_time"].int64_value() * 1000);
+					DesktopNotificationManagerCompat::AddScheduledToastNotification(title.data(), content.data(), L"RP", u16_wide(GetIconPath(Gallop::LocalPushDefine::LocalPushType::Rp)->chars).data(), MsgPackData::rp_info["max_recovery_time"].int64_value() * 1000);
 				}
 			}
 		}
@@ -232,7 +232,7 @@ namespace MsgPackData
 
 						int notiId = Gallop::PushNotificationManager::Instance().MakeNotificationId(Gallop::LocalPushDefine::GetJobsLocalPushTypeByIndex(local_push_type_index), 0);
 
-						DesktopNotificationManagerCompat::AddScheduledToastNotification(title.data(), content.data(), (L"Jobs" + to_wstring(notiId)).data(), GetIconPath(Gallop::LocalPushDefine::GetJobsLocalPushTypeByIndex(local_push_type_index))->chars, end_time, L"Jobs");
+						DesktopNotificationManagerCompat::AddScheduledToastNotification(title.data(), content.data(), (L"Jobs" + to_wstring(notiId)).data(), u16_wide(GetIconPath(Gallop::LocalPushDefine::GetJobsLocalPushTypeByIndex(local_push_type_index))->chars).data(), end_time, L"Jobs");
 					}
 				}
 			}
@@ -318,14 +318,14 @@ namespace MsgPackData
 								DumpTexture2D(leader_chara_id, Gallop::LocalPushDefine::LocalPushType::Tp, texture2D);
 								DesktopNotificationManagerCompat::RemoveFromScheduleByTag(L"TP");
 								auto content = u8_wide(MasterDB::GetTextData(184, leader_chara_id));
-								DesktopNotificationManagerCompat::AddScheduledToastNotification(title.data(), content.data(), L"TP", GetIconPath(Gallop::LocalPushDefine::LocalPushType::Tp)->chars, MsgPackData::tp_info["max_recovery_time"].int64_value() * 1000);
+								DesktopNotificationManagerCompat::AddScheduledToastNotification(title.data(), content.data(), L"TP", u16_wide(GetIconPath(Gallop::LocalPushDefine::LocalPushType::Tp)->chars).data(), MsgPackData::tp_info["max_recovery_time"].int64_value() * 1000);
 							}
 							if ((data["user_info"].is_object() || data["rp_info"].is_object()) && config::notification_rp)
 							{
 								DumpTexture2D(leader_chara_id, Gallop::LocalPushDefine::LocalPushType::Rp, texture2D);
 								DesktopNotificationManagerCompat::RemoveFromScheduleByTag(L"RP");
 								auto content = u8_wide(MasterDB::GetTextData(185, leader_chara_id));
-								DesktopNotificationManagerCompat::AddScheduledToastNotification(title.data(), content.data(), L"RP", GetIconPath(Gallop::LocalPushDefine::LocalPushType::Rp)->chars, MsgPackData::rp_info["max_recovery_time"].int64_value() * 1000);
+								DesktopNotificationManagerCompat::AddScheduledToastNotification(title.data(), content.data(), L"RP", u16_wide(GetIconPath(Gallop::LocalPushDefine::LocalPushType::Rp)->chars).data(), MsgPackData::rp_info["max_recovery_time"].int64_value() * 1000);
 							}
 							if ((data["jobs_load_info"].is_object() || data["jobs_going_info_array"].is_array()) && config::notification_jobs)
 							{
@@ -370,7 +370,7 @@ namespace MsgPackData
 
 									int notiId = Gallop::PushNotificationManager::Instance().MakeNotificationId(Gallop::LocalPushDefine::GetJobsLocalPushTypeByIndex(local_push_type_index), 0);
 
-									DesktopNotificationManagerCompat::AddScheduledToastNotification(title.data(), content.data(), (L"Jobs" + to_wstring(notiId)).data(), GetIconPath(Gallop::LocalPushDefine::GetJobsLocalPushTypeByIndex(local_push_type_index))->chars, end_time, L"Jobs");
+									DesktopNotificationManagerCompat::AddScheduledToastNotification(title.data(), content.data(), (L"Jobs" + to_wstring(notiId)).data(), u16_wide(GetIconPath(Gallop::LocalPushDefine::GetJobsLocalPushTypeByIndex(local_push_type_index))->chars).data(), end_time, L"Jobs");
 								}
 							}
 						}

@@ -25,7 +25,11 @@ inline void PrintStackTrace()
 {
 	// Il2CppString* (*trace)() = il2cpp_symbols::get_method_pointer<Il2CppString * (*)()>("UnityEngine.CoreModule.dll", "UnityEngine", "StackTraceUtility", "ExtractStackTrace", 0);
 	Il2CppString* (*trace)() = il2cpp_symbols::get_method_pointer<Il2CppString * (*)()>("mscorlib.dll", "System", "Environment", "get_StackTrace", 0);
-	std::wcout << trace()->chars << std::endl;
+#ifdef _MSC_VER
+	wcout << reinterpret_cast<wchar_t*>(trace()->chars) << endl;
+#else
+	printf("%ls\n", trace()->chars);
+#endif
 }
 
 template<typename... Ts, typename = Il2CppReflectionType*>
@@ -605,7 +609,7 @@ inline Il2CppReflectionType* GetRuntimeType(Il2CppClass* klass)
 	return reinterpret_cast<Il2CppReflectionType*>(il2cpp_type_get_object(il2cpp_class_get_type(klass)));
 }
 
-inline Il2CppObject* ParseEnum(Il2CppReflectionType* runtimeType, const wstring& name)
+inline Il2CppObject* ParseEnum(Il2CppReflectionType* runtimeType, const u16string& name)
 {
 	return il2cpp_symbols::get_method_pointer<Il2CppObject * (*)(Il2CppReflectionType*, Il2CppString*)>("mscorlib.dll", "System", "Enum", "Parse", 2)(runtimeType, il2cpp_string_new16(name.data()));
 }
@@ -681,16 +685,16 @@ inline Il2CppDelegate* GetButtonCommonOnClickDelegate(Il2CppObject* object)
 	return nullptr;
 }
 
-inline uint64_t GetTextIdByName(const wstring& name)
+inline uint64_t GetTextIdByName(const u16string& name)
 {
 	return GetEnumValue(ParseEnum(GetRuntimeType("umamusume.dll", "Gallop", "TextId"), name));
 }
 
-inline wstring GetTextIdNameById(int id)
+inline u16string GetTextIdNameById(int id)
 {
 	auto name = GetEnumName(GetRuntimeType("umamusume.dll", "Gallop", "TextId"), id);
 
-	return name ? name->chars : L"";
+	return name ? name->chars : u"";
 }
 
 inline Il2CppObject* GetCurrentViewController()
@@ -764,12 +768,6 @@ inline Il2CppObject* GetFrontDialog()
 #ifdef _MSC_VER
 inline HWND GetHWND()
 {
-	std::wstring title = config::custom_title_name;
-	if (title.empty())
-	{
-		title = L"umamusume";
-	}
-
 	static HWND hWndFound;
 
 	EnumWindows(reinterpret_cast<WNDENUMPROC>(*([](HWND hWnd, LPARAM lParam)

@@ -22,7 +22,7 @@ namespace MasterDB
 
 	void InitMasterDB()
 	{
-		auto path = wide_u8(il2cpp_symbols::get_method_pointer<Il2CppString * (*)()>("Cute.Core.Assembly.dll", "Cute.Core", "Device", "GetPersistentDataPath", IgnoreNumberOfArguments)()->chars);
+		auto path = u16_u8(il2cpp_symbols::get_method_pointer<Il2CppString * (*)()>("Cute.Core.Assembly.dll", "Cute.Core", "Device", "GetPersistentDataPath", IgnoreNumberOfArguments)()->chars);
 		auto metaDBPath = path + R"(\meta)";
 		masterDBPath = path + R"(\master\master.mdb)";
 

@@ -9,7 +9,7 @@ using namespace std;
 
 namespace LocalifySettings
 {
-	inline const wchar_t* GetText(string id)
+	inline const Il2CppChar* GetText(string id)
 	{
 		bool isKor = Game::CurrentGameRegion == Game::Region::KOR || config::localify_settings_force_korean;
 		bool isEng = Game::CurrentGameRegion == Game::Region::ENG;
@@ -18,696 +18,696 @@ namespace LocalifySettings
 		{
 			if (isKor)
 			{
-				return L"Localify 설정";
+				return u"Localify 설정";
 			}
 			if (isEng)
 			{
-				return L"Localify Settings";
+				return u"Localify Settings";
 			}
-			return L"Localify設定";
+			return u"Localify設定";
 		}
 
 		if (id == "open_settings")
 		{
 			if (isKor)
 			{
-				return L"설정 열기";
+				return u"설정 열기";
 			}
 			if (isEng)
 			{
-				return L"Open settings";
+				return u"Open settings";
 			}
-			return L"設定を開く";
+			return u"設定を開く";
 		}
 
 		if (id == "setting_disabled")
 		{
 			if (isKor)
 			{
-				return L"설정이 활성화 되지 않음";
+				return u"설정이 활성화 되지 않음";
 			}
 			if (isEng)
 			{
-				return L"Setting are not enabled";
+				return u"Setting are not enabled";
 			}
-			return L"設定が有効になっていません";
+			return u"設定が有効になっていません";
 		}
 
 		if (id == "applied_after_restart")
 		{
 			if (isKor)
 			{
-				return L"<color=#ff911c>변경 사항은 게임 재실행 후 반영됩니다</color>";
+				return u"<color=#ff911c>변경 사항은 게임 재실행 후 반영됩니다</color>";
 			}
 			if (isEng)
 			{
-				return L"<color=#ff911c>Changes will be applied after restart.</color>";
+				return u"<color=#ff911c>Changes will be applied after restart.</color>";
 			}
-			return L"<color=#ff911c>変更はゲームの再実行後に反映されます</color>";
+			return u"<color=#ff911c>変更はゲームの再実行後に反映されます</color>";
 		}
 
 		if (id == "anti_aliasing")
 		{
 			if (isKor)
 			{
-				return L"안티 엘리어싱";
+				return u"안티 엘리어싱";
 			}
 			if (isEng)
 			{
-				return L"Anti-aliasing";
+				return u"Anti-aliasing";
 			}
-			return L"アンチエイリアシング";
+			return u"アンチエイリアシング";
 		}
 
 		if (id == "graphics_quality")
 		{
 			if (isKor)
 			{
-				return L"그래픽 품질";
+				return u"그래픽 품질";
 			}
 			if (isEng)
 			{
-				return L"Graphics quality";
+				return u"Graphics quality";
 			}
-			return L"グラフィックの品質";
+			return u"グラフィックの品質";
 		}
 
 		if (id == "character_system_text_caption")
 		{
 			if (isKor)
 			{
-				return  L"캐릭터 대사 자막";
+				return  u"캐릭터 대사 자막";
 			}
 			if (isEng)
 			{
-				return  L"Character dialogue caption";
+				return  u"Character dialogue caption";
 			}
-			return L"キャラクターのダイアログテキストを\nキャプションで表示";
+			return u"キャラクターのダイアログテキストを\nキャプションで表示";
 		}
 
 		if (id == "character_system_text_caption_line_char_count")
 		{
 			if (isKor)
 			{
-				return L"줄당 글자 수";
+				return u"줄당 글자 수";
 			}
 			if (isEng)
 			{
-				return L"Characters per line";
+				return u"Characters per line";
 			}
-			return L"一行あたりの文字数";
+			return u"一行あたりの文字数";
 		}
 
 		if (id == "character_system_text_caption_font_size")
 		{
 			if (isKor)
 			{
-				return L"폰트 크기";
+				return u"폰트 크기";
 			}
 			if (isEng)
 			{
-				return L"Font size";
+				return u"Font size";
 			}
-			return L"フォントサイズ";
+			return u"フォントサイズ";
 		}
 
 		if (id == "character_system_text_caption_position_x")
 		{
 			if (isKor)
 			{
-				return L"X좌표";
+				return u"X좌표";
 			}
 			if (isEng)
 			{
-				return L"X-coordinate";
+				return u"X-coordinate";
 			}
-			return L"X座標";
+			return u"X座標";
 		}
 
 		if (id == "character_system_text_caption_position_y")
 		{
 			if (isKor)
 			{
-				return L"Y좌표";
+				return u"Y좌표";
 			}
 			if (isEng)
 			{
-				return L"Y-coordinate";
+				return u"Y-coordinate";
 			}
-			return L"Y座標";
+			return u"Y座標";
 		}
 
 		if (id == "character_system_text_caption_background_alpha")
 		{
 			if (isKor)
 			{
-				return L"배경 투명도";
+				return u"배경 투명도";
 			}
 			if (isEng)
 			{
-				return L"Background transparency";
+				return u"Background transparency";
 			}
-			return L"背景透明度";
+			return u"背景透明度";
 		}
 
 		if (id == "character_system_text_caption_font_color")
 		{
 			if (isKor)
 			{
-				return L"폰트 색상";
+				return u"폰트 색상";
 			}
 			if (isEng)
 			{
-				return L"Font color";
+				return u"Font color";
 			}
-			return L"フォントの色";
+			return u"フォントの色";
 		}
 
 		if (id == "character_system_text_caption_outline_size")
 		{
 			if (isKor)
 			{
-				return L"외곽선 크기";
+				return u"외곽선 크기";
 			}
 			if (isEng)
 			{
-				return L"Outline size";
+				return u"Outline size";
 			}
-			return L"アウトラインサイズ";
+			return u"アウトラインサイズ";
 		}
 
 		if (id == "character_system_text_caption_outline_color")
 		{
 			if (isKor)
 			{
-				return L"외곽선 색상";
+				return u"외곽선 색상";
 			}
 			if (isEng)
 			{
-				return L"Outline color";
+				return u"Outline color";
 			}
-			return L"アウトラインの色";
+			return u"アウトラインの色";
 		}
 
 		if (id == "show_caption")
 		{
 			if (isKor)
 			{
-				return L"자막 표시";
+				return u"자막 표시";
 			}
 			if (isEng)
 			{
-				return L"Show caption";
+				return u"Show caption";
 			}
-			return L"字幕表示";
+			return u"字幕表示";
 		}
 
 		if (id == "show_notification")
 		{
 			if (isKor)
 			{
-				return L"알림 표시";
+				return u"알림 표시";
 			}
 			if (isEng)
 			{
-				return L"Show notification";
+				return u"Show notification";
 			}
-			return L"通知表示";
+			return u"通知表示";
 		}
 
 		if (id == "sample_caption")
 		{
 			if (isKor)
 			{
-				return L"샘플 자막";
+				return u"샘플 자막";
 			}
 			if (isEng)
 			{
-				return L"Sample caption";
+				return u"Sample caption";
 			}
-			return L"サンプル字幕";
+			return u"サンプル字幕";
 		}
 
 		if (id == "champions_live_show_text")
 		{
 			if (isKor)
 			{
-				return L"Ms. VICTORIA 챔피언스 미팅 순위 표시";
+				return u"Ms. VICTORIA 챔피언스 미팅 순위 표시";
 			}
 			if (isEng)
 			{
-				return L"Ms. VICTORIA Champions Meeting Standings";
+				return u"Ms. VICTORIA Champions Meeting Standings";
 			}
-			return L"Ms. VICTORIAチャンピオンズミーティングの\n順位表示";
+			return u"Ms. VICTORIAチャンピオンズミーティングの\n順位表示";
 		}
 
 		if (id == "champions_live_resource_id")
 		{
 			if (isKor)
 			{
-				return L"챔피언스 미팅 일정";
+				return u"챔피언스 미팅 일정";
 			}
 			if (isEng)
 			{
-				return L"Champions Meeting Schedule";
+				return u"Champions Meeting Schedule";
 			}
-			return L"チャンピオンズミーティングスケジュール";
+			return u"チャンピオンズミーティングスケジュール";
 		}
 
 		if (id == "champions_live_year")
 		{
 			if (isKor)
 			{
-				return L"챔피언스 미팅 년도";
+				return u"챔피언스 미팅 년도";
 			}
 			if (isEng)
 			{
-				return L"Champions Meeting year";
+				return u"Champions Meeting year";
 			}
-			return L"チャンピオンズミーティングの年";
+			return u"チャンピオンズミーティングの年";
 		}
 
 		if (id == "dump_msgpack")
 		{
 			if (isKor)
 			{
-				return L"MessagePack 덤프";
+				return u"MessagePack 덤프";
 			}
 			if (isEng)
 			{
-				return L"Dump MessagePack";
+				return u"Dump MessagePack";
 			}
-			return L"MessagePackダンプ";
+			return u"MessagePackダンプ";
 		}
 
 		if (id == "dump_msgpack_request")
 		{
 			if (isKor)
 			{
-				return L"MessagePack 요청 덤프";
+				return u"MessagePack 요청 덤프";
 			}
 			if (isEng)
 			{
-				return L"Dump MessagePack request";
+				return u"Dump MessagePack request";
 			}
-			return L"MessagePackリクエストダンプ";
+			return u"MessagePackリクエストダンプ";
 		}
 
 		if (id == "unlock_live_chara")
 		{
 			if (isKor)
 			{
-				return L"라이브 시어터 전체 해방";
+				return u"라이브 시어터 전체 해방";
 			}
 			if (isEng)
 			{
-				return L"Unlock full concert theater";
+				return u"Unlock full concert theater";
 			}
-			return L"ライブシアター全体解放";
+			return u"ライブシアター全体解放";
 		}
 
 		if (id == "live_slider_always_show")
 		{
 			if (isKor)
 			{
-				return L"재생 슬라이더 항상 표시";
+				return u"재생 슬라이더 항상 표시";
 			}
 			if (isEng)
 			{
-				return L"Always show playback slider";
+				return u"Always show playback slider";
 			}
-			return L"プレイスライダーを常に表示";
+			return u"プレイスライダーを常に表示";
 		}
 
 		if (id == "live_playback_loop")
 		{
 			if (isKor)
 			{
-				return L"반복 재생";
+				return u"반복 재생";
 			}
 			if (isEng)
 			{
-				return L"Repeat playback";
+				return u"Repeat playback";
 			}
-			return L"ループプレイ";
+			return u"ループプレイ";
 		}
 
 		if (id == "unlock_live_chara_info")
 		{
 			if (isKor)
 			{
-				return L"미해금/미해방/미공개 곡 및 우마무스메와 드레스를 사용 가능하게 변경합니다.";
+				return u"미해금/미해방/미공개 곡 및 우마무스메와 드레스를 사용 가능하게 변경합니다.";
 			}
 			if (isEng)
 			{
-				return L"Changes the availability of unreleased/unreleased/unpublished songs and Umamusume and dresses.";
+				return u"Changes the availability of unreleased/unreleased/unpublished songs and Umamusume and dresses.";
 			}
-			return L"未解禁/未解放/未公開曲及びウマ娘とドレスを使えるように変更します。";
+			return u"未解禁/未解放/未公開曲及びウマ娘とドレスを使えるように変更します。";
 		}
 
 		if (id == "allow_delete_cookie")
 		{
 			if (isKor)
 			{
-				return L"WebView Cookie 삭제 허용";
+				return u"WebView Cookie 삭제 허용";
 			}
 			if (isEng)
 			{
-				return L"Allow deletion of WebView cookies";
+				return u"Allow deletion of WebView cookies";
 			}
-			return L"WebView Cookieの削除を許可する";
+			return u"WebView Cookieの削除を許可する";
 		}
 
 		if (id == "clear_webview_cache")
 		{
 			if (isKor)
 			{
-				return L"WebView 캐시 삭제";
+				return u"WebView 캐시 삭제";
 			}
 			if (isEng)
 			{
-				return L"Clear WebView cache";
+				return u"Clear WebView cache";
 			}
-			return L"WebViewキャッシュの削除";
+			return u"WebViewキャッシュの削除";
 		}
 
 		if (id == "clear_webview_cache_confirm")
 		{
 			if (isKor)
 			{
-				return L"WebView 캐시를 삭제하시겠습니까?";
+				return u"WebView 캐시를 삭제하시겠습니까?";
 			}
 			if (isEng)
 			{
-				return L"Do you want to clear the WebView cache?";
+				return u"Do you want to clear the WebView cache?";
 			}
-			return L"WebViewキャッシュを削除しますか？";
+			return u"WebViewキャッシュを削除しますか？";
 		}
 
 		if (id == "deleted")
 		{
 			if (isKor)
 			{
-				return L"삭제했습니다";
+				return u"삭제했습니다";
 			}
 			if (isEng)
 			{
-				return L"Deleted";
+				return u"Deleted";
 			}
-			return L"削除しました";
+			return u"削除しました";
 		}
 
 		if (id == "cyspring_update_mode")
 		{
 			if (isKor)
 			{
-				return L"CySpring 업데이트 모드";
+				return u"CySpring 업데이트 모드";
 			}
 			if (isEng)
 			{
-				return L"CySpring update mode";
+				return u"CySpring update mode";
 			}
-			return L"CySpringアップデートモード";
+			return u"CySpringアップデートモード";
 		}
 
 		if (id == "graphics")
 		{
 			if (isKor)
 			{
-				return L"그래픽";
+				return u"그래픽";
 			}
 			if (isEng)
 			{
-				return L"Graphics";
+				return u"Graphics";
 			}
-			return L"グラフィック";
+			return u"グラフィック";
 		}
 
 		if (id == "ui_animation_scale")
 		{
 			if (isKor)
 			{
-				return L"UI 애니메이션 배율";
+				return u"UI 애니메이션 배율";
 			}
 			if (isEng)
 			{
-				return L"UI animation scale";
+				return u"UI animation scale";
 			}
-			return L"UIアニメーションスケール";
+			return u"UIアニメーションスケール";
 		}
 
 		if (id == "resolution_3d_scale")
 		{
 			if (isKor)
 			{
-				return L"3D 렌더링 해상도 배율";
+				return u"3D 렌더링 해상도 배율";
 			}
 			if (isEng)
 			{
-				return L"3D rendering resolution scale";
+				return u"3D rendering resolution scale";
 			}
-			return L"3Dレンダリングの解像度スケール";
+			return u"3Dレンダリングの解像度スケール";
 		}
 
 		if (id == "screen")
 		{
 			if (isKor)
 			{
-				return L"화면";
+				return u"화면";
 			}
 			if (isEng)
 			{
-				return L"Screen";
+				return u"Screen";
 			}
-			return L"画面";
+			return u"画面";
 		}
 
 		if (id == "unlock_size")
 		{
 			if (isKor)
 			{
-				return L"해상도 고정 해제";
+				return u"해상도 고정 해제";
 			}
 			if (isEng)
 			{
-				return L"Unlock resolution";
+				return u"Unlock resolution";
 			}
-			return L"解像度固定解除";
+			return u"解像度固定解除";
 		}
 
 		if (id == "use_system_resolution")
 		{
 			if (isKor)
 			{
-				return L"시스템 해상도 사용";
+				return u"시스템 해상도 사용";
 			}
 			if (isEng)
 			{
-				return L"Use system resolution";
+				return u"Use system resolution";
 			}
-			return L"システムの解像度を使用する";
+			return u"システムの解像度を使用する";
 		}
 
 		if (id == "ui_scale")
 		{
 			if (isKor)
 			{
-				return L"UI 스케일";
+				return u"UI 스케일";
 			}
 			if (isEng)
 			{
-				return L"UI scale";
+				return u"UI scale";
 			}
-			return L"UIスケール";
+			return u"UIスケール";
 		}
 
 		if (id == "auto_fullscreen")
 		{
 			if (isKor)
 			{
-				return L"자동 전체화면";
+				return u"자동 전체화면";
 			}
 			if (isEng)
 			{
-				return L"Auto fullscreen";
+				return u"Auto fullscreen";
 			}
-			return L"自動全画面";
+			return u"自動全画面";
 		}
 
 		if (id == "freeform_window")
 		{
 			if (isKor)
 			{
-				return L"자유 형식 창";
+				return u"자유 형식 창";
 			}
 			if (isEng)
 			{
-				return L"Free-form window";
+				return u"Free-form window";
 			}
-			return L"自由形式ウィンドウ";
+			return u"自由形式ウィンドウ";
 		}
 
 		if (id == "ui_scale_portrait")
 		{
 			if (isKor)
 			{
-				return L"UI 스케일 (세로)";
+				return u"UI 스케일 (세로)";
 			}
 			if (isEng)
 			{
-				return L"UI scale (Vertical)";
+				return u"UI scale (Vertical)";
 			}
-			return L"UIスケール(縦)";
+			return u"UIスケール(縦)";
 		}
 
 		if (id == "ui_scale_landscape")
 		{
 			if (isKor)
 			{
-				return L"UI 스케일 (가로)";
+				return u"UI 스케일 (가로)";
 			}
 			if (isEng)
 			{
-				return L"UI scale (Horizontal)";
+				return u"UI scale (Horizontal)";
 			}
-			return L"UIスケール(横)";
+			return u"UIスケール(横)";
 		}
 
 		if (id == "use_third_party_news")
 		{
 			if (isKor)
 			{
-				return L"타사 공지 사용";
+				return u"타사 공지 사용";
 			}
 			if (isEng)
 			{
-				return L"Use of Third-Party notices";
+				return u"Use of Third-Party notices";
 			}
-			return L"サードパーティのお知らせの使用";
+			return u"サードパーティのお知らせの使用";
 		}
 
 		if (id == "use_third_party_news_info")
 		{
 			if (isKor)
 			{
-				return L"인앱 공지 대신 타사 공지를 사용합니다";
+				return u"인앱 공지 대신 타사 공지를 사용합니다";
 			}
 			if (isEng)
 			{
-				return L"Use third-party notices instead of in-app notices";
+				return u"Use third-party notices instead of in-app notices";
 			}
-			return L"アプリ内お知らせの代わりにサードパーティのお知らせを使用します";
+			return u"アプリ内お知らせの代わりにサードパーティのお知らせを使用します";
 		}
 
 		if (id == "taskbar")
 		{
 			if (isKor)
 			{
-				return L"작업 표시줄";
+				return u"작업 표시줄";
 			}
 			if (isEng)
 			{
-				return L"Taskbar";
+				return u"Taskbar";
 			}
-			return L"タスクバー";
+			return u"タスクバー";
 		}
 
 		if (id == "taskbar_show_progress_on_download")
 		{
 			if (isKor)
 			{
-				return L"다운로드 진행률 표시";
+				return u"다운로드 진행률 표시";
 			}
 			if (isEng)
 			{
-				return L"Show download progress";
+				return u"Show download progress";
 			}
-			return L"ダウンロードの進行状況を表示";
+			return u"ダウンロードの進行状況を表示";
 		}
 
 		if (id == "taskbar_show_progress_on_connecting")
 		{
 			if (isKor)
 			{
-				return L"Connecting 진행률 표시";
+				return u"Connecting 진행률 표시";
 			}
 			if (isEng)
 			{
-				return L"Show Connecting progress";
+				return u"Show Connecting progress";
 			}
-			return L"Connectingの進捗状況を表示";
+			return u"Connectingの進捗状況を表示";
 		}
 
 		if (id == "persistent_data_path")
 		{
 			if (isKor)
 			{
-				return L"로컬 데이터 경로";
+				return u"로컬 데이터 경로";
 			}
 			if (isEng)
 			{
-				return L"Local data path";
+				return u"Local data path";
 			}
-			return L"ローカルデータパス";
+			return u"ローカルデータパス";
 		}
 
 		if (id == "experiments")
 		{
-			return L"Experiments";
+			return u"Experiments";
 		}
 
 		if (id == "initial_disclaimer_1")
 		{
 			if (isKor)
 			{
-				return L"본 개선 모드를 사용함으로서 발생하는 이용 제한, 진행 오류 또는\n이외 기타 문제에 대한 책임은 본인에게 있습니다.\n\n계속 진행하려면 <color=#ff911c><i>";
+				return u"본 개선 모드를 사용함으로서 발생하는 이용 제한, 진행 오류 또는\n이외 기타 문제에 대한 책임은 본인에게 있습니다.\n\n계속 진행하려면 <color=#ff911c><i>";
 			}
 			if (isEng)
 			{
-				return L"You are responsible for any limitations, errors, or other issues that may arise from using this improvement mod.\n\nPlease check <color=#ff911c><i>";
+				return u"You are responsible for any limitations, errors, or other issues that may arise from using this improvement mod.\n\nPlease check <color=#ff911c><i>";
 			}
-			return L"本改善モードを使用することによって発生する利用制限、進行エラーまたは\nその他の問題に対する責任は本人にあります。\n\n続行するには、<color=#ff911c><i>";
+			return u"本改善モードを使用することによって発生する利用制限、進行エラーまたは\nその他の問題に対する責任は本人にあります。\n\n続行するには、<color=#ff911c><i>";
 		}
 
 		if (id == "initial_disclaimer_2")
 		{
 			if (isKor)
 			{
-				return L"</i></color> 를 체크해주세요.";
+				return u"</i></color> 를 체크해주세요.";
 			}
 			if (isEng)
 			{
-				return L"</i></color> to continue.";
+				return u"</i></color> to continue.";
 			}
-			return L"</i></color>をチェックしてください。";
+			return u"</i></color>をチェックしてください。";
 		}
 
 		if (id == "title")
 		{
 			if (isKor)
 			{
-				return L"우마무스메";
+				return u"우마무스메";
 			}
 			if (isEng)
 			{
-				return L"Umamusume";
+				return u"Umamusume";
 			}
-			return L"ウマ娘";
+			return u"ウマ娘";
 		}
 
 		if (id == "unknown")
 		{
 			if (isKor)
 			{
-				return L"알수없음";
+				return u"알수없음";
 			}
 			if (isEng)
 			{
-				return L"Unknown";
+				return u"Unknown";
 			}
-			return L"不明";
+			return u"不明";
 		}
 
-		return L"";
+		return u"";
 	}
 }

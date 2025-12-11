@@ -51,12 +51,12 @@ namespace logger
 		request_exit = true;
 	}
 
-	void write_entry(size_t hash, const wstring& text)
+	void write_entry(size_t hash, const u16string& text)
 	{
 		if (!enabled)
 			return;
 
-		auto u8str = wide_u8(text);
+		auto u8str = u16_u8(text);
 		replaceAll(u8str, "\n", "\\n");
 		replaceAll(u8str, "\"", "\\\"");
 
@@ -65,7 +65,7 @@ namespace logger
 		has_change = true;
 	}
 
-	void write_static_dict(const std::vector<std::wstring>& dict)
+	void write_static_dict(const std::vector<std::u16string>& dict)
 	{
 		if (config::enable_logger)
 		{
@@ -74,8 +74,8 @@ namespace logger
 			thread t([dict]() {
 				for (int i = 0; i < dict.size(); i++)
 				{
-					auto hash = std::hash<wstring>{}(dict[i]);
-					auto u8str = wide_u8(dict[i]);
+					auto hash = std::hash<u16string>{}(dict[i]);
+					auto u8str = u16_u8(dict[i]);
 					replaceAll(u8str, "\n", "\\n");
 					replaceAll(u8str, "\"", "\\\"");
 					if (i == dict.size() - 1)
@@ -96,8 +96,8 @@ namespace logger
 
 	}
 
-	void write_text_id_static_dict(const vector<pair<const wstring, const wstring>>& dict,
-		const vector<pair<const wstring, const wstring>>& not_matched)
+	void write_text_id_static_dict(const vector<pair<const u16string, const u16string>>& dict,
+		const vector<pair<const u16string, const u16string>>& not_matched)
 	{
 		if (config::enable_logger)
 		{
@@ -106,16 +106,17 @@ namespace logger
 			thread t([dict]() {
 				for (auto pair = dict.begin(); pair != dict.end(); pair++)
 				{
-					auto u8str = wide_u8(pair->second);
+					auto u8key = u16_u8(pair->first);
+					auto u8str = u16_u8(pair->second);
 					replaceAll(u8str, "\n", "\\n");
 					replaceAll(u8str, "\"", "\\\"");
 					if (next(pair) == dict.end())
 					{
-						static_json << "\"" << wide_u8(pair->first) << "\": \"" << u8str << "\"\n";
+						static_json << "\"" << u8key << "\": \"" << u8str << "\"\n";
 					}
 					else
 					{
-						static_json << "\"" << wide_u8(pair->first) << "\": \"" << u8str << "\",\n";
+						static_json << "\"" << u8key << "\": \"" << u8str << "\",\n";
 					}
 				}
 				static_json << "}\n";
@@ -130,16 +131,17 @@ namespace logger
 				thread t1([not_matched]() {
 					for (auto pair = not_matched.begin(); pair != not_matched.end(); pair++)
 					{
-						auto u8str = wide_u8(pair->second);
+						auto u8key = u16_u8(pair->first);
+						auto u8str = u16_u8(pair->second);
 						replaceAll(u8str, "\n", "\\n");
 						replaceAll(u8str, "\"", "\\\"");
 						if (next(pair) == not_matched.end())
 						{
-							not_matched_json << "\"" << wide_u8(pair->first) << "\": \"" << u8str << "\"\n";
+							not_matched_json << "\"" << u8key << "\": \"" << u8str << "\"\n";
 						}
 						else
 						{
-							not_matched_json << "\"" << wide_u8(pair->first) << "\": \"" << u8str << "\",\n";
+							not_matched_json << "\"" << u8key << "\": \"" << u8str << "\",\n";
 						}
 					}
 					not_matched_json << "}\n";

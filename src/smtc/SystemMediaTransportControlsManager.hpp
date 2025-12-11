@@ -204,7 +204,7 @@ namespace SystemMediaTransportControlsManager
 			}
 			else
 			{
-				wcout << exception->message->chars << endl;
+				wcout << u16_wide(exception->message->chars) << endl;
 			}
 		}
 		catch (winrt::hresult_error& e)

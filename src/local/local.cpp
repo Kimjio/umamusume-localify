@@ -10,55 +10,57 @@ namespace local
 {
 	namespace
 	{
-		unordered_map<size_t, wstring> text_db;
-		unordered_map<wstring, wstring> textId_text_db;
+		unordered_map<size_t, u16string> text_db;
+		unordered_map<u16string, u16string> textId_text_db;
 		vector<size_t> str_list;
 	}
 
-	void reload_textdb(const vector<wstring>* dicts)
+	static void reload_textdb(const vector<u16string>* dicts)
 	{
 		text_db.clear();
 		load_textdb(dicts);
 	}
 
-	void reload_textId_textdb(const wstring& dict)
+	static void reload_textId_textdb(const u16string& dict)
 	{
 		textId_text_db.clear();
 		load_textId_textdb(dict);
 	}
 
-	void load_textdb(const vector<wstring>* dicts)
+	static void load_textdb(const vector<u16string>* dicts)
 	{
-		for (wstring dict : *dicts)
+		for (u16string dict : *dicts)
 		{
 			if (filesystem::exists(dict))
 			{
 				if (filesystem::is_directory(dict))
 				{
-					wcout << L"Dict directory: " << dict << endl;
+					wcout << L"Dict directory: " << u16_wide(dict) << endl;
 					for (auto& file : filesystem::directory_iterator(dict))
 					{
-						const auto filePath = file.path().wstring();
-						const auto fileName = file.path().filename().wstring();
+						const auto filePath = file.path().u16string();
+						const auto fileName = file.path().filename().u16string();
 						if (file.is_regular_file())
 						{
-							wifstream dict_stream{ filePath };
+							u16ifstream dict_stream{ u16_wide(filePath) };
 							dict_stream.imbue(locale(".UTF-8"));
 
 							if (!dict_stream.is_open())
+							{
 								continue;
+							}
 
-							wcout << L"Reading " << fileName << L"..." << endl;
+							wcout << L"Reading " << u16_wide(fileName) << L"..." << endl;
 
-							rapidjson::WIStreamWrapper wrapper{ dict_stream };
-							WDocument document;
+							U16IStreamWrapper wrapper{ dict_stream };
+							U16Document document;
 
 							document.ParseStream(wrapper);
 
 							for (auto iter = document.MemberBegin();
 								iter != document.MemberEnd(); ++iter)
 							{
-								auto key = stoull(iter->name.GetString());
+								auto key = stoull(u16_wide(iter->name.GetString()));
 								auto value = iter->value.GetString();
 
 								text_db.emplace(key, value);
@@ -70,23 +72,25 @@ namespace local
 				}
 				else
 				{
-					wifstream dict_stream{ dict };
+					u16ifstream dict_stream{ u16_wide(dict) };
 					dict_stream.imbue(locale(".UTF-8"));
 
 					if (!dict_stream.is_open())
+					{
 						continue;
+					}
 
-					wcout << L"Reading " << dict << L"..." << endl;
+					wcout << L"Reading " << u16_wide(dict) << L"..." << endl;
 
-					rapidjson::WIStreamWrapper wrapper{ dict_stream };
-					WDocument document;
+					U16IStreamWrapper wrapper{ dict_stream };
+					U16Document document;
 
 					document.ParseStream(wrapper);
 
 					for (auto iter = document.MemberBegin();
 						iter != document.MemberEnd(); ++iter)
 					{
-						auto key = stoull(iter->name.GetString());
+						auto key = stoull(u16_wide(iter->name.GetString()));
 						auto value = iter->value.GetString();
 
 						text_db.emplace(key, value);
@@ -100,20 +104,20 @@ namespace local
 		cout << "loaded " << text_db.size() << " localized entries." << endl;
 	}
 
-	void load_textId_textdb(const wstring& dict)
+	static void load_textId_textdb(const u16string& dict)
 	{
 		if (filesystem::exists(dict.data()))
 		{
-			wifstream dict_stream{ dict };
+			u16ifstream dict_stream{ u16_wide(dict) };
 			dict_stream.imbue(locale(".UTF-8"));
 
 			if (!dict_stream.is_open())
 				return;
 
-			wcout << L"Reading " << dict << L"..." << endl;
+			wcout << L"Reading " << u16_wide(dict) << L"..." << endl;
 
-			rapidjson::WIStreamWrapper wrapper{ dict_stream };
-			WDocument document;
+			U16IStreamWrapper wrapper{ dict_stream };
+			U16Document document;
 
 			document.ParseStream(wrapper);
 
@@ -132,7 +136,7 @@ namespace local
 		cout << "loaded " << textId_text_db.size() << " TextId localized entries." << endl;
 	} 
 
-	bool localify_text(size_t hash, wstring** result)
+	static bool localify_text(size_t hash, u16string** result)
 	{
 		if (text_db.contains(hash))
 		{
@@ -143,7 +147,7 @@ namespace local
 		return false;
 	}
 
-	bool localify_text_by_textId_name(const wstring& textIdName, wstring** result)
+	static bool localify_text_by_textId_name(const u16string& textIdName, u16string** result)
 	{
 		if (textId_text_db.contains(textIdName))
 		{
@@ -153,9 +157,9 @@ namespace local
 		return false;
 	}
 
-	Il2CppString* get_localized_string(size_t hash_or_id)
+	static Il2CppString* get_localized_string(size_t hash_or_id)
 	{
-		wstring* result;
+		u16string* result;
 
 		if (local::localify_text(hash_or_id, &result))
 		{
@@ -165,9 +169,9 @@ namespace local
 		return nullptr;
 	}
 
-	Il2CppString* get_localized_string(const wstring& textIdName)
+	static Il2CppString* get_localized_string(const u16string& textIdName)
 	{
-		wstring* result;
+		u16string* result;
 
 		if (local::localify_text_by_textId_name(textIdName, &result))
 		{
@@ -177,11 +181,11 @@ namespace local
 		return nullptr;
 	}
 
-	Il2CppString* get_localized_string(Il2CppString* str)
+	static Il2CppString* get_localized_string(Il2CppString* str)
 	{
-		wstring* result;
+		u16string* result;
 
-		auto hash = std::hash<wstring>{}(str->chars);
+		auto hash = std::hash<u16string>{}(str->chars);
 
 		if (local::localify_text(hash, &result))
 		{
@@ -198,22 +202,22 @@ namespace local
 		return str;
 	}
 
-	const char* get_localized_string(const char* str)
+	static const char* get_localized_string(const char* str)
 	{
 		if (!str)
 		{
 			return nullptr;
 		}
 
-		wstring wstr = u8_wide(str);
+		u16string u16str = u8_u16(str);
 
-		wstring* result;
+		u16string* result;
 
-		auto hash = std::hash<wstring>{}(wstr);
+		auto hash = std::hash<u16string>{}(u16str);
 
 		if (local::localify_text(hash, &result))
 		{
-			string resultU8 = wide_u8(*result);
+			string resultU8 = u16_u8(*result);
 			auto dest = new char[resultU8.size() + 1];
 			strncpy(dest, resultU8.data(), resultU8.size());
 			dest[resultU8.size()] = '\0';
@@ -224,7 +228,7 @@ namespace local
 		{
 			str_list.emplace_back(hash);
 
-			logger::write_entry(hash, wstr);
+			logger::write_entry(hash, u16str);
 		}
 
 		return str;

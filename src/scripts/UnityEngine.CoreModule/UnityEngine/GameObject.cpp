@@ -8,8 +8,6 @@ namespace
 {
 	void* Internal_CreateGameObject_addr = nullptr;
 
-	void* Internal_CreateGameObject_orig = nullptr;
-
 	void* Internal_AddComponentWithType_addr = nullptr;
 
 	void* Internal_AddComponentWithType_orig = nullptr;
@@ -42,30 +40,6 @@ namespace
 	Il2CppClass* FlashActionPlayerClass;
 }
 
-static void Internal_CreateGameObject_hook(Il2CppObject* _this, Il2CppString* name)
-{
-	reinterpret_cast<decltype(Internal_CreateGameObject_hook)*>(Internal_CreateGameObject_orig)(_this, name);
-
-	if (name)
-	{
-		wcout << L"Internal_CreateGameObject " << name->chars << endl;
-	}
-}
-
-static Il2CppObject* Internal_AddComponentWithType_hook(Il2CppObject* _this, Il2CppObject* runtimeType)
-{
-	auto component = reinterpret_cast<decltype(Internal_AddComponentWithType_hook)*>(Internal_AddComponentWithType_orig)(_this, runtimeType);
-
-	if (string(component->klass->namespaze).find("Gallop") != string::npos &&
-		string(component->klass->name).find("CameraData") != string::npos)
-	{
-		il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, int)>(component->klass, "set_RenderingAntiAliasing", 1)->methodPointer(component, 8);
-		il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, bool)>(component->klass, "set_IsCreateAntialiasTexture", 1)->methodPointer(component, true);
-	}
-
-	return component;
-}
-
 struct CastHelper
 {
 	Il2CppObject* obj;
@@ -88,16 +62,16 @@ static void GetComponentFastPath_hook(Il2CppObject* self, Il2CppObject* runtimeT
 
 			if (_flashPrefabPath)
 			{
-				wstringstream pathStream(_flashPrefabPath->chars);
-				wstring segment;
-				vector<wstring> splited;
-				while (getline(pathStream, segment, L'/'))
+				u16stringstream pathStream(_flashPrefabPath->chars);
+				u16string segment;
+				vector<u16string> splited;
+				while (getline(pathStream, segment, u'/'))
 				{
 					splited.emplace_back(segment);
 				}
 
 				auto& fileName = splited.back();
-				if (find_if(config::runtime::replaceAssetNames.begin(), config::runtime::replaceAssetNames.end(), [fileName](const wstring& item)
+				if (find_if(config::runtime::replaceAssetNames.begin(), config::runtime::replaceAssetNames.end(), [fileName](const u16string& item)
 					{
 						return item.find(fileName) != wstring::npos;
 					}) != config::runtime::replaceAssetNames.end())
@@ -155,8 +129,6 @@ static void InitAddress()
 
 static void HookMethods()
 {
-	// ADD_HOOK(Internal_CreateGameObject, "UnityEngine.GameObject::Internal_CreateGameObject at %p\n");
-	// ADD_HOOK(Internal_AddComponentWithType, "UnityEngine.GameObject::Internal_AddComponentWithType at %p\n");
 	ADD_HOOK(GetComponentFastPath, "UnityEngine.GameObject::GetComponentFastPath at %p\n");
 	// ADD_HOOK(TryGetComponentFastPath, "UnityEngine.GameObject::TryGetComponentFastPath at %p\n");
 }

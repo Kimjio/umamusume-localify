@@ -45,7 +45,7 @@ static void ReplaceMaterialTextureProperty(Il2CppObject* material, Il2CppString*
 		if (texture)
 		{
 			auto uobject_name = UnityEngine::Object::Name(texture);
-			if (!wstring(uobject_name->chars).empty())
+			if (!u16string(uobject_name->chars).empty())
 			{
 				auto newTexture = GetReplacementAssets(
 					uobject_name,
@@ -107,7 +107,7 @@ static void ReplaceAssetHolderTextures(Il2CppObject* holder)
 			if (obj->klass->name == "Texture2D"s)
 			{
 				auto uobject_name = UnityEngine::Object::Name(obj);
-				if (!wstring(uobject_name->chars).empty())
+				if (!u16string(uobject_name->chars).empty())
 				{
 					auto newTexture = GetReplacementAssets(
 						uobject_name,
@@ -176,7 +176,7 @@ static void ReplaceAnimateToUnityTextures(Il2CppObject* anRoot)
 										if (textureSetColor)
 										{
 											auto uobject_name = UnityEngine::Object::Name(textureSetColor);
-											if (!wstring(uobject_name->chars).empty())
+											if (!u16string(uobject_name->chars).empty())
 											{
 												auto newTexture = GetReplacementAssets(
 													uobject_name,
@@ -193,7 +193,7 @@ static void ReplaceAnimateToUnityTextures(Il2CppObject* anRoot)
 										if (textureSetAlpha)
 										{
 											auto uobject_name = UnityEngine::Object::Name(textureSetAlpha);
-											if (!wstring(uobject_name->chars).empty())
+											if (!u16string(uobject_name->chars).empty())
 											{
 												auto newTexture = GetReplacementAssets(
 													uobject_name,
@@ -230,7 +230,7 @@ static void ReplaceAnimateToUnityTextures(Il2CppObject* anRoot)
 										if (textureColor)
 										{
 											auto uobject_name = UnityEngine::Object::Name(textureColor);
-											if (!wstring(uobject_name->chars).empty())
+											if (!u16string(uobject_name->chars).empty())
 											{
 												auto newTexture = GetReplacementAssets(
 													uobject_name,
@@ -247,7 +247,7 @@ static void ReplaceAnimateToUnityTextures(Il2CppObject* anRoot)
 										if (textureAlpha)
 										{
 											auto uobject_name = UnityEngine::Object::Name(textureAlpha);
-											if (!wstring(uobject_name->chars).empty())
+											if (!u16string(uobject_name->chars).empty())
 											{
 												auto newTexture = GetReplacementAssets(
 													uobject_name,
@@ -442,7 +442,7 @@ static void ReplaceRawImageTexture(Il2CppObject* rawImage)
 		auto uobject_name = UnityEngine::Object::Name(texture);
 		if (uobject_name)
 		{
-			auto nameU8 = wide_u8(uobject_name->chars);
+			auto nameU8 = u16_u8(uobject_name->chars);
 			if (!nameU8.empty())
 			{
 				do
@@ -486,7 +486,7 @@ static void ReplaceImageTexture(Il2CppObject* image)
 		auto uobject_name = UnityEngine::Object::Name(sprite);
 		if (uobject_name)
 		{
-			auto nameU8 = wide_u8(uobject_name->chars);
+			auto nameU8 = u16_u8(uobject_name->chars);
 			if (!nameU8.empty())
 			{
 				do
@@ -633,10 +633,10 @@ static void ReplaceAtlasReferenceSprites(Il2CppObject* atlasReference)
 
 	if (sprites)
 	{
-		wstringstream pathStream(UnityEngine::Object::Name(atlasReference)->chars);
-		wstring segment;
-		vector<wstring> splited;
-		while (getline(pathStream, segment, L'.'))
+		u16stringstream pathStream(UnityEngine::Object::Name(atlasReference)->chars);
+		u16string segment;
+		vector<u16string> splited;
+		while (getline(pathStream, segment, u'.'))
 		{
 			splited.emplace_back(segment);
 		}
@@ -644,7 +644,7 @@ static void ReplaceAtlasReferenceSprites(Il2CppObject* atlasReference)
 		auto& atlasName = splited.front();
 
 		auto atlas = GetReplacementAtlasAssets(
-			il2cpp_string_new16((L"_" + atlasName).data()),
+			il2cpp_string_new16((u"_" + atlasName).data()),
 			GetRuntimeType(AtlasReferenceClass));
 
 		if (!atlas)
@@ -662,7 +662,7 @@ static void ReplaceAtlasReferenceSprites(Il2CppObject* atlasReference)
 			if (sprite)
 			{
 				auto uobject_name = UnityEngine::Object::Name(sprite);
-				if (!wstring(uobject_name->chars).empty())
+				if (!u16string(uobject_name->chars).empty())
 				{
 					auto newSprite = il2cpp_class_get_method_from_name_type<Il2CppObject * (*)(Il2CppObject*, Il2CppString*)>(atlas->klass, "GetSprite", 1)->methodPointer(atlas, uobject_name);
 
@@ -746,10 +746,10 @@ static Il2CppObject* GetReplacementAssetsAsync(Il2CppString* name, Il2CppReflect
 
 static Il2CppObject* LoadFromFile_Internal_hook(Il2CppString* path, uint32_t crc, uint64_t offset)
 {
-	wstringstream pathStream(path->chars);
-	wstring segment;
-	vector<wstring> splited;
-	while (getline(pathStream, segment, L'\\'))
+	u16stringstream pathStream(path->chars);
+	u16string segment;
+	vector<u16string> splited;
+	while (getline(pathStream, segment, u'\\'))
 	{
 		splited.emplace_back(segment);
 	}
@@ -774,18 +774,18 @@ static Il2CppObject* LoadFromStreamInternal_hook(Il2CppObject* stream, uint32_t 
 
 static Il2CppObject* LoadAsset_Internal_hook(Il2CppObject* self, Il2CppString* name, Il2CppReflectionType* type)
 {
-	wstringstream pathStream(name->chars);
-	wstring segment;
-	vector<wstring> splited;
-	while (getline(pathStream, segment, L'/'))
+	u16stringstream pathStream(name->chars);
+	u16string segment;
+	vector<u16string> splited;
+	while (getline(pathStream, segment, u'/'))
 	{
 		splited.emplace_back(segment);
 	}
 
 	auto& fileName = splited.back();
-	if (find_if(config::runtime::replaceAssetNames.begin(), config::runtime::replaceAssetNames.end(), [fileName](const wstring& item)
+	if (find_if(config::runtime::replaceAssetNames.begin(), config::runtime::replaceAssetNames.end(), [fileName](const u16string& item)
 		{
-			return item.find(fileName) != wstring::npos;
+			return item.find(fileName) != u16string::npos;
 		}) != config::runtime::replaceAssetNames.end())
 	{
 		auto result = GetReplacementAssets(il2cpp_string_new16(fileName.data()), type);
@@ -827,17 +827,17 @@ static Il2CppObject* LoadAsset_Internal_hook(Il2CppObject* self, Il2CppString* n
 
 static Il2CppObject* LoadAssetAsync_Internal_hook(Il2CppObject* self, Il2CppString* name, Il2CppReflectionType* type)
 {
-	wstringstream pathStream(name->chars);
-	wstring segment;
-	vector<wstring> splited;
-	while (getline(pathStream, segment, L'/'))
+	u16stringstream pathStream(name->chars);
+	u16string segment;
+	vector<u16string> splited;
+	while (getline(pathStream, segment, u'/'))
 	{
 		splited.emplace_back(segment);
 	}
 	auto& fileName = splited.back();
-	if (find_if(config::runtime::replaceAssetNames.begin(), config::runtime::replaceAssetNames.end(), [fileName](const wstring& item)
+	if (find_if(config::runtime::replaceAssetNames.begin(), config::runtime::replaceAssetNames.end(), [fileName](const u16string& item)
 		{
-			return item.find(fileName) != wstring::npos;
+			return item.find(fileName) != u16string::npos;
 		}) != config::runtime::replaceAssetNames.end())
 	{
 		return GetReplacementAssetsAsync(il2cpp_string_new16(fileName.data()), type);
