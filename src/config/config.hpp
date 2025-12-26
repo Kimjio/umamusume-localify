@@ -43,6 +43,11 @@ struct ReplaceAsset {
 	Il2CppObject* asset;
 };
 
+struct ReplaceFontAsset {
+	u16string assetBundlePath;
+	u16string assetName;
+};
+
 namespace config
 {
 	extern bool dump_entries;
@@ -68,6 +73,7 @@ namespace config
 	extern u16string font_assetbundle_path;
 	extern u16string font_asset_name;
 	extern u16string tmpro_font_asset_name;
+	extern unordered_map<u16string, ReplaceFontAsset> font_asset_by_path;
 	extern bool auto_fullscreen;
 	extern int graphics_quality;
 	extern int anti_aliasing;

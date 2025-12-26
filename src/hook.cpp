@@ -116,6 +116,7 @@
 #include "scripts/umamusume/Gallop/LowResolutionCameraUtil.hpp"
 #include "scripts/umamusume/Gallop/WebViewManager.hpp"
 #include "scripts/umamusume/Gallop/TitleViewController.hpp"
+#include "scripts/umamusume/Gallop/TextFontManager.hpp"
 #include "scripts/umamusume/Gallop/Screen.hpp"
 #include "scripts/umamusume/Gallop/GameSystem.hpp"
 #ifdef _MSC_VER
@@ -1386,9 +1387,14 @@ namespace
 			return object;
 		}
 
-		if (type == GetRuntimeType("UnityEngine.TextRenderingModule.dll", "UnityEngine", "Font"))
+		if (type == GetRuntimeType("UnityEngine.TextRenderingModule.dll", "UnityEngine", "Font") ||
+			u16Name.starts_with(u"Font"))
 		{
-			wcout << "Loading Font: " << u16_wide(u16Name) << endl;
+			auto replacement = Gallop::TextFontManager::GetReplacementFontAsset(path);
+			if (replacement)
+			{
+				return replacement;
+			}
 		}
 
 		return reinterpret_cast<decltype(Resources_Load_hook)*>(Resources_Load_orig)(path, type);
@@ -6595,6 +6601,11 @@ namespace
 		}
 		if (config::replace_to_custom_font)
 		{
+			if (text_get_font(_this))
+			{
+				text_set_font(_this, nullptr);
+			}
+
 			auto customFont = GetCustomFont();
 			if (customFont)
 			{
@@ -14837,19 +14848,19 @@ ShowWindow_hook(
 {
 	if (!currentHWnd)
 	{
-	if (!config::custom_title_name.empty())
-	{
-		SetWindowTextW(hWnd, u16_wide(config::custom_title_name).data());
-	}
+		if (!config::custom_title_name.empty())
+		{
+			SetWindowTextW(hWnd, u16_wide(config::custom_title_name).data());
+		}
 
-	if (config::has_json_parse_error)
-	{
-		MessageBoxW(hWnd, u16_wide(config::json_parse_error_msg).data(), L"Umamusume Localify", MB_OK | MB_ICONWARNING);
-	}
+		if (config::has_json_parse_error)
+		{
+			MessageBoxW(hWnd, u16_wide(config::json_parse_error_msg).data(), L"Umamusume Localify", MB_OK | MB_ICONWARNING);
+		}
 
-	oldWndProcPtr = reinterpret_cast<WNDPROC>(SetWindowLongPtrW(hWnd, GWLP_WNDPROC, reinterpret_cast<LONG_PTR>(WndProc)));
+		oldWndProcPtr = reinterpret_cast<WNDPROC>(SetWindowLongPtrW(hWnd, GWLP_WNDPROC, reinterpret_cast<LONG_PTR>(WndProc)));
 
-	currentHWnd = hWnd;
+		currentHWnd = hWnd;
 	}
 
 	MH_DisableHook(ShowWindow);

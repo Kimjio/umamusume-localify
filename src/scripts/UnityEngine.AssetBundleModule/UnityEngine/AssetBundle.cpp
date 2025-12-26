@@ -795,6 +795,7 @@ static Il2CppObject* LoadAsset_Internal_hook(Il2CppObject* self, Il2CppString* n
 			return result;
 		}
 	}
+
 	auto obj = reinterpret_cast<decltype(LoadAsset_Internal_hook)*>(LoadAsset_Internal_orig)(self, name, type);
 
 	if (!obj)

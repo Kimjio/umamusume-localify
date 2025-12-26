@@ -29,7 +29,7 @@ namespace config
 	u16string font_assetbundle_path;
 	u16string font_asset_name;
 	u16string tmpro_font_asset_name;
-	// U16Object font_asset_by_path;
+	unordered_map<u16string, ReplaceFontAsset> font_asset_by_path;
 	bool auto_fullscreen = true;
 	int graphics_quality = -1;
 	int anti_aliasing = -1;
@@ -211,10 +211,25 @@ if (document.HasMember(u##_name_) && document[u##_name_].Is##_type_())\
 
 			GetValue("tmproFontAssetName", String, tmpro_font_asset_name);
 
-			//GetValue("fontAssetByPath", Obj, font_asset_by_path,
-			//	{
-			//		// font_asset_by_path;
-			//	});
+			GetValue("fontAssetByPath", Obj, auto object,
+				{
+					for (auto it = object.begin(); it != object.end(); it++)
+					{
+						auto fontName = it->name.GetString();
+						auto innerObject = it->value.GetObj();
+
+						u16string name = innerObject[u"assetName"].GetString();
+						u16string value = innerObject[u"assetBundlePath"].GetString();
+						if (filesystem::path(value.data()).is_relative())
+						{
+							value.insert(0, filesystem::current_path().u16string().append(u"/"));
+						}
+						if (filesystem::exists(value) && filesystem::is_regular_file(value))
+						{
+							font_asset_by_path.emplace(fontName, ReplaceFontAsset{ value, name });
+						}
+					}
+				});
 
 			GetValue("autoFullscreen", Bool, auto_fullscreen);
 
