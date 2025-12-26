@@ -130,6 +130,7 @@ std::string il2cpp_fn_name(const char* name)
 namespace il2cpp_symbols
 {
 	Il2CppDomain* il2cpp_domain = nullptr;
+	uint64_t base = 0;
 
 	std::vector<std::function<void()>> init_callbacks;
 
@@ -399,6 +400,14 @@ namespace il2cpp_symbols
 #include "il2cpp-api-functions.h"
 		}
 #undef DO_API
+
+		HMODULE hMod = nullptr;
+		if (GetModuleHandleExW(
+			GET_MODULE_HANDLE_EX_FLAG_FROM_ADDRESS | GET_MODULE_HANDLE_EX_FLAG_UNCHANGED_REFCOUNT,
+			reinterpret_cast<LPCTSTR>(il2cpp_domain_get_assemblies), &hMod))
+		{
+			base = reinterpret_cast<uint64_t>(hMod);
+		}
 	}
 
 	void init_defaults()

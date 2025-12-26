@@ -126,6 +126,8 @@ std::string il2cpp_fn_name(const char* name);
 namespace il2cpp_symbols
 {
 	extern Il2CppDomain* il2cpp_domain;
+	
+	extern uint64_t base;
 
 	extern std::vector<std::function<void()>> init_callbacks;
 

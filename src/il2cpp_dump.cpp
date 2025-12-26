@@ -78,7 +78,7 @@ std::string dump_method(Il2CppClass* klass) {
 		//TODO attribute
 		if (method->methodPointer) {
 			outPut << "\t// RVA: 0x";
-			outPut << std::hex << reinterpret_cast<uint64_t>(method->methodPointer) - reinterpret_cast<uint64_t>(il2cpp_symbols::il2cpp_domain);
+			outPut << std::hex << reinterpret_cast<uint64_t>(method->methodPointer) - il2cpp_symbols::base;
 			outPut << " VA: 0x";
 			outPut << std::hex << reinterpret_cast<uint64_t>(method->methodPointer);
 		}

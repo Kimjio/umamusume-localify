@@ -37,7 +37,7 @@
 #include <windows.ui.notifications.h>
 #include <winrt/Windows.Foundation.h>
 
-#include "ntdll.h"
+#include "MINT.h"
 
 #include "config/config.hpp"
 
@@ -191,7 +191,7 @@ namespace
 			return;
 		}
 
-		ifstream file{ filesystem::path(path).string(), ios::binary};
+		ifstream file{ filesystem::path(path).string(), ios::binary };
 		string magic = string(16, '\0');
 		file.read(magic.data(), 16);
 		file.close();
@@ -2926,28 +2926,6 @@ namespace
 
 						auto _originalScreenHeight_Field = il2cpp_class_get_field_from_name_wrap(GallopScreen, "_originalScreenHeight");
 
-						auto SCREEN_ORIENTATION_CATEGORIES_Field = il2cpp_class_get_field_from_name_wrap(GallopScreen, "SCREEN_ORIENTATION_CATEGORIES");
-						Il2CppObject* SCREEN_ORIENTATION_CATEGORIES;
-						il2cpp_field_static_get_value(SCREEN_ORIENTATION_CATEGORIES_Field, &SCREEN_ORIENTATION_CATEGORIES);
-
-						il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*)>(SCREEN_ORIENTATION_CATEGORIES->klass, "Clear", 0)->methodPointer(SCREEN_ORIENTATION_CATEGORIES);
-
-						if (lastWidth < lastHeight)
-						{
-							il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, int, int)>(SCREEN_ORIENTATION_CATEGORIES->klass, "Add", 2)->methodPointer(SCREEN_ORIENTATION_CATEGORIES, 1, 1);
-							il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, int, int)>(SCREEN_ORIENTATION_CATEGORIES->klass, "Add", 2)->methodPointer(SCREEN_ORIENTATION_CATEGORIES, 2, 1);
-							il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, int, int)>(SCREEN_ORIENTATION_CATEGORIES->klass, "Add", 2)->methodPointer(SCREEN_ORIENTATION_CATEGORIES, 3, 1);
-							il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, int, int)>(SCREEN_ORIENTATION_CATEGORIES->klass, "Add", 2)->methodPointer(SCREEN_ORIENTATION_CATEGORIES, 4, 1);
-							il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, int, int)>(SCREEN_ORIENTATION_CATEGORIES->klass, "Add", 2)->methodPointer(SCREEN_ORIENTATION_CATEGORIES, 5, 1);
-						}
-						else
-						{
-							il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, int, int)>(SCREEN_ORIENTATION_CATEGORIES->klass, "Add", 2)->methodPointer(SCREEN_ORIENTATION_CATEGORIES, 1, 3);
-							il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, int, int)>(SCREEN_ORIENTATION_CATEGORIES->klass, "Add", 2)->methodPointer(SCREEN_ORIENTATION_CATEGORIES, 2, 3);
-							il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, int, int)>(SCREEN_ORIENTATION_CATEGORIES->klass, "Add", 2)->methodPointer(SCREEN_ORIENTATION_CATEGORIES, 3, 3);
-							il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, int, int)>(SCREEN_ORIENTATION_CATEGORIES->klass, "Add", 2)->methodPointer(SCREEN_ORIENTATION_CATEGORIES, 4, 3);
-							il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, int, int)>(SCREEN_ORIENTATION_CATEGORIES->klass, "Add", 2)->methodPointer(SCREEN_ORIENTATION_CATEGORIES, 5, 3);
-						}
 
 						int unityWidth = UnityEngine::Screen::width();
 						int unityHeight = UnityEngine::Screen::height();
@@ -6476,20 +6454,6 @@ namespace
 		SetWindowLongPtrW(hWnd, GWL_STYLE, style);
 	}
 
-	void* Screen_SetResolution_orig = nullptr;
-
-	void Screen_SetResolution_hook(int w, int h, bool fullscreen, bool forceUpdate)
-	{
-
-	}
-
-	void* Screen_IsCurrentOrientation_orig = nullptr;
-
-	bool Screen_IsCurrentOrientation_hook(UnityEngine::ScreenOrientation target)
-	{
-		return true;
-	}
-
 	void* GallopInput_mousePosition_orig = nullptr;
 
 	UnityEngine::Vector3 GallopInput_mousePosition_hook()
@@ -9932,6 +9896,12 @@ namespace
 		SetOptionItemButtonAction("show_notification", *([](Il2CppObject*)
 			{
 				auto leader_chara_id = MsgPackData::user_info["leader_chara_id"].int_value();
+
+				if (!leader_chara_id)
+				{
+					return;
+				}
+
 				auto title = u8_wide(MasterDB::GetTextData(6, leader_chara_id));
 				auto contentU8 = MasterDB::GetTextData(163, leader_chara_id);
 				replaceAll(contentU8, "\\n", "\n");
@@ -11994,15 +11964,13 @@ namespace
 
 	void* UploadHandlerRaw_Create_orig = nullptr;
 
-	void* UploadHandlerRaw_Create_hook(Il2CppObject* self, Il2CppArraySize_t<int8_t>* data)
+	void* UploadHandlerRaw_Create_hook(Il2CppObject* self, const char* data, int dataLength)
 	{
-		auto buf = reinterpret_cast<const char*>(data) + kIl2CppSizeOfArray;
-
 		try
 		{
 			if (config::msgpack_notifier && config::msgpack_notifier_request)
 			{
-				notifier::notify_request(string(buf, data->max_length));
+				notifier::notify_request(string(data, dataLength));
 			}
 
 			if (config::dump_msgpack && config::dump_msgpack_request)
@@ -12010,22 +11978,20 @@ namespace
 				string out_path =
 					"msgpack_dump/"s.append(to_string(current_time())).append("Q.msgpack");
 
-				DumpMsgPackFile(out_path, buf, data->max_length);
+				DumpMsgPackFile(out_path, data, dataLength);
 			}
 
-			MsgPackData::ReadRequest(buf, data->max_length);
+			MsgPackData::ReadRequest(data, dataLength);
 
 #ifdef EXPERIMENTS
 			if (config::unlock_live_chara)
 			{
-				auto modified = MsgPackModify::ModifyRequest(buf, data->max_length);
+				auto modified = MsgPackModify::ModifyRequest(data, dataLength);
 
 				if (!modified.empty())
 				{
-					data = il2cpp_array_new_type<int8_t>(il2cpp_defaults.byte_class, modified.size());
-
-					char* buf1 = reinterpret_cast<char*>(data) + kIl2CppSizeOfArray;
-					memcpy(buf1, modified.data(), modified.size());
+					data = new char[modified.size()];
+					memcpy(const_cast<char*>(data), modified.data(), modified.size());
 				}
 			}
 #endif
@@ -12034,22 +12000,20 @@ namespace
 		{
 		}
 
-		return reinterpret_cast<decltype(UploadHandlerRaw_Create_hook)*>(UploadHandlerRaw_Create_orig)(self, data);
+		return reinterpret_cast<decltype(UploadHandlerRaw_Create_hook)*>(UploadHandlerRaw_Create_orig)(self, data, dataLength);
 	}
 
 	void* DownloadHandler_InternalGetByteArray_orig = nullptr;
 
-	Il2CppArraySize_t<int8_t>* DownloadHandler_InternalGetByteArray_hook(Il2CppObject* self)
+	const char* DownloadHandler_InternalGetByteArray_hook(Il2CppObject* self, int* length)
 	{
-		auto data = reinterpret_cast<decltype(DownloadHandler_InternalGetByteArray_hook)*>(DownloadHandler_InternalGetByteArray_orig)(self);
+		auto data = reinterpret_cast<decltype(DownloadHandler_InternalGetByteArray_hook)*>(DownloadHandler_InternalGetByteArray_orig)(self, length);
 
 		try
 		{
-			auto buf = reinterpret_cast<const char*>(data) + kIl2CppSizeOfArray;
-
 			if (config::msgpack_notifier)
 			{
-				notifier::notify_response(string(buf, data->max_length));
+				notifier::notify_response(string(data, *length));
 			}
 
 			if (config::dump_msgpack)
@@ -12057,22 +12021,20 @@ namespace
 				string out_path =
 					"msgpack_dump/"s.append(to_string(current_time())).append("R.msgpack");
 
-				DumpMsgPackFile(out_path, buf, data->max_length);
+				DumpMsgPackFile(out_path, data, *length);
 			}
 
-			MsgPackData::ReadResponse(buf, data->max_length);
+			MsgPackData::ReadResponse(data, *length);
 
 #ifdef EXPERIMENTS
 			if (config::unlock_live_chara)
 			{
-				auto modified = MsgPackModify::ModifyResponse(buf, data->max_length);
+				auto modified = MsgPackModify::ModifyResponse(data, *length);
 
 				if (!modified.empty())
 				{
-					data = il2cpp_array_new_type<int8_t>(il2cpp_defaults.byte_class, modified.size());
-
-					char* buf1 = reinterpret_cast<char*>(data) + kIl2CppSizeOfArray;
-					memcpy(buf1, modified.data(), modified.size());
+					data = new char[modified.size()];
+					memcpy(const_cast<char*>(data), modified.data(), modified.size());
 				}
 			}
 #endif
@@ -13258,14 +13220,6 @@ namespace
 			"StandaloneWindowResize", "KeepAspectRatio", 2
 		);
 
-		auto Screen_SetResolution_addr = il2cpp_symbols::get_method_pointer(
-			"umamusume.dll", "Gallop", "Screen", "SetResolution", 4
-		);
-
-		auto Screen_IsCurrentOrientation_addr = il2cpp_symbols::get_method_pointer(
-			"umamusume.dll", "Gallop", "Screen", "IsCurrentOrientation", 1
-		);
-
 		auto GallopInput_mousePosition_addr = il2cpp_symbols::get_method_pointer(
 			"umamusume.dll", "Gallop", "GallopInput", "mousePosition", 0
 		);
@@ -13729,8 +13683,6 @@ namespace
 		{
 			ADD_HOOK(StandaloneWindowResize_ReshapeAspectRatio, "Gallop.StandaloneWindowResize::ReshapeAspectRatio at %p\n");
 			ADD_HOOK(StandaloneWindowResize_KeepAspectRatio, "Gallop.StandaloneWindowResize::KeepAspectRatio at %p\n");
-			ADD_HOOK(Screen_SetResolution, "Gallop.Screen::SetResolution at %p\n");
-			ADD_HOOK(Screen_IsCurrentOrientation, "Gallop.Screen::IsCurrentOrientation at %p\n");
 
 			ADD_HOOK(DialogSingleModeTopMenu_SetupButtonPositions, "Gallop.DialogSingleModeTopMenu::SetupButtonPositions at %p\n");
 			ADD_HOOK(DialogSingleModeTopMenu_Setup, "Gallop.DialogSingleModeTopMenu::Setup at %p\n");
@@ -13940,11 +13892,6 @@ namespace
 			"Screen", "get_Height", 0
 		);
 
-		auto Screen_set_orientation_addr = il2cpp_symbols::get_method_pointer(
-			"UnityEngine.CoreModule.dll",
-			"UnityEngine",
-			"Screen", "set_orientation", 1);
-
 		auto SetResolution_addr = il2cpp_resolve_icall("UnityEngine.Screen::SetResolution(System.Int32,System.Int32,UnityEngine.FullScreenMode,System.Int32)");
 
 		auto SetResolution_Injected_addr = il2cpp_resolve_icall("UnityEngine.Screen::SetResolution_Injected(System.Int32,System.Int32,UnityEngine.FullScreenMode,UnityEngine.RefreshRate)");
@@ -14019,37 +13966,6 @@ namespace
 		if (config::dump_entries)
 		{
 			dump_all_entries();
-		}
-
-		if (config::freeform_window)
-		{
-			int width = UnityEngine::Screen::width();
-			int height = UnityEngine::Screen::height();
-
-			auto GallopScreen = il2cpp_symbols::get_class("umamusume.dll", "Gallop", "Screen");
-
-			auto SCREEN_ORIENTATION_CATEGORIES_Field = il2cpp_class_get_field_from_name_wrap(GallopScreen, "SCREEN_ORIENTATION_CATEGORIES");
-			Il2CppObject* SCREEN_ORIENTATION_CATEGORIES;
-			il2cpp_field_static_get_value(SCREEN_ORIENTATION_CATEGORIES_Field, &SCREEN_ORIENTATION_CATEGORIES);
-
-			il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*)>(SCREEN_ORIENTATION_CATEGORIES->klass, "Clear", 0)->methodPointer(SCREEN_ORIENTATION_CATEGORIES);
-
-			if (width < height)
-			{
-				il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, UnityEngine::ScreenOrientation, UnityEngine::ScreenOrientation)>(SCREEN_ORIENTATION_CATEGORIES->klass, "Add", 2)->methodPointer(SCREEN_ORIENTATION_CATEGORIES, UnityEngine::ScreenOrientation::Portrait, UnityEngine::ScreenOrientation::Portrait);
-				il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, UnityEngine::ScreenOrientation, UnityEngine::ScreenOrientation)>(SCREEN_ORIENTATION_CATEGORIES->klass, "Add", 2)->methodPointer(SCREEN_ORIENTATION_CATEGORIES, UnityEngine::ScreenOrientation::PortraitUpsideDown, UnityEngine::ScreenOrientation::Portrait);
-				il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, UnityEngine::ScreenOrientation, UnityEngine::ScreenOrientation)>(SCREEN_ORIENTATION_CATEGORIES->klass, "Add", 2)->methodPointer(SCREEN_ORIENTATION_CATEGORIES, UnityEngine::ScreenOrientation::LandscapeLeft, UnityEngine::ScreenOrientation::Portrait);
-				il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, UnityEngine::ScreenOrientation, UnityEngine::ScreenOrientation)>(SCREEN_ORIENTATION_CATEGORIES->klass, "Add", 2)->methodPointer(SCREEN_ORIENTATION_CATEGORIES, UnityEngine::ScreenOrientation::LandscapeRight, UnityEngine::ScreenOrientation::Portrait);
-				il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, UnityEngine::ScreenOrientation, UnityEngine::ScreenOrientation)>(SCREEN_ORIENTATION_CATEGORIES->klass, "Add", 2)->methodPointer(SCREEN_ORIENTATION_CATEGORIES, UnityEngine::ScreenOrientation::AutoRotation, UnityEngine::ScreenOrientation::Portrait);
-			}
-			else
-			{
-				il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, UnityEngine::ScreenOrientation, UnityEngine::ScreenOrientation)>(SCREEN_ORIENTATION_CATEGORIES->klass, "Add", 2)->methodPointer(SCREEN_ORIENTATION_CATEGORIES, UnityEngine::ScreenOrientation::Portrait, UnityEngine::ScreenOrientation::LandscapeLeft);
-				il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, UnityEngine::ScreenOrientation, UnityEngine::ScreenOrientation)>(SCREEN_ORIENTATION_CATEGORIES->klass, "Add", 2)->methodPointer(SCREEN_ORIENTATION_CATEGORIES, UnityEngine::ScreenOrientation::PortraitUpsideDown, UnityEngine::ScreenOrientation::LandscapeLeft);
-				il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, UnityEngine::ScreenOrientation, UnityEngine::ScreenOrientation)>(SCREEN_ORIENTATION_CATEGORIES->klass, "Add", 2)->methodPointer(SCREEN_ORIENTATION_CATEGORIES, UnityEngine::ScreenOrientation::LandscapeLeft, UnityEngine::ScreenOrientation::LandscapeLeft);
-				il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, UnityEngine::ScreenOrientation, UnityEngine::ScreenOrientation)>(SCREEN_ORIENTATION_CATEGORIES->klass, "Add", 2)->methodPointer(SCREEN_ORIENTATION_CATEGORIES, UnityEngine::ScreenOrientation::LandscapeRight, UnityEngine::ScreenOrientation::LandscapeLeft);
-				il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, UnityEngine::ScreenOrientation, UnityEngine::ScreenOrientation)>(SCREEN_ORIENTATION_CATEGORIES->klass, "Add", 2)->methodPointer(SCREEN_ORIENTATION_CATEGORIES, UnityEngine::ScreenOrientation::AutoRotation, UnityEngine::ScreenOrientation::LandscapeLeft);
-			}
 		}
 
 		if (config::auto_fullscreen || config::unlock_size || config::freeform_window)
@@ -14919,6 +14835,8 @@ ShowWindow_hook(
 	_In_ HWND hWnd,
 	_In_ int nCmdShow)
 {
+	if (!currentHWnd)
+	{
 	if (!config::custom_title_name.empty())
 	{
 		SetWindowTextW(hWnd, u16_wide(config::custom_title_name).data());
@@ -14932,10 +14850,10 @@ ShowWindow_hook(
 	oldWndProcPtr = reinterpret_cast<WNDPROC>(SetWindowLongPtrW(hWnd, GWLP_WNDPROC, reinterpret_cast<LONG_PTR>(WndProc)));
 
 	currentHWnd = hWnd;
+	}
 
 	MH_DisableHook(ShowWindow);
 	MH_RemoveHook(ShowWindow);
-
 	return ShowWindow(hWnd, nCmdShow);
 }
 
@@ -14999,14 +14917,178 @@ BOOL InternetCrackUrlW_hook(
 	return reinterpret_cast<decltype(InternetCrackUrlW_hook)*>(InternetCrackUrlW_orig)(lpszUrl, dwUrlLength, dwFlags, lpUrlComponents);
 }
 
-constexpr int MAX_DLL_COUNT = 23;
-constexpr int MAX_ROOT_FILE_COUNT = 8 + /* self (.) */1 + /* parent (..) */1;
+constexpr int MAX_DLL_COUNT = 21;
+constexpr int MAX_ROOT_FILE_COUNT = 9 + /* self (.) */1 + /* parent (..) */1;
 
 HANDLE currentFindHandle;
+vector<HANDLE> findHandles;
 HANDLE currentRootFindHandle;
 
 int dllCount;
 int rootFileCount;
+
+void* CreateFileW_orig = nullptr;
+HANDLE
+WINAPI
+CreateFileW_hook(
+	_In_ LPCWSTR lpFileName,
+	_In_ DWORD dwDesiredAccess,
+	_In_ DWORD dwShareMode,
+	_In_opt_ LPSECURITY_ATTRIBUTES lpSecurityAttributes,
+	_In_ DWORD dwCreationDisposition,
+	_In_ DWORD dwFlagsAndAttributes,
+	_In_opt_ HANDLE hTemplateFile
+)
+{
+	auto hFile = reinterpret_cast<decltype(CreateFileW)*>(CreateFileW_orig)(lpFileName, dwDesiredAccess, dwShareMode, lpSecurityAttributes, dwCreationDisposition, dwFlagsAndAttributes, hTemplateFile);
+
+	if (filesystem::current_path() == lpFileName)
+	{
+		currentFindHandle = hFile;
+	}
+
+	return hFile;
+}
+
+void* NtCreateFile_orig = nullptr;
+NTSTATUS
+NTAPI
+NtCreateFile_hook(
+	_Out_ PHANDLE FileHandle,
+	_In_ ACCESS_MASK DesiredAccess,
+	_In_ POBJECT_ATTRIBUTES ObjectAttributes,
+	_Out_ PIO_STATUS_BLOCK IoStatusBlock,
+	_In_opt_ PLARGE_INTEGER AllocationSize,
+	_In_ ULONG FileAttributes,
+	_In_ ULONG ShareAccess,
+	_In_ ULONG CreateDisposition,
+	_In_ ULONG CreateOptions,
+	_In_reads_bytes_opt_(EaLength) PVOID EaBuffer,
+	_In_ ULONG EaLength
+)
+{
+	if (ObjectAttributes)
+	{
+		if (ObjectAttributes->ObjectName)
+		{
+			wstring fileName(ObjectAttributes->ObjectName->Buffer, ObjectAttributes->ObjectName->Length / sizeof(WCHAR));
+			if (fileName == L"dat")
+			{
+				return STATUS_OBJECT_NAME_NOT_FOUND;
+			}
+		}
+
+		if (ObjectAttributes->RootDirectory == currentFindHandle)
+		{
+			findHandles.emplace_back(ObjectAttributes->RootDirectory);
+		}
+	}
+
+	auto status = reinterpret_cast<decltype(NtCreateFile)*>(NtCreateFile_orig)(FileHandle, DesiredAccess, ObjectAttributes, IoStatusBlock,
+		AllocationSize, FileAttributes, ShareAccess, CreateDisposition, CreateOptions, EaBuffer, EaLength);
+
+	return status;
+}
+
+void* NtQueryDirectoryFile_orig = nullptr;
+NTSTATUS NTAPI NtQueryDirectoryFile_hook(
+	_In_ HANDLE FileHandle,
+	_In_opt_ HANDLE Event,
+	_In_opt_ PIO_APC_ROUTINE ApcRoutine,
+	_In_opt_ PVOID ApcContext,
+	_Out_ PIO_STATUS_BLOCK IoStatusBlock,
+	_Out_writes_bytes_(Length) PVOID FileInformation,
+	_In_ ULONG Length,
+	_In_ FILE_INFORMATION_CLASS FileInformationClass,
+	_In_ BOOLEAN ReturnSingleEntry,
+	_In_opt_ PUNICODE_STRING FileName,
+	_In_ BOOLEAN RestartScan
+)
+{
+	if (FileHandle != currentFindHandle && find(findHandles.begin(), findHandles.end(), FileHandle) != findHandles.end())
+	{
+		return reinterpret_cast<decltype(NtQueryDirectoryFile)*>(NtQueryDirectoryFile_orig)(FileHandle, Event, ApcRoutine, ApcContext, IoStatusBlock,
+			FileInformation, Length, FileInformationClass,
+			ReturnSingleEntry, FileName, RestartScan);
+	}
+
+	NTSTATUS status = reinterpret_cast<decltype(NtQueryDirectoryFile)*>(NtQueryDirectoryFile_orig)(FileHandle, Event, ApcRoutine, ApcContext, IoStatusBlock,
+		FileInformation, Length, FileInformationClass,
+		ReturnSingleEntry, FileName, RestartScan);
+
+	bool isSupportedClass = FileInformationClass == FileFullDirectoryInformation;
+
+	if (!isSupportedClass)
+	{
+		return status;
+	}
+
+	if (NT_SUCCESS(status) &&
+		FileInformationClass == FileFullDirectoryInformation)
+	{
+		auto curr = (PFILE_FULL_DIR_INFORMATION)FileInformation;
+		PFILE_FULL_DIR_INFORMATION prev = nullptr;
+
+		while (true)
+		{
+			std::wstring fName(curr->FileName, curr->FileNameLength / sizeof(WCHAR));
+
+			bool removeEntry = false;
+
+			if (fName.ends_with(L".dll"))
+			{
+				dllCount++;
+				if (dllCount > MAX_DLL_COUNT) removeEntry = true;
+			}
+
+			if (removeEntry)
+			{
+				if (prev)
+				{
+					if (curr->NextEntryOffset != 0)
+					{
+						prev->NextEntryOffset += curr->NextEntryOffset;
+					}
+					else
+					{
+						prev->NextEntryOffset = 0;
+					}
+
+					if (prev->NextEntryOffset == 0) 
+					{
+						break;
+					}
+					curr = (PFILE_FULL_DIR_INFORMATION)((PUCHAR)prev + prev->NextEntryOffset);
+					continue;
+				}
+				else
+				{
+					if (curr->NextEntryOffset != 0)
+					{
+						ULONG nextOffset = curr->NextEntryOffset;
+						ULONG totalValidBytes = (ULONG)IoStatusBlock->Information;
+						ULONG bytesToMove = totalValidBytes - nextOffset;
+
+						memmove(curr, (PUCHAR)curr + nextOffset, bytesToMove);
+
+						IoStatusBlock->Information -= nextOffset;
+						continue;
+					}
+					else
+					{
+						return STATUS_NO_MORE_FILES;
+					}
+				}
+			}
+
+			if (curr->NextEntryOffset == 0) break;
+			prev = curr;
+			curr = (PFILE_FULL_DIR_INFORMATION)((PUCHAR)curr + curr->NextEntryOffset);
+		}
+	}
+
+	return status;
+}
 
 void* FindNextFileW_orig = nullptr;
 BOOL
@@ -15184,6 +15266,15 @@ void init_hook(filesystem::path module_path)
 
 	MH_CreateHook(FindNextFileW, FindNextFileW_hook, &FindNextFileW_orig);
 	MH_EnableHook(FindNextFileW);
+
+	MH_CreateHook(CreateFileW, CreateFileW_hook, &CreateFileW_orig);
+	MH_EnableHook(CreateFileW);
+
+	MH_CreateHook(NtCreateFile, NtCreateFile_hook, &NtCreateFile_orig);
+	MH_EnableHook(NtCreateFile);
+
+	MH_CreateHook(NtQueryDirectoryFile, NtQueryDirectoryFile_hook, &NtQueryDirectoryFile_orig);
+	MH_EnableHook(NtQueryDirectoryFile);
 
 	auto LoadLibraryExW_addr = GetProcAddress(GetModuleHandleW(L"KernelBase.dll"), "LoadLibraryExW");
 	MH_CreateHook(LoadLibraryExW_addr, load_library_ex_w_hook, &load_library_ex_w_orig);

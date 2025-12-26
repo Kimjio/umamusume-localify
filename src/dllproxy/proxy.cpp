@@ -5,7 +5,7 @@
 #include <string>
 #include <filesystem>
 
-#include "ntdll.h"
+#include "MINT.h"
 
 extern "C"
 {

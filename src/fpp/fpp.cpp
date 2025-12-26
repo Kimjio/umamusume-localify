@@ -1,5 +1,5 @@
-#include "fpp.h"
-#include "ntdll.h"
+﻿#include "fpp.h"
+#include "MINT.h"
 
 #include <iostream>
 #include <Psapi.h>
@@ -31,6 +31,29 @@ static bool ViewHasProtectedProtection(HANDLE ProcessHandle,
 		status == STATUS_SECTION_PROTECTION;
 }
 
+static DWORD GetSyscallNumber(const char* functionName)
+{
+	HMODULE hNtdll = GetModuleHandleA("ntdll.dll");
+	if (!hNtdll)
+	{
+		return 0;
+	}
+
+	FARPROC funcAddr = GetProcAddress(hNtdll, functionName);
+	if (!funcAddr)
+	{
+		return 0;
+	}
+
+	BYTE* pByte = reinterpret_cast<BYTE*>(funcAddr);
+	if (pByte[0] == 0x4C && pByte[1] == 0x8B && pByte[2] == 0xD1 && pByte[3] == 0xB8)
+	{
+		return *reinterpret_cast<DWORD*>(pByte + 4);
+	}
+
+	return 0;
+}
+
 static bool RemapViewOfSection(HANDLE ProcessHandle,
 	PVOID BaseAddress,
 	SIZE_T RegionSize,
@@ -53,12 +76,26 @@ static bool RemapViewOfSection(HANDLE ProcessHandle,
 
 		if (NT_SUCCESS(NtCreateSection(&hSection, SECTION_ALL_ACCESS, nullptr, &sectionMaxSize, PAGE_EXECUTE_READWRITE, SEC_COMMIT, nullptr)))
 		{
-			if (NT_SUCCESS(NtUnmapViewOfSection(ProcessHandle, BaseAddress)))
+			static DWORD ssnNtUnmap = 0;
+			NTSTATUS status;
+			if (ssnNtUnmap == 0)
+			{
+				ssnNtUnmap = GetSyscallNumber("NtUnmapViewOfSectionEx");
+			}
+
+			if (ssnNtUnmap == 0)
+			{
+				// ntdll corrupted
+				return false;
+			}
+
+			status = NtUnmapViewOfSectionEx(ProcessHandle, BaseAddress, 0);
+
+			if (NT_SUCCESS(status))
 			{
 				PVOID viewBase = BaseAddress;
 				LARGE_INTEGER sectionOffset{};
 				SIZE_T viewSize = 0;
-
 				if (NT_SUCCESS(NtMapViewOfSection(hSection, ProcessHandle, &viewBase, 0, RegionSize, &sectionOffset, &viewSize, ViewUnmap, 0, NewProtection)))
 				{
 					SIZE_T numberOfBytesWritten = 0;

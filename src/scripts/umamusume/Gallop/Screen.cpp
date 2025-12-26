@@ -15,6 +15,18 @@ namespace
 	void* get_Height_addr = nullptr;
 	void* get_Height_orig = nullptr;
 
+	void* WaitDeviceOrientation_addr = nullptr;
+	void* WaitDeviceOrientation_orig = nullptr;
+
+	void* IsCurrentOrientation_addr = nullptr;
+	void* IsCurrentOrientation_orig = nullptr;
+
+	void* SetResolution_addr = nullptr;
+	void* SetResolution_orig = nullptr;
+
+	void* SetResolution2_addr = nullptr;
+	void* SetResolution2_orig = nullptr;
+
 	void* get_OriginalScreenWidth_addr = nullptr;
 	void* get_OriginalScreenWidth_orig = nullptr;
 
@@ -58,6 +70,32 @@ namespace
 
 	constexpr float ratio_4_3 = 1.3333f;
 	constexpr float ratio_3_4 = 0.75f;
+}
+
+static Il2CppObject* WaitDeviceOrientation_hook(UnityEngine::ScreenOrientation target)
+{
+	if (config::freeform_window)
+	{
+		auto yield = il2cpp_object_new(il2cpp_symbols::get_class("UnityEngine.CoreModule.dll", "UnityEngine", "WaitWhile"));
+		il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, Il2CppDelegate*)>(yield->klass, ".ctor", 1)->methodPointer(yield, CreateDelegateStatic(*[]() { return false; }));
+		return yield;
+	}
+	return reinterpret_cast<decltype(WaitDeviceOrientation_hook)*>(WaitDeviceOrientation_orig)(target);
+}
+
+static bool IsCurrentOrientation_hook(UnityEngine::ScreenOrientation target)
+{
+	return true;
+}
+
+static void SetResolution_hook(int w, int h, bool fullscreen, bool forceUpdate)
+{
+
+}
+
+static void SetResolution2_hook(int w, int h, bool fullscreen, bool forceUpdate, bool skipKeepAspect)
+{
+
 }
 
 static int get_OriginalScreenWidth_hook()
@@ -143,6 +181,10 @@ static void InitAddress()
 	ScreenClass = il2cpp_symbols::get_class(ASSEMBLY_NAME, "Gallop", "Screen");
 	get_Width_addr = il2cpp_symbols::get_method_pointer(ASSEMBLY_NAME, "Gallop", "Screen", "get_Width", 0);
 	get_Height_addr = il2cpp_symbols::get_method_pointer(ASSEMBLY_NAME, "Gallop", "Screen", "get_Height", 0);
+	WaitDeviceOrientation_addr = il2cpp_symbols::get_method_pointer(ASSEMBLY_NAME, "Gallop", "Screen", "WaitDeviceOrientation", 1);
+	IsCurrentOrientation_addr = il2cpp_symbols::get_method_pointer(ASSEMBLY_NAME, "Gallop", "Screen", "IsCurrentOrientation", 1);
+	SetResolution_addr = il2cpp_symbols::get_method_pointer(ASSEMBLY_NAME, "Gallop", "Screen", "SetResolution", 4);
+	SetResolution2_addr = il2cpp_symbols::get_method_pointer(ASSEMBLY_NAME, "Gallop", "Screen", "SetResolution", 5);
 	get_OriginalScreenWidth_addr = il2cpp_symbols::get_method_pointer(ASSEMBLY_NAME, "Gallop", "Screen", "get_OriginalScreenWidth", 0);
 	set_OriginalScreenWidth_addr = il2cpp_symbols::get_method_pointer(ASSEMBLY_NAME, "Gallop", "Screen", "set_OriginalScreenWidth", 1);
 	get_OriginalScreenHeight_addr = il2cpp_symbols::get_method_pointer(ASSEMBLY_NAME, "Gallop", "Screen", "get_OriginalScreenHeight", 0);
@@ -172,6 +214,10 @@ static void HookMethods()
 
 	if (config::freeform_window)
 	{
+		ADD_HOOK(WaitDeviceOrientation, "Gallop.Screen::WaitDeviceOrientation at %p\n");
+		ADD_HOOK(IsCurrentOrientation, "Gallop.Screen::IsCurrentOrientation at %p\n");
+		ADD_HOOK(SetResolution, "Gallop.Screen::SetResolution at %p\n");
+		ADD_HOOK(SetResolution2, "Gallop.Screen::SetResolution2 at %p\n");
 		ADD_HOOK(get_OriginalScreenWidth, "Gallop.Screen::get_OriginalScreenWidth at %p\n");
 		ADD_HOOK(set_OriginalScreenWidth, "Gallop.Screen::set_OriginalScreenWidth at %p\n");
 		ADD_HOOK(get_OriginalScreenHeight, "Gallop.Screen::get_OriginalScreenHeight at %p\n");
