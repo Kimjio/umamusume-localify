@@ -276,8 +276,6 @@ namespace Unity
 
 		static void Internal_PumpMessageLoop();
 
-		static void Internal_SetSuccessfullyInitialized(bool value);
-
 		static bool Internal_RequestEnableExtensionString(const char* extensionString);
 
 		static void ReceiveNativeEvent(Unity::OpenXR::Feature::NativeEvent, ULONG payload);

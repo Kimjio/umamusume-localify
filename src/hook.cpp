@@ -261,9 +261,6 @@ namespace
 		il2cpp_field_static_set_value(isQuitField, &isQuit);
 	}
 
-	void* SetResolution_orig;
-	void SetResolution_hook(int width, int height, int fullscreenMode, int perferredRefreshRate);
-
 	void* SetResolution_Injected_orig;
 	void SetResolution_Injected_hook(int width, int height, int fullscreenMode, UnityEngine::RefreshRate* perferredRefreshRate);
 
@@ -299,11 +296,7 @@ namespace
 		MH_EnableHook(Resources_Load_addr);
 
 		il2cpp_runtime_class_init(il2cpp_symbols::get_class("UnityEngine.SubsystemsModule.dll", "UnityEngine", "SubsystemManager"));
-
-		if (Game::CurrentUnityVersion != Game::UnityVersion::Unity19)
-		{
-			il2cpp_runtime_class_init(il2cpp_symbols::get_class("UnityEngine.SubsystemsModule.dll", "UnityEngine.SubsystemsImplementation", "SubsystemDescriptorStore"));
-		}
+		il2cpp_runtime_class_init(il2cpp_symbols::get_class("UnityEngine.SubsystemsModule.dll", "UnityEngine.SubsystemsImplementation", "SubsystemDescriptorStore"));
 		//il2cpp_runtime_class_init(il2cpp_symbols::get_class("UnityEngine.CoreModule.dll", "UnityEngine", "BeforeRenderHelper"));
 
 		if (Game::CurrentGameRegion == Game::Region::KOR)
@@ -3363,228 +3356,6 @@ namespace
 		return false;
 	}
 
-	void SetResolution_hook(int width, int height, int fullscreenMode, int perferredRefreshRate)
-	{
-		if (width < 72)
-		{
-			if (Gallop::StandaloneWindowResize::IsVirt())
-			{
-				width = 72;
-			}
-			else
-			{
-				width = 128;
-			}
-		}
-
-		if (height < 72)
-		{
-			if (Gallop::StandaloneWindowResize::IsVirt())
-			{
-				height = 128;
-			}
-			else
-			{
-				height = 72;
-			}
-		}
-
-		if (config::freeform_window)
-		{
-			auto hWnd = GetHWND();
-
-			long style = GetWindowLongW(hWnd, GWL_STYLE);
-			style |= WS_MAXIMIZEBOX;
-			SetWindowLongPtrW(hWnd, GWL_STYLE, style);
-
-			auto StandaloneWindowResize = il2cpp_symbols::get_class("umamusume.dll", "Gallop", "StandaloneWindowResize");
-			il2cpp_class_get_method_from_name_type<void (*)(bool)>(StandaloneWindowResize, "set_IsPreventReShape", 1)->methodPointer(true);
-
-			isRequestChangeResolution = true;
-			return;
-		}
-
-		UnityEngine::Resolution r;
-		get_resolution(&r);
-
-		bool reqVirt = width < height;
-
-		bool unlockSize = config::unlock_size || config::freeform_window;
-
-		if (Gallop::StandaloneWindowResize::IsVirt() && fullScreenFl)
-		{
-			fullScreenFl = false;
-			fullScreenFlOverride = false;
-			if (unlockSize)
-			{
-				reinterpret_cast<decltype(SetResolution_hook)*>(SetResolution_orig)(last_virt_window_width, last_virt_window_height, 3, perferredRefreshRate);
-			}
-			else
-			{
-				r.height *= 0.825f;
-				r.width = r.height * config::runtime::ratioVertical;
-				reinterpret_cast<decltype(SetResolution_hook)*>(SetResolution_orig)(r.width, r.height, 3, perferredRefreshRate);
-			}
-			return;
-		}
-
-		auto display = display_get_main();
-
-		if (reqVirt && (get_rendering_width(display) > get_rendering_height(display)))
-		{
-			fullScreenFl = false;
-			fullScreenFlOverride = false;
-			if (unlockSize)
-			{
-				reinterpret_cast<decltype(SetResolution_hook)*>(SetResolution_orig)(last_virt_window_width, last_virt_window_height, 3, perferredRefreshRate);
-			}
-			else
-			{
-				r.height *= 0.825f;
-				r.width = r.height * config::runtime::ratioVertical;
-				reinterpret_cast<decltype(SetResolution_hook)*>(SetResolution_orig)(r.width, r.height, 3, perferredRefreshRate);
-			}
-			return;
-		}
-
-		bool need_fullscreen = false;
-
-		if (config::auto_fullscreen)
-		{
-			auto ratio = static_cast<float>(r.width) / static_cast<float>(r.height);
-			ratio *= 1000;
-			ratio = roundf(ratio) / 1000;
-
-			if (Gallop::StandaloneWindowResize::IsVirt() && ratio == ratio_9_16)
-			{
-				need_fullscreen = true;
-			}
-			else if (!Gallop::StandaloneWindowResize::IsVirt() && ratio == ratio_16_9)
-			{
-				need_fullscreen = true;
-			}
-		}
-
-		if (!fullScreenFl && unlockSize)
-		{
-			if (!(get_rendering_width(display) > get_rendering_height(display)))
-			{
-				last_virt_window_width = get_rendering_width(display);
-				last_virt_window_height = get_rendering_height(display);
-				if (need_fullscreen && (!last_hriz_window_width || !last_hriz_window_height))
-				{
-					last_hriz_window_width = r.width - 400;
-					last_hriz_window_height = last_hriz_window_width * config::runtime::ratioHorizontal;
-				}
-			}
-			else
-			{
-				last_hriz_window_width = get_rendering_width(display);
-				last_hriz_window_height = get_rendering_height(display);
-			}
-		}
-
-		if (!fullScreenFlOverride)
-		{
-			fullScreenFl = need_fullscreen;
-		}
-
-		if (!reqVirt && !fullScreenFl && last_hriz_window_width && last_hriz_window_height && unlockSize)
-		{
-			width = last_hriz_window_width;
-			height = last_hriz_window_height;
-		}
-
-		if (unlockSize)
-		{
-			auto ratio = static_cast<float>(width) / static_cast<float>(height);
-			ratio *= 1000;
-			ratio = roundf(ratio) / 1000;
-
-			auto round_ratio_vertical = config::runtime::ratioVertical * 1000;
-			round_ratio_vertical = roundf(round_ratio_vertical) / 1000;
-
-			auto round_ratio_horizontal = config::runtime::ratioHorizontal * 1000;
-			round_ratio_horizontal = roundf(round_ratio_horizontal) / 1000;
-
-			if (reqVirt && ratio != round_ratio_vertical)
-			{
-				auto StandaloneWindowResize = il2cpp_symbols::get_class("umamusume.dll", "Gallop", "StandaloneWindowResize");
-				il2cpp_class_get_method_from_name_type<void (*)(bool)>(StandaloneWindowResize, "set_IsPreventReShape", 1)->methodPointer(true);
-
-				if (last_virt_window_width > last_virt_window_height)
-				{
-					auto display = display_get_main();
-					if (config::initial_width < config::initial_height)
-					{
-						last_virt_window_height = get_system_width(display) - 400;
-						last_virt_window_width = last_virt_window_height * config::runtime::ratioVertical;
-
-						if (last_virt_window_height >= get_system_height(display))
-						{
-							last_virt_window_height = get_system_height(display) - 400;
-							last_virt_window_width = last_virt_window_height * config::runtime::ratioVertical;
-						}
-					}
-					else
-					{
-						last_virt_window_height = get_system_height(display) - 400;
-						last_virt_window_width = last_virt_window_height * config::runtime::ratioVertical;
-
-						if (last_virt_window_height >= get_system_height(display))
-						{
-							last_virt_window_height = get_system_height(display) - 400;
-							last_virt_window_width = last_virt_window_height * config::runtime::ratioVertical;
-						}
-					}
-				}
-
-				reinterpret_cast<decltype(SetResolution_hook)*>(SetResolution_orig)(last_virt_window_width, last_virt_window_height, fullScreenFl ? 1 : 3, perferredRefreshRate);
-				return;
-
-			}
-
-			if (!reqVirt && ratio != round_ratio_horizontal)
-			{
-				auto StandaloneWindowResize = il2cpp_symbols::get_class("umamusume.dll", "Gallop", "StandaloneWindowResize");
-				il2cpp_class_get_method_from_name_type<void (*)(bool)>(StandaloneWindowResize, "set_IsPreventReShape", 1)->methodPointer(true);
-
-				if (last_hriz_window_width < last_hriz_window_height)
-				{
-					auto display = display_get_main();
-					if (config::initial_width < config::initial_height)
-					{
-						last_hriz_window_width = get_system_height(display) - 400;
-						last_hriz_window_height = last_hriz_window_width / config::runtime::ratioHorizontal;
-
-						if (last_hriz_window_height >= get_system_height(display))
-						{
-							last_hriz_window_height = get_system_height(display) - 400;
-							last_hriz_window_width = last_hriz_window_height * config::runtime::ratioHorizontal;
-						}
-					}
-					else
-					{
-						last_hriz_window_width = get_system_width(display) - 400;
-						last_hriz_window_height = last_hriz_window_width / config::runtime::ratioHorizontal;
-
-						if (last_hriz_window_height >= get_system_height(display))
-						{
-							last_hriz_window_height = get_system_height(display) - 400;
-							last_hriz_window_width = last_hriz_window_height * config::runtime::ratioHorizontal;
-						}
-					}
-				}
-
-				reinterpret_cast<decltype(SetResolution_hook)*>(SetResolution_orig)(last_hriz_window_width, last_hriz_window_height, fullScreenFl ? 1 : 3, perferredRefreshRate);
-				return;
-			}
-		}
-
-		reinterpret_cast<decltype(SetResolution_hook)*>(SetResolution_orig)(
-			fullScreenFl ? r.width : width, fullScreenFl ? r.height : height, fullScreenFl ? 1 : 3, perferredRefreshRate);
-	}
-
 	void SetResolution_Injected_hook(int width, int height, int fullscreenMode, UnityEngine::RefreshRate* perferredRefreshRate)
 	{
 		if (width < 72)
@@ -5501,22 +5272,10 @@ namespace
 				void* iter = nullptr;
 				while (const MethodInfo* method = il2cpp_class_get_methods(bgmList->klass, &iter))
 				{
-					if (Game::CurrentUnityVersion == Game::UnityVersion::Unity22)
+					if (method->parameters_count && method->name == ".ctor"s && method->parameters[0]->type == Il2CppTypeEnum::IL2CPP_TYPE_GENERICINST)
 					{
-						if (method->parameters_count && method->name == ".ctor"s && method->parameters[0]->type == Il2CppTypeEnum::IL2CPP_TYPE_GENERICINST)
-						{
-							reinterpret_cast<void (*)(Il2CppObject*, Il2CppObject*, const MethodInfo*)>(method->methodPointer)(bgmList, Keys, method);
-							break;
-						}
-					}
-					else
-					{
-						auto method2020 = reinterpret_cast<const MethodInfo2020*>(method);
-						if (method2020->parameters_count && method2020->name == ".ctor"s && method2020->parameters[0].parameter_type->type == Il2CppTypeEnum::IL2CPP_TYPE_GENERICINST)
-						{
-							reinterpret_cast<void (*)(Il2CppObject*, Il2CppObject*, const MethodInfo2020*)>(method2020->methodPointer)(bgmList, Keys, method2020);
-							break;
-						}
+						reinterpret_cast<void (*)(Il2CppObject*, Il2CppObject*, const MethodInfo*)>(method->methodPointer)(bgmList, Keys, method);
+						break;
 					}
 				}
 
@@ -5989,15 +5748,8 @@ namespace
 							r.height = r.width / config::runtime::ratioHorizontal;
 						}
 
-						if (Game::CurrentUnityVersion != Game::UnityVersion::Unity22)
-						{
-							reinterpret_cast<decltype(SetResolution_hook)*>(SetResolution_orig)(r.width, r.height, fullScreenFl ? 1 : 3, 0);
-						}
-						else
-						{
-							auto refreshRate = RefreshRate{ 0, 1 };
-							reinterpret_cast<decltype(SetResolution_Injected_hook)*>(SetResolution_Injected_orig)(r.width, r.height, fullScreenFl ? 1 : 3, &refreshRate);
-						}
+						auto refreshRate = RefreshRate{ 0, 1 };
+						reinterpret_cast<decltype(SetResolution_Injected_hook)*>(SetResolution_Injected_orig)(r.width, r.height, fullScreenFl ? 1 : 3, &refreshRate);
 					}
 					return TRUE;
 
@@ -13188,14 +12940,7 @@ namespace
 		// the string one looks like will not be called by elsewhere
 		auto localize_get_addr = il2cpp_symbols::find_method("umamusume.dll", "Gallop", "Localize", [](const MethodInfo* method)
 			{
-				if (Game::CurrentUnityVersion == Game::UnityVersion::Unity22)
-				{
-					return method->name == "Get"s &&
-						(*method->parameters)->type == IL2CPP_TYPE_VALUETYPE;
-				}
-
-				return reinterpret_cast<const MethodInfo2020*>(method)->name == "Get"s &&
-					reinterpret_cast<const MethodInfo2020*>(method)->parameters->parameter_type->type == IL2CPP_TYPE_VALUETYPE;
+				return method->name == "Get"s && (*method->parameters)->type == IL2CPP_TYPE_VALUETYPE;
 			});
 
 		auto update_addr = il2cpp_symbols::get_method_pointer(
@@ -13903,8 +13648,6 @@ namespace
 			"Screen", "get_Height", 0
 		);
 
-		auto SetResolution_addr = il2cpp_resolve_icall("UnityEngine.Screen::SetResolution(System.Int32,System.Int32,UnityEngine.FullScreenMode,System.Int32)");
-
 		auto SetResolution_Injected_addr = il2cpp_resolve_icall("UnityEngine.Screen::SetResolution_Injected(System.Int32,System.Int32,UnityEngine.FullScreenMode,UnityEngine.RefreshRate)");
 
 		auto MovieManager_SetImageUvRect_addr = il2cpp_symbols::get_method_pointer(
@@ -13981,10 +13724,6 @@ namespace
 
 		if (config::auto_fullscreen || config::unlock_size || config::freeform_window)
 		{
-			if (SetResolution_addr)
-			{
-				ADD_HOOK(SetResolution, "UnityEngine.Screen.SetResolution(int, int, FullScreenMode, int) at %p\n");
-			}
 			ADD_HOOK(SetResolution_Injected, "UnityEngine.Screen.SetResolution_Injected(int, int, FullScreenMode, RefreshRate) at %p\n");
 		}
 
@@ -14741,28 +14480,14 @@ SetWindowLongPtrW_hook(
 	{
 		if ((config::unlock_size || config::freeform_window) && config::initial_width > 72 && config::initial_height > 72)
 		{
-			if (Game::CurrentUnityVersion != Game::UnityVersion::Unity22)
+			auto refreshRate = RefreshRate{ 0, 1 };
+			if (config::initial_width < config::initial_height)
 			{
-				if (config::initial_width < config::initial_height)
-				{
-					reinterpret_cast<decltype(SetResolution_hook)*>(SetResolution_orig)(last_virt_window_width, last_virt_window_height, 3, 0);
-				}
-				else
-				{
-					reinterpret_cast<decltype(SetResolution_hook)*>(SetResolution_orig)(last_hriz_window_width, last_hriz_window_height, 3, 0);
-				}
+				reinterpret_cast<decltype(SetResolution_Injected_hook)*>(SetResolution_Injected_orig)(last_virt_window_width, last_virt_window_height, 3, &refreshRate);
 			}
 			else
 			{
-				auto refreshRate = RefreshRate{ 0, 1 };
-				if (config::initial_width < config::initial_height)
-				{
-					reinterpret_cast<decltype(SetResolution_Injected_hook)*>(SetResolution_Injected_orig)(last_virt_window_width, last_virt_window_height, 3, &refreshRate);
-				}
-				else
-				{
-					reinterpret_cast<decltype(SetResolution_Injected_hook)*>(SetResolution_Injected_orig)(last_hriz_window_width, last_hriz_window_height, 3, &refreshRate);
-				}
+				reinterpret_cast<decltype(SetResolution_Injected_hook)*>(SetResolution_Injected_orig)(last_hriz_window_width, last_hriz_window_height, 3, &refreshRate);
 			}
 		}
 
@@ -14799,28 +14524,14 @@ SetWindowLongPtrA_hook(
 	{
 		if ((config::unlock_size || config::freeform_window) && config::initial_width > 72 && config::initial_height > 72)
 		{
-			if (Game::CurrentUnityVersion != Game::UnityVersion::Unity22)
+			auto refreshRate = RefreshRate{ 0, 1 };
+			if (config::initial_width < config::initial_height)
 			{
-				if (config::initial_width < config::initial_height)
-				{
-					reinterpret_cast<decltype(SetResolution_hook)*>(SetResolution_orig)(last_virt_window_width, last_virt_window_height, 3, 0);
-				}
-				else
-				{
-					reinterpret_cast<decltype(SetResolution_hook)*>(SetResolution_orig)(last_hriz_window_width, last_hriz_window_height, 3, 0);
-				}
+				reinterpret_cast<decltype(SetResolution_Injected_hook)*>(SetResolution_Injected_orig)(last_virt_window_width, last_virt_window_height, 3, &refreshRate);
 			}
 			else
 			{
-				auto refreshRate = RefreshRate{ 0, 1 };
-				if (config::initial_width < config::initial_height)
-				{
-					reinterpret_cast<decltype(SetResolution_Injected_hook)*>(SetResolution_Injected_orig)(last_virt_window_width, last_virt_window_height, 3, &refreshRate);
-				}
-				else
-				{
-					reinterpret_cast<decltype(SetResolution_Injected_hook)*>(SetResolution_Injected_orig)(last_hriz_window_width, last_hriz_window_height, 3, &refreshRate);
-				}
+				reinterpret_cast<decltype(SetResolution_Injected_hook)*>(SetResolution_Injected_orig)(last_hriz_window_width, last_hriz_window_height, 3, &refreshRate);
 			}
 		}
 
@@ -15065,7 +14776,7 @@ NTSTATUS NTAPI NtQueryDirectoryFile_hook(
 						prev->NextEntryOffset = 0;
 					}
 
-					if (prev->NextEntryOffset == 0) 
+					if (prev->NextEntryOffset == 0)
 					{
 						break;
 					}

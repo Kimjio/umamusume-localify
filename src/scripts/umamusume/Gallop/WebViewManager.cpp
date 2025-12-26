@@ -1017,14 +1017,7 @@ static void InitAddress()
 	Gallop_WebViewManager__errorCallback = il2cpp_class_get_field_from_name_wrap(il2cpp_symbols::get_class(ASSEMBLY_NAME, "Gallop", "WebViewManager"), "_errorCallback");
 	Gallop_WebViewManager__fontFilePaths = il2cpp_class_get_field_from_name_wrap(il2cpp_symbols::get_class(ASSEMBLY_NAME, "Gallop", "WebViewManager"), "_fontFilePaths");
 
-	if (Game::CurrentUnityVersion != Game::UnityVersion::Unity22)
-	{
-		Gallop_WebViewManager_WebViewInfo = il2cpp_class_from_type(reinterpret_cast<const MethodInfo2020*>(Gallop_WebViewManager_TryGetWebViewInfo)->parameters[1].parameter_type);
-	}
-	else
-	{
-		Gallop_WebViewManager_WebViewInfo = il2cpp_class_from_type(Gallop_WebViewManager_TryGetWebViewInfo->parameters[1]);
-	}
+	Gallop_WebViewManager_WebViewInfo = il2cpp_class_from_type(Gallop_WebViewManager_TryGetWebViewInfo->parameters[1]);
 
 	Gallop_WebViewManager_WebViewInfo_ctor_addr = il2cpp_class_get_method_from_name(Gallop_WebViewManager_WebViewInfo, ".ctor", 4)->methodPointer;
 	Gallop_WebViewManager_WebViewInfo__url = il2cpp_class_get_field_from_name(Gallop_WebViewManager_WebViewInfo, "_url");
@@ -1042,14 +1035,6 @@ static void InitAddress()
 		DialogTitleMenu_OnSelectMenu_KaKaoNotLogin_addr = il2cpp_symbols::find_method(
 			ASSEMBLY_NAME, "Gallop", "DialogTitleMenu", [](const MethodInfo* method)
 			{
-				if (Game::CurrentUnityVersion != Game::UnityVersion::Unity22)
-				{
-					auto method2020 = reinterpret_cast<const MethodInfo2020*>(method);
-					return method2020->name == "OnSelectMenu"s &&
-						il2cpp_type_get_name(method2020->parameters->parameter_type) ==
-						"Gallop.DialogTitleMenu.KaKaoNotLoginMenu"s;
-				}
-
 				return method->name == "OnSelectMenu"s &&
 					il2cpp_type_get_name(method->parameters[0]) ==
 					"Gallop.DialogTitleMenu.KaKaoNotLoginMenu"s;
