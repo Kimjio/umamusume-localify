@@ -8078,20 +8078,20 @@ namespace
 		}
 	}
 
-	void AddOrSetString(U16Document& document, const Il2CppChar* name, const Il2CppChar* value)
+	void AddOrSetString(U16Document& document, const Il2CppChar* name, u16string value)
 	{
-		auto length = char_traits<char16_t>::length(value);
+		auto length = value.size();
 		Il2CppChar* copy = new Il2CppChar[length + 1];
-		char_traits<char16_t>::copy(copy, value, length);
+		char_traits<char16_t>::copy(copy, value.data(), length);
 
 		if (document.HasMember(name))
 		{
-			document[name].SetString(rapidjson::StringRef(copy));
+			document[name].SetString(rapidjson::StringRef(copy, length));
 		}
 		else
 		{
 			U16Value v;
-			v.SetString(rapidjson::StringRef(copy));
+			v.SetString(rapidjson::StringRef(copy, length));
 
 			document.AddMember(rapidjson::StringRef(name), v, document.GetAllocator());
 		}
@@ -9735,7 +9735,8 @@ namespace
 		SetOptionItemButtonAction("character_system_text_caption_font_color", *([](Il2CppObject*)
 			{
 				auto options = GetFontColorOptions();
-				auto value = u16_u8(config::config_document[u"characterSystemTextCaptionFontColor"].GetString());
+				auto& colorValue = config::config_document[u"characterSystemTextCaptionFontColor"];
+				auto value = u16_u8(u16string(colorValue.GetString(), colorValue.GetStringLength()));
 				auto found = find(options.begin(), options.end(), value);
 				int index = 0;
 
@@ -9749,10 +9750,11 @@ namespace
 					{
 						auto options = GetFontColorOptions();
 						u16string color = u8_u16(options[value]);
-						AddOrSetString(config::config_document, u"characterSystemTextCaptionFontColor", color.data());
+						AddOrSetString(config::config_document, u"characterSystemTextCaptionFontColor", color);
 
 						auto textCommon = GetOptionItemSimpleWithButtonTextCommon("character_system_text_caption_font_color");
-						SetTextCommonText(textCommon, (LocalifySettings::GetText("character_system_text_caption_font_color") + u": "s + config::config_document[u"characterSystemTextCaptionFontColor"].GetString()).data());
+						auto& colorValue = config::config_document[u"characterSystemTextCaptionFontColor"];
+						SetTextCommonText(textCommon, (LocalifySettings::GetText("character_system_text_caption_font_color") + u": "s + u16string(colorValue.GetString(), colorValue.GetStringLength())).data());
 						SetTextCommonFontColor(textCommon, color.data());
 						SetNotificationFontColor(color.data());
 					}
@@ -9769,7 +9771,8 @@ namespace
 		SetOptionItemButtonAction("character_system_text_caption_outline_size", *([](Il2CppObject*)
 			{
 				auto options = GetOutlineSizeOptions();
-				auto value = u16_u8(config::config_document[u"characterSystemTextCaptionOutlineSize"].GetString());
+				auto& sizeValue = config::config_document[u"characterSystemTextCaptionOutlineSize"];
+				auto value = u16_u8(u16string(sizeValue.GetString(), sizeValue.GetStringLength()));
 				auto found = find(options.begin(), options.end(), value);
 				int index = 0;
 
@@ -9782,13 +9785,14 @@ namespace
 					[](int value)
 					{
 						auto options = GetOutlineSizeOptions();
-						u16string color = u8_u16(options[value]);
-						AddOrSetString(config::config_document, u"characterSystemTextCaptionOutlineSize", color.data());
+						u16string size = u8_u16(options[value]);
+						AddOrSetString(config::config_document, u"characterSystemTextCaptionOutlineSize", size);
 
 						auto textCommon = GetOptionItemSimpleWithButtonTextCommon("character_system_text_caption_outline_size");
-						SetTextCommonText(textCommon, (LocalifySettings::GetText("character_system_text_caption_outline_size") + u": "s + config::config_document[u"characterSystemTextCaptionOutlineSize"].GetString()).data());
-						SetTextCommonOutlineSize(textCommon, color.data());
-						SetNotificationOutlineSize(color.data());
+						auto& sizeValue = config::config_document[u"characterSystemTextCaptionOutlineSize"];
+						SetTextCommonText(textCommon, (LocalifySettings::GetText("character_system_text_caption_outline_size") + u": "s + u16string(sizeValue.GetString(), sizeValue.GetStringLength())).data());
+						SetTextCommonOutlineSize(textCommon, size.data());
+						SetNotificationOutlineSize(size.data());
 					}
 				);
 			})
@@ -9801,7 +9805,8 @@ namespace
 		SetOptionItemButtonAction("character_system_text_caption_outline_color", *([](Il2CppObject*)
 			{
 				auto options = GetOutlineColorOptions();
-				auto value = u16_u8(config::config_document[u"characterSystemTextCaptionOutlineColor"].GetString());
+				auto& colorValue = config::config_document[u"characterSystemTextCaptionOutlineColor"];
+				auto value = u16_u8(u16string(colorValue.GetString(), colorValue.GetStringLength()));
 				auto found = find(options.begin(), options.end(), value);
 				int index = 0;
 
@@ -9815,10 +9820,11 @@ namespace
 					{
 						auto options = GetOutlineColorOptions();
 						u16string color = u8_u16(options[value]);
-						AddOrSetString(config::config_document, u"characterSystemTextCaptionOutlineColor", color.data());
+						AddOrSetString(config::config_document, u"characterSystemTextCaptionOutlineColor", color);
 
 						auto textCommon = GetOptionItemSimpleWithButtonTextCommon("character_system_text_caption_outline_color");
-						SetTextCommonText(textCommon, (LocalifySettings::GetText("character_system_text_caption_outline_color") + u": "s + config::config_document[u"characterSystemTextCaptionOutlineColor"].GetString()).data());
+						auto& colorValue = config::config_document[u"characterSystemTextCaptionOutlineColor"];
+						SetTextCommonText(textCommon, (LocalifySettings::GetText("character_system_text_caption_outline_color") + u": "s + u16string(colorValue.GetString(), colorValue.GetStringLength())).data());
 						SetTextCommonOutlineColor(textCommon, color.data());
 						SetNotificationOutlineColor(color.data());
 					}
@@ -9929,7 +9935,7 @@ namespace
 				if (result)
 				{
 					u16string pathU16 = wide_u16(result);
-					AddOrSetString(config::config_document, u"persistentDataPath", pathU16.data());
+					AddOrSetString(config::config_document, u"persistentDataPath", pathU16);
 					auto textCommon = GetTextCommon("persistent_data_path_detail_info");
 					SetTextCommonText(textCommon, pathU16.data());
 				}
