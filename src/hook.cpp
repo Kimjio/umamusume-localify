@@ -14673,6 +14673,7 @@ CreateFileW_hook(
 	if (filesystem::current_path() == lpFileName)
 	{
 		currentFindHandle = hFile;
+		dllCount = 0;
 	}
 
 	return hFile;
