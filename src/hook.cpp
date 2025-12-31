@@ -14873,17 +14873,14 @@ NTSTATUS NTAPI NtQueryDirectoryFile_hook(
 		FileInformation, Length, FileInformationClass,
 		ReturnSingleEntry, FileName, RestartScan);
 
-	bool isSupportedClass = FileInformationClass == FileFullDirectoryInformation;
-
-	if (!isSupportedClass)
+	if (FileInformationClass != FileFullDirectoryInformation)
 	{
 		return status;
 	}
 
-	if (NT_SUCCESS(status) &&
-		FileInformationClass == FileFullDirectoryInformation)
+	if (NT_SUCCESS(status))
 	{
-		auto curr = (PFILE_FULL_DIR_INFORMATION)FileInformation;
+		auto curr = reinterpret_cast<PFILE_FULL_DIR_INFORMATION>(FileInformation);
 		PFILE_FULL_DIR_INFORMATION prev = nullptr;
 
 		while (true)
@@ -14895,7 +14892,10 @@ NTSTATUS NTAPI NtQueryDirectoryFile_hook(
 			if (fName.ends_with(L".dll"))
 			{
 				dllCount++;
-				if (dllCount > MAX_DLL_COUNT) removeEntry = true;
+				if (dllCount > MAX_DLL_COUNT)
+				{
+					removeEntry = true;
+				}
 			}
 
 			if (removeEntry)
@@ -14915,7 +14915,7 @@ NTSTATUS NTAPI NtQueryDirectoryFile_hook(
 					{
 						break;
 					}
-					curr = (PFILE_FULL_DIR_INFORMATION)((PUCHAR)prev + prev->NextEntryOffset);
+					curr = reinterpret_cast<PFILE_FULL_DIR_INFORMATION>(reinterpret_cast<PUCHAR>(prev) + prev->NextEntryOffset);
 					continue;
 				}
 				else
@@ -14923,10 +14923,10 @@ NTSTATUS NTAPI NtQueryDirectoryFile_hook(
 					if (curr->NextEntryOffset != 0)
 					{
 						ULONG nextOffset = curr->NextEntryOffset;
-						ULONG totalValidBytes = (ULONG)IoStatusBlock->Information;
+						ULONG totalValidBytes = static_cast<ULONG>(IoStatusBlock->Information);
 						ULONG bytesToMove = totalValidBytes - nextOffset;
 
-						memmove(curr, (PUCHAR)curr + nextOffset, bytesToMove);
+						memmove(curr, reinterpret_cast<PUCHAR>(curr) + nextOffset, bytesToMove);
 
 						IoStatusBlock->Information -= nextOffset;
 						continue;
@@ -14938,9 +14938,12 @@ NTSTATUS NTAPI NtQueryDirectoryFile_hook(
 				}
 			}
 
-			if (curr->NextEntryOffset == 0) break;
+			if (curr->NextEntryOffset == 0)
+			{
+				break;
+			}
 			prev = curr;
-			curr = (PFILE_FULL_DIR_INFORMATION)((PUCHAR)curr + curr->NextEntryOffset);
+			curr = reinterpret_cast<PFILE_FULL_DIR_INFORMATION>(reinterpret_cast<PUCHAR>(curr) + curr->NextEntryOffset);
 		}
 	}
 
