@@ -360,10 +360,10 @@ inline Il2CppObject* GetSingletonInstance(Il2CppClass* klass)
 	{
 		return nullptr;
 	}
-	auto instanceField = il2cpp_class_get_field_from_name_wrap(klass, "_instance");
+	auto instanceField = il2cpp_class_get_field_from_name(klass, "_instance");
 	if (!instanceField)
 	{
-		instanceField = il2cpp_class_get_field_from_name_wrap(klass, "instance");
+		instanceField = il2cpp_class_get_field_from_name(klass, "instance");
 		if (!instanceField)
 		{
 			return nullptr;
@@ -423,24 +423,24 @@ inline Il2CppDelegate* GetButtonCommonOnClickDelegate(Il2CppObject* object)
 	{
 		return nullptr;
 	}
-	auto onClickField = il2cpp_class_get_field_from_name_wrap(object->klass, "m_OnClick");
+	auto onClickField = il2cpp_class_get_field_from_name(object->klass, "m_OnClick");
 	Il2CppObject* onClick;
 	il2cpp_field_get_value(object, onClickField, &onClick);
 	if (onClick)
 	{
-		auto callsField = il2cpp_class_get_field_from_name_wrap(onClick->klass, "m_Calls");
+		auto callsField = il2cpp_class_get_field_from_name(onClick->klass, "m_Calls");
 		Il2CppObject* calls;
 		il2cpp_field_get_value(onClick, callsField, &calls);
 		if (calls)
 		{
-			auto runtimeCallsField = il2cpp_class_get_field_from_name_wrap(calls->klass,
+			auto runtimeCallsField = il2cpp_class_get_field_from_name(calls->klass,
 				"m_RuntimeCalls");
 			Il2CppObject* runtimeCalls;
 			il2cpp_field_get_value(calls, runtimeCallsField, &runtimeCalls);
 
 			if (runtimeCalls)
 			{
-				FieldInfo* itemsField = il2cpp_class_get_field_from_name_wrap(runtimeCalls->klass,
+				FieldInfo* itemsField = il2cpp_class_get_field_from_name(runtimeCalls->klass,
 					"_items");
 				Il2CppArraySize* arr;
 				il2cpp_field_get_value(runtimeCalls, itemsField, &arr);
@@ -451,14 +451,14 @@ inline Il2CppDelegate* GetButtonCommonOnClickDelegate(Il2CppObject* object)
 						auto value = reinterpret_cast<Il2CppObject*>(arr->vector[i]);
 						if (value)
 						{
-							auto delegateField = il2cpp_class_get_field_from_name_wrap(value->klass,
+							auto delegateField = il2cpp_class_get_field_from_name(value->klass,
 								"Delegate");
 							Il2CppDelegate* delegate;
 							il2cpp_field_get_value(value, delegateField, &delegate);
 							if (delegate)
 							{
 								// Unbox delegate
-								auto callbackField = il2cpp_class_get_field_from_name_wrap(
+								auto callbackField = il2cpp_class_get_field_from_name(
 									delegate->target->klass, "callback");
 								Il2CppDelegate* callback;
 								il2cpp_field_get_value(delegate->target, callbackField, &callback);

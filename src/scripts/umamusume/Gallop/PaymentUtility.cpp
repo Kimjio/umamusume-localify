@@ -47,11 +47,11 @@ static void InitAddress()
 	PaymentUtility_OpenBuyJewelDialog_1_addr = il2cpp_symbols::get_method_pointer(ASSEMBLY_NAME, "Gallop", "PaymentUtility", "OpenBuyJewelDialog", 1);
 	PaymentUtility_OpenBuyJewelDialog_addr = il2cpp_symbols::get_method_pointer(ASSEMBLY_NAME, "Gallop", "PaymentUtility", "OpenBuyJewelDialog", 6);
 	PaymentUtility_SendRequestPaymentItemList_addr = il2cpp_symbols::get_method_pointer(ASSEMBLY_NAME, "Gallop", "PaymentUtility", "SendRequestPaymentItemList", 4);
-	PaymentUtility__finishBuyJewelCallbackForUserField = il2cpp_class_get_field_from_name_wrap(il2cpp_symbols::get_class(ASSEMBLY_NAME, "Gallop", "PaymentUtility"), "_finishBuyJewelCallbackForUser");
-	PaymentUtility__onCloseShopDialogField = il2cpp_class_get_field_from_name_wrap(il2cpp_symbols::get_class(ASSEMBLY_NAME, "Gallop", "PaymentUtility"), "_onCloseShopDialog");
-	PaymentUtility__checkOpenShopDialogField = il2cpp_class_get_field_from_name_wrap(il2cpp_symbols::get_class(ASSEMBLY_NAME, "Gallop", "PaymentUtility"), "_checkOpenShopDialog");
-	PaymentUtility__autoScrollIdListField = il2cpp_class_get_field_from_name_wrap(il2cpp_symbols::get_class(ASSEMBLY_NAME, "Gallop", "PaymentUtility"), "_autoScrollIdList");
-	PaymentUtility__removeAllOnFinishField = il2cpp_class_get_field_from_name_wrap(il2cpp_symbols::get_class(ASSEMBLY_NAME, "Gallop", "PaymentUtility"), "_removeAllOnFinish");
+	PaymentUtility__finishBuyJewelCallbackForUserField = il2cpp_class_get_field_from_name(il2cpp_symbols::get_class(ASSEMBLY_NAME, "Gallop", "PaymentUtility"), "_finishBuyJewelCallbackForUser");
+	PaymentUtility__onCloseShopDialogField = il2cpp_class_get_field_from_name(il2cpp_symbols::get_class(ASSEMBLY_NAME, "Gallop", "PaymentUtility"), "_onCloseShopDialog");
+	PaymentUtility__checkOpenShopDialogField = il2cpp_class_get_field_from_name(il2cpp_symbols::get_class(ASSEMBLY_NAME, "Gallop", "PaymentUtility"), "_checkOpenShopDialog");
+	PaymentUtility__autoScrollIdListField = il2cpp_class_get_field_from_name(il2cpp_symbols::get_class(ASSEMBLY_NAME, "Gallop", "PaymentUtility"), "_autoScrollIdList");
+	PaymentUtility__removeAllOnFinishField = il2cpp_class_get_field_from_name(il2cpp_symbols::get_class(ASSEMBLY_NAME, "Gallop", "PaymentUtility"), "_removeAllOnFinish");
 }
 
 static void HookMethods()

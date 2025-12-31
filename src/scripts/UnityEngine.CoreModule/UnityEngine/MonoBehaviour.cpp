@@ -35,7 +35,7 @@ namespace
 static void LoadAssets()
 {
 	auto dialogCommon = il2cpp_symbols::get_method_pointer<Il2CppObject * (*)()>("umamusume.dll", "Gallop", "DialogManager", "GetForeFrontDialog", IgnoreNumberOfArguments)();
-	auto _currentDialogObjField = il2cpp_class_get_field_from_name_wrap(dialogCommon->klass, "_currentDialogObj");
+	auto _currentDialogObjField = il2cpp_class_get_field_from_name(dialogCommon->klass, "_currentDialogObj");
 	Il2CppObject* _currentDialogObj;
 	il2cpp_field_get_value(dialogCommon, _currentDialogObjField, &_currentDialogObj);
 
@@ -279,7 +279,7 @@ static Il2CppObject* StartCoroutineManaged2_hook(Il2CppObject* self, Il2CppObjec
 	if (!BootSystem && string(enumerator->klass->name).find("BootCoroutine") != string::npos)
 	{
 		BootSystem = self;
-		auto _bgCanvasObjectField = il2cpp_class_get_field_from_name_wrap(self->klass, "_bgCanvasObject");
+		auto _bgCanvasObjectField = il2cpp_class_get_field_from_name(self->klass, "_bgCanvasObject");
 		Il2CppObject* _bgCanvasObject;
 		il2cpp_field_get_value(self, _bgCanvasObjectField, &_bgCanvasObject);
 

@@ -564,7 +564,7 @@ static void Cute_Core_WebViewManager_SetMargins_hook(Il2CppObject* self, int lef
 		if (!Gallop::Screen::IsSplitWindow())
 		{
 			auto GallopScreen = il2cpp_symbols::get_class("umamusume.dll", "Gallop", "Screen");
-			auto _originalScreenWidth_Field = il2cpp_class_get_field_from_name_wrap(GallopScreen, "_originalScreenWidth");
+			auto _originalScreenWidth_Field = il2cpp_class_get_field_from_name(GallopScreen, "_originalScreenWidth");
 
 			int originalScreenWidth;
 

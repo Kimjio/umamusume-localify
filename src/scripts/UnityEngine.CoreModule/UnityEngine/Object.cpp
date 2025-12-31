@@ -40,7 +40,7 @@ static bool UpdateHomeMenuMainButton()
 	auto dialog = GetFrontDialog();
 	auto data = il2cpp_class_get_method_from_name_type<Il2CppObject * (*)(Il2CppObject*)>(dialog->klass, "get_DialogData", 0)->methodPointer(dialog);
 
-	auto ContentsObjectField = il2cpp_class_get_field_from_name_wrap(data->klass, "ContentsObject");
+	auto ContentsObjectField = il2cpp_class_get_field_from_name(data->klass, "ContentsObject");
 	Il2CppObject* ContentsObject;
 	il2cpp_field_get_value(data, ContentsObjectField, &ContentsObject);
 
@@ -48,7 +48,7 @@ static bool UpdateHomeMenuMainButton()
 
 	if (homeMenuMain)
 	{
-		auto _serialButtonField = il2cpp_class_get_field_from_name_wrap(homeMenuMain->klass, "_serialButton");
+		auto _serialButtonField = il2cpp_class_get_field_from_name(homeMenuMain->klass, "_serialButton");
 		Il2CppObject* _serialButton;
 		il2cpp_field_get_value(homeMenuMain, _serialButtonField, &_serialButton);
 
@@ -67,7 +67,7 @@ static bool UpdateHomeMenuMainButton()
 				auto kakaoCpnFn = *[](void*)
 					{
 						auto KakaoManager = il2cpp_symbols::get_class("umamusume.dll", "", "KakaoManager");
-						auto managerInstanceField = il2cpp_class_get_field_from_name_wrap(KakaoManager, "instance");
+						auto managerInstanceField = il2cpp_class_get_field_from_name(KakaoManager, "instance");
 
 						Il2CppObject* manager;
 						il2cpp_field_static_get_value(managerInstanceField, &manager);
@@ -104,7 +104,7 @@ static Il2CppObject* Internal_CloneSingle_hook(Il2CppObject* original)
 	{
 		auto homeMenuMain = il2cpp_class_get_method_from_name_type<Il2CppObject * (*)(Il2CppObject*, Il2CppReflectionType*)>(cloned->klass, "GetComponent", 1)->methodPointer(cloned, GetRuntimeType("umamusume.dll", "Gallop", "DialogHomeMenuMain"));
 
-		auto _dataTransButtonField = il2cpp_class_get_field_from_name_wrap(homeMenuMain->klass, "_dataTransButton");
+		auto _dataTransButtonField = il2cpp_class_get_field_from_name(homeMenuMain->klass, "_dataTransButton");
 		Il2CppObject* _dataTransButton;
 		il2cpp_field_get_value(homeMenuMain, _dataTransButtonField, &_dataTransButton);
 

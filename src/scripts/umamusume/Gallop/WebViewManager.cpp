@@ -288,7 +288,7 @@ static void Gallop_WebViewManager_cctor_hook()
 {
 	reinterpret_cast<decltype(Gallop_WebViewManager_cctor_hook)*>(Gallop_WebViewManager_cctor_orig)();
 
-	auto WebViewUrlDictField = il2cpp_class_get_field_from_name_wrap(il2cpp_symbols::get_class(ASSEMBLY_NAME, Gallop::WebViewManager::namespaze, Gallop::WebViewManager::klassName), "WebViewUrlDict");
+	auto WebViewUrlDictField = il2cpp_class_get_field_from_name(il2cpp_symbols::get_class(ASSEMBLY_NAME, Gallop::WebViewManager::namespaze, Gallop::WebViewManager::klassName), "WebViewUrlDict");
 	Il2CppObject* WebViewUrlDict;
 	il2cpp_field_static_get_value(WebViewUrlDictField, &WebViewUrlDict);
 
@@ -407,7 +407,7 @@ static void Gallop_WebViewManager_Open_hook(Il2CppObject* self, Il2CppString* ur
 
 	if (!_isShowWebView)
 	{
-		il2cpp_class_get_field_from_name_wrap(self->klass, "_errorCallback");
+		il2cpp_class_get_field_from_name(self->klass, "_errorCallback");
 		webViewManager.SetErrorCallback();
 
 		auto internetReachability = UnityEngine::Application::internetReachability();
@@ -1013,9 +1013,9 @@ static void InitAddress()
 	Gallop_WebViewManager_GetProductURLProperty_addr = il2cpp_symbols::get_method_pointer(ASSEMBLY_NAME, "Gallop", "WebViewManager", "GetProductURLProperty", 1);
 	Gallop_WebViewManager_TryGetWebViewInfo = il2cpp_symbols::get_method(ASSEMBLY_NAME, "Gallop", "WebViewManager", "TryGetWebViewInfo", 2);
 	Gallop_WebViewManager_TryGetWebViewInfo_addr = Gallop_WebViewManager_TryGetWebViewInfo->methodPointer;
-	Gallop_WebViewManager__currentWebViewDialog = il2cpp_class_get_field_from_name_wrap(il2cpp_symbols::get_class(ASSEMBLY_NAME, "Gallop", "WebViewManager"), "_currentWebViewDialog");
-	Gallop_WebViewManager__errorCallback = il2cpp_class_get_field_from_name_wrap(il2cpp_symbols::get_class(ASSEMBLY_NAME, "Gallop", "WebViewManager"), "_errorCallback");
-	Gallop_WebViewManager__fontFilePaths = il2cpp_class_get_field_from_name_wrap(il2cpp_symbols::get_class(ASSEMBLY_NAME, "Gallop", "WebViewManager"), "_fontFilePaths");
+	Gallop_WebViewManager__currentWebViewDialog = il2cpp_class_get_field_from_name(il2cpp_symbols::get_class(ASSEMBLY_NAME, "Gallop", "WebViewManager"), "_currentWebViewDialog");
+	Gallop_WebViewManager__errorCallback = il2cpp_class_get_field_from_name(il2cpp_symbols::get_class(ASSEMBLY_NAME, "Gallop", "WebViewManager"), "_errorCallback");
+	Gallop_WebViewManager__fontFilePaths = il2cpp_class_get_field_from_name(il2cpp_symbols::get_class(ASSEMBLY_NAME, "Gallop", "WebViewManager"), "_fontFilePaths");
 
 	Gallop_WebViewManager_WebViewInfo = il2cpp_class_from_type(Gallop_WebViewManager_TryGetWebViewInfo->parameters[1]);
 

@@ -22,7 +22,7 @@ static void UncheaterInit_Init_hook(Il2CppObject* self, Il2CppObject* system)
 
 static void UncheaterInit_InitializeUncheaterSDK_hook(Il2CppObject* self)
 {
-	auto flagField = il2cpp_class_get_field_from_name_wrap(self->klass, "flag");
+	auto flagField = il2cpp_class_get_field_from_name(self->klass, "flag");
 	bool flag = true;
 	il2cpp_field_set_value(self, flagField, &flag);
 }

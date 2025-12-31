@@ -51,7 +51,7 @@ namespace Gallop
 
 	GameSystem::SystemState GameSystem::_systemState()
 	{
-		auto _systemStateField = il2cpp_class_get_field_from_name_wrap(instance->klass, "_systemState");
+		auto _systemStateField = il2cpp_class_get_field_from_name(instance->klass, "_systemState");
 		GameSystem::SystemState _systemState;
 		il2cpp_field_get_value(instance, _systemStateField, &_systemState);
 

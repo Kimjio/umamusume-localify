@@ -80,7 +80,7 @@ static void SetBGCanvasScalerSize()
 	auto bgManager = il2cpp_symbols::get_method_pointer<Il2CppObject * (*)()>("umamusume.dll", "Gallop", "BGManager", "get_Instance", 0)();
 	if (bgManager)
 	{
-		auto _mainBgField = il2cpp_class_get_field_from_name_wrap(bgManager->klass, "_mainBg");
+		auto _mainBgField = il2cpp_class_get_field_from_name(bgManager->klass, "_mainBg");
 		Il2CppObject* _mainBg;
 		il2cpp_field_get_value(bgManager, _mainBgField, &_mainBg);
 
@@ -102,7 +102,7 @@ static void SetBGCanvasScalerSize()
 			}
 		}
 
-		auto _bgCanvasScalerField = il2cpp_class_get_field_from_name_wrap(bgManager->klass, "_bgCanvasScaler");
+		auto _bgCanvasScalerField = il2cpp_class_get_field_from_name(bgManager->klass, "_bgCanvasScaler");
 		Il2CppObject* _bgCanvasScaler;
 		il2cpp_field_get_value(bgManager, _bgCanvasScalerField, &_bgCanvasScaler);
 
@@ -329,7 +329,7 @@ namespace Gallop
 
 	Il2CppObject* UIManager::_noticeCanvas()
 	{
-		auto _noticeCanvasField = il2cpp_class_get_field_from_name_wrap(instance->klass, "_noticeCanvas");
+		auto _noticeCanvasField = il2cpp_class_get_field_from_name(instance->klass, "_noticeCanvas");
 		Il2CppObject* _noticeCanvas;
 		il2cpp_field_get_value(instance, _noticeCanvasField, &_noticeCanvas);
 
@@ -338,7 +338,7 @@ namespace Gallop
 
 	Il2CppObject* UIManager::_bgCamera()
 	{
-		auto _bgCameraField = il2cpp_class_get_field_from_name_wrap(instance->klass, "_bgCamera");
+		auto _bgCameraField = il2cpp_class_get_field_from_name(instance->klass, "_bgCamera");
 		Il2CppObject* _bgCamera;
 		il2cpp_field_get_value(instance, _bgCameraField, &_bgCamera);
 
@@ -347,7 +347,7 @@ namespace Gallop
 
 	Il2CppObject* UIManager::_uiCamera()
 	{
-		auto _uiCameraField = il2cpp_class_get_field_from_name_wrap(instance->klass, "_uiCamera");
+		auto _uiCameraField = il2cpp_class_get_field_from_name(instance->klass, "_uiCamera");
 		Il2CppObject* _uiCamera;
 		il2cpp_field_get_value(instance, _uiCameraField, &_uiCamera);
 
@@ -356,7 +356,7 @@ namespace Gallop
 
 	Il2CppObject* UIManager::_bgManager()
 	{
-		auto _bgManagerField = il2cpp_class_get_field_from_name_wrap(instance->klass, "_bgManager");
+		auto _bgManagerField = il2cpp_class_get_field_from_name(instance->klass, "_bgManager");
 		Il2CppObject* _bgManager;
 		il2cpp_field_get_value(instance, _bgManagerField, &_bgManager);
 
@@ -365,7 +365,7 @@ namespace Gallop
 
 	Il2CppObject* UIManager::_uiToFrameBufferRenderCameraData()
 	{
-		auto _uiToFrameBufferRenderCameraDataField = il2cpp_class_get_field_from_name_wrap(instance->klass, "_uiToFrameBufferRenderCameraData");
+		auto _uiToFrameBufferRenderCameraDataField = il2cpp_class_get_field_from_name(instance->klass, "_uiToFrameBufferRenderCameraData");
 		if (_uiToFrameBufferRenderCameraDataField)
 		{
 			Il2CppObject* _uiToFrameBufferRenderCameraData;
@@ -377,7 +377,7 @@ namespace Gallop
 
 	Il2CppObject* UIManager::_uiCommandBuffer()
 	{
-		auto _uiCommandBufferField = il2cpp_class_get_field_from_name_wrap(instance->klass, "_uiCommandBuffer");
+		auto _uiCommandBufferField = il2cpp_class_get_field_from_name(instance->klass, "_uiCommandBuffer");
 		if (_uiCommandBufferField)
 		{
 			Il2CppObject* _uiCommandBuffer;
@@ -389,7 +389,7 @@ namespace Gallop
 
 	Il2CppObject* UIManager::_blitToFrameMaterial()
 	{
-		auto _blitToFrameMaterialField = il2cpp_class_get_field_from_name_wrap(instance->klass, "_blitToFrameMaterial");
+		auto _blitToFrameMaterialField = il2cpp_class_get_field_from_name(instance->klass, "_blitToFrameMaterial");
 		if (_blitToFrameMaterialField)
 		{
 			Il2CppObject* _blitToFrameMaterial;
@@ -401,7 +401,7 @@ namespace Gallop
 
 	Il2CppObject* UIManager::_noImageEffectUICamera()
 	{
-		auto _noImageEffectUICameraField = il2cpp_class_get_field_from_name_wrap(instance->klass, "_noImageEffectUICamera");
+		auto _noImageEffectUICameraField = il2cpp_class_get_field_from_name(instance->klass, "_noImageEffectUICamera");
 		Il2CppObject* _noImageEffectUICamera;
 		il2cpp_field_get_value(instance, _noImageEffectUICameraField, &_noImageEffectUICamera);
 
@@ -410,7 +410,7 @@ namespace Gallop
 
 	Il2CppObject* UIManager::_noImageEffectCanvas()
 	{
-		auto _noImageEffectCanvasField = il2cpp_class_get_field_from_name_wrap(instance->klass, "_noImageEffectCanvas");
+		auto _noImageEffectCanvasField = il2cpp_class_get_field_from_name(instance->klass, "_noImageEffectCanvas");
 		Il2CppObject* _noImageEffectCanvas;
 		il2cpp_field_get_value(instance, _noImageEffectCanvasField, &_noImageEffectCanvas);
 
@@ -419,7 +419,7 @@ namespace Gallop
 
 	Il2CppObject* UIManager::_uiToFrameBufferBlitCamera()
 	{
-		auto _uiToFrameBufferBlitCameraField = il2cpp_class_get_field_from_name_wrap(instance->klass, "_uiToFrameBufferBlitCamera");
+		auto _uiToFrameBufferBlitCameraField = il2cpp_class_get_field_from_name(instance->klass, "_uiToFrameBufferBlitCamera");
 		Il2CppObject* _uiToFrameBufferBlitCamera;
 		il2cpp_field_get_value(instance, _uiToFrameBufferBlitCameraField, &_uiToFrameBufferBlitCamera);
 
@@ -428,7 +428,7 @@ namespace Gallop
 
 	Il2CppObject* UIManager::_mainCanvas()
 	{
-		auto _mainCanvasField = il2cpp_class_get_field_from_name_wrap(instance->klass, "_mainCanvas");
+		auto _mainCanvasField = il2cpp_class_get_field_from_name(instance->klass, "_mainCanvas");
 		Il2CppObject* _mainCanvas;
 		il2cpp_field_get_value(instance, _mainCanvasField, &_mainCanvas);
 
@@ -437,7 +437,7 @@ namespace Gallop
 
 	Il2CppObject* UIManager::_gameCanvas()
 	{
-		auto _gameCanvasField = il2cpp_class_get_field_from_name_wrap(instance->klass, "_gameCanvas");
+		auto _gameCanvasField = il2cpp_class_get_field_from_name(instance->klass, "_gameCanvas");
 		Il2CppObject* _gameCanvas;
 		il2cpp_field_get_value(instance, _gameCanvasField, &_gameCanvas);
 
@@ -446,7 +446,7 @@ namespace Gallop
 
 	Il2CppObject* UIManager::_systemCanvas()
 	{
-		auto _systemCanvasField = il2cpp_class_get_field_from_name_wrap(instance->klass, "_systemCanvas");
+		auto _systemCanvasField = il2cpp_class_get_field_from_name(instance->klass, "_systemCanvas");
 		Il2CppObject* _systemCanvas;
 		il2cpp_field_get_value(instance, _systemCanvasField, &_systemCanvas);
 
@@ -460,7 +460,7 @@ namespace Gallop
 
 	void UIManager::UITexture(Il2CppObject* value)
 	{
-		auto _uiTextureField = il2cpp_class_get_field_from_name_wrap(instance->klass, "_uiTexture");
+		auto _uiTextureField = il2cpp_class_get_field_from_name(instance->klass, "_uiTexture");
 		il2cpp_field_set_value(instance, _uiTextureField, value);
 	}
 

@@ -397,7 +397,7 @@ namespace Unity
 
 		//UnityEngine::XR::InputTracking::GetNodeStates_Internal(nodeStates);
 
-		//FieldInfo* itemsField = il2cpp_class_get_field_from_name_wrap(nodeStates->klass, "_items");
+		//FieldInfo* itemsField = il2cpp_class_get_field_from_name(nodeStates->klass, "_items");
 		//Il2CppArraySize_t<UnityEngine::XR::XRNodeState>* array;
 		//il2cpp_field_get_value(nodeStates, itemsField, &array);
 

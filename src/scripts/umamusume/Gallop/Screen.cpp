@@ -100,7 +100,7 @@ static void SetResolution2_hook(int w, int h, bool fullscreen, bool forceUpdate,
 
 static int get_OriginalScreenWidth_hook()
 {
-	/*auto widthField = il2cpp_class_get_field_from_name_wrap(ScreenClass, "_originalScreenWidth");
+	/*auto widthField = il2cpp_class_get_field_from_name(ScreenClass, "_originalScreenWidth");
 	int _originalScreenWidth;
 	il2cpp_field_static_get_value(widthField, &_originalScreenWidth);
 	return _originalScreenWidth;*/
@@ -115,13 +115,13 @@ static int get_OriginalScreenWidth_hook()
 
 static void set_OriginalScreenWidth_hook(int value)
 {
-	auto widthField = il2cpp_class_get_field_from_name_wrap(ScreenClass, "_originalScreenWidth");
+	auto widthField = il2cpp_class_get_field_from_name(ScreenClass, "_originalScreenWidth");
 	il2cpp_field_static_set_value(widthField, &value);
 }
 
 static int get_OriginalScreenHeight_hook()
 {
-	/*auto heightField = il2cpp_class_get_field_from_name_wrap(ScreenClass, "_originalScreenHeight");
+	/*auto heightField = il2cpp_class_get_field_from_name(ScreenClass, "_originalScreenHeight");
 	int _originalScreenHeight;
 	il2cpp_field_static_get_value(heightField, &_originalScreenHeight);
 	return _originalScreenHeight;*/
@@ -131,7 +131,7 @@ static int get_OriginalScreenHeight_hook()
 
 static void set_OriginalScreenHeight_hook(int value)
 {
-	auto heightField = il2cpp_class_get_field_from_name_wrap(ScreenClass, "_originalScreenHeight");
+	auto heightField = il2cpp_class_get_field_from_name(ScreenClass, "_originalScreenHeight");
 	il2cpp_field_static_set_value(heightField, &value);
 }
 

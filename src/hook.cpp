@@ -218,7 +218,7 @@ namespace
 		if (Game::CurrentGameRegion == Game::Region::KOR)
 		{
 			auto CuteCoreDevice = il2cpp_symbols::get_class("Cute.Core.Assembly.dll", "Cute.Core", "Device");
-			auto persistentDataPathField = il2cpp_class_get_field_from_name_wrap(CuteCoreDevice, "persistentDataPath");
+			auto persistentDataPathField = il2cpp_class_get_field_from_name(CuteCoreDevice, "persistentDataPath");
 
 			il2cpp_field_static_set_value(persistentDataPathField, UnityEngine::Application::persistentDataPath());
 		}
@@ -226,7 +226,7 @@ namespace
 		if (!config::persistent_data_path.empty())
 		{
 			auto CuteCoreDevice = il2cpp_symbols::get_class("Cute.Core.Assembly.dll", "Cute.Core", "Device");
-			auto persistentDataPathField = il2cpp_class_get_field_from_name_wrap(CuteCoreDevice, "persistentDataPath");
+			auto persistentDataPathField = il2cpp_class_get_field_from_name(CuteCoreDevice, "persistentDataPath");
 			if (filesystem::path(config::persistent_data_path.data()).is_relative())
 			{
 				config::persistent_data_path.insert(0, filesystem::current_path().u16string().append(u"/"));
@@ -346,7 +346,7 @@ namespace
 			return;
 		}
 
-		auto _displayTimeField = il2cpp_class_get_field_from_name_wrap(notification->klass, "_displayTime");
+		auto _displayTimeField = il2cpp_class_get_field_from_name(notification->klass, "_displayTime");
 		il2cpp_field_set_value(notification, _displayTimeField, &time);
 	}
 
@@ -367,23 +367,23 @@ namespace
 			return;
 		}
 
-		auto canvasGroupField = il2cpp_class_get_field_from_name_wrap(notification->klass, "canvasGroup");
+		auto canvasGroupField = il2cpp_class_get_field_from_name(notification->klass, "canvasGroup");
 		Il2CppObject* canvasGroup;
 		il2cpp_field_get_value(notification, canvasGroupField, &canvasGroup);
 
-		auto _tweenerField = il2cpp_class_get_field_from_name_wrap(notification->klass, "_tweener");
+		auto _tweenerField = il2cpp_class_get_field_from_name(notification->klass, "_tweener");
 		Il2CppObject* _tweener;
 		il2cpp_field_get_value(notification, _tweenerField, &_tweener);
 
-		auto _LabelField = il2cpp_class_get_field_from_name_wrap(notification->klass, "_Label");
+		auto _LabelField = il2cpp_class_get_field_from_name(notification->klass, "_Label");
 		Il2CppObject* _Label;
 		il2cpp_field_get_value(notification, _LabelField, &_Label);
 
-		auto _displayTimeField = il2cpp_class_get_field_from_name_wrap(notification->klass, "_displayTime");
+		auto _displayTimeField = il2cpp_class_get_field_from_name(notification->klass, "_displayTime");
 		float  _displayTime;
 		il2cpp_field_get_value(notification, _displayTimeField, &_displayTime);
 
-		auto _fadeOutTimeField = il2cpp_class_get_field_from_name_wrap(notification->klass, "_fadeOutTime");
+		auto _fadeOutTimeField = il2cpp_class_get_field_from_name(notification->klass, "_fadeOutTime");
 		float _fadeOutTime;
 		il2cpp_field_get_value(notification, _fadeOutTimeField, &_fadeOutTime);
 
@@ -401,15 +401,15 @@ namespace
 
 		_tweener = il2cpp_symbols::get_method_pointer<Il2CppObject * (*)(Il2CppObject*, float, float)>("Plugins.dll", "DG.Tweening", "DOTweenModuleUI", "DOFade", 3)(canvasGroup, 0, _fadeOutTime);
 
-		auto delayField = il2cpp_class_get_field_from_name_wrap(_tweener->klass, "delay");
+		auto delayField = il2cpp_class_get_field_from_name(_tweener->klass, "delay");
 		float delay = _displayTime;
 		il2cpp_field_set_value(_tweener, delayField, &delay);
 
-		auto delayCompleteField = il2cpp_class_get_field_from_name_wrap(_tweener->klass, "delayComplete");
+		auto delayCompleteField = il2cpp_class_get_field_from_name(_tweener->klass, "delayComplete");
 		bool delayComplete = delay <= 0;
 		il2cpp_field_set_value(_tweener, delayCompleteField, &delayComplete);
 
-		auto onCompleteField = il2cpp_class_get_field_from_name_wrap(_tweener->klass, "onComplete");
+		auto onCompleteField = il2cpp_class_get_field_from_name(_tweener->klass, "onComplete");
 		auto callback = CreateDelegateWithClass(il2cpp_symbols::get_class("DOTween.dll", "DG.Tweening", "TweenCallback"), notification, *([](Il2CppObject* _this)
 			{
 				auto gameObject = il2cpp_symbols::get_method_pointer<Il2CppObject * (*)(Il2CppObject*)>("UnityEngine.CoreModule.dll", "UnityEngine", "Component", "get_gameObject", 0)(notification);
@@ -417,7 +417,7 @@ namespace
 				{
 					il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, bool)>(gameObject->klass, "SetActive", 1)->methodPointer(gameObject, false);
 
-					auto _tweenerField = il2cpp_class_get_field_from_name_wrap(notification->klass, "_tweener");
+					auto _tweenerField = il2cpp_class_get_field_from_name(notification->klass, "_tweener");
 					il2cpp_field_set_value(notification, _tweenerField, nullptr);
 				}
 			}));
@@ -438,7 +438,7 @@ namespace
 			return;
 		}
 
-		auto _LabelField = il2cpp_class_get_field_from_name_wrap(notification->klass, "_Label");
+		auto _LabelField = il2cpp_class_get_field_from_name(notification->klass, "_Label");
 		Il2CppObject* _Label;
 		il2cpp_field_get_value(notification, _LabelField, &_Label);
 
@@ -458,7 +458,7 @@ namespace
 			return;
 		}
 
-		auto _LabelField = il2cpp_class_get_field_from_name_wrap(notification->klass, "_Label");
+		auto _LabelField = il2cpp_class_get_field_from_name(notification->klass, "_Label");
 		Il2CppObject* _Label;
 		il2cpp_field_get_value(notification, _LabelField, &_Label);
 
@@ -477,7 +477,7 @@ namespace
 			return;
 		}
 
-		auto _LabelField = il2cpp_class_get_field_from_name_wrap(notification->klass, "_Label");
+		auto _LabelField = il2cpp_class_get_field_from_name(notification->klass, "_Label");
 		Il2CppObject* _Label;
 		il2cpp_field_get_value(notification, _LabelField, &_Label);
 
@@ -497,7 +497,7 @@ namespace
 			return;
 		}
 
-		auto _LabelField = il2cpp_class_get_field_from_name_wrap(notification->klass, "_Label");
+		auto _LabelField = il2cpp_class_get_field_from_name(notification->klass, "_Label");
 		Il2CppObject* _Label;
 		il2cpp_field_get_value(notification, _LabelField, &_Label);
 
@@ -534,7 +534,7 @@ namespace
 			return;
 		}
 
-		auto canvasGroupField = il2cpp_class_get_field_from_name_wrap(notification->klass, "canvasGroup");
+		auto canvasGroupField = il2cpp_class_get_field_from_name(notification->klass, "canvasGroup");
 		Il2CppObject* canvasGroup;
 		il2cpp_field_get_value(notification, canvasGroupField, &canvasGroup);
 
@@ -555,11 +555,11 @@ namespace
 			return;
 		}
 
-		auto characterIdField = il2cpp_class_get_field_from_name_wrap(elem->klass, "CharacterId");
-		auto voiceIdField = il2cpp_class_get_field_from_name_wrap(elem->klass, "VoiceId");
-		auto textField = il2cpp_class_get_field_from_name_wrap(elem->klass, "Text");
-		auto cueSheetField = il2cpp_class_get_field_from_name_wrap(elem->klass, "CueSheet");
-		auto cueIdField = il2cpp_class_get_field_from_name_wrap(elem->klass, "CueId");
+		auto characterIdField = il2cpp_class_get_field_from_name(elem->klass, "CharacterId");
+		auto voiceIdField = il2cpp_class_get_field_from_name(elem->klass, "VoiceId");
+		auto textField = il2cpp_class_get_field_from_name(elem->klass, "Text");
+		auto cueSheetField = il2cpp_class_get_field_from_name(elem->klass, "CueSheet");
+		auto cueIdField = il2cpp_class_get_field_from_name(elem->klass, "CueId");
 
 		if (!characterIdField ||
 			!voiceIdField ||
@@ -702,7 +702,7 @@ namespace
 					"MasterCharacterSystemText", "GetByCharaId", 1)(stoi(charaIdStr));
 			if (textList)
 			{
-				FieldInfo* itemsField = il2cpp_class_get_field_from_name_wrap(textList->klass, "_items");
+				FieldInfo* itemsField = il2cpp_class_get_field_from_name(textList->klass, "_items");
 				Il2CppArraySize_t<Il2CppObject*>* textArr;
 				il2cpp_field_get_value(textList, itemsField, &textArr);
 
@@ -713,8 +713,8 @@ namespace
 						auto elem = textArr->vector[i];
 						if (elem)
 						{
-							auto elemCueIdField = il2cpp_class_get_field_from_name_wrap(elem->klass, "CueId");
-							auto elemCueSheetField = il2cpp_class_get_field_from_name_wrap(elem->klass, "CueSheet");
+							auto elemCueIdField = il2cpp_class_get_field_from_name(elem->klass, "CueId");
+							auto elemCueSheetField = il2cpp_class_get_field_from_name(elem->klass, "CueSheet");
 
 							Il2CppString* elemCueSheet;
 							il2cpp_field_get_value(elem, elemCueSheetField, &elemCueSheet);
@@ -769,7 +769,7 @@ namespace
 					"MasterCharacterSystemText", "GetByCharaId", 1)(stoi(charaIdStr));
 			if (textList)
 			{
-				FieldInfo* itemsField = il2cpp_class_get_field_from_name_wrap(textList->klass, "_items");
+				FieldInfo* itemsField = il2cpp_class_get_field_from_name(textList->klass, "_items");
 				Il2CppArraySize* textArr;
 				il2cpp_field_get_value(textList, itemsField, &textArr);
 
@@ -781,8 +781,8 @@ namespace
 						auto elem = reinterpret_cast<Il2CppObject*>(textArr->vector[i]);
 						if (elem)
 						{
-							auto elemCueIdField = il2cpp_class_get_field_from_name_wrap(elem->klass, "CueId");
-							auto elemCueSheetField = il2cpp_class_get_field_from_name_wrap(elem->klass, "CueSheet");
+							auto elemCueIdField = il2cpp_class_get_field_from_name(elem->klass, "CueId");
+							auto elemCueSheetField = il2cpp_class_get_field_from_name(elem->klass, "CueSheet");
 
 							Il2CppString* elemCueSheet;
 							il2cpp_field_get_value(elem, elemCueSheetField, &elemCueSheet);
@@ -828,7 +828,7 @@ namespace
 				auto gameObject = il2cpp_symbols::get_method_pointer<Il2CppObject * (*)(Il2CppObject*)>("UnityEngine.CoreModule.dll", "UnityEngine", "Component", "get_gameObject", 0)(notification);
 				if (gameObject)
 				{
-					auto _tweenerField = il2cpp_class_get_field_from_name_wrap(notification->klass, "_tweener");
+					auto _tweenerField = il2cpp_class_get_field_from_name(notification->klass, "_tweener");
 					Il2CppObject* _tweener;
 					il2cpp_field_get_value(notification, _tweenerField, &_tweener);
 					if (_tweener)
@@ -855,7 +855,7 @@ namespace
 				auto gameObject = il2cpp_symbols::get_method_pointer<Il2CppObject * (*)(Il2CppObject*)>("UnityEngine.CoreModule.dll", "UnityEngine", "Component", "get_gameObject", 0)(notification);
 				if (gameObject)
 				{
-					auto _tweenerField = il2cpp_class_get_field_from_name_wrap(notification->klass, "_tweener");
+					auto _tweenerField = il2cpp_class_get_field_from_name(notification->klass, "_tweener");
 					Il2CppObject* _tweener;
 					il2cpp_field_get_value(notification, _tweenerField, &_tweener);
 					if (_tweener)
@@ -882,7 +882,7 @@ namespace
 				auto gameObject = il2cpp_symbols::get_method_pointer<Il2CppObject * (*)(Il2CppObject*)>("UnityEngine.CoreModule.dll", "UnityEngine", "Component", "get_gameObject", 0)(notification);
 				if (gameObject)
 				{
-					auto _tweenerField = il2cpp_class_get_field_from_name_wrap(notification->klass, "_tweener");
+					auto _tweenerField = il2cpp_class_get_field_from_name(notification->klass, "_tweener");
 					Il2CppObject* _tweener;
 					il2cpp_field_get_value(notification, _tweenerField, &_tweener);
 					if (_tweener)
@@ -1360,13 +1360,13 @@ namespace
 				auto getComponent = il2cpp_class_get_method_from_name_type<Il2CppObject * (*)(Il2CppObject*, Il2CppReflectionType*)>(gameObj->klass, "GetComponent", 1)->methodPointer;
 				auto component = getComponent(gameObj, GetRuntimeType("umamusume.dll", "Gallop", "TitleView"));
 
-				auto imgField = il2cpp_class_get_field_from_name_wrap(component->klass, "TitleLogoImage");
+				auto imgField = il2cpp_class_get_field_from_name(component->klass, "TitleLogoImage");
 				Il2CppObject* imgCommon;
 				il2cpp_field_get_value(component, imgField, &imgCommon);
 				auto texture = GetReplacementAssets(
 					il2cpp_string_new("utx_obj_title_logo_umamusume.png"),
 					GetRuntimeType("UnityEngine.CoreModule.dll", "UnityEngine", "Texture2D"));
-				auto m_TextureField = il2cpp_class_get_field_from_name_wrap(imgCommon->klass->parent, "m_Texture");
+				auto m_TextureField = il2cpp_class_get_field_from_name(imgCommon->klass->parent, "m_Texture");
 				il2cpp_field_set_value(imgCommon, m_TextureField, texture);
 				return gameObj;
 			}
@@ -1375,7 +1375,7 @@ namespace
 		if (u16Name == u"TMP Settings"s && config::replace_to_custom_font && config::runtime::fontAssets)
 		{
 			auto object = reinterpret_cast<decltype(Resources_Load_hook)*>(Resources_Load_orig)(path, type);
-			auto fontAssetField = il2cpp_class_get_field_from_name_wrap(object->klass, "m_defaultFontAsset");
+			auto fontAssetField = il2cpp_class_get_field_from_name(object->klass, "m_defaultFontAsset");
 			il2cpp_field_set_value(object, fontAssetField, GetCustomTMPFont());
 			return object;
 		}
@@ -1472,14 +1472,14 @@ namespace
 		reinterpret_cast<decltype(an_text_set_material_to_textmesh_hook)*>(an_text_set_material_to_textmesh_orig)(_this);
 		if (!(config::runtime::fontAssets && config::replace_to_custom_font)) return;
 
-		FieldInfo* mainField = il2cpp_class_get_field_from_name_wrap(_this->klass, "_mainTextMesh");
-		FieldInfo* mainRenderer = il2cpp_class_get_field_from_name_wrap(_this->klass, "_mainTextMeshRenderer");
+		FieldInfo* mainField = il2cpp_class_get_field_from_name(_this->klass, "_mainTextMesh");
+		FieldInfo* mainRenderer = il2cpp_class_get_field_from_name(_this->klass, "_mainTextMeshRenderer");
 
-		FieldInfo* outlineField = il2cpp_class_get_field_from_name_wrap(_this->klass, "_outlineTextMeshList"); //List<TextMesh>
-		FieldInfo* outlineFieldRenderers = il2cpp_class_get_field_from_name_wrap(_this->klass, "_outlineTextMeshRendererList"); //List<MeshRenderer>
+		FieldInfo* outlineField = il2cpp_class_get_field_from_name(_this->klass, "_outlineTextMeshList"); //List<TextMesh>
+		FieldInfo* outlineFieldRenderers = il2cpp_class_get_field_from_name(_this->klass, "_outlineTextMeshRendererList"); //List<MeshRenderer>
 
-		FieldInfo* shadowField = il2cpp_class_get_field_from_name_wrap(_this->klass, "_shadowTextMesh");
-		FieldInfo* shadowFieldRenderer = il2cpp_class_get_field_from_name_wrap(_this->klass, "_shadowTextMeshRenderer");
+		FieldInfo* shadowField = il2cpp_class_get_field_from_name(_this->klass, "_shadowTextMesh");
+		FieldInfo* shadowFieldRenderer = il2cpp_class_get_field_from_name(_this->klass, "_shadowTextMeshRenderer");
 
 		Il2CppObject* mainMesh;
 		Il2CppObject* mainMeshRenderer;
@@ -1499,7 +1499,7 @@ namespace
 		il2cpp_field_get_value(_this, outlineField, &outlineMeshes);
 		if (outlineMeshes)
 		{
-			FieldInfo* itemsField = il2cpp_class_get_field_from_name_wrap(outlineMeshes->klass, "_items");
+			FieldInfo* itemsField = il2cpp_class_get_field_from_name(outlineMeshes->klass, "_items");
 			Il2CppArraySize* arr;
 			il2cpp_field_get_value(outlineMeshes, itemsField, &arr);
 			if (arr)
@@ -1519,7 +1519,7 @@ namespace
 		il2cpp_field_get_value(_this, outlineFieldRenderers, &outlineMeshRenderers);
 		if (outlineMeshRenderers)
 		{
-			FieldInfo* itemsField = il2cpp_class_get_field_from_name_wrap(outlineMeshRenderers->klass, "_items");
+			FieldInfo* itemsField = il2cpp_class_get_field_from_name(outlineMeshRenderers->klass, "_items");
 			Il2CppArraySize* arr;
 			il2cpp_field_get_value(outlineMeshRenderers, itemsField, &arr);
 			if (arr)
@@ -1544,7 +1544,7 @@ namespace
 	void an_text_fix_data_hook(Il2CppObject* _this)
 	{
 		reinterpret_cast<decltype(an_text_fix_data_hook)*>(an_text_fix_data_orig)(_this);
-		FieldInfo* field = il2cpp_class_get_field_from_name_wrap(_this->klass, "_text");
+		FieldInfo* field = il2cpp_class_get_field_from_name(_this->klass, "_text");
 		Il2CppString* str;
 		il2cpp_field_get_value(_this, field, &str);
 		il2cpp_field_set_value(_this, field, local::get_localized_string(str));
@@ -1854,18 +1854,18 @@ namespace
 	void* story_timeline_controller_play_orig;
 	void* story_timeline_controller_play_hook(Il2CppObject* _this)
 	{
-		FieldInfo* timelineDataField = il2cpp_class_get_field_from_name_wrap(_this->klass, "_timelineData");
+		FieldInfo* timelineDataField = il2cpp_class_get_field_from_name(_this->klass, "_timelineData");
 
 		Il2CppObject* timelineData;
 		il2cpp_field_get_value(_this, timelineDataField, &timelineData);
-		FieldInfo* StoryTimelineDataClass_TitleField = il2cpp_class_get_field_from_name_wrap(timelineData->klass, "Title");
-		FieldInfo* StoryTimelineDataClass_BlockListField = il2cpp_class_get_field_from_name_wrap(timelineData->klass, "BlockList");
+		FieldInfo* StoryTimelineDataClass_TitleField = il2cpp_class_get_field_from_name(timelineData->klass, "Title");
+		FieldInfo* StoryTimelineDataClass_BlockListField = il2cpp_class_get_field_from_name(timelineData->klass, "BlockList");
 
 		Il2CppClass* story_timeline_text_clip_data_class = il2cpp_symbols::get_class("umamusume.dll", "Gallop", "StoryTimelineTextClipData");
-		FieldInfo* nameField = il2cpp_class_get_field_from_name_wrap(story_timeline_text_clip_data_class, "Name");
-		FieldInfo* textField = il2cpp_class_get_field_from_name_wrap(story_timeline_text_clip_data_class, "Text");
-		FieldInfo* choiceDataListField = il2cpp_class_get_field_from_name_wrap(story_timeline_text_clip_data_class, "ChoiceDataList");
-		FieldInfo* colorTextInfoListField = il2cpp_class_get_field_from_name_wrap(story_timeline_text_clip_data_class, "ColorTextInfoList");
+		FieldInfo* nameField = il2cpp_class_get_field_from_name(story_timeline_text_clip_data_class, "Name");
+		FieldInfo* textField = il2cpp_class_get_field_from_name(story_timeline_text_clip_data_class, "Text");
+		FieldInfo* choiceDataListField = il2cpp_class_get_field_from_name(story_timeline_text_clip_data_class, "ChoiceDataList");
+		FieldInfo* colorTextInfoListField = il2cpp_class_get_field_from_name(story_timeline_text_clip_data_class, "ColorTextInfoList");
 
 		Il2CppString* title;
 		il2cpp_field_get_value(timelineData, StoryTimelineDataClass_TitleField, &title);
@@ -1875,30 +1875,30 @@ namespace
 		il2cpp_field_get_value(timelineData, StoryTimelineDataClass_BlockListField, &blockList);
 
 		Il2CppArraySize* blockArray;
-		il2cpp_field_get_value(blockList, il2cpp_class_get_field_from_name_wrap(blockList->klass, "_items"), &blockArray);
+		il2cpp_field_get_value(blockList, il2cpp_class_get_field_from_name(blockList->klass, "_items"), &blockArray);
 
 		for (size_t i = 0; i < blockArray->max_length; i++)
 		{
 			Il2CppObject* blockData = reinterpret_cast<Il2CppObject*>(blockArray->vector[i]);
 			if (!blockData) break;
-			FieldInfo* StoryTimelineBlockDataClass_trackListField = il2cpp_class_get_field_from_name_wrap(blockData->klass, "_trackList");
+			FieldInfo* StoryTimelineBlockDataClass_trackListField = il2cpp_class_get_field_from_name(blockData->klass, "_trackList");
 			Il2CppObject* trackList;
 			il2cpp_field_get_value(blockData, StoryTimelineBlockDataClass_trackListField, &trackList);
 
 			Il2CppArraySize* trackArray;
-			il2cpp_field_get_value(trackList, il2cpp_class_get_field_from_name_wrap(trackList->klass, "_items"), &trackArray);
+			il2cpp_field_get_value(trackList, il2cpp_class_get_field_from_name(trackList->klass, "_items"), &trackArray);
 
 			for (size_t i = 0; i < trackArray->max_length; i++)
 			{
 				Il2CppObject* trackData = reinterpret_cast<Il2CppObject*>(trackArray->vector[i]);
 				if (!trackData) break;
-				FieldInfo* StoryTimelineTrackDataClass_ClipListField = il2cpp_class_get_field_from_name_wrap(trackData->klass, "ClipList");
+				FieldInfo* StoryTimelineTrackDataClass_ClipListField = il2cpp_class_get_field_from_name(trackData->klass, "ClipList");
 				Il2CppObject* clipList;
 				il2cpp_field_get_value(trackData, StoryTimelineTrackDataClass_ClipListField, &clipList);
 
 
 				Il2CppArraySize* clipArray;
-				il2cpp_field_get_value(clipList, il2cpp_class_get_field_from_name_wrap(clipList->klass, "_items"), &clipArray);
+				il2cpp_field_get_value(clipList, il2cpp_class_get_field_from_name(clipList->klass, "_items"), &clipArray);
 
 				for (size_t i = 0; i < clipArray->max_length; i++)
 				{
@@ -1917,13 +1917,13 @@ namespace
 						if (choiceDataList)
 						{
 							Il2CppArraySize* choiceDataArray;
-							il2cpp_field_get_value(choiceDataList, il2cpp_class_get_field_from_name_wrap(choiceDataList->klass, "_items"), &choiceDataArray);
+							il2cpp_field_get_value(choiceDataList, il2cpp_class_get_field_from_name(choiceDataList->klass, "_items"), &choiceDataArray);
 
 							for (size_t i = 0; i < choiceDataArray->max_length; i++)
 							{
 								Il2CppObject* choiceData = reinterpret_cast<Il2CppObject*>(choiceDataArray->vector[i]);
 								if (!choiceData) break;
-								FieldInfo* choiceDataTextField = il2cpp_class_get_field_from_name_wrap(choiceData->klass, "Text");
+								FieldInfo* choiceDataTextField = il2cpp_class_get_field_from_name(choiceData->klass, "Text");
 
 								Il2CppString* text;
 								il2cpp_field_get_value(choiceData, choiceDataTextField, &text);
@@ -1935,13 +1935,13 @@ namespace
 						if (colorTextInfoList)
 						{
 							Il2CppArraySize* colorTextInfoArray;
-							il2cpp_field_get_value(colorTextInfoList, il2cpp_class_get_field_from_name_wrap(colorTextInfoList->klass, "_items"), &colorTextInfoArray);
+							il2cpp_field_get_value(colorTextInfoList, il2cpp_class_get_field_from_name(colorTextInfoList->klass, "_items"), &colorTextInfoArray);
 
 							for (size_t i = 0; i < colorTextInfoArray->max_length; i++)
 							{
 								Il2CppObject* colorTextInfo = reinterpret_cast<Il2CppObject*>(colorTextInfoArray->vector[i]);
 								if (!colorTextInfo) break;
-								FieldInfo* colorTextInfoTextField = il2cpp_class_get_field_from_name_wrap(colorTextInfo->klass, "Text");
+								FieldInfo* colorTextInfoTextField = il2cpp_class_get_field_from_name(colorTextInfo->klass, "Text");
 
 								Il2CppString* text;
 								il2cpp_field_get_value(colorTextInfo, colorTextInfoTextField, &text);
@@ -1960,7 +1960,7 @@ namespace
 	void* story_race_textasset_load_orig;
 	void story_race_textasset_load_hook(Il2CppObject* _this)
 	{
-		FieldInfo* textDataField = { il2cpp_class_get_field_from_name_wrap(_this->klass, "textData") };
+		FieldInfo* textDataField = { il2cpp_class_get_field_from_name(_this->klass, "textData") };
 		Il2CppObject* textData;
 		il2cpp_field_get_value(_this, textDataField, &textData);
 
@@ -1971,7 +1971,7 @@ namespace
 		while (move_next(enumerator))
 		{
 			auto key = get_current(enumerator);
-			FieldInfo* textField = { il2cpp_class_get_field_from_name_wrap(key->klass, "text") };
+			FieldInfo* textField = { il2cpp_class_get_field_from_name(key->klass, "text") };
 			Il2CppString* text;
 			il2cpp_field_get_value(key, textField, &text);
 			il2cpp_field_set_value(key, textField, local::get_localized_string(text));
@@ -2053,7 +2053,7 @@ namespace
 	void GallopStandaloneInputModule_SetPointerPosition_hook(Il2CppObject* self)
 	{
 		reinterpret_cast<decltype(GallopStandaloneInputModule_SetPointerPosition_hook)*>(GallopStandaloneInputModule_SetPointerPosition_orig)(self);
-		auto pointerEventDataField = il2cpp_class_get_field_from_name_wrap(self->klass, "pointerEventData");
+		auto pointerEventDataField = il2cpp_class_get_field_from_name(self->klass, "pointerEventData");
 		Il2CppObject* pointerEventData;
 		il2cpp_field_get_value(self, pointerEventDataField, &pointerEventData);
 		il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, UnityEngine::Vector2)>(pointerEventData->klass, "set_position", 1)->methodPointer(pointerEventData, (UnityEngine::Input::mousePosition() * (Gallop::Screen::Width() / static_cast<float>(UnityEngine::Screen::width()))));
@@ -2063,7 +2063,7 @@ namespace
 	bool GallopStandaloneInputModule_ProcessTouchEvents_hook(Il2CppObject* self)
 	{
 		// cout << "GallopStandaloneInputModule_ProcessTouchEvents_hook" << endl;
-		auto isTouchReactField = il2cpp_class_get_field_from_name_wrap(self->klass, "isTouchReact");
+		auto isTouchReactField = il2cpp_class_get_field_from_name(self->klass, "isTouchReact");
 		bool isTouchReact = true;
 		il2cpp_field_static_set_value(isTouchReactField, &isTouchReact);
 
@@ -2077,7 +2077,7 @@ namespace
 			{
 				if (!Gallop::Screen::IsSplitWindow())
 				{
-					auto m_PositionField = il2cpp_class_get_field_from_name_wrap(touch->klass, "m_Position");
+					auto m_PositionField = il2cpp_class_get_field_from_name(touch->klass, "m_Position");
 					position = position * ((float)Gallop::Screen::Width() / (float)UnityEngine::Screen::width());
 
 					il2cpp_field_set_value(touch, m_PositionField, &position);
@@ -2129,7 +2129,7 @@ namespace
 		auto bgManager = il2cpp_symbols::get_method_pointer<Il2CppObject * (*)()>("umamusume.dll", "Gallop", "BGManager", "get_Instance", 0)();
 		if (bgManager)
 		{
-			auto _mainBgField = il2cpp_class_get_field_from_name_wrap(bgManager->klass, "_mainBg");
+			auto _mainBgField = il2cpp_class_get_field_from_name(bgManager->klass, "_mainBg");
 			Il2CppObject* _mainBg;
 			il2cpp_field_get_value(bgManager, _mainBgField, &_mainBg);
 
@@ -2151,7 +2151,7 @@ namespace
 				}
 			}
 
-			auto _bgCanvasScalerField = il2cpp_class_get_field_from_name_wrap(bgManager->klass, "_bgCanvasScaler");
+			auto _bgCanvasScalerField = il2cpp_class_get_field_from_name(bgManager->klass, "_bgCanvasScaler");
 			Il2CppObject* _bgCanvasScaler;
 			il2cpp_field_get_value(bgManager, _bgCanvasScalerField, &_bgCanvasScaler);
 
@@ -2193,7 +2193,7 @@ namespace
 
 							auto TextureResolution = il2cpp_class_get_method_from_name_type<UnityEngine::Vector2Int(*)(Il2CppObject*)>(DirectorUI->klass, "get_TextureResolution", 0)->methodPointer(DirectorUI);
 
-							auto _cameraField = il2cpp_class_get_field_from_name_wrap(cameraController->klass, "_camera");
+							auto _cameraField = il2cpp_class_get_field_from_name(cameraController->klass, "_camera");
 							Il2CppObject* _camera;
 							il2cpp_field_get_value(cameraController, _cameraField, &_camera);
 
@@ -2201,7 +2201,7 @@ namespace
 							{
 								il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, UnityEngine::Vector2Int)>(cameraController->klass, "ResizeRenderTexture", 1)->methodPointer(cameraController, TextureResolution);
 
-								auto _renderTextureField = il2cpp_class_get_field_from_name_wrap(cameraController->klass, "_renderTexture");
+								auto _renderTextureField = il2cpp_class_get_field_from_name(cameraController->klass, "_renderTexture");
 								Il2CppObject* _renderTexture;
 								il2cpp_field_get_value(cameraController, _renderTextureField, &_renderTexture);
 
@@ -2277,7 +2277,7 @@ namespace
 
 				if (obj)
 				{
-					auto _frameBufferField = il2cpp_class_get_field_from_name_wrap(obj->klass, "_frameBuffer");
+					auto _frameBufferField = il2cpp_class_get_field_from_name(obj->klass, "_frameBuffer");
 					Il2CppObject* _frameBuffer;
 					il2cpp_field_get_value(obj, _frameBufferField, &_frameBuffer);
 
@@ -2310,7 +2310,7 @@ namespace
 						auto buffer = get_FrameBuffer->methodPointer(obj);
 						if (buffer)
 						{
-							auto _drawPassField = il2cpp_class_get_field_from_name_wrap(buffer->klass, "_drawPass");
+							auto _drawPassField = il2cpp_class_get_field_from_name(buffer->klass, "_drawPass");
 							uint64_t* _drawPass;
 							il2cpp_field_get_value(buffer, _drawPassField, &_drawPass);
 
@@ -2389,7 +2389,7 @@ namespace
 
 				if (obj)
 				{
-					auto _sceneField = il2cpp_class_get_field_from_name_wrap(obj->klass, "_scene");
+					auto _sceneField = il2cpp_class_get_field_from_name(obj->klass, "_scene");
 					Il2CppObject* _scene;
 					il2cpp_field_get_value(obj, _sceneField, &_scene);
 
@@ -2398,7 +2398,7 @@ namespace
 						auto camera = il2cpp_class_get_method_from_name_type<Il2CppObject * (*)(Il2CppObject*)>(_scene->klass, "GetCamera", 0)->methodPointer(_scene);
 						auto texture = il2cpp_class_get_method_from_name_type<Il2CppObject * (*)(Il2CppObject*)>(camera->klass, "get_RenderTexture", 0)->methodPointer(camera);
 
-						auto _formationAllField = il2cpp_class_get_field_from_name_wrap(obj->klass, "_formationAll");
+						auto _formationAllField = il2cpp_class_get_field_from_name(obj->klass, "_formationAll");
 						Il2CppObject* _formationAll;
 						il2cpp_field_get_value(obj, _formationAllField, &_formationAll);
 
@@ -2407,7 +2407,7 @@ namespace
 							il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, Il2CppObject*)>(_formationAll->klass, "SetRenderTex", 1)->methodPointer(_formationAll, texture);
 						}
 
-						auto _formationMainField = il2cpp_class_get_field_from_name_wrap(obj->klass, "_formationMain");
+						auto _formationMainField = il2cpp_class_get_field_from_name(obj->klass, "_formationMain");
 						Il2CppObject* _formationMain;
 						il2cpp_field_get_value(obj, _formationMainField, &_formationMain);
 
@@ -2450,13 +2450,13 @@ namespace
 		{
 			if (controller->klass->name == "FanRaidViewController"s)
 			{
-				auto _fanRaidTopSequenceField = il2cpp_class_get_field_from_name_wrap(controller->klass, "_fanRaidTopSequence");
+				auto _fanRaidTopSequenceField = il2cpp_class_get_field_from_name(controller->klass, "_fanRaidTopSequence");
 				Il2CppObject* _fanRaidTopSequence;
 				il2cpp_field_get_value(controller, _fanRaidTopSequenceField, &_fanRaidTopSequence);
 
 				if (_fanRaidTopSequence)
 				{
-					auto _frameBufferField = il2cpp_class_get_field_from_name_wrap(_fanRaidTopSequence->klass, "_frameBuffer");
+					auto _frameBufferField = il2cpp_class_get_field_from_name(_fanRaidTopSequence->klass, "_frameBuffer");
 					Il2CppObject* _frameBuffer;
 					il2cpp_field_get_value(_fanRaidTopSequence, _frameBufferField, &_frameBuffer);
 
@@ -2472,13 +2472,13 @@ namespace
 
 			if (controller->klass->name == "GachaMainViewController"s)
 			{
-				auto _contextField = il2cpp_class_get_field_from_name_wrap(controller->klass, "_context");
+				auto _contextField = il2cpp_class_get_field_from_name(controller->klass, "_context");
 				Il2CppObject* _context;
 				il2cpp_field_get_value(controller, _contextField, &_context);
 
 				if (_context)
 				{
-					auto FrameBufferField = il2cpp_class_get_field_from_name_wrap(_context->klass, "FrameBuffer");
+					auto FrameBufferField = il2cpp_class_get_field_from_name(_context->klass, "FrameBuffer");
 					Il2CppObject* FrameBuffer;
 					il2cpp_field_get_value(_context, FrameBufferField, &FrameBuffer);
 
@@ -2496,13 +2496,13 @@ namespace
 				controller->klass->name == "EpisodeMainUnlockRaceCutinViewController"s ||
 				controller->klass->name == "SingleModeSuccessionEventViewController"s)
 			{
-				auto _resultField = il2cpp_class_get_field_from_name_wrap(controller->klass, "_result");
+				auto _resultField = il2cpp_class_get_field_from_name(controller->klass, "_result");
 				Il2CppObject* _result;
 				il2cpp_field_get_value(controller, _resultField, &_result);
 
 				if (_result)
 				{
-					auto _resultCameraField = il2cpp_class_get_field_from_name_wrap(_result->klass, "_resultCamera");
+					auto _resultCameraField = il2cpp_class_get_field_from_name(_result->klass, "_resultCamera");
 					Il2CppObject* _resultCamera;
 					il2cpp_field_get_value(_result, _resultCameraField, &_resultCamera);
 
@@ -2516,7 +2516,7 @@ namespace
 
 			if (string(controller->klass->name).ends_with("PaddockViewController"))
 			{
-				auto _frameBufferField = il2cpp_class_get_field_from_name_wrap(controller->klass, "_frameBuffer");
+				auto _frameBufferField = il2cpp_class_get_field_from_name(controller->klass, "_frameBuffer");
 				Il2CppObject* _frameBuffer;
 				il2cpp_field_get_value(controller, _frameBufferField, &_frameBuffer);
 
@@ -2570,13 +2570,13 @@ namespace
 						drawDirection = 7;
 					}
 
-					auto _lowResolutionCameraListField = il2cpp_class_get_field_from_name_wrap(storySceneController->klass, "_lowResolutionCameraList");
+					auto _lowResolutionCameraListField = il2cpp_class_get_field_from_name(storySceneController->klass, "_lowResolutionCameraList");
 					Il2CppObject* _lowResolutionCameraList;
 					il2cpp_field_get_value(storySceneController, _lowResolutionCameraListField, &_lowResolutionCameraList);
 
 					if (_lowResolutionCameraList)
 					{
-						FieldInfo* _itemsField = il2cpp_class_get_field_from_name_wrap(_lowResolutionCameraList->klass, "_items");
+						FieldInfo* _itemsField = il2cpp_class_get_field_from_name(_lowResolutionCameraList->klass, "_items");
 						Il2CppArraySize_t<Il2CppObject*>* _items;
 						il2cpp_field_get_value(_lowResolutionCameraList, _itemsField, &_items);
 
@@ -2602,7 +2602,7 @@ namespace
 
 					// il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, uint64_t)>(storySceneController->klass, "UpdateFovFactor", 1)->methodPointer(storySceneController, DisplayMode);
 
-					auto FullScreenImageRendererField = il2cpp_class_get_field_from_name_wrap(scene->klass, "FullScreenImageRenderer");
+					auto FullScreenImageRendererField = il2cpp_class_get_field_from_name(scene->klass, "FullScreenImageRenderer");
 					Il2CppObject* FullScreenImageRenderer;
 					il2cpp_field_get_value(scene, FullScreenImageRendererField, &FullScreenImageRenderer);
 
@@ -2622,16 +2622,16 @@ namespace
 
 		if (movieManager)
 		{
-			auto playerDicField = il2cpp_class_get_field_from_name_wrap(movieManager->klass, "playerDic");
+			auto playerDicField = il2cpp_class_get_field_from_name(movieManager->klass, "playerDic");
 			Il2CppObject* playerDic;
 			il2cpp_field_get_value(movieManager, playerDicField, &playerDic);
 
 			if (playerDic)
 			{
-				auto entriesField = il2cpp_class_get_field_from_name_wrap(playerDic->klass, "_entries");
+				auto entriesField = il2cpp_class_get_field_from_name(playerDic->klass, "_entries");
 				if (!entriesField)
 				{
-					entriesField = il2cpp_class_get_field_from_name_wrap(playerDic->klass, "entries");
+					entriesField = il2cpp_class_get_field_from_name(playerDic->klass, "entries");
 				}
 
 				Il2CppArraySize_t<System::Collections::Generic::Dictionary<Cute::Cri::MoviePlayerHandle, Il2CppObject*>::Entry>* entries;
@@ -2673,7 +2673,7 @@ namespace
 													if (array1->max_length > 0)
 													{
 														auto fullPlayer = il2cpp_object_new(il2cpp_symbols::get_class("umamusume.dll", "Gallop", "StoryFullMoviePlayer"));
-														auto _handleField = il2cpp_class_get_field_from_name_wrap(fullPlayer->klass, "_handle");
+														auto _handleField = il2cpp_class_get_field_from_name(fullPlayer->klass, "_handle");
 														il2cpp_field_set_value(fullPlayer, _handleField, &entry.key);
 
 														il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, int)>(fullPlayer->klass, "AdjustMovieSize", 1)->methodPointer(fullPlayer, Gallop::StandaloneWindowResize::IsVirt() ? 0 : 1);
@@ -2692,20 +2692,20 @@ namespace
 												{
 													auto controller = GetCurrentViewController();
 
-													auto _wipeControllerField = il2cpp_class_get_field_from_name_wrap(controller->klass, "_wipeController");
+													auto _wipeControllerField = il2cpp_class_get_field_from_name(controller->klass, "_wipeController");
 													Il2CppObject* _wipeController;
 													il2cpp_field_get_value(controller, _wipeControllerField, &_wipeController);
 
 													if (_wipeController)
 													{
-														auto _moviePlayerField = il2cpp_class_get_field_from_name_wrap(_wipeController->klass, "_moviePlayer");
+														auto _moviePlayerField = il2cpp_class_get_field_from_name(_wipeController->klass, "_moviePlayer");
 														Il2CppObject* _moviePlayer;
 														il2cpp_field_get_value(_wipeController, _moviePlayerField, &_moviePlayer);
 
 														if (_moviePlayer)
 														{
 															auto StoryTimelineController = il2cpp_symbols::get_class("umamusume.dll", "Gallop", "StoryTimelineController");
-															auto CurrentDisplayModeField = il2cpp_class_get_field_from_name_wrap(StoryTimelineController->klass, "CurrentDisplayMode");
+															auto CurrentDisplayModeField = il2cpp_class_get_field_from_name(StoryTimelineController->klass, "CurrentDisplayMode");
 															int CurrentDisplayMode;
 															il2cpp_field_static_get_value(CurrentDisplayModeField, &CurrentDisplayMode);
 
@@ -2827,7 +2827,7 @@ namespace
 			{
 				auto dialog = Gallop::WebViewManager::Instance()._currentWebViewDialog();
 
-				auto _dataField = il2cpp_class_get_field_from_name_wrap(dialog->klass, "_data");
+				auto _dataField = il2cpp_class_get_field_from_name(dialog->klass, "_data");
 				Il2CppObject* _data;
 				il2cpp_field_get_value(dialog, _dataField, &_data);
 
@@ -2860,8 +2860,8 @@ namespace
 					{
 						auto StandaloneWindowResize = il2cpp_symbols::get_class("umamusume.dll", "Gallop", "StandaloneWindowResize");
 
-						auto lastWidthField = il2cpp_class_get_field_from_name_wrap(StandaloneWindowResize, "windowLastWidth");
-						auto lastHeightField = il2cpp_class_get_field_from_name_wrap(StandaloneWindowResize, "windowLastHeight");
+						auto lastWidthField = il2cpp_class_get_field_from_name(StandaloneWindowResize, "windowLastWidth");
+						auto lastHeightField = il2cpp_class_get_field_from_name(StandaloneWindowResize, "windowLastHeight");
 
 						RECT windowRect;
 						GetWindowRect(hWnd, &windowRect);
@@ -2904,7 +2904,7 @@ namespace
 
 						il2cpp_class_get_method_from_name_type<void (*)(float, float)>(StandaloneWindowResize, "SaveChangedWidth", 2)->methodPointer(lastWidth, lastHeight);
 
-						auto _aspectRatioField = il2cpp_class_get_field_from_name_wrap(StandaloneWindowResize, "_aspectRatio");
+						auto _aspectRatioField = il2cpp_class_get_field_from_name(StandaloneWindowResize, "_aspectRatio");
 						float _aspectRatio = contentWidth / contentHeight;
 						il2cpp_field_static_set_value(_aspectRatioField, &_aspectRatio);
 
@@ -2917,13 +2917,13 @@ namespace
 
 						auto GallopScreen = il2cpp_symbols::get_class("umamusume.dll", "Gallop", "Screen");
 
-						auto NUMBER1920_Field = il2cpp_class_get_field_from_name_wrap(GallopScreen, "NUMBER1920");
+						auto NUMBER1920_Field = il2cpp_class_get_field_from_name(GallopScreen, "NUMBER1920");
 
-						auto NUMBER1080_Field = il2cpp_class_get_field_from_name_wrap(GallopScreen, "NUMBER1080");
+						auto NUMBER1080_Field = il2cpp_class_get_field_from_name(GallopScreen, "NUMBER1080");
 
-						auto _originalScreenWidth_Field = il2cpp_class_get_field_from_name_wrap(GallopScreen, "_originalScreenWidth");
+						auto _originalScreenWidth_Field = il2cpp_class_get_field_from_name(GallopScreen, "_originalScreenWidth");
 
-						auto _originalScreenHeight_Field = il2cpp_class_get_field_from_name_wrap(GallopScreen, "_originalScreenHeight");
+						auto _originalScreenHeight_Field = il2cpp_class_get_field_from_name(GallopScreen, "_originalScreenHeight");
 
 
 						int unityWidth = UnityEngine::Screen::width();
@@ -2963,7 +2963,7 @@ namespace
 							//auto nowLoading = il2cpp_symbols::get_method_pointer<Il2CppObject * (*)()>("umamusume.dll", "Gallop", "NowLoading", "get_Instance", IgnoreNumberOfArguments)();
 							//if (nowLoading)
 							//{
-							//	auto _bgImageField = il2cpp_class_get_field_from_name_wrap(nowLoading->klass, "_bgImage");
+							//	auto _bgImageField = il2cpp_class_get_field_from_name(nowLoading->klass, "_bgImage");
 							//	Il2CppObject* _bgImage;
 							//	il2cpp_field_get_value(nowLoading, _bgImageField, &_bgImage);
 
@@ -2976,7 +2976,7 @@ namespace
 							//		}
 							//	}
 
-							//	auto _backCanvasGroupField = il2cpp_class_get_field_from_name_wrap(nowLoading->klass, "_backCanvasGroup");
+							//	auto _backCanvasGroupField = il2cpp_class_get_field_from_name(nowLoading->klass, "_backCanvasGroup");
 							//	Il2CppObject* _backCanvasGroup;
 							//	il2cpp_field_get_value(nowLoading, _backCanvasGroupField, &_backCanvasGroup);
 
@@ -2993,7 +2993,7 @@ namespace
 							//		cout << "Layer name: " << wide_u8(il2cpp_symbols::get_method_pointer<Il2CppString * (*)(int)>("UnityEngine.CoreModule.dll", "UnityEngine", "SortingLayer", "IDToName", 1)(id)->chars) << endl;
 							//	}
 
-							//	auto _activeHorseShoeParticleField = il2cpp_class_get_field_from_name_wrap(nowLoading->klass, isPortrait ? "_horseShoeParticleVertical" : "_horseShoeParticleHorizontal");
+							//	auto _activeHorseShoeParticleField = il2cpp_class_get_field_from_name(nowLoading->klass, isPortrait ? "_horseShoeParticleVertical" : "_horseShoeParticleHorizontal");
 							//	Il2CppObject* _activeHorseShoeParticle;
 							//	il2cpp_field_get_value(nowLoading, _activeHorseShoeParticleField, &_activeHorseShoeParticle);
 
@@ -3003,7 +3003,7 @@ namespace
 							//		il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, float)>(_activeHorseShoeParticle->klass, "SetParticleAlpha", 1)->methodPointer(_activeHorseShoeParticle, 1);
 							//		il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, Il2CppString*, int)>(_activeHorseShoeParticle->klass, "SetLayer", 2)->methodPointer(_activeHorseShoeParticle, il2cpp_string_new("Default"), 0);
 
-							//		auto _particleRendererField = il2cpp_class_get_field_from_name_wrap(_activeHorseShoeParticle->klass, "_particleRenderer");
+							//		auto _particleRendererField = il2cpp_class_get_field_from_name(_activeHorseShoeParticle->klass, "_particleRenderer");
 							//		Il2CppObject* _particleRenderer;
 							//		il2cpp_field_get_value(_activeHorseShoeParticle, _particleRendererField, &_particleRenderer);
 
@@ -3013,7 +3013,7 @@ namespace
 							//		}
 							//	}
 
-							//	auto _activeHorseShoeParticle1Field = il2cpp_class_get_field_from_name_wrap(nowLoading->klass, isPortrait ? "_horseShoeParticleHorizontal" : "_horseShoeParticleVertical");
+							//	auto _activeHorseShoeParticle1Field = il2cpp_class_get_field_from_name(nowLoading->klass, isPortrait ? "_horseShoeParticleHorizontal" : "_horseShoeParticleVertical");
 							//	Il2CppObject* _activeHorseShoeParticle1;
 							//	il2cpp_field_get_value(nowLoading, _activeHorseShoeParticle1Field, &_activeHorseShoeParticle1);
 
@@ -3023,13 +3023,13 @@ namespace
 							//	}
 							//}
 
-							/*auto _bgCameraSettingsField = il2cpp_class_get_field_from_name_wrap(GallopScreen, "_bgCameraSettings");
+							/*auto _bgCameraSettingsField = il2cpp_class_get_field_from_name(GallopScreen, "_bgCameraSettings");
 
 							Il2CppObject* _bgCameraSettings;
 							il2cpp_symbols::get_method_pointer<void (*)(bool, Il2CppObject**)>("umamusume.dll", "Gallop", "Screen", "InitializeChangeScaleForPC", 2)(isPortrait, &_bgCameraSettings);
 
 							il2cpp_field_static_set_value(_bgCameraSettingsField, &_bgCameraSettings);*/
-							/*auto _bgCameraField = il2cpp_class_get_field_from_name_wrap(uiManager, "_bgCamera");
+							/*auto _bgCameraField = il2cpp_class_get_field_from_name(uiManager, "_bgCamera");
 							Il2CppObject* _bgCamera;
 
 							il2cpp_field_get_value(uiManager, _bgCameraField, &_bgCamera);
@@ -3064,7 +3064,7 @@ namespace
 
 							il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, UnityEngine::Vector3)>(transform->klass, "set_localScale", 1)->methodPointer(transform, UnityEngine::Vector3{ 1, 1, 1 });
 
-							// auto _bgCameraSettingsField = il2cpp_class_get_field_from_name_wrap(GallopScreen, "_bgCameraSettings");
+							// auto _bgCameraSettingsField = il2cpp_class_get_field_from_name(GallopScreen, "_bgCameraSettings");
 
 							// Il2CppObject* _bgCameraSettings;
 							// il2cpp_field_static_get_value(_bgCameraSettingsField, &_bgCameraSettings);
@@ -3161,13 +3161,13 @@ namespace
 
 								auto GallopScreen = il2cpp_symbols::get_class("umamusume.dll", "Gallop", "Screen");
 
-								auto NUMBER1920_Field = il2cpp_class_get_field_from_name_wrap(GallopScreen, "NUMBER1920");
+								auto NUMBER1920_Field = il2cpp_class_get_field_from_name(GallopScreen, "NUMBER1920");
 
-								auto NUMBER1080_Field = il2cpp_class_get_field_from_name_wrap(GallopScreen, "NUMBER1080");
+								auto NUMBER1080_Field = il2cpp_class_get_field_from_name(GallopScreen, "NUMBER1080");
 
-								auto _originalScreenWidth_Field = il2cpp_class_get_field_from_name_wrap(GallopScreen, "_originalScreenWidth");
+								auto _originalScreenWidth_Field = il2cpp_class_get_field_from_name(GallopScreen, "_originalScreenWidth");
 
-								auto _originalScreenHeight_Field = il2cpp_class_get_field_from_name_wrap(GallopScreen, "_originalScreenHeight");
+								auto _originalScreenHeight_Field = il2cpp_class_get_field_from_name(GallopScreen, "_originalScreenHeight");
 
 								auto uiManager = Gallop::UIManager::Instance();
 
@@ -3252,13 +3252,13 @@ namespace
 								{
 									il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, int)>(director->klass, "SetupOrientation", 1)->methodPointer(director, isPortrait ? 2 : 1);
 
-									auto ChampionsTextControllerField = il2cpp_class_get_field_from_name_wrap(director->klass, "ChampionsTextController");
+									auto ChampionsTextControllerField = il2cpp_class_get_field_from_name(director->klass, "ChampionsTextController");
 									Il2CppObject* ChampionsTextController;
 									il2cpp_field_get_value(director, ChampionsTextControllerField, &ChampionsTextController);
 
 									if (ChampionsTextController)
 									{
-										auto _flashPlayerField = il2cpp_class_get_field_from_name_wrap(ChampionsTextController->klass, "_flashPlayer");
+										auto _flashPlayerField = il2cpp_class_get_field_from_name(ChampionsTextController->klass, "_flashPlayer");
 										Il2CppObject* _flashPlayer;
 										il2cpp_field_get_value(ChampionsTextController, _flashPlayerField, &_flashPlayer);
 
@@ -3691,7 +3691,7 @@ namespace
 			return false;
 		}
 
-		auto _dataField = il2cpp_class_get_field_from_name_wrap(dialog->klass, "_data");
+		auto _dataField = il2cpp_class_get_field_from_name(dialog->klass, "_data");
 		Il2CppObject* _data;
 		il2cpp_field_get_value(dialog, _dataField, &_data);
 
@@ -3700,7 +3700,7 @@ namespace
 			return false;
 		}
 
-		auto FormTypeField = il2cpp_class_get_field_from_name_wrap(_data->klass, "FormType");
+		auto FormTypeField = il2cpp_class_get_field_from_name(_data->klass, "FormType");
 
 		Gallop::DialogCommonBase::FormType type = Gallop::DialogCommonBase::FormType::WITHOUT_FRAME;
 		il2cpp_field_get_value(_data, FormTypeField, &type);
@@ -3709,7 +3709,7 @@ namespace
 		bool isTwoButton = type == Gallop::DialogCommonBase::FormType::SMALL_TWO_BUTTON || type == Gallop::DialogCommonBase::FormType::MIDDLE_TWO_BUTTON || type == Gallop::DialogCommonBase::FormType::BIG_TWO_BUTTON;
 		bool isThreeButton = type == Gallop::DialogCommonBase::FormType::SMALL_THREE_BUTTON || type == Gallop::DialogCommonBase::FormType::MIDDLE_THREE_BUTTON || type == Gallop::DialogCommonBase::FormType::BIG_THREE_BUTTON;
 
-		auto _currentDialogObjField = il2cpp_class_get_field_from_name_wrap(dialog->klass, "_currentDialogObj");
+		auto _currentDialogObjField = il2cpp_class_get_field_from_name(dialog->klass, "_currentDialogObj");
 
 		if (!_currentDialogObjField)
 		{
@@ -3813,23 +3813,23 @@ namespace
 							return false;
 						}
 
-						auto _nextMonthButtonField = il2cpp_class_get_field_from_name_wrap(stablesPanel->klass, "_nextMonthButton");
+						auto _nextMonthButtonField = il2cpp_class_get_field_from_name(stablesPanel->klass, "_nextMonthButton");
 						Il2CppObject* _nextMonthButton;
 						il2cpp_field_get_value(stablesPanel, _nextMonthButtonField, &_nextMonthButton);
 
-						auto _skillGetButtonField = il2cpp_class_get_field_from_name_wrap(stablesPanel->klass, "_skillGetButton");
+						auto _skillGetButtonField = il2cpp_class_get_field_from_name(stablesPanel->klass, "_skillGetButton");
 						Il2CppObject* _skillGetButton;
 						il2cpp_field_get_value(stablesPanel, _skillGetButtonField, &_skillGetButton);
 
-						auto _outingSummerButtonField = il2cpp_class_get_field_from_name_wrap(stablesPanel->klass, "_outingSummerButton");
+						auto _outingSummerButtonField = il2cpp_class_get_field_from_name(stablesPanel->klass, "_outingSummerButton");
 						Il2CppObject* _outingSummerButton;
 						il2cpp_field_get_value(stablesPanel, _outingSummerButtonField, &_outingSummerButton);
 
-						auto _trainingButtonField = il2cpp_class_get_field_from_name_wrap(stablesPanel->klass, "_trainingButton");
+						auto _trainingButtonField = il2cpp_class_get_field_from_name(stablesPanel->klass, "_trainingButton");
 						Il2CppObject* _trainingButton;
 						il2cpp_field_get_value(stablesPanel, _trainingButtonField, &_trainingButton);
 
-						auto _outingButtonField = il2cpp_class_get_field_from_name_wrap(stablesPanel->klass, "_outingButton");
+						auto _outingButtonField = il2cpp_class_get_field_from_name(stablesPanel->klass, "_outingButton");
 						Il2CppObject* _outingButton;
 						il2cpp_field_get_value(stablesPanel, _outingButtonField, &_outingButton);
 
@@ -3839,7 +3839,7 @@ namespace
 							outingButton = il2cpp_class_get_method_from_name_type<Il2CppObject * (*)(Il2CppObject*)>(_outingButton->klass, "get_Button", 0)->methodPointer(_outingButton);
 						}
 
-						auto _hospitalButtonField = il2cpp_class_get_field_from_name_wrap(stablesPanel->klass, "_hospitalButton");
+						auto _hospitalButtonField = il2cpp_class_get_field_from_name(stablesPanel->klass, "_hospitalButton");
 						Il2CppObject* _hospitalButton;
 						il2cpp_field_get_value(stablesPanel, _hospitalButtonField, &_hospitalButton);
 
@@ -3849,7 +3849,7 @@ namespace
 							hospitalButton = il2cpp_class_get_method_from_name_type<Il2CppObject * (*)(Il2CppObject*)>(_hospitalButton->klass, "get_Button", 0)->methodPointer(_hospitalButton);
 						}
 
-						auto _raceRegistButtonField = il2cpp_class_get_field_from_name_wrap(stablesPanel->klass, "_raceRegistButton");
+						auto _raceRegistButtonField = il2cpp_class_get_field_from_name(stablesPanel->klass, "_raceRegistButton");
 						Il2CppObject* _raceRegistButton;
 						il2cpp_field_get_value(stablesPanel, _raceRegistButtonField, &_raceRegistButton);
 
@@ -3859,7 +3859,7 @@ namespace
 							raceRegistButton = il2cpp_class_get_method_from_name_type<Il2CppObject * (*)(Il2CppObject*)>(_raceRegistButton->klass, "get_Button", 0)->methodPointer(_raceRegistButton);
 						}
 
-						auto _targetRaceSkillGetButtonField = il2cpp_class_get_field_from_name_wrap(stablesPanel->klass, "_targetRaceSkillGetButton");
+						auto _targetRaceSkillGetButtonField = il2cpp_class_get_field_from_name(stablesPanel->klass, "_targetRaceSkillGetButton");
 						Il2CppObject* _targetRaceSkillGetButton;
 						il2cpp_field_get_value(stablesPanel, _targetRaceSkillGetButtonField, &_targetRaceSkillGetButton);
 
@@ -3869,11 +3869,11 @@ namespace
 							targetRaceSkillGetButton = il2cpp_class_get_method_from_name_type<Il2CppObject * (*)(Il2CppObject*)>(_targetRaceSkillGetButton->klass, "get_Button", 0)->methodPointer(_targetRaceSkillGetButton);
 						}
 
-						auto _targetRaceRegistButtonField = il2cpp_class_get_field_from_name_wrap(stablesPanel->klass, "_targetRaceRegistButton");
+						auto _targetRaceRegistButtonField = il2cpp_class_get_field_from_name(stablesPanel->klass, "_targetRaceRegistButton");
 						Il2CppObject* _targetRaceRegistButton;
 						il2cpp_field_get_value(stablesPanel, _targetRaceRegistButtonField, &_targetRaceRegistButton);
 
-						auto _addonScenarioButtonField = il2cpp_class_get_field_from_name_wrap(stablesPanel->klass, "_addonScenarioButton");
+						auto _addonScenarioButtonField = il2cpp_class_get_field_from_name(stablesPanel->klass, "_addonScenarioButton");
 						Il2CppObject* _addonScenarioButton;
 						il2cpp_field_get_value(stablesPanel, _addonScenarioButtonField, &_addonScenarioButton);
 
@@ -4077,13 +4077,13 @@ namespace
 
 				if (wParam == VK_UP || wParam == VK_DOWN)
 				{
-					auto _itemListField = il2cpp_class_get_field_from_name_wrap(controller->klass, "_itemList");
+					auto _itemListField = il2cpp_class_get_field_from_name(controller->klass, "_itemList");
 					Il2CppObject* _itemList;
 					il2cpp_field_get_value(controller, _itemListField, &_itemList);
 
 					if (_itemList)
 					{
-						FieldInfo* itemsField = il2cpp_class_get_field_from_name_wrap(_itemList->klass, "_items");
+						FieldInfo* itemsField = il2cpp_class_get_field_from_name(_itemList->klass, "_items");
 						Il2CppArraySize_t<Il2CppObject*>* arr;
 						il2cpp_field_get_value(_itemList, itemsField, &arr);
 					}
@@ -4188,7 +4188,7 @@ namespace
 					auto treeList = il2cpp_class_get_method_from_name_type<Il2CppObject * (*)(Il2CppObject*)>(view->klass, "get_TreeList", 0)->methodPointer(view);
 					if (treeList)
 					{
-						auto _treeArrayField = il2cpp_class_get_field_from_name_wrap(treeList->klass, "_treeArray");
+						auto _treeArrayField = il2cpp_class_get_field_from_name(treeList->klass, "_treeArray");
 						Il2CppArraySize_t<Il2CppObject*>* _treeArray;
 						il2cpp_field_get_value(treeList, _treeArrayField, &_treeArray);
 
@@ -4197,7 +4197,7 @@ namespace
 							auto treeItem = _treeArray->vector[choiceIndex];
 							if (treeItem)
 							{
-								auto _buttonField = il2cpp_class_get_field_from_name_wrap(treeItem->klass, "_button");
+								auto _buttonField = il2cpp_class_get_field_from_name(treeItem->klass, "_button");
 								Il2CppObject* _button;
 
 								il2cpp_field_get_value(treeItem, _buttonField, &_button);
@@ -4252,13 +4252,13 @@ namespace
 						auto footer = il2cpp_class_get_method_from_name_type<Il2CppObject * (*)(Il2CppObject*)>(view->klass, "get_TrainingFooter", 0)->methodPointer(view);
 						if (footer)
 						{
-							auto _itemsField = il2cpp_class_get_field_from_name_wrap(footer->klass, "_items");
+							auto _itemsField = il2cpp_class_get_field_from_name(footer->klass, "_items");
 							Il2CppObject* _items;
 							il2cpp_field_get_value(footer, _itemsField, &_items);
 
 							int count = il2cpp_class_get_method_from_name_type<int (*)(Il2CppObject*)>(_items->klass, "get_Count", 0)->methodPointer(_items);
 
-							FieldInfo* itemsField = il2cpp_class_get_field_from_name_wrap(_items->klass, "_items");
+							FieldInfo* itemsField = il2cpp_class_get_field_from_name(_items->klass, "_items");
 							Il2CppArraySize_t<Il2CppObject*>* arr;
 							il2cpp_field_get_value(_items, itemsField, &arr);
 
@@ -4272,7 +4272,7 @@ namespace
 
 								if (enabled)
 								{
-									auto _onClickEnableField = il2cpp_class_get_field_from_name_wrap(footer->klass, "_onClickEnable");
+									auto _onClickEnableField = il2cpp_class_get_field_from_name(footer->klass, "_onClickEnable");
 									bool _onClickEnable = true;
 									il2cpp_field_set_value(footer, _onClickEnableField, &_onClickEnable);
 
@@ -4296,7 +4296,7 @@ namespace
 									number = count;
 								}
 
-								auto _preSelectedMenuField = il2cpp_class_get_field_from_name_wrap(footer->klass, "_preSelectedMenu");
+								auto _preSelectedMenuField = il2cpp_class_get_field_from_name(footer->klass, "_preSelectedMenu");
 								Il2CppObject* footerItem = arr->vector[number - 1];
 
 								auto trainingMenu = il2cpp_class_get_method_from_name_type<Il2CppObject * (*)(Il2CppObject*)>(footerItem->klass, "get_TrainingMenu", 0)->methodPointer(footerItem);
@@ -4311,7 +4311,7 @@ namespace
 
 									if (enabled)
 									{
-										auto _onClickEnableField = il2cpp_class_get_field_from_name_wrap(footer->klass, "_onClickEnable");
+										auto _onClickEnableField = il2cpp_class_get_field_from_name(footer->klass, "_onClickEnable");
 										bool _onClickEnable = true;
 										il2cpp_field_set_value(footer, _onClickEnableField, &_onClickEnable);
 
@@ -4358,7 +4358,7 @@ namespace
 									}
 								}
 
-								auto _preSelectedMenuField = il2cpp_class_get_field_from_name_wrap(footer->klass, "_preSelectedMenu");
+								auto _preSelectedMenuField = il2cpp_class_get_field_from_name(footer->klass, "_preSelectedMenu");
 								Il2CppObject* footerItem = arr->vector[selectedIndex];
 
 								auto trainingMenu = il2cpp_class_get_method_from_name_type<Il2CppObject * (*)(Il2CppObject*)>(footerItem->klass, "get_TrainingMenu", 0)->methodPointer(footerItem);
@@ -4411,7 +4411,7 @@ namespace
 			return false;
 		}
 
-		auto _choiceButtonListField = il2cpp_class_get_field_from_name_wrap(choiceController->klass, "_choiceButtonList");
+		auto _choiceButtonListField = il2cpp_class_get_field_from_name(choiceController->klass, "_choiceButtonList");
 		Il2CppObject* _choiceButtonList;
 
 		il2cpp_field_get_value(choiceController, _choiceButtonListField, &_choiceButtonList);
@@ -4422,7 +4422,7 @@ namespace
 		}
 
 		auto choiceButton = il2cpp_class_get_method_from_name_type<Il2CppObject * (*)(Il2CppObject*, int)>(_choiceButtonList->klass, "get_Item", 1)->methodPointer(_choiceButtonList, choiceIndex);
-		auto _buttonField = il2cpp_class_get_field_from_name_wrap(choiceButton->klass, "_button");
+		auto _buttonField = il2cpp_class_get_field_from_name(choiceButton->klass, "_button");
 		Il2CppObject* _button;
 
 		il2cpp_field_get_value(choiceButton, _buttonField, &_button);
@@ -4459,7 +4459,7 @@ namespace
 
 		int choiceIndex = (wParam - 48) - 1;
 
-		auto _choiceControllerField = il2cpp_class_get_field_from_name_wrap(storyReplay->klass, "_choiceController");
+		auto _choiceControllerField = il2cpp_class_get_field_from_name(storyReplay->klass, "_choiceController");
 		Il2CppObject* _choiceController;
 		il2cpp_field_get_value(storyReplay, _choiceControllerField, &_choiceController);
 
@@ -4468,7 +4468,7 @@ namespace
 			return false;
 		}
 
-		auto _dialogTypeField = il2cpp_class_get_field_from_name_wrap(_choiceController->klass, "_dialogType");
+		auto _dialogTypeField = il2cpp_class_get_field_from_name(_choiceController->klass, "_dialogType");
 		int _dialogType;
 		il2cpp_field_get_value(_choiceController, _dialogTypeField, &_dialogType);
 
@@ -4477,7 +4477,7 @@ namespace
 			return false;
 		}
 
-		auto _choicesArrayField = il2cpp_class_get_field_from_name_wrap(_choiceController->klass, "_choicesArray");
+		auto _choicesArrayField = il2cpp_class_get_field_from_name(_choiceController->klass, "_choicesArray");
 		Il2CppArraySize_t<Il2CppObject*>* _choicesArray;
 		il2cpp_field_get_value(_choiceController, _choicesArrayField, &_choicesArray);
 
@@ -4492,7 +4492,7 @@ namespace
 		}
 
 		auto choiceParam = _choicesArray->vector[choiceIndex];
-		auto ButtonField = il2cpp_class_get_field_from_name_wrap(choiceParam->klass, "Button");
+		auto ButtonField = il2cpp_class_get_field_from_name(choiceParam->klass, "Button");
 		Il2CppObject* Button;
 
 		il2cpp_field_get_value(choiceParam, ButtonField, &Button);
@@ -4502,7 +4502,7 @@ namespace
 			return false;
 		}
 
-		auto _buttonField = il2cpp_class_get_field_from_name_wrap(Button->klass, "_button");
+		auto _buttonField = il2cpp_class_get_field_from_name(Button->klass, "_button");
 		Il2CppObject* _button;
 
 		il2cpp_field_get_value(Button, _buttonField, &_button);
@@ -4532,7 +4532,7 @@ namespace
 		{
 			bool isPauseLive = il2cpp_class_get_method_from_name_type<bool (*)()>(director->klass, "IsPauseLive", 0)->methodPointer();
 
-			auto _liveCurrentTimeField = il2cpp_class_get_field_from_name_wrap(director->klass, "_liveCurrentTime");
+			auto _liveCurrentTimeField = il2cpp_class_get_field_from_name(director->klass, "_liveCurrentTime");
 			il2cpp_field_set_value(director, _liveCurrentTimeField, &value);
 
 			auto LiveTimeController = il2cpp_class_get_method_from_name_type<Il2CppObject * (*)(Il2CppObject*)>(director->klass, "get_LiveTimeController", 0)->methodPointer(director);
@@ -4543,7 +4543,7 @@ namespace
 				il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*)>(LiveTimeController->klass, "PauseLive", 0)->methodPointer(LiveTimeController);
 			}
 
-			auto _elapsedTimeField = il2cpp_class_get_field_from_name_wrap(LiveTimeController->klass, "_elapsedTime");
+			auto _elapsedTimeField = il2cpp_class_get_field_from_name(LiveTimeController->klass, "_elapsedTime");
 			il2cpp_field_set_value(LiveTimeController, _elapsedTimeField, &value);
 
 			il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, float)>(LiveTimeController->klass, "set_CurrentTime", 1)->methodPointer(LiveTimeController, value);
@@ -4551,15 +4551,15 @@ namespace
 			auto AudioManager = GetSingletonInstance(il2cpp_symbols::get_class("umamusume.dll", "Gallop", "AudioManager"));
 			auto CriAudioManager = il2cpp_class_get_method_from_name_type<Il2CppObject * (*)(Il2CppObject*)>(AudioManager->klass, "get_CriAudioManager", 0)->methodPointer(AudioManager);
 
-			auto audioCtrlDictField = il2cpp_class_get_field_from_name_wrap(CriAudioManager->klass, "audioCtrlDict");
+			auto audioCtrlDictField = il2cpp_class_get_field_from_name(CriAudioManager->klass, "audioCtrlDict");
 			Il2CppObject* audioCtrlDict;
 			il2cpp_field_get_value(CriAudioManager, audioCtrlDictField, &audioCtrlDict);
 
-			auto _songPlaybackField = il2cpp_class_get_field_from_name_wrap(AudioManager->klass, "_songPlayback");
+			auto _songPlaybackField = il2cpp_class_get_field_from_name(AudioManager->klass, "_songPlayback");
 			Cute::Cri::AudioPlayback _songPlayback;
 			il2cpp_field_get_value(AudioManager, _songPlaybackField, &_songPlayback);
 
-			auto _songCharaPlaybacksField = il2cpp_class_get_field_from_name_wrap(AudioManager->klass, "_songCharaPlaybacks");
+			auto _songCharaPlaybacksField = il2cpp_class_get_field_from_name(AudioManager->klass, "_songCharaPlaybacks");
 			Il2CppArraySize_t<Cute::Cri::AudioPlayback>* _songCharaPlaybacks;
 			il2cpp_field_get_value(AudioManager, _songCharaPlaybacksField, &_songCharaPlaybacks);
 
@@ -4577,17 +4577,17 @@ namespace
 				wcout << u16_wide(exception->message->chars) << endl;
 			}
 
-			auto poolField = il2cpp_class_get_field_from_name_wrap(audioCtrl->klass, "pool");
+			auto poolField = il2cpp_class_get_field_from_name(audioCtrl->klass, "pool");
 			Il2CppObject* pool;
 			il2cpp_field_get_value(audioCtrl, poolField, &pool);
 
 			if (pool)
 			{
-				FieldInfo* sourceListField = il2cpp_class_get_field_from_name_wrap(pool->klass, "sourceList");
+				FieldInfo* sourceListField = il2cpp_class_get_field_from_name(pool->klass, "sourceList");
 				Il2CppObject* sourceList;
 				il2cpp_field_get_value(pool, sourceListField, &sourceList);
 
-				FieldInfo* itemsField = il2cpp_class_get_field_from_name_wrap(sourceList->klass, "_items");
+				FieldInfo* itemsField = il2cpp_class_get_field_from_name(sourceList->klass, "_items");
 				Il2CppArraySize_t<Il2CppObject*>* sources;
 				il2cpp_field_get_value(sourceList, itemsField, &sources);
 
@@ -4610,11 +4610,11 @@ namespace
 
 				if (cuteAudioSource)
 				{
-					auto sourceListField = il2cpp_class_get_field_from_name_wrap(cuteAudioSource->klass, "sourceList");
+					auto sourceListField = il2cpp_class_get_field_from_name(cuteAudioSource->klass, "sourceList");
 					Il2CppObject* sourceList;
 					il2cpp_field_get_value(cuteAudioSource, sourceListField, &sourceList);
 
-					auto usingIndexField = il2cpp_class_get_field_from_name_wrap(cuteAudioSource->klass, "usingIndex");
+					auto usingIndexField = il2cpp_class_get_field_from_name(cuteAudioSource->klass, "usingIndex");
 					int usingIndex;
 					il2cpp_field_get_value(cuteAudioSource, usingIndexField, &usingIndex);
 
@@ -4666,17 +4666,17 @@ namespace
 						continue;
 					}
 
-					auto poolField = il2cpp_class_get_field_from_name_wrap(audioCtrl->klass, "pool");
+					auto poolField = il2cpp_class_get_field_from_name(audioCtrl->klass, "pool");
 					Il2CppObject* pool;
 					il2cpp_field_get_value(audioCtrl, poolField, &pool);
 
 					if (pool)
 					{
-						FieldInfo* sourceListField = il2cpp_class_get_field_from_name_wrap(pool->klass, "sourceList");
+						FieldInfo* sourceListField = il2cpp_class_get_field_from_name(pool->klass, "sourceList");
 						Il2CppObject* sourceList;
 						il2cpp_field_get_value(pool, sourceListField, &sourceList);
 
-						FieldInfo* itemsField = il2cpp_class_get_field_from_name_wrap(sourceList->klass, "_items");
+						FieldInfo* itemsField = il2cpp_class_get_field_from_name(sourceList->klass, "_items");
 						Il2CppArraySize_t<Il2CppObject*>* sources;
 						il2cpp_field_get_value(sourceList, itemsField, &sources);
 
@@ -4699,11 +4699,11 @@ namespace
 
 						if (cuteAudioSource)
 						{
-							auto sourceListField = il2cpp_class_get_field_from_name_wrap(cuteAudioSource->klass, "sourceList");
+							auto sourceListField = il2cpp_class_get_field_from_name(cuteAudioSource->klass, "sourceList");
 							Il2CppObject* sourceList;
 							il2cpp_field_get_value(cuteAudioSource, sourceListField, &sourceList);
 
-							auto usingIndexField = il2cpp_class_get_field_from_name_wrap(cuteAudioSource->klass, "usingIndex");
+							auto usingIndexField = il2cpp_class_get_field_from_name(cuteAudioSource->klass, "usingIndex");
 							int usingIndex;
 							il2cpp_field_get_value(cuteAudioSource, usingIndexField, &usingIndex);
 
@@ -5042,7 +5042,7 @@ namespace
 							il2cpp_symbols::get_method_pointer<Il2CppObject* (*)(float, Il2CppDelegate*, bool)>("DOTween.dll", "DG.Tweening", "DOVirtual", "DelayedCall", 3)(3, callback, true);
 						}
 
-						auto IsPlayingField = il2cpp_class_get_field_from_name_wrap(JukeboxSetListPlayingInfo->klass, "IsPlaying");
+						auto IsPlayingField = il2cpp_class_get_field_from_name(JukeboxSetListPlayingInfo->klass, "IsPlaying");
 						bool IsPlaying = false;
 						il2cpp_field_get_value(JukeboxSetListPlayingInfo, IsPlayingField, &IsPlaying);
 
@@ -5062,7 +5062,7 @@ namespace
 		auto tempData = GetSingletonInstance(il2cpp_symbols::get_class("umamusume.dll", "Gallop", "TempData"));
 		auto JukeboxSetListPlayingInfo = il2cpp_class_get_method_from_name_type<Il2CppObject * (*)(Il2CppObject*)>(tempData->klass, "get_JukeboxSetListPlayingInfo", 0)->methodPointer(tempData);
 
-		auto IsPlayingField = il2cpp_class_get_field_from_name_wrap(JukeboxSetListPlayingInfo->klass, "IsPlaying");
+		auto IsPlayingField = il2cpp_class_get_field_from_name(JukeboxSetListPlayingInfo->klass, "IsPlaying");
 		bool IsPlaying = false;
 		il2cpp_field_get_value(JukeboxSetListPlayingInfo, IsPlayingField, &IsPlaying);
 
@@ -5070,7 +5070,7 @@ namespace
 
 		if (IsPlaying)
 		{
-			auto SetListIdField = il2cpp_class_get_field_from_name_wrap(JukeboxSetListPlayingInfo->klass, "SetListId");
+			auto SetListIdField = il2cpp_class_get_field_from_name(JukeboxSetListPlayingInfo->klass, "SetListId");
 			int SetListId = 0;
 			il2cpp_field_get_value(JukeboxSetListPlayingInfo, SetListIdField, &SetListId);
 			setListId.Value(SetListId);
@@ -5324,7 +5324,7 @@ namespace
 					}
 				);
 
-				auto _startTrialListeningField = il2cpp_class_get_field_from_name_wrap(dialogJukeboxRequestSong->klass, "_startTrialListening");
+				auto _startTrialListeningField = il2cpp_class_get_field_from_name(dialogJukeboxRequestSong->klass, "_startTrialListening");
 				il2cpp_field_set_value(dialogJukeboxRequestSong, _startTrialListeningField, _startTrialListening);
 
 				auto _resetBgm = CreateDelegate(
@@ -5338,7 +5338,7 @@ namespace
 					}
 				);
 
-				auto _resetBgmField = il2cpp_class_get_field_from_name_wrap(dialogJukeboxRequestSong->klass, "_resetBgm");
+				auto _resetBgmField = il2cpp_class_get_field_from_name(dialogJukeboxRequestSong->klass, "_resetBgm");
 				il2cpp_field_set_value(dialogJukeboxRequestSong, _resetBgmField, _resetBgm);
 
 				int musicId = il2cpp_class_get_method_from_name_type<int (*)(Il2CppObject*)>(JukeboxBgmSelector->klass, "get_CurrentBgmMusicId", 0)->methodPointer(JukeboxBgmSelector);
@@ -5351,7 +5351,7 @@ namespace
 				{
 					auto JukeboxSetListPlayingInfo = get_JukeboxSetListPlayingInfo->methodPointer(tempData);
 
-					auto IsPlayingField = il2cpp_class_get_field_from_name_wrap(JukeboxSetListPlayingInfo->klass, "IsPlaying");
+					auto IsPlayingField = il2cpp_class_get_field_from_name(JukeboxSetListPlayingInfo->klass, "IsPlaying");
 					il2cpp_field_get_value(JukeboxSetListPlayingInfo, IsPlayingField, &IsPlaying);
 
 					if (IsPlaying)
@@ -5563,11 +5563,11 @@ namespace
 			//		auto detail = details->vector[0];
 			//		cout << detail->klass->name << endl;
 
-			//		/*auto _scrollRootRectField = il2cpp_class_get_field_from_name_wrap(detail->klass, "_scrollRootRect");
+			//		/*auto _scrollRootRectField = il2cpp_class_get_field_from_name(detail->klass, "_scrollRootRect");
 			//		Il2CppObject* _scrollRootRect;
 			//		il2cpp_field_get_value(detail, _scrollRootRectField, &_scrollRootRect);
 
-			//		auto _successionToggleRootField = il2cpp_class_get_field_from_name_wrap(detail->klass, "_successionToggleRoot");
+			//		auto _successionToggleRootField = il2cpp_class_get_field_from_name(detail->klass, "_successionToggleRoot");
 			//		Il2CppObject* _successionToggleRoot;
 			//		il2cpp_field_get_value(detail, _successionToggleRootField, &_successionToggleRoot);
 
@@ -5827,7 +5827,7 @@ namespace
 		if (uMsg == WM_ENTERSIZEMOVE)
 		{
 			auto StandaloneWindowResize = il2cpp_symbols::get_class("umamusume.dll", "Gallop", "StandaloneWindowResize");
-			auto _isWindowSizeChangingField = il2cpp_class_get_field_from_name_wrap(StandaloneWindowResize->klass, "_isWindowSizeChanging");
+			auto _isWindowSizeChangingField = il2cpp_class_get_field_from_name(StandaloneWindowResize->klass, "_isWindowSizeChanging");
 			bool _isWindowSizeChanging = true;
 			il2cpp_field_static_set_value(_isWindowSizeChangingField, &_isWindowSizeChanging);
 		}
@@ -5835,7 +5835,7 @@ namespace
 		if (uMsg == WM_MOVING)
 		{
 			auto StandaloneWindowResize = il2cpp_symbols::get_class("umamusume.dll", "Gallop", "StandaloneWindowResize");
-			auto _isWindowDraggingField = il2cpp_class_get_field_from_name_wrap(StandaloneWindowResize->klass, "_isWindowDragging");
+			auto _isWindowDraggingField = il2cpp_class_get_field_from_name(StandaloneWindowResize->klass, "_isWindowDragging");
 			bool _isWindowDragging = true;
 			il2cpp_field_static_set_value(_isWindowDraggingField, &_isWindowDragging);
 		}
@@ -5857,7 +5857,7 @@ namespace
 			}
 			case SIZE_MINIMIZED:
 			{
-				auto _isWindowDraggingField = il2cpp_class_get_field_from_name_wrap(StandaloneWindowResize->klass, "_isWindowDragging");
+				auto _isWindowDraggingField = il2cpp_class_get_field_from_name(StandaloneWindowResize->klass, "_isWindowDragging");
 				bool _isWindowDragging = true;
 				il2cpp_field_static_set_value(_isWindowDraggingField, &_isWindowDragging);
 				break;
@@ -5868,8 +5868,8 @@ namespace
 		if (uMsg == WM_EXITSIZEMOVE)
 		{
 			auto StandaloneWindowResize = il2cpp_symbols::get_class("umamusume.dll", "Gallop", "StandaloneWindowResize");
-			auto _isWindowDraggingField = il2cpp_class_get_field_from_name_wrap(StandaloneWindowResize->klass, "_isWindowDragging");
-			auto _isWindowSizeChangingField = il2cpp_class_get_field_from_name_wrap(StandaloneWindowResize->klass, "_isWindowSizeChanging");
+			auto _isWindowDraggingField = il2cpp_class_get_field_from_name(StandaloneWindowResize->klass, "_isWindowDragging");
+			auto _isWindowSizeChangingField = il2cpp_class_get_field_from_name(StandaloneWindowResize->klass, "_isWindowSizeChanging");
 			bool _isWindowSizeChanging = false;
 			il2cpp_field_static_set_value(_isWindowDraggingField, &_isWindowSizeChanging);
 			il2cpp_field_static_set_value(_isWindowSizeChangingField, &_isWindowSizeChanging);
@@ -5912,8 +5912,8 @@ namespace
 		{
 			auto StandaloneWindowResize = il2cpp_symbols::get_class("umamusume.dll", "Gallop", "StandaloneWindowResize");
 
-			auto lastWidthField = il2cpp_class_get_field_from_name_wrap(StandaloneWindowResize, "windowLastWidth");
-			auto lastHeightField = il2cpp_class_get_field_from_name_wrap(StandaloneWindowResize, "windowLastHeight");
+			auto lastWidthField = il2cpp_class_get_field_from_name(StandaloneWindowResize, "windowLastWidth");
+			auto lastHeightField = il2cpp_class_get_field_from_name(StandaloneWindowResize, "windowLastHeight");
 
 			int lastWidth, lastHeight;
 
@@ -5941,8 +5941,8 @@ namespace
 		if (uMsg == WM_SIZING && config::freeform_window)
 		{
 			auto StandaloneWindowResize = il2cpp_symbols::get_class("umamusume.dll", "Gallop", "StandaloneWindowResize");
-			auto lastWidthField = il2cpp_class_get_field_from_name_wrap(StandaloneWindowResize, "windowLastWidth");
-			auto lastHeightField = il2cpp_class_get_field_from_name_wrap(StandaloneWindowResize, "windowLastHeight");
+			auto lastWidthField = il2cpp_class_get_field_from_name(StandaloneWindowResize, "windowLastWidth");
+			auto lastHeightField = il2cpp_class_get_field_from_name(StandaloneWindowResize, "windowLastHeight");
 
 			int lastWidth, lastHeight;
 
@@ -5999,7 +5999,7 @@ namespace
 
 				il2cpp_class_get_method_from_name_type<void (*)(float, float)>(StandaloneWindowResize, "SaveChangedWidth", 2)->methodPointer(width, height);
 
-				auto _aspectRatioField = il2cpp_class_get_field_from_name_wrap(StandaloneWindowResize, "_aspectRatio");
+				auto _aspectRatioField = il2cpp_class_get_field_from_name(StandaloneWindowResize, "_aspectRatio");
 				float _aspectRatio = contentWidth / contentHeight;
 				il2cpp_field_static_set_value(_aspectRatioField, &_aspectRatio);
 
@@ -6044,8 +6044,8 @@ namespace
 			GetClientRect(hWnd, &clientRect);
 			int clientWidth = (clientRect.right - clientRect.left),
 				clientHeight = (clientRect.bottom - clientRect.top);
-			auto lastWidthField = il2cpp_class_get_field_from_name_wrap(StandaloneWindowResize, "windowLastWidth");
-			auto lastHeightField = il2cpp_class_get_field_from_name_wrap(StandaloneWindowResize, "windowLastHeight");
+			auto lastWidthField = il2cpp_class_get_field_from_name(StandaloneWindowResize, "windowLastWidth");
+			auto lastHeightField = il2cpp_class_get_field_from_name(StandaloneWindowResize, "windowLastHeight");
 
 			auto tapEffectController = GetSingletonInstance(il2cpp_symbols::get_class("umamusume.dll", "Gallop", "TapEffectController"));
 			il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*)>(tapEffectController->klass, "Disable", 0)->methodPointer(tapEffectController);
@@ -6113,7 +6113,7 @@ namespace
 
 			il2cpp_class_get_method_from_name_type<void (*)(float, float)>(StandaloneWindowResize, "SaveChangedWidth", 2)->methodPointer(width, height);
 
-			auto _aspectRatioField = il2cpp_class_get_field_from_name_wrap(StandaloneWindowResize, "_aspectRatio");
+			auto _aspectRatioField = il2cpp_class_get_field_from_name(StandaloneWindowResize, "_aspectRatio");
 			float _aspectRatio = static_cast<float>(width) / static_cast<float>(height);
 			il2cpp_field_static_set_value(_aspectRatioField, &_aspectRatio);
 
@@ -6279,7 +6279,7 @@ namespace
 		{
 			if (buffer && il2cpp_class_get_method_from_name_type<Il2CppObject * (*)(Il2CppObject*)>(buffer->klass, "get_ColorBuffer", 0)->methodPointer(buffer))
 			{
-				auto _drawPathField = il2cpp_class_get_field_from_name_wrap(buffer->klass, "_drawPass");
+				auto _drawPathField = il2cpp_class_get_field_from_name(buffer->klass, "_drawPass");
 				Il2CppObject* _drawPath;
 				il2cpp_field_get_value(buffer, _drawPathField, &_drawPath);
 
@@ -6392,7 +6392,7 @@ namespace
 	Il2CppObject* TMP_Settings_get_instance_hook()
 	{
 		auto tmpSettings = reinterpret_cast<decltype(TMP_Settings_get_instance_hook)*>(TMP_Settings_get_instance_orig)();
-		auto fontAssetField = il2cpp_class_get_field_from_name_wrap(tmpSettings->klass,
+		auto fontAssetField = il2cpp_class_get_field_from_name(tmpSettings->klass,
 			"m_defaultFontAsset");
 		il2cpp_field_set_value(tmpSettings, fontAssetField, GetCustomTMPFont());
 		return tmpSettings;
@@ -6409,7 +6409,7 @@ namespace
 			return;
 		}
 
-		auto customFontMaterialField = il2cpp_class_get_field_from_name_wrap(customFont->klass, "material");
+		auto customFontMaterialField = il2cpp_class_get_field_from_name(customFont->klass, "material");
 		Il2CppObject* customFontMaterial;
 		il2cpp_field_get_value(customFont, customFontMaterialField, &customFontMaterial);
 
@@ -6418,15 +6418,15 @@ namespace
 
 		auto origOutlineWidth = il2cpp_class_get_method_from_name_type<float (*)(Il2CppObject*)>(_this->klass, "get_outlineWidth", 0)->methodPointer(_this);
 
-		auto outlineColorDictField = il2cpp_class_get_field_from_name_wrap(il2cpp_symbols::get_class("umamusume.dll", "Gallop", "ColorPreset"), "OutlineColorDictionary");
+		auto outlineColorDictField = il2cpp_class_get_field_from_name(il2cpp_symbols::get_class("umamusume.dll", "Gallop", "ColorPreset"), "OutlineColorDictionary");
 		Il2CppObject* outlineColorDict;
 		il2cpp_field_static_get_value(outlineColorDictField, &outlineColorDict);
 		auto colorEnum = il2cpp_class_get_method_from_name_type<int (*)(Il2CppObject*)>(_this->klass, "get_OutlineColor", 0)->methodPointer(_this);
 
-		auto entriesField = il2cpp_class_get_field_from_name_wrap(outlineColorDict->klass, "_entries");
+		auto entriesField = il2cpp_class_get_field_from_name(outlineColorDict->klass, "_entries");
 		if (!entriesField)
 		{
-			entriesField = il2cpp_class_get_field_from_name_wrap(outlineColorDict->klass, "entries");
+			entriesField = il2cpp_class_get_field_from_name(outlineColorDict->klass, "entries");
 		}
 		Il2CppArraySize* entries;
 		il2cpp_field_get_value(outlineColorDict, entriesField, &entries);
@@ -6475,7 +6475,7 @@ namespace
 			auto font = GetCustomFont();
 			if (font)
 			{
-				FieldInfo* zekkenFontField = il2cpp_class_get_field_from_name_wrap(_this->klass, "_fontZekken");
+				FieldInfo* zekkenFontField = il2cpp_class_get_field_from_name(_this->klass, "_fontZekken");
 				il2cpp_field_set_value(_this, zekkenFontField, font);
 			}
 		}
@@ -6550,9 +6550,9 @@ namespace
 
 			/*auto GallopScreen = il2cpp_symbols::get_class("umamusume.dll", "Gallop", "Screen");
 
-			auto NUMBER1920_Field = il2cpp_class_get_field_from_name_wrap(GallopScreen, "NUMBER1920");
+			auto NUMBER1920_Field = il2cpp_class_get_field_from_name(GallopScreen, "NUMBER1920");
 
-			auto NUMBER1080_Field = il2cpp_class_get_field_from_name_wrap(GallopScreen, "NUMBER1080");
+			auto NUMBER1080_Field = il2cpp_class_get_field_from_name(GallopScreen, "NUMBER1080");
 
 			int number1920;
 			int number1080;
@@ -6588,9 +6588,9 @@ namespace
 
 			/*auto GallopScreen = il2cpp_symbols::get_class("umamusume.dll", "Gallop", "Screen");
 
-			auto NUMBER1920_Field = il2cpp_class_get_field_from_name_wrap(GallopScreen, "NUMBER1920");
+			auto NUMBER1920_Field = il2cpp_class_get_field_from_name(GallopScreen, "NUMBER1920");
 
-			auto NUMBER1080_Field = il2cpp_class_get_field_from_name_wrap(GallopScreen, "NUMBER1080");
+			auto NUMBER1080_Field = il2cpp_class_get_field_from_name(GallopScreen, "NUMBER1080");
 
 			int number1920;
 			int number1080;
@@ -6736,7 +6736,7 @@ namespace
 
 		auto objectList = il2cpp_class_get_method_from_name_type<Il2CppObject * (*)(Il2CppObject*)>(holder->klass, "get_ObjectList", 0)->methodPointer(holder);
 
-		FieldInfo* itemsField = il2cpp_class_get_field_from_name_wrap(objectList->klass, "_items");
+		FieldInfo* itemsField = il2cpp_class_get_field_from_name(objectList->klass, "_items");
 		Il2CppArraySize_t<Il2CppObject*>* arr;
 		il2cpp_field_get_value(objectList, itemsField, &arr);
 
@@ -6749,7 +6749,7 @@ namespace
 				continue;
 			}
 
-			auto field = il2cpp_class_get_field_from_name_wrap(pair->klass, "Value");
+			auto field = il2cpp_class_get_field_from_name(pair->klass, "Value");
 			Il2CppObject* obj;
 			il2cpp_field_get_value(pair, field, &obj);
 
@@ -6817,7 +6817,7 @@ namespace
 			return;
 		}
 
-		auto textureField = il2cpp_class_get_field_from_name_wrap(rawImage->klass, "m_Texture");
+		auto textureField = il2cpp_class_get_field_from_name(rawImage->klass, "m_Texture");
 		Il2CppObject* texture;
 		il2cpp_field_get_value(rawImage, textureField, &texture);
 
@@ -6869,7 +6869,7 @@ namespace
 
 			if (meshParameterList)
 			{
-				FieldInfo* itemsField = il2cpp_class_get_field_from_name_wrap(meshParameterList->klass, "_items");
+				FieldInfo* itemsField = il2cpp_class_get_field_from_name(meshParameterList->klass, "_items");
 				Il2CppArraySize_t<Il2CppObject*>* items;
 				il2cpp_field_get_value(meshParameterList, itemsField, &items);
 
@@ -6885,7 +6885,7 @@ namespace
 
 							if (meshParameterGroupList)
 							{
-								FieldInfo* items1Field = il2cpp_class_get_field_from_name_wrap(meshParameterGroupList->klass, "_items");
+								FieldInfo* items1Field = il2cpp_class_get_field_from_name(meshParameterGroupList->klass, "_items");
 								Il2CppArraySize_t<Il2CppObject*>* items1;
 								il2cpp_field_get_value(meshParameterGroupList, items1Field, &items1);
 
@@ -6939,7 +6939,7 @@ namespace
 
 							if (customMeshInfoParameterList)
 							{
-								FieldInfo* items1Field = il2cpp_class_get_field_from_name_wrap(customMeshInfoParameterList->klass, "_items");
+								FieldInfo* items1Field = il2cpp_class_get_field_from_name(customMeshInfoParameterList->klass, "_items");
 								Il2CppArraySize_t<Il2CppObject*>* items1;
 								il2cpp_field_get_value(customMeshInfoParameterList, items1Field, &items1);
 
@@ -7039,7 +7039,7 @@ namespace
 
 			if (worksheetList)
 			{
-				FieldInfo* itemsField = il2cpp_class_get_field_from_name_wrap(worksheetList->klass, "_items");
+				FieldInfo* itemsField = il2cpp_class_get_field_from_name(worksheetList->klass, "_items");
 				Il2CppArraySize_t<Il2CppObject*>* items;
 				il2cpp_field_get_value(worksheetList, itemsField, &items);
 
@@ -7051,13 +7051,13 @@ namespace
 
 						if (worksheet)
 						{
-							auto effectListField = il2cpp_class_get_field_from_name_wrap(worksheet->klass, "_effectList");
+							auto effectListField = il2cpp_class_get_field_from_name(worksheet->klass, "_effectList");
 							Il2CppObject* effectList;
 							il2cpp_field_get_value(worksheet, effectListField, &effectList);
 
 							if (effectList)
 							{
-								FieldInfo* items1Field = il2cpp_class_get_field_from_name_wrap(effectList->klass, "_items");
+								FieldInfo* items1Field = il2cpp_class_get_field_from_name(effectList->klass, "_items");
 								Il2CppArraySize_t<Il2CppObject*>* items1;
 								il2cpp_field_get_value(effectList, items1Field, &items1);
 
@@ -7070,7 +7070,7 @@ namespace
 
 										if (effectData)
 										{
-											auto keysField = il2cpp_class_get_field_from_name_wrap(effectData->klass, "_keys");
+											auto keysField = il2cpp_class_get_field_from_name(effectData->klass, "_keys");
 											Il2CppObject* keys;
 											il2cpp_field_get_value(effectData, keysField, &keys);
 
@@ -7088,13 +7088,13 @@ namespace
 								}
 							}
 
-							auto bgListField = il2cpp_class_get_field_from_name_wrap(worksheet->klass, "_bgList");
+							auto bgListField = il2cpp_class_get_field_from_name(worksheet->klass, "_bgList");
 							Il2CppObject* bgList;
 							il2cpp_field_get_value(worksheet, bgListField, &bgList);
 
 							if (bgList)
 							{
-								FieldInfo* items1Field = il2cpp_class_get_field_from_name_wrap(bgList->klass, "_items");
+								FieldInfo* items1Field = il2cpp_class_get_field_from_name(bgList->klass, "_items");
 								Il2CppArraySize_t<Il2CppObject*>* items1;
 								il2cpp_field_get_value(bgList, items1Field, &items1);
 
@@ -7107,7 +7107,7 @@ namespace
 
 										if (effectData)
 										{
-											auto keysField = il2cpp_class_get_field_from_name_wrap(effectData->klass, "_keys");
+											auto keysField = il2cpp_class_get_field_from_name(effectData->klass, "_keys");
 											Il2CppObject* keys;
 											il2cpp_field_get_value(effectData, keysField, &keys);
 
@@ -7337,7 +7337,7 @@ namespace
 	{
 		text_set_text(textCommon, il2cpp_string_new16(text));
 
-		auto textIdStrField = il2cpp_class_get_field_from_name_wrap(textCommon->klass, "m_textid_str");
+		auto textIdStrField = il2cpp_class_get_field_from_name(textCommon->klass, "m_textid_str");
 		il2cpp_field_set_value(textCommon, textIdStrField, nullptr);
 	}
 
@@ -7353,7 +7353,7 @@ namespace
 			il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, Il2CppString*, float)>(textCommon->klass, "SetTextWithCustomTag", 2)->methodPointer(textCommon, il2cpp_string_new16(text), 1);
 		}
 
-		auto textIdStrField = il2cpp_class_get_field_from_name_wrap(textCommon->klass, "m_textid_str");
+		auto textIdStrField = il2cpp_class_get_field_from_name(textCommon->klass, "m_textid_str");
 		il2cpp_field_set_value(textCommon, textIdStrField, nullptr);
 	}
 
@@ -7555,7 +7555,7 @@ namespace
 		il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, int)>(padding->klass, "set_left", 1)->methodPointer(padding, 64);
 		il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, int)>(padding->klass, "set_right", 1)->methodPointer(padding, 64);
 
-		auto _layoutField = il2cpp_class_get_field_from_name_wrap(contentSizeFitter->klass, "_layout");
+		auto _layoutField = il2cpp_class_get_field_from_name(contentSizeFitter->klass, "_layout");
 		il2cpp_field_set_value(contentSizeFitter, _layoutField, verticalLayoutGroup);
 
 		il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*)>(contentSizeFitter->klass, "SetSize", 0)->methodPointer(contentSizeFitter);
@@ -7872,7 +7872,7 @@ namespace
 
 		auto invokeableCall = il2cpp_object_new(GetGenericClass(GetRuntimeType("UnityEngine.CoreModule.dll", "UnityEngine.Events", "InvokableCall`1"), GetRuntimeType(il2cpp_defaults.single_class)));
 
-		auto delegateField = il2cpp_class_get_field_from_name_wrap(invokeableCall->klass, "Delegate");
+		auto delegateField = il2cpp_class_get_field_from_name(invokeableCall->klass, "Delegate");
 		il2cpp_field_set_value(invokeableCall, delegateField, valueChanged);
 
 		AddCall->methodPointer(onValueChanged, invokeableCall);
@@ -7996,10 +7996,10 @@ namespace
 		il2cpp_array_setref(array1, 0, option1);
 		il2cpp_array_setref(array1, 1, option2);
 
-		auto itemField = il2cpp_class_get_field_from_name_wrap(optionList->klass, "_items");
+		auto itemField = il2cpp_class_get_field_from_name(optionList->klass, "_items");
 		il2cpp_field_set_value(optionList, itemField, array1);
 
-		auto sizeField = il2cpp_class_get_field_from_name_wrap(optionList->klass, "_size");
+		auto sizeField = il2cpp_class_get_field_from_name(optionList->klass, "_size");
 		int size = 2;
 		il2cpp_field_set_value(optionList, sizeField, &size);
 
@@ -8277,7 +8277,7 @@ namespace
 
 		auto scrollRect = scrollRectArray->vector[0];
 
-		auto m_ViewportField = il2cpp_class_get_field_from_name_wrap(scrollRect->klass, "m_Viewport");
+		auto m_ViewportField = il2cpp_class_get_field_from_name(scrollRect->klass, "m_Viewport");
 		Il2CppObject* m_Viewport;
 		il2cpp_field_get_value(scrollRect, m_ViewportField, &m_Viewport);
 
@@ -8295,7 +8295,7 @@ namespace
 
 		il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, Il2CppObject*, bool)>(scrollRectTransform->klass, "SetParent", 2)->methodPointer(scrollRectTransform, rootTransform, false);
 
-		auto m_ContentField = il2cpp_class_get_field_from_name_wrap(scrollRect->klass, "m_Content");
+		auto m_ContentField = il2cpp_class_get_field_from_name(scrollRect->klass, "m_Content");
 		Il2CppObject* m_Content;
 		il2cpp_field_get_value(scrollRect, m_ContentField, &m_Content);
 
@@ -8402,7 +8402,7 @@ namespace
 
 		auto scrollRect = scrollRectArray->vector[0];
 
-		auto m_ViewportField = il2cpp_class_get_field_from_name_wrap(scrollRect->klass, "m_Viewport");
+		auto m_ViewportField = il2cpp_class_get_field_from_name(scrollRect->klass, "m_Viewport");
 		Il2CppObject* m_Viewport;
 		il2cpp_field_get_value(scrollRect, m_ViewportField, &m_Viewport);
 
@@ -8420,7 +8420,7 @@ namespace
 
 		il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, Il2CppObject*, bool)>(scrollRectTransform->klass, "SetParent", 2)->methodPointer(scrollRectTransform, rootTransform, false);
 
-		auto m_ContentField = il2cpp_class_get_field_from_name_wrap(scrollRect->klass, "m_Content");
+		auto m_ContentField = il2cpp_class_get_field_from_name(scrollRect->klass, "m_Content");
 		Il2CppObject* m_Content;
 		il2cpp_field_get_value(scrollRect, m_ContentField, &m_Content);
 
@@ -8530,7 +8530,7 @@ namespace
 
 		auto scrollRect = scrollRectArray->vector[0];
 
-		auto m_ViewportField = il2cpp_class_get_field_from_name_wrap(scrollRect->klass, "m_Viewport");
+		auto m_ViewportField = il2cpp_class_get_field_from_name(scrollRect->klass, "m_Viewport");
 		Il2CppObject* m_Viewport;
 		il2cpp_field_get_value(scrollRect, m_ViewportField, &m_Viewport);
 
@@ -8548,7 +8548,7 @@ namespace
 
 		il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, Il2CppObject*, bool)>(scrollRectTransform->klass, "SetParent", 2)->methodPointer(scrollRectTransform, rootTransform, false);
 
-		auto m_ContentField = il2cpp_class_get_field_from_name_wrap(scrollRect->klass, "m_Content");
+		auto m_ContentField = il2cpp_class_get_field_from_name(scrollRect->klass, "m_Content");
 		Il2CppObject* m_Content;
 		il2cpp_field_get_value(scrollRect, m_ContentField, &m_Content);
 
@@ -8660,7 +8660,7 @@ namespace
 
 		auto scrollRect = scrollRectArray->vector[0];
 
-		auto m_ViewportField = il2cpp_class_get_field_from_name_wrap(scrollRect->klass, "m_Viewport");
+		auto m_ViewportField = il2cpp_class_get_field_from_name(scrollRect->klass, "m_Viewport");
 		Il2CppObject* m_Viewport;
 		il2cpp_field_get_value(scrollRect, m_ViewportField, &m_Viewport);
 
@@ -8678,7 +8678,7 @@ namespace
 
 		il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, Il2CppObject*, bool)>(scrollRectTransform->klass, "SetParent", 2)->methodPointer(scrollRectTransform, rootTransform, false);
 
-		auto m_ContentField = il2cpp_class_get_field_from_name_wrap(scrollRect->klass, "m_Content");
+		auto m_ContentField = il2cpp_class_get_field_from_name(scrollRect->klass, "m_Content");
 		Il2CppObject* m_Content;
 		il2cpp_field_get_value(scrollRect, m_ContentField, &m_Content);
 
@@ -8951,11 +8951,11 @@ namespace
 
 				if (graphicSettings)
 				{
-					auto _resolutionScaleField = il2cpp_class_get_field_from_name_wrap(graphicSettings->klass, "_resolutionScale");
+					auto _resolutionScaleField = il2cpp_class_get_field_from_name(graphicSettings->klass, "_resolutionScale");
 
 					il2cpp_field_set_value(graphicSettings, _resolutionScaleField, &config::resolution_3d_scale);
 
-					auto _resolutionScale2DField = il2cpp_class_get_field_from_name_wrap(graphicSettings->klass, "_resolutionScale2D");
+					auto _resolutionScale2DField = il2cpp_class_get_field_from_name(graphicSettings->klass, "_resolutionScale2D");
 
 					il2cpp_field_set_value(graphicSettings, _resolutionScale2DField, &config::resolution_3d_scale);
 				}
@@ -9073,7 +9073,7 @@ namespace
 
 		auto scrollRect = scrollRectArray->vector[0];
 
-		auto m_ViewportField = il2cpp_class_get_field_from_name_wrap(scrollRect->klass, "m_Viewport");
+		auto m_ViewportField = il2cpp_class_get_field_from_name(scrollRect->klass, "m_Viewport");
 		Il2CppObject* m_Viewport;
 		il2cpp_field_get_value(scrollRect, m_ViewportField, &m_Viewport);
 
@@ -9091,7 +9091,7 @@ namespace
 
 		il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, Il2CppObject*, bool)>(scrollRectTransform->klass, "SetParent", 2)->methodPointer(scrollRectTransform, rootTransform, false);
 
-		auto m_ContentField = il2cpp_class_get_field_from_name_wrap(scrollRect->klass, "m_Content");
+		auto m_ContentField = il2cpp_class_get_field_from_name(scrollRect->klass, "m_Content");
 		Il2CppObject* m_Content;
 		il2cpp_field_get_value(scrollRect, m_ContentField, &m_Content);
 
@@ -9325,7 +9325,7 @@ namespace
 		}
 
 		auto CuteCoreDevice = il2cpp_symbols::get_class("Cute.Core.Assembly.dll", "Cute.Core", "Device");
-		auto persistentDataPathField = il2cpp_class_get_field_from_name_wrap(CuteCoreDevice, "persistentDataPath");
+		auto persistentDataPathField = il2cpp_class_get_field_from_name(CuteCoreDevice, "persistentDataPath");
 		Il2CppString* persistentDataPath;
 		il2cpp_field_static_get_value(persistentDataPathField, &persistentDataPath);
 
@@ -9926,7 +9926,7 @@ namespace
 		SetOptionItemButtonAction("persistent_data_path", *([](Il2CppObject*)
 			{
 				auto CuteCoreDevice = il2cpp_symbols::get_class("Cute.Core.Assembly.dll", "Cute.Core", "Device");
-				auto persistentDataPathField = il2cpp_class_get_field_from_name_wrap(CuteCoreDevice, "persistentDataPath");
+				auto persistentDataPathField = il2cpp_class_get_field_from_name(CuteCoreDevice, "persistentDataPath");
 				Il2CppString* persistentDataPath;
 				il2cpp_field_static_get_value(persistentDataPathField, &persistentDataPath);
 
@@ -9977,7 +9977,7 @@ namespace
 
 		auto contentSizeFitter = AddComponent(contentGameObject, GetRuntimeType("umamusume.dll", "Gallop", "LayoutGroupContentSizeFitter"));
 
-		auto _layoutField = il2cpp_class_get_field_from_name_wrap(contentSizeFitter->klass, "_layout");
+		auto _layoutField = il2cpp_class_get_field_from_name(contentSizeFitter->klass, "_layout");
 		il2cpp_field_set_value(contentSizeFitter, _layoutField, verticalLayoutGroup);
 
 		il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*)>(contentSizeFitter->klass, "SetSize", 0)->methodPointer(contentSizeFitter);
@@ -10068,7 +10068,7 @@ namespace
 
 		auto scrollRect = scrollRectArray->vector[0];
 
-		auto m_ViewportField = il2cpp_class_get_field_from_name_wrap(scrollRect->klass, "m_Viewport");
+		auto m_ViewportField = il2cpp_class_get_field_from_name(scrollRect->klass, "m_Viewport");
 		Il2CppObject* m_Viewport;
 		il2cpp_field_get_value(scrollRect, m_ViewportField, &m_Viewport);
 
@@ -10086,7 +10086,7 @@ namespace
 
 		il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, Il2CppObject*, bool)>(scrollRectTransform->klass, "SetParent", 2)->methodPointer(scrollRectTransform, rootTransform, false);
 
-		auto m_ContentField = il2cpp_class_get_field_from_name_wrap(scrollRect->klass, "m_Content");
+		auto m_ContentField = il2cpp_class_get_field_from_name(scrollRect->klass, "m_Content");
 		Il2CppObject* m_Content;
 		il2cpp_field_get_value(scrollRect, m_ContentField, &m_Content);
 
@@ -10213,11 +10213,11 @@ namespace
 
 		auto contentSizeFitter = AddComponent(contentGameObject, GetRuntimeType("umamusume.dll", "Gallop", "LayoutGroupContentSizeFitter"));
 
-		auto _layoutField = il2cpp_class_get_field_from_name_wrap(contentSizeFitter->klass, "_layout");
+		auto _layoutField = il2cpp_class_get_field_from_name(contentSizeFitter->klass, "_layout");
 		il2cpp_field_set_value(contentSizeFitter, _layoutField, verticalLayoutGroup);
 
 		bool _autoUpdate = true;
-		auto _autoUpdateField = il2cpp_class_get_field_from_name_wrap(contentSizeFitter->klass, "_autoUpdate");
+		auto _autoUpdateField = il2cpp_class_get_field_from_name(contentSizeFitter->klass, "_autoUpdate");
 		il2cpp_field_set_value(contentSizeFitter, _autoUpdateField, &_autoUpdate);
 
 		il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*)>(contentSizeFitter->klass, "SetSize", 0)->methodPointer(contentSizeFitter);
@@ -10266,11 +10266,11 @@ namespace
 		{
 			auto view = il2cpp_class_get_method_from_name_type<Il2CppObject * (*)(Il2CppObject*)>(controller->klass, "GetViewBase", 0)->methodPointer(controller);
 
-			auto ViewerIdTextField = il2cpp_class_get_field_from_name_wrap(view->klass, "ViewerIdText");
+			auto ViewerIdTextField = il2cpp_class_get_field_from_name(view->klass, "ViewerIdText");
 			Il2CppObject* ViewerIdText;
 			il2cpp_field_get_value(view, ViewerIdTextField, &ViewerIdText);
 
-			auto CopyIdButtonField = il2cpp_class_get_field_from_name_wrap(view->klass, "CopyIdButton");
+			auto CopyIdButtonField = il2cpp_class_get_field_from_name(view->klass, "CopyIdButton");
 			Il2CppObject* CopyIdButton;
 			il2cpp_field_get_value(view, CopyIdButtonField, &CopyIdButton);
 
@@ -10368,7 +10368,7 @@ namespace
 
 			auto invokeableCall = il2cpp_object_new(GetGenericClass(GetRuntimeType("UnityEngine.CoreModule.dll", "UnityEngine.Events", "InvokableCall`1"), GetRuntimeType(il2cpp_defaults.single_class)));
 
-			auto delegateField = il2cpp_class_get_field_from_name_wrap(invokeableCall->klass, "Delegate");
+			auto delegateField = il2cpp_class_get_field_from_name(invokeableCall->klass, "Delegate");
 			il2cpp_field_set_value(invokeableCall, delegateField, valueChanged);
 
 			AddCall->methodPointer(onValueChanged, invokeableCall);
@@ -10573,7 +10573,7 @@ namespace
 
 			if (CharacterHomeTopUI)
 			{
-				auto _cardRootButtonField = il2cpp_class_get_field_from_name_wrap(CharacterHomeTopUI->klass, "_cardRootButton");
+				auto _cardRootButtonField = il2cpp_class_get_field_from_name(CharacterHomeTopUI->klass, "_cardRootButton");
 				Il2CppObject* _cardRootButton;
 				il2cpp_field_get_value(CharacterHomeTopUI, _cardRootButtonField, &_cardRootButton);
 
@@ -10629,7 +10629,7 @@ namespace
 					auto raceHorse = il2cpp_class_get_method_from_name_type<Il2CppArraySize_t<Il2CppObject*>*(*)(Il2CppObject*)>(raceInfo->klass, "get_RaceHorse", 0)->methodPointer(raceInfo);
 					auto horseData = raceHorse->vector[playerHorseIndex];
 
-					auto charaIdField = il2cpp_class_get_field_from_name_wrap(horseData->klass, "charaId");
+					auto charaIdField = il2cpp_class_get_field_from_name(horseData->klass, "charaId");
 
 					int charaId;
 					il2cpp_field_get_value(horseData, charaIdField, &charaId);
@@ -10638,7 +10638,7 @@ namespace
 					{
 						auto gameObject = UnityEngine::GameObject(cloned);
 						auto raceResultList = gameObject.GetComponent(GetRuntimeType("umamusume.dll", "Gallop", "RaceResultList"));
-						auto _singleModeLiveButtonField = il2cpp_class_get_field_from_name_wrap(raceResultList->klass, "_singleModeLiveButton");
+						auto _singleModeLiveButtonField = il2cpp_class_get_field_from_name(raceResultList->klass, "_singleModeLiveButton");
 						Il2CppObject* _singleModeLiveButton;
 						il2cpp_field_get_value(raceResultList, _singleModeLiveButtonField, &_singleModeLiveButton);
 
@@ -10655,13 +10655,13 @@ namespace
 					auto director = GetSingletonInstance(il2cpp_symbols::get_class("umamusume.dll", "Gallop.Live", "Director"));
 					if (director)
 					{
-						auto ChampionsTextControllerField = il2cpp_class_get_field_from_name_wrap(director->klass, "ChampionsTextController");
+						auto ChampionsTextControllerField = il2cpp_class_get_field_from_name(director->klass, "ChampionsTextController");
 						Il2CppObject* ChampionsTextController;
 						il2cpp_field_get_value(director, ChampionsTextControllerField, &ChampionsTextController);
 
 						if (ChampionsTextController)
 						{
-							auto _flashPlayerField = il2cpp_class_get_field_from_name_wrap(ChampionsTextController->klass, "_flashPlayer");
+							auto _flashPlayerField = il2cpp_class_get_field_from_name(ChampionsTextController->klass, "_flashPlayer");
 							Il2CppObject* _flashPlayer;
 							il2cpp_field_get_value(ChampionsTextController, _flashPlayerField, &_flashPlayer);
 
@@ -10671,7 +10671,7 @@ namespace
 
 							int unityHeight = UnityEngine::Screen::height();
 
-							auto _flashCanvasScalerField = il2cpp_class_get_field_from_name_wrap(ChampionsTextController->klass, "_flashCanvasScaler");
+							auto _flashCanvasScalerField = il2cpp_class_get_field_from_name(ChampionsTextController->klass, "_flashCanvasScaler");
 							Il2CppObject* _flashCanvasScaler;
 							il2cpp_field_get_value(ChampionsTextController, _flashCanvasScalerField, &_flashCanvasScaler);
 
@@ -11224,13 +11224,13 @@ namespace
 									auto dialog = GetFrontDialog();
 									auto data = il2cpp_class_get_method_from_name_type<Il2CppObject * (*)(Il2CppObject*)>(dialog->klass, "get_DialogData", 0)->methodPointer(dialog);
 
-									auto ContentsObjectField = il2cpp_class_get_field_from_name_wrap(data->klass, "ContentsObject");
+									auto ContentsObjectField = il2cpp_class_get_field_from_name(data->klass, "ContentsObject");
 									Il2CppObject* ContentsObject;
 									il2cpp_field_get_value(data, ContentsObjectField, &ContentsObject);
 
 									auto idSearch = il2cpp_class_get_method_from_name_type<Il2CppObject * (*)(Il2CppObject*, Il2CppReflectionType*)>(ContentsObject->klass, "GetComponent", 1)->methodPointer(ContentsObject, GetRuntimeType("umamusume.dll", "Gallop", "DialogIDSearch"));
 
-									auto _inputFieldField = il2cpp_class_get_field_from_name_wrap(idSearch->klass, "_inputField");
+									auto _inputFieldField = il2cpp_class_get_field_from_name(idSearch->klass, "_inputField");
 									Il2CppObject* _inputField;
 									il2cpp_field_get_value(idSearch, _inputFieldField, &_inputField);
 
@@ -11264,13 +11264,13 @@ namespace
 							auto dialog = GetFrontDialog();
 							auto data = il2cpp_class_get_method_from_name_type<Il2CppObject * (*)(Il2CppObject*)>(dialog->klass, "get_DialogData", 0)->methodPointer(dialog);
 
-							auto ContentsObjectField = il2cpp_class_get_field_from_name_wrap(data->klass, "ContentsObject");
+							auto ContentsObjectField = il2cpp_class_get_field_from_name(data->klass, "ContentsObject");
 							Il2CppObject* ContentsObject;
 							il2cpp_field_get_value(data, ContentsObjectField, &ContentsObject);
 
 							auto idSearch = il2cpp_class_get_method_from_name_type<Il2CppObject * (*)(Il2CppObject*, Il2CppReflectionType*)>(ContentsObject->klass, "GetComponent", 1)->methodPointer(ContentsObject, GetRuntimeType("umamusume.dll", "Gallop", "DialogIDSearch"));
 
-							auto _inputFieldField = il2cpp_class_get_field_from_name_wrap(idSearch->klass, "_inputField");
+							auto _inputFieldField = il2cpp_class_get_field_from_name(idSearch->klass, "_inputField");
 							Il2CppObject* _inputField;
 							il2cpp_field_get_value(idSearch, _inputFieldField, &_inputField);
 
@@ -11284,13 +11284,13 @@ namespace
 									auto dialog = GetFrontDialog();
 									auto data = il2cpp_class_get_method_from_name_type<Il2CppObject * (*)(Il2CppObject*)>(dialog->klass, "get_DialogData", 0)->methodPointer(dialog);
 
-									auto ContentsObjectField = il2cpp_class_get_field_from_name_wrap(data->klass, "ContentsObject");
+									auto ContentsObjectField = il2cpp_class_get_field_from_name(data->klass, "ContentsObject");
 									Il2CppObject* ContentsObject;
 									il2cpp_field_get_value(data, ContentsObjectField, &ContentsObject);
 
 									auto idSearch = il2cpp_class_get_method_from_name_type<Il2CppObject * (*)(Il2CppObject*, Il2CppReflectionType*)>(ContentsObject->klass, "GetComponent", 1)->methodPointer(ContentsObject, GetRuntimeType("umamusume.dll", "Gallop", "DialogIDSearch"));
 
-									auto _inputFieldField = il2cpp_class_get_field_from_name_wrap(idSearch->klass, "_inputField");
+									auto _inputFieldField = il2cpp_class_get_field_from_name(idSearch->klass, "_inputField");
 									Il2CppObject* _inputField;
 									il2cpp_field_get_value(idSearch, _inputFieldField, &_inputField);
 
@@ -11328,7 +11328,7 @@ namespace
 
 							il2cpp_runtime_invoke_type<void>(il2cpp_class_get_method_from_name(onValueChanged->klass, "AddListener", 1), onValueChanged, params, &exception);
 
-							auto _myIdTextField = il2cpp_class_get_field_from_name_wrap(idSearch->klass, "_myIdText");
+							auto _myIdTextField = il2cpp_class_get_field_from_name(idSearch->klass, "_myIdText");
 							Il2CppObject* _myIdText;
 							il2cpp_field_get_value(idSearch, _myIdTextField, &_myIdText);
 
@@ -11381,7 +11381,7 @@ namespace
 
 				auto newFn = *[](Il2CppObject* _this)
 					{
-						auto storyIdField = il2cpp_class_get_field_from_name_wrap(voiceButtonTarget->klass, "storyId");
+						auto storyIdField = il2cpp_class_get_field_from_name(voiceButtonTarget->klass, "storyId");
 						int storyId;
 						il2cpp_field_get_value(voiceButtonTarget, storyIdField, &storyId);
 
@@ -11400,7 +11400,7 @@ namespace
 
 						auto onLeft = CreateDelegateStatic(*[](void*)
 							{
-								auto storyIdField = il2cpp_class_get_field_from_name_wrap(voiceButtonTarget->klass, "storyId");
+								auto storyIdField = il2cpp_class_get_field_from_name(voiceButtonTarget->klass, "storyId");
 								int storyId;
 								il2cpp_field_get_value(voiceButtonTarget, storyIdField, &storyId);
 
@@ -11421,7 +11421,7 @@ namespace
 										1)->methodPointer(masterBannerData,
 											7);
 
-								FieldInfo* itemsField = il2cpp_class_get_field_from_name_wrap(
+								FieldInfo* itemsField = il2cpp_class_get_field_from_name(
 									bannerList->klass, "_items");
 								Il2CppArraySize* arr;
 								il2cpp_field_get_value(bannerList, itemsField,
@@ -11434,12 +11434,12 @@ namespace
 									auto item = reinterpret_cast<Il2CppObject*>(arr->vector[i]);
 									if (item)
 									{
-										auto typeField = il2cpp_class_get_field_from_name_wrap(
+										auto typeField = il2cpp_class_get_field_from_name(
 											item->klass, "Type");
 										int type;
 										il2cpp_field_get_value(item, typeField,
 											&type);
-										auto conditionValueField = il2cpp_class_get_field_from_name_wrap(
+										auto conditionValueField = il2cpp_class_get_field_from_name(
 											item->klass, "ConditionValue");
 										int conditionValue;
 										il2cpp_field_get_value(item,
@@ -11448,7 +11448,7 @@ namespace
 										if (type == 7 &&
 											conditionValue == storyId)
 										{
-											auto transitionField = il2cpp_class_get_field_from_name_wrap(
+											auto transitionField = il2cpp_class_get_field_from_name(
 												item->klass, "Transition");
 											il2cpp_field_get_value(item,
 												transitionField,
@@ -11476,22 +11476,22 @@ namespace
 						{
 							auto onRight = CreateDelegateStatic(*[](void*)
 								{
-									auto storyIdField = il2cpp_class_get_field_from_name_wrap(voiceButtonTarget->klass, "storyId");
+									auto storyIdField = il2cpp_class_get_field_from_name(voiceButtonTarget->klass, "storyId");
 									int storyId;
 									il2cpp_field_get_value(voiceButtonTarget, storyIdField, &storyId);
 
-									auto cueSheetNameField = il2cpp_class_get_field_from_name_wrap(voiceButtonTarget->klass, "cueSheetName");
+									auto cueSheetNameField = il2cpp_class_get_field_from_name(voiceButtonTarget->klass, "cueSheetName");
 									Il2CppString* cueSheetName;
 									il2cpp_field_get_value(voiceButtonTarget, cueSheetNameField, &cueSheetName);
 
-									auto cueNameField = il2cpp_class_get_field_from_name_wrap(voiceButtonTarget->klass, "cueName");
+									auto cueNameField = il2cpp_class_get_field_from_name(voiceButtonTarget->klass, "cueName");
 									Il2CppString* cueName;
 									il2cpp_field_get_value(voiceButtonTarget, cueNameField, &cueName);
 
 									string optionKey = string("kakaoUmaAnnounceEvent").append(to_string(storyId));
 
 									auto KakaoManager = il2cpp_symbols::get_class("umamusume.dll", "", "KakaoManager");
-									auto managerInstanceField = il2cpp_class_get_field_from_name_wrap(KakaoManager, "instance");
+									auto managerInstanceField = il2cpp_class_get_field_from_name(KakaoManager, "instance");
 
 									Il2CppObject* manager;
 									il2cpp_field_static_get_value(managerInstanceField, &manager);
@@ -11564,14 +11564,14 @@ namespace
 	{
 		reinterpret_cast<decltype(PartsEpisodeList_SetupStoryExtraEpisodeList_hook)*>(PartsEpisodeList_SetupStoryExtraEpisodeList_orig)(_this, extraSubCategory, partDataList, partData, onClick);
 
-		auto partDataIdField = il2cpp_class_get_field_from_name_wrap(partData->klass, "<Id>k__BackingField");
+		auto partDataIdField = il2cpp_class_get_field_from_name(partData->klass, "<Id>k__BackingField");
 		il2cpp_field_get_value(partData, partDataIdField, &currentStoryId);
 
-		auto voiceButtonField = il2cpp_class_get_field_from_name_wrap(_this->klass, "_voiceButton");
+		auto voiceButtonField = il2cpp_class_get_field_from_name(_this->klass, "_voiceButton");
 		Il2CppObject* voiceButton;
 		il2cpp_field_get_value(_this, voiceButtonField, &voiceButton);
 
-		auto buttonField = il2cpp_class_get_field_from_name_wrap(voiceButton->klass, "_playVoiceButton");
+		auto buttonField = il2cpp_class_get_field_from_name(voiceButton->klass, "_playVoiceButton");
 		Il2CppObject* button;
 		il2cpp_field_get_value(voiceButton, buttonField, &button);
 
@@ -11606,7 +11606,7 @@ namespace
 									1)->methodPointer(masterBannerData,
 										7);
 
-							FieldInfo* itemsField = il2cpp_class_get_field_from_name_wrap(
+							FieldInfo* itemsField = il2cpp_class_get_field_from_name(
 								bannerList->klass, "_items");
 							Il2CppArraySize_t<Il2CppObject*>* arr;
 							il2cpp_field_get_value(bannerList, itemsField, &arr);
@@ -11618,12 +11618,12 @@ namespace
 								auto item = arr->vector[i];
 								if (item)
 								{
-									auto typeField = il2cpp_class_get_field_from_name_wrap(
+									auto typeField = il2cpp_class_get_field_from_name(
 										item->klass, "Type");
 									int type;
 									il2cpp_field_get_value(item, typeField,
 										&type);
-									auto conditionValueField = il2cpp_class_get_field_from_name_wrap(
+									auto conditionValueField = il2cpp_class_get_field_from_name(
 										item->klass, "ConditionValue");
 									int conditionValue;
 									il2cpp_field_get_value(item,
@@ -11632,7 +11632,7 @@ namespace
 									if (type == 7 &&
 										conditionValue == currentStoryId)
 									{
-										auto transitionField = il2cpp_class_get_field_from_name_wrap(
+										auto transitionField = il2cpp_class_get_field_from_name(
 											item->klass, "Transition");
 										il2cpp_field_get_value(item,
 											transitionField,
@@ -11668,7 +11668,7 @@ namespace
 	{
 		reinterpret_cast<decltype(DialogCircleItemDonate_Initialize_hook)*>(DialogCircleItemDonate_Initialize_orig)(
 			_this, dialog, itemRequestInfo);
-		auto donateCountField = il2cpp_class_get_field_from_name_wrap(_this->klass, "_donateCount");
+		auto donateCountField = il2cpp_class_get_field_from_name(_this->klass, "_donateCount");
 		il2cpp_field_set_value(_this, donateCountField,
 			GetInt32Instance(
 				il2cpp_class_get_method_from_name_type<int (*)(Il2CppObject*)>(
@@ -11920,7 +11920,7 @@ namespace
 			return nullptr;
 		}
 
-		auto _horseManagerField = il2cpp_class_get_field_from_name_wrap(instance->klass, "_horseManager");
+		auto _horseManagerField = il2cpp_class_get_field_from_name(instance->klass, "_horseManager");
 		Il2CppObject* _horseManager;
 		il2cpp_field_get_value(instance, _horseManagerField, &_horseManager);
 
@@ -11979,12 +11979,12 @@ namespace
 				float totalTime = il2cpp_class_get_method_from_name_type<float (*)(Il2CppObject*)>(director->klass, "get_LiveTotalTime", 0)->methodPointer(director);
 				string name;
 
-				auto titleField = il2cpp_class_get_field_from_name_wrap(director->klass, "TitleController");
+				auto titleField = il2cpp_class_get_field_from_name(director->klass, "TitleController");
 				Il2CppObject* title;
 				il2cpp_field_get_value(director, titleField, &title);
 				if (title)
 				{
-					auto textField = il2cpp_class_get_field_from_name_wrap(title->klass, "_titleText");
+					auto textField = il2cpp_class_get_field_from_name(title->klass, "_titleText");
 					Il2CppObject* text;
 					il2cpp_field_get_value(title, textField, &text);
 					if (text)
@@ -12026,7 +12026,7 @@ namespace
 
 					if (CommonHeaderTitle)
 					{
-						auto _cacheTextField = il2cpp_class_get_field_from_name_wrap(CommonHeaderTitle->klass, "_cacheText");
+						auto _cacheTextField = il2cpp_class_get_field_from_name(CommonHeaderTitle->klass, "_cacheText");
 						Il2CppString* _cacheText;
 						il2cpp_field_get_value(CommonHeaderTitle, _cacheTextField, &_cacheText);
 
@@ -12179,7 +12179,7 @@ namespace
 								{
 									auto data = get_TempSetListPlayingData->methodPointer(topUi);
 
-									auto IsPlayingField = il2cpp_class_get_field_from_name_wrap(data->klass, "IsPlaying");
+									auto IsPlayingField = il2cpp_class_get_field_from_name(data->klass, "IsPlaying");
 									bool IsPlaying;
 									il2cpp_field_get_value(data, IsPlayingField, &IsPlaying);
 
@@ -12189,7 +12189,7 @@ namespace
 									{
 										SystemMediaTransportControlsManager::instance.PlaybackStatus(winrt::Windows::Media::MediaPlaybackStatus::Playing);
 
-										auto SetListIndexField = il2cpp_class_get_field_from_name_wrap(data->klass, "SetListIndex");
+										auto SetListIndexField = il2cpp_class_get_field_from_name(data->klass, "SetListIndex");
 										int SetListIndex;
 										il2cpp_field_get_value(data, SetListIndexField, &SetListIndex);
 
@@ -12200,7 +12200,7 @@ namespace
 
 										auto musicData = il2cpp_class_get_method_from_name_type<Il2CppObject * (*)(Il2CppObject*)>(data->klass, "GetMasterSetListMusicData", 0)->methodPointer(data);
 
-										auto MusicIdField = il2cpp_class_get_field_from_name_wrap(musicData->klass, "MusicId");
+										auto MusicIdField = il2cpp_class_get_field_from_name(musicData->klass, "MusicId");
 										int MusicId;
 										il2cpp_field_get_value(musicData, MusicIdField, &MusicId);
 
@@ -12236,7 +12236,7 @@ namespace
 
 						if (controller && controller->klass->name == "LiveViewController"s)
 						{
-							auto _stateField = il2cpp_class_get_field_from_name_wrap(controller->klass, "_state");
+							auto _stateField = il2cpp_class_get_field_from_name(controller->klass, "_state");
 							Gallop::LiveViewController::LiveState state;
 							il2cpp_field_get_value(controller, _stateField, &state);
 
@@ -12376,14 +12376,14 @@ namespace
 	{
 		reinterpret_cast<decltype(LiveTempData_CreateLiveSettingScreenModeCached_hook)*>(LiveTempData_CreateLiveSettingScreenModeCached_orig)(self);
 
-		auto _screenModeDicField = il2cpp_class_get_field_from_name_wrap(self->klass, "_cachedLiveScreenModeDic");
+		auto _screenModeDicField = il2cpp_class_get_field_from_name(self->klass, "_cachedLiveScreenModeDic");
 		Il2CppObject* _screenModeDic;
 		il2cpp_field_get_value(self, _screenModeDicField, &_screenModeDic);
 
-		auto entriesField = il2cpp_class_get_field_from_name_wrap(_screenModeDic->klass, "_entries");
+		auto entriesField = il2cpp_class_get_field_from_name(_screenModeDic->klass, "_entries");
 		if (!entriesField)
 		{
-			entriesField = il2cpp_class_get_field_from_name_wrap(_screenModeDic->klass, "entries");
+			entriesField = il2cpp_class_get_field_from_name(_screenModeDic->klass, "entries");
 		}
 
 		Il2CppArraySize_t<System::Collections::Generic::Dictionary<int, int>::Entry>* entries;
@@ -12417,18 +12417,18 @@ namespace
 	{
 		reinterpret_cast<decltype(TempData_ctor_hook)*>(TempData_ctor_orig)(self);
 
-		auto LiveDataField = il2cpp_class_get_field_from_name_wrap(self->klass, "LiveData");
+		auto LiveDataField = il2cpp_class_get_field_from_name(self->klass, "LiveData");
 		Il2CppObject* LiveData;
 		il2cpp_field_get_value(self, LiveDataField, &LiveData);
 
-		auto _screenModeDicField = il2cpp_class_get_field_from_name_wrap(LiveData->klass, "_cachedLiveScreenModeDic");
+		auto _screenModeDicField = il2cpp_class_get_field_from_name(LiveData->klass, "_cachedLiveScreenModeDic");
 		Il2CppObject* _screenModeDic;
 		il2cpp_field_get_value(LiveData, _screenModeDicField, &_screenModeDic);
 
-		auto entriesField = il2cpp_class_get_field_from_name_wrap(_screenModeDic->klass, "_entries");
+		auto entriesField = il2cpp_class_get_field_from_name(_screenModeDic->klass, "_entries");
 		if (!entriesField)
 		{
-			entriesField = il2cpp_class_get_field_from_name_wrap(_screenModeDic->klass, "entries");
+			entriesField = il2cpp_class_get_field_from_name(_screenModeDic->klass, "entries");
 		}
 
 		Il2CppArraySize_t<System::Collections::Generic::Dictionary<int, int>::Entry>* entries;
@@ -12462,14 +12462,14 @@ namespace
 	{
 		reinterpret_cast<decltype(LiveTempData_ctor_hook)*>(LiveTempData_ctor_orig)(self);
 
-		auto _screenModeDicField = il2cpp_class_get_field_from_name_wrap(self->klass, "_cachedLiveScreenModeDic");
+		auto _screenModeDicField = il2cpp_class_get_field_from_name(self->klass, "_cachedLiveScreenModeDic");
 		Il2CppObject* _screenModeDic;
 		il2cpp_field_get_value(self, _screenModeDicField, &_screenModeDic);
 
-		auto entriesField = il2cpp_class_get_field_from_name_wrap(_screenModeDic->klass, "_entries");
+		auto entriesField = il2cpp_class_get_field_from_name(_screenModeDic->klass, "_entries");
 		if (!entriesField)
 		{
-			entriesField = il2cpp_class_get_field_from_name_wrap(_screenModeDic->klass, "entries");
+			entriesField = il2cpp_class_get_field_from_name(_screenModeDic->klass, "entries");
 		}
 
 		Il2CppArraySize_t<System::Collections::Generic::Dictionary<int, int>::Entry>* entries;
@@ -12531,7 +12531,7 @@ namespace
 
 		if (config::freeform_window && Gallop::Screen::IsLandscapeMode())
 		{
-			auto _menuButtonField = il2cpp_class_get_field_from_name_wrap(self->klass, "_menuButton");
+			auto _menuButtonField = il2cpp_class_get_field_from_name(self->klass, "_menuButton");
 			Il2CppObject* _menuButton;
 			il2cpp_field_get_value(self, _menuButtonField, &_menuButton);
 
@@ -12598,7 +12598,7 @@ namespace
 
 		if (config::freeform_window && Gallop::Screen::IsLandscapeMode())
 		{
-			auto _logButtonField = il2cpp_class_get_field_from_name_wrap(self->klass, "_logButton");
+			auto _logButtonField = il2cpp_class_get_field_from_name(self->klass, "_logButton");
 			Il2CppObject* _logButton;
 			il2cpp_field_get_value(self, _logButtonField, &_logButton);
 
@@ -12619,7 +12619,7 @@ namespace
 
 		if (config::freeform_window && Gallop::Screen::IsLandscapeMode())
 		{
-			auto _infoButtonField = il2cpp_class_get_field_from_name_wrap(self->klass, "_infoButton");
+			auto _infoButtonField = il2cpp_class_get_field_from_name(self->klass, "_infoButton");
 			Il2CppObject* _infoButton;
 			il2cpp_field_get_value(self, _infoButtonField, &_infoButton);
 
@@ -12640,7 +12640,7 @@ namespace
 
 		if (config::freeform_window && Gallop::Screen::IsLandscapeMode())
 		{
-			auto _infoButtonField = il2cpp_class_get_field_from_name_wrap(self->klass, "_infoButton");
+			auto _infoButtonField = il2cpp_class_get_field_from_name(self->klass, "_infoButton");
 			Il2CppObject* _infoButton;
 			il2cpp_field_get_value(self, _infoButtonField, &_infoButton);
 
@@ -12888,7 +12888,7 @@ namespace
 		if (Game::CurrentGameRegion == Game::Region::KOR)
 		{
 			auto binData = il2cpp_symbols::get_class("uncheatercsd.dll", "Uncheater", "SystemBins64");
-			auto binArrayField = il2cpp_class_get_field_from_name_wrap(binData->klass, "UNCHEATER_DATA");
+			auto binArrayField = il2cpp_class_get_field_from_name(binData->klass, "UNCHEATER_DATA");
 			auto array = il2cpp_array_new(il2cpp_symbols::get_class("mscorlib.dll", "System", "Object"), 128);
 
 			auto byteArray = il2cpp_array_new(il2cpp_symbols::get_class("mscorlib.dll", "System", "Byte"), 0);
@@ -13472,13 +13472,13 @@ namespace
 
 			auto GallopScreen = il2cpp_symbols::get_class("umamusume.dll", "Gallop", "Screen");
 
-			auto NUMBER1920_Field = il2cpp_class_get_field_from_name_wrap(GallopScreen, "NUMBER1920");
+			auto NUMBER1920_Field = il2cpp_class_get_field_from_name(GallopScreen, "NUMBER1920");
 
-			auto NUMBER1080_Field = il2cpp_class_get_field_from_name_wrap(GallopScreen, "NUMBER1080");
+			auto NUMBER1080_Field = il2cpp_class_get_field_from_name(GallopScreen, "NUMBER1080");
 
-			auto _originalScreenWidth_Field = il2cpp_class_get_field_from_name_wrap(GallopScreen, "_originalScreenWidth");
+			auto _originalScreenWidth_Field = il2cpp_class_get_field_from_name(GallopScreen, "_originalScreenWidth");
 
-			auto _originalScreenHeight_Field = il2cpp_class_get_field_from_name_wrap(GallopScreen, "_originalScreenHeight");
+			auto _originalScreenHeight_Field = il2cpp_class_get_field_from_name(GallopScreen, "_originalScreenHeight");
 
 			if (width < height)
 			{
@@ -13572,11 +13572,11 @@ namespace
 		notification = helper->obj;
 		delete helper;
 
-		auto canvasGroupField = il2cpp_class_get_field_from_name_wrap(notification->klass, "canvasGroup");
+		auto canvasGroupField = il2cpp_class_get_field_from_name(notification->klass, "canvasGroup");
 		Il2CppObject* canvasGroup;
 		il2cpp_field_get_value(notification, canvasGroupField, &canvasGroup);
 
-		auto _LabelField = il2cpp_class_get_field_from_name_wrap(notification->klass, "_Label");
+		auto _LabelField = il2cpp_class_get_field_from_name(notification->klass, "_Label");
 		Il2CppObject* _Label;
 		il2cpp_field_get_value(notification, _LabelField, &_Label);
 
@@ -13800,13 +13800,13 @@ namespace
 
 			auto GallopScreen = il2cpp_symbols::get_class("umamusume.dll", "Gallop", "Screen");
 
-			auto NUMBER1920_Field = il2cpp_class_get_field_from_name_wrap(GallopScreen, "NUMBER1920");
+			auto NUMBER1920_Field = il2cpp_class_get_field_from_name(GallopScreen, "NUMBER1920");
 
-			auto NUMBER1080_Field = il2cpp_class_get_field_from_name_wrap(GallopScreen, "NUMBER1080");
+			auto NUMBER1080_Field = il2cpp_class_get_field_from_name(GallopScreen, "NUMBER1080");
 
-			auto _originalScreenWidth_Field = il2cpp_class_get_field_from_name_wrap(GallopScreen, "_originalScreenWidth");
+			auto _originalScreenWidth_Field = il2cpp_class_get_field_from_name(GallopScreen, "_originalScreenWidth");
 
-			auto _originalScreenHeight_Field = il2cpp_class_get_field_from_name_wrap(GallopScreen, "_originalScreenHeight");
+			auto _originalScreenHeight_Field = il2cpp_class_get_field_from_name(GallopScreen, "_originalScreenHeight");
 
 			bool isPortrait = last_display_width < last_display_height;
 
@@ -13926,7 +13926,7 @@ namespace
 
 		auto sceneManagerClass = il2cpp_symbols::get_class("UnityEngine.CoreModule.dll", "UnityEngine.SceneManagement", "SceneManager");
 
-		auto activeSceneChangedField = il2cpp_class_get_field_from_name_wrap(sceneManagerClass, "activeSceneChanged");
+		auto activeSceneChangedField = il2cpp_class_get_field_from_name(sceneManagerClass, "activeSceneChanged");
 
 		auto action = CreateDelegateWithClassStatic(il2cpp_class_from_type(activeSceneChangedField->type), *([](void*, UnityEngine::SceneManagement::Scene scene, UnityEngine::SceneManagement::Scene scene1)
 			{
@@ -13960,11 +13960,11 @@ namespace
 
 					if (graphicSettings)
 					{
-						auto _resolutionScaleField = il2cpp_class_get_field_from_name_wrap(graphicSettings->klass, "_resolutionScale");
+						auto _resolutionScaleField = il2cpp_class_get_field_from_name(graphicSettings->klass, "_resolutionScale");
 
 						il2cpp_field_set_value(graphicSettings, _resolutionScaleField, &config::resolution_3d_scale);
 
-						auto _resolutionScale2DField = il2cpp_class_get_field_from_name_wrap(graphicSettings->klass, "_resolutionScale2D");
+						auto _resolutionScale2DField = il2cpp_class_get_field_from_name(graphicSettings->klass, "_resolutionScale2D");
 
 						il2cpp_field_set_value(graphicSettings, _resolutionScale2DField, &config::resolution_3d_scale);
 					}
@@ -14007,7 +14007,7 @@ namespace
 				if (CriWareInitializerList && CriWareInitializerList->max_length)
 				{
 					auto obj = CriWareInitializerList->vector[0];
-					auto useDecrypterField = il2cpp_class_get_field_from_name_wrap(obj->klass, "useDecrypter");
+					auto useDecrypterField = il2cpp_class_get_field_from_name(obj->klass, "useDecrypter");
 					bool useDecrypter;
 					il2cpp_field_get_value(obj, useDecrypterField, &useDecrypter);
 
@@ -14015,13 +14015,13 @@ namespace
 
 					if (useDecrypter)
 					{
-						auto decrypterConfigField = il2cpp_class_get_field_from_name_wrap(obj->klass, "DecrypterConfig");
+						auto decrypterConfigField = il2cpp_class_get_field_from_name(obj->klass, "DecrypterConfig");
 						Il2CppObject* decrypterConfig;
 						il2cpp_field_get_value(obj, decrypterConfigField, &decrypterConfig);
 
 						if (decrypterConfig)
 						{
-							auto keyField = il2cpp_class_get_field_from_name_wrap(decrypterConfig->klass, "key");
+							auto keyField = il2cpp_class_get_field_from_name(decrypterConfig->klass, "key");
 							Il2CppString* key;
 							il2cpp_field_get_value(decrypterConfig, keyField, &key);
 
@@ -14110,17 +14110,17 @@ namespace
 
 						if (uncheater)
 						{
-							auto flagField = il2cpp_class_get_field_from_name_wrap(uncheater->klass, "flag");
+							auto flagField = il2cpp_class_get_field_from_name(uncheater->klass, "flag");
 							bool flag = true;
 							il2cpp_field_set_value(uncheater, flagField, &flag);
 
-							auto systemField = il2cpp_class_get_field_from_name_wrap(uncheater->klass, "uncheater");
+							auto systemField = il2cpp_class_get_field_from_name(uncheater->klass, "uncheater");
 							Il2CppObject* system;
 							il2cpp_field_get_value(uncheater, systemField, &system);
 
 							if (system)
 							{
-								auto pUncSendCommandVa_Field = il2cpp_class_get_field_from_name_wrap(system->klass, "pUncSendCommandVa_");
+								auto pUncSendCommandVa_Field = il2cpp_class_get_field_from_name(system->klass, "pUncSendCommandVa_");
 								auto fn = CreateDelegateStatic(*[](void*, uint32_t cmd, va_list va)
 									{
 										cout << cmd << endl;
@@ -14203,26 +14203,26 @@ namespace
 						{
 							auto userChara = il2cpp_object_new(UserCharaClass);
 
-							auto chara_id_field = il2cpp_class_get_field_from_name_wrap(userChara->klass, "chara_id");
+							auto chara_id_field = il2cpp_class_get_field_from_name(userChara->klass, "chara_id");
 							int chara_id = chara["chara_id"].int32_value();
 							il2cpp_field_set_value(userChara, chara_id_field, &chara_id);
 
-							auto training_num_field = il2cpp_class_get_field_from_name_wrap(userChara->klass, "training_num");
+							auto training_num_field = il2cpp_class_get_field_from_name(userChara->klass, "training_num");
 							int training_num = chara["training_num"].int32_value();
 							il2cpp_field_set_value(userChara, training_num_field, &training_num);
 
-							auto love_point_field = il2cpp_class_get_field_from_name_wrap(userChara->klass, "love_point");
+							auto love_point_field = il2cpp_class_get_field_from_name(userChara->klass, "love_point");
 							int love_point = chara["love_point"].int32_value();
 							il2cpp_field_set_value(userChara, love_point_field, &love_point);
 
-							auto love_point_pool_field = il2cpp_class_get_field_from_name_wrap(userChara->klass, "love_point_pool");
+							auto love_point_pool_field = il2cpp_class_get_field_from_name(userChara->klass, "love_point_pool");
 							if (love_point_pool_field)
 							{
 								int love_point_pool = chara["love_point_pool"].int32_value();
 								il2cpp_field_set_value(userChara, love_point_pool_field, &love_point_pool);
 							}
 
-							auto fan_field = il2cpp_class_get_field_from_name_wrap(userChara->klass, "fan");
+							auto fan_field = il2cpp_class_get_field_from_name(userChara->klass, "fan");
 							uint64_t fan = chara["fan"].uint64_value();
 							il2cpp_field_set_value(userChara, fan_field, &fan);
 
@@ -14255,7 +14255,7 @@ namespace
 
 							auto charaInfoList = il2cpp_class_get_method_from_name_type<Il2CppObject * (*)(Il2CppObject*)>(loadSettings->klass, "get_CharacterInfoList", 0)->methodPointer(loadSettings);
 
-							FieldInfo* itemsField = il2cpp_class_get_field_from_name_wrap(charaInfoList->klass, "_items");
+							FieldInfo* itemsField = il2cpp_class_get_field_from_name(charaInfoList->klass, "_items");
 							Il2CppArraySize_t<Il2CppObject*>* charaInfoArr;
 							il2cpp_field_get_value(charaInfoList, itemsField, &charaInfoArr);
 
@@ -14343,13 +14343,13 @@ namespace
 										{
 											auto data = il2cpp_class_get_method_from_name_type<Il2CppObject * (*)(Il2CppObject*)>(topUi->klass, "get_TempSetListPlayingData", 0)->methodPointer(topUi);
 
-											auto SetListIdField = il2cpp_class_get_field_from_name_wrap(data->klass, "SetListId");
+											auto SetListIdField = il2cpp_class_get_field_from_name(data->klass, "SetListId");
 											int SetListId;
 											il2cpp_field_get_value(data, SetListIdField, &SetListId);
 
 											if (SetListId > 0)
 											{
-												auto _jukeboxBgmSelectorField = il2cpp_class_get_field_from_name_wrap(topUi->klass, "_jukeboxBgmSelector");
+												auto _jukeboxBgmSelectorField = il2cpp_class_get_field_from_name(topUi->klass, "_jukeboxBgmSelector");
 												Il2CppObject* _jukeboxBgmSelector;
 												il2cpp_field_get_value(topUi, _jukeboxBgmSelectorField, &_jukeboxBgmSelector);
 
@@ -14414,7 +14414,7 @@ namespace
 
 										auto data = il2cpp_class_get_method_from_name_type<Il2CppObject * (*)(Il2CppObject*)>(topUi->klass, "get_TempSetListPlayingData", 0)->methodPointer(topUi);
 
-										auto IsPlayingField = il2cpp_class_get_field_from_name_wrap(data->klass, "IsPlaying");
+										auto IsPlayingField = il2cpp_class_get_field_from_name(data->klass, "IsPlaying");
 										bool IsPlaying;
 										il2cpp_field_get_value(data, IsPlayingField, &IsPlaying);
 

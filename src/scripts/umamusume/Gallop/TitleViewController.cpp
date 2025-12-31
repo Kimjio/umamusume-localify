@@ -593,7 +593,7 @@ static Il2CppObject* TitleViewController_InitializeView_hook(Il2CppObject* self)
 	}
 
 	auto viewBase = il2cpp_class_get_method_from_name_type<Il2CppObject * (*)(Il2CppObject*)>(self->klass, "GetViewBase", 0)->methodPointer(self);
-	auto TitleLogoTransformField = il2cpp_class_get_field_from_name_wrap(viewBase->klass, "TitleLogoTransform");
+	auto TitleLogoTransformField = il2cpp_class_get_field_from_name(viewBase->klass, "TitleLogoTransform");
 	Il2CppObject* TitleLogoTransform;
 	il2cpp_field_get_value(viewBase, TitleLogoTransformField, &TitleLogoTransform);
 
