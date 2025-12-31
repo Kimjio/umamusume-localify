@@ -1372,8 +1372,10 @@ namespace
 			}
 		}
 
-		if (u16Name == u"TMP Settings"s && config::replace_to_custom_font && config::runtime::fontAssets)
+		if (config::replace_to_custom_font)
 		{
+			if (config::runtime::fontAssets && u16Name == u"TMP Settings"s)
+			{
 			auto object = reinterpret_cast<decltype(Resources_Load_hook)*>(Resources_Load_orig)(path, type);
 			auto fontAssetField = il2cpp_class_get_field_from_name(object->klass, "m_defaultFontAsset");
 			il2cpp_field_set_value(object, fontAssetField, GetCustomTMPFont());
@@ -1388,6 +1390,7 @@ namespace
 			{
 				return replacement;
 			}
+		}
 		}
 
 		return reinterpret_cast<decltype(Resources_Load_hook)*>(Resources_Load_orig)(path, type);
@@ -1470,7 +1473,7 @@ namespace
 	void an_text_set_material_to_textmesh_hook(Il2CppObject* _this)
 	{
 		reinterpret_cast<decltype(an_text_set_material_to_textmesh_hook)*>(an_text_set_material_to_textmesh_orig)(_this);
-		if (!(config::runtime::fontAssets && config::replace_to_custom_font)) return;
+		if (!(config::replace_to_custom_font && config::runtime::fontAssets)) return;
 
 		FieldInfo* mainField = il2cpp_class_get_field_from_name(_this->klass, "_mainTextMesh");
 		FieldInfo* mainRenderer = il2cpp_class_get_field_from_name(_this->klass, "_mainTextMeshRenderer");
@@ -6470,7 +6473,7 @@ namespace
 	void* load_zekken_composite_resource_orig = nullptr;
 	void load_zekken_composite_resource_hook(Il2CppObject* _this)
 	{
-		if (config::runtime::fontAssets && config::replace_to_custom_font)
+		if (config::replace_to_custom_font && config::runtime::fontAssets)
 		{
 			auto font = GetCustomFont();
 			if (font)

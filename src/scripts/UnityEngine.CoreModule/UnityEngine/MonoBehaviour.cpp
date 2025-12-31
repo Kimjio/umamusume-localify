@@ -13,6 +13,7 @@
 #include "scripts/umamusume/Gallop/StandaloneWindowResize.hpp"
 #include "scripts/umamusume/Gallop/DialogCommon.hpp"
 #include "scripts/umamusume/Gallop/DialogManager.hpp"
+#include "scripts/umamusume/Gallop/TextFontManager.hpp"
 
 #include "config/config.hpp"
 
@@ -49,7 +50,6 @@ static void LoadAssets()
 			assetbundlePath.insert(0, filesystem::current_path().u16string().append(u"/"));
 		}
 
-
 		if (filesystem::exists(assetbundlePath))
 		{
 			u16stringstream ss;
@@ -62,7 +62,7 @@ static void LoadAssets()
 					Sleep(100);
 
 					auto t = il2cpp_thread_attach(il2cpp_domain_get());
-					config::runtime::fontAssets = UnityEngine::AssetBundle::LoadFromFile(il2cpp_string_new_utf16(assetbundlePath.data(), assetbundlePath.length()));
+					config::runtime::fontAssets = Gallop::TextFontManager::GetReplacementFontAssetBundle(assetbundlePath);
 					il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*)>(text->klass, "FontTextureChanged", 0)->methodPointer(text);
 
 					if (!config::runtime::fontAssets)

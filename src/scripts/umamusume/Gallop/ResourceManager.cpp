@@ -43,7 +43,10 @@ static void InitAddress()
 
 static void HookMethods()
 {
-	ADD_HOOK(ResourceManager_Load, "Gallop.ResourceManager::Load at %p\n");
+	if (config::replace_to_custom_font)
+	{
+		ADD_HOOK(ResourceManager_Load, "Gallop.ResourceManager::Load at %p\n");
+	}
 }
 
 STATIC
