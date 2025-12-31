@@ -63,7 +63,7 @@ template<typename... Ts, typename = Il2CppReflectionType*>
 inline const MethodInfo* GetGenericMethod(const MethodInfo* baseMethodInfo, Ts... runtimeTypes)
 {
 	auto runtimeMethodInfo = il2cpp_method_get_object(baseMethodInfo, nullptr);
-	auto typeArray = reinterpret_cast<Il2CppArraySize*>(il2cpp_array_new(il2cpp_symbols::get_class("mscorlib.dll", "System", "Type"), sizeof...(runtimeTypes)));
+	auto typeArray = reinterpret_cast<Il2CppArraySize*>(il2cpp_array_new(il2cpp_defaults.systemtype_class, sizeof...(runtimeTypes)));
 
 	int i = 0;
 	for (const auto type : { runtimeTypes... })

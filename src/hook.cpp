@@ -217,8 +217,8 @@ namespace
 
 			if (!key.empty())
 			{
-			sqlite3_key(db, key.data(), key.size());
-			sqlite3_rekey(db, nullptr, 0);
+				sqlite3_key(db, key.data(), key.size());
+				sqlite3_rekey(db, nullptr, 0);
 			}
 
 			sqlite3_close(db);
@@ -1389,21 +1389,21 @@ namespace
 		{
 			if (config::runtime::fontAssets && u16Name == u"TMP Settings"s)
 			{
-			auto object = reinterpret_cast<decltype(Resources_Load_hook)*>(Resources_Load_orig)(path, type);
-			auto fontAssetField = il2cpp_class_get_field_from_name(object->klass, "m_defaultFontAsset");
-			il2cpp_field_set_value(object, fontAssetField, GetCustomTMPFont());
-			return object;
-		}
-
-		if (type == GetRuntimeType("UnityEngine.TextRenderingModule.dll", "UnityEngine", "Font") ||
-			u16Name.starts_with(u"Font"))
-		{
-			auto replacement = Gallop::TextFontManager::GetReplacementFontAsset(path);
-			if (replacement)
-			{
-				return replacement;
+				auto object = reinterpret_cast<decltype(Resources_Load_hook)*>(Resources_Load_orig)(path, type);
+				auto fontAssetField = il2cpp_class_get_field_from_name(object->klass, "m_defaultFontAsset");
+				il2cpp_field_set_value(object, fontAssetField, GetCustomTMPFont());
+				return object;
 			}
-		}
+
+			if (type == GetRuntimeType("UnityEngine.TextRenderingModule.dll", "UnityEngine", "Font") ||
+				u16Name.starts_with(u"Font"))
+			{
+				auto replacement = Gallop::TextFontManager::GetReplacementFontAsset(path);
+				if (replacement)
+				{
+					return replacement;
+				}
+			}
 		}
 
 		return reinterpret_cast<decltype(Resources_Load_hook)*>(Resources_Load_orig)(path, type);
@@ -3322,12 +3322,12 @@ namespace
 
 											float scale = 1.0f;
 
-										if (_contentWidth < _contentHeight)
-										{
+											if (_contentWidth < _contentHeight)
+											{
 												scale = min(config::freeform_ui_scale_portrait, max(1.0f, _contentHeight * config::runtime::ratioVertical) * config::freeform_ui_scale_portrait);
-										}
-										else
-										{
+											}
+											else
+											{
 												scale = min(config::freeform_ui_scale_landscape, max(1.0f, _contentWidth / config::runtime::ratioHorizontal) * config::freeform_ui_scale_landscape);
 											}
 
@@ -4972,7 +4972,7 @@ namespace
 
 	void StartCoroutinePlaySetList(Il2CppObject* dialogJukeboxRequestSong, Il2CppObject* JukeboxBgmSelector, Il2CppObject* itemInfoList)
 	{
-		auto ValueTuple3Class = GetGenericClass(GetRuntimeType("mscorlib.dll", "System", "ValueTuple`3"), GetRuntimeType("mscorlib.dll", "System", "Object"), GetRuntimeType("mscorlib.dll", "System", "Object"), GetRuntimeType("mscorlib.dll", "System", "Object"));
+		auto ValueTuple3Class = GetGenericClass(GetRuntimeType("mscorlib.dll", "System", "ValueTuple`3"), GetRuntimeType(il2cpp_defaults.object_class), GetRuntimeType(il2cpp_defaults.object_class), GetRuntimeType(il2cpp_defaults.object_class));
 		System::ValueTuple3<Il2CppObject*, Il2CppObject*, Il2CppObject*> tuple = { dialogJukeboxRequestSong, JukeboxBgmSelector, itemInfoList };
 
 		auto boxedTuple = il2cpp_value_box(ValueTuple3Class, &tuple);
@@ -5147,7 +5147,7 @@ namespace
 			setListId.Value(SetListId);
 		}
 
-		auto ValueTuple3Class = GetGenericClass(GetRuntimeType("mscorlib.dll", "System", "ValueTuple`3"), GetRuntimeType("mscorlib.dll", "System", "Object"), GetRuntimeType("mscorlib.dll", "System", "Object"), GetRuntimeType("mscorlib.dll", "System", "Object"));
+		auto ValueTuple3Class = GetGenericClass(GetRuntimeType("mscorlib.dll", "System", "ValueTuple`3"), GetRuntimeType(il2cpp_defaults.object_class), GetRuntimeType(il2cpp_defaults.object_class), GetRuntimeType(il2cpp_defaults.object_class));
 		System::ValueTuple3<Il2CppObject*, Il2CppObject*, Il2CppObject*> tuple = { dialogJukeboxRequestSong, JukeboxBgmSelector, itemInfoList };
 
 		auto boxedTuple = il2cpp_value_box(ValueTuple3Class, &tuple);
@@ -5367,7 +5367,7 @@ namespace
 				auto _dialogDataField = il2cpp_class_get_field_from_name(dialogJukeboxRequestSong->klass, "_dialogData");
 				il2cpp_field_set_value(dialogJukeboxRequestSong, _dialogDataField, data);
 
-				auto ValueTuple2Class = GetGenericClass(GetRuntimeType("mscorlib.dll", "System", "ValueTuple`2"), GetRuntimeType("mscorlib.dll", "System", "Object"), GetRuntimeType("mscorlib.dll", "System", "Object"));
+				auto ValueTuple2Class = GetGenericClass(GetRuntimeType("mscorlib.dll", "System", "ValueTuple`2"), GetRuntimeType(il2cpp_defaults.object_class), GetRuntimeType(il2cpp_defaults.object_class));
 				System::ValueTuple<Il2CppObject*, Il2CppObject*> tuple2 = { dialogJukeboxRequestSong, JukeboxBgmSelector };
 
 				auto boxed2 = il2cpp_value_box(ValueTuple2Class, &tuple2);
@@ -5526,7 +5526,7 @@ namespace
 
 				il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, Il2CppObject*, int)>(_songList->klass, "Create", 2)->methodPointer(_songList, itemInfoList, static_cast<int>(GetEnumValue(ParseEnum(GetRuntimeType("umamusume.dll", "Gallop", "ResourceManager/ResourceHash"), u"ViewHashBegin"))));
 
-				auto ValueTuple3Class = GetGenericClass(GetRuntimeType("mscorlib.dll", "System", "ValueTuple`3"), GetRuntimeType("mscorlib.dll", "System", "Object"), GetRuntimeType("mscorlib.dll", "System", "Object"), GetRuntimeType("mscorlib.dll", "System", "Object"));
+				auto ValueTuple3Class = GetGenericClass(GetRuntimeType("mscorlib.dll", "System", "ValueTuple`3"), GetRuntimeType(il2cpp_defaults.object_class), GetRuntimeType(il2cpp_defaults.object_class), GetRuntimeType(il2cpp_defaults.object_class));
 				System::ValueTuple3<Il2CppObject*, Il2CppObject*, Il2CppObject*> tuple = { dialogJukeboxRequestSong, JukeboxBgmSelector, itemInfoList };
 
 				auto boxed = il2cpp_value_box(ValueTuple3Class, &tuple);
@@ -10790,14 +10790,14 @@ namespace
 
 								int unityHeight = UnityEngine::Screen::height();
 
-							float scale = 1.0f;
+								float scale = 1.0f;
 
-							if (unityWidth < unityHeight)
-							{
+								if (unityWidth < unityHeight)
+								{
 									scale = min(config::freeform_ui_scale_portrait, max(1.0f, unityHeight * config::runtime::ratioVertical) * config::freeform_ui_scale_portrait);
-							}
-							else
-							{
+								}
+								else
+								{
 									scale = min(config::freeform_ui_scale_landscape, max(1.0f, unityWidth / config::runtime::ratioHorizontal) * config::freeform_ui_scale_landscape);
 								}
 
@@ -11447,7 +11447,7 @@ namespace
 									}
 								};
 
-							auto delegateClass = GetGenericClass(GetRuntimeType("UnityEngine.CoreModule.dll", "UnityEngine.Events", "UnityAction`1"), GetRuntimeType("mscorlib.dll", "System", "String"));
+							auto delegateClass = GetGenericClass(GetRuntimeType("UnityEngine.CoreModule.dll", "UnityEngine.Events", "UnityAction`1"), GetRuntimeType(il2cpp_defaults.string_class));
 
 							void** params = new void* [1];
 							params[0] = CreateDelegateWithClass(delegateClass, _inputField, valueChangeFn);
@@ -11784,7 +11784,7 @@ namespace
 									"DialogAnnounceEvent", "Open", 3)(announceId, action, action);
 						});
 					il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, Il2CppDelegate*)>(button->klass, "SetOnClick", 1)->methodPointer(button,
-						&CreateUnityAction(il2cpp_value_box(il2cpp_symbols::get_class("mscorlib.dll", "System", "Int32"), &currentStoryId), newFn)->delegate);
+						&CreateUnityAction(il2cpp_value_box(il2cpp_defaults.int32_class, &currentStoryId), newFn)->delegate);
 				}
 			}
 		}
@@ -13017,9 +13017,9 @@ namespace
 		{
 			auto binData = il2cpp_symbols::get_class("uncheatercsd.dll", "Uncheater", "SystemBins64");
 			auto binArrayField = il2cpp_class_get_field_from_name(binData->klass, "UNCHEATER_DATA");
-			auto array = il2cpp_array_new(il2cpp_symbols::get_class("mscorlib.dll", "System", "Object"), 128);
+			auto array = il2cpp_array_new(il2cpp_defaults.object_class, 128);
 
-			auto byteArray = il2cpp_array_new(il2cpp_symbols::get_class("mscorlib.dll", "System", "Byte"), 0);
+			auto byteArray = il2cpp_array_new(il2cpp_defaults.byte_class, 0);
 
 			il2cpp_array_setref(array, 8, byteArray);
 			il2cpp_array_setref(array, 9, byteArray);
@@ -14372,8 +14372,8 @@ namespace
 
 						if (resourceId == 0)
 						{
-							auto charaNameArray = il2cpp_array_new_type<Il2CppString*>(il2cpp_symbols::get_class("mscorlib.dll", "System", "String"), 9);
-							auto trainerNameArray = il2cpp_array_new_type<Il2CppString*>(il2cpp_symbols::get_class("mscorlib.dll", "System", "String"), 9);
+							auto charaNameArray = il2cpp_array_new_type<Il2CppString*>(il2cpp_defaults.string_class, 9);
+							auto trainerNameArray = il2cpp_array_new_type<Il2CppString*>(il2cpp_defaults.string_class, 9);
 
 							il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, Il2CppArraySize_t<Il2CppString*>*)>(raceInfo->klass, "set_CharacterNameArray", 1)->methodPointer(raceInfo, charaNameArray);
 							il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, Il2CppArraySize_t<Il2CppString*>*)>(raceInfo->klass, "set_TrainerNameArray", 1)->methodPointer(raceInfo, trainerNameArray);
