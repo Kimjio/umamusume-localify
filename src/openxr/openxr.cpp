@@ -348,7 +348,7 @@ namespace Unity
 		}
 
 		auto productName = UnityEngine::Application::productName()->chars;
-		SetDllDirectoryW(u16_wide(productName + u"_Data\\Plugins\\x86_64\\"s).data());
+		SetDllDirectoryW((productName + il2cppstring(IL2CPP_STRING("_Data\\Plugins\\x86_64\\"))).data());
 		module = LoadLibraryW(L"UnityOpenXR.dll");
 		SetDllDirectoryW(nullptr);
 
@@ -441,13 +441,13 @@ namespace Unity
 			return;
 		}
 
-		auto productName = u16_u8(il2cpp_resolve_icall_type<Il2CppString * (*)()>("UnityEngine.Application::get_productName")()->chars);
+		auto productName = il2cpp_u8(il2cpp_resolve_icall_type<Il2CppString * (*)()>("UnityEngine.Application::get_productName")()->chars);
 
-		auto version = u16_u8(il2cpp_symbols::get_method_pointer<Il2CppString * (*)()>(
+		auto version = il2cpp_u8(il2cpp_symbols::get_method_pointer<Il2CppString * (*)()>(
 			"UnityEngine.CoreModule.dll", "UnityEngine",
 			"Application", "get_version", IgnoreNumberOfArguments)()->chars);
 
-		auto unityVersion = u16_u8(il2cpp_symbols::get_method_pointer<Il2CppString * (*)()>(
+		auto unityVersion = il2cpp_u8(il2cpp_symbols::get_method_pointer<Il2CppString * (*)()>(
 			"UnityEngine.CoreModule.dll", "UnityEngine",
 			"Application", "get_unityVersion", IgnoreNumberOfArguments)()->chars);
 
@@ -515,14 +515,14 @@ namespace Unity
 
 					auto subsystem = il2cpp_symbols::get_method_pointer<Il2CppObject * (*)(void*)>("UnityEngine.SubsystemsModule.dll", "UnityEngine", "SubsystemManager", "GetIntegratedSubsystemByPtr", 1)(ptr);
 
-					wcout << u16_wide(id->chars) << endl;
+					wcout << id->chars << endl;
 
-					if (u16string(id->chars).find(u"Display") != u16string::npos)
+					if (il2cppstring(id->chars).find(IL2CPP_STRING("Display")) != il2cppstring::npos)
 					{
 						xrDisplaySubsystem = subsystem;
 					}
 
-					if (u16string(id->chars).find(u"Input") != u16string::npos)
+					if (il2cppstring(id->chars).find(IL2CPP_STRING("Input")) != il2cppstring::npos)
 					{
 						xrInputSubsystem = subsystem;
 					}

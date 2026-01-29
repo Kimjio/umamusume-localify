@@ -62,16 +62,16 @@ static void GetComponentFastPath_hook(Il2CppObject* self, Il2CppObject* runtimeT
 
 			if (_flashPrefabPath)
 			{
-				u16stringstream pathStream(_flashPrefabPath->chars);
-				u16string segment;
-				vector<u16string> splited;
-				while (getline(pathStream, segment, u'/'))
+				il2cppstringstream pathStream(_flashPrefabPath->chars);
+				il2cppstring segment;
+				vector<il2cppstring> splited;
+				while (getline(pathStream, segment, IL2CPP_STRING('/')))
 				{
 					splited.emplace_back(segment);
 				}
 
 				auto& fileName = splited.back();
-				if (find_if(config::runtime::replaceAssetNames.begin(), config::runtime::replaceAssetNames.end(), [fileName](const u16string& item)
+				if (find_if(config::runtime::replaceAssetNames.begin(), config::runtime::replaceAssetNames.end(), [fileName](const il2cppstring& item)
 					{
 						return item.find(fileName) != wstring::npos;
 					}) != config::runtime::replaceAssetNames.end())

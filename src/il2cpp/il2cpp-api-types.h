@@ -3,6 +3,10 @@
 #include <stdint.h>
 #include <stddef.h>
 
+#include <string>
+#include <sstream>
+#include <iostream>
+
 #if !defined(__cplusplus)
 #define bool uint8_t
 #endif // !__cplusplus
@@ -155,14 +159,29 @@ typedef struct
 #endif
 #endif
 
-//#if _MSC_VER
-//typedef wchar_t Il2CppChar;
-// #elif
-#if __has_feature(cxx_unicode_literals)
+#if _MSC_VER
+typedef wchar_t Il2CppChar;
+#elif  __has_feature(cxx_unicode_literals)
 typedef char16_t Il2CppChar;
 #else
 typedef uint16_t Il2CppChar;
 #endif
+
+#if _MSC_VER
+#define IL2CPP_STRING(str) L##str
+#define IL2CPP_BASIC_STRING wstring
+#elif  __has_feature(cxx_unicode_literals)
+#define IL2CPP_STRING(str) u##str
+#define IL2CPP_BASIC_STRING u16string
+#else
+#define IL2CPP_STRING(str) str
+#define IL2CPP_BASIC_STRING string
+#endif
+
+using il2cppstring = std::basic_string<Il2CppChar, std::char_traits<Il2CppChar>, std::allocator<Il2CppChar>>;
+using il2cppstringstream = std::basic_stringstream<Il2CppChar, std::char_traits<Il2CppChar>, std::allocator<Il2CppChar>>;
+using il2cppistream = std::basic_istream<Il2CppChar, std::char_traits<Il2CppChar>>;
+using il2cppifstream = std::basic_ifstream<Il2CppChar, std::char_traits<Il2CppChar>>;
 
 #if _MSC_VER
 typedef wchar_t Il2CppNativeChar;

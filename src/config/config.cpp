@@ -26,28 +26,29 @@ namespace config
 	float resolution_3d_scale = 1.0f;
 	bool replace_to_builtin_font = false;
 	bool replace_to_custom_font = false;
-	u16string font_assetbundle_path;
-	u16string font_asset_name;
-	u16string tmpro_font_asset_name;
-	unordered_map<u16string, ReplaceFontAsset> font_asset_by_path;
+	il2cppstring font_assetbundle_path;
+	il2cppstring font_asset_name;
+	il2cppstring tmpro_font_asset_name;
+	unordered_map<il2cppstring, ReplaceFontAsset> font_asset_by_path;
 	bool auto_fullscreen = true;
 	int graphics_quality = -1;
 	int anti_aliasing = -1;
 	int anisotropic_filtering = -1;
 	int vsync_count = -1;
 	bool ui_loading_show_orientation_guide = true;
-	u16string custom_title_name;
-	unordered_map<u16string, ReplaceAsset> replace_assets;
-	u16string replace_assetbundle_file_path;
-	u16string replace_atlas_assetbundle_file_path;
-	vector<u16string> replace_assetbundle_file_paths;
-	u16string replace_text_db_path;
+	il2cppstring custom_title_name;
+	unordered_map<il2cppstring, ReplaceAsset> replace_assets;
+	il2cppstring replace_assetbundle_file_path;
+	il2cppstring replace_atlas_assetbundle_file_path;
+	vector<il2cppstring> replace_assetbundle_file_paths;
+	il2cppstring replace_text_db_path;
+	il2cppstring replace_timeline_path;
 	bool character_system_text_caption = false;
 	int character_system_text_caption_line_char_count = 26;
 	int character_system_text_caption_font_size = 50;
-	u16string character_system_text_caption_font_color = u"White";
-	u16string character_system_text_caption_outline_size = u"u";
-	u16string character_system_text_caption_outline_color = u"Brown";
+	il2cppstring character_system_text_caption_font_color = IL2CPP_STRING("White");
+	il2cppstring character_system_text_caption_outline_size = IL2CPP_STRING("u");
+	il2cppstring character_system_text_caption_outline_color = IL2CPP_STRING("Brown");
 	float character_system_text_caption_background_alpha = 0;
 	float character_system_text_caption_position_x = 0;
 	float character_system_text_caption_position_y = -3;
@@ -75,14 +76,14 @@ namespace config
 	bool notification_jobs = false;
 	bool msgpack_notifier = false;
 	bool msgpack_notifier_request = false;
-	u16string msgpack_notifier_host = u"http://localhost:4693";
+	il2cppstring msgpack_notifier_host = IL2CPP_STRING("http://localhost:4693");
 	int msgpack_notifier_connection_timeout_ms = 1000;
 	bool msgpack_notifier_print_error = false;
 	bool use_third_party_news = false;
 	bool taskbar_show_progress_on_download = true;
 	bool taskbar_show_progress_on_connecting = true;
 
-	u16string text_id_dict;
+	il2cppstring text_id_dict;
 
 	rapidjson::Document code_map;
 	rapidjson::Document fn_map;
@@ -90,17 +91,17 @@ namespace config
 	rapidjson::Document faq_index;
 	rapidjson::Document glossary_index;
 
-	u16string web_icon_sprite_path;
-	u16string web_icon_sprite_version;
-	u16string web_font_path;
+	il2cppstring web_icon_sprite_path;
+	il2cppstring web_icon_sprite_version;
+	il2cppstring web_font_path;
 
-	u16string persistent_data_path;
+	il2cppstring persistent_data_path;
 
 	bool has_json_parse_error = false;
-	u16string json_parse_error_msg;
+	il2cppstring json_parse_error_msg;
 
-	vector<u16string> external_dlls_path;
-	vector<u16string> dicts;
+	vector<il2cppstring> external_dlls_path;
+	vector<il2cppstring> dicts;
 
 	U16Document config_document;
 	U16Document backup_document;
@@ -114,12 +115,12 @@ namespace config
 		Il2CppObject* fontAssets = nullptr;
 		Il2CppObject* replaceAtlas = nullptr;
 		vector<Il2CppObject*> replaceAssets;
-		vector<u16string> replaceAssetNames;
+		vector<il2cppstring> replaceAssetNames;
 	}
 
 	void read_config_init()
 	{
-		u16ifstream config_stream{ "config.json" };
+		il2cppifstream config_stream{ "config.json" };
 		config_stream.imbue(locale(".UTF-8"));
 
 		if (!config_stream.is_open())
@@ -136,9 +137,9 @@ namespace config
 		if (!document.HasParseError())
 		{
 #define GetValue(_name_, _type_, _value_, ...)\
-if (document.HasMember(u##_name_) && document[u##_name_].Is##_type_())\
+if (document.HasMember(IL2CPP_STRING(_name_)) && document[IL2CPP_STRING(_name_)].Is##_type_())\
 {\
-	_value_ = document[u##_name_].Get##_type_();\
+	_value_ = document[IL2CPP_STRING(_name_)].Get##_type_();\
 	__VA_ARGS__\
 }
 
@@ -218,11 +219,11 @@ if (document.HasMember(u##_name_) && document[u##_name_].Is##_type_())\
 						auto fontName = it->name.GetString();
 						auto innerObject = it->value.GetObj();
 
-						u16string name = innerObject[u"assetName"].GetString();
-						u16string value = innerObject[u"assetBundlePath"].GetString();
+						il2cppstring name = innerObject[IL2CPP_STRING("assetName")].GetString();
+						il2cppstring value = innerObject[IL2CPP_STRING("assetBundlePath")].GetString();
 						if (filesystem::path(value.data()).is_relative())
 						{
-							value.insert(0, filesystem::current_path().u16string().append(u"/"));
+							value.insert(0, filesystem::current_path().IL2CPP_BASIC_STRING().append(IL2CPP_STRING("/")));
 						}
 						if (filesystem::exists(value) && filesystem::is_regular_file(value))
 						{
@@ -268,11 +269,11 @@ if (document.HasMember(u##_name_) && document[u##_name_].Is##_type_())\
 				{
 					if (it->IsString())
 					{
-						u16string value = it->GetString();
+						il2cppstring value = it->GetString();
 
 						if (filesystem::path(value.data()).is_relative())
 						{
-							value.insert(0, filesystem::current_path().u16string().append(u"/"));
+							value.insert(0, filesystem::current_path().IL2CPP_BASIC_STRING().append(IL2CPP_STRING("/")));
 						}
 						if (filesystem::exists(value) && filesystem::is_directory(value))
 						{
@@ -280,7 +281,7 @@ if (document.HasMember(u##_name_) && document[u##_name_].Is##_type_())\
 							{
 								if (file.is_regular_file())
 								{
-									replace_assets.emplace(file.path().filename().u16string(), ReplaceAsset{ file.path().u16string(), nullptr });
+									replace_assets.emplace(file.path().filename().IL2CPP_BASIC_STRING(), ReplaceAsset{ file.path().IL2CPP_BASIC_STRING(), nullptr });
 								}
 							}
 						}
@@ -297,13 +298,15 @@ if (document.HasMember(u##_name_) && document[u##_name_].Is##_type_())\
 				{
 					if (it->IsString())
 					{
-						u16string value = it->GetString();
+						il2cppstring value = it->GetString();
 						replace_assetbundle_file_paths.emplace_back(value);
 					}
 				}
 					);
 
 			GetValue("replaceTextDBPath", String, replace_text_db_path);
+
+			GetValue("replaceTimelinePath", String, replace_timeline_path);
 
 			GetValue("characterSystemTextCaption", Bool, character_system_text_caption);
 
@@ -355,7 +358,7 @@ if (document.HasMember(u##_name_) && document[u##_name_].Is##_type_())\
 			GetValue("textIdDict", String, text_id_dict);
 
 			GetValue("codeMapPath", String, auto path,
-				ifstream code_map_stream{ u16_u8(path) };
+				ifstream code_map_stream{ il2cpp_u8(path) };
 
 			if (code_map_stream.is_open())
 			{
@@ -367,7 +370,7 @@ if (document.HasMember(u##_name_) && document[u##_name_].Is##_type_())\
 				);
 
 			GetValue("il2cppFnMapPath", String, auto path,
-				ifstream fn_map_stream{ u16_u8(path) };
+				ifstream fn_map_stream{ il2cpp_u8(path) };
 
 			if (fn_map_stream.is_open())
 			{
@@ -379,7 +382,7 @@ if (document.HasMember(u##_name_) && document[u##_name_].Is##_type_())\
 				);
 
 			GetValue("faqIndexPath", String, auto path,
-				ifstream faq_index_stream{ u16_u8(path) };
+				ifstream faq_index_stream{ il2cpp_u8(path) };
 
 			if (faq_index_stream.is_open())
 			{
@@ -391,7 +394,7 @@ if (document.HasMember(u##_name_) && document[u##_name_].Is##_type_())\
 				);
 
 			GetValue("glossaryIndexPath", String, auto path,
-				ifstream glossary_index_stream{ u16_u8(path) };
+				ifstream glossary_index_stream{ il2cpp_u8(path) };
 
 			if (glossary_index_stream.is_open())
 			{
@@ -471,15 +474,15 @@ if (document.HasMember(u##_name_) && document[u##_name_].Is##_type_())\
 		else
 		{
 			has_json_parse_error = true;
-			u16stringstream str_stream;
-			str_stream << "JSON parse error: " << GetParseError_En(document.GetParseError()) << " (" << wide_u16(to_wstring(document.GetErrorOffset())) << ")";
+			il2cppstringstream str_stream;
+			str_stream << "JSON parse error: " << GetParseError_En(document.GetParseError()) << " (" << to_wstring(document.GetErrorOffset()) << ")";
 			json_parse_error_msg = str_stream.str();
 		}
 	}
 
 	bool read_config()
 	{
-		u16ifstream config_stream{ "config.json" };
+		il2cppifstream config_stream{ "config.json" };
 		config_stream.imbue(locale(".UTF-8"));
 
 		if (!config_stream.is_open())
@@ -501,7 +504,7 @@ if (document.HasMember(u##_name_) && document[u##_name_].Is##_type_())\
 	{
 		rapidjson::StringBuffer buffer;
 		buffer.Clear();
-		rapidjson::PrettyWriter<rapidjson::StringBuffer, rapidjson::UTF16<char16_t>, rapidjson::UTF8<>> writer(buffer);
+		rapidjson::PrettyWriter<rapidjson::StringBuffer, rapidjson::UTF16<Il2CppChar>, rapidjson::UTF8<>> writer(buffer);
 		config_document.Accept(writer);
 
 		ofstream config_stream{ "config.json" };

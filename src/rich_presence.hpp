@@ -5,9 +5,9 @@
 #include "il2cpp/il2cpp_symbols.hpp"
 #include "string_utils.hpp"
 
-using namespace std;
+#include "scripts/ScriptInternal.hpp"
 
-extern uint64_t GetTextIdByName(const u16string& name);
+using namespace std;
 
 namespace
 {
@@ -15,7 +15,7 @@ namespace
 
 	string GetViewName(string viewId)
 	{
-		u16string textId;
+		il2cppstring textId;
 		if (viewId == "Splash")
 		{
 
@@ -59,7 +59,7 @@ namespace
 		if (viewId == "Home" ||
 			viewId == "HomeHub")
 		{
-			textId = u"Home0036";
+			textId = IL2CPP_STRING("Home0036");
 		}
 		if (viewId == "Live")
 		{
@@ -254,7 +254,7 @@ namespace
 			viewId == "CharacterNoteMain" ||
 			viewId == "CharacterNoteHub")
 		{
-			textId = u"Directory0001";
+			textId = IL2CPP_STRING("Directory0001");
 		}
 		if (viewId == "CharacterCardLimitBreakCut")
 		{
@@ -262,11 +262,11 @@ namespace
 		}
 		if (viewId == "TipsComic")
 		{
-			textId = u"Outgame0072";
+			textId = IL2CPP_STRING("Outgame0072");
 		}
 		if (viewId == "TipsChara")
 		{
-			textId = u"Outgame0093";
+			textId = IL2CPP_STRING("Outgame0093");
 		}
 		if (viewId == "ProfileTop")
 		{
@@ -302,14 +302,14 @@ namespace
 		}
 		if (viewId == "PhotoLibrary")
 		{
-			textId = u"Outgame213009";
+			textId = IL2CPP_STRING("Outgame213009");
 		}
 		if (viewId == "PhotoStudio" ||
 			viewId == "PhotoStudioPlayCut" ||
 			viewId == "PhotoStudioViewTop" ||
 			viewId == "PhotoStudioCharaViewer")
 		{
-			textId = u"Outgame352001";
+			textId = IL2CPP_STRING("Outgame352001");
 		}
 		if (viewId == "Mission")
 		{
@@ -666,7 +666,7 @@ namespace
 
 		if (!textId.empty())
 		{
-			return u16_u8(localizeextension_text_hook(GetTextIdByName(textId))->chars).append(" ");
+			return il2cpp_u8(localizeextension_text_hook(GetTextIdByName(textId))->chars).append(" ");
 		}
 
 		return "";
@@ -674,42 +674,42 @@ namespace
 
 	string GetSceneName(string sceneId)
 	{
-		u16string textId;
+		il2cppstring textId;
 		if (sceneId == "Title")
 		{
 
 		}
 		if (sceneId == "Home")
 		{
-			textId = u"Home0036";
+			textId = IL2CPP_STRING("Home0036");
 		}
 		if (sceneId == "Race")
 		{
-			textId = u"Outgame213036";
+			textId = IL2CPP_STRING("Outgame213036");
 		}
 		if (sceneId == "Live")
 		{
-			textId = u"Common0035";
+			textId = IL2CPP_STRING("Common0035");
 		}
 		if (sceneId == "LiveTheater")
 		{
-			textId = u"Home0037";
+			textId = IL2CPP_STRING("Home0037");
 		}
 		if (sceneId == "Story" || sceneId == "StoryMovie")
 		{
-			textId = u"Home0066";
+			textId = IL2CPP_STRING("Home0066");
 		}
 		if (sceneId == "Gacha")
 		{
-			textId = u"Gacha0004";
+			textId = IL2CPP_STRING("Gacha0004");
 		}
 		if (sceneId == "Episode")
 		{
-			textId = u"Home0036";
+			textId = IL2CPP_STRING("Home0036");
 		}
 		if (sceneId == "SingleMode")
 		{
-			textId = u"Common0273";
+			textId = IL2CPP_STRING("Common0273");
 		}
 		if (sceneId == "OutGame")
 		{
@@ -717,19 +717,19 @@ namespace
 		}
 		if (sceneId == "Circle")
 		{
-			textId = u"Circle0321";
+			textId = IL2CPP_STRING("Circle0321");
 		}
 		if (sceneId == "DailyRace")
 		{
-			textId = u"Race0043";
+			textId = IL2CPP_STRING("Race0043");
 		}
 		if (sceneId == "LegendRace")
 		{
-			textId = u"Race0072";
+			textId = IL2CPP_STRING("Race0072");
 		}
 		if (sceneId == "TeamStadium")
 		{
-			textId = u"Race0583";
+			textId = IL2CPP_STRING("Race0583");
 		}
 		if (sceneId == "CraneGame")
 		{
@@ -737,7 +737,7 @@ namespace
 		}
 		if (sceneId == "Champions" || sceneId == "ChampionsLobby")
 		{
-			textId = u"Champions0034";
+			textId = IL2CPP_STRING("Champions0034");
 		}
 		if (sceneId == "Tutorial")
 		{
@@ -745,27 +745,27 @@ namespace
 		}
 		if (sceneId == "StoryEvent")
 		{
-			textId = u"StoryEvent0018";
+			textId = IL2CPP_STRING("StoryEvent0018");
 		}
 		if (sceneId == "ChallengeMatch")
 		{
-			textId = u"ChallengeMatch408005";
+			textId = IL2CPP_STRING("ChallengeMatch408005");
 		}
 		if (sceneId == "RoomMatch")
 		{
-			textId = u"RoomMatch0001";
+			textId = IL2CPP_STRING("RoomMatch0001");
 		}
 		if (sceneId == "PracticeRace")
 		{
-			textId = u"PracticeRace400101";
+			textId = IL2CPP_STRING("PracticeRace400101");
 		}
 		if (sceneId == "TrainingChallenge")
 		{
-			textId = u"TrainingChallenge4180100";
+			textId = IL2CPP_STRING("TrainingChallenge4180100");
 		}
 		if (sceneId == "TeamBuilding")
 		{
-			textId = u"TeamBuilding408033";
+			textId = IL2CPP_STRING("TeamBuilding408033");
 		}
 		if (sceneId == "FanRaid")
 		{
@@ -777,11 +777,11 @@ namespace
 		}
 		if (sceneId == "CollectEventMap")
 		{
-			textId = u"CollectEvent508000";
+			textId = IL2CPP_STRING("CollectEvent508000");
 		}
 		if (sceneId == "CollectRaid")
 		{
-			textId = u"CollectEvent508000";
+			textId = IL2CPP_STRING("CollectEvent508000");
 		}
 		if (sceneId == "MapEvent")
 		{
@@ -798,7 +798,7 @@ namespace
 
 		if (!textId.empty())
 		{
-			return u16_u8(localizeextension_text_hook(GetTextIdByName(textId))->chars).append(" ");
+			return il2cpp_u8(localizeextension_text_hook(GetTextIdByName(textId))->chars).append(" ");
 		}
 
 		return sceneId;

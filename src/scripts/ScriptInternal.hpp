@@ -398,7 +398,7 @@ inline Il2CppReflectionType* GetRuntimeType(Il2CppClass* klass)
 	return reinterpret_cast<Il2CppReflectionType*>(il2cpp_type_get_object(il2cpp_class_get_type(klass)));
 }
 
-inline Il2CppObject* ParseEnum(Il2CppReflectionType* runtimeType, const u16string& name)
+inline Il2CppObject* ParseEnum(Il2CppReflectionType* runtimeType, const IL2CPP_BASIC_STRING& name)
 {
 	return il2cpp_symbols::get_method_pointer<Il2CppObject * (*)(Il2CppReflectionType*, Il2CppString*)>("mscorlib.dll", "System", "Enum", "Parse", 2)(runtimeType, il2cpp_string_new16(name.data()));
 }
@@ -474,16 +474,16 @@ inline Il2CppDelegate* GetButtonCommonOnClickDelegate(Il2CppObject* object)
 	return nullptr;
 }
 
-inline uint64_t GetTextIdByName(const u16string& name)
+inline uint64_t GetTextIdByName(const il2cppstring& name)
 {
 	return GetEnumValue(ParseEnum(GetRuntimeType("umamusume.dll", "Gallop", "TextId"), name));
 }
 
-inline u16string GetTextIdNameById(int id)
+inline il2cppstring GetTextIdNameById(int id)
 {
 	auto name = GetEnumName(GetRuntimeType("umamusume.dll", "Gallop", "TextId"), id);
 
-	return name ? name->chars : u"";
+	return name ? name->chars : IL2CPP_STRING("");
 }
 
 inline Il2CppObject* GetCurrentViewController()

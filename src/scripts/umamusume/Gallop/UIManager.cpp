@@ -140,10 +140,10 @@ static void ChangeResizeUIForPC_hook(Il2CppObject* self, int width, int height)
 
 			auto scaleMode = il2cpp_class_get_method_from_name_type<int (*)(Il2CppObject*)>(scaler->klass, "get_uiScaleMode", 0)->methodPointer(scaler);
 
-			if (UnityEngine::Object::Name(scaler)->chars == u"SystemCanvas"s ||
-				UnityEngine::Object::Name(scaler)->chars == u"GameCanvas"s ||
-				UnityEngine::Object::Name(scaler)->chars == u"BGCanvas"s ||
-				UnityEngine::Object::Name(scaler)->chars == u"NoImageEffectGameCanvas"s)
+			if (UnityEngine::Object::Name(scaler)->chars == il2cppstring(IL2CPP_STRING("SystemCanvas")) ||
+				UnityEngine::Object::Name(scaler)->chars == il2cppstring(IL2CPP_STRING("GameCanvas")) ||
+				UnityEngine::Object::Name(scaler)->chars == il2cppstring(IL2CPP_STRING("BGCanvas")) ||
+				UnityEngine::Object::Name(scaler)->chars == il2cppstring(IL2CPP_STRING("NoImageEffectGameCanvas")))
 			{
 				il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, int)>(scaler->klass, "set_uiScaleMode", 1)->methodPointer(scaler, 0);
 

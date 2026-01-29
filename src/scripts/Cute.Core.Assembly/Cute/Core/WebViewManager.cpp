@@ -62,7 +62,7 @@ namespace
 
 	RECT webViewBounds{};
 
-	wstring CurrentUrlString;
+	il2cppstring CurrentUrlString;
 }
 
 wil::com_ptr<ICoreWebView2> webview;
@@ -72,7 +72,7 @@ static void Cute_Core_WebViewManager_Awake_hook(Il2CppObject* self)
 	reinterpret_cast<decltype(Cute_Core_WebViewManager_Awake_hook)*>(Cute_Core_WebViewManager_Awake_orig)(self);
 	auto path = UnityEngine::Application::persistentDataPath()->chars;
 
-	u16string combinedPath = path + u"\\WebView2"s;
+	auto combinedPath = path + il2cppstring(IL2CPP_STRING("\\WebView2"));
 
 	auto envOptions = Make<CoreWebView2EnvironmentOptions>();
 
@@ -90,7 +90,7 @@ static void Cute_Core_WebViewManager_Awake_hook(Il2CppObject* self)
 
 	options4->SetCustomSchemeRegistrations(1, registrations);
 
-	CreateCoreWebView2EnvironmentWithOptions(nullptr, u16_wide(combinedPath).data(), envOptions.Get(),
+	CreateCoreWebView2EnvironmentWithOptions(nullptr, combinedPath.data(), envOptions.Get(),
 		Callback<ICoreWebView2CreateCoreWebView2EnvironmentCompletedHandler>(
 			[](HRESULT result, ICoreWebView2Environment* env) -> HRESULT
 			{
@@ -180,7 +180,7 @@ static void Cute_Core_WebViewManager_Awake_hook(Il2CppObject* self)
 											{
 												reinterpret_cast<void (*)(Il2CppObject*, Il2CppString*)>(
 													callback->method_ptr
-													)(callback->target, il2cpp_string_new16(wide_u16(wuri.substr(6)).data()));
+													)(callback->target, il2cpp_string_new16(wuri.substr(6).data()));
 											}
 										}
 
@@ -258,7 +258,7 @@ document.head.appendChild(style);
 
 								wil::unique_cotaskmem_string uri;
 								webview->get_Source(&uri);
-								if (!wide_u16(uri.get()).starts_with(serverUrl))
+								if (!il2cppstring(uri.get()).starts_with(serverUrl))
 								{
 									auto script1 = LR"(
 window.Unity = {
@@ -310,7 +310,7 @@ viewport.content = `width=device-width, initial-scale=${zoom}, user-scalable=no`
 										{
 											reinterpret_cast<void (*)(Il2CppObject*, Il2CppString*)>(
 												callback->method_ptr
-												)(callback->target, il2cpp_string_new16(wide_u16(wuri.substr(6)).data()));
+												)(callback->target, il2cpp_string_new16(wuri.substr(6).data()));
 										}
 										return E_INVALIDARG;
 									}
@@ -325,12 +325,12 @@ viewport.content = `width=device-width, initial-scale=${zoom}, user-scalable=no`
 									{
 										splited.emplace_back(segment);
 									}
-									u16string fileName = wide_u16(splited.back());
+									il2cppstring fileName = splited.back();
 
 									if (!config::web_font_path.empty() && filesystem::exists(config::web_font_path))
 									{
 										IStream* stream;
-										SHCreateStreamOnFileEx(u16_wide(config::web_font_path).data(), STGM_READ, FILE_ATTRIBUTE_NORMAL, FALSE, nullptr, &stream);
+										SHCreateStreamOnFileEx(config::web_font_path.data(), STGM_READ, FILE_ATTRIBUTE_NORMAL, FALSE, nullptr, &stream);
 
 										ICoreWebView2WebResourceResponse* response;
 										env->CreateWebResourceResponse(stream, 200, L"OK", L"Content-Type: font/otf", &response);
@@ -343,7 +343,7 @@ viewport.content = `width=device-width, initial-scale=${zoom}, user-scalable=no`
 									if (Cute::Core::WebViewManager::customFontMap.contains(fileName))
 									{
 										IStream* stream;
-										SHCreateStreamOnFileEx(u16_wide(Cute::Core::WebViewManager::customFontMap.at(fileName)).data(), STGM_READ, FILE_ATTRIBUTE_NORMAL, FALSE, nullptr, &stream);
+										SHCreateStreamOnFileEx(Cute::Core::WebViewManager::customFontMap.at(fileName).data(), STGM_READ, FILE_ATTRIBUTE_NORMAL, FALSE, nullptr, &stream);
 
 										ICoreWebView2WebResourceResponse* response;
 										env->CreateWebResourceResponse(stream, 200, L"OK", L"Content-Type: font/otf", &response);
@@ -355,7 +355,7 @@ viewport.content = `width=device-width, initial-scale=${zoom}, user-scalable=no`
 
 								if (resourceContext == COREWEBVIEW2_WEB_RESOURCE_CONTEXT_IMAGE)
 								{
-									if (wstring(uri.get()).find(L"v_sprites/icon/sprite.png") != u16string::npos)
+									if (wstring(uri.get()).find(L"v_sprites/icon/sprite.png") != il2cppstring::npos)
 									{
 										wstringstream pathStream(uri.get());
 										wstring segment;
@@ -370,13 +370,13 @@ viewport.content = `width=device-width, initial-scale=${zoom}, user-scalable=no`
 										if (!config::web_icon_sprite_path.empty() &&
 											filesystem::exists(config::web_icon_sprite_path))
 										{
-											if (!config::web_icon_sprite_version.empty() && version != u16_wide(config::web_icon_sprite_version))
+											if (!config::web_icon_sprite_version.empty() && version != config::web_icon_sprite_version)
 											{
 												return E_INVALIDARG;
 											}
 
 											IStream* stream;
-											SHCreateStreamOnFileEx(u16_wide(config::web_icon_sprite_path).data(), STGM_READ, FILE_ATTRIBUTE_NORMAL, FALSE, nullptr, &stream);
+											SHCreateStreamOnFileEx(config::web_icon_sprite_path.data(), STGM_READ, FILE_ATTRIBUTE_NORMAL, FALSE, nullptr, &stream);
 
 											ICoreWebView2WebResourceResponse* response;
 											env->CreateWebResourceResponse(stream, 200, L"OK", L"Content-Type: image/png", &response);
@@ -543,7 +543,7 @@ static void Cute_Core_WebViewManager_GoBack_hook(Il2CppObject* self)
 
 static void Cute_Core_WebViewManager_OpenWeb_hook(Il2CppObject* self, Il2CppString* url)
 {
-	CurrentUrlString = u16_wide(url->chars);
+	CurrentUrlString = url->chars;
 	if (webview)
 	{
 		webview->Navigate(CurrentUrlString.data());
@@ -643,7 +643,7 @@ namespace Cute
 	{
 		wil::com_ptr<ICoreWebView2Controller> WebViewManager::webviewController;
 
-		unordered_map<u16string, u16string> WebViewManager::customFontMap;
+		unordered_map<il2cppstring, il2cppstring> WebViewManager::customFontMap;
 
 		WebViewManager WebViewManager::Instance()
 		{

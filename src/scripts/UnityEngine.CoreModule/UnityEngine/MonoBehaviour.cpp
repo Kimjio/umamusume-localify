@@ -44,17 +44,17 @@ static void LoadAssets()
 #pragma region LOAD_ASSETBUNDLE
 	if (!config::runtime::fontAssets && !config::font_assetbundle_path.empty() && config::replace_to_custom_font && !font_asset_loaded)
 	{
-		u16string assetbundlePath = config::font_assetbundle_path;
+		il2cppstring assetbundlePath = config::font_assetbundle_path;
 		if (filesystem::path(assetbundlePath.data()).is_relative())
 		{
-			assetbundlePath.insert(0, filesystem::current_path().u16string().append(u"/"));
+			assetbundlePath.insert(0, filesystem::current_path().IL2CPP_BASIC_STRING().append(IL2CPP_STRING("/")));
 		}
 
 		if (filesystem::exists(assetbundlePath))
 		{
-			u16stringstream ss;
-			ss << u"Loading font asset: " << assetbundlePath << u"... ";
-			wcout << u16_wide(ss.str());
+			il2cppstringstream ss;
+			ss << IL2CPP_STRING("Loading font asset: ") << assetbundlePath << IL2CPP_STRING("... ");
+			wcout << ss.str();
 			il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, Il2CppString*)>(text->klass, "set_text", 1)->methodPointer(text, il2cpp_string_new16(ss.str().data()));
 
 			std::thread([text, assetbundlePath]()
@@ -97,17 +97,17 @@ static void LoadAssets()
 
 	if (!config::replace_assetbundle_file_path.empty() && !replace_assetbundle_file_path_loaded)
 	{
-		u16string assetbundlePath = config::replace_assetbundle_file_path;
+		il2cppstring assetbundlePath = config::replace_assetbundle_file_path;
 		if (filesystem::path(assetbundlePath.data()).is_relative())
 		{
-			assetbundlePath.insert(0, filesystem::current_path().u16string().append(u"/"));
+			assetbundlePath.insert(0, filesystem::current_path().IL2CPP_BASIC_STRING().append(IL2CPP_STRING("/")));
 		}
 
 		if (filesystem::exists(assetbundlePath))
 		{
-			u16stringstream ss;
-			ss << u"Loading replacement AssetBundle: " << assetbundlePath << u"... ";
-			wcout << u16_wide(ss.str());
+			il2cppstringstream ss;
+			ss << IL2CPP_STRING("Loading replacement AssetBundle: ") << assetbundlePath << IL2CPP_STRING("... ");
+			wcout << ss.str();
 			il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, Il2CppString*)>(text->klass, "set_text", 1)->methodPointer(text, il2cpp_string_new16(ss.str().data()));
 
 			std::thread([text, assetbundlePath]()
@@ -150,17 +150,17 @@ static void LoadAssets()
 
 	if (!config::replace_atlas_assetbundle_file_path.empty() && !replace_atlas_assetbundle_file_path_loaded)
 	{
-		u16string assetbundlePath = config::replace_atlas_assetbundle_file_path;
+		il2cppstring assetbundlePath = config::replace_atlas_assetbundle_file_path;
 		if (filesystem::path(assetbundlePath.data()).is_relative())
 		{
-			assetbundlePath.insert(0, filesystem::current_path().u16string().append(u"/"));
+			assetbundlePath.insert(0, filesystem::current_path().IL2CPP_BASIC_STRING().append(IL2CPP_STRING("/")));
 		}
 
 		if (filesystem::exists(assetbundlePath))
 		{
-			u16stringstream ss;
-			ss << u"Loading replacement atlas AssetBundle: " << assetbundlePath << u"... ";
-			wcout << u16_wide(ss.str());
+			il2cppstringstream ss;
+			ss << IL2CPP_STRING("Loading replacement atlas AssetBundle: ") << assetbundlePath << IL2CPP_STRING("... ");
+			wcout << ss.str();
 			il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, Il2CppString*)>(text->klass, "set_text", 1)->methodPointer(text, il2cpp_string_new16(ss.str().data()));
 
 			std::thread([text, assetbundlePath]()
@@ -206,17 +206,17 @@ static void LoadAssets()
 		static auto it = config::replace_assetbundle_file_paths.begin();
 		if (it != config::replace_assetbundle_file_paths.end())
 		{
-			u16string assetbundlePath = *it;
+			il2cppstring assetbundlePath = *it;
 			if (filesystem::path(assetbundlePath.data()).is_relative())
 			{
-				assetbundlePath.insert(0, filesystem::current_path().u16string().append(u"/"));
+				assetbundlePath.insert(0, filesystem::current_path().IL2CPP_BASIC_STRING().append(IL2CPP_STRING("/")));
 			}
 
 			if (filesystem::exists(assetbundlePath))
 			{
-				u16stringstream ss;
-				ss << u"Loading replacement AssetBundle: " << assetbundlePath << u"... ";
-				wcout << u16_wide(ss.str());
+				il2cppstringstream ss;
+				ss << IL2CPP_STRING("Loading replacement AssetBundle: ") << assetbundlePath << IL2CPP_STRING("... ");
+				wcout << ss.str();
 				il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, Il2CppString*)>(text->klass, "set_text", 1)->methodPointer(text, il2cpp_string_new16(ss.str().data()));
 
 				std::thread([text, assetbundlePath]()
@@ -323,8 +323,8 @@ static Il2CppObject* StartCoroutineManaged2_hook(Il2CppObject* self, Il2CppObjec
 						if (!config::runtime::allowStart)
 						{
 							dialogData.SetSimpleNoButtonMessage(
-								text(GetEnumValue(ParseEnum(GetRuntimeType("umamusume.dll", "Gallop", "TextId"), u"Common0071"))),
-								text(GetEnumValue(ParseEnum(GetRuntimeType("umamusume.dll", "Gallop", "TextId"), u"Error0032")))
+								text(GetEnumValue(ParseEnum(GetRuntimeType("umamusume.dll", "Gallop", "TextId"), IL2CPP_STRING("Common0071")))),
+								text(GetEnumValue(ParseEnum(GetRuntimeType("umamusume.dll", "Gallop", "TextId"), IL2CPP_STRING("Error0032"))))
 							);
 
 							Gallop::DialogManager::PushSystemDialog(dialogData, true);

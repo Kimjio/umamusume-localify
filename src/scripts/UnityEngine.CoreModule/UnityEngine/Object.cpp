@@ -4,6 +4,7 @@
 
 #include "../../umamusume/Gallop/DialogCommon.hpp"
 #include "../../umamusume/Gallop/DialogManager.hpp"
+#include "string_utils.hpp"
 
 namespace
 {
@@ -28,6 +29,8 @@ namespace
 	void* DestroyImmediate_addr = nullptr;
 
 	void* IsNativeObjectAlive_addr = nullptr;
+
+	Il2CppClass* StoryTimelineDataClass;
 }
 
 static bool UpdateHomeMenuMainButton()
@@ -79,11 +82,11 @@ static bool UpdateHomeMenuMainButton()
 				dialogData.SetSimpleTwoButtonMessage(
 					il2cpp_symbols::get_method_pointer<Il2CppString * (*)(uint64_t)>(
 						"umamusume.dll", "Gallop", "LocalizeExtention", "Text", 1
-					)(GetTextIdByName(u"Menu0136")),
+					)(GetTextIdByName(IL2CPP_STRING("Menu0136"))),
 					il2cpp_string_new("Kakao Games 쿠폰 입력 창을 열겠습니까?"),
 					CreateDelegateStatic(kakaoCpnFn),
-					GetTextIdByName(u"Common0002"),
-					GetTextIdByName(u"Common0003"),
+					GetTextIdByName(IL2CPP_STRING("Common0002")),
+					GetTextIdByName(IL2CPP_STRING("Common0003")),
 					CreateDelegateStatic(gallopCpnFn));
 
 				Gallop::DialogManager::PushDialog(dialogData);
@@ -100,7 +103,7 @@ static Il2CppObject* Internal_CloneSingle_hook(Il2CppObject* original)
 {
 	auto cloned = reinterpret_cast<decltype(Internal_CloneSingle_hook)*>(Internal_CloneSingle_orig)(original);
 
-	if (Game::CurrentGameRegion == Game::Region::KOR && u16string(UnityEngine::Object::Name(cloned)->chars).find(u"DialogHomeMenuMain") != u16string::npos)
+	if (Game::CurrentGameRegion == Game::Region::KOR && il2cppstring(UnityEngine::Object::Name(cloned)->chars).find(IL2CPP_STRING("DialogHomeMenuMain")) != il2cppstring::npos)
 	{
 		auto homeMenuMain = il2cpp_class_get_method_from_name_type<Il2CppObject * (*)(Il2CppObject*, Il2CppReflectionType*)>(cloned->klass, "GetComponent", 1)->methodPointer(cloned, GetRuntimeType("umamusume.dll", "Gallop", "DialogHomeMenuMain"));
 
@@ -139,6 +142,7 @@ static void InitAddress()
 	Destroy_addr = il2cpp_resolve_icall("UnityEngine.Object::Destroy()");
 	DestroyImmediate_addr = il2cpp_resolve_icall("UnityEngine.Object::DestroyImmediate()");
 	IsNativeObjectAlive_addr = il2cpp_symbols::get_method_pointer(ASSEMBLY_NAME, "UnityEngine", "Object", "IsNativeObjectAlive", 1);
+	StoryTimelineDataClass = il2cpp_symbols::get_class("umamusume.dll", "Gallop", "StoryTimelineData");
 }
 
 static void HookMethods()

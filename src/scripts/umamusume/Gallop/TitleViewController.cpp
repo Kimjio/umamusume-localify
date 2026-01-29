@@ -66,7 +66,7 @@ static void ShowErrorDialog(string error)
 	auto t = il2cpp_thread_attach(il2cpp_domain_get());
 
 	auto dialogData = Gallop::DialogCommon::Data();
-	dialogData.SetSimpleOneButtonMessage(GetTextIdByName(u"Error0014"), il2cpp_string_new(error.data()), nullptr, GetTextIdByName(u"Common0007"));
+	dialogData.SetSimpleOneButtonMessage(GetTextIdByName(IL2CPP_STRING("Error0014")), il2cpp_string_new(error.data()), nullptr, GetTextIdByName(IL2CPP_STRING("Common0007")));
 
 	Gallop::DialogManager::PushDialog(dialogData);
 
@@ -495,8 +495,8 @@ static void TitleViewController_OnClickPushStart_hook(Il2CppObject* self)
 	const auto dmmId = il2cpp_symbols::get_method_pointer<Il2CppString * (*)()>("umamusume.dll", "Gallop", "Certification", "get_dmmViewerId", IgnoreNumberOfArguments)();
 	const auto dmmOnetimeToken = il2cpp_symbols::get_method_pointer<Il2CppString * (*)()>("umamusume.dll", "Gallop", "Certification", "get_dmmOnetimeToken", IgnoreNumberOfArguments)();
 
-	if ((dmmId && !u16string(dmmId->chars).empty() &&
-		dmmOnetimeToken && !u16string(dmmOnetimeToken->chars).empty()) ||
+	if ((dmmId && !il2cppstring(dmmId->chars).empty() &&
+		dmmOnetimeToken && !il2cppstring(dmmOnetimeToken->chars).empty()) ||
 		Game::CurrentGameRegion != Game::Region::JPN ||
 		Game::CurrentGameStore == Game::Store::Steam)
 	{
@@ -513,9 +513,9 @@ static void TitleViewController_OnClickPushStart_hook(Il2CppObject* self)
 			if (il2cpp_symbols::get_class("umamusume.dll", "Gallop", "DialogSimpleCheckNoWarning"))
 			{
 				il2cpp_symbols::get_method_pointer<Il2CppObject* (*)(Il2CppString*, Il2CppString*, Il2CppString*, uint64_t, Il2CppDelegate*, Il2CppDelegate*, bool, bool, Il2CppString*)>
-					("umamusume.dll", "Gallop", "DialogSimpleCheckNoWarning", "OpenMiddleOneButton", 9)(localizeextension_text(GetTextIdByName(u"Common0081")), il2cpp_string_new16(
-						(LocalifySettings::GetText("initial_disclaimer_1") + u16string(localizeextension_text(GetTextIdByName(u"Common187002"))->chars) + LocalifySettings::GetText("initial_disclaimer_2")).data()),
-						localizeextension_text(GetTextIdByName(u"Common187002")), GetTextIdByName(u"Common0007"),
+					("umamusume.dll", "Gallop", "DialogSimpleCheckNoWarning", "OpenMiddleOneButton", 9)(localizeextension_text(GetTextIdByName(IL2CPP_STRING("Common0081"))), il2cpp_string_new16(
+						(LocalifySettings::GetText("initial_disclaimer_1") + il2cppstring(localizeextension_text(GetTextIdByName(IL2CPP_STRING("Common187002")))->chars) + LocalifySettings::GetText("initial_disclaimer_2")).data()),
+						localizeextension_text(GetTextIdByName(IL2CPP_STRING("Common187002"))), GetTextIdByName(IL2CPP_STRING("Common0007")),
 						CreateDelegateStatic(*[](void*, Il2CppObject* dialog)
 							{
 								il2cpp_symbols::get_method_pointer<void (*)(Il2CppObject*)>("umamusume.dll", "Gallop", "DialogCommon", "Close", 0)(GetFrontDialog());
@@ -527,16 +527,16 @@ static void TitleViewController_OnClickPushStart_hook(Il2CppObject* self)
 			{
 				auto dialogData = Gallop::DialogCommon::Data();
 				dialogData.SetSimpleOneButtonMessage(
-					GetTextIdByName(u"Common0081"),
+					GetTextIdByName(IL2CPP_STRING("Common0081")),
 					il2cpp_string_new16(
-						(LocalifySettings::GetText("initial_disclaimer_1") + u16string(localizeextension_text(GetTextIdByName(u"Common0150"))->chars) + LocalifySettings::GetText("initial_disclaimer_2")).data()),
+						(LocalifySettings::GetText("initial_disclaimer_1") + il2cppstring(localizeextension_text(GetTextIdByName(IL2CPP_STRING("Common0150")))->chars) + LocalifySettings::GetText("initial_disclaimer_2")).data()),
 					CreateDelegateStatic(*[](void*, Il2CppObject* dialog)
 						{
 							Gallop::DialogCommon(GetFrontDialog()).Close();
 							il2cpp_symbols::get_method_pointer<void (*)(Il2CppString*, int)>("UnityEngine.CoreModule.dll", "UnityEngine", "PlayerPrefs", "SetInt", 2)(il2cpp_string_new("ReadDisclaimer"), 1);
 							il2cpp_symbols::get_method_pointer<void (*)()>("UnityEngine.CoreModule.dll", "UnityEngine", "PlayerPrefs", "Save", IgnoreNumberOfArguments)();
 						}),
-					GetTextIdByName(u"Common0150")
+					GetTextIdByName(IL2CPP_STRING("Common0150"))
 				);
 
 				dialogData.AutoClose(false);

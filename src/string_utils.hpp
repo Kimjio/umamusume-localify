@@ -2,6 +2,8 @@
 #include <codecvt>
 #include <string>
 
+#include "il2cpp/il2cpp-api-types.h"
+
 #ifdef _MSC_VER
 #include <Windows.h>
 #endif
@@ -128,6 +130,40 @@ inline u16string wide_u16(const wstring& str)
 	return u16string(str.begin(), str.end());
 #else
 	return u8_u16(wide_u8(str));
+#endif
+}
+
+inline il2cppstring u8_il2cpp(const string& str)
+{
+#ifdef _MSC_VER
+	il2cppstring result;
+	result.resize(str.length() * 4);
+
+	int len = MultiByteToWideChar(CP_UTF8, 0, str.data(), str.length(), reinterpret_cast<Il2CppChar*>(result.data()), result.length());
+
+	result.resize(len);
+
+	return result;
+#else
+	wstring_convert<codecvt_utf8<Il2CppChar>, Il2CppChar> wconv;
+	return wconv.from_bytes(str);
+#endif
+}
+
+inline string il2cpp_u8(const il2cppstring& str)
+{
+#ifdef _MSC_VER
+	string result;
+	result.resize(str.length() * 4);
+
+	int len = WideCharToMultiByte(CP_UTF8, 0, reinterpret_cast<const Il2CppChar*>(str.data()), str.length(), result.data(), result.length(), nullptr, nullptr);
+
+	result.resize(len);
+
+	return result;
+#else
+	wstring_convert<codecvt_utf8_utf16<Il2CppChar>, Il2CppChar> utf16conv;
+	return utf16conv.to_bytes(str);
 #endif
 }
 

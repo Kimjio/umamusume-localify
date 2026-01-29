@@ -11,7 +11,7 @@ namespace notifier
 
     void init()
     {
-        client = new httplib::Client(u16_u8(config::msgpack_notifier_host));
+        client = new httplib::Client(il2cpp_u8(config::msgpack_notifier_host));
         client->set_connection_timeout(0, config::msgpack_notifier_connection_timeout_ms);
     }
 

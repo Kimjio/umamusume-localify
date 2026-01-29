@@ -12,6 +12,12 @@
 #include "config/config.hpp"
 #include "string_utils.hpp"
 
+#include "local/local.hpp"
+
+#include <msgpack11.hpp>
+
+using namespace msgpack11;
+
 namespace
 {
 	void* LoadFromFile_Internal_addr = nullptr;
@@ -26,6 +32,9 @@ namespace
 	void* LoadAssetAsync_Internal_addr = nullptr;
 	void* LoadAssetAsync_Internal_orig = nullptr;
 
+	void* AssetBundleRequest_GetResult_addr = nullptr;
+	void* AssetBundleRequest_GetResult_orig = nullptr;
+
 	void* GetAllAssetNames_addr = nullptr;
 
 	void* Unload_addr = nullptr;
@@ -35,6 +44,8 @@ namespace
 	Il2CppClass* GameObjectClass;
 	Il2CppClass* MaterialClass;
 	Il2CppClass* FontClass;
+
+	Il2CppClass* StoryTimelineDataClass;
 }
 
 static void ReplaceMaterialTextureProperty(Il2CppObject* material, Il2CppString* property)
@@ -45,7 +56,7 @@ static void ReplaceMaterialTextureProperty(Il2CppObject* material, Il2CppString*
 		if (texture)
 		{
 			auto uobject_name = UnityEngine::Object::Name(texture);
-			if (!u16string(uobject_name->chars).empty())
+			if (!il2cppstring(uobject_name->chars).empty())
 			{
 				auto newTexture = GetReplacementAssets(
 					uobject_name,
@@ -107,7 +118,7 @@ static void ReplaceAssetHolderTextures(Il2CppObject* holder)
 			if (obj->klass->name == "Texture2D"s)
 			{
 				auto uobject_name = UnityEngine::Object::Name(obj);
-				if (!u16string(uobject_name->chars).empty())
+				if (!il2cppstring(uobject_name->chars).empty())
 				{
 					auto newTexture = GetReplacementAssets(
 						uobject_name,
@@ -176,7 +187,7 @@ static void ReplaceAnimateToUnityTextures(Il2CppObject* anRoot)
 										if (textureSetColor)
 										{
 											auto uobject_name = UnityEngine::Object::Name(textureSetColor);
-											if (!u16string(uobject_name->chars).empty())
+											if (!il2cppstring(uobject_name->chars).empty())
 											{
 												auto newTexture = GetReplacementAssets(
 													uobject_name,
@@ -193,7 +204,7 @@ static void ReplaceAnimateToUnityTextures(Il2CppObject* anRoot)
 										if (textureSetAlpha)
 										{
 											auto uobject_name = UnityEngine::Object::Name(textureSetAlpha);
-											if (!u16string(uobject_name->chars).empty())
+											if (!il2cppstring(uobject_name->chars).empty())
 											{
 												auto newTexture = GetReplacementAssets(
 													uobject_name,
@@ -230,7 +241,7 @@ static void ReplaceAnimateToUnityTextures(Il2CppObject* anRoot)
 										if (textureColor)
 										{
 											auto uobject_name = UnityEngine::Object::Name(textureColor);
-											if (!u16string(uobject_name->chars).empty())
+											if (!il2cppstring(uobject_name->chars).empty())
 											{
 												auto newTexture = GetReplacementAssets(
 													uobject_name,
@@ -247,7 +258,7 @@ static void ReplaceAnimateToUnityTextures(Il2CppObject* anRoot)
 										if (textureAlpha)
 										{
 											auto uobject_name = UnityEngine::Object::Name(textureAlpha);
-											if (!u16string(uobject_name->chars).empty())
+											if (!il2cppstring(uobject_name->chars).empty())
 											{
 												auto newTexture = GetReplacementAssets(
 													uobject_name,
@@ -442,7 +453,7 @@ static void ReplaceRawImageTexture(Il2CppObject* rawImage)
 		auto uobject_name = UnityEngine::Object::Name(texture);
 		if (uobject_name)
 		{
-			auto nameU8 = u16_u8(uobject_name->chars);
+			auto nameU8 = il2cpp_u8(uobject_name->chars);
 			if (!nameU8.empty())
 			{
 				do
@@ -486,7 +497,7 @@ static void ReplaceImageTexture(Il2CppObject* image)
 		auto uobject_name = UnityEngine::Object::Name(sprite);
 		if (uobject_name)
 		{
-			auto nameU8 = u16_u8(uobject_name->chars);
+			auto nameU8 = il2cpp_u8(uobject_name->chars);
 			if (!nameU8.empty())
 			{
 				do
@@ -633,10 +644,10 @@ static void ReplaceAtlasReferenceSprites(Il2CppObject* atlasReference)
 
 	if (sprites)
 	{
-		u16stringstream pathStream(UnityEngine::Object::Name(atlasReference)->chars);
-		u16string segment;
-		vector<u16string> splited;
-		while (getline(pathStream, segment, u'.'))
+		il2cppstringstream pathStream(UnityEngine::Object::Name(atlasReference)->chars);
+		il2cppstring segment;
+		vector<il2cppstring> splited;
+		while (getline(pathStream, segment, IL2CPP_STRING('.')))
 		{
 			splited.emplace_back(segment);
 		}
@@ -644,7 +655,7 @@ static void ReplaceAtlasReferenceSprites(Il2CppObject* atlasReference)
 		auto& atlasName = splited.front();
 
 		auto atlas = GetReplacementAtlasAssets(
-			il2cpp_string_new16((u"_" + atlasName).data()),
+			il2cpp_string_new16((IL2CPP_STRING("_") + atlasName).data()),
 			GetRuntimeType(AtlasReferenceClass));
 
 		if (!atlas)
@@ -662,7 +673,7 @@ static void ReplaceAtlasReferenceSprites(Il2CppObject* atlasReference)
 			if (sprite)
 			{
 				auto uobject_name = UnityEngine::Object::Name(sprite);
-				if (!u16string(uobject_name->chars).empty())
+				if (!il2cppstring(uobject_name->chars).empty())
 				{
 					auto newSprite = il2cpp_class_get_method_from_name_type<Il2CppObject * (*)(Il2CppObject*, Il2CppString*)>(atlas->klass, "GetSprite", 1)->methodPointer(atlas, uobject_name);
 
@@ -695,6 +706,198 @@ static void ReplaceFontTexture(Il2CppObject* font)
 	if (material)
 	{
 		ReplaceMaterialTexture(material);
+	}
+}
+
+static void ReplaceTimelineData(Il2CppObject* timelineData)
+{
+	auto objectName = UnityEngine::Object::Name(timelineData);
+
+	il2cppstring timelinePath = config::replace_timeline_path;
+	if (filesystem::path(timelinePath.data()).is_relative())
+	{
+		timelinePath.insert(0, filesystem::current_path().IL2CPP_BASIC_STRING().append(IL2CPP_STRING("/")));
+	}
+
+	auto filePath = filesystem::path(timelinePath + IL2CPP_STRING("/") + objectName->chars + IL2CPP_STRING(".msgpack"));
+
+	auto object = MsgPack();
+	if (filesystem::exists(filePath))
+	{
+		ifstream fileStream(filePath, ios::in | ios::binary);
+		object = MsgPack::parse(fileStream);
+	}
+
+	MsgPack::array ReplacementBlockList = object.is_null() ? MsgPack::array{} : object["BlockList"].array_items();
+
+	auto StoryTimelineDataClass_TitleField = il2cpp_class_get_field_from_name(timelineData->klass, "Title");
+	Il2CppString* TimelineTitle;
+
+	if (object.is_null())
+	{
+		il2cpp_field_get_value(timelineData, StoryTimelineDataClass_TitleField, &TimelineTitle);
+	}
+	else
+	{
+		TimelineTitle = il2cpp_string_new(object["TItle"].string_value().data());
+	}
+	il2cpp_field_set_value(timelineData, StoryTimelineDataClass_TitleField, local::get_localized_string(TimelineTitle));
+
+	auto StoryTimelineDataClass_BlockListField = il2cpp_class_get_field_from_name(timelineData->klass, "BlockList");
+
+	Il2CppObject* blockList;
+	il2cpp_field_get_value(timelineData, StoryTimelineDataClass_BlockListField, &blockList);
+
+	Il2CppArraySize_t<Il2CppObject*>* blockArray;
+	il2cpp_field_get_value(blockList, il2cpp_class_get_field_from_name(blockList->klass, "_items"), &blockArray);
+
+	auto StoryTimelineTextClipDataClass = il2cpp_symbols::get_class("umamusume.dll", "Gallop", "StoryTimelineTextClipData");
+	auto NameField = il2cpp_class_get_field_from_name(StoryTimelineTextClipDataClass, "Name");
+	auto TextField = il2cpp_class_get_field_from_name(StoryTimelineTextClipDataClass, "Text");
+	auto ChoiceDataListField = il2cpp_class_get_field_from_name(StoryTimelineTextClipDataClass, "ChoiceDataList");
+	auto ColorTextInfoListField = il2cpp_class_get_field_from_name(StoryTimelineTextClipDataClass, "ColorTextInfoList");
+	auto AdditionalGradientListField = il2cpp_class_get_field_from_name(StoryTimelineTextClipDataClass, "AdditionalGradientList");
+
+	auto BlockListSize = object.is_null() ? blockArray->max_length : ReplacementBlockList.size();
+
+	for (size_t i = 0; i < BlockListSize; i++)
+	{
+		MsgPack::object ReplacementBlockData = object.is_null() ? MsgPack::object{} : ReplacementBlockList[i].object_items();
+		auto blockData = blockArray->vector[i];
+
+		MsgPack::object ReplacementTextTrack = object.is_null() ? MsgPack::object{} : ReplacementBlockData["TextTrack"].object_items();
+		MsgPack::array ReplacementClipList = object.is_null() ? MsgPack::array{} : ReplacementTextTrack["ClipList"].array_items();
+
+		auto TextTrackField = il2cpp_class_get_field_from_name(blockData->klass, "TextTrack");
+		Il2CppObject* TextTrack;
+		il2cpp_field_get_value(blockData, TextTrackField, &TextTrack);
+
+		auto ClipListField = il2cpp_class_get_field_from_name(TextTrack->klass, "ClipList");
+		Il2CppObject* ClipList;
+		il2cpp_field_get_value(TextTrack, ClipListField, &ClipList);
+
+		Il2CppArraySize_t<Il2CppObject*>* ClipArray;
+		il2cpp_field_get_value(ClipList, il2cpp_class_get_field_from_name(ClipList->klass, "_items"), &ClipArray);
+
+		auto ClipListSize = object.is_null() ? ClipArray->max_length : ReplacementClipList.size();
+
+		for (size_t i = 0; i < ClipListSize; i++)
+		{
+			MsgPack::object ReplacementClipData = object.is_null() ? MsgPack::object{} : ReplacementClipList[i].object_items();
+			auto clipData = ClipArray->vector[i];
+
+			Il2CppString* ClipDataName;
+			if (object.is_null())
+			{
+				il2cpp_field_get_value(clipData, NameField, &ClipDataName);
+			}
+			else
+			{
+				ClipDataName = il2cpp_string_new(ReplacementClipData["Name"].string_value().data());
+			}
+			il2cpp_field_set_value(clipData, NameField, local::get_localized_string(ClipDataName));
+
+			Il2CppString* ClipDataText;
+			if (object.is_null())
+			{
+				il2cpp_field_get_value(clipData, TextField, &ClipDataText);
+			}
+			else
+			{
+				ClipDataText = il2cpp_string_new(ReplacementClipData["Text"].string_value().data());
+			}
+			il2cpp_field_set_value(clipData, TextField, local::get_localized_string(ClipDataText));
+
+			Il2CppObject* choiceDataList;
+			il2cpp_field_get_value(clipData, ChoiceDataListField, &choiceDataList);
+
+			if (choiceDataList)
+			{
+				MsgPack::array ReplacementChoiceDataList = object.is_null() ? MsgPack::array{} : ReplacementClipData["ChoiceDataList"].array_items();
+				Il2CppArraySize_t<Il2CppObject*>* choiceDataArray;
+				il2cpp_field_get_value(choiceDataList, il2cpp_class_get_field_from_name(choiceDataList->klass, "_items"), &choiceDataArray);
+
+				auto ChoiceDataListSize = object.is_null() ? choiceDataArray->max_length : ReplacementChoiceDataList.size();
+
+				for (size_t i = 0; i < ChoiceDataListSize; i++)
+				{
+					MsgPack::object ReplacementChoiceData = object.is_null() ? MsgPack::object{} : ReplacementChoiceDataList[i].object_items();
+					auto choiceData = choiceDataArray->vector[i];
+					auto choiceDataTextField = il2cpp_class_get_field_from_name(choiceData->klass, "Text");
+
+					Il2CppString* ChoiceDataText;
+					if (object.is_null())
+					{
+						il2cpp_field_get_value(choiceData, choiceDataTextField, &ChoiceDataText);
+					}
+					else
+					{
+						ChoiceDataText = il2cpp_string_new(ReplacementChoiceData["Text"].string_value().data());
+					}
+					il2cpp_field_set_value(choiceData, choiceDataTextField, local::get_localized_string(ChoiceDataText));
+				}
+			}
+
+			Il2CppObject* colorTextInfoList;
+			il2cpp_field_get_value(clipData, ColorTextInfoListField, &colorTextInfoList);
+
+			if (colorTextInfoList)
+			{
+				MsgPack::array ReplacementColorTextInfoList = object.is_null() ? MsgPack::array{} : ReplacementClipData["ColorTextInfoList"].array_items();
+				Il2CppArraySize_t<Il2CppObject*>* colorTextInfoArray;
+				il2cpp_field_get_value(colorTextInfoList, il2cpp_class_get_field_from_name(colorTextInfoList->klass, "_items"), &colorTextInfoArray);
+
+				auto ColorTextInfoListSize = object.is_null() ? colorTextInfoArray->max_length : ReplacementColorTextInfoList.size();
+
+				for (size_t i = 0; i < ColorTextInfoListSize; i++)
+				{
+					MsgPack::object ReplacementColorTextInfo = object.is_null() ? MsgPack::object{} : ReplacementColorTextInfoList[i].object_items();
+					auto colorTextInfo = colorTextInfoArray->vector[i];
+					auto colorTextInfoTextField = il2cpp_class_get_field_from_name(colorTextInfo->klass, "Text");
+
+					Il2CppString* ColorTextInfoText;
+					if (object.is_null())
+					{
+						il2cpp_field_get_value(colorTextInfo, colorTextInfoTextField, &ColorTextInfoText);
+					}
+					else
+					{
+						ColorTextInfoText = il2cpp_string_new(ReplacementColorTextInfo["Text"].string_value().data());
+					}
+					il2cpp_field_set_value(colorTextInfo, colorTextInfoTextField, local::get_localized_string(ColorTextInfoText));
+				}
+			}
+
+			Il2CppObject* additionalGradientList;
+			il2cpp_field_get_value(clipData, AdditionalGradientListField, &additionalGradientList);
+
+			if (additionalGradientList)
+			{
+				MsgPack::array ReplacementAdditionalGradientList = object.is_null() ? MsgPack::array{} : ReplacementClipData["AdditionalGradientList"].array_items();
+				Il2CppArraySize_t<Il2CppObject*>* additionalGradientArray;
+				il2cpp_field_get_value(additionalGradientList, il2cpp_class_get_field_from_name(additionalGradientList->klass, "_items"), &additionalGradientArray);
+
+				auto AdditionalGradientListSize = object.is_null() ? additionalGradientArray->max_length : ReplacementAdditionalGradientList.size();
+
+				for (size_t i = 0; i < AdditionalGradientListSize; i++)
+				{
+					MsgPack::object ReplacementAdditionalGradient = object.is_null() ? MsgPack::object{} : ReplacementAdditionalGradientList[i].object_items();
+					auto additionalGradient = additionalGradientArray->vector[i];
+					auto additionalGradientColorTextField = il2cpp_class_get_field_from_name(additionalGradient->klass, "ColorText");
+
+					Il2CppString* AdditionalGradientColorText;
+					if (object.is_null())
+					{
+						il2cpp_field_get_value(additionalGradient, additionalGradientColorTextField, &AdditionalGradientColorText);
+					}
+					else
+					{
+						AdditionalGradientColorText = il2cpp_string_new(ReplacementAdditionalGradient["ColorText"].string_value().data());
+					}
+					il2cpp_field_set_value(additionalGradient, additionalGradientColorTextField, local::get_localized_string(AdditionalGradientColorText));
+				}
+			}
+		}
 	}
 }
 
@@ -746,10 +949,10 @@ static Il2CppObject* GetReplacementAssetsAsync(Il2CppString* name, Il2CppReflect
 
 static Il2CppObject* LoadFromFile_Internal_hook(Il2CppString* path, uint32_t crc, uint64_t offset)
 {
-	u16stringstream pathStream(path->chars);
-	u16string segment;
-	vector<u16string> splited;
-	while (getline(pathStream, segment, u'\\'))
+	il2cppstringstream pathStream(path->chars);
+	il2cppstring segment;
+	vector<il2cppstring> splited;
+	while (getline(pathStream, segment, IL2CPP_STRING('\\')))
 	{
 		splited.emplace_back(segment);
 	}
@@ -774,18 +977,18 @@ static Il2CppObject* LoadFromStreamInternal_hook(Il2CppObject* stream, uint32_t 
 
 static Il2CppObject* LoadAsset_Internal_hook(Il2CppObject* self, Il2CppString* name, Il2CppReflectionType* type)
 {
-	u16stringstream pathStream(name->chars);
-	u16string segment;
-	vector<u16string> splited;
-	while (getline(pathStream, segment, u'/'))
+	il2cppstringstream pathStream(name->chars);
+	il2cppstring segment;
+	vector<il2cppstring> splited;
+	while (getline(pathStream, segment, IL2CPP_STRING('/')))
 	{
 		splited.emplace_back(segment);
 	}
 
 	auto& fileName = splited.back();
-	if (find_if(config::runtime::replaceAssetNames.begin(), config::runtime::replaceAssetNames.end(), [fileName](const u16string& item)
+	if (find_if(config::runtime::replaceAssetNames.begin(), config::runtime::replaceAssetNames.end(), [fileName](const il2cppstring& item)
 		{
-			return item.find(fileName) != u16string::npos;
+			return item.find(fileName) != il2cppstring::npos;
 		}) != config::runtime::replaceAssetNames.end())
 	{
 		auto result = GetReplacementAssets(il2cpp_string_new16(fileName.data()), type);
@@ -823,27 +1026,58 @@ static Il2CppObject* LoadAsset_Internal_hook(Il2CppObject* self, Il2CppString* n
 		ReplaceFontTexture(obj);
 	}
 
+	if (obj->klass == StoryTimelineDataClass)
+	{
+		ReplaceTimelineData(obj);
+	}
+
 	return obj;
 }
 
 static Il2CppObject* LoadAssetAsync_Internal_hook(Il2CppObject* self, Il2CppString* name, Il2CppReflectionType* type)
 {
-	u16stringstream pathStream(name->chars);
-	u16string segment;
-	vector<u16string> splited;
-	while (getline(pathStream, segment, u'/'))
+	il2cppstringstream pathStream(name->chars);
+	il2cppstring segment;
+	vector<il2cppstring> splited;
+	while (getline(pathStream, segment, IL2CPP_STRING('/')))
 	{
 		splited.emplace_back(segment);
 	}
 	auto& fileName = splited.back();
-	if (find_if(config::runtime::replaceAssetNames.begin(), config::runtime::replaceAssetNames.end(), [fileName](const u16string& item)
+	if (find_if(config::runtime::replaceAssetNames.begin(), config::runtime::replaceAssetNames.end(), [fileName](const il2cppstring& item)
 		{
-			return item.find(fileName) != u16string::npos;
+			return item.find(fileName) != il2cppstring::npos;
 		}) != config::runtime::replaceAssetNames.end())
 	{
 		return GetReplacementAssetsAsync(il2cpp_string_new16(fileName.data()), type);
 	}
 	return reinterpret_cast<decltype(LoadAssetAsync_Internal_hook)*>(LoadAssetAsync_Internal_orig)(self, name, type);
+}
+
+static Il2CppObject* AssetBundleRequest_GetResult_hook(Il2CppObject* self)
+{
+	auto obj = reinterpret_cast<decltype(AssetBundleRequest_GetResult_hook)*>(AssetBundleRequest_GetResult_orig)(self);
+
+	if (obj->klass == StoryTimelineDataClass)
+	{
+		ReplaceTimelineData(obj);
+	}
+	else if (obj)
+	{
+		auto name = UnityEngine::Object::Name(obj);
+		il2cppstring wName = name->chars;
+		if (find(config::runtime::replaceAssetNames.begin(), config::runtime::replaceAssetNames.end(), wName) != config::runtime::replaceAssetNames.end())
+		{
+			return GetReplacementAssets(name, reinterpret_cast<Il2CppReflectionType*>(il2cpp_type_get_object(il2cpp_class_get_type(obj->klass))));
+		}
+
+		if (obj->klass == GameObjectClass)
+		{
+			ReplaceGameObjectTextures(obj);
+		}
+	}
+
+	return obj;
 }
 
 static void Unload_hook(Il2CppObject* self, bool unloadAllLoadedObjects)
@@ -867,6 +1101,7 @@ static void InitAddress()
 	LoadFromStreamInternal_addr = il2cpp_resolve_icall("UnityEngine.AssetBundle::LoadFromStreamInternal()");
 	LoadAsset_Internal_addr = il2cpp_resolve_icall("UnityEngine.AssetBundle::LoadAsset_Internal(System.String,System.Type)");
 	LoadAssetAsync_Internal_addr = il2cpp_resolve_icall("UnityEngine.AssetBundle::LoadAssetAsync_Internal(System.String,System.Type)");
+	AssetBundleRequest_GetResult_addr = il2cpp_resolve_icall("UnityEngine.AssetBundleRequest::GetResult()");
 	GetAllAssetNames_addr = il2cpp_resolve_icall("UnityEngine.AssetBundle::GetAllAssetNames()");
 	Unload_addr = il2cpp_resolve_icall("UnityEngine.AssetBundle::Unload()");
 
@@ -874,6 +1109,7 @@ static void InitAddress()
 	GameObjectClass = il2cpp_symbols::get_class("UnityEngine.CoreModule.dll", "UnityEngine", "GameObject");
 	MaterialClass = il2cpp_symbols::get_class("UnityEngine.CoreModule.dll", "UnityEngine", "Material");
 	FontClass = il2cpp_symbols::get_class("UnityEngine.TextRenderingModule.dll", "UnityEngine", "Font");
+	StoryTimelineDataClass = il2cpp_symbols::get_class("umamusume.dll", "Gallop", "StoryTimelineData");
 }
 
 static void HookMethods()
@@ -882,6 +1118,7 @@ static void HookMethods()
 	// ADD_HOOK(LoadFromStreamInternal, "UnityEngine.AssetBundle::LoadFromStreamInternal at %p\n");
 	ADD_HOOK(LoadAsset_Internal, "UnityEngine.AssetBundle::LoadAsset_Internal at %p\n");
 	ADD_HOOK(LoadAssetAsync_Internal, "UnityEngine.AssetBundle::LoadAssetAsync_Internal at %p\n");
+	ADD_HOOK(AssetBundleRequest_GetResult, "UnityEngine.AssetBundleRequest::GetResult at %p\n");
 	ADD_HOOK(Unload, "UnityEngine.AssetBundle::Unload at %p\n");
 }
 

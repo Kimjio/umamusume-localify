@@ -48,18 +48,18 @@ namespace Gallop
 			iconName.append(to_string(id));
 		}
 
-		auto fileName = u16string(Cryptographer::MakeMd5(il2cpp_string_new(iconName.data()))->chars);
-		fileName.append(u".png");
+		auto fileName = il2cppstring(Cryptographer::MakeMd5(il2cpp_string_new(iconName.data()))->chars);
+		fileName.append(IL2CPP_STRING(".png"));
 
-		auto path = u16string(UnityEngine::Application::persistentDataPath()->chars);
-		path.append(u"/lpfi");
+		auto path = il2cppstring(UnityEngine::Application::persistentDataPath()->chars);
+		path.append(IL2CPP_STRING("/lpfi"));
 
 		if (!filesystem::exists(path))
 		{
 			filesystem::create_directories(path);
 		}
 
-		return il2cpp_string_new16((path + u"/" + fileName).data());
+		return il2cpp_string_new16((path + IL2CPP_STRING("/") + fileName).data());
 	}
 
 	int PushNotificationManager::MakeNotificationId(LocalPushDefine::LocalPushType localPushType, int key)

@@ -10,7 +10,7 @@ namespace Gallop
 	class TextFontManager : public MonoSingleton<TextFontManager>
 	{
 	public:
-		static Il2CppObject* GetReplacementFontAssetBundle(u16string path);
+		static Il2CppObject* GetReplacementFontAssetBundle(il2cppstring path);
 
 		static Il2CppObject* GetReplacementFontAsset(Il2CppString* path);
 

@@ -51,12 +51,12 @@ namespace logger
 		request_exit = true;
 	}
 
-	void write_entry(size_t hash, const u16string& text)
+	void write_entry(size_t hash, const il2cppstring& text)
 	{
 		if (!enabled)
 			return;
 
-		auto u8str = u16_u8(text);
+		auto u8str = il2cpp_u8(text);
 		replaceAll(u8str, "\n", "\\n");
 		replaceAll(u8str, "\"", "\\\"");
 
@@ -65,7 +65,7 @@ namespace logger
 		has_change = true;
 	}
 
-	void write_static_dict(const std::vector<std::u16string>& dict)
+	void write_static_dict(const std::vector<il2cppstring>& dict)
 	{
 		if (config::enable_logger)
 		{
@@ -74,8 +74,8 @@ namespace logger
 			thread t([dict]() {
 				for (int i = 0; i < dict.size(); i++)
 				{
-					auto hash = std::hash<u16string>{}(dict[i]);
-					auto u8str = u16_u8(dict[i]);
+					auto hash = std::hash<il2cppstring>{}(dict[i]);
+					auto u8str = il2cpp_u8(dict[i]);
 					replaceAll(u8str, "\n", "\\n");
 					replaceAll(u8str, "\"", "\\\"");
 					if (i == dict.size() - 1)
@@ -96,8 +96,8 @@ namespace logger
 
 	}
 
-	void write_text_id_static_dict(const vector<pair<const u16string, const u16string>>& dict,
-		const vector<pair<const u16string, const u16string>>& not_matched)
+	void write_text_id_static_dict(const vector<pair<const il2cppstring, const il2cppstring>>& dict,
+		const vector<pair<const il2cppstring, const il2cppstring>>& not_matched)
 	{
 		if (config::enable_logger)
 		{
@@ -106,8 +106,8 @@ namespace logger
 			thread t([dict]() {
 				for (auto pair = dict.begin(); pair != dict.end(); pair++)
 				{
-					auto u8key = u16_u8(pair->first);
-					auto u8str = u16_u8(pair->second);
+					auto u8key = il2cpp_u8(pair->first);
+					auto u8str = il2cpp_u8(pair->second);
 					replaceAll(u8str, "\n", "\\n");
 					replaceAll(u8str, "\"", "\\\"");
 					if (next(pair) == dict.end())
@@ -131,8 +131,8 @@ namespace logger
 				thread t1([not_matched]() {
 					for (auto pair = not_matched.begin(); pair != not_matched.end(); pair++)
 					{
-						auto u8key = u16_u8(pair->first);
-						auto u8str = u16_u8(pair->second);
+						auto u8key = il2cpp_u8(pair->first);
+						auto u8str = il2cpp_u8(pair->second);
 						replaceAll(u8str, "\n", "\\n");
 						replaceAll(u8str, "\"", "\\\"");
 						if (next(pair) == not_matched.end())

@@ -13,7 +13,7 @@ namespace
 {
 	void* TextFontManager_get_DefaultFont_addr = nullptr;
 
-	unordered_map<u16string, Il2CppObject*> loadedFontAssets;
+	unordered_map<il2cppstring, Il2CppObject*> loadedFontAssets;
 }
 
 static void InitAddress()
@@ -28,7 +28,7 @@ STATIC
 
 namespace Gallop
 {
-	Il2CppObject* TextFontManager::GetReplacementFontAssetBundle(u16string path)
+	Il2CppObject* TextFontManager::GetReplacementFontAssetBundle(il2cppstring path)
 	{
 		if (!loadedFontAssets.contains(path))
 		{

@@ -35,7 +35,7 @@ static Il2CppObject* PushDialog_hook(Il2CppObject* data)
 
 		if (ContentsObject)
 		{
-			if (u16string(UnityEngine::Object::Name(ContentsObject)->chars).starts_with(u"SingleModeLogDialog"))
+			if (il2cppstring(UnityEngine::Object::Name(ContentsObject)->chars).starts_with(IL2CPP_STRING("SingleModeLogDialog")))
 			{
 				dialogData.FormType(Gallop::DialogCommonBase::FormType::BIG_ONE_BUTTON);
 			}

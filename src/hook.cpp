@@ -14,8 +14,6 @@
 #include <set>
 #include <sstream>
 
-#include <format>
-
 #include <Tlhelp32.h>
 
 #include <regex>
@@ -140,15 +138,15 @@ using namespace ABI::Windows::Data::Xml::Dom;
 
 namespace
 {
-	u16string GotoTitleError =
-		u"내부적으로 오류가 발생하여 홈으로 이동합니다.\n\n"
+	il2cppstring GotoTitleError =
+		IL2CPP_STRING("내부적으로 오류가 발생하여 홈으로 이동합니다.\n\n"
 		"경우에 따라서 <color=#ff911c><i>타이틀</i></color>로 돌아가거나, \n"
-		"게임 <color=#ff911c><i>다시 시작</i></color>이 필요할 수 있습니다.";
+		"게임 <color=#ff911c><i>다시 시작</i></color>이 필요할 수 있습니다.");
 
-	u16string GotoTitleErrorJa =
-		u"内部的にエラーが発生し、ホームに移動します。\n\n"
+	il2cppstring GotoTitleErrorJa =
+		IL2CPP_STRING("内部的にエラーが発生し、ホームに移動します。\n\n"
 		"場合によっては、<color=#ff911c><i>タイトル</i></color>に戻るか、\n"
-		"ゲーム<color=#ff911c><i>再起動</i></color>が必要になる場合がありますあります。";
+		"ゲーム<color=#ff911c><i>再起動</i></color>が必要になる場合がありますあります。");
 
 	void patch_game_assembly();
 
@@ -185,7 +183,7 @@ namespace
 		auto CuteCoreDevice = il2cpp_symbols::get_class("Cute.Core.Assembly.dll", "Cute.Core", "Device");
 		Il2CppString* persistentDataPath = il2cpp_class_get_method_from_name_type<Il2CppString * (*)()>(CuteCoreDevice, "GetPersistentDataPath", 0)->methodPointer();
 
-		u16string path = persistentDataPath->chars + u"/meta"s;
+		il2cppstring path = persistentDataPath->chars + il2cppstring(IL2CPP_STRING("/meta"));
 
 		if (!filesystem::exists(path))
 		{
@@ -200,7 +198,7 @@ namespace
 		if (!magic.starts_with("SQLite format 3"))
 		{
 			sqlite3* db;
-			sqlite3_open(u16_u8(path).data(), &db);
+			sqlite3_open(il2cpp_u8(path).data(), &db);
 
 			sqlite3mc_config(db, "cipher", CODEC_TYPE_CHACHA20);
 
@@ -242,7 +240,7 @@ namespace
 			auto persistentDataPathField = il2cpp_class_get_field_from_name(CuteCoreDevice, "persistentDataPath");
 			if (filesystem::path(config::persistent_data_path.data()).is_relative())
 			{
-				config::persistent_data_path.insert(0, filesystem::current_path().u16string().append(u"/"));
+				config::persistent_data_path.insert(0, filesystem::current_path().IL2CPP_BASIC_STRING().append(IL2CPP_STRING("/")));
 			}
 			if (filesystem::exists(config::persistent_data_path))
 			{
@@ -459,7 +457,7 @@ namespace
 		il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, int)>(_Label->klass, "set_resizeTextMaxSize", 1)->methodPointer(_Label, size);
 	}
 
-	void SetNotificationFontColor(u16string color)
+	void SetNotificationFontColor(il2cppstring color)
 	{
 		if (!notification)
 		{
@@ -478,7 +476,7 @@ namespace
 		il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, int)>(_Label->klass, "set_FontColor", 1)->methodPointer(_Label, GetEnumValue(ParseEnum(GetRuntimeType("umamusume.dll", "Gallop", "FontColorType"), color)));
 	}
 
-	void SetNotificationOutlineSize(u16string size)
+	void SetNotificationOutlineSize(il2cppstring size)
 	{
 		if (!notification)
 		{
@@ -498,7 +496,7 @@ namespace
 		il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*)>(_Label->klass, "UpdateOutline", 0)->methodPointer(_Label);
 	}
 
-	void SetNotificationOutlineColor(u16string color)
+	void SetNotificationOutlineColor(il2cppstring color)
 	{
 		if (!notification)
 		{
@@ -603,19 +601,19 @@ namespace
 			return;
 		}
 
-		auto u16Text = u16string(text->chars);
-		replaceAll(u16Text, u"\n\n", u" ");
-		replaceAll(u16Text, u"\n", u" ");
-		if (notification && u16string(cueSheet->chars).find(u"_home_") == u16string::npos &&
-			u16string(cueSheet->chars).find(u"_tc_") == u16string::npos &&
-			u16string(cueSheet->chars).find(u"_title_") == u16string::npos &&
-			u16string(cueSheet->chars).find(u"_kakao_") == u16string::npos &&
-			u16string(cueSheet->chars).find(u"_gacha_") == u16string::npos &&
+		auto u16Text = il2cppstring(text->chars);
+		replaceAll(u16Text, IL2CPP_STRING("\n\n"), IL2CPP_STRING(" "));
+		replaceAll(u16Text, IL2CPP_STRING("\n"), IL2CPP_STRING(" "));
+		if (notification && il2cppstring(cueSheet->chars).find(IL2CPP_STRING("_home_")) == il2cppstring::npos &&
+			il2cppstring(cueSheet->chars).find(IL2CPP_STRING("_tc_")) == il2cppstring::npos &&
+			il2cppstring(cueSheet->chars).find(IL2CPP_STRING("_title_")) == il2cppstring::npos &&
+			il2cppstring(cueSheet->chars).find(IL2CPP_STRING("_kakao_")) == il2cppstring::npos &&
+			il2cppstring(cueSheet->chars).find(IL2CPP_STRING("_gacha_")) == il2cppstring::npos &&
 			voiceId != 95001 &&
 			(characterId < 9000 || voiceId == 95005 || voiceId == 95006 || voiceId == 70000))
 		{
 
-			if (u16string(cueSheet->chars).find(u"_training_") != string::npos && (cueId < 29 || cueId == 39))
+			if (il2cppstring(cueSheet->chars).find(IL2CPP_STRING("_training_")) != il2cppstring::npos && (cueId < 29 || cueId == 39))
 			{
 				if (!(voiceId >= 2030 && voiceId <= 2037) && voiceId < 93000 && !(cueId == 8 || cueId == 9 || cueId == 12 || cueId == 13))
 				{
@@ -695,7 +693,7 @@ namespace
 		const regex r(R"(_(?:9)*(\d{4})(?:\d{2})*_(\d{4})*_*(\d{2})*(?:\d{2})*$)");
 		smatch stringMatch;
 		const auto cueSheet = string(info->name);
-		const auto cueSheet16 = u8_u16(cueSheet);
+		const auto cueSheet16 = u8_il2cpp(cueSheet);
 		regex_search(cueSheet, stringMatch, r);
 		if (!stringMatch.empty())
 		{
@@ -762,7 +760,7 @@ namespace
 		const regex r(R"((\d{4})(?:\d{2})*_(\d{4})*_*(\d{2})*(?:\d{2})*$)");
 		smatch stringMatch;
 		const auto cueSheet = string(info->name);
-		const auto cueSheet16 = u8_u16(cueSheet);
+		const auto cueSheet16 = u8_il2cpp(cueSheet);
 		regex_search(cueSheet, stringMatch, r);
 		if (!stringMatch.empty())
 		{
@@ -921,12 +919,12 @@ namespace
 		{
 			splited.emplace_back(segment);
 		}
-		auto fileName = u8_u16(splited.back());
+		auto fileName = u8_il2cpp(splited.back());
 
 		if (config::replace_assets.find(fileName) != config::replace_assets.end())
 		{
 			auto& replaceAsset = config::replace_assets.at(fileName);
-			reinterpret_cast<decltype(CriMana_SetFileNew_hook)*>(CriMana_SetFileNew_orig)(player_id, binder, u16_u8(replaceAsset.path).data());
+			reinterpret_cast<decltype(CriMana_SetFileNew_hook)*>(CriMana_SetFileNew_orig)(player_id, binder, il2cpp_u8(replaceAsset.path).data());
 			return;
 		}
 
@@ -945,12 +943,12 @@ namespace
 		{
 			splited.emplace_back(segment);
 		}
-		auto fileName = u8_u16(splited.back());
+		auto fileName = u8_il2cpp(splited.back());
 
 		if (config::replace_assets.find(fileName) != config::replace_assets.end())
 		{
 			auto& replaceAsset = config::replace_assets.at(fileName);
-			return reinterpret_cast<decltype(CriMana_SetFileAppend_hook)*>(CriMana_SetFileAppend_orig)(player_id, binder, u16_u8(replaceAsset.path).data(), repeat);
+			return reinterpret_cast<decltype(CriMana_SetFileAppend_hook)*>(CriMana_SetFileAppend_orig)(player_id, binder, il2cpp_u8(replaceAsset.path).data(), repeat);
 		}
 
 		return reinterpret_cast<decltype(CriMana_SetFileAppend_hook)*>(CriMana_SetFileAppend_orig)(player_id, binder, path, repeat);
@@ -1134,7 +1132,7 @@ namespace
 			{
 				for (int i = 0; i < config::external_dlls_path.size(); i++)
 				{
-					auto path = u16_wide(config::external_dlls_path[i]);
+					auto path = config::external_dlls_path[i];
 					wcout << L"Loading " << path << L": ";
 					auto dll = LoadLibraryW(path.data());
 					wcout << dll << endl;
@@ -1360,13 +1358,13 @@ namespace
 
 	Il2CppObject* Resources_Load_hook(Il2CppString* path, Il2CppReflectionType* type)
 	{
-		u16string u16Name = path->chars;
+		il2cppstring u16Name = path->chars;
 
-		if (u16Name == u"ui/views/titleview"s)
+		if (u16Name == il2cppstring(IL2CPP_STRING("ui/views/titleview")))
 		{
-			if (find_if(config::runtime::replaceAssetNames.begin(), config::runtime::replaceAssetNames.end(), [](const u16string& item)
+			if (find_if(config::runtime::replaceAssetNames.begin(), config::runtime::replaceAssetNames.end(), [](const il2cppstring& item)
 				{
-					return item.find(u"utx_obj_title_logo_umamusume") != wstring::npos;
+					return item.find(IL2CPP_STRING("utx_obj_title_logo_umamusume")) != wstring::npos;
 				}) != config::runtime::replaceAssetNames.end())
 			{
 				auto gameObj = reinterpret_cast<decltype(Resources_Load_hook)*>(Resources_Load_orig)(path, type);
@@ -1387,7 +1385,7 @@ namespace
 
 		if (config::replace_to_custom_font)
 		{
-			if (config::runtime::fontAssets && u16Name == u"TMP Settings"s)
+			if (config::runtime::fontAssets && u16Name == IL2CPP_STRING("TMP Settings"))
 			{
 				auto object = reinterpret_cast<decltype(Resources_Load_hook)*>(Resources_Load_orig)(path, type);
 				auto fontAssetField = il2cpp_class_get_field_from_name(object->klass, "m_defaultFontAsset");
@@ -1396,7 +1394,7 @@ namespace
 			}
 
 			if (type == GetRuntimeType("UnityEngine.TextRenderingModule.dll", "UnityEngine", "Font") ||
-				u16Name.starts_with(u"Font"))
+				u16Name.starts_with(IL2CPP_STRING("Font")))
 			{
 				auto replacement = Gallop::TextFontManager::GetReplacementFontAsset(path);
 				if (replacement)
@@ -1865,112 +1863,6 @@ namespace
 	int CySpringUpdater_get_SpringUpdateMode_hook(Il2CppObject* _this)
 	{
 		return config::cyspring_update_mode;
-	}
-
-	void* story_timeline_controller_play_orig;
-	void* story_timeline_controller_play_hook(Il2CppObject* _this)
-	{
-		FieldInfo* timelineDataField = il2cpp_class_get_field_from_name(_this->klass, "_timelineData");
-
-		Il2CppObject* timelineData;
-		il2cpp_field_get_value(_this, timelineDataField, &timelineData);
-		FieldInfo* StoryTimelineDataClass_TitleField = il2cpp_class_get_field_from_name(timelineData->klass, "Title");
-		FieldInfo* StoryTimelineDataClass_BlockListField = il2cpp_class_get_field_from_name(timelineData->klass, "BlockList");
-
-		Il2CppClass* story_timeline_text_clip_data_class = il2cpp_symbols::get_class("umamusume.dll", "Gallop", "StoryTimelineTextClipData");
-		FieldInfo* nameField = il2cpp_class_get_field_from_name(story_timeline_text_clip_data_class, "Name");
-		FieldInfo* textField = il2cpp_class_get_field_from_name(story_timeline_text_clip_data_class, "Text");
-		FieldInfo* choiceDataListField = il2cpp_class_get_field_from_name(story_timeline_text_clip_data_class, "ChoiceDataList");
-		FieldInfo* colorTextInfoListField = il2cpp_class_get_field_from_name(story_timeline_text_clip_data_class, "ColorTextInfoList");
-
-		Il2CppString* title;
-		il2cpp_field_get_value(timelineData, StoryTimelineDataClass_TitleField, &title);
-		il2cpp_field_set_value(timelineData, StoryTimelineDataClass_TitleField, local::get_localized_string(title));
-
-		Il2CppObject* blockList;
-		il2cpp_field_get_value(timelineData, StoryTimelineDataClass_BlockListField, &blockList);
-
-		Il2CppArraySize* blockArray;
-		il2cpp_field_get_value(blockList, il2cpp_class_get_field_from_name(blockList->klass, "_items"), &blockArray);
-
-		for (size_t i = 0; i < blockArray->max_length; i++)
-		{
-			Il2CppObject* blockData = reinterpret_cast<Il2CppObject*>(blockArray->vector[i]);
-			if (!blockData) break;
-			FieldInfo* StoryTimelineBlockDataClass_trackListField = il2cpp_class_get_field_from_name(blockData->klass, "_trackList");
-			Il2CppObject* trackList;
-			il2cpp_field_get_value(blockData, StoryTimelineBlockDataClass_trackListField, &trackList);
-
-			Il2CppArraySize* trackArray;
-			il2cpp_field_get_value(trackList, il2cpp_class_get_field_from_name(trackList->klass, "_items"), &trackArray);
-
-			for (size_t i = 0; i < trackArray->max_length; i++)
-			{
-				Il2CppObject* trackData = reinterpret_cast<Il2CppObject*>(trackArray->vector[i]);
-				if (!trackData) break;
-				FieldInfo* StoryTimelineTrackDataClass_ClipListField = il2cpp_class_get_field_from_name(trackData->klass, "ClipList");
-				Il2CppObject* clipList;
-				il2cpp_field_get_value(trackData, StoryTimelineTrackDataClass_ClipListField, &clipList);
-
-
-				Il2CppArraySize* clipArray;
-				il2cpp_field_get_value(clipList, il2cpp_class_get_field_from_name(clipList->klass, "_items"), &clipArray);
-
-				for (size_t i = 0; i < clipArray->max_length; i++)
-				{
-					Il2CppObject* clipData = reinterpret_cast<Il2CppObject*>(clipArray->vector[i]);
-					if (!clipData) break;
-					if (story_timeline_text_clip_data_class == clipData->klass)
-					{
-						Il2CppString* name;
-						il2cpp_field_get_value(clipData, nameField, &name);
-						il2cpp_field_set_value(clipData, nameField, local::get_localized_string(name));
-						Il2CppString* text;
-						il2cpp_field_get_value(clipData, textField, &text);
-						il2cpp_field_set_value(clipData, textField, local::get_localized_string(text));
-						Il2CppObject* choiceDataList;
-						il2cpp_field_get_value(clipData, choiceDataListField, &choiceDataList);
-						if (choiceDataList)
-						{
-							Il2CppArraySize* choiceDataArray;
-							il2cpp_field_get_value(choiceDataList, il2cpp_class_get_field_from_name(choiceDataList->klass, "_items"), &choiceDataArray);
-
-							for (size_t i = 0; i < choiceDataArray->max_length; i++)
-							{
-								Il2CppObject* choiceData = reinterpret_cast<Il2CppObject*>(choiceDataArray->vector[i]);
-								if (!choiceData) break;
-								FieldInfo* choiceDataTextField = il2cpp_class_get_field_from_name(choiceData->klass, "Text");
-
-								Il2CppString* text;
-								il2cpp_field_get_value(choiceData, choiceDataTextField, &text);
-								il2cpp_field_set_value(choiceData, choiceDataTextField, local::get_localized_string(text));
-							}
-						}
-						Il2CppObject* colorTextInfoList;
-						il2cpp_field_get_value(clipData, colorTextInfoListField, &colorTextInfoList);
-						if (colorTextInfoList)
-						{
-							Il2CppArraySize* colorTextInfoArray;
-							il2cpp_field_get_value(colorTextInfoList, il2cpp_class_get_field_from_name(colorTextInfoList->klass, "_items"), &colorTextInfoArray);
-
-							for (size_t i = 0; i < colorTextInfoArray->max_length; i++)
-							{
-								Il2CppObject* colorTextInfo = reinterpret_cast<Il2CppObject*>(colorTextInfoArray->vector[i]);
-								if (!colorTextInfo) break;
-								FieldInfo* colorTextInfoTextField = il2cpp_class_get_field_from_name(colorTextInfo->klass, "Text");
-
-								Il2CppString* text;
-								il2cpp_field_get_value(colorTextInfo, colorTextInfoTextField, &text);
-								il2cpp_field_set_value(colorTextInfo, colorTextInfoTextField, local::get_localized_string(text));
-							}
-						}
-					}
-
-				}
-			}
-		}
-
-		return reinterpret_cast<decltype(story_timeline_controller_play_hook)*>(story_timeline_controller_play_orig)(_this);
 	}
 
 	void* story_race_textasset_load_orig;
@@ -2678,7 +2570,7 @@ namespace
 										auto parentGameObject = il2cpp_class_get_method_from_name_type<Il2CppObject * (*)(Il2CppObject*)>(parent->klass, "get_gameObject", 0)->methodPointer(parent);
 										auto getComponents = il2cpp_class_get_method_from_name_type<Il2CppArraySize * (*)(Il2CppObject*, Il2CppType*, bool, bool, bool, bool, Il2CppObject*)>(parentGameObject->klass, "GetComponentsInternal", 6)->methodPointer;
 
-										if (UnityEngine::Object::Name(parent)->chars == u"MainCanvas"s)
+										if (UnityEngine::Object::Name(parent)->chars == il2cppstring(IL2CPP_STRING("MainCanvas")))
 										{
 											if (auto klass = il2cpp_symbols::get_class("umamusume.dll", "Gallop", "StoryMovieView"))
 											{
@@ -2811,7 +2703,7 @@ namespace
 		}
 		catch (const Il2CppExceptionWrapper& e)
 		{
-			wcout << "WaitForEndOfFrame error: " << u16_wide(e.ex->message->chars) << endl;
+			wcout << "WaitForEndOfFrame error: " << e.ex->message->chars << endl;
 			PrintStackTrace();
 		}
 	}
@@ -2827,7 +2719,7 @@ namespace
 		}
 		catch (const Il2CppExceptionWrapper& e)
 		{
-			wcout << "WaitForEndOfFrame error: " << u16_wide(e.ex->message->chars) << endl;
+			wcout << "WaitForEndOfFrame error: " << e.ex->message->chars << endl;
 			PrintStackTrace();
 		}
 	}
@@ -3660,15 +3552,15 @@ namespace
 
 		auto dialogData = Gallop::DialogCommon::Data();
 		dialogData.SetSimpleTwoButtonMessage(
-			localizeextension_text_hook(GetTextIdByName(u"Title0040")),
-			localizeextension_text_hook(GetTextIdByName(u"Title0041")),
+			localizeextension_text_hook(GetTextIdByName(IL2CPP_STRING("Title0040"))),
+			localizeextension_text_hook(GetTextIdByName(IL2CPP_STRING("Title0041"))),
 			CreateDelegateStatic(*[]()
 				{
 					isExitOpened = false;
 					UnityEngine::Application::Exit(0);
 				}),
-			GetTextIdByName(u"Common0004"),
-			GetTextIdByName(u"Common0003"),
+			GetTextIdByName(IL2CPP_STRING("Common0004")),
+			GetTextIdByName(IL2CPP_STRING("Common0003")),
 			CreateDelegateStatic(*[]()
 				{
 					isExitOpened = false;
@@ -4334,7 +4226,7 @@ namespace
 							il2cpp_field_get_value(_items, itemsField, &arr);
 
 							auto selectedItem = il2cpp_class_get_method_from_name_type<Il2CppObject * (*)(Il2CppObject*)>(footer->klass, "get_SelectItem", 0)->methodPointer(footer);
-							auto selectedMenu = il2cpp_class_get_method_from_name_type<Il2CppObject * (*)(Il2CppObject*)>(footer->klass, "get_SelectedMenu", 0)->methodPointer(footer);
+							auto selectedMenu = il2cpp_class_get_method_from_name_type<Il2CppObject * (*)(Il2CppObject*)>(footer->klass, "get_SelectedMenIL2CPP_STRING(", 0)->methodPointer(footer);
 
 							if (wParam == VK_RETURN)
 							{
@@ -4367,10 +4259,10 @@ namespace
 									number = count;
 								}
 
-								auto _preSelectedMenuField = il2cpp_class_get_field_from_name(footer->klass, "_preSelectedMenu");
+								auto _preSelectedMenuField = il2cpp_class_get_field_from_name(footer->klass, "_preSelectedMenIL2CPP_STRING(");
 								Il2CppObject* footerItem = arr->vector[number - 1];
 
-								auto trainingMenu = il2cpp_class_get_method_from_name_type<Il2CppObject * (*)(Il2CppObject*)>(footerItem->klass, "get_TrainingMenu", 0)->methodPointer(footerItem);
+								auto trainingMenu = il2cpp_class_get_method_from_name_type<Il2CppObject * (*)(Il2CppObject*)>(footerItem->klass, "get_TrainingMenIL2CPP_STRING(", 0)->methodPointer(footerItem);
 								il2cpp_field_set_value(footer, _preSelectedMenuField, trainingMenu);
 
 								isNumKeyDown = true;
@@ -4429,10 +4321,10 @@ namespace
 									}
 								}
 
-								auto _preSelectedMenuField = il2cpp_class_get_field_from_name(footer->klass, "_preSelectedMenu");
+								auto _preSelectedMenuField = il2cpp_class_get_field_from_name(footer->klass, "_preSelectedMenIL2CPP_STRING(");
 								Il2CppObject* footerItem = arr->vector[selectedIndex];
 
-								auto trainingMenu = il2cpp_class_get_method_from_name_type<Il2CppObject * (*)(Il2CppObject*)>(footerItem->klass, "get_TrainingMenu", 0)->methodPointer(footerItem);
+								auto trainingMenu = il2cpp_class_get_method_from_name_type<Il2CppObject * (*)(Il2CppObject*)>(footerItem->klass, "get_TrainingMenIL2CPP_STRING(", 0)->methodPointer(footerItem);
 								il2cpp_field_set_value(footer, _preSelectedMenuField, trainingMenu);
 
 								il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, Il2CppObject*, Il2CppObject*, bool, bool)>(footer->klass, "Select", 4)->methodPointer(footer, footerItem, trainingMenu, false, false);
@@ -4645,7 +4537,7 @@ namespace
 
 			if (exception)
 			{
-				wcout << u16_wide(exception->message->chars) << endl;
+				wcout << exception->message->chars << endl;
 			}
 
 			auto poolField = il2cpp_class_get_field_from_name(audioCtrl->klass, "pool");
@@ -4698,7 +4590,7 @@ namespace
 
 					if (exception)
 					{
-						wcout << u16_wide(exception->message->chars) << endl;
+						wcout << exception->message->chars << endl;
 					}
 
 					auto player = il2cpp_class_get_method_from_name_type<Il2CppObject * (*)(Il2CppObject*)>(AtomSource->klass, "get_player", 0)->methodPointer(AtomSource);
@@ -4733,7 +4625,7 @@ namespace
 
 					if (exception)
 					{
-						wcout << u16_wide(exception->message->chars) << endl;
+						wcout << exception->message->chars << endl;
 						continue;
 					}
 
@@ -4787,7 +4679,7 @@ namespace
 
 							if (exception)
 							{
-								wcout << u16_wide(exception->message->chars) << endl;
+								wcout << exception->message->chars << endl;
 								continue;
 							}
 
@@ -4910,15 +4802,15 @@ namespace
 
 					auto dialogData = Gallop::DialogCommon::Data();
 					dialogData.SetSimpleTwoButtonMessage(
-						localizeextension_text_hook(GetTextIdByName(u"Title0002")),
-						localizeextension_text_hook(GetTextIdByName(u"Title0023")),
+						localizeextension_text_hook(GetTextIdByName(IL2CPP_STRING("Title0002"))),
+						localizeextension_text_hook(GetTextIdByName(IL2CPP_STRING("Title0023"))),
 						CreateDelegateStatic(*[]()
 							{
 								wstringstream subKeyStream;
 
 								subKeyStream << L"Software";
-								subKeyStream << L"\\" << u16_wide(UnityEngine::Application::companyName()->chars);
-								subKeyStream << L"\\" << u16_wide(UnityEngine::Application::productName()->chars);
+								subKeyStream << L"\\" << UnityEngine::Application::companyName()->chars;
+								subKeyStream << L"\\" << UnityEngine::Application::productName()->chars;
 
 								DWORD data = 1;
 								HKEY hKey;
@@ -4927,7 +4819,7 @@ namespace
 								RegCloseKey(hKey);
 
 								auto dialogData = Gallop::DialogCommon::Data();
-								dialogData.SetSimpleOneButtonMessage(GetTextIdByName(u"AccoutDataLink0061"), localize_get_hook(GetTextIdByName(u"Outgame0309")), nullptr, GetTextIdByName(u"Common0185"));
+								dialogData.SetSimpleOneButtonMessage(GetTextIdByName(IL2CPP_STRING("AccoutDataLink0061")), localize_get_hook(GetTextIdByName(IL2CPP_STRING("Outgame0309"))), nullptr, GetTextIdByName(IL2CPP_STRING("Common0185")));
 
 								auto onDestroy = CreateDelegateStatic(*[]()
 									{
@@ -4937,8 +4829,8 @@ namespace
 								dialogData.AddDestroyCallback(onDestroy);
 								Gallop::DialogManager::PushDialog(dialogData);
 							}),
-						GetTextIdByName(u"Common0309"),
-						GetTextIdByName(u"Common0150"),
+						GetTextIdByName(IL2CPP_STRING("Common0309")),
+						GetTextIdByName(IL2CPP_STRING("Common0150")),
 						CreateDelegateStatic(*[]()
 							{
 								isKonamiOpened = false;
@@ -5355,14 +5247,14 @@ namespace
 				auto dialogJukeboxRequestSong = reinterpret_cast<Il2CppObject * (*)(Il2CppString*, const MethodInfo*)>(LoadAndInstantiatePrefabGeneric->methodPointer)(il2cpp_string_new("UI/Parts/Home/Jukebox/DialogJukeboxRequestSong"), LoadAndInstantiatePrefabGeneric);
 
 				Gallop::DialogCommon::Data data = il2cpp_class_get_method_from_name_type<Il2CppObject * (*)(Il2CppObject*)>(dialogJukeboxRequestSong->klass, "CreateDialogData", 0)->methodPointer(dialogJukeboxRequestSong);
-				data.Title(localizeextension_text_hook(GetTextIdByName(u"Outgame424008")));
+				data.Title(localizeextension_text_hook(GetTextIdByName(IL2CPP_STRING("Outgame424008"))));
 				auto dialogHash = data.DialogHash();
 
 				auto _isSplitWindowField = il2cpp_class_get_field_from_name(dialogJukeboxRequestSong->klass, "_isSplitWindow");
 				bool _isSplitWindow = true;
 				il2cpp_field_set_value(dialogJukeboxRequestSong, _isSplitWindowField, &_isSplitWindow);
 
-				data.RightButtonText(localizeextension_text_hook(GetTextIdByName(u"Home400101")));
+				data.RightButtonText(localizeextension_text_hook(GetTextIdByName(IL2CPP_STRING("Home400101"))));
 
 				auto _dialogDataField = il2cpp_class_get_field_from_name(dialogJukeboxRequestSong->klass, "_dialogData");
 				il2cpp_field_set_value(dialogJukeboxRequestSong, _dialogDataField, data);
@@ -5524,7 +5416,7 @@ namespace
 				Il2CppObject* _songList;
 				il2cpp_field_get_value(dialogJukeboxRequestSong, _songListField, &_songList);
 
-				il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, Il2CppObject*, int)>(_songList->klass, "Create", 2)->methodPointer(_songList, itemInfoList, static_cast<int>(GetEnumValue(ParseEnum(GetRuntimeType("umamusume.dll", "Gallop", "ResourceManager/ResourceHash"), u"ViewHashBegin"))));
+				il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, Il2CppObject*, int)>(_songList->klass, "Create", 2)->methodPointer(_songList, itemInfoList, static_cast<int>(GetEnumValue(ParseEnum(GetRuntimeType("umamusume.dll", "Gallop", "ResourceManager/ResourceHash"), IL2CPP_STRING("ViewHashBegin")))));
 
 				auto ValueTuple3Class = GetGenericClass(GetRuntimeType("mscorlib.dll", "System", "ValueTuple`3"), GetRuntimeType(il2cpp_defaults.object_class), GetRuntimeType(il2cpp_defaults.object_class), GetRuntimeType(il2cpp_defaults.object_class));
 				System::ValueTuple3<Il2CppObject*, Il2CppObject*, Il2CppObject*> tuple = { dialogJukeboxRequestSong, JukeboxBgmSelector, itemInfoList };
@@ -5537,7 +5429,7 @@ namespace
 					{
 						if (!il2cpp_symbols::get_class("umamusume.dll", "Gallop", "DialogJukeboxSetListModel"))
 						{
-							ShowUINotification(localizeextension_text_hook(GetTextIdByName(u"Error0025")));
+							ShowUINotification(localizeextension_text_hook(GetTextIdByName(IL2CPP_STRING("Error0025"))));
 							return;
 						}
 						auto tuple = *il2cpp_object_unbox_type<System::ValueTuple3<Il2CppObject*, Il2CppObject*, Il2CppObject*>*>(self);
@@ -5571,7 +5463,7 @@ namespace
 		}
 		catch (const Il2CppExceptionWrapper& e)
 		{
-			wcout << u16_wide(e.ex->message->chars) << endl;
+			wcout << e.ex->message->chars << endl;
 		}
 	}
 
@@ -5581,7 +5473,8 @@ namespace
 
 	LRESULT WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 	{
-		if (uMsg == WM_XBUTTONDOWN && GET_KEYSTATE_WPARAM(wParam) == MK_XBUTTON1)
+		if (uMsg == WM_XBUTTONDOWN && GET_KEYSTATE_WPARAM(wParam) == MK_XBUTTON1 ||
+			uMsg == WM_RBUTTONDOWN)
 		{
 			auto backKeyInputManager = GetSingletonInstance(il2cpp_symbols::get_class("umamusume.dll", "Gallop", "BackKeyInputManager"));
 			auto ExecuteBackKeyAction = il2cpp_class_get_method_from_name_type<void(*)(Il2CppObject*)>(backKeyInputManager->klass, "ExecuteBackKeyAction", 0);
@@ -6386,7 +6279,7 @@ namespace
 		{
 			auto font = text_get_font(_this);
 			Il2CppString* name = UnityEngine::Object::Name(font);
-			if (config::font_asset_name.find(name->chars) == string::npos)
+			if (config::font_asset_name.find(name->chars) == il2cppstring::npos)
 			{
 				auto customFont = GetCustomFont();
 				if (customFont)
@@ -6398,14 +6291,14 @@ namespace
 		auto textId = textcommon_get_TextId(_this);
 		if (textId)
 		{
-			if (GetTextIdByName(u"Common0121") == textId ||
-				GetTextIdByName(u"Common0186") == textId ||
-				GetTextIdByName(u"Outgame0028") == textId ||
-				GetTextIdByName(u"Outgame0231") == textId ||
-				GetTextIdByName(u"Outgame0393") == textId ||
-				GetTextIdByName(u"SingleMode0265") == textId ||
-				GetTextIdByName(u"Character0039") == textId ||
-				GetTextIdByName(u"Character0325") == textId)
+			if (GetTextIdByName(IL2CPP_STRING("Common0121")) == textId ||
+				GetTextIdByName(IL2CPP_STRING("Common0186")) == textId ||
+				GetTextIdByName(IL2CPP_STRING("Outgame0028")) == textId ||
+				GetTextIdByName(IL2CPP_STRING("Outgame0231")) == textId ||
+				GetTextIdByName(IL2CPP_STRING("Outgame0393")) == textId ||
+				GetTextIdByName(IL2CPP_STRING("SingleMode0265")) == textId ||
+				GetTextIdByName(IL2CPP_STRING("Character0039")) == textId ||
+				GetTextIdByName(IL2CPP_STRING("Character0325")) == textId)
 			{
 				text_set_horizontalOverflow(_this, 1);
 				text_set_verticalOverflow(_this, 1);
@@ -6516,7 +6409,7 @@ namespace
 				break;
 			}
 			auto enumName = GetEnumName(colorType, colorEnum)->chars;
-			if (enumName == u"White"s || enumName == u"Black"s)
+			if (enumName == il2cppstring(IL2CPP_STRING("White")) || enumName == il2cppstring(IL2CPP_STRING("Black")))
 			{
 				color32 = color;
 				break;
@@ -6558,8 +6451,8 @@ namespace
 	{
 		if (!allowNewLine)
 		{
-			auto str = u16string(text->chars);
-			replaceAll(str, u"\n", u"");
+			auto str = il2cppstring(text->chars);
+			replaceAll(str, IL2CPP_STRING("\n"), IL2CPP_STRING(""));
 			return il2cpp_string_new16(str.data());
 		}
 		return text;
@@ -6860,7 +6753,7 @@ namespace
 				if (obj->klass->name == "Texture2D"s)
 				{
 					auto uobject_name = UnityEngine::Object::Name(obj);
-					if (!u16string(uobject_name->chars).empty())
+					if (!il2cppstring(uobject_name->chars).empty())
 					{
 						auto newTexture = GetReplacementAssets(
 							uobject_name,
@@ -6897,7 +6790,7 @@ namespace
 			auto uobject_name = UnityEngine::Object::Name(texture);
 			if (uobject_name)
 			{
-				auto nameU8 = u16_u8(uobject_name->chars);
+				auto nameU8 = il2cpp_u8(uobject_name->chars);
 				if (!nameU8.empty())
 				{
 					do
@@ -6973,7 +6866,7 @@ namespace
 											if (textureSetColor)
 											{
 												auto uobject_name = UnityEngine::Object::Name(textureSetColor);
-												if (!u16string(uobject_name->chars).empty())
+												if (!il2cppstring(uobject_name->chars).empty())
 												{
 													auto newTexture = GetReplacementAssets(
 														uobject_name,
@@ -6990,7 +6883,7 @@ namespace
 											if (textureSetAlpha)
 											{
 												auto uobject_name = UnityEngine::Object::Name(textureSetAlpha);
-												if (!u16string(uobject_name->chars).empty())
+												if (!il2cppstring(uobject_name->chars).empty())
 												{
 													auto newTexture = GetReplacementAssets(
 														uobject_name,
@@ -7027,7 +6920,7 @@ namespace
 											if (textureColor)
 											{
 												auto uobject_name = UnityEngine::Object::Name(textureColor);
-												if (!u16string(uobject_name->chars).empty())
+												if (!il2cppstring(uobject_name->chars).empty())
 												{
 													auto newTexture = GetReplacementAssets(
 														uobject_name,
@@ -7044,7 +6937,7 @@ namespace
 											if (textureAlpha)
 											{
 												auto uobject_name = UnityEngine::Object::Name(textureAlpha);
-												if (!u16string(uobject_name->chars).empty())
+												if (!il2cppstring(uobject_name->chars).empty())
 												{
 													auto newTexture = GetReplacementAssets(
 														uobject_name,
@@ -7319,27 +7212,6 @@ namespace
 		{
 			ReplaceMaterialTexture(material);
 		}
-	}
-
-	void* AssetBundleRequest_GetResult_orig = nullptr;
-	Il2CppObject* AssetBundleRequest_GetResult_hook(Il2CppObject* _this)
-	{
-		auto obj = reinterpret_cast<decltype(AssetBundleRequest_GetResult_hook)*>(AssetBundleRequest_GetResult_orig)(_this);
-		if (obj)
-		{
-			auto name = UnityEngine::Object::Name(obj);
-			u16string wName = name->chars;
-			if (find(config::runtime::replaceAssetNames.begin(), config::runtime::replaceAssetNames.end(), wName) != config::runtime::replaceAssetNames.end())
-			{
-				return GetReplacementAssets(name, reinterpret_cast<Il2CppReflectionType*>(il2cpp_type_get_object(il2cpp_class_get_type(obj->klass))));
-			}
-
-			if (obj->klass->name == "GameObject"s)
-			{
-				ReplaceGameObjectTextures(obj);
-			}
-		}
-		return obj;
 	}
 
 	Il2CppArraySize_t<Il2CppObject*>* GetRectTransformArray(Il2CppObject* object)
@@ -7971,9 +7843,9 @@ namespace
 
 			if (transform)
 			{
-				if (UnityEngine::Object::Name(transform)->chars == u"ToggleMute"s ||
-					UnityEngine::Object::Name(transform)->chars == u"ImageIcon"s ||
-					UnityEngine::Object::Name(transform)->chars == u"Line"s)
+				if (UnityEngine::Object::Name(transform)->chars == il2cppstring(IL2CPP_STRING("ToggleMute")) ||
+					UnityEngine::Object::Name(transform)->chars == il2cppstring(IL2CPP_STRING("ImageIcon")) ||
+					UnityEngine::Object::Name(transform)->chars == il2cppstring(IL2CPP_STRING("Line")))
 				{
 					destroyTargets.emplace_back(transform);
 				}
@@ -7998,7 +7870,7 @@ namespace
 
 			if (transform)
 			{
-				if (UnityEngine::Object::Name(transform)->chars == u"Slider"s)
+				if (UnityEngine::Object::Name(transform)->chars == il2cppstring(IL2CPP_STRING("Slider")))
 				{
 					il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, UnityEngine::Vector2)>(transform->klass, "set_sizeDelta", 1)->methodPointer(transform, UnityEngine::Vector2{ 560, 24 });
 					break;
@@ -8149,11 +8021,11 @@ namespace
 		}
 	}
 
-	void AddOrSetString(U16Document& document, const Il2CppChar* name, u16string value)
+	void AddOrSetString(U16Document& document, const Il2CppChar* name, il2cppstring value)
 	{
 		auto length = value.size();
 		Il2CppChar* copy = new Il2CppChar[length + 1];
-		char_traits<char16_t>::copy(copy, value.data(), length);
+		char_traits<Il2CppChar>::copy(copy, value.data(), length);
 
 		if (document.HasMember(name))
 		{
@@ -8314,7 +8186,7 @@ namespace
 
 		auto dialogData = Gallop::DialogCommon::Data();
 
-		dialogData.SetSimpleTwoButtonMessage(il2cpp_string_new16(title), nullptr, onRight, GetTextIdByName(u"Common0004"), GetTextIdByName(u"Common0003"), onLeft, Gallop::DialogCommonBase::FormType::BIG_TWO_BUTTON);
+		dialogData.SetSimpleTwoButtonMessage(il2cpp_string_new16(title), nullptr, onRight, GetTextIdByName(IL2CPP_STRING("Common0004")), GetTextIdByName(IL2CPP_STRING("Common0003")), onLeft, Gallop::DialogCommonBase::FormType::BIG_TWO_BUTTON);
 		dialogData.DispStackType(Gallop::DialogCommon::DispStackType::DialogOnDialog);
 		dialogData.ObjParentType(Gallop::DialogCommon::Data::ObjectParentType::Base);
 		dialogData.AutoClose(false);
@@ -8400,7 +8272,7 @@ namespace
 
 		for (auto& pair : options)
 		{
-			toggles.emplace_back(GetRadioButtonWithText(("radio_"s + pair).data(), u8_u16(pair).data()));
+			toggles.emplace_back(GetRadioButtonWithText(("radio_"s + pair).data(), u8_il2cpp(pair).data()));
 		}
 
 		AddToLayout(m_Content, toggles);
@@ -8439,7 +8311,7 @@ namespace
 
 		auto dialogData = Gallop::DialogCommon::Data();
 
-		dialogData.SetSimpleTwoButtonMessage(il2cpp_string_new16(title), nullptr, onRight, GetTextIdByName(u"Common0004"), GetTextIdByName(u"Common0003"), onLeft, Gallop::DialogCommonBase::FormType::BIG_TWO_BUTTON);
+		dialogData.SetSimpleTwoButtonMessage(il2cpp_string_new16(title), nullptr, onRight, GetTextIdByName(IL2CPP_STRING("Common0004")), GetTextIdByName(IL2CPP_STRING("Common0003")), onLeft, Gallop::DialogCommonBase::FormType::BIG_TWO_BUTTON);
 		dialogData.DispStackType(Gallop::DialogCommon::DispStackType::DialogOnDialog);
 		dialogData.ObjParentType(Gallop::DialogCommon::Data::ObjectParentType::Base);
 		dialogData.AutoClose(false);
@@ -8525,7 +8397,7 @@ namespace
 
 		for (auto& color : options)
 		{
-			auto colorU16 = u8_u16(color);
+			auto colorU16 = u8_il2cpp(color);
 			toggles.emplace_back(GetRadioButtonWithText(("radio_"s + color).data(), colorU16.data()));
 			SetTextCommonFontColor(GetTextCommon(("radio_"s + color).data()), colorU16.data());
 		}
@@ -8567,7 +8439,7 @@ namespace
 
 		auto dialogData = Gallop::DialogCommon::Data();
 
-		dialogData.SetSimpleTwoButtonMessage(il2cpp_string_new16(title), nullptr, onRight, GetTextIdByName(u"Common0004"), GetTextIdByName(u"Common0003"), onLeft, Gallop::DialogCommonBase::FormType::BIG_TWO_BUTTON);
+		dialogData.SetSimpleTwoButtonMessage(il2cpp_string_new16(title), nullptr, onRight, GetTextIdByName(IL2CPP_STRING("Common0004")), GetTextIdByName(IL2CPP_STRING("Common0003")), onLeft, Gallop::DialogCommonBase::FormType::BIG_TWO_BUTTON);
 		dialogData.DispStackType(Gallop::DialogCommon::DispStackType::DialogOnDialog);
 		dialogData.ObjParentType(Gallop::DialogCommon::Data::ObjectParentType::Base);
 		dialogData.AutoClose(false);
@@ -8653,11 +8525,11 @@ namespace
 
 		for (auto& size : options)
 		{
-			auto sizeU16 = u8_u16(size);
+			auto sizeU16 = u8_il2cpp(size);
 			toggles.emplace_back(GetRadioButtonWithText(("radio_"s + size).data(), sizeU16.data()));
-			SetTextCommonFontColor(GetTextCommon(("radio_"s + size).data()), u"White");
+			SetTextCommonFontColor(GetTextCommon(("radio_"s + size).data()), IL2CPP_STRING("White"));
 			SetTextCommonOutlineSize(GetTextCommon(("radio_"s + size).data()), sizeU16.data());
-			SetTextCommonOutlineColor(GetTextCommon(("radio_"s + size).data()), u"Brown");
+			SetTextCommonOutlineColor(GetTextCommon(("radio_"s + size).data()), IL2CPP_STRING("Brown"));
 		}
 
 		AddToLayout(m_Content, toggles);
@@ -8697,7 +8569,7 @@ namespace
 
 		auto dialogData = Gallop::DialogCommon::Data();
 
-		dialogData.SetSimpleTwoButtonMessage(il2cpp_string_new16(title), nullptr, onRight, GetTextIdByName(u"Common0004"), GetTextIdByName(u"Common0003"), onLeft, Gallop::DialogCommonBase::FormType::BIG_TWO_BUTTON);
+		dialogData.SetSimpleTwoButtonMessage(il2cpp_string_new16(title), nullptr, onRight, GetTextIdByName(IL2CPP_STRING("Common0004")), GetTextIdByName(IL2CPP_STRING("Common0003")), onLeft, Gallop::DialogCommonBase::FormType::BIG_TWO_BUTTON);
 		dialogData.DispStackType(Gallop::DialogCommon::DispStackType::DialogOnDialog);
 		dialogData.ObjParentType(Gallop::DialogCommon::Data::ObjectParentType::Base);
 		dialogData.AutoClose(false);
@@ -8783,7 +8655,7 @@ namespace
 
 		for (auto& color : options)
 		{
-			auto colorU16 = u8_u16(color);
+			auto colorU16 = u8_il2cpp(color);
 			toggles.emplace_back(GetRadioButtonWithText(("radio_"s + color).data(), colorU16.data()));
 			SetTextCommonOutlineColor(GetTextCommon(("radio_"s + color).data()), colorU16.data());
 		}
@@ -8921,102 +8793,102 @@ namespace
 			{
 				auto& configDocument = config::config_document;
 
-				AddOrSet(configDocument, u"antiAliasing", vector<int>{ -1, 0, 2, 4, 8 }[GetOptionSliderValue("anti_aliasing")]);
+				AddOrSet(configDocument, IL2CPP_STRING("antiAliasing"), vector<int>{ -1, 0, 2, 4, 8 }[GetOptionSliderValue("anti_aliasing")]);
 
-				AddOrSet(configDocument, u"characterSystemTextCaption", GetOptionItemOnOffIsOn("character_system_text_caption"));
+				AddOrSet(configDocument, IL2CPP_STRING("characterSystemTextCaption"), GetOptionItemOnOffIsOn("character_system_text_caption"));
 
-				AddOrSet(configDocument, u"characterSystemTextCaptionLineCharCount", static_cast<int>(GetOptionSliderValue("character_system_text_caption_line_char_count")));
+				AddOrSet(configDocument, IL2CPP_STRING("characterSystemTextCaptionLineCharCount"), static_cast<int>(GetOptionSliderValue("character_system_text_caption_line_char_count")));
 
-				AddOrSet(configDocument, u"characterSystemTextCaptionFontSize", static_cast<int>(GetOptionSliderValue("character_system_text_caption_font_size")));
+				AddOrSet(configDocument, IL2CPP_STRING("characterSystemTextCaptionFontSize"), static_cast<int>(GetOptionSliderValue("character_system_text_caption_font_size")));
 
-				AddOrSet(configDocument, u"characterSystemTextCaptionPositionX", GetOptionSliderValue("character_system_text_caption_position_x") / 10);
+				AddOrSet(configDocument, IL2CPP_STRING("characterSystemTextCaptionPositionX"), GetOptionSliderValue("character_system_text_caption_position_x") / 10);
 
-				AddOrSet(configDocument, u"characterSystemTextCaptionPositionY", GetOptionSliderValue("character_system_text_caption_position_y") / 10);
+				AddOrSet(configDocument, IL2CPP_STRING("characterSystemTextCaptionPositionY"), GetOptionSliderValue("character_system_text_caption_position_y") / 10);
 
-				AddOrSet(configDocument, u"characterSystemTextCaptionBackgroundAlpha", GetOptionSliderValue("character_system_text_caption_background_alpha") / 100);
+				AddOrSet(configDocument, IL2CPP_STRING("characterSystemTextCaptionBackgroundAlpha"), GetOptionSliderValue("character_system_text_caption_background_alpha") / 100);
 
-				AddOrSet(configDocument, u"liveSliderAlwaysShow", GetOptionItemOnOffIsOn("live_slider_always_show"));
+				AddOrSet(configDocument, IL2CPP_STRING("liveSliderAlwaysShow"), GetOptionItemOnOffIsOn("live_slider_always_show"));
 
-				AddOrSet(configDocument, u"livePlaybackLoop", GetOptionItemOnOffIsOn("live_playback_loop"));
+				AddOrSet(configDocument, IL2CPP_STRING("livePlaybackLoop"), GetOptionItemOnOffIsOn("live_playback_loop"));
 
-				AddOrSet(configDocument, u"championsLiveShowText", GetOptionItemOnOffIsOn("champions_live_show_text"));
+				AddOrSet(configDocument, IL2CPP_STRING("championsLiveShowText"), GetOptionItemOnOffIsOn("champions_live_show_text"));
 
-				AddOrSet(configDocument, u"allowDeleteCookie", GetOptionItemOnOffIsOn("allow_delete_cookie"));
+				AddOrSet(configDocument, IL2CPP_STRING("allowDeleteCookie"), GetOptionItemOnOffIsOn("allow_delete_cookie"));
 
-				AddOrSet(configDocument, u"cySpringUpdateMode", static_cast<int>(GetOptionSliderValue("cyspring_update_mode")));
+				AddOrSet(configDocument, IL2CPP_STRING("cySpringUpdateMode"), static_cast<int>(GetOptionSliderValue("cyspring_update_mode")));
 
-				AddOrSet(configDocument, u"uiAnimationScale", static_cast<int>(round(GetOptionSliderValue("ui_animation_scale") * 100)) / 100.0);
+				AddOrSet(configDocument, IL2CPP_STRING("uiAnimationScale"), static_cast<int>(round(GetOptionSliderValue("ui_animation_scale") * 100)) / 100.0);
 
-				AddOrSet(configDocument, u"resolution3dScale", static_cast<int>(round(GetOptionSliderValue("resolution_3d_scale") * 100)) / 100.0);
+				AddOrSet(configDocument, IL2CPP_STRING("resolution3dScale"), static_cast<int>(round(GetOptionSliderValue("resolution_3d_scale") * 100)) / 100.0);
 
-				AddOrSet(configDocument, u"notificationTp", GetOptionItemOnOffIsOn("notification_tp"));
+				AddOrSet(configDocument, IL2CPP_STRING("notificationTp"), GetOptionItemOnOffIsOn("notification_tp"));
 
-				AddOrSet(configDocument, u"notificationRp", GetOptionItemOnOffIsOn("notification_rp"));
+				AddOrSet(configDocument, IL2CPP_STRING("notificationRp"), GetOptionItemOnOffIsOn("notification_rp"));
 
-				AddOrSet(configDocument, u"notificationJobs", GetOptionItemOnOffIsOn("notification_jobs"));
+				AddOrSet(configDocument, IL2CPP_STRING("notificationJobs"), GetOptionItemOnOffIsOn("notification_jobs"));
 
-				AddOrSet(configDocument, u"dumpMsgPack", GetOptionItemOnOffIsOn("dump_msgpack"));
+				AddOrSet(configDocument, IL2CPP_STRING("dumpMsgPack"), GetOptionItemOnOffIsOn("dump_msgpack"));
 
-				AddOrSet(configDocument, u"dumpMsgPackRequest", GetOptionItemOnOffIsOn("dump_msgpack_request"));
+				AddOrSet(configDocument, IL2CPP_STRING("dumpMsgPackRequest"), GetOptionItemOnOffIsOn("dump_msgpack_request"));
 
-				AddOrSet(configDocument, u"useThirdPartyNews", GetOptionItemOnOffIsOn("use_third_party_news"));
+				AddOrSet(configDocument, IL2CPP_STRING("useThirdPartyNews"), GetOptionItemOnOffIsOn("use_third_party_news"));
 
 #ifdef EXPERIMENTS
-				AddOrSet(configDocument, u"unlockLiveChara", GetOptionItemOnOffIsOn("unlock_live_chara"));
+				AddOrSet(configDocument, IL2CPP_STRING("unlockLiveChara"), GetOptionItemOnOffIsOn("unlock_live_chara"));
 #endif
-				AddOrSet(configDocument, u"unlockSize", GetOptionItemOnOffIsOn("unlock_size"));
+				AddOrSet(configDocument, IL2CPP_STRING("unlockSize"), GetOptionItemOnOffIsOn("unlock_size"));
 
-				AddOrSet(configDocument, u"unlockSizeUseSystemResolution", GetOptionItemOnOffIsOn("use_system_resolution"));
+				AddOrSet(configDocument, IL2CPP_STRING("unlockSizeUseSystemResolution"), GetOptionItemOnOffIsOn("use_system_resolution"));
 
-				AddOrSet(configDocument, u"uiScale", static_cast<int>(round(GetOptionSliderValue("ui_scale") * 100)) / 100.0);
+				AddOrSet(configDocument, IL2CPP_STRING("uiScale"), static_cast<int>(round(GetOptionSliderValue("ui_scale") * 100)) / 100.0);
 
-				AddOrSet(configDocument, u"autoFullscreen", GetOptionItemOnOffIsOn("auto_fullscreen"));
+				AddOrSet(configDocument, IL2CPP_STRING("autoFullscreen"), GetOptionItemOnOffIsOn("auto_fullscreen"));
 
-				AddOrSet(configDocument, u"freeFormWindow", GetOptionItemOnOffIsOn("freeform_window"));
+				AddOrSet(configDocument, IL2CPP_STRING("freeFormWindow"), GetOptionItemOnOffIsOn("freeform_window"));
 
-				AddOrSet(configDocument, u"freeFormUiScalePortrait", static_cast<int>(round(GetOptionSliderValue("ui_scale_portrait") * 100)) / 100.0);
+				AddOrSet(configDocument, IL2CPP_STRING("freeFormUiScalePortrait"), static_cast<int>(round(GetOptionSliderValue("ui_scale_portrait") * 100)) / 100.0);
 
-				AddOrSet(configDocument, u"freeFormUiScaleLandscape", static_cast<int>(round(GetOptionSliderValue("ui_scale_landscape") * 100)) / 100.0);
+				AddOrSet(configDocument, IL2CPP_STRING("freeFormUiScaleLandscape"), static_cast<int>(round(GetOptionSliderValue("ui_scale_landscape") * 100)) / 100.0);
 
-				AddOrSet(configDocument, u"taskbarShowProgressOnDownload", GetOptionItemOnOffIsOn("taskbar_show_progress_on_download"));
+				AddOrSet(configDocument, IL2CPP_STRING("taskbarShowProgressOnDownload"), GetOptionItemOnOffIsOn("taskbar_show_progress_on_download"));
 
-				AddOrSet(configDocument, u"taskbarShowProgressOnConnecting", GetOptionItemOnOffIsOn("taskbar_show_progress_on_connecting"));
+				AddOrSet(configDocument, IL2CPP_STRING("taskbarShowProgressOnConnecting"), GetOptionItemOnOffIsOn("taskbar_show_progress_on_connecting"));
 
-				config::graphics_quality = configDocument[u"graphicsQuality"].GetInt();
+				config::graphics_quality = configDocument[IL2CPP_STRING("graphicsQuality")].GetInt();
 
-				config::anti_aliasing = configDocument[u"antiAliasing"].GetInt();
+				config::anti_aliasing = configDocument[IL2CPP_STRING("antiAliasing")].GetInt();
 
-				config::character_system_text_caption_line_char_count = configDocument[u"characterSystemTextCaptionLineCharCount"].GetInt();
+				config::character_system_text_caption_line_char_count = configDocument[IL2CPP_STRING("characterSystemTextCaptionLineCharCount")].GetInt();
 
-				config::character_system_text_caption_font_size = configDocument[u"characterSystemTextCaptionFontSize"].GetInt();
+				config::character_system_text_caption_font_size = configDocument[IL2CPP_STRING("characterSystemTextCaptionFontSize")].GetInt();
 
-				config::character_system_text_caption_background_alpha = configDocument[u"characterSystemTextCaptionBackgroundAlpha"].GetFloat();
+				config::character_system_text_caption_background_alpha = configDocument[IL2CPP_STRING("characterSystemTextCaptionBackgroundAlpha")].GetFloat();
 
-				config::character_system_text_caption_position_x = configDocument[u"characterSystemTextCaptionPositionX"].GetFloat();
+				config::character_system_text_caption_position_x = configDocument[IL2CPP_STRING("characterSystemTextCaptionPositionX")].GetFloat();
 
-				config::character_system_text_caption_position_y = configDocument[u"characterSystemTextCaptionPositionY"].GetFloat();
+				config::character_system_text_caption_position_y = configDocument[IL2CPP_STRING("characterSystemTextCaptionPositionY")].GetFloat();
 
-				config::character_system_text_caption_font_color = configDocument[u"characterSystemTextCaptionFontColor"].GetString();
+				config::character_system_text_caption_font_color = configDocument[IL2CPP_STRING("characterSystemTextCaptionFontColor")].GetString();
 
-				config::character_system_text_caption_outline_size = configDocument[u"characterSystemTextCaptionOutlineSize"].GetString();
+				config::character_system_text_caption_outline_size = configDocument[IL2CPP_STRING("characterSystemTextCaptionOutlineSize")].GetString();
 
-				config::character_system_text_caption_outline_color = configDocument[u"characterSystemTextCaptionOutlineColor"].GetString();
+				config::character_system_text_caption_outline_color = configDocument[IL2CPP_STRING("characterSystemTextCaptionOutlineColor")].GetString();
 
-				config::live_slider_always_show = configDocument[u"liveSliderAlwaysShow"].GetBool();
+				config::live_slider_always_show = configDocument[IL2CPP_STRING("liveSliderAlwaysShow")].GetBool();
 
-				config::live_playback_loop = configDocument[u"livePlaybackLoop"].GetBool();
+				config::live_playback_loop = configDocument[IL2CPP_STRING("livePlaybackLoop")].GetBool();
 
-				config::champions_live_show_text = configDocument[u"championsLiveShowText"].GetBool();
+				config::champions_live_show_text = configDocument[IL2CPP_STRING("championsLiveShowText")].GetBool();
 
-				config::champions_live_year = configDocument[u"championsLiveYear"].GetInt();
+				config::champions_live_year = configDocument[IL2CPP_STRING("championsLiveYear")].GetInt();
 
-				config::champions_live_resource_id = configDocument[u"championsLiveResourceId"].GetInt();
+				config::champions_live_resource_id = configDocument[IL2CPP_STRING("championsLiveResourceId")].GetInt();
 
-				config::cyspring_update_mode = configDocument[u"cySpringUpdateMode"].GetInt();
+				config::cyspring_update_mode = configDocument[IL2CPP_STRING("cySpringUpdateMode")].GetInt();
 
-				config::ui_animation_scale = configDocument[u"uiAnimationScale"].GetFloat();
+				config::ui_animation_scale = configDocument[IL2CPP_STRING("uiAnimationScale")].GetFloat();
 
-				config::resolution_3d_scale = configDocument[u"resolution3dScale"].GetFloat();
+				config::resolution_3d_scale = configDocument[IL2CPP_STRING("resolution3dScale")].GetFloat();
 
 				auto graphicSettings = GetSingletonInstance(il2cpp_symbols::get_class("umamusume.dll", "Gallop", "GraphicSettings"));
 
@@ -9035,17 +8907,17 @@ namespace
 				il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*)>(nowLoading->klass, "DeleteMiniCharacter", 0)->methodPointer(nowLoading);
 				il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*)>(nowLoading->klass, "CreateMiniCharacter", 0)->methodPointer(nowLoading);
 
-				config::unlock_size_use_system_resolution = configDocument[u"unlockSizeUseSystemResolution"].GetBool();
+				config::unlock_size_use_system_resolution = configDocument[IL2CPP_STRING("unlockSizeUseSystemResolution")].GetBool();
 
-				config::ui_scale = configDocument[u"uiScale"].GetFloat();
+				config::ui_scale = configDocument[IL2CPP_STRING("uiScale")].GetFloat();
 
-				config::auto_fullscreen = configDocument[u"autoFullscreen"].GetBool();
+				config::auto_fullscreen = configDocument[IL2CPP_STRING("autoFullscreen")].GetBool();
 
-				config::freeform_ui_scale_portrait = configDocument[u"freeFormUiScalePortrait"].GetFloat();
+				config::freeform_ui_scale_portrait = configDocument[IL2CPP_STRING("freeFormUiScalePortrait")].GetFloat();
 
-				config::freeform_ui_scale_landscape = configDocument[u"freeFormUiScaleLandscape"].GetFloat();
+				config::freeform_ui_scale_landscape = configDocument[IL2CPP_STRING("freeFormUiScaleLandscape")].GetFloat();
 
-				config::notification_tp = configDocument[u"notificationTp"].GetBool();
+				config::notification_tp = configDocument[IL2CPP_STRING("notificationTp")].GetBool();
 
 				if (config::notification_tp)
 				{
@@ -9056,7 +8928,7 @@ namespace
 					DesktopNotificationManagerCompat::RemoveFromScheduleByTag(L"TP");
 				}
 
-				config::notification_rp = configDocument[u"notificationRp"].GetBool();
+				config::notification_rp = configDocument[IL2CPP_STRING("notificationRp")].GetBool();
 
 				if (config::notification_rp)
 				{
@@ -9067,7 +8939,7 @@ namespace
 					DesktopNotificationManagerCompat::RemoveFromScheduleByTag(L"RP");
 				}
 
-				config::notification_jobs = configDocument[u"notificationJobs"].GetBool();
+				config::notification_jobs = configDocument[IL2CPP_STRING("notificationJobs")].GetBool();
 
 				if (config::notification_jobs)
 				{
@@ -9078,23 +8950,23 @@ namespace
 					DesktopNotificationManagerCompat::RemoveFromScheduleByGroup(L"Jobs");
 				}
 
-				config::taskbar_show_progress_on_download = configDocument[u"taskbarShowProgressOnDownload"].GetBool();
+				config::taskbar_show_progress_on_download = configDocument[IL2CPP_STRING("taskbarShowProgressOnDownload")].GetBool();
 
-				config::taskbar_show_progress_on_connecting = configDocument[u"taskbarShowProgressOnConnecting"].GetBool();
+				config::taskbar_show_progress_on_connecting = configDocument[IL2CPP_STRING("taskbarShowProgressOnConnecting")].GetBool();
 
-				config::dump_msgpack = configDocument[u"dumpMsgPack"].GetBool();
+				config::dump_msgpack = configDocument[IL2CPP_STRING("dumpMsgPack")].GetBool();
 
-				config::dump_msgpack_request = configDocument[u"dumpMsgPackRequest"].GetBool();
+				config::dump_msgpack_request = configDocument[IL2CPP_STRING("dumpMsgPackRequest")].GetBool();
 
-				config::use_third_party_news = configDocument[u"useThirdPartyNews"].GetBool();
+				config::use_third_party_news = configDocument[IL2CPP_STRING("useThirdPartyNews")].GetBool();
 
 #ifdef EXPERIMENTS
-				config::unlock_live_chara = configDocument[u"unlockLiveChara"].GetBool();
+				config::unlock_live_chara = configDocument[IL2CPP_STRING("unlockLiveChara")].GetBool();
 #endif
 				config::write_config();
 
 				auto dialogData = Gallop::DialogCommon::Data();
-				dialogData.SetSimpleOneButtonMessage(GetTextIdByName(u"AccoutDataLink0061"), localize_get_hook(GetTextIdByName(u"Outgame0309")), nullptr, GetTextIdByName(u"Common0007"));
+				dialogData.SetSimpleOneButtonMessage(GetTextIdByName(IL2CPP_STRING("AccoutDataLink0061")), localize_get_hook(GetTextIdByName(IL2CPP_STRING("Outgame0309"))), nullptr, GetTextIdByName(IL2CPP_STRING("Common0007")));
 
 				auto onDestroy = CreateDelegateStatic(*[]()
 					{
@@ -9110,7 +8982,7 @@ namespace
 
 		auto dialogData = Gallop::DialogCommon::Data();
 
-		dialogData.SetSimpleTwoButtonMessage(il2cpp_string_new16(LocalifySettings::GetText("settings_title")), nullptr, onRight, GetTextIdByName(u"Common0004"), GetTextIdByName(u"Common0261"), onLeft, Gallop::DialogCommonBase::FormType::BIG_TWO_BUTTON);
+		dialogData.SetSimpleTwoButtonMessage(il2cpp_string_new16(LocalifySettings::GetText("settings_title")), nullptr, onRight, GetTextIdByName(IL2CPP_STRING("Common0004")), GetTextIdByName(IL2CPP_STRING("Common0261")), onLeft, Gallop::DialogCommonBase::FormType::BIG_TWO_BUTTON);
 		dialogData.DispStackType(Gallop::DialogCommon::DispStackType::DialogOnDialog);
 		dialogData.ObjParentType(Gallop::DialogCommon::Data::ObjectParentType::Base);
 		dialogData.AutoClose(false);
@@ -9223,161 +9095,161 @@ namespace
 		{
 			auto& configDocument = config::config_document;
 
-			if (configDocument.HasMember(u"antiAliasing"))
+			if (configDocument.HasMember(IL2CPP_STRING("antiAliasing")))
 			{
 				vector<int> options = { -1, 0, 2, 4, 8 };
-				antiAliasing = find(options.begin(), options.end(), configDocument[u"antiAliasing"].GetInt()) - options.begin();
+				antiAliasing = find(options.begin(), options.end(), configDocument[IL2CPP_STRING("antiAliasing")].GetInt()) - options.begin();
 			}
 
-			if (configDocument.HasMember(u"characterSystemTextCaption"))
+			if (configDocument.HasMember(IL2CPP_STRING("characterSystemTextCaption")))
 			{
-				characterSystemTextCaption = configDocument[u"characterSystemTextCaption"].GetBool();
+				characterSystemTextCaption = configDocument[IL2CPP_STRING("characterSystemTextCaption")].GetBool();
 			}
 
-			if (configDocument.HasMember(u"championsLiveShowText"))
+			if (configDocument.HasMember(IL2CPP_STRING("championsLiveShowText")))
 			{
-				championsLiveShowText = configDocument[u"championsLiveShowText"].GetBool();
+				championsLiveShowText = configDocument[IL2CPP_STRING("championsLiveShowText")].GetBool();
 			}
 
-			if (configDocument.HasMember(u"liveSliderAlwaysShow"))
+			if (configDocument.HasMember(IL2CPP_STRING("liveSliderAlwaysShow")))
 			{
-				liveSliderAlwaysShow = configDocument[u"liveSliderAlwaysShow"].GetBool();
+				liveSliderAlwaysShow = configDocument[IL2CPP_STRING("liveSliderAlwaysShow")].GetBool();
 			}
 
-			if (configDocument.HasMember(u"livePlaybackLoop"))
+			if (configDocument.HasMember(IL2CPP_STRING("livePlaybackLoop")))
 			{
-				livePlaybackLoop = configDocument[u"livePlaybackLoop"].GetBool();
+				livePlaybackLoop = configDocument[IL2CPP_STRING("livePlaybackLoop")].GetBool();
 			}
 
-			if (configDocument.HasMember(u"championsLiveYear"))
+			if (configDocument.HasMember(IL2CPP_STRING("championsLiveYear")))
 			{
-				championsLiveYear = configDocument[u"championsLiveYear"].GetInt();
+				championsLiveYear = configDocument[IL2CPP_STRING("championsLiveYear")].GetInt();
 			}
 
-			if (configDocument.HasMember(u"characterSystemTextCaptionLineCharCount"))
+			if (configDocument.HasMember(IL2CPP_STRING("characterSystemTextCaptionLineCharCount")))
 			{
-				characterSystemTextCaptionLineCharCount = configDocument[u"characterSystemTextCaptionLineCharCount"].GetInt();
+				characterSystemTextCaptionLineCharCount = configDocument[IL2CPP_STRING("characterSystemTextCaptionLineCharCount")].GetInt();
 			}
 
-			if (configDocument.HasMember(u"characterSystemTextCaptionFontSize"))
+			if (configDocument.HasMember(IL2CPP_STRING("characterSystemTextCaptionFontSize")))
 			{
-				characterSystemTextCaptionFontSize = configDocument[u"characterSystemTextCaptionFontSize"].GetInt();
+				characterSystemTextCaptionFontSize = configDocument[IL2CPP_STRING("characterSystemTextCaptionFontSize")].GetInt();
 			}
 
-			if (configDocument.HasMember(u"characterSystemTextCaptionPositionX"))
+			if (configDocument.HasMember(IL2CPP_STRING("characterSystemTextCaptionPositionX")))
 			{
-				characterSystemTextCaptionPositionX = configDocument[u"characterSystemTextCaptionPositionX"].GetFloat();
+				characterSystemTextCaptionPositionX = configDocument[IL2CPP_STRING("characterSystemTextCaptionPositionX")].GetFloat();
 			}
 
-			if (configDocument.HasMember(u"characterSystemTextCaptionPositionY"))
+			if (configDocument.HasMember(IL2CPP_STRING("characterSystemTextCaptionPositionY")))
 			{
-				characterSystemTextCaptionPositionY = configDocument[u"characterSystemTextCaptionPositionY"].GetFloat();
+				characterSystemTextCaptionPositionY = configDocument[IL2CPP_STRING("characterSystemTextCaptionPositionY")].GetFloat();
 			}
 
-			if (configDocument.HasMember(u"characterSystemTextCaptionBackgroundAlpha"))
+			if (configDocument.HasMember(IL2CPP_STRING("characterSystemTextCaptionBackgroundAlpha")))
 			{
-				characterSystemTextCaptionBackgroundAlpha = configDocument[u"characterSystemTextCaptionBackgroundAlpha"].GetFloat();
+				characterSystemTextCaptionBackgroundAlpha = configDocument[IL2CPP_STRING("characterSystemTextCaptionBackgroundAlpha")].GetFloat();
 			}
 
-			if (configDocument.HasMember(u"allowDeleteCookie"))
+			if (configDocument.HasMember(IL2CPP_STRING("allowDeleteCookie")))
 			{
-				allowDeleteCookie = configDocument[u"allowDeleteCookie"].GetBool();
+				allowDeleteCookie = configDocument[IL2CPP_STRING("allowDeleteCookie")].GetBool();
 			}
 
-			if (configDocument.HasMember(u"cySpringUpdateMode"))
+			if (configDocument.HasMember(IL2CPP_STRING("cySpringUpdateMode")))
 			{
-				cySpringUpdateMode = configDocument[u"cySpringUpdateMode"].GetInt();
+				cySpringUpdateMode = configDocument[IL2CPP_STRING("cySpringUpdateMode")].GetInt();
 			}
 
-			if (configDocument.HasMember(u"resolution3dScale"))
+			if (configDocument.HasMember(IL2CPP_STRING("resolution3dScale")))
 			{
-				resolution3dScale = configDocument[u"resolution3dScale"].GetFloat();
+				resolution3dScale = configDocument[IL2CPP_STRING("resolution3dScale")].GetFloat();
 			}
 
-			if (configDocument.HasMember(u"uiAnimationScale"))
+			if (configDocument.HasMember(IL2CPP_STRING("uiAnimationScale")))
 			{
-				uiAnimationScale = configDocument[u"uiAnimationScale"].GetFloat();
+				uiAnimationScale = configDocument[IL2CPP_STRING("uiAnimationScale")].GetFloat();
 			}
 
-			if (configDocument.HasMember(u"notificationTp"))
+			if (configDocument.HasMember(IL2CPP_STRING("notificationTp")))
 			{
-				notificationTp = configDocument[u"notificationTp"].GetBool();
+				notificationTp = configDocument[IL2CPP_STRING("notificationTp")].GetBool();
 			}
 
-			if (configDocument.HasMember(u"notificationRp"))
+			if (configDocument.HasMember(IL2CPP_STRING("notificationRp")))
 			{
-				notificationRp = configDocument[u"notificationRp"].GetBool();
+				notificationRp = configDocument[IL2CPP_STRING("notificationRp")].GetBool();
 			}
 
-			if (configDocument.HasMember(u"notificationJobs"))
+			if (configDocument.HasMember(IL2CPP_STRING("notificationJobs")))
 			{
-				notificationJobs = configDocument[u"notificationJobs"].GetBool();
+				notificationJobs = configDocument[IL2CPP_STRING("notificationJobs")].GetBool();
 			}
 
-			if (configDocument.HasMember(u"dumpMsgPack"))
+			if (configDocument.HasMember(IL2CPP_STRING("dumpMsgPack")))
 			{
-				dumpMsgPack = configDocument[u"dumpMsgPack"].GetBool();
+				dumpMsgPack = configDocument[IL2CPP_STRING("dumpMsgPack")].GetBool();
 			}
 
-			if (configDocument.HasMember(u"dumpMsgPackRequest"))
+			if (configDocument.HasMember(IL2CPP_STRING("dumpMsgPackRequest")))
 			{
-				dumpMsgPackRequest = configDocument[u"dumpMsgPackRequest"].GetBool();
+				dumpMsgPackRequest = configDocument[IL2CPP_STRING("dumpMsgPackRequest")].GetBool();
 			}
 
-			if (configDocument.HasMember(u"useThirdPartyNews"))
+			if (configDocument.HasMember(IL2CPP_STRING("useThirdPartyNews")))
 			{
-				useThirdPartyNews = configDocument[u"useThirdPartyNews"].GetBool();
+				useThirdPartyNews = configDocument[IL2CPP_STRING("useThirdPartyNews")].GetBool();
 			}
 
 #ifdef EXPERIMENTS
-			if (configDocument.HasMember(u"unlockLiveChara"))
+			if (configDocument.HasMember(IL2CPP_STRING("unlockLiveChara")))
 			{
-				unlockLiveChara = configDocument[u"unlockLiveChara"].GetBool();
+				unlockLiveChara = configDocument[IL2CPP_STRING("unlockLiveChara")].GetBool();
 			}
 #endif
-			if (configDocument.HasMember(u"unlockSize"))
+			if (configDocument.HasMember(IL2CPP_STRING("unlockSize")))
 			{
-				unlockSize = configDocument[u"unlockSize"].GetBool();
+				unlockSize = configDocument[IL2CPP_STRING("unlockSize")].GetBool();
 			}
 
-			if (configDocument.HasMember(u"unlockSizeUseSystemResolution"))
+			if (configDocument.HasMember(IL2CPP_STRING("unlockSizeUseSystemResolution")))
 			{
-				unlockSizeUseSystemResolution = configDocument[u"unlockSizeUseSystemResolution"].GetBool();
+				unlockSizeUseSystemResolution = configDocument[IL2CPP_STRING("unlockSizeUseSystemResolution")].GetBool();
 			}
 
-			if (configDocument.HasMember(u"uiScale"))
+			if (configDocument.HasMember(IL2CPP_STRING("uiScale")))
 			{
-				uiScale = configDocument[u"uiScale"].GetFloat();
+				uiScale = configDocument[IL2CPP_STRING("uiScale")].GetFloat();
 			}
 
-			if (configDocument.HasMember(u"autoFullscreen"))
+			if (configDocument.HasMember(IL2CPP_STRING("autoFullscreen")))
 			{
-				autoFullscreen = configDocument[u"autoFullscreen"].GetBool();
+				autoFullscreen = configDocument[IL2CPP_STRING("autoFullscreen")].GetBool();
 			}
 
-			if (configDocument.HasMember(u"freeFormWindow"))
+			if (configDocument.HasMember(IL2CPP_STRING("freeFormWindow")))
 			{
-				freeFormWindow = configDocument[u"freeFormWindow"].GetBool();
+				freeFormWindow = configDocument[IL2CPP_STRING("freeFormWindow")].GetBool();
 			}
 
-			if (configDocument.HasMember(u"freeFormUiScalePortrait"))
+			if (configDocument.HasMember(IL2CPP_STRING("freeFormUiScalePortrait")))
 			{
-				freeFormUiScalePortrait = configDocument[u"freeFormUiScalePortrait"].GetFloat();
+				freeFormUiScalePortrait = configDocument[IL2CPP_STRING("freeFormUiScalePortrait")].GetFloat();
 			}
 
-			if (configDocument.HasMember(u"freeFormUiScaleLandscape"))
+			if (configDocument.HasMember(IL2CPP_STRING("freeFormUiScaleLandscape")))
 			{
-				freeFormUiScaleLandscape = configDocument[u"freeFormUiScaleLandscape"].GetFloat();
+				freeFormUiScaleLandscape = configDocument[IL2CPP_STRING("freeFormUiScaleLandscape")].GetFloat();
 			}
 
-			if (configDocument.HasMember(u"taskbarShowProgressOnDownload"))
+			if (configDocument.HasMember(IL2CPP_STRING("taskbarShowProgressOnDownload")))
 			{
-				taskbarShowProgressOnDownload = configDocument[u"taskbarShowProgressOnDownload"].GetBool();
+				taskbarShowProgressOnDownload = configDocument[IL2CPP_STRING("taskbarShowProgressOnDownload")].GetBool();
 			}
 
-			if (configDocument.HasMember(u"taskbarShowProgressOnConnecting"))
+			if (configDocument.HasMember(IL2CPP_STRING("taskbarShowProgressOnConnecting")))
 			{
-				taskbarShowProgressOnConnecting = configDocument[u"taskbarShowProgressOnConnecting"].GetBool();
+				taskbarShowProgressOnConnecting = configDocument[IL2CPP_STRING("taskbarShowProgressOnConnecting")].GetBool();
 			}
 		}
 
@@ -9387,12 +9259,12 @@ namespace
 
 		try
 		{
-			GetTextIdByName(u"Jobs600005");
+			GetTextIdByName(IL2CPP_STRING("Jobs600005"));
 			isJobsExist = true;
 		}
 		catch (const Il2CppExceptionWrapper& ex)
 		{
-			wcout << u16_wide(ex.ex->message->chars) << endl;
+			wcout << ex.ex->message->chars << endl;
 		}
 
 		auto CuteCoreDevice = il2cpp_symbols::get_class("Cute.Core.Assembly.dll", "Cute.Core", "Device");
@@ -9401,12 +9273,12 @@ namespace
 		il2cpp_field_static_get_value(persistentDataPathField, &persistentDataPath);
 
 		string championsResourceText;
-		int championsLiveResourceIndex = config::config_document[u"championsLiveResourceId"].GetInt() - 1;
+		int championsLiveResourceIndex = config::config_document[IL2CPP_STRING("championsLiveResourceId")].GetInt() - 1;
 		auto championsResources = MasterDB::GetChampionsResources();
 
 		if (championsResources.size() <= championsLiveResourceIndex)
 		{
-			championsResourceText = u16_u8(LocalifySettings::GetText("unknown"));
+			championsResourceText = il2cpp_u8(LocalifySettings::GetText("unknown"));
 		}
 		else
 		{
@@ -9416,8 +9288,8 @@ namespace
 		AddToLayout(m_Content,
 			{
 				GetOptionItemTitle(LocalifySettings::GetText("graphics")),
-				GetOptionItemSimpleWithButton("graphics_quality", (LocalifySettings::GetText("graphics_quality") + u": "s + u8_u16(graphicsQualityOptions[config::config_document[u"graphicsQuality"].GetInt() + 1])).data(),
-					localize_get_hook(GetTextIdByName(u"Circle0206"))->chars),
+				GetOptionItemSimpleWithButton("graphics_quality", (LocalifySettings::GetText("graphics_quality") + il2cppstring(IL2CPP_STRING(": ")) + u8_il2cpp(graphicsQualityOptions[config::config_document[IL2CPP_STRING("graphicsQuality")].GetInt() + 1])).data(),
+					localize_get_hook(GetTextIdByName(IL2CPP_STRING("Circle0206")))->chars),
 				GetOptionSlider("anti_aliasing", LocalifySettings::GetText("anti_aliasing"), antiAliasing, 0, 4, true,
 					*[](Il2CppObject* slider)
 					{
@@ -9482,15 +9354,15 @@ namespace
 				GetOptionItemAttention(LocalifySettings::GetText("applied_after_restart")),
 				GetOptionSlider("ui_scale_portrait", LocalifySettings::GetText("ui_scale_portrait"), freeFormUiScalePortrait, 0.1, 2.0, false),
 				GetOptionSlider("ui_scale_landscape", LocalifySettings::GetText("ui_scale_landscape"), freeFormUiScaleLandscape, 0.1, 2.0, false),
-				GetOptionItemTitle(localize_get_hook(GetTextIdByName(u"Common0035"))->chars),
+				GetOptionItemTitle(localize_get_hook(GetTextIdByName(IL2CPP_STRING("Common0035")))->chars),
 				GetOptionItemOnOff("live_slider_always_show", LocalifySettings::GetText("live_slider_always_show")),
 				GetOptionItemOnOff("live_playback_loop", LocalifySettings::GetText("live_playback_loop")),
 				GetOptionItemOnOff("champions_live_show_text", LocalifySettings::GetText("champions_live_show_text")),
-				GetOptionItemSimpleWithButton("champions_live_resource_id", (LocalifySettings::GetText("champions_live_resource_id") + u": "s + u8_u16(championsResourceText)).data(),
-					localize_get_hook(GetTextIdByName(u"Circle0206"))->chars),
-				GetOptionItemSimpleWithButton("champions_live_year", (LocalifySettings::GetText("champions_live_year") + u": "s + u8_u16(to_string(championsLiveYear))).data(),
-					localize_get_hook(GetTextIdByName(u"Circle0206"))->chars),
-				GetOptionItemSimple(u""),
+				GetOptionItemSimpleWithButton("champions_live_resource_id", (LocalifySettings::GetText("champions_live_resource_id") + il2cppstring(IL2CPP_STRING(": ")) + u8_il2cpp(championsResourceText)).data(),
+					localize_get_hook(GetTextIdByName(IL2CPP_STRING("Circle0206")))->chars),
+				GetOptionItemSimpleWithButton("champions_live_year", (LocalifySettings::GetText("champions_live_year") + il2cppstring(IL2CPP_STRING(": ")) + u8_il2cpp(to_string(championsLiveYear))).data(),
+					localize_get_hook(GetTextIdByName(IL2CPP_STRING("Circle0206")))->chars),
+				GetOptionItemSimple(IL2CPP_STRING("")),
 				GetOptionItemTitle(LocalifySettings::GetText("character_system_text_caption")),
 				GetOptionItemOnOff("character_system_text_caption", LocalifySettings::GetText("character_system_text_caption")),
 				GetOptionSlider("character_system_text_caption_line_char_count", LocalifySettings::GetText("character_system_text_caption_line_char_count"), characterSystemTextCaptionLineCharCount, 0, 100, true,
@@ -9557,25 +9429,25 @@ namespace
 						ShowNotification(il2cpp_string_new16(LocalifySettings::GetText("sample_caption")));
 					}
 				),
-				GetOptionItemSimpleWithButton("character_system_text_caption_font_color", (LocalifySettings::GetText("character_system_text_caption_font_color") + u": "s + config::config_document[u"characterSystemTextCaptionFontColor"].GetString()).data(),
-					localize_get_hook(GetTextIdByName(u"Circle0206"))->chars),
-				GetOptionItemSimpleWithButton("character_system_text_caption_outline_size", (LocalifySettings::GetText("character_system_text_caption_outline_size") + u": "s + config::config_document[u"characterSystemTextCaptionOutlineSize"].GetString()).data(),
-					localize_get_hook(GetTextIdByName(u"Circle0206"))->chars),
-				GetOptionItemSimpleWithButton("character_system_text_caption_outline_color", (LocalifySettings::GetText("character_system_text_caption_outline_color") + u": "s + config::config_document[u"characterSystemTextCaptionOutlineColor"].GetString()).data(),
-					localize_get_hook(GetTextIdByName(u"Circle0206"))->chars),
+				GetOptionItemSimpleWithButton("character_system_text_caption_font_color", (LocalifySettings::GetText("character_system_text_caption_font_color") + il2cppstring(IL2CPP_STRING(": ")) + config::config_document[IL2CPP_STRING("characterSystemTextCaptionFontColor")].GetString()).data(),
+					localize_get_hook(GetTextIdByName(IL2CPP_STRING("Circle0206")))->chars),
+				GetOptionItemSimpleWithButton("character_system_text_caption_outline_size", (LocalifySettings::GetText("character_system_text_caption_outline_size") + il2cppstring(IL2CPP_STRING(": ")) + config::config_document[IL2CPP_STRING("characterSystemTextCaptionOutlineSize")].GetString()).data(),
+					localize_get_hook(GetTextIdByName(IL2CPP_STRING("Circle0206")))->chars),
+				GetOptionItemSimpleWithButton("character_system_text_caption_outline_color", (LocalifySettings::GetText("character_system_text_caption_outline_color") + il2cppstring(IL2CPP_STRING(": ")) + config::config_document[IL2CPP_STRING("characterSystemTextCaptionOutlineColor")].GetString()).data(),
+					localize_get_hook(GetTextIdByName(IL2CPP_STRING("Circle0206")))->chars),
 				GetOptionItemButton("show_caption", LocalifySettings::GetText("show_caption")),
 				GetOptionItemAttention(LocalifySettings::GetText("applied_after_restart")),
-				GetOptionItemTitle(localize_get_hook(GetTextIdByName(u"Outgame0293"))->chars),
-				GetOptionItemOnOff("notification_tp", localize_get_hook(GetTextIdByName(u"Outgame0294"))->chars),
-				GetOptionItemOnOff("notification_rp", localize_get_hook(GetTextIdByName(u"Outgame0437"))->chars),
-				isJobsExist ? GetOptionItemOnOff("notification_jobs", localize_get_hook(GetTextIdByName(u"Jobs600005"))->chars) : nullptr,
+				GetOptionItemTitle(localize_get_hook(GetTextIdByName(IL2CPP_STRING("Outgame0293")))->chars),
+				GetOptionItemOnOff("notification_tp", localize_get_hook(GetTextIdByName(IL2CPP_STRING("Outgame0294")))->chars),
+				GetOptionItemOnOff("notification_rp", localize_get_hook(GetTextIdByName(IL2CPP_STRING("Outgame0437")))->chars),
+				isJobsExist ? GetOptionItemOnOff("notification_jobs", localize_get_hook(GetTextIdByName(IL2CPP_STRING("Jobs600005")))->chars) : nullptr,
 				GetOptionItemButton("show_notification", LocalifySettings::GetText("show_notification")),
-				GetOptionItemAttention(localize_get_hook(GetTextIdByName(u"Outgame0297"))->chars),
+				GetOptionItemAttention(localize_get_hook(GetTextIdByName(IL2CPP_STRING("Outgame0297")))->chars),
 				GetOptionItemTitle(LocalifySettings::GetText("taskbar")),
 				GetOptionItemOnOff("taskbar_show_progress_on_download", LocalifySettings::GetText("taskbar_show_progress_on_download")),
 				GetOptionItemOnOff("taskbar_show_progress_on_connecting", LocalifySettings::GetText("taskbar_show_progress_on_connecting")),
 				GetOptionItemTitle(LocalifySettings::GetText("settings_title")),
-				GetOptionItemSimpleWithButton("persistent_data_path", LocalifySettings::GetText("persistent_data_path"), localize_get_hook(GetTextIdByName(u"Circle0206"))->chars),
+				GetOptionItemSimpleWithButton("persistent_data_path", LocalifySettings::GetText("persistent_data_path"), localize_get_hook(GetTextIdByName(IL2CPP_STRING("Circle0206")))->chars),
 				GetOptionItemInfo("persistent_data_path_detail", persistentDataPath->chars),
 				Game::CurrentGameRegion == Game::Region::JPN ?
 					GetOptionItemButton("clear_webview_cache", LocalifySettings::GetText("clear_webview_cache")) :
@@ -9590,9 +9462,9 @@ namespace
 				GetOptionItemOnOff("unlock_live_chara", LocalifySettings::GetText("unlock_live_chara")),
 				GetOptionItemInfo(nullptr, LocalifySettings::GetText("unlock_live_chara_info")),
 #endif
-				GetOptionItemButton("github", u"GitHub"),
+				GetOptionItemButton("github", IL2CPP_STRING("GitHub")),
 				GetOptionItemTitle(LocalifySettings::GetText("experiments")),
-				GetOptionItemButton("toggle_vr", u"Toggle VR"),
+				GetOptionItemButton("toggle_vr", IL2CPP_STRING("Toggle VR")),
 			// GetOptionItemSimple("Simple"),
 			// GetOptionItemOnOff("on_off", "On Off"),
 			// GetOptionItem3ToggleVertical("Text"),
@@ -9741,19 +9613,19 @@ namespace
 				replaceAll(contentU8, "\\n", "\n");
 				auto content = u8_wide(contentU8);
 
-				DesktopNotificationManagerCompat::ShowToastNotification(title.data(), content.data(), u16_wide(MsgPackData::GetIconPath(Gallop::LocalPushDefine::LocalPushType::Tp)->chars).data());
+				DesktopNotificationManagerCompat::ShowToastNotification(title.data(), content.data(), MsgPackData::GetIconPath(Gallop::LocalPushDefine::LocalPushType::Tp)->chars);
 			})
 		);
 
 		SetOptionItemButtonAction("graphics_quality", *([](Il2CppObject*)
 			{
-				OpenSelectOption(LocalifySettings::GetText("graphics_quality"), GetGraphicsQualityOptions(), config::config_document[u"graphicsQuality"].GetInt() + 1,
+				OpenSelectOption(LocalifySettings::GetText("graphics_quality"), GetGraphicsQualityOptions(), config::config_document[IL2CPP_STRING("graphicsQuality")].GetInt() + 1,
 					[](int value)
 					{
-						AddOrSet(config::config_document, u"graphicsQuality", value - 1);
+						AddOrSet(config::config_document, IL2CPP_STRING("graphicsQuality"), value - 1);
 
 						auto textCommon = GetOptionItemSimpleWithButtonTextCommon("graphics_quality");
-						SetTextCommonText(textCommon, (LocalifySettings::GetText("graphics_quality") + u": "s + u8_u16(GetGraphicsQualityOptions()[config::config_document[u"graphicsQuality"].GetInt() + 1])).data());
+						SetTextCommonText(textCommon, (LocalifySettings::GetText("graphics_quality") + il2cppstring(IL2CPP_STRING(": ")) + u8_il2cpp(GetGraphicsQualityOptions()[config::config_document[IL2CPP_STRING("graphicsQuality")].GetInt() + 1])).data());
 					}
 				);
 			})
@@ -9761,13 +9633,13 @@ namespace
 
 		SetOptionItemButtonAction("champions_live_resource_id", *([](Il2CppObject*)
 			{
-				OpenSelectOption(LocalifySettings::GetText("champions_live_resource_id"), MasterDB::GetChampionsResources(), config::config_document[u"championsLiveResourceId"].GetInt() - 1,
+				OpenSelectOption(LocalifySettings::GetText("champions_live_resource_id"), MasterDB::GetChampionsResources(), config::config_document[IL2CPP_STRING("championsLiveResourceId")].GetInt() - 1,
 					[](int value)
 					{
-						AddOrSet(config::config_document, u"championsLiveResourceId", value + 1);
+						AddOrSet(config::config_document, IL2CPP_STRING("championsLiveResourceId"), value + 1);
 
 						auto textCommon = GetOptionItemSimpleWithButtonTextCommon("champions_live_resource_id");
-						SetTextCommonText(textCommon, (LocalifySettings::GetText("champions_live_resource_id") + u": "s + u8_u16(MasterDB::GetChampionsResources()[config::config_document[u"championsLiveResourceId"].GetInt() - 1])).data());
+						SetTextCommonText(textCommon, (LocalifySettings::GetText("champions_live_resource_id") + il2cppstring(IL2CPP_STRING(": ")) + u8_il2cpp(MasterDB::GetChampionsResources()[config::config_document[IL2CPP_STRING("championsLiveResourceId")].GetInt() - 1])).data());
 					}
 				);
 			})
@@ -9786,28 +9658,28 @@ namespace
 					championsLiveYears.emplace_back(to_string(i));
 				}
 
-				OpenSelectOption(LocalifySettings::GetText("champions_live_year"), championsLiveYears, config::config_document[u"championsLiveYear"].GetInt() - 2022,
+				OpenSelectOption(LocalifySettings::GetText("champions_live_year"), championsLiveYears, config::config_document[IL2CPP_STRING("championsLiveYear")].GetInt() - 2022,
 					[](int value)
 					{
-						AddOrSet(config::config_document, u"championsLiveYear", value + 2022);
+						AddOrSet(config::config_document, IL2CPP_STRING("championsLiveYear"), value + 2022);
 
 						auto textCommon = GetOptionItemSimpleWithButtonTextCommon("champions_live_year");
-						SetTextCommonText(textCommon, (LocalifySettings::GetText("champions_live_year") + u": "s + u8_u16(to_string(config::config_document[u"championsLiveYear"].GetInt()))).data());
+						SetTextCommonText(textCommon, (LocalifySettings::GetText("champions_live_year") + il2cppstring(IL2CPP_STRING(": ")) + u8_il2cpp(to_string(config::config_document[IL2CPP_STRING("championsLiveYear")].GetInt()))).data());
 					}
 				);
 			})
 		);
 
 		auto fontColorTextCommon = GetOptionItemSimpleWithButtonTextCommon("character_system_text_caption_font_color");
-		SetTextCommonOutlineColor(fontColorTextCommon, u"Brown");
+		SetTextCommonOutlineColor(fontColorTextCommon, IL2CPP_STRING("Brown"));
 		SetTextCommonFontColor(fontColorTextCommon,
-			config::config_document[u"characterSystemTextCaptionFontColor"].GetString());
+			config::config_document[IL2CPP_STRING("characterSystemTextCaptionFontColor")].GetString());
 
 		SetOptionItemButtonAction("character_system_text_caption_font_color", *([](Il2CppObject*)
 			{
 				auto options = GetFontColorOptions();
-				auto& colorValue = config::config_document[u"characterSystemTextCaptionFontColor"];
-				auto value = u16_u8(u16string(colorValue.GetString(), colorValue.GetStringLength()));
+				auto& colorValue = config::config_document[IL2CPP_STRING("characterSystemTextCaptionFontColor")];
+				auto value = il2cpp_u8(il2cppstring(colorValue.GetString(), colorValue.GetStringLength()));
 				auto found = find(options.begin(), options.end(), value);
 				int index = 0;
 
@@ -9820,12 +9692,12 @@ namespace
 					[](int value)
 					{
 						auto options = GetFontColorOptions();
-						u16string color = u8_u16(options[value]);
-						AddOrSetString(config::config_document, u"characterSystemTextCaptionFontColor", color);
+						il2cppstring color = u8_il2cpp(options[value]);
+						AddOrSetString(config::config_document, IL2CPP_STRING("characterSystemTextCaptionFontColor"), color);
 
 						auto textCommon = GetOptionItemSimpleWithButtonTextCommon("character_system_text_caption_font_color");
-						auto& colorValue = config::config_document[u"characterSystemTextCaptionFontColor"];
-						SetTextCommonText(textCommon, (LocalifySettings::GetText("character_system_text_caption_font_color") + u": "s + u16string(colorValue.GetString(), colorValue.GetStringLength())).data());
+						auto& colorValue = config::config_document[IL2CPP_STRING("characterSystemTextCaptionFontColor")];
+						SetTextCommonText(textCommon, (LocalifySettings::GetText("character_system_text_caption_font_color") + il2cppstring(IL2CPP_STRING(": ")) + il2cppstring(colorValue.GetString(), colorValue.GetStringLength())).data());
 						SetTextCommonFontColor(textCommon, color.data());
 						SetNotificationFontColor(color.data());
 					}
@@ -9834,16 +9706,16 @@ namespace
 		);
 
 		auto outlineSizeTextCommon = GetOptionItemSimpleWithButtonTextCommon("character_system_text_caption_outline_size");
-		SetTextCommonFontColor(outlineSizeTextCommon, u"White");
-		SetTextCommonOutlineColor(outlineSizeTextCommon, u"Brown");
+		SetTextCommonFontColor(outlineSizeTextCommon, IL2CPP_STRING("White"));
+		SetTextCommonOutlineColor(outlineSizeTextCommon, IL2CPP_STRING("Brown"));
 		SetTextCommonOutlineSize(outlineSizeTextCommon,
-			config::config_document[u"characterSystemTextCaptionOutlineSize"].GetString());
+			config::config_document[IL2CPP_STRING("characterSystemTextCaptionOutlineSize")].GetString());
 
 		SetOptionItemButtonAction("character_system_text_caption_outline_size", *([](Il2CppObject*)
 			{
 				auto options = GetOutlineSizeOptions();
-				auto& sizeValue = config::config_document[u"characterSystemTextCaptionOutlineSize"];
-				auto value = u16_u8(u16string(sizeValue.GetString(), sizeValue.GetStringLength()));
+				auto& sizeValue = config::config_document[IL2CPP_STRING("characterSystemTextCaptionOutlineSize")];
+				auto value = il2cpp_u8(il2cppstring(sizeValue.GetString(), sizeValue.GetStringLength()));
 				auto found = find(options.begin(), options.end(), value);
 				int index = 0;
 
@@ -9856,12 +9728,12 @@ namespace
 					[](int value)
 					{
 						auto options = GetOutlineSizeOptions();
-						u16string size = u8_u16(options[value]);
-						AddOrSetString(config::config_document, u"characterSystemTextCaptionOutlineSize", size);
+						il2cppstring size = u8_il2cpp(options[value]);
+						AddOrSetString(config::config_document, IL2CPP_STRING("characterSystemTextCaptionOutlineSize"), size);
 
 						auto textCommon = GetOptionItemSimpleWithButtonTextCommon("character_system_text_caption_outline_size");
-						auto& sizeValue = config::config_document[u"characterSystemTextCaptionOutlineSize"];
-						SetTextCommonText(textCommon, (LocalifySettings::GetText("character_system_text_caption_outline_size") + u": "s + u16string(sizeValue.GetString(), sizeValue.GetStringLength())).data());
+						auto& sizeValue = config::config_document[IL2CPP_STRING("characterSystemTextCaptionOutlineSize")];
+						SetTextCommonText(textCommon, (LocalifySettings::GetText("character_system_text_caption_outline_size") + il2cppstring(IL2CPP_STRING(": ")) + il2cppstring(sizeValue.GetString(), sizeValue.GetStringLength())).data());
 						SetTextCommonOutlineSize(textCommon, size.data());
 						SetNotificationOutlineSize(size.data());
 					}
@@ -9871,13 +9743,13 @@ namespace
 
 		auto outlineColorTextCommon = GetOptionItemSimpleWithButtonTextCommon("character_system_text_caption_outline_color");
 		SetTextCommonOutlineColor(outlineColorTextCommon,
-			config::config_document[u"characterSystemTextCaptionOutlineColor"].GetString());
+			config::config_document[IL2CPP_STRING("characterSystemTextCaptionOutlineColor")].GetString());
 
 		SetOptionItemButtonAction("character_system_text_caption_outline_color", *([](Il2CppObject*)
 			{
 				auto options = GetOutlineColorOptions();
-				auto& colorValue = config::config_document[u"characterSystemTextCaptionOutlineColor"];
-				auto value = u16_u8(u16string(colorValue.GetString(), colorValue.GetStringLength()));
+				auto& colorValue = config::config_document[IL2CPP_STRING("characterSystemTextCaptionOutlineColor")];
+				auto value = il2cpp_u8(il2cppstring(colorValue.GetString(), colorValue.GetStringLength()));
 				auto found = find(options.begin(), options.end(), value);
 				int index = 0;
 
@@ -9890,12 +9762,12 @@ namespace
 					[](int value)
 					{
 						auto options = GetOutlineColorOptions();
-						u16string color = u8_u16(options[value]);
-						AddOrSetString(config::config_document, u"characterSystemTextCaptionOutlineColor", color);
+						il2cppstring color = u8_il2cpp(options[value]);
+						AddOrSetString(config::config_document, IL2CPP_STRING("characterSystemTextCaptionOutlineColor"), color);
 
 						auto textCommon = GetOptionItemSimpleWithButtonTextCommon("character_system_text_caption_outline_color");
-						auto& colorValue = config::config_document[u"characterSystemTextCaptionOutlineColor"];
-						SetTextCommonText(textCommon, (LocalifySettings::GetText("character_system_text_caption_outline_color") + u": "s + u16string(colorValue.GetString(), colorValue.GetStringLength())).data());
+						auto& colorValue = config::config_document[IL2CPP_STRING("characterSystemTextCaptionOutlineColor")];
+						SetTextCommonText(textCommon, (LocalifySettings::GetText("character_system_text_caption_outline_color") + il2cppstring(IL2CPP_STRING(": ")) + il2cppstring(colorValue.GetString(), colorValue.GetStringLength())).data());
 						SetTextCommonOutlineColor(textCommon, color.data());
 						SetNotificationOutlineColor(color.data());
 					}
@@ -9979,15 +9851,15 @@ namespace
 			{
 				auto dialogData = Gallop::DialogCommon::Data();
 				dialogData.SetSimpleTwoButtonMessage(
-					localizeextension_text_hook(GetTextIdByName(u"Common0009")),
-					localizeextension_text_hook(GetTextIdByName(u"Home0073")),
+					localizeextension_text_hook(GetTextIdByName(IL2CPP_STRING("Common0009"))),
+					localizeextension_text_hook(GetTextIdByName(IL2CPP_STRING("Home0073"))),
 					CreateDelegateStatic(*[]()
 						{
 							UnityEngine::Application::OpenURL(il2cpp_string_new("https://github.com/Kimjio/umamusume-localify"));
 						}
 					),
-					GetTextIdByName(u"Common0004"),
-					GetTextIdByName(u"Common0003")
+					GetTextIdByName(IL2CPP_STRING("Common0004")),
+					GetTextIdByName(IL2CPP_STRING("Common0003"))
 				);
 
 				Gallop::DialogManager::PushDialog(dialogData);
@@ -10005,8 +9877,8 @@ namespace
 
 				if (result)
 				{
-					u16string pathU16 = wide_u16(result);
-					AddOrSetString(config::config_document, u"persistentDataPath", pathU16);
+					il2cppstring pathU16 = result;
+					AddOrSetString(config::config_document, IL2CPP_STRING("persistentDataPath"), result);
 					auto textCommon = GetTextCommon("persistent_data_path_detail_info");
 					SetTextCommonText(textCommon, pathU16.data());
 				}
@@ -10019,14 +9891,14 @@ namespace
 				{
 					auto dialogData = Gallop::DialogCommon::Data();
 					dialogData.SetSimpleTwoButtonMessage(
-						localizeextension_text_hook(GetTextIdByName(u"Race0652")),
+						localizeextension_text_hook(GetTextIdByName(IL2CPP_STRING("Race0652"))),
 						il2cpp_string_new16(LocalifySettings::GetText("clear_webview_cache_confirm")),
 						CreateDelegateStatic(*[]()
 							{
 								PWSTR path;
 								SHGetKnownFolderPath(FOLDERID_LocalAppDataLow, 0, NULL, &path);
 
-								u16string combinedPath = wide_u16(path).append(u"\\DMMWebView2");
+								il2cppstring combinedPath = il2cppstring(path).append(IL2CPP_STRING("\\DMMWebView2"));
 
 								try
 								{
@@ -10038,8 +9910,8 @@ namespace
 									cout << e.what() << endl;
 								}
 							}),
-						GetTextIdByName(u"Common0004"),
-						GetTextIdByName(u"Common0003")
+						GetTextIdByName(IL2CPP_STRING("Common0004")),
+						GetTextIdByName(IL2CPP_STRING("Common0003"))
 					);
 					Gallop::DialogManager::PushDialog(dialogData);
 				})
@@ -10072,26 +9944,26 @@ namespace
 			{
 				auto& configDocument = config::config_document;
 
-				AddOrSet(configDocument, u"liveSliderAlwaysShow", GetOptionItemOnOffIsOn("live_slider_always_show"));
+				AddOrSet(configDocument, IL2CPP_STRING("liveSliderAlwaysShow"), GetOptionItemOnOffIsOn("live_slider_always_show"));
 
-				AddOrSet(configDocument, u"livePlaybackLoop", GetOptionItemOnOffIsOn("live_playback_loop"));
+				AddOrSet(configDocument, IL2CPP_STRING("livePlaybackLoop"), GetOptionItemOnOffIsOn("live_playback_loop"));
 
-				AddOrSet(configDocument, u"championsLiveShowText", GetOptionItemOnOffIsOn("champions_live_show_text"));
+				AddOrSet(configDocument, IL2CPP_STRING("championsLiveShowText"), GetOptionItemOnOffIsOn("champions_live_show_text"));
 
-				config::live_slider_always_show = configDocument[u"liveSliderAlwaysShow"].GetBool();
+				config::live_slider_always_show = configDocument[IL2CPP_STRING("liveSliderAlwaysShow")].GetBool();
 
-				config::live_playback_loop = configDocument[u"livePlaybackLoop"].GetBool();
+				config::live_playback_loop = configDocument[IL2CPP_STRING("livePlaybackLoop")].GetBool();
 
-				config::champions_live_show_text = configDocument[u"championsLiveShowText"].GetBool();
+				config::champions_live_show_text = configDocument[IL2CPP_STRING("championsLiveShowText")].GetBool();
 
-				config::champions_live_year = configDocument[u"championsLiveYear"].GetInt();
+				config::champions_live_year = configDocument[IL2CPP_STRING("championsLiveYear")].GetInt();
 
-				config::champions_live_resource_id = configDocument[u"championsLiveResourceId"].GetInt();
+				config::champions_live_resource_id = configDocument[IL2CPP_STRING("championsLiveResourceId")].GetInt();
 
 				config::write_config();
 
 				auto dialogData = Gallop::DialogCommon::Data();
-				dialogData.SetSimpleOneButtonMessage(GetTextIdByName(u"AccoutDataLink0061"), localize_get_hook(GetTextIdByName(u"Outgame0309")), nullptr, GetTextIdByName(u"Common0007"));
+				dialogData.SetSimpleOneButtonMessage(GetTextIdByName(IL2CPP_STRING("AccoutDataLink0061")), localize_get_hook(GetTextIdByName(IL2CPP_STRING("Outgame0309"))), nullptr, GetTextIdByName(IL2CPP_STRING("Common0007")));
 
 				auto onDestroy = CreateDelegateStatic(*[]()
 					{
@@ -10105,7 +9977,7 @@ namespace
 
 		auto dialogData = Gallop::DialogCommon::Data();
 
-		dialogData.SetSimpleTwoButtonMessage(il2cpp_string_new16(LocalifySettings::GetText("settings_title")), nullptr, onRight, GetTextIdByName(u"Common0004"), GetTextIdByName(u"Common0261"), onLeft, Gallop::DialogCommonBase::FormType::BIG_TWO_BUTTON);
+		dialogData.SetSimpleTwoButtonMessage(il2cpp_string_new16(LocalifySettings::GetText("settings_title")), nullptr, onRight, GetTextIdByName(IL2CPP_STRING("Common0004")), GetTextIdByName(IL2CPP_STRING("Common0261")), onLeft, Gallop::DialogCommonBase::FormType::BIG_TWO_BUTTON);
 		dialogData.DispStackType(Gallop::DialogCommon::DispStackType::DialogOnDialog);
 		dialogData.ObjParentType(Gallop::DialogCommon::Data::ObjectParentType::Base);
 		dialogData.AutoClose(false);
@@ -10191,34 +10063,34 @@ namespace
 		{
 			auto& configDocument = config::config_document;
 
-			if (configDocument.HasMember(u"liveSliderAlwaysShow"))
+			if (configDocument.HasMember(IL2CPP_STRING("liveSliderAlwaysShow")))
 			{
-				liveSliderAlwaysShow = configDocument[u"liveSliderAlwaysShow"].GetBool();
+				liveSliderAlwaysShow = configDocument[IL2CPP_STRING("liveSliderAlwaysShow")].GetBool();
 			}
 
-			if (configDocument.HasMember(u"livePlaybackLoop"))
+			if (configDocument.HasMember(IL2CPP_STRING("livePlaybackLoop")))
 			{
-				livePlaybackLoop = configDocument[u"livePlaybackLoop"].GetBool();
+				livePlaybackLoop = configDocument[IL2CPP_STRING("livePlaybackLoop")].GetBool();
 			}
 
-			if (configDocument.HasMember(u"championsLiveShowText"))
+			if (configDocument.HasMember(IL2CPP_STRING("championsLiveShowText")))
 			{
-				championsLiveShowText = configDocument[u"championsLiveShowText"].GetBool();
+				championsLiveShowText = configDocument[IL2CPP_STRING("championsLiveShowText")].GetBool();
 			}
 
-			if (configDocument.HasMember(u"championsLiveYear"))
+			if (configDocument.HasMember(IL2CPP_STRING("championsLiveYear")))
 			{
-				championsLiveYear = configDocument[u"championsLiveYear"].GetInt();
+				championsLiveYear = configDocument[IL2CPP_STRING("championsLiveYear")].GetInt();
 			}
 		}
 
 		string championsResourceText;
-		int championsLiveResourceIndex = config::config_document[u"championsLiveResourceId"].GetInt() - 1;
+		int championsLiveResourceIndex = config::config_document[IL2CPP_STRING("championsLiveResourceId")].GetInt() - 1;
 		auto championsResources = MasterDB::GetChampionsResources();
 
 		if (championsResources.size() <= championsLiveResourceIndex)
 		{
-			championsResourceText = u16_u8(LocalifySettings::GetText("unknown"));
+			championsResourceText = il2cpp_u8(LocalifySettings::GetText("unknown"));
 		}
 		else
 		{
@@ -10227,15 +10099,15 @@ namespace
 
 		AddToLayout(m_Content,
 			{
-				GetOptionItemTitle(localize_get_hook(GetTextIdByName(u"Common0035"))->chars),
+				GetOptionItemTitle(localize_get_hook(GetTextIdByName(IL2CPP_STRING("Common0035")))->chars),
 				GetOptionItemOnOff("live_slider_always_show", LocalifySettings::GetText("live_slider_always_show")),
 				GetOptionItemOnOff("live_playback_loop", LocalifySettings::GetText("live_playback_loop")),
 				GetOptionItemOnOff("champions_live_show_text", LocalifySettings::GetText("champions_live_show_text")),
-				GetOptionItemSimpleWithButton("champions_live_resource_id", (LocalifySettings::GetText("champions_live_resource_id") + u": "s + u8_u16(championsResourceText)).data(),
-					localize_get_hook(GetTextIdByName(u"Circle0206"))->chars),
-				GetOptionItemSimpleWithButton("champions_live_year", (LocalifySettings::GetText("champions_live_year") + u": "s + u8_u16(to_string(championsLiveYear))).data(),
-					localize_get_hook(GetTextIdByName(u"Circle0206"))->chars),
-				GetOptionItemSimple(u""),
+				GetOptionItemSimpleWithButton("champions_live_resource_id", (LocalifySettings::GetText("champions_live_resource_id") + il2cppstring(IL2CPP_STRING(": ")) + u8_il2cpp(championsResourceText)).data(),
+					localize_get_hook(GetTextIdByName(IL2CPP_STRING("Circle0206")))->chars),
+				GetOptionItemSimpleWithButton("champions_live_year", (LocalifySettings::GetText("champions_live_year") + il2cppstring(IL2CPP_STRING(": ")) + u8_il2cpp(to_string(championsLiveYear))).data(),
+					localize_get_hook(GetTextIdByName(IL2CPP_STRING("Circle0206")))->chars),
+				GetOptionItemSimple(IL2CPP_STRING("")),
 			}
 			);
 
@@ -10253,11 +10125,11 @@ namespace
 
 		SetOptionItemButtonAction("champions_live_resource_id", *([](Il2CppObject*)
 			{
-				OpenSelectOption(LocalifySettings::GetText("champions_live_resource_id"), MasterDB::GetChampionsResources(), config::config_document[u"championsLiveResourceId"].GetInt() - 1, [](int value) {
-					AddOrSet(config::config_document, u"championsLiveResourceId", value + 1);
+				OpenSelectOption(LocalifySettings::GetText("champions_live_resource_id"), MasterDB::GetChampionsResources(), config::config_document[IL2CPP_STRING("championsLiveResourceId")].GetInt() - 1, [](int value) {
+					AddOrSet(config::config_document, IL2CPP_STRING("championsLiveResourceId"), value + 1);
 
 					auto textCommon = GetOptionItemSimpleWithButtonTextCommon("champions_live_resource_id");
-					SetTextCommonText(textCommon, (LocalifySettings::GetText("champions_live_resource_id") + u": "s + u8_u16(MasterDB::GetChampionsResources()[config::config_document[u"championsLiveResourceId"].GetInt() - 1])).data());
+					SetTextCommonText(textCommon, (LocalifySettings::GetText("champions_live_resource_id") + il2cppstring(IL2CPP_STRING(": ")) + u8_il2cpp(MasterDB::GetChampionsResources()[config::config_document[IL2CPP_STRING("championsLiveResourceId")].GetInt() - 1])).data());
 					});
 			}));
 
@@ -10274,11 +10146,11 @@ namespace
 					championsLiveYears.emplace_back(to_string(i));
 				}
 
-				OpenSelectOption(LocalifySettings::GetText("champions_live_year"), championsLiveYears, config::config_document[u"championsLiveYear"].GetInt() - 2022, [](int value) {
-					AddOrSet(config::config_document, u"championsLiveYear", value + 2022);
+				OpenSelectOption(LocalifySettings::GetText("champions_live_year"), championsLiveYears, config::config_document[IL2CPP_STRING("championsLiveYear")].GetInt() - 2022, [](int value) {
+					AddOrSet(config::config_document, IL2CPP_STRING("championsLiveYear"), value + 2022);
 
 					auto textCommon = GetOptionItemSimpleWithButtonTextCommon("champions_live_year");
-					SetTextCommonText(textCommon, (LocalifySettings::GetText("champions_live_year") + u": "s + u8_u16(to_string(config::config_document[u"championsLiveYear"].GetInt()))).data());
+					SetTextCommonText(textCommon, (LocalifySettings::GetText("champions_live_year") + il2cppstring(IL2CPP_STRING(": ")) + u8_il2cpp(to_string(config::config_document[IL2CPP_STRING("championsLiveYear")].GetInt()))).data());
 					});
 			}));
 
@@ -10360,7 +10232,7 @@ namespace
 			if (viewerId)
 			{
 				auto text = text_get_text(ViewerIdText);
-				auto newText = text->chars + u"\n("s + viewerId->chars + u")";
+				auto newText = text->chars + il2cppstring(IL2CPP_STRING("\n(")) + viewerId->chars + IL2CPP_STRING(")");
 				text_set_text(ViewerIdText, il2cpp_string_new16(newText.data()));
 			}
 
@@ -10377,7 +10249,7 @@ namespace
 							il2cpp_symbols::get_method_pointer<void (*)(Il2CppString*)>("UnityEngine.IMGUIModule.dll", "UnityEngine", "GUIUtility", "set_systemCopyBuffer", 1)(il2cpp_string_new(to_string(viewerId).data()));
 
 							auto dialogData = Gallop::DialogCommon::Data();
-							dialogData.SetSimpleOneButtonMessage(GetTextIdByName(u"Outgame0031"), il2cpp_string_new16(u"트레이너 ID를 복사했습니다."), nullptr, GetTextIdByName(u"Common0007"));
+							dialogData.SetSimpleOneButtonMessage(GetTextIdByName(IL2CPP_STRING("Outgame0031")), il2cpp_string_new16(IL2CPP_STRING("트레이너 ID를 복사했습니다.")), nullptr, GetTextIdByName(IL2CPP_STRING("Common0007")));
 
 							Gallop::DialogManager::PushDialog(dialogData);
 						};
@@ -10390,11 +10262,11 @@ namespace
 
 					auto dialogData = Gallop::DialogCommon::Data();
 					dialogData.SetSimpleTwoButtonMessage(
-						localizeextension_text_hook(GetTextIdByName(u"Outgame0031")),
+						localizeextension_text_hook(GetTextIdByName(IL2CPP_STRING("Outgame0031"))),
 						il2cpp_string_new("트레이너 ID를 복사하시겠습니까?"),
 						CreateDelegateStatic(viewerIdCopyFn),
-						GetTextIdByName(u"Outgame0002"),
-						GetTextIdByName(u"Common0003"),
+						GetTextIdByName(IL2CPP_STRING("Outgame0002")),
+						GetTextIdByName(IL2CPP_STRING("Common0003")),
 						CreateDelegateStatic(playerIdCopyFn)
 					);
 
@@ -10468,10 +10340,10 @@ namespace
 
 			if (transform)
 			{
-				if (UnityEngine::Object::Name(transform)->chars == u"TextName"s ||
-					UnityEngine::Object::Name(transform)->chars == u"ToggleMute"s ||
-					UnityEngine::Object::Name(transform)->chars == u"ImageIcon"s ||
-					UnityEngine::Object::Name(transform)->chars == u"Line"s)
+				if (UnityEngine::Object::Name(transform)->chars == il2cppstring(IL2CPP_STRING("TextName")) ||
+					UnityEngine::Object::Name(transform)->chars == il2cppstring(IL2CPP_STRING("ToggleMute")) ||
+					UnityEngine::Object::Name(transform)->chars == il2cppstring(IL2CPP_STRING("ImageIcon")) ||
+					UnityEngine::Object::Name(transform)->chars == il2cppstring(IL2CPP_STRING("Line")))
 				{
 					destroyTargets.emplace_back(transform);
 				}
@@ -10498,12 +10370,12 @@ namespace
 
 			if (transform)
 			{
-				if (UnityEngine::Object::Name(transform)->chars == u"Slider"s)
+				if (UnityEngine::Object::Name(transform)->chars == il2cppstring(IL2CPP_STRING("Slider")))
 				{
 					sliderTransform = UnityEngine::RectTransform(transform);
 				}
 
-				if (UnityEngine::Object::Name(transform)->chars == u"Num"s)
+				if (UnityEngine::Object::Name(transform)->chars == il2cppstring(IL2CPP_STRING("Num")))
 				{
 					numTransform = UnityEngine::RectTransform(transform);
 				}
@@ -10520,10 +10392,10 @@ namespace
 
 		auto textCommon = array->vector[0];
 
-		SetTextCommonText(textCommon, u"0:00");
+		SetTextCommonText(textCommon, IL2CPP_STRING("0:00"));
 
-		il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, int)>(textCommon->klass, "set_OutlineSize", 1)->methodPointer(textCommon, GetEnumValue(ParseEnum(GetRuntimeType("umamusume.dll", "Gallop", "OutlineSizeType"), u"M")));
-		il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, int)>(textCommon->klass, "set_OutlineColor", 1)->methodPointer(textCommon, GetEnumValue(ParseEnum(GetRuntimeType("umamusume.dll", "Gallop", "OutlineColorType"), u"White")));
+		il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, int)>(textCommon->klass, "set_OutlineSize", 1)->methodPointer(textCommon, GetEnumValue(ParseEnum(GetRuntimeType("umamusume.dll", "Gallop", "OutlineSizeType"), IL2CPP_STRING("M"))));
+		il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, int)>(textCommon->klass, "set_OutlineColor", 1)->methodPointer(textCommon, GetEnumValue(ParseEnum(GetRuntimeType("umamusume.dll", "Gallop", "OutlineColorType"), IL2CPP_STRING("White"))));
 		il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*)>(textCommon->klass, "UpdateOutline", 0)->methodPointer(textCommon);
 
 		numTransform.anchoredPosition({ -100, 11 });
@@ -10545,10 +10417,10 @@ namespace
 
 		auto textCommon1 = array1->vector[0];
 
-		SetTextCommonText(textCommon1, u"1:00");
+		SetTextCommonText(textCommon1, IL2CPP_STRING("1:00"));
 
-		il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, int)>(textCommon1->klass, "set_OutlineSize", 1)->methodPointer(textCommon1, GetEnumValue(ParseEnum(GetRuntimeType("umamusume.dll", "Gallop", "OutlineSizeType"), u"M")));
-		il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, int)>(textCommon1->klass, "set_OutlineColor", 1)->methodPointer(textCommon1, GetEnumValue(ParseEnum(GetRuntimeType("umamusume.dll", "Gallop", "OutlineColorType"), u"White")));
+		il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, int)>(textCommon1->klass, "set_OutlineSize", 1)->methodPointer(textCommon1, GetEnumValue(ParseEnum(GetRuntimeType("umamusume.dll", "Gallop", "OutlineSizeType"), IL2CPP_STRING("M"))));
+		il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, int)>(textCommon1->klass, "set_OutlineColor", 1)->methodPointer(textCommon1, GetEnumValue(ParseEnum(GetRuntimeType("umamusume.dll", "Gallop", "OutlineColorType"), IL2CPP_STRING("White"))));
 		il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*)>(textCommon1->klass, "UpdateOutline", 0)->methodPointer(textCommon1);
 
 		totalNumTransform.anchoredPosition({ 100, 11 });
@@ -10569,7 +10441,7 @@ namespace
 	{
 		auto cloned = reinterpret_cast<decltype(Object_Internal_CloneSingleWithParent_hook)*>(Object_Internal_CloneSingleWithParent_orig)(data, parent, worldPositionStays);
 
-		if (Game::CurrentGameRegion == Game::Region::KOR && u16string(UnityEngine::Object::Name(cloned)->chars).find(u"ProfileTopView") != wstring::npos)
+		if (Game::CurrentGameRegion == Game::Region::KOR && il2cppstring(UnityEngine::Object::Name(cloned)->chars).find(IL2CPP_STRING("ProfileTopView")) != wstring::npos)
 		{
 			static Il2CppDelegate* updateViewerIdText;
 			updateViewerIdText = &CreateDelegateWithClassStatic(il2cpp_symbols::get_class("DOTween.dll", "DG.Tweening", "TweenCallback"), *([](void*)
@@ -10584,7 +10456,7 @@ namespace
 			il2cpp_symbols::get_method_pointer<Il2CppObject* (*)(float, Il2CppDelegate*, bool)>("DOTween.dll", "DG.Tweening", "DOVirtual", "DelayedCall", 3)(0.05, updateViewerIdText, true);
 		}
 
-		if (u16string(UnityEngine::Object::Name(cloned)->chars).find(u"DialogOptionHome") != wstring::npos)
+		if (il2cppstring(UnityEngine::Object::Name(cloned)->chars).find(IL2CPP_STRING("DialogOptionHome")) != wstring::npos)
 		{
 			auto getComponents = il2cpp_class_get_method_from_name_type<Il2CppArraySize_t<Il2CppObject*> *(*)(Il2CppObject*, Il2CppType*, bool, bool, bool, bool, Il2CppObject*)>(cloned->klass, "GetComponentsInternal", 6)->methodPointer;
 			auto rectTransformArray = getComponents(cloned, reinterpret_cast<Il2CppType*>(GetRuntimeType(
@@ -10594,7 +10466,7 @@ namespace
 			{
 				auto rectTransform = rectTransformArray->vector[i];
 
-				if (rectTransform && UnityEngine::Object::Name(rectTransform)->chars == u"PartsOptionPageBasicSetting"s)
+				if (rectTransform && UnityEngine::Object::Name(rectTransform)->chars == il2cppstring(IL2CPP_STRING("PartsOptionPageBasicSetting")))
 				{
 					UnityEngine::RectTransform(rectTransform).gameObject().SetActive(true);
 					auto PartsOptionPageBasicSetting = UnityEngine::RectTransform(rectTransform).gameObject().NativeObject();
@@ -10604,7 +10476,7 @@ namespace
 					for (int j = 0; j < rectTransformArray1->max_length; j++)
 					{
 						auto rectTransform1 = rectTransformArray1->vector[j];
-						if (rectTransform1 && UnityEngine::Object::Name(rectTransform1)->chars == u"Content"s)
+						if (rectTransform1 && UnityEngine::Object::Name(rectTransform1)->chars == il2cppstring(IL2CPP_STRING("Content")))
 						{
 							InitOptionLayout(rectTransform1);
 							break;
@@ -10617,7 +10489,7 @@ namespace
 			SetupOptionLayout();
 		}
 
-		if (u16string(UnityEngine::Object::Name(cloned)->chars).find(u"DialogOptionLiveTheater") != wstring::npos)
+		if (il2cppstring(UnityEngine::Object::Name(cloned)->chars).find(IL2CPP_STRING("DialogOptionLiveTheater")) != wstring::npos)
 		{
 			auto getComponents = il2cpp_class_get_method_from_name_type<Il2CppArraySize_t<Il2CppObject*> *(*)(Il2CppObject*, Il2CppType*, bool, bool, bool, bool, Il2CppObject*)>(cloned->klass, "GetComponentsInternal", 6)->methodPointer;
 			auto rectTransformArray = getComponents(cloned, reinterpret_cast<Il2CppType*>(GetRuntimeType(
@@ -10627,7 +10499,7 @@ namespace
 			{
 				auto rectTransform = rectTransformArray->vector[i];
 
-				if (rectTransform && UnityEngine::Object::Name(rectTransform)->chars == u"Content"s)
+				if (rectTransform && UnityEngine::Object::Name(rectTransform)->chars == il2cppstring(IL2CPP_STRING("Content")))
 				{
 					InitOptionLayout(rectTransform);
 					break;
@@ -10637,7 +10509,7 @@ namespace
 			SetupLiveOptionLayout();
 		}
 
-		if (u16string(UnityEngine::Object::Name(cloned)->chars).find(u"CharacterHomeTopUI") != wstring::npos)
+		if (il2cppstring(UnityEngine::Object::Name(cloned)->chars).find(IL2CPP_STRING("CharacterHomeTopUI")) != wstring::npos)
 		{
 			auto getComponent = il2cpp_class_get_method_from_name_type<Il2CppObject * (*)(Il2CppObject*, Il2CppReflectionType*)>(cloned->klass, "GetComponent", 1)->methodPointer;
 			auto CharacterHomeTopUI = getComponent(cloned, GetRuntimeType("umamusume.dll", "Gallop", "CharacterHomeTopUI"));
@@ -10661,7 +10533,7 @@ namespace
 			}
 		}
 
-		if (u16string(UnityEngine::Object::Name(cloned)->chars).find(u"LiveView") != wstring::npos)
+		if (il2cppstring(UnityEngine::Object::Name(cloned)->chars).find(IL2CPP_STRING("LiveView")) != wstring::npos)
 		{
 			auto gameObject = UnityEngine::GameObject(cloned);
 			auto contentsRoot = gameObject.transform().Find(il2cpp_string_new(config::live_slider_always_show ? "ContentsRoot" : "ContentsRoot/MenuRoot"));
@@ -10681,7 +10553,7 @@ namespace
 			sliderTransform.SetParent(contentsRoot, false);
 		}
 
-		if (u16string(UnityEngine::Object::Name(cloned)->chars).find(u"RaceResultList") != wstring::npos)
+		if (il2cppstring(UnityEngine::Object::Name(cloned)->chars).find(IL2CPP_STRING("RaceResultList")) != wstring::npos)
 		{
 			auto raceInfo = il2cpp_symbols::get_method_pointer<Il2CppObject * (*)()>("umamusume.dll", "Gallop", "RaceManager", "get_RaceInfo", 0)();
 
@@ -10719,7 +10591,7 @@ namespace
 			}
 		}
 
-		if (u16string(UnityEngine::Object::Name(cloned)->chars).find(u"LiveChampionsTextController") != wstring::npos)
+		if (il2cppstring(UnityEngine::Object::Name(cloned)->chars).find(IL2CPP_STRING("LiveChampionsTextController")) != wstring::npos)
 		{
 			auto updateScreenReferenceSize = CreateDelegateWithClass(il2cpp_symbols::get_class("DOTween.dll", "DG.Tweening", "TweenCallback"), cloned, *([](Il2CppObject* _this)
 				{
@@ -10831,7 +10703,7 @@ namespace
 	{
 		auto texture2D = reinterpret_cast<decltype(Sprite_get_texture_hook)*>(Sprite_get_texture_orig)(_this);
 		auto uobject_name = UnityEngine::Object::Name(texture2D);
-		if (!u16string(uobject_name->chars).empty())
+		if (!il2cppstring(uobject_name->chars).empty())
 		{
 			auto newTexture = GetReplacementAssets(
 				uobject_name,
@@ -10921,55 +10793,10 @@ namespace
 		reinterpret_cast<decltype(Renderer_set_materials_hook)*>(Renderer_set_materials_orig)(_this, materials);
 	}
 
-	void* Material_set_mainTexture_orig = nullptr;
-	void Material_set_mainTexture_hook(Il2CppObject* _this, Il2CppObject* texture)
-	{
-		if (texture)
-		{
-			if (!u16string(UnityEngine::Object::Name(texture)->chars).empty())
-			{
-				auto newTexture = GetReplacementAssets(
-					UnityEngine::Object::Name(texture),
-					GetRuntimeType("UnityEngine.CoreModule.dll", "UnityEngine", "Texture2D"));
-				if (newTexture)
-				{
-					il2cpp_symbols::get_method_pointer<void (*)(Il2CppObject*, int)>("UnityEngine.CoreModule.dll", "UnityEngine", "Object", "set_hideFlags", 1)
-						(newTexture, 32);
-					reinterpret_cast<decltype(Material_set_mainTexture_hook)*>(Material_set_mainTexture_orig)(_this, newTexture);
-					return;
-				}
-			}
-		}
-		reinterpret_cast<decltype(Material_set_mainTexture_hook)*>(Material_set_mainTexture_orig)(_this, texture);
-	}
-
-	void* Material_get_mainTexture_orig = nullptr;
-	Il2CppObject* Material_get_mainTexture_hook(Il2CppObject* _this)
-	{
-		auto texture = reinterpret_cast<decltype(Material_get_mainTexture_hook)*>(Material_get_mainTexture_orig)(_this);
-		if (texture)
-		{
-			auto uobject_name = UnityEngine::Object::Name(texture);
-			if (!u16string(uobject_name->chars).empty())
-			{
-				auto newTexture = GetReplacementAssets(
-					uobject_name,
-					GetRuntimeType("UnityEngine.CoreModule.dll", "UnityEngine", "Texture2D"));
-				if (newTexture)
-				{
-					il2cpp_symbols::get_method_pointer<void (*)(Il2CppObject*, int)>("UnityEngine.CoreModule.dll", "UnityEngine", "Object", "set_hideFlags", 1)
-						(newTexture, 32);
-					return newTexture;
-				}
-			}
-		}
-		return texture;
-	}
-
 	void* Material_SetTextureI4_orig = nullptr;
 	void Material_SetTextureI4_hook(Il2CppObject* _this, int nameID, Il2CppObject* texture)
 	{
-		if (texture && !u16string(UnityEngine::Object::Name(texture)->chars).empty())
+		if (texture && !il2cppstring(UnityEngine::Object::Name(texture)->chars).empty())
 		{
 			auto newTexture = GetReplacementAssets(
 				UnityEngine::Object::Name(texture),
@@ -10989,7 +10816,7 @@ namespace
 	Il2CppObject* Material_GetTextureImpl_hook(Il2CppObject* _this, int nameID)
 	{
 		auto texture = reinterpret_cast<decltype(Material_GetTextureImpl_hook)*>(Material_GetTextureImpl_orig)(_this, nameID);
-		if (texture && !u16string(UnityEngine::Object::Name(texture)->chars).empty())
+		if (texture && !il2cppstring(UnityEngine::Object::Name(texture)->chars).empty())
 		{
 			auto newTexture = GetReplacementAssets(
 				UnityEngine::Object::Name(texture),
@@ -11007,7 +10834,7 @@ namespace
 	void* Material_SetTextureImpl_orig = nullptr;
 	void Material_SetTextureImpl_hook(Il2CppObject* _this, int nameID, Il2CppObject* texture)
 	{
-		if (texture && !u16string(UnityEngine::Object::Name(texture)->chars).empty())
+		if (texture && !il2cppstring(UnityEngine::Object::Name(texture)->chars).empty())
 		{
 			auto newTexture = GetReplacementAssets(
 				UnityEngine::Object::Name(texture),
@@ -11026,7 +10853,7 @@ namespace
 	void* CharaPropRendererAccessor_SetTexture_orig = nullptr;
 	void CharaPropRendererAccessor_SetTexture_hook(Il2CppObject* _this, Il2CppObject* texture)
 	{
-		if (!u16string(UnityEngine::Object::Name(texture)->chars).empty())
+		if (!il2cppstring(UnityEngine::Object::Name(texture)->chars).empty())
 		{
 			auto newTexture = GetReplacementAssets(
 				UnityEngine::Object::Name(texture),
@@ -11221,54 +11048,6 @@ namespace
 	CriWare::CriMana::MovieInfo* (*MoviePlayerBase_get_MovieInfo)(Il2CppObject* _this);
 	CriWare::CriMana::MovieInfo* (*MovieManager_GetMovieInfo)(Il2CppObject* _this, Cute::Cri::MoviePlayerHandle playerHandle);
 
-	void* MovieManager_SetImageUvRect_orig = nullptr;
-
-	void MovieManager_SetImageUvRect_hook(Il2CppObject* _this, Cute::Cri::MoviePlayerHandle playerHandle, UnityEngine::Rect uv)
-	{
-		auto movieInfo = MovieManager_GetMovieInfo(_this, playerHandle);
-		if (!movieInfo)
-		{
-			return;
-		}
-
-		if (movieInfo->width < movieInfo->height && !Gallop::StandaloneWindowResize::IsVirt())
-		{
-			int rWidth = UnityEngine::Screen::width();
-			int rHeight = UnityEngine::Screen::height();
-			if (roundf(config::runtime::ratioHorizontal * (max(1.0f, rHeight * config::runtime::ratioVertical) * (config::freeform_window ? config::freeform_ui_scale_landscape : config::ui_scale))) == uv.height)
-			{
-				uv.height = rWidth;
-			}
-			uv.width = rHeight;
-		}
-
-		reinterpret_cast<decltype(MovieManager_SetImageUvRect_hook)*>(MovieManager_SetImageUvRect_orig)(_this, playerHandle, uv);
-	}
-
-	void* MovieManager_SetScreenSize_orig = nullptr;
-
-	void MovieManager_SetScreenSize_hook(Il2CppObject* _this, Cute::Cri::MoviePlayerHandle playerHandle, UnityEngine::Vector2 screenSize)
-	{
-		auto movieInfo = MovieManager_GetMovieInfo(_this, playerHandle);
-		if (!movieInfo)
-		{
-			return;
-		}
-
-		if (movieInfo->width < movieInfo->height && !Gallop::StandaloneWindowResize::IsVirt())
-		{
-			int rWidth = UnityEngine::Screen::width();
-			int rHeight = UnityEngine::Screen::height();
-			if (roundf(config::runtime::ratioHorizontal * (max(1.0f, rHeight * config::runtime::ratioVertical) * (config::freeform_window ? config::freeform_ui_scale_landscape : config::ui_scale))) == screenSize.y)
-			{
-				screenSize.y = rWidth;
-			}
-			screenSize.x = rHeight;
-		}
-
-		reinterpret_cast<decltype(MovieManager_SetScreenSize_hook)*>(MovieManager_SetScreenSize_orig)(_this, playerHandle, screenSize);
-	}
-
 	void* MoviePlayerForUI_AdjustScreenSize_orig = nullptr;
 
 	void MoviePlayerForUI_AdjustScreenSize_hook(Il2CppObject* self, UnityEngine::Vector2 dispRectWH, bool isPanScan)
@@ -11364,7 +11143,7 @@ namespace
 
 									auto text1 = il2cpp_class_get_method_from_name_type<Il2CppString * (*)(Il2CppObject*)>(_inputField->klass, "get_text", 0)->methodPointer(_inputField);
 
-									u16string searchId = text1->chars;
+									string searchId = il2cpp_u8(text1->chars);
 
 									auto workDataManager = GetSingletonInstance(il2cpp_symbols::get_class("umamusume.dll", "Gallop", "WorkDataManager"));
 
@@ -11372,7 +11151,7 @@ namespace
 									auto viewerIdObscured = il2cpp_class_get_method_from_name_type<CodeStage::AntiCheat::ObscuredTypes::ObscuredLong(*)(Il2CppObject*)>(workUserData->klass, "get_ViewerId", 0)->methodPointer(workUserData);
 									auto viewerId = viewerIdObscured.GetDecrypted();
 
-									if (searchId == wide_u16(to_wstring(viewerId)))
+									if (searchId == to_string(viewerId))
 									{
 										il2cpp_symbols::get_method_pointer("umamusume.dll", "Gallop", "FriendViewController", "PushErrorSearchOwn", IgnoreNumberOfArguments)();
 										return;
@@ -11385,7 +11164,7 @@ namespace
 										};
 
 									il2cpp_symbols::get_method_pointer<void (*)(int64_t, Il2CppDelegate*, Il2CppDelegate*, Il2CppDelegate*, Il2CppDelegate*, Il2CppObject*, bool, Il2CppDelegate*, bool, Il2CppDelegate*)>("umamusume.dll", "Gallop", "DialogTrainerInfo", "PushDialog", 10)
-										(stoll(u16_u8(searchId).data()), CreateDelegateStatic(onModifyFriendCloseFn), nullptr, nullptr, nullptr, nullptr, false, nullptr, false, nullptr);
+										(stoll(searchId.data()), CreateDelegateStatic(onModifyFriendCloseFn), nullptr, nullptr, nullptr, nullptr, false, nullptr, false, nullptr);
 								};
 							il2cpp_symbols::get_method_pointer<void (*)(Il2CppDelegate*)>("umamusume.dll", "Gallop", "DialogIDSearch", "PushDialog", 1)(CreateDelegateStatic(fn));
 
@@ -11432,7 +11211,7 @@ namespace
 									{
 										try
 										{
-											stoll(u16_u8(value->chars).data());
+											stoll(il2cpp_u8(value->chars).data());
 											valid = true;
 										}
 										catch (invalid_argument e)
@@ -11443,7 +11222,7 @@ namespace
 									if (rightButton)
 									{
 										il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, bool)>(rightButton->klass, "set_interactable", 1)->methodPointer(rightButton, valid);
-										il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, Il2CppString*)>(rightButton->klass, "SetNotificationMessage", 1)->methodPointer(rightButton, valid ? il2cpp_string_new("") : localizeextension_text_hook(GetTextIdByName(u"Friend0013")));
+										il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, Il2CppString*)>(rightButton->klass, "SetNotificationMessage", 1)->methodPointer(rightButton, valid ? il2cpp_string_new("") : localizeextension_text_hook(GetTextIdByName(IL2CPP_STRING("Friend0013"))));
 									}
 								};
 
@@ -11478,11 +11257,11 @@ namespace
 
 					auto dialogData = Gallop::DialogCommon::Data();
 					dialogData.SetSimpleTwoButtonMessage(
-						localizeextension_text_hook(GetTextIdByName(u"Friend0039")),
+						localizeextension_text_hook(GetTextIdByName(IL2CPP_STRING("Friend0039"))),
 						il2cpp_string_new("트레이너 ID로 검색하시겠습니까?"),
 						CreateDelegateStatic(viewerIdSearchFn),
-						GetTextIdByName(u"Outgame0002"),
-						GetTextIdByName(u"Common0003"),
+						GetTextIdByName(IL2CPP_STRING("Outgame0002")),
+						GetTextIdByName(IL2CPP_STRING("Common0003")),
 						CreateDelegateStatic(playerIdSearchFn)
 					);
 
@@ -11663,11 +11442,11 @@ namespace
 
 							auto dialogData = Gallop::DialogCommon::Data();
 							dialogData.SetSimpleTwoButtonMessage(
-								localizeextension_text_hook(GetTextIdByName(u"StoryEvent0079")),
+								localizeextension_text_hook(GetTextIdByName(IL2CPP_STRING("StoryEvent0079"))),
 								il2cpp_string_new("해당 스토리 이벤트는 개최 정보가 누락되어있습니다.\n\n웹 페이지를 보시겠습니까?"),
 								onRight,
-								GetTextIdByName(u"Common0002"),
-								GetTextIdByName(u"Common0001"),
+								GetTextIdByName(IL2CPP_STRING("Common0002")),
+								GetTextIdByName(IL2CPP_STRING("Common0001")),
 								onLeft
 							);
 
@@ -12055,12 +11834,12 @@ namespace
 		return _horseManager;
 	}
 
-	u16string GetRaceState()
+	il2cppstring GetRaceState()
 	{
 		auto instance = GetRaceManager();
 		if (!instance)
 		{
-			return u"";
+			return IL2CPP_STRING("");
 		}
 
 		auto state = il2cpp_class_get_method_from_name_type<int (*)(Il2CppObject*)>(instance->klass, "get_State", 0)->methodPointer(instance);
@@ -12068,12 +11847,12 @@ namespace
 		return stateName->chars;
 	}
 
-	u16string GetRaceCameraMode()
+	il2cppstring GetRaceCameraMode()
 	{
 		auto instance = GetSingletonInstance(il2cpp_symbols::get_class("umamusume.dll", "Gallop", "RaceCameraManager"));
 		if (!instance)
 		{
-			return u"";
+			return IL2CPP_STRING("");
 		}
 
 		auto mode = il2cpp_class_get_method_from_name_type<int (*)(Il2CppObject*)>(instance->klass, "GetCameraMode", 0)->methodPointer(instance);
@@ -12085,7 +11864,7 @@ namespace
 		auto stateName = GetRaceState();
 		if (!stateName.empty())
 		{
-			return u"Race" == stateName;
+			return IL2CPP_STRING("Race") == stateName;
 		}
 		return false;
 	}
@@ -12117,7 +11896,7 @@ namespace
 					il2cpp_field_get_value(title, textField, &text);
 					if (text)
 					{
-						name = u16_u8(text_get_text(text)->chars);
+						name = il2cpp_u8(text_get_text(text)->chars);
 						if (name.empty())
 						{
 							name = "Live (unknown)";
@@ -12160,14 +11939,14 @@ namespace
 
 						if (_cacheText)
 						{
-							detail = u16_u8(_cacheText->chars);
+							detail = il2cpp_u8(_cacheText->chars);
 						}
 					}
 
 					if (detail.empty())
 					{
 						auto viewId = il2cpp_class_get_method_from_name_type<int (*)(Il2CppObject*)>(sceneManager->klass, "GetCurrentViewId", 0)->methodPointer(sceneManager);
-						auto viewName = u16_u8(GetEnumName(GetRuntimeType("umamusume.dll", "Gallop", "SceneDefine/ViewId"), viewId)->chars);
+						auto viewName = il2cpp_u8(GetEnumName(GetRuntimeType("umamusume.dll", "Gallop", "SceneDefine/ViewId"), viewId)->chars);
 						detail = GetViewName(viewName);
 
 						if (detail.empty())
@@ -12221,9 +12000,9 @@ namespace
 
 			if (handleName)
 			{
-				u16string sceneName = handleName->chars;
+				il2cppstring sceneName = handleName->chars;
 
-				if (sceneName == u"Live")
+				if (sceneName == IL2CPP_STRING("Live"))
 				{
 					auto controller = GetCurrentViewController();
 
@@ -12244,10 +12023,13 @@ namespace
 								auto timeMin = static_cast<int>(LiveCurrentTime / 60);
 								auto timeSec = static_cast<int>(fmodf(LiveCurrentTime, 60));
 
-								u16stringstream str;
-								str << setw(2) << setfill(u'0') << wide_u16(to_wstring(timeSec));
+								auto timeMinIl2Cpp = u8_il2cpp(to_string(timeMin));
+								auto timeSecIl2Cpp = u8_il2cpp(to_string(timeSec));
 
-								SetTextCommonText(textCommon, (wide_u16(to_wstring(timeMin)) + u":" + str.str()).data());
+								il2cppstringstream str;
+								str << setw(2) << setfill(IL2CPP_STRING('0')) << timeSecIl2Cpp;
+
+								SetTextCommonText(textCommon, (timeMinIl2Cpp + IL2CPP_STRING(":") + str.str()).data());
 							}
 
 							auto textCommonTotal = GetTextCommon("live_slider_total");
@@ -12257,10 +12039,13 @@ namespace
 								auto timeMin = static_cast<int>(LiveTotalTime / 60);
 								auto timeSec = static_cast<int>(fmodf(LiveTotalTime, 60));
 
-								u16stringstream str;
-								str << setw(2) << setfill(u'0') << wide_u16(to_wstring(timeSec));
+								auto timeMinIl2Cpp = u8_il2cpp(to_string(timeMin));
+								auto timeSecIl2Cpp = u8_il2cpp(to_string(timeSec));
 
-								SetTextCommonText(textCommonTotal, (wide_u16(to_wstring(timeMin)) + u":" + str.str()).data());
+								il2cppstringstream str;
+								str << setw(2) << setfill(IL2CPP_STRING('0')) << timeSecIl2Cpp;
+
+								SetTextCommonText(textCommonTotal, (timeMinIl2Cpp + IL2CPP_STRING(":") + str.str()).data());
 							}
 
 							if (config::live_playback_loop)
@@ -12291,7 +12076,7 @@ namespace
 
 				if (SystemMediaTransportControlsManager::instance.IsEnabled())
 				{
-					if (sceneName == u"Home")
+					if (sceneName == IL2CPP_STRING("Home"))
 					{
 						bool hasSetList = false;
 
@@ -12358,7 +12143,7 @@ namespace
 						}
 					}
 
-					if (sceneName == u"Live")
+					if (sceneName == IL2CPP_STRING("Live"))
 					{
 						auto controller = GetCurrentViewController();
 
@@ -12385,7 +12170,7 @@ namespace
 		}
 		catch (const Il2CppExceptionWrapper& e)
 		{
-			wcout << "TickFrame error: " << u16_wide(e.ex->message->chars) << endl;
+			wcout << "TickFrame error: " << e.ex->message->chars << endl;
 		}
 	}
 
@@ -12403,7 +12188,7 @@ namespace
 		}
 		catch (const Il2CppExceptionWrapper& e)
 		{
-			wcout << "StartTickFrame error: " << u16_wide(e.ex->message->chars) << endl;
+			wcout << "StartTickFrame error: " << e.ex->message->chars << endl;
 		}
 	}
 
@@ -12452,9 +12237,9 @@ namespace
 
 	void dump_all_entries()
 	{
-		vector<u16string> static_entries;
-		vector<pair<const u16string, const u16string>> text_id_static_entries;
-		vector<pair<const u16string, const u16string>> text_id_not_matched_entries;
+		vector<il2cppstring> static_entries;
+		vector<pair<const il2cppstring, const il2cppstring>> text_id_static_entries;
+		vector<pair<const il2cppstring, const il2cppstring>> text_id_not_matched_entries;
 		// 0 is None
 		for (uint64_t i = 1;; i++)
 		{
@@ -12471,10 +12256,10 @@ namespace
 			{
 				if (config::static_entries_use_text_id_name)
 				{
-					u16string textIdName = GetTextIdNameById(i);
+					il2cppstring textIdName = GetTextIdNameById(i);
 					text_id_static_entries.emplace_back(textIdName, str->chars);
 					if (local::get_localized_string(textIdName) == nullptr ||
-						u16string(local::get_localized_string(textIdName)->chars) == str->chars)
+						il2cppstring(local::get_localized_string(textIdName)->chars) == str->chars)
 					{
 						text_id_not_matched_entries.emplace_back(textIdName, str->chars);
 					}
@@ -12919,7 +12704,7 @@ namespace
 				auto titleMovie = il2cpp_class_get_method_from_name_type<Il2CppString * (*)(Il2CppObject*)>(_stringBuilder->klass, "ToString", 0)->methodPointer(_stringBuilder)->chars;
 				il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, int)>(_stringBuilder->klass, "set_Length", 1)->methodPointer(_stringBuilder, 0);
 
-				if (filesystem::exists(streamingAssetsPath + u"/PreinResource/Movie/m/"s + titleMovie + u"_landscape.usm"))
+				if (filesystem::exists(streamingAssetsPath + il2cppstring(IL2CPP_STRING("/PreinResource/Movie/m/")) + titleMovie + IL2CPP_STRING("_landscape.usm")))
 				{
 					titleMovieFormat = il2cpp_string_new("Title/title_movie_{0:D2}_landscape");
 				}
@@ -12971,7 +12756,7 @@ namespace
 			auto titleMovie = il2cpp_class_get_method_from_name_type<Il2CppString * (*)(Il2CppObject*)>(_stringBuilder->klass, "ToString", 0)->methodPointer(_stringBuilder)->chars;
 			il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, int)>(_stringBuilder->klass, "set_Length", 1)->methodPointer(_stringBuilder, 0);
 
-			if (filesystem::exists(streamingAssetsPath + u"/PreinResource/Movie/m/"s + titleMovie + u"_landscape.usm"))
+			if (filesystem::exists(streamingAssetsPath + il2cppstring(IL2CPP_STRING("/PreinResource/Movie/m/")) + titleMovie + IL2CPP_STRING("_landscape.usm")))
 			{
 				titleMovieFormat = il2cpp_string_new("Title/title_movie_{0:D2}_landscape");
 			}
@@ -13081,10 +12866,6 @@ namespace
 			"DOTween.dll", "DG.Tweening.Core", "TweenManager", "Update", 3
 		);
 
-		auto update_timeline_data_addr = il2cpp_symbols::get_method_pointer(
-			"umamusume.dll", "Gallop", "StoryTimelineBlockData", "UpdateBlockData", 4
-		);
-
 		auto CySpringUpdater_set_SpringUpdateMode_addr = il2cpp_symbols::get_method_pointer(
 			"umamusume.dll", "Gallop.Model.Component",
 			"CySpringUpdater", "set_SpringUpdateMode", 1
@@ -13156,8 +12937,6 @@ namespace
 			"Display", "get_renderingHeight", 0);
 
 		get_resolution = reinterpret_cast<decltype(get_resolution)>(il2cpp_resolve_icall("UnityEngine.Screen::get_currentResolution_Injected(UnityEngine.Resolution&)"));
-
-		auto story_timeline_controller_play_addr = il2cpp_symbols::get_method_pointer("umamusume.dll", "Gallop", "StoryTimelineController", "Play", 0);
 
 		auto story_race_textasset_load_addr = il2cpp_symbols::get_method_pointer("umamusume.dll", "Gallop", "StoryRaceTextAsset", "Load", 0);
 
@@ -13380,11 +13159,11 @@ namespace
 
 		auto PartsSingleModeCommonFooter_Setup_addr = il2cpp_symbols::get_method_pointer("umamusume.dll", "Gallop", "PartsSingleModeCommonFooter", "Setup", 0);
 
-		auto DialogSingleModeTopMenu_Setup_addr = il2cpp_symbols::get_method_pointer("umamusume.dll", "Gallop", "DialogSingleModeTopMenu", "Setup", 0);
+		auto DialogSingleModeTopMenu_Setup_addr = il2cpp_symbols::get_method_pointer("umamusume.dll", "Gallop", "DialogSingleModeTopMenIL2CPP_STRING(", "Setup", 0);
 
-		auto DialogSingleModeTopMenu_Setup1_addr = il2cpp_symbols::get_method_pointer("umamusume.dll", "Gallop", "DialogSingleModeTopMenu", "Setup", 1);
+		auto DialogSingleModeTopMenu_Setup1_addr = il2cpp_symbols::get_method_pointer("umamusume.dll", "Gallop", "DialogSingleModeTopMenIL2CPP_STRING(", "Setup", 1);
 
-		auto DialogSingleModeTopMenu_SetupButtonPositions_addr = il2cpp_symbols::get_method_pointer("umamusume.dll", "Gallop", "DialogSingleModeTopMenu", "SetupButtonPositions", 0);
+		auto DialogSingleModeTopMenu_SetupButtonPositions_addr = il2cpp_symbols::get_method_pointer("umamusume.dll", "Gallop", "DialogSingleModeTopMenIL2CPP_STRING(", "SetupButtonPositions", 0);
 
 		auto SingleModeRaceEntryViewController_SetupBottomButtons_addr = il2cpp_symbols::get_method_pointer("umamusume.dll", "Gallop", "SingleModeRaceEntryViewController", "SetupBottomButtons", 1);
 
@@ -13492,10 +13271,6 @@ namespace
 		// Looks like they store all localized texts that used by code in a dict
 		ADD_HOOK(localize_get, "Gallop.Localize.Get(TextId) at %p\n");
 
-		// ADD_HOOK(text_clip_data_ctor, "Gallop.StoryTimelineTextClipData::ctor at %p\n")
-
-		ADD_HOOK(story_timeline_controller_play, "StoryTimelineController::Play at %p\n");
-
 		ADD_HOOK(story_race_textasset_load, "StoryRaceTextAsset.Load at %p\n");
 
 		ADD_HOOK(get_modified_string, "GallopUtil_GetModifiedString at %p\n");
@@ -13506,7 +13281,7 @@ namespace
 
 		if (!config::replace_text_db_path.empty())
 		{
-			if (MasterDB::InitReplacementMasterDB(u16_u8(config::replace_text_db_path.data())))
+			if (MasterDB::InitReplacementMasterDB(il2cpp_u8(config::replace_text_db_path.data())))
 			{
 				ADD_HOOK(sqlite3_prepare_v2, "Plugin::sqlite3_prepare_v2 at %p\n");
 				ADD_HOOK(sqlite3_step, "Plugin::sqlite3_step at %p\n");
@@ -13743,25 +13518,26 @@ namespace
 
 	void patch_after_criware()
 	{
-		auto amuid = u16_wide(UnityEngine::Application::companyName()->chars) + L".Gallop";
+		il2cppstring amuid = UnityEngine::Application::companyName()->chars;
+		amuid += IL2CPP_STRING(".Gallop");
 
 		if (Game::CurrentGameRegion == Game::Region::ENG)
 		{
-			amuid += L".Eng";
+			amuid += IL2CPP_STRING(".Eng");
 		}
 
-		wstring title;
+		il2cppstring title;
 		if (Game::CurrentGameRegion == Game::Region::KOR)
 		{
-			title = L"우마무스메";
+			title = IL2CPP_STRING("우마무스메");
 		}
 		else if (Game::CurrentGameRegion == Game::Region::ENG)
 		{
-			title = L"Umamusume";
+			title = IL2CPP_STRING("Umamusume");
 		}
 		else
 		{
-			title = L"ウマ娘";
+			title = IL2CPP_STRING("ウマ娘");
 		}
 
 		DesktopNotificationManagerCompat::RegisterAumidAndComServer(amuid.data(), title.data());
@@ -13784,14 +13560,6 @@ namespace
 
 		auto SetResolution_Injected_addr = il2cpp_resolve_icall("UnityEngine.Screen::SetResolution_Injected(System.Int32,System.Int32,UnityEngine.FullScreenMode,UnityEngine.RefreshRate)");
 
-		auto MovieManager_SetImageUvRect_addr = il2cpp_symbols::get_method_pointer(
-			"Cute.Cri.Assembly.dll", "Cute.Cri", "MovieManager", "SetImageUvRect", 2);
-
-		auto MovieManager_SetScreenSize_addr = il2cpp_symbols::get_method_pointer(
-			"Cute.Cri.Assembly.dll", "Cute.Cri", "MovieManager", "SetScreenSize", 2);
-
-		auto AssetBundleRequest_GetResult_addr = il2cpp_resolve_icall("UnityEngine.AssetBundleRequest::GetResult()");
-
 		auto Sprite_get_texture_addr = il2cpp_resolve_icall("UnityEngine.Sprite::get_texture(UnityEngine.Sprite)");
 
 		auto Renderer_get_material_addr = il2cpp_symbols::get_method_pointer("UnityEngine.CoreModule.dll", "UnityEngine", "Renderer", "get_material", 0);
@@ -13806,10 +13574,6 @@ namespace
 
 		auto Renderer_set_materials_addr = il2cpp_symbols::get_method_pointer("UnityEngine.CoreModule.dll", "UnityEngine", "Renderer", "set_materials", 1);
 
-		auto Material_get_mainTexture_addr = il2cpp_symbols::get_method_pointer("UnityEngine.CoreModule.dll", "UnityEngine", "Material", "get_mainTexture", 0);
-
-		auto Material_set_mainTexture_addr = il2cpp_symbols::get_method_pointer("UnityEngine.CoreModule.dll", "UnityEngine", "Material", "set_mainTexture", 1);
-
 		auto Material_GetTextureImpl_addr = il2cpp_resolve_icall("UnityEngine.Material::GetTextureImpl(System.String,System.Int32)");
 
 		auto Material_SetTextureImpl_addr = il2cpp_resolve_icall("UnityEngine.Material::SetTextureImpl(System.String,System.Int32,UnityEngine.Texture)");
@@ -13822,8 +13586,6 @@ namespace
 
 		if (!config::replace_assetbundle_file_paths.empty())
 		{
-			ADD_HOOK(AssetBundleRequest_GetResult, "UnityEngine.AssetBundleRequest::GetResult at %p\n");
-
 			ADD_HOOK(GameObject_GetComponent, "UnityEngine.GameObject::GetComponent at %p\n");
 
 			ADD_HOOK(Sprite_get_texture, "UnityEngine.Sprite::get_texture at %p\n");
@@ -13839,10 +13601,6 @@ namespace
 			ADD_HOOK(Renderer_set_material, "UnityEngine.Renderer::set_material at %p\n");
 
 			ADD_HOOK(Renderer_set_materials, "UnityEngine.Renderer::set_materials at %p\n");
-
-			// ADD_HOOK(Material_get_mainTexture, "UnityEngine.Material::get_mainTexture at %p\n");
-
-			// ADD_HOOK(Material_set_mainTexture, "UnityEngine.Material::set_mainTexture at %p\n");
 
 			ADD_HOOK(Material_GetTextureImpl, "UnityEngine.Material::GetTextureImpl at %p\n");
 
@@ -14031,9 +13789,9 @@ namespace
 			{
 				auto path = il2cpp_symbols::get_method_pointer<Il2CppString * (*)()>("Cute.Core.Assembly.dll", "Cute.Core", "Device", "GetPersistentDataPath", 0)()->chars;
 
-				if (filesystem::exists(path + uR"(\master\master_orig.mdb)"s))
+				if (filesystem::exists(path + il2cppstring(IL2CPP_STRING(R"(\master\master_orig.mdb)"))))
 				{
-					filesystem::remove_all(path + uR"(\master)"s);
+					filesystem::remove_all(path + il2cppstring(IL2CPP_STRING(R"(\master)")));
 				}
 			}
 			catch (const exception& ex)
@@ -14076,7 +13834,7 @@ namespace
 					return;
 				}
 
-				u16string sceneName = handleName->chars;
+				il2cppstring sceneName = handleName->chars;
 
 				isPortraitBeforeFullscreen = false;
 
@@ -14159,7 +13917,7 @@ namespace
 					}
 				}*/
 
-				//if (sceneName == u"Race")
+				//if (sceneName == IL2CPP_STRING("Race")
 				//{
 				//	auto delayCallback = &CreateDelegateWithClassStatic(il2cpp_symbols::get_class("DOTween.dll", "DG.Tweening", "TweenCallback"), *([](void*)
 				//		{
@@ -14172,24 +13930,24 @@ namespace
 				//	il2cpp_symbols::get_method_pointer<Il2CppObject* (*)(float, Il2CppDelegate*, bool)>("DOTween.dll", "DG.Tweening", "DOVirtual", "DelayedCall", 3)(0.05, delayCallback, true);
 				//}
 
-				if (sceneName == u"_Boot" && Game::CurrentGameStore == Game::Store::Steam)
+				if (sceneName == IL2CPP_STRING("_Boot") && Game::CurrentGameStore == Game::Store::Steam)
 				{
 					Gallop::StandaloneWindowResize::IsVirt(!Gallop::Screen::IsLandscapeMode());
 				}
 
-				if (sceneName == u"Title")
+				if (sceneName == IL2CPP_STRING("Title"))
 				{
 					TaskbarManager::SetProgressValue(0, 0);
 					TaskbarManager::SetProgressState(TBPF_NOPROGRESS);
 				}
 
-				if (sceneName == u"OutGame" && Game::CurrentGameRegion == Game::Region::KOR)
+				if (sceneName == IL2CPP_STRING("OutGame") && Game::CurrentGameRegion == Game::Region::KOR)
 				{
 					auto sceneManager = GetSingletonInstance(il2cpp_symbols::get_class("umamusume.dll", "Gallop", "SceneManager"));
 					auto viewId = il2cpp_class_get_method_from_name_type<int (*)(Il2CppObject*)>(sceneManager->klass, "GetCurrentViewId", 0)->methodPointer(sceneManager);
-					u16string viewName = GetEnumName(GetRuntimeType("umamusume.dll", "Gallop", "SceneDefine/ViewId"), viewId)->chars;
+					il2cppstring viewName = GetEnumName(GetRuntimeType("umamusume.dll", "Gallop", "SceneDefine/ViewId"), viewId)->chars;
 
-					if (viewName == u"Friend")
+					if (viewName == IL2CPP_STRING("Friend"))
 					{
 						updateFriendSearchButton = &CreateDelegateWithClassStatic(il2cpp_symbols::get_class("DOTween.dll", "DG.Tweening", "TweenCallback"), *([](void*)
 							{
@@ -14204,7 +13962,7 @@ namespace
 					}
 				}
 
-				if (sceneName == u"Live")
+				if (sceneName == IL2CPP_STRING("Live"))
 				{
 					SystemMediaTransportControlsManager::instance.IsEnabled(true);
 
@@ -14215,7 +13973,7 @@ namespace
 					SystemMediaTransportControlsManager::instance.IsPreviousEnabled(false);
 					SystemMediaTransportControlsManager::instance.IsNextEnabled(true);
 				}
-				else if (sceneName == u"Home")
+				else if (sceneName == IL2CPP_STRING("Home"))
 				{
 					SystemMediaTransportControlsManager::instance.IsEnabled(true);
 					SystemMediaTransportControlsManager::instance.IsPreviousEnabled(false);
@@ -14230,7 +13988,7 @@ namespace
 					SystemMediaTransportControlsManager::instance.IsNextEnabled(false);
 				}
 
-				if (sceneName == u"Title")
+				if (sceneName == IL2CPP_STRING("Title"))
 				{
 					if (Game::CurrentGameRegion == Game::Region::KOR)
 					{
@@ -14305,7 +14063,7 @@ namespace
 					}
 				}
 
-				if (sceneName == u"Home")
+				if (sceneName == IL2CPP_STRING("Home"))
 				{
 					if (config::character_system_text_caption)
 					{
@@ -14359,7 +14117,7 @@ namespace
 					}
 				}
 
-				if (sceneName == u"Live" && config::champions_live_show_text)
+				if (sceneName == IL2CPP_STRING("Live") && config::champions_live_show_text)
 				{
 					auto loadSettings = il2cpp_symbols::get_method_pointer<Il2CppObject * (*)()>("umamusume.dll", "Gallop.Live", "Director", "get_LoadSettings", IgnoreNumberOfArguments)();
 					auto musicId = il2cpp_class_get_method_from_name_type<int (*)(Il2CppObject*)>(loadSettings->klass, "get_MusicId", 0)->methodPointer(loadSettings);
@@ -14415,13 +14173,13 @@ namespace
 
 				if (config::discord_rich_presence && discord)
 				{
-					auto detail = GetSceneName(u16_u8(sceneName));
+					auto detail = GetSceneName(il2cpp_u8(sceneName));
 
 					discord::Activity activity{};
 					activity.GetAssets().SetLargeImage("umamusume");
 					activity.SetDetails(detail.data());
 					activity.GetTimestamps().SetStart(startTime);
-					if (sceneName == u"Live"s)
+					if (sceneName == IL2CPP_STRING("Live"))
 					{
 						activity.SetType(discord::ActivityType::Watching);
 					}
@@ -14695,12 +14453,12 @@ ShowWindow_hook(
 	{
 		if (!config::custom_title_name.empty())
 		{
-			SetWindowTextW(hWnd, u16_wide(config::custom_title_name).data());
+			SetWindowTextW(hWnd, config::custom_title_name.data());
 		}
 
 		if (config::has_json_parse_error)
 		{
-			MessageBoxW(hWnd, u16_wide(config::json_parse_error_msg).data(), L"Umamusume Localify", MB_OK | MB_ICONWARNING);
+			MessageBoxW(hWnd, config::json_parse_error_msg.data(), L"Umamusume Localify", MB_OK | MB_ICONWARNING);
 		}
 
 		oldWndProcPtr = reinterpret_cast<WNDPROC>(SetWindowLongPtrW(hWnd, GWLP_WNDPROC, reinterpret_cast<LONG_PTR>(WndProc)));
