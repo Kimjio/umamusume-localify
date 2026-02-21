@@ -29,7 +29,7 @@ static void LandscapeUIManager_Initialize_hook(Il2CppObject* self, float leftUiO
 static void InitAddress()
 {
 	auto LandscapeUIManager = il2cpp_symbols::get_class("umamusume.dll", "Gallop", "LandscapeUIManager");
-	LandscapeUIManager_Initialize_addr = il2cpp_symbols::get_method_pointer<void (*)(Il2CppObject*)>(LandscapeUIManager, "Initialize", 2);
+	LandscapeUIManager_Initialize_addr = il2cpp_symbols::get_method_pointer(LandscapeUIManager, "Initialize", 2);
 	LandscapeUIManager__displayOrientationButtonField = il2cpp_class_get_field_from_name(LandscapeUIManager, "_displayOrientationButton");
 }
 

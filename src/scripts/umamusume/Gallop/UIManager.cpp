@@ -66,6 +66,15 @@ namespace
 #ifdef _MSC_VER
 	void* ChangeResizeUIForPC_addr = nullptr;
 	void* ChangeResizeUIForPC_orig = nullptr;
+
+	void* OnPushBandUIButton_addr = nullptr;
+	void* OnPushBandUIButton_orig = nullptr;
+
+	void* RestorePrevSelectedBandMenu_addr = nullptr;
+	void* RestorePrevSelectedBandMenu_orig = nullptr;
+
+	void* IsEnableSwitchBandMenu_addr = nullptr;
+	void* IsEnableSwitchBandMenu_orig = nullptr;
 #endif
 
 	float ratio_vertical = 0.5625f;
@@ -266,6 +275,21 @@ static bool get_IsLandscapeMode_hook()
 	return false;
 }
 
+static void OnPushBandUIButton_hook(Il2CppObject* self, uint64_t buttonType)
+{
+	// no-op
+}
+
+static void RestorePrevSelectedBandMenu_hook(Il2CppObject* self)
+{
+	// no-op
+}
+
+static bool IsEnableSwitchBandMenu_hook(Il2CppObject* self)
+{
+	return true;
+}
+
 static void InitAddress()
 {
 	ShowNotification_addr = il2cpp_symbols::get_method_pointer(ASSEMBLY_NAME, "Gallop", "UIManager", "ShowNotification", 1);
@@ -290,6 +314,9 @@ static void InitAddress()
 	get_DefaultResolution_addr = il2cpp_symbols::get_method_pointer(ASSEMBLY_NAME, "Gallop", "UIManager", "get_DefaultResolution", 0);
 #ifdef _MSC_VER
 	ChangeResizeUIForPC_addr = il2cpp_symbols::get_method_pointer(ASSEMBLY_NAME, "Gallop", "UIManager", "ChangeResizeUIForPC", 2);
+	OnPushBandUIButton_addr = il2cpp_symbols::get_method_pointer(ASSEMBLY_NAME, "Gallop", "UIManager", "OnPushBandUIButton", 1);
+	RestorePrevSelectedBandMenu_addr = il2cpp_symbols::get_method_pointer(ASSEMBLY_NAME, "Gallop", "UIManager", "RestorePrevSelectedBandMenu", 0);
+	IsEnableSwitchBandMenu_addr = il2cpp_symbols::get_method_pointer(ASSEMBLY_NAME, "Gallop", "UIManager", "IsEnableSwitchBandMenu", 0);
 #endif
 }
 
@@ -312,6 +339,9 @@ static void HookMethods()
 	{
 		ADD_HOOK(GetCameraSizeByOrientation, "Gallop.UIManager::GetCameraSizeByOrientation at %p\n");
 		ADD_HOOK(get_DefaultResolution, "Gallop.UIManager::get_DefaultResolution at %p\n");
+		ADD_HOOK(OnPushBandUIButton, "Gallop.UIManager::OnPushBandUIButton at %p\n");
+		ADD_HOOK(RestorePrevSelectedBandMenu, "Gallop.UIManager::RestorePrevSelectedBandMenu at %p\n");
+		ADD_HOOK(IsEnableSwitchBandMenu, "Gallop.UIManager::IsEnableSwitchBandMenu at %p\n");
 		// ADD_HOOK(get_IsLandscapeMode, "Gallop.UIManager::get_IsLandscapeMode at %p\n");
 	}
 }
