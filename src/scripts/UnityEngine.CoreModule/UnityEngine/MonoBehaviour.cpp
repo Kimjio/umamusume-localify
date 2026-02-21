@@ -14,6 +14,7 @@
 #include "scripts/umamusume/Gallop/DialogCommon.hpp"
 #include "scripts/umamusume/Gallop/DialogManager.hpp"
 #include "scripts/umamusume/Gallop/TextFontManager.hpp"
+#include "scripts/umamusume/Gallop/Localize.hpp"
 
 #include "config/config.hpp"
 
@@ -316,15 +317,11 @@ static Il2CppObject* StartCoroutineManaged2_hook(Il2CppObject* self, Il2CppObjec
 						auto dialogData = Gallop::DialogCommon::Data();
 						dialogData.AutoClose(false);
 
-						auto text = il2cpp_symbols::get_method_pointer<Il2CppString * (*)(unsigned long)>(
-							"umamusume.dll", "Gallop", "LocalizeExtention", "Text", 1
-						);
-
 						if (!config::runtime::allowStart)
 						{
 							dialogData.SetSimpleNoButtonMessage(
-								text(GetEnumValue(ParseEnum(GetRuntimeType("umamusume.dll", "Gallop", "TextId"), IL2CPP_STRING("Common0071")))),
-								text(GetEnumValue(ParseEnum(GetRuntimeType("umamusume.dll", "Gallop", "TextId"), IL2CPP_STRING("Error0032"))))
+								Gallop::Localize::Get(GetEnumValue(ParseEnum(GetRuntimeType("umamusume.dll", "Gallop", "TextId"), IL2CPP_STRING("Common0071")))),
+								Gallop::Localize::Get(GetEnumValue(ParseEnum(GetRuntimeType("umamusume.dll", "Gallop", "TextId"), IL2CPP_STRING("Error0032"))))
 							);
 
 							Gallop::DialogManager::PushSystemDialog(dialogData, true);

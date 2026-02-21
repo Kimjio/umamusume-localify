@@ -34,6 +34,10 @@ namespace UnityEngine
 
 		void position(Vector3 value);
 
+		Vector3 localPosition();
+
+		void localPosition(Vector3 value);
+
 		Vector3 localScale();
 
 		void localScale(Vector3 value);
@@ -41,6 +45,8 @@ namespace UnityEngine
 		int childCount();
 
 		Transform GetChild(int index);
+
+		void SetAsFirstSibling();
 
 		using Component::Component;
 

@@ -10,6 +10,8 @@
 #include "il2cpp/il2cpp_symbols.hpp"
 #include "il2cpp/il2cpp-tabledefs.h"
 
+#include "scripts/UnityEngine.AssetBundleModule/UnityEngine/AssetBundle.hpp"
+
 #include "config/config.hpp"
 
 #include "game.hpp"
@@ -104,18 +106,6 @@ static void InvokeDelegateConstructor(Il2CppDelegate* delegate, Il2CppObject* ta
 
 	void* ctorArgs[2] = { target, reinterpret_cast<void*>(&method) };
 	ctor->invoker_method(ctor->methodPointer, ctor, delegate, ctorArgs, nullptr);
-}
-
-static void InvokeDelegateConstructor2020(Il2CppDelegate2020* delegate, Il2CppObject* target, const MethodInfo2020* method)
-{
-	const MethodInfo2020* ctor = reinterpret_cast<const MethodInfo2020*>(il2cpp_class_get_method_from_name(delegate->object.klass, ".ctor", 2));
-
-	if (!ctor) {
-		return;
-	}
-
-	void* ctorArgs[2] = { target, reinterpret_cast<void*>(&method) };
-	ctor->invoker_method(ctor->methodPointer, reinterpret_cast<const MethodInfo*>(ctor), delegate, ctorArgs);
 }
 
 template<typename... T, typename R>
@@ -403,9 +393,9 @@ inline Il2CppObject* ParseEnum(Il2CppReflectionType* runtimeType, const IL2CPP_B
 	return il2cpp_symbols::get_method_pointer<Il2CppObject * (*)(Il2CppReflectionType*, Il2CppString*)>("mscorlib.dll", "System", "Enum", "Parse", 2)(runtimeType, il2cpp_string_new16(name.data()));
 }
 
-inline Il2CppString* GetEnumName(Il2CppReflectionType* runtimeType, int id)
+inline Il2CppString* GetEnumName(Il2CppReflectionType* runtimeType, uint64_t id)
 {
-	return il2cpp_symbols::get_method_pointer<Il2CppString * (*)(Il2CppReflectionType*, Il2CppObject*)>("mscorlib.dll", "System", "Enum", "GetName", 2)(runtimeType, il2cpp_value_box(il2cpp_defaults.int32_class, &id));
+	return il2cpp_symbols::get_method_pointer<Il2CppString * (*)(Il2CppReflectionType*, Il2CppObject*)>("mscorlib.dll", "System", "Enum", "GetName", 2)(runtimeType, il2cpp_value_box(il2cpp_defaults.uint64_class, &id));
 }
 
 inline uint64_t GetEnumValue(Il2CppObject* runtimeEnum)
@@ -479,7 +469,7 @@ inline uint64_t GetTextIdByName(const il2cppstring& name)
 	return GetEnumValue(ParseEnum(GetRuntimeType("umamusume.dll", "Gallop", "TextId"), name));
 }
 
-inline il2cppstring GetTextIdNameById(int id)
+inline il2cppstring GetTextIdNameById(uint64_t id)
 {
 	auto name = GetEnumName(GetRuntimeType("umamusume.dll", "Gallop", "TextId"), id);
 
@@ -540,6 +530,54 @@ inline Il2CppObject* GetCurrentHubViewChildController()
 inline Il2CppObject* GetFrontDialog()
 {
 	return il2cpp_symbols::get_method_pointer<Il2CppObject * (*)()>("umamusume.dll", "Gallop", "DialogManager", "GetForeFrontDialog", IgnoreNumberOfArguments)();
+}
+
+inline Il2CppObject* GetCustomFont()
+{
+	if (!config::runtime::fontAssets)
+	{
+		return nullptr;
+	}
+
+	if (!config::font_asset_name.empty())
+	{
+		return UnityEngine::AssetBundle{ config::runtime::fontAssets }.LoadAsset(il2cpp_string_new16(config::font_asset_name.data()), GetRuntimeType("UnityEngine.TextRenderingModule.dll", "UnityEngine", "Font"));
+	}
+	return nullptr;
+}
+
+// Fallback not support outline style
+inline Il2CppObject* GetCustomTMPFontFallback()
+{
+	if (!config::runtime::fontAssets)
+	{
+		return nullptr;
+	}
+
+	auto font = GetCustomFont();
+	if (font)
+	{
+		return il2cpp_symbols::get_method_pointer<Il2CppObject * (*)(
+			Il2CppObject * font, int samplingPointSize, int atlasPadding, int renderMode, int atlasWidth, int atlasHeight, int atlasPopulationMode, bool enableMultiAtlasSupport
+			)>("Unity.TextMeshPro.dll", "TMPro", "TMP_FontAsset", "CreateFontAsset", 1)
+			(font, 36, 4, 4165, 8192, 8192, 1, false);
+	}
+	return nullptr;
+}
+
+inline Il2CppObject* GetCustomTMPFont()
+{
+	if (!config::runtime::fontAssets)
+	{
+		return nullptr;
+	}
+
+	if (!config::tmpro_font_asset_name.empty())
+	{
+		auto tmpFont = UnityEngine::AssetBundle{ config::runtime::fontAssets }.LoadAsset(il2cpp_string_new16(config::tmpro_font_asset_name.data()), GetRuntimeType("Unity.TextMeshPro.dll", "TMPro", "TMP_FontAsset"));
+		return tmpFont ? tmpFont : GetCustomTMPFontFallback();
+	}
+	return GetCustomTMPFontFallback();
 }
 
 #ifdef _MSC_VER

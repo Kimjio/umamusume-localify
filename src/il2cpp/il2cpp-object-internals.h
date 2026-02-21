@@ -618,63 +618,6 @@ typedef struct Il2CppMulticastDelegate
 #endif
 } Il2CppMulticastDelegate;
 
-typedef struct Il2CppDelegate2020
-{
-    Il2CppObject object;
-#if !IL2CPP_TINY
-    /* The compiled code of the target method */
-    Il2CppMethodPointer method_ptr;
-    /* The invoke code */
-    Il2CppMethodPointer invoke_impl;
-    Il2CppObject* target;
-    const MethodInfo2020* method;
-
-    // This is used in PlatformInvoke.cpp to store the native function pointer
-    // IMPORTANT: It is assumed to NULL otherwise!  See PlatformInvoke::IsFakeDelegateMethodMarshaledFromNativeCode
-    void* delegate_trampoline;
-
-    // Used to store the mulicast_invoke_impl
-    intptr_t extraArg;
-
-    /* MONO:
-     * If non-NULL, this points to a memory location which stores the address of
-     * the compiled code of the method, or NULL if it is not yet compiled.
-     * uint8_t **method_code;
-     */
-     // IL2CPP: Points to the "this" method pointer we use when calling invoke_impl
-     // For closed delegates invoke_impl_this points to target and invoke_impl is method pointer so we just do a single indirect call
-     // For all other delegates invoke_impl_this is points to it's owning delegate an invoke_impl is a delegate invoke stub
-     // NOTE: This field is NOT VISIBLE to the GC because its not a managed field in the classlibs
-     //       Our usages are safe becuase we either pointer to ourself or whats stored in the target field
-    Il2CppObject* invoke_impl_this;
-
-    void* interp_method;
-    /* Interp method that is executed when invoking the delegate */
-    void* interp_invoke_impl;
-    Il2CppReflectionMethod* method_info;
-    Il2CppReflectionMethod* original_method_info;
-    Il2CppObject* data;
-
-    bool method_is_virtual;
-#else
-    void* method_ptr;
-    Il2CppObject* m_target;
-    void* invoke_impl;
-    void* multicast_invoke_impl;
-    void* m_ReversePInvokeWrapperPtr;
-    bool m_IsDelegateOpen;
-#endif // !IL2CPP_TINY
-} Il2CppDelegate2020;
-
-typedef struct Il2CppMulticastDelegate2020
-{
-    Il2CppDelegate2020 delegate;
-    Il2CppArray* delegates;
-#if IL2CPP_TINY
-    int delegateCount;
-#endif
-} Il2CppMulticastDelegate2020;
-
 // System.MarshalByRefObject
 typedef struct Il2CppMarshalByRefObject
 {

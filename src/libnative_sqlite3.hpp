@@ -1,3 +1,5 @@
+#pragma once
+
 /*
 ** CAPI3REF: Result Codes
 ** KEYWORDS: {result code definitions}
@@ -153,12 +155,12 @@ typedef sqlite_uint64 sqlite3_uint64;
 #define PROC void*
 #endif
 
-#define DEFINE_PROC(name) decltype(name)* name##_addr = nullptr; \
-void* name##_orig = nullptr
+#define DEFINE_PROC(name) inline decltype(name)* name##_addr = nullptr; \
+inline void* name##_orig = nullptr
 
 #define CALL_ORIG_PROC(name) if (name##_orig) return reinterpret_cast<decltype(name)*>(name##_orig)
 
-MODULE libnative;
+inline MODULE libnative;
 
 int sqlite3_bind_blob(
 	sqlite3_stmt* pStmt,
@@ -301,7 +303,7 @@ DEFINE_PROC(sqlite3mc_codec_data);
 DEFINE_PROC(sqlite3mc_config);
 DEFINE_PROC(sqlite3mc_config_cipher);
 
-void init_sqlite3()
+inline void init_sqlite3()
 {
 #ifdef _MSC_VER
 	wstring module_name;
@@ -353,7 +355,7 @@ void init_sqlite3()
 	SET_PROC(sqlite3mc_config_cipher);
 }
 
-int sqlite3_bind_blob(
+inline int sqlite3_bind_blob(
 	sqlite3_stmt* pStmt,
 	int i,
 	const void* zData,
@@ -374,7 +376,7 @@ int sqlite3_bind_blob(
 	return SQLITE_OK;
 }
 
-int sqlite3_bind_double(sqlite3_stmt* pStmt, int i, double rValue)
+inline int sqlite3_bind_double(sqlite3_stmt* pStmt, int i, double rValue)
 {
 	if (sqlite3_bind_double_orig)
 	{
@@ -389,7 +391,7 @@ int sqlite3_bind_double(sqlite3_stmt* pStmt, int i, double rValue)
 	return SQLITE_OK;
 }
 
-int sqlite3_bind_int(sqlite3_stmt* pStmt, int i, int iValue)
+inline int sqlite3_bind_int(sqlite3_stmt* pStmt, int i, int iValue)
 {
 	if (sqlite3_bind_int_orig)
 	{
@@ -404,7 +406,7 @@ int sqlite3_bind_int(sqlite3_stmt* pStmt, int i, int iValue)
 	return SQLITE_OK;
 }
 
-int sqlite3_bind_int64(sqlite3_stmt* pStmt, int i, sqlite_int64 iValue)
+inline int sqlite3_bind_int64(sqlite3_stmt* pStmt, int i, sqlite_int64 iValue)
 {
 	if (sqlite3_bind_int64_orig)
 	{
@@ -419,7 +421,7 @@ int sqlite3_bind_int64(sqlite3_stmt* pStmt, int i, sqlite_int64 iValue)
 	return SQLITE_OK;
 }
 
-int sqlite3_bind_null(sqlite3_stmt* pStmt, int i)
+inline int sqlite3_bind_null(sqlite3_stmt* pStmt, int i)
 {
 	if (sqlite3_bind_null_orig)
 	{
@@ -434,7 +436,7 @@ int sqlite3_bind_null(sqlite3_stmt* pStmt, int i)
 	return SQLITE_OK;
 }
 
-int sqlite3_bind_text(
+inline int sqlite3_bind_text(
 	sqlite3_stmt* pStmt,
 	int i,
 	const char* zData,
@@ -455,7 +457,7 @@ int sqlite3_bind_text(
 	return SQLITE_OK;
 }
 
-int sqlite3_close(sqlite3* db)
+inline int sqlite3_close(sqlite3* db)
 {
 	if (sqlite3_close_orig)
 	{
@@ -470,7 +472,7 @@ int sqlite3_close(sqlite3* db)
 	return SQLITE_OK;
 }
 
-const void* sqlite3_column_blob(sqlite3_stmt* pStmt, int i)
+inline const void* sqlite3_column_blob(sqlite3_stmt* pStmt, int i)
 {
 	if (sqlite3_column_blob_orig)
 	{
@@ -485,7 +487,7 @@ const void* sqlite3_column_blob(sqlite3_stmt* pStmt, int i)
 	return SQLITE_OK;
 }
 
-int sqlite3_column_bytes(sqlite3_stmt* pStmt, int i)
+inline int sqlite3_column_bytes(sqlite3_stmt* pStmt, int i)
 {
 	if (sqlite3_column_bytes_orig)
 	{
@@ -500,7 +502,7 @@ int sqlite3_column_bytes(sqlite3_stmt* pStmt, int i)
 	return SQLITE_OK;
 }
 
-double sqlite3_column_double(sqlite3_stmt* pStmt, int i)
+inline double sqlite3_column_double(sqlite3_stmt* pStmt, int i)
 {
 	if (sqlite3_column_double_orig)
 	{
@@ -515,7 +517,7 @@ double sqlite3_column_double(sqlite3_stmt* pStmt, int i)
 	return SQLITE_OK;
 }
 
-int sqlite3_column_int(sqlite3_stmt* pStmt, int i)
+inline int sqlite3_column_int(sqlite3_stmt* pStmt, int i)
 {
 	if (sqlite3_column_int_orig)
 	{
@@ -530,7 +532,7 @@ int sqlite3_column_int(sqlite3_stmt* pStmt, int i)
 	return SQLITE_OK;
 }
 
-sqlite_int64 sqlite3_column_int64(sqlite3_stmt* pStmt, int i)
+inline sqlite_int64 sqlite3_column_int64(sqlite3_stmt* pStmt, int i)
 {
 	if (sqlite3_column_int64_orig)
 	{
@@ -545,7 +547,7 @@ sqlite_int64 sqlite3_column_int64(sqlite3_stmt* pStmt, int i)
 	return SQLITE_OK;
 }
 
-const unsigned char* sqlite3_column_text(sqlite3_stmt* pStmt, int i)
+inline const unsigned char* sqlite3_column_text(sqlite3_stmt* pStmt, int i)
 {
 	if (sqlite3_column_text_orig)
 	{
@@ -560,7 +562,7 @@ const unsigned char* sqlite3_column_text(sqlite3_stmt* pStmt, int i)
 	return SQLITE_OK;
 }
 
-int sqlite3_column_type(sqlite3_stmt* pStmt, int i)
+inline int sqlite3_column_type(sqlite3_stmt* pStmt, int i)
 {
 	if (sqlite3_column_type_orig)
 	{
@@ -575,7 +577,7 @@ int sqlite3_column_type(sqlite3_stmt* pStmt, int i)
 	return SQLITE_OK;
 }
 
-int sqlite3_exec(
+inline int sqlite3_exec(
 	sqlite3* db,                /* The database on which the SQL executes */
 	const char* zSql,           /* The SQL to be executed */
 	sqlite3_callback xCallback, /* Invoke this callback routine */
@@ -596,7 +598,7 @@ int sqlite3_exec(
 	return SQLITE_OK;
 }
 
-int sqlite3_finalize(sqlite3_stmt* pStmt)
+inline int sqlite3_finalize(sqlite3_stmt* pStmt)
 {
 	if (sqlite3_finalize_orig)
 	{
@@ -611,7 +613,7 @@ int sqlite3_finalize(sqlite3_stmt* pStmt)
 	return SQLITE_OK;
 }
 
-int sqlite3_key(sqlite3* db, const void* zKey, int nKey)
+inline int sqlite3_key(sqlite3* db, const void* zKey, int nKey)
 {
 	if (sqlite3_key_orig)
 	{
@@ -626,7 +628,7 @@ int sqlite3_key(sqlite3* db, const void* zKey, int nKey)
 	return SQLITE_OK;
 }
 
-int sqlite3_key_v2(sqlite3* db, const char* zDbName, const void* zKey, int nKey)
+inline int sqlite3_key_v2(sqlite3* db, const char* zDbName, const void* zKey, int nKey)
 {
 	if (sqlite3_key_v2_orig)
 	{
@@ -641,7 +643,7 @@ int sqlite3_key_v2(sqlite3* db, const char* zDbName, const void* zKey, int nKey)
 	return SQLITE_OK;
 }
 
-int sqlite3_open(
+inline int sqlite3_open(
 	const char* zFilename,
 	sqlite3** ppDb
 )
@@ -659,7 +661,7 @@ int sqlite3_open(
 	return SQLITE_OK;
 }
 
-int sqlite3_open_v2(
+inline int sqlite3_open_v2(
 	const char* filename,   /* Database filename (UTF-8) */
 	sqlite3** ppDb,         /* OUT: SQLite db handle */
 	int flags,              /* Flags */
@@ -679,7 +681,7 @@ int sqlite3_open_v2(
 	return SQLITE_OK;
 }
 
-int sqlite3_prepare_v2(
+inline int sqlite3_prepare_v2(
 	sqlite3* db,              /* Database handle. */
 	const char* zSql,         /* UTF-8 encoded SQL statement. */
 	int nBytes,               /* Length of zSql in bytes. */
@@ -700,7 +702,7 @@ int sqlite3_prepare_v2(
 	return SQLITE_OK;
 }
 
-int sqlite3_rekey(sqlite3* db, const void* zKey, int nKey)
+inline int sqlite3_rekey(sqlite3* db, const void* zKey, int nKey)
 {
 	if (sqlite3_rekey_orig)
 	{
@@ -715,7 +717,7 @@ int sqlite3_rekey(sqlite3* db, const void* zKey, int nKey)
 	return SQLITE_OK;
 }
 
-int sqlite3_rekey_v2(sqlite3* db, const char* zDbName, const void* zKey, int nKey)
+inline int sqlite3_rekey_v2(sqlite3* db, const char* zDbName, const void* zKey, int nKey)
 {
 	if (sqlite3_rekey_v2_orig)
 	{
@@ -730,7 +732,7 @@ int sqlite3_rekey_v2(sqlite3* db, const char* zDbName, const void* zKey, int nKe
 	return SQLITE_OK;
 }
 
-int sqlite3_reset(sqlite3_stmt* pStmt)
+inline int sqlite3_reset(sqlite3_stmt* pStmt)
 {
 	if (sqlite3_reset_orig)
 	{
@@ -745,7 +747,7 @@ int sqlite3_reset(sqlite3_stmt* pStmt)
 	return SQLITE_OK;
 }
 
-int sqlite3_step(sqlite3_stmt* pStmt)
+inline int sqlite3_step(sqlite3_stmt* pStmt)
 {
 	if (sqlite3_step_orig)
 	{
@@ -760,7 +762,7 @@ int sqlite3_step(sqlite3_stmt* pStmt)
 	return SQLITE_OK;
 }
 
-int sqlite3_threadsafe(void)
+inline int sqlite3_threadsafe(void)
 {
 	if (sqlite3_threadsafe_orig)
 	{
@@ -775,7 +777,7 @@ int sqlite3_threadsafe(void)
 	return SQLITE_OK;
 }
 
-sqlite3_vfs* sqlite3_vfs_find(const char* zVfs)
+inline sqlite3_vfs* sqlite3_vfs_find(const char* zVfs)
 {
 	if (sqlite3_vfs_find_orig)
 	{
@@ -790,7 +792,7 @@ sqlite3_vfs* sqlite3_vfs_find(const char* zVfs)
 	return SQLITE_OK;
 }
 
-int sqlite3_vfs_register(sqlite3_vfs* pVfs, int makeDflt)
+inline int sqlite3_vfs_register(sqlite3_vfs* pVfs, int makeDflt)
 {
 	if (sqlite3_vfs_register_orig)
 	{
@@ -805,7 +807,7 @@ int sqlite3_vfs_register(sqlite3_vfs* pVfs, int makeDflt)
 	return SQLITE_OK;
 }
 
-int sqlite3_vfs_unregister(sqlite3_vfs* pVfs)
+inline int sqlite3_vfs_unregister(sqlite3_vfs* pVfs)
 {
 	if (sqlite3_vfs_unregister_orig)
 	{
@@ -820,7 +822,7 @@ int sqlite3_vfs_unregister(sqlite3_vfs* pVfs)
 	return SQLITE_OK;
 }
 
-int sqlite3_wal_checkpoint(sqlite3* db, const char* zDb)
+inline int sqlite3_wal_checkpoint(sqlite3* db, const char* zDb)
 {
 	if (sqlite3_wal_checkpoint_orig)
 	{
@@ -835,7 +837,7 @@ int sqlite3_wal_checkpoint(sqlite3* db, const char* zDb)
 	return SQLITE_OK;
 }
 
-int sqlite3_wal_checkpoint_v2(
+inline int sqlite3_wal_checkpoint_v2(
 	sqlite3* db,                    /* Database handle */
 	const char* zDb,                /* Name of attached database (or NULL) */
 	int eMode,                      /* SQLITE_CHECKPOINT_* value */
@@ -856,7 +858,7 @@ int sqlite3_wal_checkpoint_v2(
 	return SQLITE_OK;
 }
 
-unsigned char* sqlite3mc_codec_data(sqlite3* db, const char* zDbName, const char* paramName)
+inline unsigned char* sqlite3mc_codec_data(sqlite3* db, const char* zDbName, const char* paramName)
 {
 	if (sqlite3mc_codec_data_orig)
 	{
@@ -871,7 +873,7 @@ unsigned char* sqlite3mc_codec_data(sqlite3* db, const char* zDbName, const char
 	return nullptr;
 }
 
-int sqlite3mc_config(sqlite3* db, const char* paramName, int neU16Value)
+inline int sqlite3mc_config(sqlite3* db, const char* paramName, int neU16Value)
 {
 	if (sqlite3mc_config_orig)
 	{
@@ -886,7 +888,7 @@ int sqlite3mc_config(sqlite3* db, const char* paramName, int neU16Value)
 	return SQLITE_OK;
 }
 
-int sqlite3mc_config_cipher(sqlite3* db, const char* cipherName, const char* paramName, int neU16Value)
+inline int sqlite3mc_config_cipher(sqlite3* db, const char* cipherName, const char* paramName, int neU16Value)
 {
 	if (sqlite3mc_config_cipher_orig)
 	{

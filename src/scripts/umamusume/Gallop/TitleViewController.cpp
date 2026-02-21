@@ -4,6 +4,7 @@
 #include "DialogManager.hpp"
 #include "Screen.hpp"
 #include "UIManager.hpp"
+#include "Localize.hpp"
 #include "../../Cute.Cri.Assembly/Cute/Cri/AudioPlayback.hpp"
 #include "../../UnityEngine.CoreModule/UnityEngine/RectTransform.hpp"
 #include "../../Plugins/CodeStage/AntiCheat/ObscuredTypes/ObscuredInt.hpp"
@@ -506,16 +507,12 @@ static void TitleViewController_OnClickPushStart_hook(Il2CppObject* self)
 		{
 			PlaySfxUiDecideL01();
 
-			auto localizeextension_text = il2cpp_symbols::get_method_pointer<Il2CppString * (*)(int id)>(
-				"umamusume.dll", "Gallop", "LocalizeExtention", "Text", 1
-			);
-
 			if (il2cpp_symbols::get_class("umamusume.dll", "Gallop", "DialogSimpleCheckNoWarning"))
 			{
 				il2cpp_symbols::get_method_pointer<Il2CppObject* (*)(Il2CppString*, Il2CppString*, Il2CppString*, uint64_t, Il2CppDelegate*, Il2CppDelegate*, bool, bool, Il2CppString*)>
-					("umamusume.dll", "Gallop", "DialogSimpleCheckNoWarning", "OpenMiddleOneButton", 9)(localizeextension_text(GetTextIdByName(IL2CPP_STRING("Common0081"))), il2cpp_string_new16(
-						(LocalifySettings::GetText("initial_disclaimer_1") + il2cppstring(localizeextension_text(GetTextIdByName(IL2CPP_STRING("Common187002")))->chars) + LocalifySettings::GetText("initial_disclaimer_2")).data()),
-						localizeextension_text(GetTextIdByName(IL2CPP_STRING("Common187002"))), GetTextIdByName(IL2CPP_STRING("Common0007")),
+					("umamusume.dll", "Gallop", "DialogSimpleCheckNoWarning", "OpenMiddleOneButton", 9)(Gallop::Localize::Get(GetTextIdByName(IL2CPP_STRING("Common0081"))), il2cpp_string_new16(
+						(LocalifySettings::GetText("initial_disclaimer_1") + il2cppstring(Gallop::Localize::Get(GetTextIdByName(IL2CPP_STRING("Common187002")))->chars) + LocalifySettings::GetText("initial_disclaimer_2")).data()),
+						Gallop::Localize::Get(GetTextIdByName(IL2CPP_STRING("Common187002"))), GetTextIdByName(IL2CPP_STRING("Common0007")),
 						CreateDelegateStatic(*[](void*, Il2CppObject* dialog)
 							{
 								il2cpp_symbols::get_method_pointer<void (*)(Il2CppObject*)>("umamusume.dll", "Gallop", "DialogCommon", "Close", 0)(GetFrontDialog());
@@ -529,7 +526,7 @@ static void TitleViewController_OnClickPushStart_hook(Il2CppObject* self)
 				dialogData.SetSimpleOneButtonMessage(
 					GetTextIdByName(IL2CPP_STRING("Common0081")),
 					il2cpp_string_new16(
-						(LocalifySettings::GetText("initial_disclaimer_1") + il2cppstring(localizeextension_text(GetTextIdByName(IL2CPP_STRING("Common0150")))->chars) + LocalifySettings::GetText("initial_disclaimer_2")).data()),
+						(LocalifySettings::GetText("initial_disclaimer_1") + il2cppstring(Gallop::Localize::Get(GetTextIdByName(IL2CPP_STRING("Common0150")))->chars) + LocalifySettings::GetText("initial_disclaimer_2")).data()),
 					CreateDelegateStatic(*[](void*, Il2CppObject* dialog)
 						{
 							Gallop::DialogCommon(GetFrontDialog()).Close();

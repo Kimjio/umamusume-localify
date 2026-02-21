@@ -6,13 +6,12 @@
 #include "string_utils.hpp"
 
 #include "scripts/ScriptInternal.hpp"
+#include "scripts/umamusume/Gallop/Localize.hpp"
 
 using namespace std;
 
 namespace
 {
-	extern Il2CppString* localizeextension_text_hook(uint64_t id);
-
 	string GetViewName(string viewId)
 	{
 		il2cppstring textId;
@@ -666,7 +665,7 @@ namespace
 
 		if (!textId.empty())
 		{
-			return il2cpp_u8(localizeextension_text_hook(GetTextIdByName(textId))->chars).append(" ");
+			return il2cpp_u8(Gallop::Localize::Get(GetTextIdByName(textId))->chars).append(" ");
 		}
 
 		return "";
@@ -798,7 +797,7 @@ namespace
 
 		if (!textId.empty())
 		{
-			return il2cpp_u8(localizeextension_text_hook(GetTextIdByName(textId))->chars).append(" ");
+			return il2cpp_u8(Gallop::Localize::Get(GetTextIdByName(textId))->chars).append(" ");
 		}
 
 		return sceneId;

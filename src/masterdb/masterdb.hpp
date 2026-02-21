@@ -14,13 +14,13 @@
 
 namespace MasterDB
 {
-	sqlite3* replacementMasterDB;
-	sqlite3* masterDB;
-	sqlite3* metaDB;
+	inline sqlite3* replacementMasterDB;
+	inline sqlite3* masterDB;
+	inline sqlite3* metaDB;
 
-	string masterDBPath;
+	inline string masterDBPath;
 
-	void InitMasterDB()
+	inline void InitMasterDB()
 	{
 		auto path = il2cpp_u8(il2cpp_symbols::get_method_pointer<Il2CppString * (*)()>("Cute.Core.Assembly.dll", "Cute.Core", "Device", "GetPersistentDataPath", IgnoreNumberOfArguments)()->chars);
 		auto metaDBPath = path + R"(\meta)";
@@ -54,7 +54,7 @@ namespace MasterDB
 		}
 	}
 
-	bool InitReplacementMasterDB(string path)
+	inline bool InitReplacementMasterDB(string path)
 	{
 		auto res = sqlite3_open_v2(path.data(), &replacementMasterDB, SQLITE_OPEN_READONLY, nullptr);
 
@@ -67,13 +67,13 @@ namespace MasterDB
 		return isOk;
 	}
 
-	void ReloadMasterDB()
+	inline void ReloadMasterDB()
 	{
 		sqlite3_close(masterDB);
 		sqlite3_open_v2(masterDBPath.data(), &masterDB, SQLITE_OPEN_READONLY, nullptr);
 	}
 
-	vector<string> GetChampionsResources()
+	inline vector<string> GetChampionsResources()
 	{
 		if (!masterDB)
 		{
@@ -112,7 +112,7 @@ namespace MasterDB
 		return pairs;
 	}
 
-	string GetTextData(int category, int index)
+	inline string GetTextData(int category, int index)
 	{
 		if (!masterDB)
 		{
@@ -157,7 +157,7 @@ namespace MasterDB
 		return "";
 	}
 
-	tuple<int, int> GetJobsInfo(int rewardId)
+	inline tuple<int, int> GetJobsInfo(int rewardId)
 	{
 		if (!masterDB)
 		{
@@ -183,7 +183,7 @@ namespace MasterDB
 		return tuple{ 0, 0 };
 	}
 
-	int GetJobsPlaceRaceTrackId(int placeId)
+	inline int GetJobsPlaceRaceTrackId(int placeId)
 	{
 		if (!masterDB)
 		{
@@ -208,7 +208,7 @@ namespace MasterDB
 		return 0;
 	}
 
-	int GetSingleModeRaceLiveMusicId(int raceInstanceId, int grade)
+	inline int GetSingleModeRaceLiveMusicId(int raceInstanceId, int grade)
 	{
 		if (!masterDB)
 		{
@@ -248,7 +248,7 @@ namespace MasterDB
 		return 1001;
 	}
 
-	bool HasLivePermission(int musicId, int charaId)
+	inline bool HasLivePermission(int musicId, int charaId)
 	{
 		if (!masterDB)
 		{

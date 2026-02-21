@@ -20,8 +20,6 @@
 
 #include "notification/DesktopNotificationManagerCompat.h"
 
-#include "masterdb/masterdb.hpp"
-
 #include "msgpack_data.hpp"
 
 using namespace std;
@@ -29,29 +27,29 @@ using namespace msgpack11;
 
 namespace MsgPackModify
 {
-	sqlite3* masterDB;
+	inline sqlite3* masterDB;
 
-	unordered_map<int, MsgPack::object> liveTheaterSaveInfoMap;
+	inline unordered_map<int, MsgPack::object> liveTheaterSaveInfoMap;
 
-	unordered_map<int, bool> availableCharaIds;
-	unordered_map<int, bool> defaultAvailableDressIds;
-	unordered_map<int, bool> availableDressIds;
-	unordered_map<int, bool> availableMusicIds;
+	inline unordered_map<int, bool> availableCharaIds;
+	inline unordered_map<int, bool> defaultAvailableDressIds;
+	inline unordered_map<int, bool> availableDressIds;
+	inline unordered_map<int, bool> availableMusicIds;
 
-	vector<int> mobIds;
-	queue<int> mobIdQueue;
+	inline vector<int> mobIds;
+	inline queue<int> mobIdQueue;
 
-	MsgPack::array charaList;
+	inline MsgPack::array charaList;
 
-	bool charaListInit = false;
+	inline bool charaListInit = false;
 
-	int64_t current_time() {
+	inline int64_t current_time() {
 		auto ms = chrono::duration_cast<chrono::seconds>(
 			chrono::system_clock::now().time_since_epoch());
 		return ms.count();
 	}
 
-	void SuffleMobIds()
+	inline void SuffleMobIds()
 	{
 		vector<int> ids = mobIds;
 
@@ -68,7 +66,7 @@ namespace MsgPackModify
 		mobIdQueue = q;
 	}
 
-	int GetRandomMobId()
+	inline int GetRandomMobId()
 	{
 		auto num = mobIdQueue.front();
 		mobIdQueue.pop();
@@ -76,7 +74,7 @@ namespace MsgPackModify
 		return num;
 	}
 
-	void InitMasterDB()
+	inline void InitMasterDB()
 	{
 		MasterDB::InitMasterDB();
 
@@ -209,7 +207,7 @@ namespace MsgPackModify
 		SuffleMobIds();
 	}
 
-	string ModifyRequest(const char* data, size_t size)
+	inline string ModifyRequest(const char* data, size_t size)
 	{
 		string error;
 		string dump;
@@ -434,12 +432,12 @@ namespace MsgPackModify
 		return dump;
 	}
 
-	MsgPack::array GetCharaList()
+	inline MsgPack::array GetCharaList()
 	{
 		return charaList;
 	}
 
-	string ModifyResponse(const char* data, size_t size)
+	inline string ModifyResponse(const char* data, size_t size)
 	{
 		string error;
 		string dump;

@@ -1,9 +1,10 @@
 #include "../UnityEngine.CoreModule.hpp"
-#include "../../ScriptInternal.hpp"
+#include "scripts/ScriptInternal.hpp"
 #include "Object.hpp"
 
-#include "../../umamusume/Gallop/DialogCommon.hpp"
-#include "../../umamusume/Gallop/DialogManager.hpp"
+#include "scripts/umamusume/Gallop/DialogCommon.hpp"
+#include "scripts/umamusume/Gallop/DialogManager.hpp"
+#include "scripts/umamusume/Gallop/Localize.hpp"
 #include "string_utils.hpp"
 
 namespace
@@ -80,9 +81,7 @@ static bool UpdateHomeMenuMainButton()
 
 				auto dialogData = Gallop::DialogCommon::Data();
 				dialogData.SetSimpleTwoButtonMessage(
-					il2cpp_symbols::get_method_pointer<Il2CppString * (*)(uint64_t)>(
-						"umamusume.dll", "Gallop", "LocalizeExtention", "Text", 1
-					)(GetTextIdByName(IL2CPP_STRING("Menu0136"))),
+					Gallop::Localize::Get(GetTextIdByName(IL2CPP_STRING("Menu0136"))),
 					il2cpp_string_new("Kakao Games 쿠폰 입력 창을 열겠습니까?"),
 					CreateDelegateStatic(kakaoCpnFn),
 					GetTextIdByName(IL2CPP_STRING("Common0002")),

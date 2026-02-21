@@ -29,19 +29,19 @@ using namespace Microsoft::WRL;
 
 namespace MsgPackData
 {
-	MsgPack::object user_info;
+	inline MsgPack::object user_info;
 
-	MsgPack::object tp_info;
-	MsgPack::object rp_info;
+	inline MsgPack::object tp_info;
+	inline MsgPack::object rp_info;
 
-	MsgPack::array jobs_going_info_array;
+	inline MsgPack::array jobs_going_info_array;
 
-	Il2CppString* GetIconPath(Gallop::LocalPushDefine::LocalPushType localPushType)
+	inline Il2CppString* GetIconPath(Gallop::LocalPushDefine::LocalPushType localPushType)
 	{
 		return Gallop::PushNotificationManager::Instance().CreatePushIconFilePath(localPushType);
 	}
 
-	void DumpTexture2D(int unitId, Gallop::LocalPushDefine::LocalPushType localPushType, Il2CppObject* texture)
+	inline void DumpTexture2D(int unitId, Gallop::LocalPushDefine::LocalPushType localPushType, Il2CppObject* texture)
 	{
 		auto width = il2cpp_class_get_method_from_name_type<int (*)(Il2CppObject*)>(texture->klass, "get_width", 0)->methodPointer(texture);
 
@@ -94,7 +94,7 @@ namespace MsgPackData
 		il2cpp_symbols::get_method_pointer<void (*)(Il2CppString*, Il2CppArraySize_t<uint8_t>*)>("mscorlib.dll", "System.IO", "File", "WriteAllBytes", 2)(il2cpp_string_new_utf16(path.data(), path.size()), pngData);
 	}
 
-	Il2CppObject* GetCharaPushIcon(int charaId, int dressId)
+	inline Il2CppObject* GetCharaPushIcon(int charaId, int dressId)
 	{
 		auto old_str = to_string(dressId);
 		size_t n_zero = 6;
@@ -127,7 +127,7 @@ namespace MsgPackData
 		return reinterpret_cast<Il2CppObject * (*)(Il2CppObject*, Il2CppString*, const Il2CppType*)>(il2cpp_resolve_icall("UnityEngine.AssetBundle::LoadAsset_Internal(System.String,System.Type)"))(assetBundle, il2cpp_string_new(push_icon.data()), texture2DType);
 	}
 
-	void RegisterTPScheduledToast()
+	inline void RegisterTPScheduledToast()
 	{
 		if (!MsgPackData::user_info.empty() || !MsgPackData::tp_info.empty())
 		{
@@ -155,7 +155,7 @@ namespace MsgPackData
 		}
 	}
 
-	void RegisterRPScheduledToast()
+	inline void RegisterRPScheduledToast()
 	{
 		if (!MsgPackData::user_info.empty() || !MsgPackData::rp_info.empty())
 		{
@@ -183,7 +183,7 @@ namespace MsgPackData
 		}
 	}
 
-	void RegisterJobsScheduledToast()
+	inline void RegisterJobsScheduledToast()
 	{
 		if (!MsgPackData::jobs_going_info_array.empty())
 		{
@@ -239,7 +239,7 @@ namespace MsgPackData
 		}
 	}
 
-	void ReadRequest(const char* data, size_t size)
+	inline void ReadRequest(const char* data, size_t size)
 	{
 		string error;
 		auto parsed = MsgPack::parse(data, size, error);
@@ -253,7 +253,7 @@ namespace MsgPackData
 		}
 	}
 
-	void ReadResponse(const char* data, size_t size)
+	inline void ReadResponse(const char* data, size_t size)
 	{
 		string error;
 		auto parsed = MsgPack::parse(data, size, error);

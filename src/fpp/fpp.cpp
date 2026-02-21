@@ -86,22 +86,24 @@ static bool RemapViewOfSection(HANDLE ProcessHandle,
 			if (ssnNtUnmap == 0)
 			{
 				// ntdll corrupted
-				return false;
+				result = false;
 			}
-
-			status = NtUnmapViewOfSectionEx(ProcessHandle, BaseAddress, 0);
-
-			if (NT_SUCCESS(status))
+			else
 			{
-				PVOID viewBase = BaseAddress;
-				LARGE_INTEGER sectionOffset{};
-				SIZE_T viewSize = 0;
-				if (NT_SUCCESS(NtMapViewOfSection(hSection, ProcessHandle, &viewBase, 0, RegionSize, &sectionOffset, &viewSize, ViewUnmap, 0, NewProtection)))
+				status = NtUnmapViewOfSectionEx(ProcessHandle, BaseAddress, 0);
+
+				if (NT_SUCCESS(status))
 				{
-					SIZE_T numberOfBytesWritten = 0;
-					if (WriteProcessMemory(ProcessHandle, viewBase, CopyBuffer, viewSize, &numberOfBytesWritten))
+					PVOID viewBase = BaseAddress;
+					LARGE_INTEGER sectionOffset{};
+					SIZE_T viewSize = 0;
+					if (NT_SUCCESS(NtMapViewOfSection(hSection, ProcessHandle, &viewBase, 0, RegionSize, &sectionOffset, &viewSize, ViewUnmap, 0, NewProtection)))
 					{
-						result = true;
+						SIZE_T numberOfBytesWritten = 0;
+						if (WriteProcessMemory(ProcessHandle, viewBase, CopyBuffer, viewSize, &numberOfBytesWritten))
+						{
+							result = true;
+						}
 					}
 				}
 			}
