@@ -67,6 +67,9 @@
 
 #include "taskbar/TaskbarManager.hpp"
 
+#include "localify/SettingsUI.hpp"
+#include "localify/NotificationManager.hpp"
+
 #include "scripts/ScriptInternal.hpp"
 #include "scripts/Localify/SettingsUI.hpp"
 
@@ -5443,12 +5446,12 @@ namespace
 			WaitForEndOfFrame(*[]() {
 				auto callback = &CreateDelegateWithClassStatic(il2cpp_symbols::get_class("DOTween.dll", "DG.Tweening", "TweenCallback"), *([](void*)
 					{
-						auto sliderX = Localify::SettingsDOM::GetOptionSlider("character_system_text_caption_position_x");
-						auto sliderY = Localify::SettingsDOM::GetOptionSlider("character_system_text_caption_position_y");
+						auto sliderX = Localify::UIParts::GetOptionSlider("character_system_text_caption_position_x");
+						auto sliderY = Localify::UIParts::GetOptionSlider("character_system_text_caption_position_y");
 
 						if (sliderX && sliderY)
 						{
-							Localify::NotificationManager::SetPosition(Localify::SettingsDOM::GetOptionSliderValue(sliderX) / 10, Localify::SettingsDOM::GetOptionSliderValue(sliderY) / 10);
+							Localify::NotificationManager::SetPosition(Localify::UIParts::GetOptionSliderValue(sliderX) / 10, Localify::UIParts::GetOptionSliderValue(sliderY) / 10);
 						}
 						else
 						{
@@ -6804,17 +6807,17 @@ namespace
 
 	void InitOptionLayout(Il2CppObject* parentRectTransform)
 	{
-		Localify::SettingsDOM::AddToLayout(parentRectTransform,
+		Localify::UIParts::AddToLayout(parentRectTransform,
 			{
-				Localify::SettingsDOM::GetOptionItemTitle(LocalifySettings::GetText("settings_title")),
-				Localify::SettingsDOM::GetOptionItemButton("open_settings", LocalifySettings::GetText("open_settings")),
+				Localify::UIParts::GetOptionItemTitle(LocalifySettings::GetText("settings_title")),
+				Localify::UIParts::GetOptionItemButton("open_settings", LocalifySettings::GetText("open_settings")),
 			}
 		);
 	}
 
 	void SetupOptionLayout()
 	{
-		Localify::SettingsDOM::SetOptionItemButtonAction("open_settings", *([](Il2CppObject*)
+		Localify::UIParts::SetOptionItemButtonAction("open_settings", *([](Il2CppObject*)
 			{
 				Localify::SettingsUI::OpenSettings();
 			}));
@@ -6822,7 +6825,7 @@ namespace
 
 	void SetupLiveOptionLayout()
 	{
-		Localify::SettingsDOM::SetOptionItemButtonAction("open_settings", *([](Il2CppObject*)
+		Localify::UIParts::SetOptionItemButtonAction("open_settings", *([](Il2CppObject*)
 			{
 				Localify::SettingsUI::OpenLiveSettings();
 			}));
@@ -7012,10 +7015,10 @@ namespace
 		{
 			auto gameObject = UnityEngine::GameObject(cloned);
 			auto contentsRoot = gameObject.transform().Find(il2cpp_string_new(config::live_slider_always_show ? "ContentsRoot" : "ContentsRoot/MenuRoot"));
-			auto slider = Localify::SettingsDOM::GetSlider("live_slider", 0, 0, 180, false,
+			auto slider = Localify::UIParts::GetSlider("live_slider", 0, 0, 180, false,
 				*[](Il2CppObject* sliderCommon)
 				{
-					auto value = Localify::SettingsDOM::GetOptionSliderValue("live_slider");
+					auto value = Localify::UIParts::GetOptionSliderValue("live_slider");
 
 					MoveLivePlayback(value);
 				});
@@ -8483,9 +8486,9 @@ namespace
 							auto LiveCurrentTime = il2cpp_class_get_method_from_name_type<float (*)(Il2CppObject*)>(director->klass, "get_LiveCurrentTime", 0)->methodPointer(director);
 							auto LiveTotalTime = il2cpp_class_get_method_from_name_type<float (*)(Il2CppObject*)>(director->klass, "get_LiveTotalTime", 0)->methodPointer(director);
 
-							auto sliderCommon = Localify::SettingsDOM::GetOptionSlider("live_slider");
+							auto sliderCommon = Localify::UIParts::GetOptionSlider("live_slider");
 
-							auto textCommon = Localify::SettingsDOM::GetTextCommon("live_slider");
+							auto textCommon = Localify::UIParts::GetTextCommon("live_slider");
 
 							if (textCommon)
 							{
@@ -8498,10 +8501,10 @@ namespace
 								il2cppstringstream str;
 								str << setw(2) << setfill(IL2CPP_STRING('0')) << timeSecIl2Cpp;
 
-								Localify::SettingsDOM::SetTextCommonText(textCommon, (timeMinIl2Cpp + IL2CPP_STRING(":") + str.str()).data());
+								Localify::UIParts::SetTextCommonText(textCommon, (timeMinIl2Cpp + IL2CPP_STRING(":") + str.str()).data());
 							}
 
-							auto textCommonTotal = Localify::SettingsDOM::GetTextCommon("live_slider_total");
+							auto textCommonTotal = Localify::UIParts::GetTextCommon("live_slider_total");
 
 							if (textCommonTotal)
 							{
@@ -8514,7 +8517,7 @@ namespace
 								il2cppstringstream str;
 								str << setw(2) << setfill(IL2CPP_STRING('0')) << timeSecIl2Cpp;
 
-								Localify::SettingsDOM::SetTextCommonText(textCommonTotal, (timeMinIl2Cpp + IL2CPP_STRING(":") + str.str()).data());
+								Localify::UIParts::SetTextCommonText(textCommonTotal, (timeMinIl2Cpp + IL2CPP_STRING(":") + str.str()).data());
 							}
 
 							if (config::live_playback_loop)

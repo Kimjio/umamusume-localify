@@ -6,7 +6,7 @@
 
 namespace Localify
 {
-	class SettingsDOM
+	class UIParts
 	{
 	public:
 		static void SetTextCommonText(Il2CppObject* textCommon, const Il2CppChar* text);
@@ -14,6 +14,7 @@ namespace Localify
 		static void SetTextCommonFontColor(Il2CppObject* textCommon, const Il2CppChar* color);
 		static void SetTextCommonOutlineSize(Il2CppObject* textCommon, const Il2CppChar* size);
 		static void SetTextCommonOutlineColor(Il2CppObject* textCommon, const Il2CppChar* color);
+		static void SetImageCommonAtlasSprite(Il2CppObject* imageCommon, const Il2CppChar* atlasName, const Il2CppChar* spriteName);
 		static UnityEngine::GameObject GetOptionItemTitle(const Il2CppChar* title);
 		static UnityEngine::GameObject GetOptionItemOnOff(const char* name, const Il2CppChar* title);
 		static UnityEngine::GameObject GetOptionItemOnOffQualityRich(const char* name, const Il2CppChar* title);
@@ -43,9 +44,10 @@ namespace Localify
 		static UnityEngine::GameObject GetCheckbox(const char* name);
 		static UnityEngine::GameObject GetCheckboxWithText(const char* name);
 		static UnityEngine::GameObject GetRadioButtonWithText(const char* name, const Il2CppChar* title);
+		static UnityEngine::GameObject GetRadioButtonWithImageAndText(const char* name, const Il2CppChar* title, const Il2CppChar* atlasName, const Il2CppChar* spriteName);
 		static UnityEngine::GameObject GetSlider(const char* name, float value, float min = 0, float max = 10, bool wholeNumbers = true, void (*onChange)(Il2CppObject*) = nullptr);
 		
-		static void AddToLayout(Il2CppObject* layout, vector<Il2CppObject*> objects);
+		static void AddToLayout(Il2CppObject* layout, vector<Il2CppObject*> objects, bool setAsFirstSibling = true);
 		static Il2CppObject* GetTextCommon(const char* name);
 	};
 }

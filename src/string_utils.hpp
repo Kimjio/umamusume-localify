@@ -1,6 +1,8 @@
 #pragma once
 #include <codecvt>
 #include <string>
+#include <vector>
+#include <sstream>
 
 #include "il2cpp/il2cpp-api-types.h"
 
@@ -165,6 +167,20 @@ inline string il2cpp_u8(const il2cppstring& str)
 	wstring_convert<codecvt_utf8_utf16<Il2CppChar>, Il2CppChar> utf16conv;
 	return utf16conv.to_bytes(str);
 #endif
+}
+
+inline il2cppstring GetFileName(const char* path)
+{
+	string pathString = path;
+	replaceAll(pathString, "\\", "/");
+	stringstream pathStream(pathString);
+	string segment;
+	vector<string> splited;
+	while (getline(pathStream, segment, '/'))
+	{
+		splited.emplace_back(segment);
+	}
+	return u8_il2cpp(splited.back());
 }
 
 #ifdef _MSC_VER

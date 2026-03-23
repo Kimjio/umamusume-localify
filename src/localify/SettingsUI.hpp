@@ -1,6 +1,6 @@
 #pragma once
 #include <stdinclude.hpp>
-#include "SettingsDOM.hpp"
+#include "UIParts.hpp"
 
 typedef rapidjson::GenericDocument<rapidjson::UTF16<>> U16Document;
 typedef rapidjson::GenericValue<rapidjson::UTF16<>> U16Value;

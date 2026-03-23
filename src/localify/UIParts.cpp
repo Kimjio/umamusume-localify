@@ -1,4 +1,4 @@
-#include "SettingsDOM.hpp"
+#include "UIParts.hpp"
 #include "scripts/ScriptInternal.hpp" 
 #include <vector>
 #include <string>
@@ -31,7 +31,7 @@ namespace Localify
 		return nullptr;
 	}
 
-	void SettingsDOM::SetTextCommonText(Il2CppObject* textCommon, const Il2CppChar* text)
+	void UIParts::SetTextCommonText(Il2CppObject* textCommon, const Il2CppChar* text)
 	{
 		il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, Il2CppString*)>(textCommon->klass, "set_text", 1)->methodPointer(textCommon, il2cpp_string_new16(text));
 
@@ -39,7 +39,7 @@ namespace Localify
 		il2cpp_field_set_value(textCommon, textIdStrField, nullptr);
 	}
 
-	void SettingsDOM::SetTextCommonTextWithCustomTag(Il2CppObject* textCommon, const Il2CppChar* text)
+	void UIParts::SetTextCommonTextWithCustomTag(Il2CppObject* textCommon, const Il2CppChar* text)
 	{
 		auto SetTextWithCustomTag = il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, Il2CppString*, float, int)>(textCommon->klass, "SetTextWithCustomTag", 3);
 		if (SetTextWithCustomTag)
@@ -55,24 +55,33 @@ namespace Localify
 		il2cpp_field_set_value(textCommon, textIdStrField, nullptr);
 	}
 
-	void SettingsDOM::SetTextCommonFontColor(Il2CppObject* textCommon, const Il2CppChar* color)
+	void UIParts::SetTextCommonFontColor(Il2CppObject* textCommon, const Il2CppChar* color)
 	{
 		il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, uint64_t)>(textCommon->klass, "set_FontColor", 1)->methodPointer(textCommon, GetEnumValue(ParseEnum(GetRuntimeType("umamusume.dll", "Gallop", "FontColorType"), color)));
 	}
 
-	void SettingsDOM::SetTextCommonOutlineSize(Il2CppObject* textCommon, const Il2CppChar* size)
+	void UIParts::SetTextCommonOutlineSize(Il2CppObject* textCommon, const Il2CppChar* size)
 	{
 		il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, uint64_t)>(textCommon->klass, "set_OutlineSize", 1)->methodPointer(textCommon, GetEnumValue(ParseEnum(GetRuntimeType("umamusume.dll", "Gallop", "OutlineSizeType"), size)));
 		il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*)>(textCommon->klass, "UpdateOutline", 0)->methodPointer(textCommon);
 	}
 
-	void SettingsDOM::SetTextCommonOutlineColor(Il2CppObject* textCommon, const Il2CppChar* color)
+	void UIParts::SetTextCommonOutlineColor(Il2CppObject* textCommon, const Il2CppChar* color)
 	{
 		il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, uint64_t)>(textCommon->klass, "set_OutlineColor", 1)->methodPointer(textCommon, GetEnumValue(ParseEnum(GetRuntimeType("umamusume.dll", "Gallop", "OutlineColorType"), color)));
 		il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*)>(textCommon->klass, "RebuildOutline", 0)->methodPointer(textCommon);
 	}
 
-	UnityEngine::GameObject SettingsDOM::GetOptionItemTitle(const Il2CppChar* title)
+	void UIParts::SetImageCommonAtlasSprite(Il2CppObject* imageCommon, const Il2CppChar* atlasName, const Il2CppChar* spriteName)
+	{
+		auto _atlasNameField = il2cpp_class_get_field_from_name(imageCommon->klass, "_atlasName");
+		il2cpp_field_set_value(imageCommon, _atlasNameField, il2cpp_string_new16(atlasName));
+
+		auto _spriteNameField = il2cpp_class_get_field_from_name(imageCommon->klass, "_spriteName");
+		il2cpp_field_set_value(imageCommon, _spriteNameField, il2cpp_string_new16(spriteName));
+	}
+
+	UnityEngine::GameObject UIParts::GetOptionItemTitle(const Il2CppChar* title)
 	{
 		UnityEngine::GameObject object = UnityEngine::ResourcesAPIInternal::Load(il2cpp_string_new("ui/parts/outgame/option/partsoptionitemtitle"), GetRuntimeType("UnityEngine.CoreModule.dll", "UnityEngine", "GameObject"));
 
@@ -87,7 +96,7 @@ namespace Localify
 		return optionItemTitle;
 	}
 
-	UnityEngine::GameObject SettingsDOM::GetOptionItemOnOff(const char* name, const Il2CppChar* title)
+	UnityEngine::GameObject UIParts::GetOptionItemOnOff(const char* name, const Il2CppChar* title)
 	{
 		UnityEngine::GameObject object = UnityEngine::ResourcesAPIInternal::Load(il2cpp_string_new("ui/parts/outgame/option/partsoptionitemonoff"), GetRuntimeType("UnityEngine.CoreModule.dll", "UnityEngine", "GameObject"));
 
@@ -105,7 +114,7 @@ namespace Localify
 		return optionItemOnOff;
 	}
 
-	UnityEngine::GameObject SettingsDOM::GetOptionItemOnOffQualityRich(const char* name, const Il2CppChar* title)
+	UnityEngine::GameObject UIParts::GetOptionItemOnOffQualityRich(const char* name, const Il2CppChar* title)
 	{
 		UnityEngine::GameObject object = UnityEngine::ResourcesAPIInternal::Load(il2cpp_string_new("ui/parts/outgame/option/partsoptioniteminfo_qualityrich"), GetRuntimeType("UnityEngine.CoreModule.dll", "UnityEngine", "GameObject"));
 
@@ -123,7 +132,7 @@ namespace Localify
 		return optionItemOnOff;
 	}
 
-	void SettingsDOM::SetOptionItemOnOffAction(const char* name, bool isOn, void (*onChange)(Il2CppObject*, bool))
+	void UIParts::SetOptionItemOnOffAction(const char* name, bool isOn, void (*onChange)(Il2CppObject*, bool))
 	{
 		auto optionItemOnOff = reinterpret_cast<Il2CppObject * (*)(Il2CppString*)>(il2cpp_resolve_icall("UnityEngine.GameObject::Find()"))(il2cpp_string_new(name));
 
@@ -139,7 +148,7 @@ namespace Localify
 		}
 	}
 
-	bool SettingsDOM::GetOptionItemOnOffIsOn(const char* name)
+	bool UIParts::GetOptionItemOnOffIsOn(const char* name)
 	{
 		auto optionItemOnOff = reinterpret_cast<Il2CppObject * (*)(Il2CppString*)>(il2cpp_resolve_icall("UnityEngine.GameObject::Find()"))(il2cpp_string_new(name));
 
@@ -155,7 +164,7 @@ namespace Localify
 		return false;
 	}
 
-	UnityEngine::GameObject SettingsDOM::GetOptionItemButton(const char* name, const Il2CppChar* title)
+	UnityEngine::GameObject UIParts::GetOptionItemButton(const char* name, const Il2CppChar* title)
 	{
 		UnityEngine::GameObject object = UnityEngine::ResourcesAPIInternal::Load(il2cpp_string_new("ui/parts/outgame/option/partsoptionitembutton"), GetRuntimeType("UnityEngine.CoreModule.dll", "UnityEngine", "GameObject"));
 
@@ -178,7 +187,7 @@ namespace Localify
 		return optionItemButton;
 	}
 
-	void SettingsDOM::SetOptionItemButtonAction(const char* name, void (*onClick)(Il2CppObject*))
+	void UIParts::SetOptionItemButtonAction(const char* name, void (*onClick)(Il2CppObject*))
 	{
 		auto optionItemButton = UnityEngine::GameObject::Find(il2cpp_string_new(name)).NativeObject();
 
@@ -194,7 +203,7 @@ namespace Localify
 		}
 	}
 
-	UnityEngine::GameObject SettingsDOM::GetOptionItemAttention(const Il2CppChar* text)
+	UnityEngine::GameObject UIParts::GetOptionItemAttention(const Il2CppChar* text)
 	{
 		UnityEngine::GameObject object = UnityEngine::ResourcesAPIInternal::Load(il2cpp_string_new("ui/parts/outgame/option/partsoptionitemattention"), GetRuntimeType("UnityEngine.CoreModule.dll", "UnityEngine", "GameObject"));
 
@@ -209,7 +218,7 @@ namespace Localify
 		return optionItemAttention;
 	}
 
-	UnityEngine::GameObject SettingsDOM::GetOptionItemInfo(const char* name, const Il2CppChar* text)
+	UnityEngine::GameObject UIParts::GetOptionItemInfo(const char* name, const Il2CppChar* text)
 	{
 		UnityEngine::GameObject object = UnityEngine::ResourcesAPIInternal::Load(il2cpp_string_new("ui/parts/outgame/option/partsoptioniteminfo"), GetRuntimeType("UnityEngine.CoreModule.dll", "UnityEngine", "GameObject"));
 
@@ -245,7 +254,7 @@ namespace Localify
 		return optionItemInfo;
 	}
 
-	UnityEngine::GameObject SettingsDOM::GetOptionItemSimple(const Il2CppChar* title)
+	UnityEngine::GameObject UIParts::GetOptionItemSimple(const Il2CppChar* title)
 	{
 		UnityEngine::GameObject object = UnityEngine::ResourcesAPIInternal::Load(il2cpp_string_new("ui/parts/outgame/option/partsoptionitemsimple"), GetRuntimeType("UnityEngine.CoreModule.dll", "UnityEngine", "GameObject"));
 
@@ -260,7 +269,7 @@ namespace Localify
 		return optionItemSimple;
 	}
 
-	UnityEngine::GameObject SettingsDOM::GetOptionItemSimpleWithButton(const char* name, const Il2CppChar* title, const Il2CppChar* text)
+	UnityEngine::GameObject UIParts::GetOptionItemSimpleWithButton(const char* name, const Il2CppChar* title, const Il2CppChar* text)
 	{
 		UnityEngine::GameObject object = UnityEngine::ResourcesAPIInternal::Load(il2cpp_string_new("ui/parts/outgame/option/partsoptionitemsimple"), GetRuntimeType("UnityEngine.CoreModule.dll", "UnityEngine", "GameObject"));
 
@@ -300,7 +309,7 @@ namespace Localify
 		return optionItemSimple;
 	}
 
-	Il2CppObject* SettingsDOM::GetOptionItemSimpleWithButtonTextCommon(const char* name)
+	Il2CppObject* UIParts::GetOptionItemSimpleWithButtonTextCommon(const char* name)
 	{
 		UnityEngine::GameObject gameObject = UnityEngine::GameObject::Find(il2cpp_string_new((string(name) + "_simple"s).data())).NativeObject();
 
@@ -314,7 +323,7 @@ namespace Localify
 	}
 
 	// Toggles
-	Il2CppObject* SettingsDOM::GetToggleCommon(const char* name)
+	Il2CppObject* UIParts::GetToggleCommon(const char* name)
 	{
 		UnityEngine::GameObject toggleObject = UnityEngine::GameObject::Find(il2cpp_string_new(name)).NativeObject();
 		if (toggleObject)
@@ -325,7 +334,7 @@ namespace Localify
 		return nullptr;
 	}
 
-	Il2CppObject* SettingsDOM::GetToggleGroupCommon(UnityEngine::GameObject toggleGroupObject)
+	Il2CppObject* UIParts::GetToggleGroupCommon(UnityEngine::GameObject toggleGroupObject)
 	{
 		if (toggleGroupObject)
 		{
@@ -335,7 +344,7 @@ namespace Localify
 		return nullptr;
 	}
 
-	Il2CppObject* SettingsDOM::GetToggleGroupCommon(const char* name)
+	Il2CppObject* UIParts::GetToggleGroupCommon(const char* name)
 	{
 		UnityEngine::GameObject toggleGroupCommon = UnityEngine::GameObject::Find(il2cpp_string_new(name)).NativeObject();
 		if (toggleGroupCommon)
@@ -345,7 +354,7 @@ namespace Localify
 		return nullptr;
 	}
 
-	int SettingsDOM::GetToggleGroupCommonValue(const char* name)
+	int UIParts::GetToggleGroupCommonValue(const char* name)
 	{
 		UnityEngine::GameObject gameObject = UnityEngine::GameObject::Find(il2cpp_string_new(name)).NativeObject();
 		if (gameObject)
@@ -357,7 +366,7 @@ namespace Localify
 		return -1;
 	}
 
-	void SettingsDOM::AddToLayout(Il2CppObject* parentRectTransform, vector<Il2CppObject*> objects)
+	void UIParts::AddToLayout(Il2CppObject* parentRectTransform, vector<Il2CppObject*> objects, bool setAsFirstSibling)
 	{
 		for (int i = objects.size() - 1; i >= 0; i--)
 		{
@@ -367,13 +376,17 @@ namespace Localify
 				if (rectTransform)
 				{
 					rectTransform.SetParent(parentRectTransform, false);
-					rectTransform.SetAsFirstSibling();
+
+					if (setAsFirstSibling)
+					{
+						rectTransform.SetAsFirstSibling();
+					}
 				}
 			}
 		}
 	}
 
-	Il2CppObject* SettingsDOM::GetTextCommon(const char* name)
+	Il2CppObject* UIParts::GetTextCommon(const char* name)
 	{
 		UnityEngine::GameObject gameObject = UnityEngine::GameObject::Find(il2cpp_string_new(name)).NativeObject();
 		if (gameObject)
@@ -385,19 +398,19 @@ namespace Localify
 	}
 
 	// Helpers for Sliders, etc.
-	Il2CppObject* SettingsDOM::GetOptionSliderNumText(Il2CppObject* slider)
+	Il2CppObject* UIParts::GetOptionSliderNumText(Il2CppObject* slider)
 	{
 		UnityEngine::GameObject gameObject = il2cpp_class_get_method_from_name_type<Il2CppObject * (*)(Il2CppObject*)>(slider->klass, "get_gameObject", 0)->methodPointer(slider);
 		auto array = gameObject.GetComponentsInChildren(GetRuntimeType("umamusume.dll", "Gallop", "TextCommon"), false);
 		return array->vector[0];
 	}
 
-	float SettingsDOM::GetOptionSliderValue(Il2CppObject* slider)
+	float UIParts::GetOptionSliderValue(Il2CppObject* slider)
 	{
 		return il2cpp_class_get_method_from_name_type<float (*)(Il2CppObject*)>(slider->klass, "get_value", 0)->methodPointer(slider);
 	}
 
-	float SettingsDOM::GetOptionSliderValue(const char* name)
+	float UIParts::GetOptionSliderValue(const char* name)
 	{
 		UnityEngine::GameObject optionSlider = UnityEngine::GameObject::Find(il2cpp_string_new(name));
 		if (optionSlider)
@@ -409,7 +422,7 @@ namespace Localify
 		return 0;
 	}
 
-	Il2CppObject* SettingsDOM::GetOptionSlider(const char* name)
+	Il2CppObject* UIParts::GetOptionSlider(const char* name)
 	{
 		UnityEngine::GameObject optionSlider = UnityEngine::GameObject::Find(il2cpp_string_new(name));
 		if (optionSlider)
@@ -420,7 +433,7 @@ namespace Localify
 		return nullptr;
 	}
 
-	UnityEngine::GameObject SettingsDOM::GetOptionSlider(const char* name, const Il2CppChar* title, float value, float min, float max, bool wholeNumbers, void (*onChange)(Il2CppObject*))
+	UnityEngine::GameObject UIParts::GetOptionSlider(const char* name, const Il2CppChar* title, float value, float min, float max, bool wholeNumbers, void (*onChange)(Il2CppObject*))
 	{
 		UnityEngine::GameObject object = UnityEngine::ResourcesAPIInternal::Load(il2cpp_string_new("ui/parts/outgame/option/optionsoundvolumeslider"), GetRuntimeType("UnityEngine.CoreModule.dll", "UnityEngine", "GameObject"));
 
@@ -569,7 +582,7 @@ namespace Localify
 		return gameObject;
 	}
 
-	void SettingsDOM::SetOptionSliderAction(const char* name, void (*onChange)(Il2CppObject*))
+	void UIParts::SetOptionSliderAction(const char* name, void (*onChange)(Il2CppObject*))
 	{
 		UnityEngine::GameObject optionSlider = UnityEngine::GameObject::Find(il2cpp_string_new(name)).NativeObject();
 
@@ -596,21 +609,21 @@ namespace Localify
 		}
 	}
 
-	UnityEngine::GameObject SettingsDOM::GetCheckbox(const char* name)
+	UnityEngine::GameObject UIParts::GetCheckbox(const char* name)
 	{
 		UnityEngine::GameObject object = UnityEngine::ResourcesAPIInternal::Load(il2cpp_string_new("ui/parts/base/checkbox"), GetRuntimeType("UnityEngine.CoreModule.dll", "UnityEngine", "GameObject"));
 		UnityEngine::GameObject checkbox = UnityEngine::Object::Internal_CloneSingle(object);
 		return checkbox;
 	}
 
-	UnityEngine::GameObject SettingsDOM::GetCheckboxWithText(const char* name)
+	UnityEngine::GameObject UIParts::GetCheckboxWithText(const char* name)
 	{
 		UnityEngine::GameObject object = UnityEngine::ResourcesAPIInternal::Load(il2cpp_string_new("ui/parts/base/checkboxwithtext"), GetRuntimeType("UnityEngine.CoreModule.dll", "UnityEngine", "GameObject"));
 		UnityEngine::GameObject checkboxWithText = UnityEngine::Object::Internal_CloneSingle(object);
 		return checkboxWithText;
 	}
 
-	UnityEngine::GameObject SettingsDOM::GetRadioButtonWithText(const char* name, const Il2CppChar* title)
+	UnityEngine::GameObject UIParts::GetRadioButtonWithText(const char* name, const Il2CppChar* title)
 	{
 		UnityEngine::GameObject object = UnityEngine::ResourcesAPIInternal::Load(il2cpp_string_new("ui/parts/base/radiobuttonwithtext"), GetRuntimeType("UnityEngine.CoreModule.dll", "UnityEngine", "GameObject"));
 		UnityEngine::GameObject radioButtonWithText = UnityEngine::Object::Internal_CloneSingle(object);
@@ -620,7 +633,20 @@ namespace Localify
 		return radioButtonWithText;
 	}
 
-	UnityEngine::GameObject SettingsDOM::GetOptionItem3ToggleVertical(const char* name, const Il2CppChar* title, const Il2CppChar* option1, const Il2CppChar* option2, const Il2CppChar* option3, int selectedIndex)
+	UnityEngine::GameObject UIParts::GetRadioButtonWithImageAndText(const char* name, const Il2CppChar* title, const Il2CppChar* atlasName, const Il2CppChar* spriteName)
+	{
+		UnityEngine::GameObject object = UnityEngine::ResourcesAPIInternal::Load(il2cpp_string_new("ui/parts/base/radiobuttonwithimageandtext"), GetRuntimeType("UnityEngine.CoreModule.dll", "UnityEngine", "GameObject"));
+		UnityEngine::GameObject radioButtonWithText = UnityEngine::Object::Internal_CloneSingle(object);
+		UnityEngine::Object::Name(radioButtonWithText, il2cpp_string_new(name));
+		auto imageArray = radioButtonWithText.GetComponentsInChildren(GetRuntimeType("umamusume.dll", "Gallop", "ImageCommon"), false);
+		SetImageCommonAtlasSprite(imageArray->vector[0], atlasName, spriteName);
+
+		auto array = radioButtonWithText.GetComponentsInChildren(GetRuntimeType("umamusume.dll", "Gallop", "TextCommon"), false);
+		SetTextCommonText(array->vector[0], title);
+		return radioButtonWithText;
+	}
+
+	UnityEngine::GameObject UIParts::GetOptionItem3ToggleVertical(const char* name, const Il2CppChar* title, const Il2CppChar* option1, const Il2CppChar* option2, const Il2CppChar* option3, int selectedIndex)
 	{
 		UnityEngine::GameObject object = UnityEngine::ResourcesAPIInternal::Load(il2cpp_string_new("ui/parts/outgame/option/partsoptionitem3togglevertical"), GetRuntimeType("UnityEngine.CoreModule.dll", "UnityEngine", "GameObject"));
 
@@ -641,7 +667,7 @@ namespace Localify
 		return optionItem3ToggleVertical;
 	}
 
-	UnityEngine::GameObject SettingsDOM::GetOptionItem3Toggle(const char* name, const Il2CppChar* title, const Il2CppChar* option1, const Il2CppChar* option2, const Il2CppChar* option3, int selectedIndex)
+	UnityEngine::GameObject UIParts::GetOptionItem3Toggle(const char* name, const Il2CppChar* title, const Il2CppChar* option1, const Il2CppChar* option2, const Il2CppChar* option3, int selectedIndex)
 	{
 		UnityEngine::GameObject object = UnityEngine::ResourcesAPIInternal::Load(il2cpp_string_new("ui/parts/outgame/option/partsoptionitem3toggle"), GetRuntimeType("UnityEngine.CoreModule.dll", "UnityEngine", "GameObject"));
 
@@ -662,7 +688,7 @@ namespace Localify
 		return optionItem3Toggle;
 	}
 
-	UnityEngine::GameObject SettingsDOM::GetOptionItem2Toggle(const char* name, const Il2CppChar* title, const Il2CppChar* option1, const Il2CppChar* option2, int selectedIndex)
+	UnityEngine::GameObject UIParts::GetOptionItem2Toggle(const char* name, const Il2CppChar* title, const Il2CppChar* option1, const Il2CppChar* option2, int selectedIndex)
 	{
 		UnityEngine::GameObject object = UnityEngine::ResourcesAPIInternal::Load(il2cpp_string_new("ui/parts/outgame/option/partsoptionitem2toggle"), GetRuntimeType("UnityEngine.CoreModule.dll", "UnityEngine", "GameObject"));
 
@@ -682,7 +708,7 @@ namespace Localify
 		return optionItem2Toggle;
 	}
 
-	UnityEngine::GameObject SettingsDOM::GetDropdown(const char* name)
+	UnityEngine::GameObject UIParts::GetDropdown(const char* name)
 	{
 		UnityEngine::GameObject object = UnityEngine::ResourcesAPIInternal::Load(il2cpp_string_new("ui/parts/base/dropdowncommon"), GetRuntimeType("UnityEngine.CoreModule.dll", "UnityEngine", "GameObject"));
 
@@ -728,7 +754,7 @@ namespace Localify
 		return dropdownGameObject;
 	}
 
-	UnityEngine::GameObject SettingsDOM::GetSlider(const char* name, float value, float min, float max, bool wholeNumbers, void (*onChange)(Il2CppObject*))
+	UnityEngine::GameObject UIParts::GetSlider(const char* name, float value, float min, float max, bool wholeNumbers, void (*onChange)(Il2CppObject*))
 	{
 		UnityEngine::GameObject object = UnityEngine::ResourcesAPIInternal::Load(il2cpp_string_new("ui/parts/outgame/option/optionsoundvolumeslider"), GetRuntimeType("UnityEngine.CoreModule.dll", "UnityEngine", "GameObject"));
 
@@ -836,7 +862,7 @@ namespace Localify
 
 		auto textCommon = array->vector[0];
 
-		Localify::SettingsDOM::SetTextCommonText(textCommon, IL2CPP_STRING("0:00"));
+		Localify::UIParts::SetTextCommonText(textCommon, IL2CPP_STRING("0:00"));
 
 		il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, int)>(textCommon->klass, "set_OutlineSize", 1)->methodPointer(textCommon, GetEnumValue(ParseEnum(GetRuntimeType("umamusume.dll", "Gallop", "OutlineSizeType"), IL2CPP_STRING("M"))));
 		il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, int)>(textCommon->klass, "set_OutlineColor", 1)->methodPointer(textCommon, GetEnumValue(ParseEnum(GetRuntimeType("umamusume.dll", "Gallop", "OutlineColorType"), IL2CPP_STRING("White"))));
@@ -860,7 +886,7 @@ namespace Localify
 
 		auto textCommon1 = array1->vector[0];
 
-		Localify::SettingsDOM::SetTextCommonText(textCommon1, IL2CPP_STRING("1:00"));
+		Localify::UIParts::SetTextCommonText(textCommon1, IL2CPP_STRING("1:00"));
 
 		il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, int)>(textCommon1->klass, "set_OutlineSize", 1)->methodPointer(textCommon1, GetEnumValue(ParseEnum(GetRuntimeType("umamusume.dll", "Gallop", "OutlineSizeType"), IL2CPP_STRING("M"))));
 		il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, int)>(textCommon1->klass, "set_OutlineColor", 1)->methodPointer(textCommon1, GetEnumValue(ParseEnum(GetRuntimeType("umamusume.dll", "Gallop", "OutlineColorType"), IL2CPP_STRING("White"))));
