@@ -7,6 +7,7 @@
 #include <iostream>
 #include <string>
 #include <unordered_map>
+#include <optional>
 #include <vector>
 
 #define RAPIDJSON_HAS_STDSTRING 1
@@ -83,6 +84,7 @@ namespace config
 	extern vector<il2cppstring> replace_assetbundle_file_paths;
 	extern il2cppstring replace_text_db_path;
 	extern il2cppstring replace_timeline_path;
+	extern il2cppstring replace_race_text_asset_path;
 	extern bool character_system_text_caption;
 	extern int character_system_text_caption_line_char_count;
 	extern int character_system_text_caption_font_size;
@@ -156,6 +158,7 @@ namespace config
 		extern Il2CppObject* replaceAtlas;
 		extern vector<Il2CppObject*> replaceAssets;
 		extern vector<il2cppstring> replaceAssetNames;
+		extern optional<bool> LiveStartSettingIsOrientationFullPortrait;
 	}
 
 	void read_config_init();

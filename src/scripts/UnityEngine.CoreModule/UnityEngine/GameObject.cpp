@@ -145,7 +145,7 @@ namespace UnityEngine
 	{
 		auto gameObject = il2cpp_object_new(il2cpp_symbols::get_class(ASSEMBLY_NAME, "UnityEngine", "GameObject"));
 		Internal_CreateGameObject(gameObject, name);
-		this->instance = gameObject;
+		instance = gameObject;
 	}
 
 	GameObject GameObject::Find(Il2CppString* name)

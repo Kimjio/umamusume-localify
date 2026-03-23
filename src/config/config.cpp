@@ -43,6 +43,7 @@ namespace config
 	vector<il2cppstring> replace_assetbundle_file_paths;
 	il2cppstring replace_text_db_path;
 	il2cppstring replace_timeline_path;
+	il2cppstring replace_race_text_asset_path;
 	bool character_system_text_caption = false;
 	int character_system_text_caption_line_char_count = 26;
 	int character_system_text_caption_font_size = 50;
@@ -116,6 +117,7 @@ namespace config
 		Il2CppObject* replaceAtlas = nullptr;
 		vector<Il2CppObject*> replaceAssets;
 		vector<il2cppstring> replaceAssetNames;
+		optional<bool> LiveStartSettingIsOrientationFullPortrait = nullopt;
 	}
 
 	void read_config_init()
@@ -307,6 +309,8 @@ if (document.HasMember(IL2CPP_STRING(_name_)) && document[IL2CPP_STRING(_name_)]
 			GetValue("replaceTextDBPath", String, replace_text_db_path);
 
 			GetValue("replaceTimelinePath", String, replace_timeline_path);
+
+			GetValue("replaceRaceTextAssetPath", String, replace_race_text_asset_path);
 
 			GetValue("characterSystemTextCaption", Bool, character_system_text_caption);
 

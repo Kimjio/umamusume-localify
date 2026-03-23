@@ -46,6 +46,7 @@ namespace
 	Il2CppClass* FontClass;
 
 	Il2CppClass* StoryTimelineDataClass;
+	Il2CppClass* StoryRaceTextAssetClass;
 }
 
 static void ReplaceMaterialTextureProperty(Il2CppObject* material, Il2CppString* property)
@@ -868,36 +869,87 @@ static void ReplaceTimelineData(Il2CppObject* timelineData)
 				}
 			}
 
-			Il2CppObject* additionalGradientList;
-			il2cpp_field_get_value(clipData, AdditionalGradientListField, &additionalGradientList);
-
-			if (additionalGradientList)
+			if (AdditionalGradientListField)
 			{
-				MsgPack::array ReplacementAdditionalGradientList = object.is_null() ? MsgPack::array{} : ReplacementClipData["AdditionalGradientList"].array_items();
-				Il2CppArraySize_t<Il2CppObject*>* additionalGradientArray;
-				il2cpp_field_get_value(additionalGradientList, il2cpp_class_get_field_from_name(additionalGradientList->klass, "_items"), &additionalGradientArray);
+				Il2CppObject* additionalGradientList;
+				il2cpp_field_get_value(clipData, AdditionalGradientListField, &additionalGradientList);
 
-				auto AdditionalGradientListSize = object.is_null() ? additionalGradientArray->max_length : ReplacementAdditionalGradientList.size();
-
-				for (size_t i = 0; i < AdditionalGradientListSize; i++)
+				if (additionalGradientList)
 				{
-					MsgPack::object ReplacementAdditionalGradient = object.is_null() ? MsgPack::object{} : ReplacementAdditionalGradientList[i].object_items();
-					auto additionalGradient = additionalGradientArray->vector[i];
-					auto additionalGradientColorTextField = il2cpp_class_get_field_from_name(additionalGradient->klass, "ColorText");
+					MsgPack::array ReplacementAdditionalGradientList = object.is_null() ? MsgPack::array{} : ReplacementClipData["AdditionalGradientList"].array_items();
+					Il2CppArraySize_t<Il2CppObject*>* additionalGradientArray;
+					il2cpp_field_get_value(additionalGradientList, il2cpp_class_get_field_from_name(additionalGradientList->klass, "_items"), &additionalGradientArray);
 
-					Il2CppString* AdditionalGradientColorText;
-					if (object.is_null())
+					auto AdditionalGradientListSize = object.is_null() ? additionalGradientArray->max_length : ReplacementAdditionalGradientList.size();
+
+					for (size_t i = 0; i < AdditionalGradientListSize; i++)
 					{
-						il2cpp_field_get_value(additionalGradient, additionalGradientColorTextField, &AdditionalGradientColorText);
+						MsgPack::object ReplacementAdditionalGradient = object.is_null() ? MsgPack::object{} : ReplacementAdditionalGradientList[i].object_items();
+						auto additionalGradient = additionalGradientArray->vector[i];
+						auto additionalGradientColorTextField = il2cpp_class_get_field_from_name(additionalGradient->klass, "ColorText");
+
+						Il2CppString* AdditionalGradientColorText;
+						if (object.is_null())
+						{
+							il2cpp_field_get_value(additionalGradient, additionalGradientColorTextField, &AdditionalGradientColorText);
+						}
+						else
+						{
+							AdditionalGradientColorText = il2cpp_string_new(ReplacementAdditionalGradient["ColorText"].string_value().data());
+						}
+						il2cpp_field_set_value(additionalGradient, additionalGradientColorTextField, local::get_localized_string(AdditionalGradientColorText));
 					}
-					else
-					{
-						AdditionalGradientColorText = il2cpp_string_new(ReplacementAdditionalGradient["ColorText"].string_value().data());
-					}
-					il2cpp_field_set_value(additionalGradient, additionalGradientColorTextField, local::get_localized_string(AdditionalGradientColorText));
 				}
 			}
 		}
+	}
+}
+
+static void ReplaceRaceTextAssetData(Il2CppObject* raceTextAssetData)
+{
+	auto objectName = UnityEngine::Object::Name(raceTextAssetData);
+
+	il2cppstring raceTextAssetPath = config::replace_race_text_asset_path;
+	if (filesystem::path(raceTextAssetPath.data()).is_relative())
+	{
+		raceTextAssetPath.insert(0, filesystem::current_path().IL2CPP_BASIC_STRING().append(IL2CPP_STRING("/")));
+	}
+
+	auto filePath = filesystem::path(raceTextAssetPath + IL2CPP_STRING("/") + objectName->chars + IL2CPP_STRING(".msgpack"));
+
+	auto object = MsgPack();
+	if (filesystem::exists(filePath))
+	{
+		ifstream fileStream(filePath, ios::in | ios::binary);
+		object = MsgPack::parse(fileStream);
+	}
+
+	MsgPack::array ReplacementTextData = object.is_null() ? MsgPack::array{} : object["textData"].array_items();
+
+	auto StoryRaceTextAssetClass_textDataField = il2cpp_class_get_field_from_name(raceTextAssetData->klass, "textData");
+
+	Il2CppArraySize_t<Il2CppObject*>* textData;
+	il2cpp_field_get_value(raceTextAssetData, StoryRaceTextAssetClass_textDataField, &textData);
+
+	auto TextDataSize = object.is_null() ? textData->max_length : ReplacementTextData.size();
+
+	for (size_t i = 0; i < TextDataSize; i++)
+	{
+		MsgPack::object ReplacementKey = object.is_null() ? MsgPack::object{} : ReplacementTextData[i].object_items();
+		auto key = textData->vector[i];
+
+		auto textField = il2cpp_class_get_field_from_name(key->klass, "text");
+		
+		Il2CppString* text;
+		if (object.is_null())
+		{
+			il2cpp_field_get_value(key, textField, &text);
+		}
+		else
+		{
+			text = il2cpp_string_new(ReplacementKey["text"].string_value().data());
+		}
+		il2cpp_field_set_value(key, textField, local::get_localized_string(text));
 	}
 }
 
@@ -1031,6 +1083,11 @@ static Il2CppObject* LoadAsset_Internal_hook(Il2CppObject* self, Il2CppString* n
 		ReplaceTimelineData(obj);
 	}
 
+	if (obj->klass == StoryRaceTextAssetClass)
+	{
+		ReplaceRaceTextAssetData(obj);
+	}
+
 	return obj;
 }
 
@@ -1110,6 +1167,7 @@ static void InitAddress()
 	MaterialClass = il2cpp_symbols::get_class("UnityEngine.CoreModule.dll", "UnityEngine", "Material");
 	FontClass = il2cpp_symbols::get_class("UnityEngine.TextRenderingModule.dll", "UnityEngine", "Font");
 	StoryTimelineDataClass = il2cpp_symbols::get_class("umamusume.dll", "Gallop", "StoryTimelineData");
+	StoryRaceTextAssetClass = il2cpp_symbols::get_class("umamusume.dll", "Gallop", "StoryRaceTextAsset");
 }
 
 static void HookMethods()
