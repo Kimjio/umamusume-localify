@@ -3814,7 +3814,7 @@ namespace
 							il2cpp_field_get_value(_items, itemsField, &arr);
 
 							auto selectedItem = il2cpp_class_get_method_from_name_type<Il2CppObject * (*)(Il2CppObject*)>(footer->klass, "get_SelectItem", 0)->methodPointer(footer);
-							auto selectedMenu = il2cpp_class_get_method_from_name_type<Il2CppObject * (*)(Il2CppObject*)>(footer->klass, "get_SelectedMenIL2CPP_STRING(", 0)->methodPointer(footer);
+							auto selectedMenu = il2cpp_class_get_method_from_name_type<Il2CppObject * (*)(Il2CppObject*)>(footer->klass, "get_SelectedMenu", 0)->methodPointer(footer);
 
 							if (wParam == VK_RETURN)
 							{
@@ -3847,10 +3847,10 @@ namespace
 									number = count;
 								}
 
-								auto _preSelectedMenuField = il2cpp_class_get_field_from_name(footer->klass, "_preSelectedMenIL2CPP_STRING(");
+								auto _preSelectedMenuField = il2cpp_class_get_field_from_name(footer->klass, "_preSelectedMenu");
 								Il2CppObject* footerItem = arr->vector[number - 1];
 
-								auto trainingMenu = il2cpp_class_get_method_from_name_type<Il2CppObject * (*)(Il2CppObject*)>(footerItem->klass, "get_TrainingMenIL2CPP_STRING(", 0)->methodPointer(footerItem);
+								auto trainingMenu = il2cpp_class_get_method_from_name_type<Il2CppObject * (*)(Il2CppObject*)>(footerItem->klass, "get_TrainingMenu", 0)->methodPointer(footerItem);
 								il2cpp_field_set_value(footer, _preSelectedMenuField, trainingMenu);
 
 								isNumKeyDown = true;
@@ -3909,10 +3909,10 @@ namespace
 									}
 								}
 
-								auto _preSelectedMenuField = il2cpp_class_get_field_from_name(footer->klass, "_preSelectedMenIL2CPP_STRING(");
+								auto _preSelectedMenuField = il2cpp_class_get_field_from_name(footer->klass, "_preSelectedMenu");
 								Il2CppObject* footerItem = arr->vector[selectedIndex];
 
-								auto trainingMenu = il2cpp_class_get_method_from_name_type<Il2CppObject * (*)(Il2CppObject*)>(footerItem->klass, "get_TrainingMenIL2CPP_STRING(", 0)->methodPointer(footerItem);
+								auto trainingMenu = il2cpp_class_get_method_from_name_type<Il2CppObject * (*)(Il2CppObject*)>(footerItem->klass, "get_TrainingMenu", 0)->methodPointer(footerItem);
 								il2cpp_field_set_value(footer, _preSelectedMenuField, trainingMenu);
 
 								il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, Il2CppObject*, Il2CppObject*, bool, bool)>(footer->klass, "Select", 4)->methodPointer(footer, footerItem, trainingMenu, false, false);
@@ -9572,11 +9572,11 @@ namespace
 
 		auto PartsSingleModeCommonFooter_Setup_addr = il2cpp_symbols::get_method_pointer("umamusume.dll", "Gallop", "PartsSingleModeCommonFooter", "Setup", 0);
 
-		auto DialogSingleModeTopMenu_Setup_addr = il2cpp_symbols::get_method_pointer("umamusume.dll", "Gallop", "DialogSingleModeTopMenIL2CPP_STRING(", "Setup", 0);
+		auto DialogSingleModeTopMenu_Setup_addr = il2cpp_symbols::get_method_pointer("umamusume.dll", "Gallop", "DialogSingleModeTopMenu", "Setup", 0);
 
-		auto DialogSingleModeTopMenu_Setup1_addr = il2cpp_symbols::get_method_pointer("umamusume.dll", "Gallop", "DialogSingleModeTopMenIL2CPP_STRING(", "Setup", 1);
+		auto DialogSingleModeTopMenu_Setup1_addr = il2cpp_symbols::get_method_pointer("umamusume.dll", "Gallop", "DialogSingleModeTopMenu", "Setup", 1);
 
-		auto DialogSingleModeTopMenu_SetupButtonPositions_addr = il2cpp_symbols::get_method_pointer("umamusume.dll", "Gallop", "DialogSingleModeTopMenIL2CPP_STRING(", "SetupButtonPositions", 0);
+		auto DialogSingleModeTopMenu_SetupButtonPositions_addr = il2cpp_symbols::get_method_pointer("umamusume.dll", "Gallop", "DialogSingleModeTopMenu", "SetupButtonPositions", 0);
 
 		auto SingleModeRaceEntryViewController_SetupBottomButtons_addr = il2cpp_symbols::get_method_pointer("umamusume.dll", "Gallop", "SingleModeRaceEntryViewController", "SetupBottomButtons", 1);
 
