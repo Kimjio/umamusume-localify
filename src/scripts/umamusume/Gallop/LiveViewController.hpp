@@ -1,8 +1,9 @@
 #pragma once
+#include "scripts/UnityEngine.CoreModule/UnityEngine/Object.hpp"
 
 namespace Gallop
 {
-	class LiveViewController
+	class LiveViewController : UnityEngine::Object
 	{
 	public:
 		enum LiveState
@@ -14,5 +15,7 @@ namespace Gallop
 			ShowSettingDialog,
 			HideUI
 		};
+
+		using Object::Object;
 	};
 }

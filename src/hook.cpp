@@ -84,6 +84,7 @@
 #include "scripts/CriMw.CriWare.Runtime/CriWare/CriAtomEx.hpp"
 #include "scripts/CriMw.CriWare.Runtime/CriWare/CriAtomExPlayback.hpp"
 #include "scripts/CriMw.CriWare.Runtime/CriWare/CriMana/MovieInfo.hpp"
+#include "scripts/CriMw.CriWare.Runtime/CriWare/CriMana/FrameInfo.hpp"
 
 #include "scripts/Cute.Cri.Assembly/Cute/Cri/AudioPlayback.hpp"
 #include "scripts/Cute.Cri.Assembly/Cute/Cri/MoviePlayerHandle.hpp"
@@ -645,7 +646,7 @@ namespace
 	void* CriMana_SetFileNew_orig = nullptr;
 	void CriMana_SetFileNew_hook(int player_id, void* binder, const char* path)
 	{
-		auto fileName = Localify::GetFileName(path);
+		auto fileName = GetFileName(path);
 
 		if (config::replace_assets.find(fileName) != config::replace_assets.end())
 		{
@@ -660,7 +661,7 @@ namespace
 	void* CriMana_SetFileAppend_orig = nullptr;
 	bool CriMana_SetFileAppend_hook(int player_id, void* binder, const char* path, bool repeat)
 	{
-		auto fileName = Localify::GetFileName(path);
+		auto fileName = GetFileName(path);
 
 		if (config::replace_assets.find(fileName) != config::replace_assets.end())
 		{
@@ -2042,6 +2043,26 @@ namespace
 					if (il2cpp_class_get_method_from_name_type<Il2CppObject * (*)(Il2CppObject*)>(_frameBuffer->klass, "get_ColorBuffer", 0)->methodPointer(_frameBuffer))
 					{
 						il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*)>(_frameBuffer->klass, "RemakeRenderTexture", 0)->methodPointer(_frameBuffer);
+					}
+				}
+			}
+
+			if (config::freeform_window)
+			{
+				if (string(controller->klass->name).ends_with("LiveViewController"))
+				{
+					auto view = il2cpp_class_get_method_from_name_type<Il2CppObject * (*)(Il2CppObject*)>(controller->klass, "GetViewBase", 0)->methodPointer(controller);
+					auto _fullPortraitRootField = il2cpp_class_get_field_from_name(view->klass, "_fullPortraitRoot");
+
+					if (_fullPortraitRootField)
+					{
+						Il2CppObject* _fullPortraitRoot;
+						il2cpp_field_get_value(view, _fullPortraitRootField, &_fullPortraitRoot);
+
+						if (_fullPortraitRoot)
+						{
+							UnityEngine::GameObject(_fullPortraitRoot).SetActive(false);
+		}
 					}
 				}
 			}
@@ -8721,139 +8742,6 @@ namespace
 		return reinterpret_cast<decltype(load_scene_internal_hook)*>(load_scene_internal_orig)(sceneName, sceneBuildIndex, parameters, mustCompleteNextFrame);
 	}
 
-	void* LiveTempData_CreateLiveSettingScreenModeCached_orig = nullptr;
-	void LiveTempData_CreateLiveSettingScreenModeCached_hook(Il2CppObject* self)
-	{
-		reinterpret_cast<decltype(LiveTempData_CreateLiveSettingScreenModeCached_hook)*>(LiveTempData_CreateLiveSettingScreenModeCached_orig)(self);
-
-		auto _screenModeDicField = il2cpp_class_get_field_from_name(self->klass, "_cachedLiveScreenModeDic");
-		Il2CppObject* _screenModeDic;
-		il2cpp_field_get_value(self, _screenModeDicField, &_screenModeDic);
-
-		auto entriesField = il2cpp_class_get_field_from_name(_screenModeDic->klass, "_entries");
-		if (!entriesField)
-		{
-			entriesField = il2cpp_class_get_field_from_name(_screenModeDic->klass, "entries");
-		}
-
-		Il2CppArraySize_t<System::Collections::Generic::Dictionary<int, int>::Entry>* entries;
-		il2cpp_field_get_value(_screenModeDic, entriesField, &entries);
-
-		vector<int> musicIds;
-
-		if (entries)
-		{
-			for (int i = 0; i < entries->max_length; i++)
-			{
-				auto entry = entries->vector[i];
-
-				if (entry.key)
-				{
-					musicIds.emplace_back(entry.key);
-				}
-			}
-		}
-
-		il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*)>(_screenModeDic->klass, "Clear", 0)->methodPointer(_screenModeDic);
-
-		for (auto musicId : musicIds)
-		{
-			il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, int, int)>(_screenModeDic->klass, "Add", 2)->methodPointer(_screenModeDic, musicId, 0);
-		}
-	}
-
-	void* TempData_ctor_orig = nullptr;
-	void TempData_ctor_hook(Il2CppObject* self)
-	{
-		reinterpret_cast<decltype(TempData_ctor_hook)*>(TempData_ctor_orig)(self);
-
-		auto LiveDataField = il2cpp_class_get_field_from_name(self->klass, "LiveData");
-		Il2CppObject* LiveData;
-		il2cpp_field_get_value(self, LiveDataField, &LiveData);
-
-		auto _screenModeDicField = il2cpp_class_get_field_from_name(LiveData->klass, "_cachedLiveScreenModeDic");
-		Il2CppObject* _screenModeDic;
-		il2cpp_field_get_value(LiveData, _screenModeDicField, &_screenModeDic);
-
-		auto entriesField = il2cpp_class_get_field_from_name(_screenModeDic->klass, "_entries");
-		if (!entriesField)
-		{
-			entriesField = il2cpp_class_get_field_from_name(_screenModeDic->klass, "entries");
-		}
-
-		Il2CppArraySize_t<System::Collections::Generic::Dictionary<int, int>::Entry>* entries;
-		il2cpp_field_get_value(_screenModeDic, entriesField, &entries);
-
-		vector<int> musicIds;
-
-		if (entries)
-		{
-			for (int i = 0; i < entries->max_length; i++)
-			{
-				auto entry = entries->vector[i];
-
-				if (entry.key)
-				{
-					musicIds.emplace_back(entry.key);
-				}
-			}
-		}
-
-		il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*)>(_screenModeDic->klass, "Clear", 0)->methodPointer(_screenModeDic);
-
-		for (auto musicId : musicIds)
-		{
-			il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, int, int)>(_screenModeDic->klass, "Add", 2)->methodPointer(_screenModeDic, musicId, 0);
-		}
-	}
-
-	void* LiveTempData_ctor_orig = nullptr;
-	void LiveTempData_ctor_hook(Il2CppObject* self)
-	{
-		reinterpret_cast<decltype(LiveTempData_ctor_hook)*>(LiveTempData_ctor_orig)(self);
-
-		auto _screenModeDicField = il2cpp_class_get_field_from_name(self->klass, "_cachedLiveScreenModeDic");
-		Il2CppObject* _screenModeDic;
-		il2cpp_field_get_value(self, _screenModeDicField, &_screenModeDic);
-
-		auto entriesField = il2cpp_class_get_field_from_name(_screenModeDic->klass, "_entries");
-		if (!entriesField)
-		{
-			entriesField = il2cpp_class_get_field_from_name(_screenModeDic->klass, "entries");
-		}
-
-		Il2CppArraySize_t<System::Collections::Generic::Dictionary<int, int>::Entry>* entries;
-		il2cpp_field_get_value(_screenModeDic, entriesField, &entries);
-
-		vector<int> musicIds;
-
-		if (entries)
-		{
-			for (int i = 0; i < entries->max_length; i++)
-			{
-				auto entry = entries->vector[i];
-
-				if (entry.key)
-				{
-					musicIds.emplace_back(entry.key);
-				}
-			}
-		}
-
-		il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*)>(_screenModeDic->klass, "Clear", 0)->methodPointer(_screenModeDic);
-
-		for (auto musicId : musicIds)
-		{
-			il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, int, int)>(_screenModeDic->klass, "Add", 2)->methodPointer(_screenModeDic, musicId, 0);
-		}
-	}
-
-	void* Director_get_IsScreenModeFullPortrait_orig = nullptr;
-	bool Director_get_IsScreenModeFullPortrait_hook(Il2CppObject* self)
-	{
-		return false;
-	}
-
 	void* CollectRaidBgCutinHelper_InstantiateTimeline_orig = nullptr;
 	bool CollectRaidBgCutinHelper_InstantiateTimeline_hook(Il2CppObject* self, Il2CppString* path, Il2CppObject* parent, Il2CppObject* renderTexture, float fovFactor)
 	{
@@ -9233,6 +9121,48 @@ namespace
 		}
 	}
 
+
+	void* LiveTempData_ctor_orig = nullptr;
+	void LiveTempData_ctor_hook(Il2CppObject* self)
+	{
+		reinterpret_cast<decltype(LiveTempData_ctor_hook)*>(LiveTempData_ctor_orig)(self);
+
+		auto _screenModeDicField = il2cpp_class_get_field_from_name(self->klass, "_cachedLiveScreenModeDic");
+		Il2CppObject* _screenModeDic;
+		il2cpp_field_get_value(self, _screenModeDicField, &_screenModeDic);
+
+		auto entriesField = il2cpp_class_get_field_from_name(_screenModeDic->klass, "_entries");
+		if (!entriesField)
+		{
+			entriesField = il2cpp_class_get_field_from_name(_screenModeDic->klass, "entries");
+		}
+
+		Il2CppArraySize_t<System::Collections::Generic::Dictionary<int, int>::Entry>* entries;
+		il2cpp_field_get_value(_screenModeDic, entriesField, &entries);
+
+		vector<int> musicIds;
+
+		if (entries)
+		{
+			for (int i = 0; i < entries->max_length; i++)
+			{
+				auto entry = entries->vector[i];
+
+				if (entry.key)
+				{
+					musicIds.emplace_back(entry.key);
+				}
+			}
+		}
+
+		il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*)>(_screenModeDic->klass, "Clear", 0)->methodPointer(_screenModeDic);
+
+		for (auto musicId : musicIds)
+		{
+			il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, int, int)>(_screenModeDic->klass, "Add", 2)->methodPointer(_screenModeDic, musicId, 0);
+		}
+	}
+
 	void patch_game_assembly()
 	{
 		if (Game::CurrentGameRegion == Game::Region::KOR)
@@ -9573,17 +9503,7 @@ namespace
 
 		auto GallopStandaloneInputModule_ProcessTouchEvents_addr = il2cpp_symbols::get_method_pointer("umamusume.dll", "UnityEngine.EventSystems", "GallopStandaloneInputModule", "ProcessTouchEvents", 0);
 
-		auto DialogLiveStartConfirm_PushDialog_addr = il2cpp_symbols::get_method_pointer("umamusume.dll", "Gallop", "DialogLiveStartConfirmFullPortrait", "PushDialog", 3);
-
-		auto Director_get_IsScreenModeFullPortrait_addr = il2cpp_symbols::get_method_pointer("umamusume.dll", "Gallop.Live", "Director", "get_IsScreenModeFullPortrait", 0);
-
 		auto CollectRaidBgCutinHelper_InstantiateTimeline_addr = il2cpp_symbols::get_method_pointer("umamusume.dll", "Gallop", "CollectRaidBgCutinHelper", "InstantiateTimeline", 4);
-
-		auto LiveTempData_CreateLiveSettingScreenModeCached_addr = il2cpp_symbols::get_method_pointer("umamusume.dll", "Gallop", "TempData/LiveTempData", "CreateLiveSettingScreenModeCached", 0);
-
-		auto TempData_ctor_addr = il2cpp_symbols::get_method_pointer("umamusume.dll", "Gallop", "TempData", ".ctor", 0);
-
-		auto LiveTempData_ctor_addr = il2cpp_symbols::get_method_pointer("umamusume.dll", "Gallop", "TempData/LiveTempData", ".ctor", 0);
 
 		auto Header_Initialize_addr = il2cpp_symbols::get_method_pointer("umamusume.dll", "Gallop", "Header", "Initialize", 0);
 
@@ -9625,16 +9545,6 @@ namespace
 		{
 			ADD_HOOK(Certification_initDmmPlatformData, "Gallop.Certification::initDmmPlatformData at %p\n");
 		}
-
-		// ADD_HOOK(TempData_ctor, "Gallop.TempData::.ctor at %p\n");
-
-		// ADD_HOOK(LiveTempData_CreateLiveSettingScreenModeCached, "Gallop.TempData.LiveTempData::CreateLiveSettingScreenModeCached at %p\n");
-
-		// ADD_HOOK(LiveTempData_get_CachedLiveScreenModeDic, "Gallop.TempData.LiveTempData::get_CachedLiveScreenModeDic at %p\n");
-
-		// ADD_HOOK(Director_get_IsScreenModeFullPortrait, "Gallop.Live.Director::get_IsScreenModeFullPortrait at %p\n");
-
-		// ADD_HOOK(DialogLiveStartConfirm_PushDialog, "Gallop.DialogLiveStartConfirm::PushDialog at %p\n");
 
 		// ADD_HOOK(GallopStandaloneInputModule_SetPointerPosition, "UnityEngine.EventSystems.GallopStandaloneInputModule::SetPointerPosition at %p\n");
 

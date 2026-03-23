@@ -25,7 +25,7 @@ namespace Gallop
 			WITHOUT_FRAME
 		};
 
-		void Close();
+		virtual void Close() abstract;
 
 		using LockableBehaviour::LockableBehaviour;
 	};
