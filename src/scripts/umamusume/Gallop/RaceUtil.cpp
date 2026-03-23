@@ -13,6 +13,18 @@ namespace
 
 static bool GetRaceDynamicCameraSettingData_hook(uint64_t bootMode)
 {
+	auto RaceInfo = il2cpp_symbols::get_method_pointer<Il2CppObject * (*)()>(ASSEMBLY_NAME, "Gallop", "RaceManager", "get_RaceInfo", 0)();
+
+	if (RaceInfo)
+	{
+		auto RaceType = il2cpp_class_get_method_from_name_type<uint64_t(*)(Il2CppObject*)>(RaceInfo->klass, "get_RaceType", 0)->methodPointer(RaceInfo);
+
+		if (RaceType == 3)
+		{
+			return false;
+		}
+	}
+
 	auto SaveDataManager = GetSingletonInstance(il2cpp_symbols::get_class("umamusume.dll", "Gallop", "SaveDataManager"));
 	auto SaveLoader = il2cpp_class_get_method_from_name_type<Il2CppObject * (*)(Il2CppObject*)>(SaveDataManager->klass, "get_SaveLoader", 0)->methodPointer(SaveDataManager);
 	bool IsTryRaceDynamicCamera = il2cpp_class_get_method_from_name_type<bool (*)(Il2CppObject*)>(SaveLoader->klass, "get_IsTryRaceDynamicCamera", 0)->methodPointer(SaveLoader);
