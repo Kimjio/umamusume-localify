@@ -71,7 +71,6 @@
 #include "localify/NotificationManager.hpp"
 
 #include "scripts/ScriptInternal.hpp"
-#include "scripts/Localify/SettingsUI.hpp"
 
 #include "scripts/mscorlib/System/Boolean.hpp"
 #include "scripts/mscorlib/System/Enum.hpp"
@@ -136,8 +135,6 @@
 #include "fpp/fpp.h"
 
 #include "string_utils.hpp"
-#include "scripts/Localify/LocalifyGlobal.hpp"
-#include "scripts/Localify/NotificationManager.hpp"
 
 using namespace std;
 
@@ -4405,7 +4402,7 @@ namespace
 	}
 
 
-	static vector<int8_t> KONAMI_COMMAND{ VK_UP, VK_UP, VK_DOWN, VK_DOWN, VK_LEFT, VK_RIGHT, VK_LEFT, VK_RIGHT, static_cast<int8_t>('B'), static_cast<int8_t>('A') };
+	static vector<int8_t> KONAMI_COMMAND{ VK_UP, VK_UP, VK_DOWN, VK_DOWN, VK_LEFT, VK_RIGHT, VK_LEFT, VK_RIGHT, 'B', 'A' };
 
 	static int konamiCommandIndex = 0;
 
@@ -5259,7 +5256,7 @@ namespace
 		if (uMsg == WM_SYSKEYDOWN)
 		{
 			bool altDown = (lParam & (static_cast<long long>(1) << 29)) != 0;
-			if (Game::CurrentGameStore != Game::Store::Steam || config::freeform_window)
+			if (config::freeform_window)
 			{
 				if ((config::auto_fullscreen || config::unlock_size || config::freeform_window) &&
 					wParam == VK_RETURN &&
@@ -6971,42 +6968,33 @@ namespace
 
 		if (il2cppstring(UnityEngine::Object::Name(cloned)->chars).find(IL2CPP_STRING("DialogOptionHome")) != wstring::npos)
 		{
-			auto getComponents = il2cpp_class_get_method_from_name_type<Il2CppArraySize_t<Il2CppObject*> *(*)(Il2CppObject*, Il2CppType*, bool, bool, bool, bool, Il2CppObject*)>(cloned->klass, "GetComponentsInternal", 6)->methodPointer;
-			auto rectTransformArray = getComponents(cloned, reinterpret_cast<Il2CppType*>(GetRuntimeType(
-				"UnityEngine.CoreModule.dll", "UnityEngine", "RectTransform")), true, true, true, false, nullptr);
+			auto dialog = UnityEngine::GameObject(cloned).GetComponent(GetRuntimeType("umamusume.dll", "Gallop", "DialogOptionHome"));
 
-			for (int i = 0; i < rectTransformArray->max_length; i++)
-			{
-				auto rectTransform = rectTransformArray->vector[i];
+			auto _optionPageBasicSettingField = il2cpp_class_get_field_from_name(dialog->klass, "_optionPageBasicSetting");
+			Il2CppObject* _optionPageBasicSetting;
+			il2cpp_field_get_value(dialog, _optionPageBasicSettingField, &_optionPageBasicSetting);
 
-				if (rectTransform && UnityEngine::Object::Name(rectTransform)->chars == il2cppstring(IL2CPP_STRING("PartsOptionPageBasicSetting")))
-				{
-					UnityEngine::RectTransform(rectTransform).gameObject().SetActive(true);
-					auto PartsOptionPageBasicSetting = UnityEngine::RectTransform(rectTransform).gameObject().NativeObject();
-					auto rectTransformArray1 = getComponents(PartsOptionPageBasicSetting, reinterpret_cast<Il2CppType*>(GetRuntimeType(
-						"UnityEngine.CoreModule.dll", "UnityEngine", "RectTransform")), true, true, false, false, nullptr);
+			auto PartsOptionPageBasicSetting = UnityEngine::MonoBehaviour(_optionPageBasicSetting).gameObject();
+			PartsOptionPageBasicSetting.SetActive(true);
 
-					for (int j = 0; j < rectTransformArray1->max_length; j++)
+			auto rectTransformArray = PartsOptionPageBasicSetting.GetComponentsInChildren(GetRuntimeType("UnityEngine.CoreModule.dll", "UnityEngine", "RectTransform"), false);
+
+			for (int j = 0; j < rectTransformArray->max_length; j++)
 					{
-						auto rectTransform1 = rectTransformArray1->vector[j];
-						if (rectTransform1 && UnityEngine::Object::Name(rectTransform1)->chars == il2cppstring(IL2CPP_STRING("Content")))
+				auto rectTransform = rectTransformArray->vector[j];
+				if (rectTransform && UnityEngine::Object::Name(rectTransform)->chars == il2cppstring(IL2CPP_STRING("Content")))
 						{
-							InitOptionLayout(rectTransform1);
+					InitOptionLayout(rectTransform);
 							break;
 						}
 					}
-					break;
-				}
-			}
 
 			SetupOptionLayout();
 		}
 
 		if (il2cppstring(UnityEngine::Object::Name(cloned)->chars).find(IL2CPP_STRING("DialogOptionLiveTheater")) != wstring::npos)
 		{
-			auto getComponents = il2cpp_class_get_method_from_name_type<Il2CppArraySize_t<Il2CppObject*> *(*)(Il2CppObject*, Il2CppType*, bool, bool, bool, bool, Il2CppObject*)>(cloned->klass, "GetComponentsInternal", 6)->methodPointer;
-			auto rectTransformArray = getComponents(cloned, reinterpret_cast<Il2CppType*>(GetRuntimeType(
-				"UnityEngine.CoreModule.dll", "UnityEngine", "RectTransform")), true, true, false, false, nullptr);
+			auto rectTransformArray = UnityEngine::GameObject(cloned).GetComponentsInChildren(GetRuntimeType("UnityEngine.CoreModule.dll", "UnityEngine", "RectTransform"), false);
 
 			for (int i = 0; i < rectTransformArray->max_length; i++)
 			{
@@ -7024,8 +7012,7 @@ namespace
 
 		if (il2cppstring(UnityEngine::Object::Name(cloned)->chars).find(IL2CPP_STRING("CharacterHomeTopUI")) != wstring::npos)
 		{
-			auto getComponent = il2cpp_class_get_method_from_name_type<Il2CppObject * (*)(Il2CppObject*, Il2CppReflectionType*)>(cloned->klass, "GetComponent", 1)->methodPointer;
-			auto CharacterHomeTopUI = getComponent(cloned, GetRuntimeType("umamusume.dll", "Gallop", "CharacterHomeTopUI"));
+			auto CharacterHomeTopUI = UnityEngine::GameObject(cloned).GetComponent(GetRuntimeType("umamusume.dll", "Gallop", "CharacterHomeTopUI"));
 
 			if (CharacterHomeTopUI)
 			{
