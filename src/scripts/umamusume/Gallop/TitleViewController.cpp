@@ -619,7 +619,7 @@ static Il2CppObject* TitleViewController_InitializeView_hook(Il2CppObject* self)
 		if (Game::CurrentGameRegion == Game::Region::ENG)
 		{
 			transform.sizeDelta(Vector2{ 1200.0f, 600.0f });
-			transform.anchoredPosition(Vector2{ -56.0f, 410.0f });
+			transform.anchoredPosition(Vector2{ -56.0f, 480.0f });
 		}
 		else
 		{
