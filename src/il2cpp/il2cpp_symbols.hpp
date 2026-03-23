@@ -129,6 +129,8 @@ namespace il2cpp_symbols
 	
 	extern uint64_t base;
 
+	extern HMODULE module;
+
 	extern std::vector<std::function<void()>> init_callbacks;
 
 	void load_symbols(std::filesystem::path & path);

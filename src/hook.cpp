@@ -1032,6 +1032,20 @@ namespace
 		return reinterpret_cast<decltype(LoadLibraryW)*>(load_library_w_orig)(lpLibFileName);
 	}
 
+	void* GetProcAddress_orig = nullptr;
+	FARPROC WINAPI GetProcAddress_hook(
+		_In_ HMODULE hModule,
+		_In_ LPCSTR lpProcName
+	)
+	{
+		if (hModule == il2cpp_symbols::module)
+		{
+			return reinterpret_cast<decltype(GetProcAddress_hook)*>(GetProcAddress_orig)(hModule, il2cpp_fn_name(lpProcName).data());
+		}
+
+		return reinterpret_cast<decltype(GetProcAddress_hook)*>(GetProcAddress_orig)(hModule, lpProcName);
+	}
+
 	Il2CppObject* GetInt32Instance(int value)
 	{
 		return il2cpp_value_box(il2cpp_defaults.int32_class, &value);
@@ -11246,6 +11260,10 @@ void init_hook(filesystem::path module_path)
 	auto LoadLibraryW_addr = GetProcAddress(GetModuleHandleW(L"KernelBase.dll"), "LoadLibraryW");
 	MH_CreateHook(LoadLibraryW_addr, load_library_w_hook, &load_library_w_orig);
 	MH_EnableHook(LoadLibraryW_addr);
+
+	auto GetProcAddress_addr = GetProcAddress(GetModuleHandleW(L"kernel32.dll"), "GetProcAddress");
+	MH_CreateHook(GetProcAddress_addr, GetProcAddress_hook, &GetProcAddress_orig);
+	MH_EnableHook(GetProcAddress_addr);
 
 	fullScreenFl = config::auto_fullscreen && !config::freeform_window;
 

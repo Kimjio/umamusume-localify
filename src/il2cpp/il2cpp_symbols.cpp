@@ -132,6 +132,8 @@ namespace il2cpp_symbols
 	Il2CppDomain* il2cpp_domain = nullptr;
 	uint64_t base = 0;
 
+	HMODULE module = nullptr;
+
 	std::vector<std::function<void()>> init_callbacks;
 
 	static bool HasValidCert(filesystem::path path)
@@ -364,6 +366,7 @@ namespace il2cpp_symbols
 
 	void init(HMODULE game_module)
 	{
+		module = game_module;
 		init_functions(game_module);
 	}
 
