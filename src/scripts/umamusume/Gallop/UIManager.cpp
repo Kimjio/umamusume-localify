@@ -40,6 +40,8 @@ namespace
 
 	void* AdjustSafeAreaToAnnounceRect_addr = nullptr;
 
+	void* CreateRenderTextureFromScreen_addr = nullptr;
+
 	void* ReleaseRenderTexture_addr = nullptr;
 
 	void* LockGameCanvas_addr = nullptr;
@@ -303,6 +305,7 @@ static void InitAddress()
 	AdjustSafeArea_addr = il2cpp_symbols::get_method_pointer(ASSEMBLY_NAME, "Gallop", "UIManager", "AdjustSafeArea", 0);
 	AdjustMissionClearContentsRootRect_addr = il2cpp_symbols::get_method_pointer(ASSEMBLY_NAME, "Gallop", "UIManager", "AdjustMissionClearContentsRootRect", 0);
 	AdjustSafeAreaToAnnounceRect_addr = il2cpp_symbols::get_method_pointer(ASSEMBLY_NAME, "Gallop", "UIManager", "AdjustSafeAreaToAnnounceRect", 0);
+	CreateRenderTextureFromScreen_addr = il2cpp_symbols::get_method_pointer(ASSEMBLY_NAME, "Gallop", "UIManager", "CreateRenderTextureFromScreen", 0);
 	ReleaseRenderTexture_addr = il2cpp_symbols::get_method_pointer(ASSEMBLY_NAME, "Gallop", "UIManager", "ReleaseRenderTexture", 0);
 	LockGameCanvas_addr = il2cpp_symbols::get_method_pointer(ASSEMBLY_NAME, "Gallop", "UIManager", "LockGameCanvas", 0);
 	UnlockGameCanvas_addr = il2cpp_symbols::get_method_pointer(ASSEMBLY_NAME, "Gallop", "UIManager", "UnlockGameCanvas", 0);
@@ -540,6 +543,11 @@ namespace Gallop
 		{
 			reinterpret_cast<void (*)(Il2CppObject*)>(AdjustSafeAreaToAnnounceRect_addr)(instance);
 		}
+	}
+
+	void UIManager::CreateRenderTextureFromScreen()
+	{
+		reinterpret_cast<void (*)(Il2CppObject*)>(CreateRenderTextureFromScreen_addr)(instance);
 	}
 
 	void UIManager::ReleaseRenderTexture()

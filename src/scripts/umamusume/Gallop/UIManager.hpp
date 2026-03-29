@@ -57,6 +57,8 @@ namespace Gallop
 
 		void AdjustSafeAreaToAnnounceRect();
 
+		void CreateRenderTextureFromScreen();
+
 		void ReleaseRenderTexture();
 
 		void LockGameCanvas();

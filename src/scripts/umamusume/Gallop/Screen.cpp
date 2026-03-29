@@ -273,7 +273,8 @@ namespace Gallop
 			return reinterpret_cast<bool (*)()>(get_IsLandscapeMode_addr)();
 		}
 
-		if (Game::CurrentGameStore == Game::Store::Steam)
+		// ENG Fallback
+		if (Game::CurrentGameRegion == Game::Region::ENG)
 		{
 			return true;
 		}

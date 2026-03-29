@@ -126,6 +126,7 @@
 #include "scripts/umamusume/Gallop/GameSystem.hpp"
 #ifdef _MSC_VER
 #include "scripts/umamusume/Gallop/StandaloneWindowResize.hpp"
+#include "scripts/umamusume/Gallop/WindowsGamepadControl.hpp"
 #endif
 
 #include "scripts/Plugins/CodeStage/AntiCheat/ObscuredTypes/ObscuredBool.hpp"
@@ -2059,7 +2060,7 @@ namespace
 						if (_fullPortraitRoot)
 						{
 							UnityEngine::GameObject(_fullPortraitRoot).SetActive(false);
-		}
+						}
 					}
 				}
 			}
@@ -2711,61 +2712,7 @@ namespace
 										il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*)>(_bgManager->klass, "OnChangeResolutionByGraphicsSettings", 0)->methodPointer(_bgManager);
 									}
 
-									uiManager.CheckUIToFrameBufferBlitInstance();
-									uiManager.ReleaseRenderTexture();
-
-									auto renderTexture = il2cpp_object_new(il2cpp_symbols::get_class("UnityEngine.CoreModule.dll", "UnityEngine", "RenderTexture"));
-									il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, int, int, int)>(renderTexture->klass, ".ctor", 3)->methodPointer(renderTexture, _contentWidth, _contentHeight, 24);
-									il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, bool)>(renderTexture->klass, "set_autoGenerateMips", 1)->methodPointer(renderTexture, false);
-									il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, bool)>(renderTexture->klass, "set_useMipMap", 1)->methodPointer(renderTexture, false);
-									il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, int)>(renderTexture->klass, "set_antiAliasing", 1)->methodPointer(renderTexture, 1);
-
-									uiManager.UITexture(renderTexture);
-
-									if (!il2cpp_class_get_method_from_name_type<bool (*)(Il2CppObject*)>(renderTexture->klass, "Create", 0)->methodPointer(renderTexture))
-									{
-										uiManager.ReleaseRenderTexture();
-									}
-
-									Il2CppObject* _uiToFrameBufferRenderCameraData = uiManager._uiToFrameBufferRenderCameraData();
-
-									if (_uiToFrameBufferRenderCameraData)
-									{
-										il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, Il2CppObject*)>(_uiToFrameBufferRenderCameraData->klass, "set_ScreenTexture", 1)->methodPointer(_uiToFrameBufferRenderCameraData, renderTexture);
-									}
-
-									Il2CppObject* _uiCommandBuffer = uiManager._uiCommandBuffer();
-
-									if (_uiCommandBuffer)
-									{
-										il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, Il2CppObject*, UnityEngine::Rendering::RenderTargetIdentifier, Il2CppObject*)>(_uiCommandBuffer->klass, "Blit", 3)->methodPointer(_uiCommandBuffer, renderTexture, UnityEngine::Rendering::RenderTargetIdentifier(UnityEngine::Rendering::BuiltinRenderTextureType::CurrentActive), uiManager._blitToFrameMaterial());
-									}
-
-									Il2CppObject* _uiCamera = uiManager._uiCamera();
-									Il2CppObject* _bgCamera = uiManager._bgCamera();
-
-									Il2CppObject* _noImageEffectUICamera = uiManager._noImageEffectUICamera();
-									Il2CppObject* _uiToFrameBufferBlitCamera = uiManager._uiToFrameBufferBlitCamera();
-
-									if (_uiCamera)
-									{
-										il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, Il2CppObject*)>(_uiCamera->klass, "set_targetTexture", 1)->methodPointer(_uiCamera, renderTexture);
-									}
-
-									if (_bgCamera)
-									{
-										il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, Il2CppObject*)>(_bgCamera->klass, "set_targetTexture", 1)->methodPointer(_bgCamera, renderTexture);
-									}
-
-									if (_noImageEffectUICamera)
-									{
-										il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, Il2CppObject*)>(_noImageEffectUICamera->klass, "set_targetTexture", 1)->methodPointer(_noImageEffectUICamera, renderTexture);
-									}
-
-									if (_uiToFrameBufferBlitCamera)
-									{
-										il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, bool)>(_uiToFrameBufferBlitCamera->klass, "set_enabled", 1)->methodPointer(_uiToFrameBufferBlitCamera, true);
-									}
+									uiManager.CreateRenderTextureFromScreen();
 								}
 
 								RemakeTextures();
@@ -4334,6 +4281,24 @@ namespace
 
 	bool ControlLiveTime(WPARAM wParam)
 	{
+		auto SaveDataManager = GetSingletonInstance(il2cpp_symbols::get_class("umamusume.dll", "Gallop", "SaveDataManager"));
+		auto SaveLoader = il2cpp_class_get_method_from_name_type<Il2CppObject * (*)(Il2CppObject*)>(SaveDataManager->klass, "get_SaveLoader", 0)->methodPointer(SaveDataManager);
+		auto get_IsEnableKeyboard = il2cpp_class_get_method_from_name_type<bool(*)(Il2CppObject*)>(SaveLoader->klass, "get_IsEnableKeyboard", 0);
+		if (get_IsEnableKeyboard)
+		{
+			auto IsEnableKeyboard = get_IsEnableKeyboard->methodPointer(SaveLoader);
+
+			if (IsEnableKeyboard)
+			{
+				return false;
+			}
+		}
+
+		if (il2cpp_symbols::get_class("umamusume.dll", "Gallop", "SteamGamepadControl"))
+		{
+			return false;
+		}
+
 		if (wParam == VK_LEFT || wParam == VK_RIGHT)
 		{
 			auto director = GetSingletonInstance(il2cpp_symbols::get_class("umamusume.dll", "Gallop.Live", "Director"));
@@ -5193,7 +5158,7 @@ namespace
 			//	}
 			//}
 
-			if (PressDialogButton(wParam))
+			/*if (PressDialogButton(wParam))
 			{
 				return TRUE;
 			}
@@ -5221,7 +5186,7 @@ namespace
 			if (StepTrainingItem(wParam))
 			{
 				return TRUE;
-			}
+			}*/
 
 			if (SelectStoryChoice(wParam))
 			{
@@ -5249,7 +5214,7 @@ namespace
 			if ((0 < (wParam - 48) && (wParam - 48) <= 9))
 			{
 				isNumKeyDown = false;
-				return TRUE;
+				// return TRUE;
 			}
 		}
 
@@ -5803,6 +5768,11 @@ namespace
 
 	UnityEngine::Vector3 GallopInput_mousePosition_hook()
 	{
+		if (auto WindowsGamepadControl = Gallop::WindowsGamepadControl::Instance())
+		{
+			WindowsGamepadControl.UpdateInputControls();
+		}
+
 		auto position = il2cpp_symbols::get_method_pointer<UnityEngine::Vector3(*)()>("UnityEngine.InputLegacyModule.dll", "UnityEngine", "Input", "get_mousePosition", IgnoreNumberOfArguments)();
 
 		if (!config::freeform_window)
@@ -6844,7 +6814,7 @@ namespace
 				Localify::UIParts::GetOptionItemTitle(LocalifySettings::GetText("settings_title")),
 				Localify::UIParts::GetOptionItemButton("open_settings", LocalifySettings::GetText("open_settings")),
 			}
-		);
+			);
 	}
 
 	void SetupOptionLayout()
@@ -6980,14 +6950,14 @@ namespace
 			auto rectTransformArray = PartsOptionPageBasicSetting.GetComponentsInChildren(GetRuntimeType("UnityEngine.CoreModule.dll", "UnityEngine", "RectTransform"), false);
 
 			for (int j = 0; j < rectTransformArray->max_length; j++)
-					{
+			{
 				auto rectTransform = rectTransformArray->vector[j];
 				if (rectTransform && UnityEngine::Object::Name(rectTransform)->chars == il2cppstring(IL2CPP_STRING("Content")))
-						{
+				{
 					InitOptionLayout(rectTransform);
-							break;
-						}
-					}
+					break;
+				}
+			}
 
 			SetupOptionLayout();
 		}
@@ -7426,20 +7396,17 @@ namespace
 	{
 		if (!config::freeform_window)
 		{
-			reinterpret_cast<decltype(Screen_set_orientation_hook)*>(Screen_set_orientation_orig)(
-				orientation);
+			reinterpret_cast<decltype(Screen_set_orientation_hook)*>(Screen_set_orientation_orig)(orientation);
 		}
 	}
 
 	void* DeviceOrientationGuide_Show_orig = nullptr;
 
-	void DeviceOrientationGuide_Show_hook(Il2CppObject* _this, bool isTargetOrientationPortrait,
-		int target)
+	void DeviceOrientationGuide_Show_hook(Il2CppObject* _this, bool isTargetOrientationPortrait, int target)
 	{
 		if (!config::freeform_window)
 		{
-			reinterpret_cast<decltype(DeviceOrientationGuide_Show_hook)*>(DeviceOrientationGuide_Show_orig)(
-				_this, isTargetOrientationPortrait, target);
+			reinterpret_cast<decltype(DeviceOrientationGuide_Show_hook)*>(DeviceOrientationGuide_Show_orig)(_this, isTargetOrientationPortrait, target);
 		}
 	}
 
@@ -7524,8 +7491,7 @@ namespace
 	{
 		if (!config::freeform_window)
 		{
-			return reinterpret_cast<decltype(WaitDeviceOrientation_hook)*>(WaitDeviceOrientation_orig)(
-				targetOrientation);
+			return reinterpret_cast<decltype(WaitDeviceOrientation_hook)*>(WaitDeviceOrientation_orig)(targetOrientation);
 		}
 
 		auto yield = il2cpp_object_new(il2cpp_symbols::get_class("UnityEngine.CoreModule.dll", "UnityEngine", "WaitWhile"));
@@ -7792,13 +7758,6 @@ namespace
 		il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*)>(_this->klass, "OnClickPlusButton",
 			0)->methodPointer
 			(_this);
-	}
-
-	void* Input_get_mousePosition_Injected_orig = nullptr;
-
-	void Input_get_mousePosition_Injected_hook(UnityEngine::Vector3* out)
-	{
-		reinterpret_cast<decltype(Input_get_mousePosition_Injected_hook)*>(Input_get_mousePosition_Injected_orig)(out);
 	}
 
 	void* Certification_initDmmPlatformData_orig = nullptr;
@@ -9174,8 +9133,6 @@ namespace
 		auto DialogCircleItemDonate_Initialize_addr = il2cpp_symbols::get_method_pointer("umamusume.dll", "Gallop", "DialogCircleItemDonate", "Initialize", 2);
 
 		auto Object_Internal_CloneSingleWithParent_addr = il2cpp_resolve_icall("UnityEngine.Object::Internal_CloneSingleWithParent()");
-
-		auto Input_get_mousePosition_Injected_addr = il2cpp_resolve_icall("UnityEngine.Input::get_mousePosition_Injected(UnityEngine.Vector3&)");
 
 		auto Certification_initDmmPlatformData_addr = il2cpp_symbols::get_method_pointer("umamusume.dll", "Gallop", "Certification", "initDmmPlatformData", IgnoreNumberOfArguments);
 

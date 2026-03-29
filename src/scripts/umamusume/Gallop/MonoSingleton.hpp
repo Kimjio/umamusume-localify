@@ -10,7 +10,14 @@ namespace Gallop
 	public:
 		static T Instance()
 		{
-			auto instanceField = il2cpp_class_get_field_from_name(il2cpp_symbols::get_class("umamusume.dll", T::namespaze, T::klassName), "_instance");
+			auto klass = il2cpp_symbols::get_class("umamusume.dll", T::namespaze, T::klassName);
+
+			if (!klass)
+			{
+				return nullptr;
+			}
+
+			auto instanceField = il2cpp_class_get_field_from_name(klass, "_instance");
 			Il2CppObject* instance;
 			il2cpp_field_static_get_value(instanceField, &instance);
 			return T(instance);

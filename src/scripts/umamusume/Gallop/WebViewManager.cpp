@@ -151,8 +151,7 @@ static void OpenWebViewDialog(Il2CppString* url, Il2CppString* headerTextArg, ui
 	auto data = Gallop::DialogCommon::Data();
 	data.SetSimpleOneButtonMessage(headerTextArg, nullptr, onClose, closeTextId, Gallop::DialogCommonBase::FormType::BIG_ONE_BUTTON);
 
-	auto webViewManager = GetSingletonInstance(
-		il2cpp_symbols::get_class(ASSEMBLY_NAME, "Gallop", "WebViewManager"));
+	auto webViewManager = GetSingletonInstance(il2cpp_symbols::get_class(ASSEMBLY_NAME, "Gallop", "WebViewManager"));
 	il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, Il2CppString*, Il2CppObject*, Il2CppDelegate*, Il2CppDelegate*, bool)>
 		(webViewManager->klass, "Open", 5)->methodPointer(webViewManager, url, data, nullptr, nullptr, false);
 }
@@ -167,28 +166,21 @@ static void OpenNewsDialog()
 	}
 	else
 	{
-		auto webViewManager = GetSingletonInstance(
-			il2cpp_symbols::get_class(ASSEMBLY_NAME, "Gallop", "WebViewManager"));
-		reinterpret_cast<void (*)(Il2CppObject*,
-			Il2CppDelegate*)>(il2cpp_class_get_method_from_name(
-				webViewManager->klass, "OpenNews", 1)->methodPointer)(webViewManager, nullptr);
+		auto webViewManager = GetSingletonInstance(il2cpp_symbols::get_class(ASSEMBLY_NAME, "Gallop", "WebViewManager"));
+		reinterpret_cast<void (*)(Il2CppObject*, Il2CppDelegate*)>(il2cpp_class_get_method_from_name(webViewManager->klass, "OpenNews", 1)->methodPointer)(webViewManager, nullptr);
 	}
 }
 
 static void OpenHelpDialog()
 {
-	auto webViewManager = GetSingletonInstance(
-		il2cpp_symbols::get_class(ASSEMBLY_NAME, "Gallop", "WebViewManager"));
-	reinterpret_cast<void (*)(Il2CppObject*)>(il2cpp_class_get_method_from_name(
-		webViewManager->klass, "OpenHelp", 0)->methodPointer)(webViewManager);
+	auto webViewManager = GetSingletonInstance(il2cpp_symbols::get_class(ASSEMBLY_NAME, "Gallop", "WebViewManager"));
+	reinterpret_cast<void (*)(Il2CppObject*)>(il2cpp_class_get_method_from_name(webViewManager->klass, "OpenHelp", 0)->methodPointer)(webViewManager);
 }
 
 static void OpenStoryEventHelpDialog()
 {
-	auto webViewManager = GetSingletonInstance(
-		il2cpp_symbols::get_class(ASSEMBLY_NAME, "Gallop", "WebViewManager"));
-	reinterpret_cast<void (*)(Il2CppObject*)>(il2cpp_class_get_method_from_name(
-		webViewManager->klass, "OpenStoryEventHelp", 0)->methodPointer)(webViewManager);
+	auto webViewManager = GetSingletonInstance(il2cpp_symbols::get_class(ASSEMBLY_NAME, "Gallop", "WebViewManager"));
+	reinterpret_cast<void (*)(Il2CppObject*)>(il2cpp_class_get_method_from_name(webViewManager->klass, "OpenStoryEventHelp", 0)->methodPointer)(webViewManager);
 }
 
 static string GetOqupieToken()
@@ -288,11 +280,6 @@ static void Gallop_WebViewManager_cctor_hook()
 
 	auto WebViewUrlDict_Add = il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, Gallop::WebViewDefine::Url, Il2CppObject*, const MethodInfo*)>(WebViewUrlDict->klass, "Add", 2);
 	void (*WebViewUrlDict_Add_methodPointer)(Il2CppObject*, Gallop::WebViewDefine::Url, Il2CppObject*, const MethodInfo*) = WebViewUrlDict_Add->methodPointer;
-
-	if (Game::CurrentGameRegion == Game::Region::KOR)
-	{
-		WebViewUrlDict_Add_methodPointer = reinterpret_cast<decltype(WebViewUrlDict_Add_methodPointer)>(reinterpret_cast<const MethodInfo2020*>(WebViewUrlDict_Add)->methodPointer);
-	}
 
 	auto methodInfo = reinterpret_cast<const MethodInfo*>(WebViewUrlDict_Add);
 
@@ -807,13 +794,10 @@ static void BannerUI_OnClickBannerItem_hook(Il2CppObject* self, Il2CppObject* bu
 static void KakaoManager_OnKakaoShowInAppWebView_hook(Il2CppObject* self, Il2CppString* url, Il2CppDelegate* isSuccess)
 {
 	if (url->chars == il2cppstring(IL2CPP_STRING("https://m.cafe.daum.net/umamusume-kor/Z4os?boardType=notice"))) {
-		auto NewsDialogInfo = il2cpp_symbols::get_class(ASSEMBLY_NAME, "Gallop",
-			"HomeStartCheckSequence/NewsDialogInfo");
+		auto NewsDialogInfo = il2cpp_symbols::get_class(ASSEMBLY_NAME, "Gallop", "HomeStartCheckSequence/NewsDialogInfo");
 		auto instance = il2cpp_object_new(NewsDialogInfo);
 		il2cpp_runtime_object_init(instance);
-		auto newsOpened = reinterpret_cast<bool (*)(
-			Il2CppObject*)>(il2cpp_class_get_method_from_name(instance->klass, "Check",
-				0)->methodPointer)(instance);
+		auto newsOpened = reinterpret_cast<bool (*)(Il2CppObject*)>(il2cpp_class_get_method_from_name(instance->klass, "Check", 0)->methodPointer)(instance);
 		if (!newsOpened)
 		{
 			OpenNewsDialog();
