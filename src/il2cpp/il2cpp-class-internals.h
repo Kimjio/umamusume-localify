@@ -372,40 +372,6 @@ typedef struct MethodInfo
 	uint8_t has_full_generic_sharing_signature : 1;
 } MethodInfo;
 
-typedef struct MethodInfo2020
-{
-	Il2CppMethodPointer methodPointer;
-	InvokerMethod2020 invoker_method;
-	const char* name;
-	Il2CppClass* klass;
-	const Il2CppType* return_type;
-	const ParameterInfo* parameters;
-
-	union
-	{
-		const Il2CppRGCTXData* rgctx_data; /* is_inflated is true and is_generic is false, i.e. a generic instance method */
-		Il2CppMetadataMethodDefinitionHandle methodMetadataHandle;
-	};
-
-	/* note, when is_generic == true and is_inflated == true the method represents an uninflated generic method on an inflated type. */
-	union
-	{
-		const Il2CppGenericMethod* genericMethod; /* is_inflated is true */
-		Il2CppMetadataGenericContainerHandle genericContainerHandle; /* is_inflated is false and is_generic is true */
-		Il2CppMethodPointer nativeFunction; /* if is_marshaled_from_native is true */
-	};
-
-	uint32_t token;
-	uint16_t flags;
-	uint16_t iflags;
-	uint16_t slot;
-	uint8_t parameters_count;
-	uint8_t is_generic : 1; /* true if method is a generic method definition */
-	uint8_t is_inflated : 1; /* true if declaring_type is a generic instance or if method is a generic instance*/
-	uint8_t wrapper_type : 1; /* always zero (MONO_WRAPPER_NONE) needed for the debugger */
-	uint8_t is_marshaled_from_native : 1; /* a fake MethodInfo wrapping a native function pointer */
-} MethodInfo2020;
-
 typedef struct Il2CppRuntimeInterfaceOffsetPair
 {
 	Il2CppClass* interfaceType;

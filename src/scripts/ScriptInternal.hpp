@@ -150,7 +150,7 @@ inline Il2CppDelegate* CreateDelegate(Il2CppObject* target, R(*fn)(Il2CppObject*
 	delegate->method_ptr = reinterpret_cast<Il2CppMethodPointer>(fn);
 	delegate->invoke_impl = reinterpret_cast<Il2CppMethodPointer>(fn);
 
-	MethodInfo* methodInfo = reinterpret_cast<MethodInfo*>(new MethodInfo{});
+	MethodInfo* methodInfo = new MethodInfo{};
 	methodInfo->name = "AnonymousMethod";
 	methodInfo->methodPointer = delegate->method_ptr;
 	methodInfo->virtualMethodPointer = delegate->method_ptr;
@@ -184,7 +184,7 @@ inline Il2CppMulticastDelegate* CreateUnityAction(Il2CppObject* target, R(*fn)(I
 	delegate->delegate.method_ptr = reinterpret_cast<Il2CppMethodPointer>(fn);
 	delegate->delegate.invoke_impl = reinterpret_cast<Il2CppMethodPointer>(fn);
 
-	MethodInfo* methodInfo = reinterpret_cast<MethodInfo*>(new MethodInfo{});
+	MethodInfo* methodInfo = new MethodInfo{};
 	methodInfo->name = "AnonymousMethod";
 	methodInfo->methodPointer = delegate->delegate.method_ptr;
 	methodInfo->virtualMethodPointer = delegate->delegate.method_ptr;
