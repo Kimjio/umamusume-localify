@@ -74,7 +74,7 @@ static void InitAddress()
 
 static void HookMethods()
 {
-	if (config::unlock_size || config::freeform_window)
+	if (config::unlock_size || config::freeform_window && WindowsGamepadControl_CreateRenderTextureFromScreen_addr)
 	{
 		ADD_HOOK(WindowsGamepadControl_CreateRenderTextureFromScreen, "Gallop.WindowsGamepadControl::CreateRenderTextureFromScreen at %p\n");
 	}

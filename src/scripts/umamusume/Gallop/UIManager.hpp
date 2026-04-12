@@ -57,9 +57,13 @@ namespace Gallop
 
 		void AdjustSafeAreaToAnnounceRect();
 
+		void SetBgCameraRenderTexture(Il2CppObject* texture);
+
 		void CreateRenderTextureFromScreen();
 
 		void ReleaseRenderTexture();
+
+		bool IsLockGameCanvas();
 
 		void LockGameCanvas();
 

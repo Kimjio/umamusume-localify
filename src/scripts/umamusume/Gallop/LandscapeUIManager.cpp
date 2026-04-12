@@ -23,6 +23,10 @@ namespace
 	void* LandscapeUIManager_GetWindowsHeightMax_addr = nullptr;
 	void* LandscapeUIManager_GetWindowsHeightMax_orig = nullptr;
 
+	void* LandscapeUIManager_GetTouchPositionCameraType_addr = nullptr;
+
+	void* LandscapeUIManager_GetTouchPositionOffsetX_addr = nullptr;
+
 	FieldInfo* LandscapeUIManager__displayOrientationButtonField = nullptr;
 }
 
@@ -72,29 +76,36 @@ static float LandscapeUIManager_get_WindowScaleRate_hook()
 	{
 		return 1.0f;
 	}
-	return UnityEngine::Screen::width() / LandscapeUIManager_GetWindowsWidthMax_hook();
+
+	return static_cast<float>(UnityEngine::Screen::width()) / LandscapeUIManager_GetWindowsWidthMax_hook();
 }
 
 static void InitAddress()
 {
-	auto LandscapeUIManager = il2cpp_symbols::get_class("umamusume.dll", "Gallop", "LandscapeUIManager");
-	if (!LandscapeUIManager)
+	auto LandscapeUIManager_klass = il2cpp_symbols::get_class("umamusume.dll", "Gallop", "LandscapeUIManager");
+	if (!LandscapeUIManager_klass)
 	{
-		LandscapeUIManager = il2cpp_symbols::get_class("umamusume.dll", "Gallop", "SteamUIManager");
+		LandscapeUIManager_klass = il2cpp_symbols::get_class("umamusume.dll", "Gallop", "SteamUIManager");
 	}
-	LandscapeUIManager_Initialize_addr = il2cpp_symbols::get_method_pointer(LandscapeUIManager, "Initialize", 2);
-	LandscapeUIManager_get_WindowScaleRate_addr = il2cpp_symbols::get_method_pointer(LandscapeUIManager, "get_WindowScaleRate", 0);
-	LandscapeUIManager_GetWindowsWidthMax_addr = il2cpp_symbols::get_method_pointer(LandscapeUIManager, "GetWindowsWidthMax", 0);
-	LandscapeUIManager_GetWindowsHeightMax_addr = il2cpp_symbols::get_method_pointer(LandscapeUIManager, "GetWindowsHeightMax", 0);
-	LandscapeUIManager__displayOrientationButtonField = il2cpp_class_get_field_from_name(LandscapeUIManager, "_displayOrientationButton");
+	LandscapeUIManager_Initialize_addr = il2cpp_symbols::get_method_pointer(LandscapeUIManager_klass, "Initialize", 2);
+	LandscapeUIManager_get_WindowScaleRate_addr = il2cpp_symbols::get_method_pointer(LandscapeUIManager_klass, "get_WindowScaleRate", 0);
+	LandscapeUIManager_GetWindowsWidthMax_addr = il2cpp_symbols::get_method_pointer(LandscapeUIManager_klass, "GetWindowsWidthMax", 0);
+	LandscapeUIManager_GetWindowsHeightMax_addr = il2cpp_symbols::get_method_pointer(LandscapeUIManager_klass, "GetWindowsHeightMax", 0);
+	LandscapeUIManager_GetTouchPositionCameraType_addr = il2cpp_symbols::get_method_pointer(LandscapeUIManager_klass, "GetTouchPositionCameraType", 1);
+	LandscapeUIManager_GetTouchPositionOffsetX_addr = il2cpp_symbols::get_method_pointer(LandscapeUIManager_klass, "GetTouchPositionOffsetX", 1);
+	LandscapeUIManager__displayOrientationButtonField = il2cpp_class_get_field_from_name(LandscapeUIManager_klass, "_displayOrientationButton");
 }
 
 static void HookMethods()
 {
 	ADD_HOOK(LandscapeUIManager_Initialize, "Gallop.LandscapeUIManager::Initialize at %p\n");
-	ADD_HOOK(LandscapeUIManager_get_WindowScaleRate, "Gallop.LandscapeUIManager::get_WindowScaleRate at %p\n");
-	ADD_HOOK(LandscapeUIManager_GetWindowsWidthMax, "Gallop.LandscapeUIManager::Initialize at %p\n");
-	ADD_HOOK(LandscapeUIManager_GetWindowsHeightMax, "Gallop.LandscapeUIManager::Initialize at %p\n");
+
+	if (config::freeform_window)
+	{
+		ADD_HOOK(LandscapeUIManager_GetWindowsWidthMax, "Gallop.LandscapeUIManager::GetWindowsWidthMax at %p\n");
+		ADD_HOOK(LandscapeUIManager_GetWindowsHeightMax, "Gallop.LandscapeUIManager::GetWindowsHeightMax at %p\n");
+		ADD_HOOK(LandscapeUIManager_get_WindowScaleRate, "Gallop.LandscapeUIManager::get_WindowScaleRate at %p\n");
+	}
 }
 
 STATIC
@@ -105,4 +116,19 @@ STATIC
 
 namespace Gallop
 {
+	float LandscapeUIManager::WindowScaleRate()
+	{
+		return reinterpret_cast<float (*)()>(LandscapeUIManager_get_WindowScaleRate_addr)();
+	}
+
+
+	LandscapeUIManager::CameraType LandscapeUIManager::GetTouchPositionCameraType(float touchPositionX)
+	{
+		return reinterpret_cast<CameraType(*)(float)>(LandscapeUIManager_GetTouchPositionCameraType_addr)(touchPositionX);
+	}
+
+	float LandscapeUIManager::GetTouchPositionOffsetX(CameraType cameraType)
+	{
+		return reinterpret_cast<float (*)(CameraType)>(LandscapeUIManager_GetTouchPositionOffsetX_addr)(cameraType);
+	}
 }

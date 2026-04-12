@@ -8894,52 +8894,6 @@ namespace
 
 				auto uiManager = Gallop::UIManager::Instance();
 
-				/*if (config::resolution_3d_scale != 1.0f)
-				{
-					auto graphicSettings = GetSingletonInstance(il2cpp_symbols::get_class("umamusume.dll", "Gallop", "GraphicSettings"));
-
-					if (graphicSettings)
-					{
-						auto _resolutionScaleField = il2cpp_class_get_field_from_name(graphicSettings->klass, "_resolutionScale");
-
-						il2cpp_field_set_value(graphicSettings, _resolutionScaleField, &config::resolution_3d_scale);
-
-						auto _resolutionScale2DField = il2cpp_class_get_field_from_name(graphicSettings->klass, "_resolutionScale2D");
-
-						il2cpp_field_set_value(graphicSettings, _resolutionScale2DField, &config::resolution_3d_scale);
-					}
-				}*/
-
-				/*if (config::graphics_quality > -1)
-				{
-					auto graphicSettings = GetSingletonInstance(il2cpp_symbols::get_class("umamusume.dll", "Gallop", "GraphicSettings"));
-					if (graphicSettings)
-					{
-						apply_graphics_quality_hook(graphicSettings, config::graphics_quality, true);
-					}
-				}*/
-
-				// auto graphicSettings = GetSingletonInstance(il2cpp_symbols::get_class("umamusume.dll", "Gallop", "GraphicSettings"));
-
-				// if (graphicSettings)
-				// {
-					// const auto get_RenderingManager = il2cpp_class_get_method_from_name_type<Il2CppObject * (*)(Il2CppObject*)>(graphicSettings->klass, "get_RenderingManager", 0);
-					// if (get_RenderingManager)
-					// {
-						// auto renderingManager = get_RenderingManager->methodPointer(graphicSettings);
-						// il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, bool)>(renderingManager->klass, "set_IsOverrideAntiAliasingLevel", 1)->methodPointer(renderingManager, true);
-
-						/*if (config::anti_aliasing == 0)
-						{
-							il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, int)>(renderingManager->klass, "set_OverrideAntiAliasingLevel", 1)->methodPointer(renderingManager, 1);
-						}
-						else
-						{
-							il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, int)>(renderingManager->klass, "set_OverrideAntiAliasingLevel", 1)->methodPointer(renderingManager, 0);
-						}*/
-						// }
-					// }
-
 				/*Il2CppArraySize_t<Il2CppObject*>* CriWareInitializerList;
 				CriWareInitializerList = UnityEngine::Object::FindObjectsByType(
 					GetRuntimeType("CriMw.CriWare.Runtime.dll", "CriWare", "CriWareInitializer"), UnityEngine::FindObjectsInactive::Include, UnityEngine::FindObjectsSortMode::None);
@@ -8984,7 +8938,7 @@ namespace
 				//	il2cpp_symbols::get_method_pointer<Il2CppObject* (*)(float, Il2CppDelegate*, bool)>("DOTween.dll", "DG.Tweening", "DOVirtual", "DelayedCall", 3)(0.05, delayCallback, true);
 				//}
 
-				if (sceneName == IL2CPP_STRING("_Boot") && Game::CurrentGameStore == Game::Store::Steam)
+				if (sceneName == IL2CPP_STRING("_Boot"))
 				{
 					Gallop::StandaloneWindowResize::IsVirt(!Gallop::Screen::IsLandscapeMode());
 				}
@@ -9076,44 +9030,16 @@ namespace
 						Localify::NotificationManager::Reset();
 					}
 
-					// if (config::max_fps > -1 || config::unlock_size || config::freeform_window)
-					// {
-						// if (uiManager)
-						// {
-							// Il2CppObject* _bgCamera = uiManager._bgCamera();
-
-							/*il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, Color_t)>(_bgCamera->klass, "set_backgroundColor", 1)->methodPointer(_bgCamera,
-								il2cpp_symbols::get_method_pointer<Color_t(*)()>("UnityEngine.CoreModule.dll", "UnityEngine", "Color", "get_clear", IgnoreNumberOfArguments)());*/
-								// }
-							// }
-
 					if (config::freeform_window)
 					{
 						int width = UnityEngine::Screen::width();
 						int height = UnityEngine::Screen::height();
 
 						bool isVirt = width < height;
+						Gallop::Screen::OriginalScreenWidth(width);
+						Gallop::Screen::OriginalScreenHeight(height);
 						Gallop::StandaloneWindowResize::IsVirt(isVirt);
 					}
-
-					/*if (uiManager && (config::unlock_size || config::freeform_window))
-					{
-						int width = UnityEngine::Screen::width();
-						int height = UnityEngine::Screen::height();
-
-						bool isVirt = width < height;
-
-						if (config::freeform_window)
-						{
-							uiManager.ChangeResizeUIForPC(isVirt ? min(last_virt_window_width, last_virt_window_height) : max(last_hriz_window_width, last_hriz_window_height),
-								isVirt ? max(last_virt_window_width, last_virt_window_height) : min(last_hriz_window_width, last_hriz_window_height));
-						}
-						else
-						{
-							uiManager.ChangeResizeUIForPC(isVirt ? min(last_display_width, last_display_height) : max(last_display_width, last_display_height),
-								isVirt ? max(last_display_width, last_display_height) : min(last_display_width, last_display_height));
-						}
-					}*/
 					}
 
 				if (sceneName == IL2CPP_STRING("Home"))

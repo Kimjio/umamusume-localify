@@ -26,6 +26,9 @@ namespace
 	void* StandaloneWindowResize_ReshapeAspectRatio_addr = nullptr;
 	void* StandaloneWindowResize_ReshapeAspectRatio_orig = nullptr;
 
+	void* StandaloneWindowResize_ReshapeAspectRatio2_addr = nullptr;
+	void* StandaloneWindowResize_ReshapeAspectRatio2_orig = nullptr;
+
 	void* StandaloneWindowResize_KeepAspectRatio_addr = nullptr;
 	void* StandaloneWindowResize_KeepAspectRatio_orig = nullptr;
 
@@ -70,6 +73,11 @@ static void StandaloneWindowResize_ReshapeAspectRatio_hook()
 
 }
 
+static void StandaloneWindowResize_ReshapeAspectRatio2_hook(float currentWidth, float currentHeight)
+{
+
+}
+
 static void StandaloneWindowResize_KeepAspectRatio_hook(float currentWidth, float currentHeight)
 {
 	auto hWnd = GetHWND();
@@ -88,6 +96,7 @@ static void InitAddress()
 	StandaloneWindowResize_DisableWindowHitTest_addr = il2cpp_symbols::get_method_pointer(StandaloneWindowResize_klass, "DisableWindowHitTest", 0);
 	StandaloneWindowResize_DisableMaximizebox_addr = il2cpp_symbols::get_method_pointer(StandaloneWindowResize_klass, "DisableMaximizebox", 0);
 	StandaloneWindowResize_ReshapeAspectRatio_addr = il2cpp_symbols::get_method_pointer(StandaloneWindowResize_klass, "ReshapeAspectRatio", 0);
+	StandaloneWindowResize_ReshapeAspectRatio2_addr = il2cpp_symbols::get_method_pointer(StandaloneWindowResize_klass, "ReshapeAspectRatio", 2);
 	StandaloneWindowResize_KeepAspectRatio_addr = il2cpp_symbols::get_method_pointer(StandaloneWindowResize_klass, "KeepAspectRatio", 2);
 	StandaloneWindowResize_ClearStopFlagAfterWhile_addr = il2cpp_symbols::get_method_pointer(StandaloneWindowResize_klass, "ClearStopFlagAfterWhile", 0);
 	StandaloneWindowResize_windowLastWidthField = il2cpp_class_get_field_from_name(StandaloneWindowResize_klass, "windowLastWidth");
@@ -100,7 +109,7 @@ static void InitAddress()
 	StandaloneWindowResize__isWindowDraggingField = il2cpp_class_get_field_from_name(StandaloneWindowResize_klass, "_isWindowDragging");
 }
 
-static void HookAddress()
+static void HookMethods()
 {
 	if (config::freeform_window || Game::CurrentGameStore == Game::Store::Steam)
 	{
@@ -110,6 +119,7 @@ static void HookAddress()
 	if (config::freeform_window)
 	{
 		ADD_HOOK(StandaloneWindowResize_ReshapeAspectRatio, "Gallop.StandaloneWindowResize::ReshapeAspectRatio at %p\n");
+		ADD_HOOK(StandaloneWindowResize_ReshapeAspectRatio2, "Gallop.StandaloneWindowResize::ReshapeAspectRatio2 at %p\n");
 		ADD_HOOK(StandaloneWindowResize_KeepAspectRatio, "Gallop.StandaloneWindowResize::KeepAspectRatio at %p\n");
 		ADD_HOOK(StandaloneWindowResize_GetLimitSize, "Gallop.StandaloneWindowResize::GetLimitSize at %p\n");
 	}
@@ -118,7 +128,7 @@ static void HookAddress()
 STATIC
 {
 	il2cpp_symbols::init_callbacks.emplace_back(InitAddress);
-	il2cpp_symbols::init_callbacks.emplace_back(HookAddress);
+	il2cpp_symbols::init_callbacks.emplace_back(HookMethods);
 }
 
 namespace Gallop

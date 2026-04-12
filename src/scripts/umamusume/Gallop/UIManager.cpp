@@ -40,15 +40,17 @@ namespace
 
 	void* AdjustSafeAreaToAnnounceRect_addr = nullptr;
 
+	void* SetBgCameraRenderTexture_addr = nullptr;
+
 	void* CreateRenderTextureFromScreen_addr = nullptr;
 
 	void* ReleaseRenderTexture_addr = nullptr;
 
+	void* IsLockGameCanvas_addr = nullptr;
+
 	void* LockGameCanvas_addr = nullptr;
-	void* LockGameCanvas_orig = nullptr;
 
 	void* UnlockGameCanvas_addr = nullptr;
-	void* UnlockGameCanvas_orig = nullptr;
 
 	void* UnlockAllCanvas_addr = nullptr;
 
@@ -88,7 +90,7 @@ namespace
 
 static void SetBGCanvasScalerSize()
 {
-	auto bgManager = il2cpp_symbols::get_method_pointer<Il2CppObject * (*)()>("umamusume.dll", "Gallop", "BGManager", "get_Instance", 0)();
+	auto bgManager = il2cpp_symbols::get_method_pointer<Il2CppObject * (*)()>(ASSEMBLY_NAME, "Gallop", "BGManager", "get_Instance", 0)();
 	if (bgManager)
 	{
 		auto _mainBgField = il2cpp_class_get_field_from_name(bgManager->klass, "_mainBg");
@@ -97,18 +99,18 @@ static void SetBGCanvasScalerSize()
 
 		if (_mainBg)
 		{
-			auto transform = il2cpp_class_get_method_from_name_type<Il2CppObject * (*)(Il2CppObject*)>(_mainBg->klass, "get_transform", 0)->methodPointer(_mainBg);
+			UnityEngine::Transform transform = UnityEngine::MonoBehaviour(_mainBg).transform();
 
-			int width = il2cpp_symbols::get_method_pointer<int (*)()>("UnityEngine.CoreModule.dll", "UnityEngine", "Screen", "get_width", IgnoreNumberOfArguments)();
-			int height = il2cpp_symbols::get_method_pointer<int (*)()>("UnityEngine.CoreModule.dll", "UnityEngine", "Screen", "get_height", IgnoreNumberOfArguments)();
+			int width = UnityEngine::Screen::width();
+			int height = UnityEngine::Screen::height();
 
 			if (width > height)
 			{
-				auto pos = il2cpp_class_get_method_from_name_type<UnityEngine::Vector3(*)(Il2CppObject*)>(transform->klass, "get_localPosition", 0)->methodPointer(transform);
+				auto pos = transform.localPosition();
 
 				if (pos.y == 0)
 				{
-					il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, UnityEngine::Vector3)>(transform->klass, "set_localPosition", 1)->methodPointer(transform, UnityEngine::Vector3{ 0, 0, 0 });
+					transform.localPosition(UnityEngine::Vector3{ 0, 0, 0 });
 				}
 			}
 		}
@@ -163,12 +165,6 @@ static void ChangeResizeUIForPC_hook(Il2CppObject* self, int width, int height)
 
 			if (config::freeform_window)
 			{
-				if (Gallop::Screen::IsSplitWindow())
-				{
-					width = height * ratio_3_4;
-				}
-
-
 				if (scaleMode == 1)
 				{
 					if (width < height)
@@ -261,20 +257,15 @@ static float GetCameraSizeByOrientation_hook(int orientation)
 
 static UnityEngine::Vector2 get_DefaultResolution_hook()
 {
-	int width = UnityEngine::Screen::width();
-	int height = UnityEngine::Screen::height();
+	int width = Gallop::Screen::Width();
+	int height = Gallop::Screen::Height();
 
-	if (Gallop::Screen::IsSplitWindow())
+	if (Gallop::Screen::IsVertical())
 	{
-		width = height * ratio_3_4;
+		return UnityEngine::Vector2{ static_cast<float>(height), static_cast<float>(width) };
 	}
 
 	return UnityEngine::Vector2{ static_cast<float>(width), static_cast<float>(height) };
-}
-
-static bool get_IsLandscapeMode_hook()
-{
-	return false;
 }
 
 static void OnPushBandUIButton_hook(Il2CppObject* self, uint64_t buttonType)
@@ -294,49 +285,51 @@ static bool IsEnableSwitchBandMenu_hook(Il2CppObject* self)
 
 static void InitAddress()
 {
-	ShowNotification_addr = il2cpp_symbols::get_method_pointer(ASSEMBLY_NAME, "Gallop", "UIManager", "ShowNotification", 1);
-	ShowNotification2_addr = il2cpp_symbols::get_method_pointer(ASSEMBLY_NAME, "Gallop", "UIManager", "ShowNotification", 2);
-	get_UITexture_addr = il2cpp_symbols::get_method_pointer(ASSEMBLY_NAME, "Gallop", "UIManager", "get_UITexture", 0);
-	get_CommonHeaderTitle_addr = il2cpp_symbols::get_method_pointer(ASSEMBLY_NAME, "Gallop", "UIManager", "get_CommonHeaderTitle", 0);
-	get_LandscapeUIManager_addr = il2cpp_symbols::get_method_pointer(ASSEMBLY_NAME, "Gallop", "UIManager", "get_LandscapeUIManager", 0);
-	get_IsLandscapeMode_addr = il2cpp_symbols::get_method_pointer(ASSEMBLY_NAME, "Gallop", "UIManager", "get_IsLandscapeMode", 0);
-	SetCameraSizeByOrientation_addr = il2cpp_symbols::get_method_pointer(ASSEMBLY_NAME, "Gallop", "UIManager", "SetCameraSizeByOrientation", 1);
-	CheckUIToFrameBufferBlitInstance_addr = il2cpp_symbols::get_method_pointer(ASSEMBLY_NAME, "Gallop", "UIManager", "CheckUIToFrameBufferBlitInstance", 0);
-	AdjustSafeArea_addr = il2cpp_symbols::get_method_pointer(ASSEMBLY_NAME, "Gallop", "UIManager", "AdjustSafeArea", 0);
-	AdjustMissionClearContentsRootRect_addr = il2cpp_symbols::get_method_pointer(ASSEMBLY_NAME, "Gallop", "UIManager", "AdjustMissionClearContentsRootRect", 0);
-	AdjustSafeAreaToAnnounceRect_addr = il2cpp_symbols::get_method_pointer(ASSEMBLY_NAME, "Gallop", "UIManager", "AdjustSafeAreaToAnnounceRect", 0);
-	CreateRenderTextureFromScreen_addr = il2cpp_symbols::get_method_pointer(ASSEMBLY_NAME, "Gallop", "UIManager", "CreateRenderTextureFromScreen", 0);
-	ReleaseRenderTexture_addr = il2cpp_symbols::get_method_pointer(ASSEMBLY_NAME, "Gallop", "UIManager", "ReleaseRenderTexture", 0);
-	LockGameCanvas_addr = il2cpp_symbols::get_method_pointer(ASSEMBLY_NAME, "Gallop", "UIManager", "LockGameCanvas", 0);
-	UnlockGameCanvas_addr = il2cpp_symbols::get_method_pointer(ASSEMBLY_NAME, "Gallop", "UIManager", "UnlockGameCanvas", 0);
-	UnlockAllCanvas_addr = il2cpp_symbols::get_method_pointer(ASSEMBLY_NAME, "Gallop", "UIManager", "UnlockAllCanvas", 0);
-	ChangeResolution_addr = il2cpp_symbols::get_method_pointer(ASSEMBLY_NAME, "Gallop", "UIManager", "ChangeResolution", 0);
-	WaitResizeUI_addr = il2cpp_symbols::get_method_pointer(ASSEMBLY_NAME, "Gallop", "UIManager", "WaitResizeUI", 2);
-	GetCanvasScalerList_addr = il2cpp_symbols::get_method_pointer(ASSEMBLY_NAME, "Gallop", "UIManager", "GetCanvasScalerList", 0);
-	GetCameraSizeByOrientation_addr = il2cpp_symbols::get_method_pointer(ASSEMBLY_NAME, "Gallop", "UIManager", "GetCameraSizeByOrientation", 1);
-	get_DefaultResolution_addr = il2cpp_symbols::get_method_pointer(ASSEMBLY_NAME, "Gallop", "UIManager", "get_DefaultResolution", 0);
+	auto UIManager_klass = il2cpp_symbols::get_class(ASSEMBLY_NAME, "Gallop", "UIManager");
+	ShowNotification_addr = il2cpp_symbols::get_method_pointer(UIManager_klass, "ShowNotification", 1);
+	ShowNotification2_addr = il2cpp_symbols::get_method_pointer(UIManager_klass, "ShowNotification", 2);
+	get_UITexture_addr = il2cpp_symbols::get_method_pointer(UIManager_klass, "get_UITexture", 0);
+	get_CommonHeaderTitle_addr = il2cpp_symbols::get_method_pointer(UIManager_klass, "get_CommonHeaderTitle", 0);
+	get_LandscapeUIManager_addr = il2cpp_symbols::get_method_pointer(UIManager_klass, "get_LandscapeUIManager", 0);
+	get_IsLandscapeMode_addr = il2cpp_symbols::get_method_pointer(UIManager_klass, "get_IsLandscapeMode", 0);
+	SetCameraSizeByOrientation_addr = il2cpp_symbols::get_method_pointer(UIManager_klass, "SetCameraSizeByOrientation", 1);
+	CheckUIToFrameBufferBlitInstance_addr = il2cpp_symbols::get_method_pointer(UIManager_klass, "CheckUIToFrameBufferBlitInstance", 0);
+	AdjustSafeArea_addr = il2cpp_symbols::get_method_pointer(UIManager_klass, "AdjustSafeArea", 0);
+	AdjustMissionClearContentsRootRect_addr = il2cpp_symbols::get_method_pointer(UIManager_klass, "AdjustMissionClearContentsRootRect", 0);
+	AdjustSafeAreaToAnnounceRect_addr = il2cpp_symbols::get_method_pointer(UIManager_klass, "AdjustSafeAreaToAnnounceRect", 0);
+	SetBgCameraRenderTexture_addr = il2cpp_symbols::get_method_pointer(UIManager_klass, "SetBgCameraRenderTexture", 1);
+	CreateRenderTextureFromScreen_addr = il2cpp_symbols::get_method_pointer(UIManager_klass, "CreateRenderTextureFromScreen", 0);
+	ReleaseRenderTexture_addr = il2cpp_symbols::get_method_pointer(UIManager_klass, "ReleaseRenderTexture", 0);
+	IsLockGameCanvas_addr = il2cpp_symbols::get_method_pointer(UIManager_klass, "IsLockGameCanvas", 0);
+	LockGameCanvas_addr = il2cpp_symbols::get_method_pointer(UIManager_klass, "LockGameCanvas", 0);
+	UnlockGameCanvas_addr = il2cpp_symbols::get_method_pointer(UIManager_klass, "UnlockGameCanvas", 0);
+	UnlockAllCanvas_addr = il2cpp_symbols::get_method_pointer(UIManager_klass, "UnlockAllCanvas", 0);
+	ChangeResolution_addr = il2cpp_symbols::get_method_pointer(UIManager_klass, "ChangeResolution", 0);
+	WaitResizeUI_addr = il2cpp_symbols::get_method_pointer(UIManager_klass, "WaitResizeUI", 2);
+	GetCanvasScalerList_addr = il2cpp_symbols::get_method_pointer(UIManager_klass, "GetCanvasScalerList", 0);
+	GetCameraSizeByOrientation_addr = il2cpp_symbols::get_method_pointer(UIManager_klass, "GetCameraSizeByOrientation", 1);
+	get_DefaultResolution_addr = il2cpp_symbols::get_method_pointer(UIManager_klass, "get_DefaultResolution", 0);
 #ifdef _MSC_VER
-	ChangeResizeUIForPC_addr = il2cpp_symbols::get_method_pointer(ASSEMBLY_NAME, "Gallop", "UIManager", "ChangeResizeUIForPC", 2);
-	OnPushBandUIButton_addr = il2cpp_symbols::get_method_pointer(ASSEMBLY_NAME, "Gallop", "UIManager", "OnPushBandUIButton", 1);
-	RestorePrevSelectedBandMenu_addr = il2cpp_symbols::get_method_pointer(ASSEMBLY_NAME, "Gallop", "UIManager", "RestorePrevSelectedBandMenu", 0);
-	IsEnableSwitchBandMenu_addr = il2cpp_symbols::get_method_pointer(ASSEMBLY_NAME, "Gallop", "UIManager", "IsEnableSwitchBandMenu", 0);
+	ChangeResizeUIForPC_addr = il2cpp_symbols::get_method_pointer(UIManager_klass, "ChangeResizeUIForPC", 2);
+	OnPushBandUIButton_addr = il2cpp_symbols::get_method_pointer(UIManager_klass, "OnPushBandUIButton", 1);
+	RestorePrevSelectedBandMenu_addr = il2cpp_symbols::get_method_pointer(UIManager_klass, "RestorePrevSelectedBandMenu", 0);
+	IsEnableSwitchBandMenu_addr = il2cpp_symbols::get_method_pointer(UIManager_klass, "IsEnableSwitchBandMenu", 0);
 #endif
 }
 
 static void HookMethods()
 {
-#ifdef _MSC_VER
-	if (config::auto_fullscreen || config::unlock_size || config::freeform_window)
+	if (config::unlock_size || config::freeform_window)
 	{
+#ifdef _MSC_VER
 		ADD_HOOK(ChangeResizeUIForPC, "Gallop.UIManager::ChangeResizeUIForPC at %p\n");
-	}
 #endif
+	}
 
 	if (config::freeform_window || config::ui_loading_show_orientation_guide)
 	{
 		ADD_HOOK(WaitResizeUI, "Gallop.UIManager::WaitResizeUI at %p\n");
 	}
-
 
 	if (config::freeform_window)
 	{
@@ -345,7 +338,6 @@ static void HookMethods()
 		ADD_HOOK(OnPushBandUIButton, "Gallop.UIManager::OnPushBandUIButton at %p\n");
 		ADD_HOOK(RestorePrevSelectedBandMenu, "Gallop.UIManager::RestorePrevSelectedBandMenu at %p\n");
 		ADD_HOOK(IsEnableSwitchBandMenu, "Gallop.UIManager::IsEnableSwitchBandMenu at %p\n");
-		// ADD_HOOK(get_IsLandscapeMode, "Gallop.UIManager::get_IsLandscapeMode at %p\n");
 	}
 }
 
@@ -545,6 +537,11 @@ namespace Gallop
 		}
 	}
 
+	void UIManager::SetBgCameraRenderTexture(Il2CppObject* texture)
+	{
+		reinterpret_cast<void (*)(Il2CppObject*, Il2CppObject*)>(SetBgCameraRenderTexture_addr)(instance, texture);
+	}
+
 	void UIManager::CreateRenderTextureFromScreen()
 	{
 		reinterpret_cast<void (*)(Il2CppObject*)>(CreateRenderTextureFromScreen_addr)(instance);
@@ -553,6 +550,11 @@ namespace Gallop
 	void UIManager::ReleaseRenderTexture()
 	{
 		reinterpret_cast<void (*)(Il2CppObject*)>(ReleaseRenderTexture_addr)(instance);
+	}
+
+	bool UIManager::IsLockGameCanvas()
+	{
+		return reinterpret_cast<bool (*)(Il2CppObject*)>(IsLockGameCanvas_addr)(instance);
 	}
 
 	void UIManager::LockGameCanvas()

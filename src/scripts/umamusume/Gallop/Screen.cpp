@@ -1,7 +1,14 @@
 #include "../umamusume.hpp"
 #include "../../ScriptInternal.hpp"
 #include "Screen.hpp"
-#include "../../UnityEngine.CoreModule/UnityEngine/Screen.hpp"
+#include "scripts/UnityEngine.CoreModule/UnityEngine/Display.hpp"
+#include "scripts/UnityEngine.CoreModule/UnityEngine/Screen.hpp"
+
+#include "UIManager.hpp"
+
+#ifdef _MSC_VER
+#include "StandaloneWindowResize.hpp"
+#endif
 
 #include "config/config.hpp"
 
@@ -40,7 +47,6 @@ namespace
 	void* set_OriginalScreenHeight_orig = nullptr;
 
 	void* get_IsLandscapeMode_addr = nullptr;
-	void* get_IsLandscapeMode_orig = nullptr;
 
 	void* get_IsSplitWindow_addr = nullptr;
 
@@ -68,8 +74,84 @@ namespace
 	void* get_IsVertical_addr = nullptr;
 	void* get_IsVertical_orig = nullptr;
 
+	constexpr float ratio_16_9 = 1.7777f;
+	constexpr float ratio_9_16 = 0.5625f;
 	constexpr float ratio_4_3 = 1.3333f;
 	constexpr float ratio_3_4 = 0.75f;
+}
+
+static int get_Width_hook()
+{
+	if (!config::freeform_window)
+	{
+		int width;
+		int height;
+		
+		if (config::initial_width >= 72 && config::initial_height >= 72)
+		{
+			width = config::initial_width;
+			height = config::initial_height;
+		}
+		else
+		{
+			width = UnityEngine::Display::main().systemWidth();
+			height = width * ratio_9_16;
+		}
+
+		if (Gallop::UIManager::IsLandscapeMode())
+		{
+			if (Gallop::Screen::IsVertical())
+			{
+				return width * ratio_3_4;
+			}
+
+			return width;
+		}
+
+		int w = UnityEngine::Screen::width();
+		int h = UnityEngine::Screen::height();
+
+		return w > h ? width : height;
+	}
+
+	return UnityEngine::Screen::width();
+}
+
+static int get_Height_hook()
+{
+	if (!config::freeform_window)
+	{
+		int width;
+		int height;
+
+		if (config::initial_width >= 72 && config::initial_height >= 72)
+		{
+			width = config::initial_width;
+			height = config::initial_height;
+		}
+		else
+		{
+			width = UnityEngine::Display::main().systemWidth();
+			height = width * ratio_9_16;
+		}
+
+		if (Gallop::UIManager::IsLandscapeMode())
+		{
+			if (Gallop::Screen::IsVertical())
+			{
+				return width;
+			}
+
+			return height;
+		}
+
+		int w = UnityEngine::Screen::width();
+		int h = UnityEngine::Screen::height();
+
+		return w > h ? height : width;
+	}
+
+	return UnityEngine::Screen::height();
 }
 
 static Il2CppObject* WaitDeviceOrientation_hook(UnityEngine::ScreenOrientation target)
@@ -100,17 +182,25 @@ static void SetResolution2_hook(int w, int h, bool fullscreen, bool forceUpdate,
 
 static int get_OriginalScreenWidth_hook()
 {
-	/*auto widthField = il2cpp_class_get_field_from_name(ScreenClass, "_originalScreenWidth");
+	auto widthField = il2cpp_class_get_field_from_name(ScreenClass, "_originalScreenWidth");
 	int _originalScreenWidth;
 	il2cpp_field_static_get_value(widthField, &_originalScreenWidth);
-	return _originalScreenWidth;*/
+
+	auto heightField = il2cpp_class_get_field_from_name(ScreenClass, "_originalScreenHeight");
+	int _originalScreenHeight;
+	il2cpp_field_static_get_value(heightField, &_originalScreenHeight);
 
 	if (Gallop::Screen::IsSplitWindow())
 	{
-		return UnityEngine::Screen::height() * ratio_3_4;
+		return _originalScreenHeight * ratio_3_4;
 	}
 
-	return UnityEngine::Screen::width();
+	if (Gallop::Screen::IsVertical())
+	{
+		return _originalScreenHeight;
+	}
+
+	return _originalScreenWidth;
 }
 
 static void set_OriginalScreenWidth_hook(int value)
@@ -121,12 +211,20 @@ static void set_OriginalScreenWidth_hook(int value)
 
 static int get_OriginalScreenHeight_hook()
 {
-	/*auto heightField = il2cpp_class_get_field_from_name(ScreenClass, "_originalScreenHeight");
+	auto widthField = il2cpp_class_get_field_from_name(ScreenClass, "_originalScreenWidth");
+	int _originalScreenWidth;
+	il2cpp_field_static_get_value(widthField, &_originalScreenWidth);
+	
+	auto heightField = il2cpp_class_get_field_from_name(ScreenClass, "_originalScreenHeight");
 	int _originalScreenHeight;
 	il2cpp_field_static_get_value(heightField, &_originalScreenHeight);
-	return _originalScreenHeight;*/
 
-	return UnityEngine::Screen::height();
+	if (Gallop::Screen::IsVertical())
+	{
+		return _originalScreenWidth;
+	}
+
+	return _originalScreenHeight;
 }
 
 static void set_OriginalScreenHeight_hook(int value)
@@ -171,11 +269,6 @@ static Il2CppObject* ChangeScreenOrientationPortraitAsync_hook()
 	return reinterpret_cast<decltype(ChangeScreenOrientationPortraitAsync_hook)*>(ChangeScreenOrientationPortraitAsync_orig)();
 }
 
-static bool get_IsLandscapeMode_hook()
-{
-	return false;
-}
-
 static void InitAddress()
 {
 	ScreenClass = il2cpp_symbols::get_class(ASSEMBLY_NAME, "Gallop", "Screen");
@@ -206,11 +299,13 @@ static void HookMethods()
 	if (config::unlock_size || config::freeform_window)
 	{
 		// remove fixed 1080p render resolution
-		// ADD_HOOK(get_Width, "Gallop.Screen::get_Width at %p\n");
-		// ADD_HOOK(get_Height, "Gallop.Screen::get_Height at %p\n");
+		ADD_HOOK(get_Width, "Gallop.Screen::get_Width at %p\n");
+		ADD_HOOK(get_Height, "Gallop.Screen::get_Height at %p\n");
+		ADD_HOOK(get_OriginalScreenWidth, "Gallop.Screen::get_OriginalScreenWidth at %p\n");
+		ADD_HOOK(set_OriginalScreenWidth, "Gallop.Screen::set_OriginalScreenWidth at %p\n");
+		ADD_HOOK(get_OriginalScreenHeight, "Gallop.Screen::get_OriginalScreenHeight at %p\n");
+		ADD_HOOK(set_OriginalScreenHeight, "Gallop.Screen::set_OriginalScreenHeight at %p\n");
 	}
-
-	// ADD_HOOK(get_IsLandscapeMode, "Gallop.Screen::get_IsLandscapeMode at %p\n");
 
 	if (config::freeform_window)
 	{
@@ -218,10 +313,6 @@ static void HookMethods()
 		ADD_HOOK(IsCurrentOrientation, "Gallop.Screen::IsCurrentOrientation at %p\n");
 		ADD_HOOK(SetResolution, "Gallop.Screen::SetResolution at %p\n");
 		ADD_HOOK(SetResolution2, "Gallop.Screen::SetResolution2 at %p\n");
-		ADD_HOOK(get_OriginalScreenWidth, "Gallop.Screen::get_OriginalScreenWidth at %p\n");
-		ADD_HOOK(set_OriginalScreenWidth, "Gallop.Screen::set_OriginalScreenWidth at %p\n");
-		ADD_HOOK(get_OriginalScreenHeight, "Gallop.Screen::get_OriginalScreenHeight at %p\n");
-		ADD_HOOK(set_OriginalScreenHeight, "Gallop.Screen::set_OriginalScreenHeight at %p\n");
 		ADD_HOOK(ChangeScreenOrientation, "Gallop.Screen::ChangeScreenOrientation at %p\n");
 		ADD_HOOK(ChangeScreenOrientationLandscapeAsync, "Gallop.Screen::ChangeScreenOrientationLandscapeAsync at %p\n");
 		ADD_HOOK(ChangeScreenOrientationPortraitAsync, "Gallop.Screen::ChangeScreenOrientationPortraitAsync at %p\n");
