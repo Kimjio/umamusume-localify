@@ -92,6 +92,7 @@
 
 #include "scripts/UnityEngine.CoreModule/UnityEngine/Application.hpp"
 #include "scripts/UnityEngine.CoreModule/UnityEngine/CastHelper.hpp"
+#include "scripts/UnityEngine.CoreModule/UnityEngine/Display.hpp"
 #include "scripts/UnityEngine.CoreModule/UnityEngine/Object.hpp"
 #include "scripts/UnityEngine.CoreModule/UnityEngine/Shader.hpp"
 #include "scripts/UnityEngine.CoreModule/UnityEngine/Material.hpp"
@@ -101,6 +102,7 @@
 #include "scripts/UnityEngine.CoreModule/UnityEngine/Vector3.hpp"
 #include "scripts/UnityEngine.CoreModule/UnityEngine/Vector4.hpp"
 #include "scripts/UnityEngine.CoreModule/UnityEngine/Vector2Int.hpp"
+#include "scripts/UnityEngine.CoreModule/UnityEngine/Quaternion.hpp"
 #include "scripts/UnityEngine.CoreModule/UnityEngine/Rect.hpp"
 #include "scripts/UnityEngine.CoreModule/UnityEngine/Resolution.hpp"
 #include "scripts/UnityEngine.CoreModule/UnityEngine/ResourcesAPIInternal.hpp"
@@ -123,10 +125,12 @@
 #include "scripts/umamusume/Gallop/TitleViewController.hpp"
 #include "scripts/umamusume/Gallop/TextFontManager.hpp"
 #include "scripts/umamusume/Gallop/Screen.hpp"
+#include "scripts/umamusume/Gallop/StoryViewController.hpp"
 #include "scripts/umamusume/Gallop/GameSystem.hpp"
 #ifdef _MSC_VER
 #include "scripts/umamusume/Gallop/StandaloneWindowResize.hpp"
 #include "scripts/umamusume/Gallop/WindowsGamepadControl.hpp"
+#include "scripts/umamusume/Gallop/LandscapeUIManager.hpp"
 #endif
 
 #include "scripts/Plugins/CodeStage/AntiCheat/ObscuredTypes/ObscuredBool.hpp"
@@ -764,12 +768,6 @@ namespace
 		// Unity::OpenXR::Start();
 	}
 
-	Il2CppObject* (*display_get_main)();
-
-	int (*get_system_width)(Il2CppObject* _this);
-
-	int (*get_system_height)(Il2CppObject* _this);
-
 	void* KGInterfaceBrokerRequest_orig = nullptr;
 	LPCWSTR KGInterfaceBrokerRequest_hook(const wchar_t* request)
 	{
@@ -788,8 +786,8 @@ namespace
 			{
 				auto params = doc.GetArray()[2].GetObj();
 
-				auto display = display_get_main();
-				auto systemHeight = get_system_height(display);
+				auto display = UnityEngine::Display::main();
+				auto systemHeight = display.systemHeight();
 
 				auto width = params["width"].GetInt();
 				auto height = params["height"].GetInt();
@@ -1498,147 +1496,33 @@ namespace
 
 	bool useDefaultFPS = false;
 
-	int (*get_rendering_width)(Il2CppObject* _this);
-
-	int (*get_rendering_height)(Il2CppObject* _this);
-
 	constexpr float ratio_16_9 = 1.7777f;
 	constexpr float ratio_9_16 = 0.5625f;
 	constexpr float ratio_4_3 = 1.3333f;
 	constexpr float ratio_3_4 = 0.75f;
 
-	int last_display_width = 0, last_display_height = 0;
-	int last_virt_window_width = 0, last_virt_window_height = 0;
-	int last_hriz_window_width = 0, last_hriz_window_height = 0;
-
-	bool fullScreenFl = false;
-	bool fullScreenFlOverride = false;
-
-	void (*get_resolution)(UnityEngine::Resolution* buffer);
-
-	void (*set_resolution)(int width, int height, bool fullscreen);
-
-	void get_resolution_stub(UnityEngine::Resolution* r)
-	{
-		get_resolution(r);
-
-		int width = min(r->height, r->width) * config::aspect_ratio;
-		if (r->width > r->height)
-			r->width = width;
-		else
-			r->height = width;
-	}
-
-	void* gallop_get_screenheight_orig;
-	int gallop_get_screenheight_hook()
-	{
-		if (!config::freeform_window)
-		{
-			int w = max(last_display_width, last_display_height), h = min(last_display_width, last_display_height);
-
-			if (Gallop::Screen::IsSplitWindow())
-			{
-				return h;
-			}
-
-			return Gallop::StandaloneWindowResize::IsVirt() ? w : h;
-		}
-
-		return UnityEngine::Screen::height();
-	}
-
-	void* gallop_get_screenwidth_orig;
-	int gallop_get_screenwidth_hook()
-	{
-		if (!config::freeform_window)
-		{
-			int w = max(last_display_width, last_display_height), h = min(last_display_width, last_display_height);
-
-			if (Gallop::Screen::IsSplitWindow())
-			{
-				return h * ratio_3_4;
-			}
-
-			return Gallop::StandaloneWindowResize::IsVirt() ? h : w;
-		}
-
-		return UnityEngine::Screen::width();
-	}
-
-	void* GallopStandaloneInputModule_SetPointerPosition_orig = nullptr;
-	void GallopStandaloneInputModule_SetPointerPosition_hook(Il2CppObject* self)
-	{
-		reinterpret_cast<decltype(GallopStandaloneInputModule_SetPointerPosition_hook)*>(GallopStandaloneInputModule_SetPointerPosition_orig)(self);
-		auto pointerEventDataField = il2cpp_class_get_field_from_name(self->klass, "pointerEventData");
-		Il2CppObject* pointerEventData;
-		il2cpp_field_get_value(self, pointerEventDataField, &pointerEventData);
-		il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, UnityEngine::Vector2)>(pointerEventData->klass, "set_position", 1)->methodPointer(pointerEventData, (UnityEngine::Input::mousePosition() * (Gallop::Screen::Width() / static_cast<float>(UnityEngine::Screen::width()))));
-	}
-
-	void* GallopStandaloneInputModule_ProcessTouchEvents_orig = nullptr;
-	bool GallopStandaloneInputModule_ProcessTouchEvents_hook(Il2CppObject* self)
-	{
-		// cout << "GallopStandaloneInputModule_ProcessTouchEvents_hook" << endl;
-		auto isTouchReactField = il2cpp_class_get_field_from_name(self->klass, "isTouchReact");
-		bool isTouchReact = true;
-		il2cpp_field_static_set_value(isTouchReactField, &isTouchReact);
-
-		auto input = il2cpp_class_get_method_from_name_type<Il2CppObject * (*)(Il2CppObject*)>(self->klass, "get_input", 0)->methodPointer(self);
-		auto touchCount = il2cpp_class_get_method_from_name_type<int (*)(Il2CppObject*)>(input->klass, "get_touchCount", 0)->methodPointer(input);
-		for (int i = 0; i < touchCount; i++)
-		{
-			auto touch = il2cpp_class_get_method_from_name_type<Il2CppObject * (*)(Il2CppObject*, int)>(input->klass, "GetTouch", 1)->methodPointer(input, i);
-			auto position = il2cpp_class_get_method_from_name_type<UnityEngine::Vector2(*)(Il2CppObject*)>(touch->klass, "get_position", 0)->methodPointer(touch);
-			if (!isnan(position.x) && !isnan(position.y))
-			{
-				if (!Gallop::Screen::IsSplitWindow())
-				{
-					auto m_PositionField = il2cpp_class_get_field_from_name(touch->klass, "m_Position");
-					position = position * ((float)Gallop::Screen::Width() / (float)UnityEngine::Screen::width());
-
-					il2cpp_field_set_value(touch, m_PositionField, &position);
-				}
-				auto type = il2cpp_class_get_method_from_name_type<uint64_t(*)(Il2CppObject*)>(touch->klass, "get_type", 0)->methodPointer(touch);
-				if (type != 1 /* TouchType.Indirect */)
-				{
-					bool pressed;
-					bool released;
-					auto touchPointerEventData = il2cpp_class_get_method_from_name_type<Il2CppObject * (*)(Il2CppObject*, Il2CppObject*, bool*, bool*)>(self->klass, "GetTouchPointerEventData", 3)->methodPointer(self, touch, &pressed, &released);
-					il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, Il2CppObject*, bool, bool)>(self->klass, "ProcessTouchPress", 3)->methodPointer(self, touchPointerEventData, pressed, released);
-					if (!released)
-					{
-						il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, Il2CppObject*)>(self->klass, "ProcessMove", 1)->methodPointer(self, touchPointerEventData);
-						il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, Il2CppObject*)>(self->klass, "ProcessDrag", 1)->methodPointer(self, touchPointerEventData);
-					}
-					else
-					{
-						il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, Il2CppObject*)>(self->klass, "RemovePointerData", 1)->methodPointer(self, touchPointerEventData);
-					}
-				}
-			}
-		}
-		isTouchReact = false;
-		il2cpp_field_static_set_value(isTouchReactField, &isTouchReact);
-		touchCount = il2cpp_class_get_method_from_name_type<int (*)(Il2CppObject*)>(input->klass, "get_touchCount", 0)->methodPointer(input);
-		return touchCount > 0;
-	}
-
 	void (*set_scale_factor)(void*, float);
 
-	void* BGManager_CalcBgScale_orig = nullptr;
-	float BGManager_CalcBgScale_hook(Il2CppObject* _this, int width, int height, int renderTextureWidth, int renderTextureHeight)
+	void* BGManager_SetMainBg_orig = nullptr;
+	void BGManager_SetMainBg_hook(Il2CppObject* self, Il2CppString* path, int width, int height, float posX, float posY, bool isSetScale)
 	{
-		int width1 = UnityEngine::Screen::width();
-		int height1 = UnityEngine::Screen::height();
-		float ratio1 = (float)width1 / (float)height1;
+		float ratio = static_cast<float>(width) / static_cast<float>(height);
+		int width1 = Gallop::Screen::Width();
+		int height1 = Gallop::Screen::Height();
 
-		float bgCanvasScalerBaseScale = il2cpp_class_get_method_from_name_type<float (*)(Il2CppObject*, int, int)>(_this->klass, "GetBgCanvasScalerBaseScale", 2)->methodPointer(_this, renderTextureWidth, renderTextureHeight);
-		if (Gallop::StandaloneWindowResize::IsVirt())
-		{
-			return max((float)renderTextureHeight / (float)height, (float)height / (float)renderTextureHeight) * (config::freeform_window ? 2 : 1) / bgCanvasScalerBaseScale;
+		if (width < height)
+	{
+			height = height1;
+			width = static_cast<int>(height * ratio);
+			}
+					else
+					{
+			width = width1;
+			height = static_cast<int>(width / ratio);
+			}
+
+		reinterpret_cast<decltype(BGManager_SetMainBg_hook)*>(BGManager_SetMainBg_orig)(self, path, width, height, 0, 0, isSetScale);
 		}
-		return max((float)renderTextureWidth / (float)width, (float)width / (float)renderTextureWidth) * (config::freeform_window ? 2 : 1) / bgCanvasScalerBaseScale * ratio1;
-	}
 
 	void SetBGCanvasScalerSize()
 	{
@@ -1651,33 +1535,34 @@ namespace
 
 			if (_mainBg)
 			{
-				auto transform = il2cpp_class_get_method_from_name_type<Il2CppObject * (*)(Il2CppObject*)>(_mainBg->klass, "get_transform", 0)->methodPointer(_mainBg);
+				auto _currentBgWidthField = il2cpp_class_get_field_from_name(bgManager->klass, "_currentBgWidth");
+				int _currentBgWidth;
+				il2cpp_field_get_value(bgManager, _currentBgWidthField, &_currentBgWidth);
 
-				int width = UnityEngine::Screen::width();
-				int height = UnityEngine::Screen::height();
+				auto _currentBgHeightField = il2cpp_class_get_field_from_name(bgManager->klass, "_currentBgHeight");
+				int _currentBgHeight;
+				il2cpp_field_get_value(bgManager, _currentBgHeightField, &_currentBgHeight);
 
-				if (width > height)
-				{
-					auto pos = il2cpp_class_get_method_from_name_type<UnityEngine::Vector3(*)(Il2CppObject*)>(transform->klass, "get_localPosition", 0)->methodPointer(transform);
+				float ratio = static_cast<float>(_currentBgWidth) / static_cast<float>(_currentBgHeight);
 
-					if (pos.y == 0)
+				int width = Gallop::Screen::Width();
+				int height = Gallop::Screen::Height();
+
+				if (_currentBgWidth < _currentBgHeight)
 					{
-						il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, UnityEngine::Vector3)>(transform->klass, "set_localPosition", 1)->methodPointer(transform, UnityEngine::Vector3{ 0, 0, 0 });
-					}
-				}
+					_currentBgHeight = height;
+					_currentBgWidth = static_cast<int>(_currentBgHeight * ratio);
 			}
-
-			auto _bgCanvasScalerField = il2cpp_class_get_field_from_name(bgManager->klass, "_bgCanvasScaler");
-			Il2CppObject* _bgCanvasScaler;
-			il2cpp_field_get_value(bgManager, _bgCanvasScalerField, &_bgCanvasScaler);
-
-			if (_bgCanvasScaler)
+				else
 			{
-				il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, float)>(_bgCanvasScaler->klass, "set_scaleFactor", 1)->methodPointer(_bgCanvasScaler, 1);
+					_currentBgWidth = width;
+					_currentBgHeight = static_cast<int>(_currentBgWidth / ratio);
+				}
 
-				il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, int)>(_bgCanvasScaler->klass, "set_uiScaleMode", 1)->methodPointer(_bgCanvasScaler, 1);
+				il2cpp_field_set_value(bgManager, _currentBgWidthField, &_currentBgWidth);
+				il2cpp_field_set_value(bgManager, _currentBgHeightField, &_currentBgHeight);
 
-				il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, int)>(_bgCanvasScaler->klass, "set_screenMatchMode", 1)->methodPointer(_bgCanvasScaler, 0);
+				il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*)>(bgManager->klass, "RecalcBgSize", 0)->methodPointer(bgManager);
 			}
 		}
 	}
@@ -1728,17 +1613,6 @@ namespace
 				}
 			}
 		}
-	}
-
-	void* GetLimitSize_orig = nullptr;
-	UnityEngine::Vector2 GetLimitSize_hook()
-	{
-		auto orig = reinterpret_cast<decltype(GetLimitSize_hook)*>(GetLimitSize_orig)();
-		UnityEngine::Resolution r;
-		get_resolution(&r);
-		orig.x = r.width;
-		orig.y = r.height;
-		return orig;
 	}
 
 	bool altEnterPressed = false;
@@ -2074,15 +1948,15 @@ namespace
 			{
 				auto DisplayMode = il2cpp_class_get_method_from_name_type<uint64_t(*)(Il2CppObject*)>(storySceneController->klass, "get_DisplayMode", 0)->methodPointer(storySceneController);
 
-				auto storyViewController = il2cpp_symbols::get_method_pointer<Il2CppObject * (*)(Il2CppObject*)>("umamusume.dll", "Gallop", "StoryManager", "get_ViewController", 0)(storyManager);
+				Gallop::StoryViewController storyViewController = il2cpp_symbols::get_method_pointer<Il2CppObject * (*)(Il2CppObject*)>("umamusume.dll", "Gallop", "StoryManager", "get_ViewController", 0)(storyManager);
 
-				auto IsSingleModeOrGallery = il2cpp_class_get_method_from_name_type<bool (*)(Il2CppObject*)>(storyViewController->klass, "get_IsSingleModeOrGallery", 0)->methodPointer(storyViewController);
+				auto IsSingleModeOrGallery = storyViewController.IsSingleModeOrGallery();
 
 				auto scene = il2cpp_class_get_method_from_name_type<Il2CppObject * (*)(Il2CppObject*)>(storySceneController->klass, "GetSceneBase", 0)->methodPointer(storySceneController);
 
 				if (!IsSingleModeOrGallery)
 				{
-					il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, uint64_t)>(storyViewController->klass, "SetDisplayMode", 1)->methodPointer(storyViewController, DisplayMode);
+					storyViewController.SetDisplayMode(DisplayMode);
 				}
 				else
 				{
@@ -2145,7 +2019,7 @@ namespace
 					il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*)>(FullScreenImageRenderer->klass, "ForceRender", 0)->methodPointer(FullScreenImageRenderer);
 				}
 
-				il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*)>(storyViewController->klass, "SetupUIOnChangeOrientation", 0)->methodPointer(storyViewController);
+				storyViewController.SetupUIOnChangeOrientation();
 			}
 		}
 	}
@@ -2263,7 +2137,6 @@ namespace
 											auto newSize = il2cpp_symbols::get_method_pointer<UnityEngine::Vector2(*)()>("umamusume.dll", "Gallop", "MovieScreenSizeHelper", "GetMovieTargetCanvasSize", IgnoreNumberOfArguments)();
 
 											auto criPlayer = il2cpp_class_get_method_from_name_type<Il2CppObject * (*)(Il2CppObject*)>(player->klass, "get_Player", 0)->methodPointer(player);
-
 											if (criPlayer)
 											{
 												auto status = il2cpp_class_get_method_from_name_type<int (*)(Il2CppObject*)>(criPlayer->klass, "get_status", 0)->methodPointer(criPlayer);
@@ -2390,11 +2263,6 @@ namespace
 			{
 				WaitForEndOfFrame(*[]()
 					{
-						auto StandaloneWindowResize = il2cpp_symbols::get_class("umamusume.dll", "Gallop", "StandaloneWindowResize");
-
-						auto lastWidthField = il2cpp_class_get_field_from_name(StandaloneWindowResize, "windowLastWidth");
-						auto lastHeightField = il2cpp_class_get_field_from_name(StandaloneWindowResize, "windowLastHeight");
-
 						RECT windowRect;
 						GetWindowRect(hWnd, &windowRect);
 						int windowWidth = windowRect.right - windowRect.left;
@@ -2411,70 +2279,31 @@ namespace
 
 						auto ratio = static_cast<float>(contentWidth) / static_cast<float>(contentHeight);
 
-						if (contentWidth < contentHeight)
-						{
-							last_display_width = contentWidth;
-							last_display_height = contentHeight;
-
-							last_virt_window_width = contentWidth;
-							last_virt_window_height = contentHeight;
-						}
-						else
-						{
-							last_display_width = contentWidth;
-							last_display_height = contentHeight;
-
-							last_hriz_window_width = contentWidth;
-							last_hriz_window_height = contentHeight;
-						}
-
 						auto lastWidth = updateWidth;
 						auto lastHeight = updateHeight;
 
-						il2cpp_field_static_set_value(lastWidthField, &lastWidth);
-						il2cpp_field_static_set_value(lastHeightField, &lastHeight);
+						Gallop::StandaloneWindowResize::windowLastWidth(lastWidth);
+						Gallop::StandaloneWindowResize::windowLastHeight(lastHeight);
 
-						il2cpp_class_get_method_from_name_type<void (*)(float, float)>(StandaloneWindowResize, "SaveChangedWidth", 2)->methodPointer(lastWidth, lastHeight);
+						Gallop::StandaloneWindowResize::SaveChangedWidth(lastWidth, lastHeight);
 
-						auto _aspectRatioField = il2cpp_class_get_field_from_name(StandaloneWindowResize, "_aspectRatio");
 						float _aspectRatio = contentWidth / contentHeight;
-						il2cpp_field_static_set_value(_aspectRatioField, &_aspectRatio);
+						Gallop::StandaloneWindowResize::AspectRatio(_aspectRatio);
 
-						il2cpp_class_get_method_from_name_type<void (*)(bool)>(StandaloneWindowResize, "set_IsPreventReShape", 1)->methodPointer(true);
-						il2cpp_class_get_method_from_name_type<void (*)()>(StandaloneWindowResize, "DisableWindowHitTest", IgnoreNumberOfArguments)->methodPointer();
+						Gallop::StandaloneWindowResize::IsPreventReShape(true);
+						Gallop::StandaloneWindowResize::DisableWindowHitTest();
 
 						bool isPortrait = contentWidth < contentHeight;
 
 						Gallop::StandaloneWindowResize::IsVirt(isPortrait);
 
-						auto GallopScreen = il2cpp_symbols::get_class("umamusume.dll", "Gallop", "Screen");
-
-						auto NUMBER1920_Field = il2cpp_class_get_field_from_name(GallopScreen, "NUMBER1920");
-
-						auto NUMBER1080_Field = il2cpp_class_get_field_from_name(GallopScreen, "NUMBER1080");
-
-						auto _originalScreenWidth_Field = il2cpp_class_get_field_from_name(GallopScreen, "_originalScreenWidth");
-
-						auto _originalScreenHeight_Field = il2cpp_class_get_field_from_name(GallopScreen, "_originalScreenHeight");
-
-
 						int unityWidth = UnityEngine::Screen::width();
 						int unityHeight = UnityEngine::Screen::height();
 
-						if (unityWidth < unityHeight)
-						{
-							il2cpp_field_static_set_value(NUMBER1080_Field, &contentWidth);
-							il2cpp_field_static_set_value(NUMBER1920_Field, &contentHeight);
-							il2cpp_field_static_set_value(_originalScreenHeight_Field, &contentWidth);
-							il2cpp_field_static_set_value(_originalScreenWidth_Field, &contentHeight);
-						}
-						else
-						{
-							il2cpp_field_static_set_value(NUMBER1920_Field, &contentWidth);
-							il2cpp_field_static_set_value(NUMBER1080_Field, &contentHeight);
-							il2cpp_field_static_set_value(_originalScreenWidth_Field, &contentWidth);
-							il2cpp_field_static_set_value(_originalScreenHeight_Field, &contentHeight);
-						}
+						bool isUnityPortrait = unityWidth < unityHeight;
+
+						Gallop::Screen::OriginalScreenWidth(isUnityPortrait ? contentHeight : contentWidth);
+						Gallop::Screen::OriginalScreenHeight(isUnityPortrait ? contentWidth : contentHeight);
 
 						auto tapEffectController = GetSingletonInstance(il2cpp_symbols::get_class("umamusume.dll", "Gallop", "TapEffectController"));
 
@@ -2685,21 +2514,9 @@ namespace
 
 						WaitForEndOfFrame(*[]()
 							{
-								auto StandaloneWindowResize = il2cpp_symbols::get_class("umamusume.dll", "Gallop", "StandaloneWindowResize");
-
 								auto tapEffectController = GetSingletonInstance(il2cpp_symbols::get_class("umamusume.dll", "Gallop", "TapEffectController"));
 
 								bool isPortrait = _contentWidth < _contentHeight;
-
-								auto GallopScreen = il2cpp_symbols::get_class("umamusume.dll", "Gallop", "Screen");
-
-								auto NUMBER1920_Field = il2cpp_class_get_field_from_name(GallopScreen, "NUMBER1920");
-
-								auto NUMBER1080_Field = il2cpp_class_get_field_from_name(GallopScreen, "NUMBER1080");
-
-								auto _originalScreenWidth_Field = il2cpp_class_get_field_from_name(GallopScreen, "_originalScreenWidth");
-
-								auto _originalScreenHeight_Field = il2cpp_class_get_field_from_name(GallopScreen, "_originalScreenHeight");
 
 								auto uiManager = Gallop::UIManager::Instance();
 
@@ -2829,24 +2646,11 @@ namespace
 									}*/
 								}
 
-								if (isPortrait)
-								{
-									il2cpp_field_static_set_value(NUMBER1080_Field, &_contentWidth);
-									il2cpp_field_static_set_value(NUMBER1920_Field, &_contentHeight);
-									il2cpp_field_static_set_value(_originalScreenHeight_Field, &_contentWidth);
-									il2cpp_field_static_set_value(_originalScreenWidth_Field, &_contentHeight);
-								}
-								else
-								{
-									il2cpp_field_static_set_value(NUMBER1920_Field, &_contentWidth);
-									il2cpp_field_static_set_value(NUMBER1080_Field, &_contentHeight);
-									il2cpp_field_static_set_value(_originalScreenWidth_Field, &_contentWidth);
-									il2cpp_field_static_set_value(_originalScreenHeight_Field, &_contentHeight);
-								}
+								Gallop::Screen::OriginalScreenWidth(isPortrait ? _contentHeight : _contentWidth);
+								Gallop::Screen::OriginalScreenHeight(isPortrait ? _contentWidth : _contentHeight);
 
-								il2cpp_class_get_method_from_name_type<void (*)()>(StandaloneWindowResize, "EnableWindowHitTest", IgnoreNumberOfArguments)->methodPointer();
-								// il2cpp_class_get_method_from_name_type<void (*)(bool)>(StandaloneWindowResize, "set_IsPreventReShape", 1)->methodPointer(false);
-
+								Gallop::StandaloneWindowResize::EnableWindowHitTest();
+								Gallop::StandaloneWindowResize::IsPreventReShape(false);
 							});
 					});
 			});
@@ -2923,193 +2727,14 @@ namespace
 			style |= WS_MAXIMIZEBOX;
 			SetWindowLongPtrW(hWnd, GWL_STYLE, style);
 
-			auto StandaloneWindowResize = il2cpp_symbols::get_class("umamusume.dll", "Gallop", "StandaloneWindowResize");
-			il2cpp_class_get_method_from_name_type<void (*)(bool)>(StandaloneWindowResize, "set_IsPreventReShape", 1)->methodPointer(true);
+			Gallop::StandaloneWindowResize::IsPreventReShape(true);
 
 			isRequestChangeResolution = true;
 			return;
 		}
 
-		UnityEngine::Resolution r;
-		get_resolution(&r);
-
-		bool reqVirt = width < height;
-
-		bool unlockSize = config::unlock_size || config::freeform_window;
-
-		if (Gallop::StandaloneWindowResize::IsVirt() && fullScreenFl)
-		{
-			fullScreenFl = false;
-			fullScreenFlOverride = false;
-			if (unlockSize)
-			{
-				reinterpret_cast<decltype(SetResolution_Injected_hook)*>(SetResolution_Injected_orig)(last_virt_window_width, last_virt_window_height, 3, perferredRefreshRate);
+		reinterpret_cast<decltype(SetResolution_Injected_hook)*>(SetResolution_Injected_orig)(width, height, fullscreenMode, perferredRefreshRate);
 			}
-			else
-			{
-				r.height *= 0.825f;
-				r.width = r.height * config::runtime::ratioVertical;
-				reinterpret_cast<decltype(SetResolution_Injected_hook)*>(SetResolution_Injected_orig)(r.width, r.height, 3, perferredRefreshRate);
-			}
-			return;
-		}
-
-		auto display = display_get_main();
-
-		if (reqVirt && (get_rendering_width(display) > get_rendering_height(display)))
-		{
-			fullScreenFl = false;
-			fullScreenFlOverride = false;
-			if (unlockSize)
-			{
-				reinterpret_cast<decltype(SetResolution_Injected_hook)*>(SetResolution_Injected_orig)(last_virt_window_width, last_virt_window_height, 3, perferredRefreshRate);
-			}
-			else
-			{
-				r.height *= 0.825f;
-				r.width = r.height * config::runtime::ratioVertical;
-				reinterpret_cast<decltype(SetResolution_Injected_hook)*>(SetResolution_Injected_orig)(r.width, r.height, 3, perferredRefreshRate);
-			}
-			return;
-		}
-
-		bool need_fullscreen = false;
-
-		if (config::auto_fullscreen)
-		{
-			auto ratio = static_cast<float>(r.width) / static_cast<float>(r.height);
-			ratio *= 1000;
-			ratio = roundf(ratio) / 1000;
-
-			if (Gallop::StandaloneWindowResize::IsVirt() && ratio == ratio_9_16)
-			{
-				need_fullscreen = true;
-			}
-			else if (!Gallop::StandaloneWindowResize::IsVirt() && ratio == ratio_16_9)
-			{
-				need_fullscreen = true;
-			}
-		}
-
-		if (!fullScreenFl && unlockSize)
-		{
-			if (!(get_rendering_width(display) > get_rendering_height(display)))
-			{
-				last_virt_window_width = get_rendering_width(display);
-				last_virt_window_height = get_rendering_height(display);
-				if (need_fullscreen && (!last_hriz_window_width || !last_hriz_window_height))
-				{
-					last_hriz_window_width = r.width - 400;
-					last_hriz_window_height = last_hriz_window_width * config::runtime::ratioHorizontal;
-				}
-			}
-			else
-			{
-				last_hriz_window_width = get_rendering_width(display);
-				last_hriz_window_height = get_rendering_height(display);
-			}
-		}
-
-		if (!fullScreenFlOverride)
-		{
-			fullScreenFl = need_fullscreen;
-		}
-
-		if (!reqVirt && !fullScreenFl && last_hriz_window_width && last_hriz_window_height && unlockSize)
-		{
-			width = last_hriz_window_width;
-			height = last_hriz_window_height;
-		}
-
-		if (unlockSize)
-		{
-			auto ratio = static_cast<float>(width) / static_cast<float>(height);
-			ratio *= 1000;
-			ratio = roundf(ratio) / 1000;
-
-			auto round_ratio_vertical = config::runtime::ratioVertical * 1000;
-			round_ratio_vertical = roundf(round_ratio_vertical) / 1000;
-
-			auto round_ratio_horizontal = config::runtime::ratioHorizontal * 1000;
-			round_ratio_horizontal = roundf(round_ratio_horizontal) / 1000;
-
-			if (reqVirt && ratio != round_ratio_vertical)
-			{
-				auto StandaloneWindowResize = il2cpp_symbols::get_class("umamusume.dll", "Gallop", "StandaloneWindowResize");
-				il2cpp_class_get_method_from_name_type<void (*)(bool)>(StandaloneWindowResize, "set_IsPreventReShape", 1)->methodPointer(true);
-
-				if (last_virt_window_width > last_virt_window_height)
-				{
-					auto display = display_get_main();
-					if (config::initial_width < config::initial_height)
-					{
-						last_virt_window_height = get_system_width(display) - 400;
-						last_virt_window_width = last_virt_window_height * config::runtime::ratioVertical;
-
-						if (last_virt_window_height >= get_system_height(display))
-						{
-							last_virt_window_height = get_system_height(display) - 400;
-							last_virt_window_width = last_virt_window_height * config::runtime::ratioVertical;
-						}
-					}
-					else
-					{
-						last_virt_window_height = get_system_height(display) - 400;
-						last_virt_window_width = last_virt_window_height * config::runtime::ratioVertical;
-
-						if (last_virt_window_height >= get_system_height(display))
-						{
-							last_virt_window_height = get_system_height(display) - 400;
-							last_virt_window_width = last_virt_window_height * config::runtime::ratioVertical;
-						}
-					}
-				}
-
-				reinterpret_cast<decltype(SetResolution_Injected_hook)*>(SetResolution_Injected_orig)(last_virt_window_width, last_virt_window_height, 3, perferredRefreshRate);
-				return;
-
-			}
-
-			if (!reqVirt && ratio != round_ratio_horizontal)
-			{
-				auto StandaloneWindowResize = il2cpp_symbols::get_class("umamusume.dll", "Gallop", "StandaloneWindowResize");
-				il2cpp_class_get_method_from_name_type<void (*)(bool)>(StandaloneWindowResize, "set_IsPreventReShape", 1)->methodPointer(true);
-
-				if (last_hriz_window_width < last_hriz_window_height)
-				{
-					auto display = display_get_main();
-					if (config::initial_width < config::initial_height)
-					{
-						last_hriz_window_width = get_system_height(display) - 400;
-						last_hriz_window_height = last_hriz_window_width / config::runtime::ratioHorizontal;
-
-						if (last_hriz_window_height >= get_system_height(display))
-						{
-							last_hriz_window_height = get_system_height(display) - 400;
-							last_hriz_window_width = last_hriz_window_height * config::runtime::ratioHorizontal;
-						}
-					}
-					else
-					{
-						last_hriz_window_width = get_system_width(display) - 400;
-						last_hriz_window_height = last_hriz_window_width / config::runtime::ratioHorizontal;
-
-						if (last_hriz_window_height >= get_system_height(display))
-						{
-							last_hriz_window_height = get_system_height(display) - 400;
-							last_hriz_window_width = last_hriz_window_height * config::runtime::ratioHorizontal;
-						}
-					}
-				}
-
-				reinterpret_cast<decltype(SetResolution_Injected_hook)*>(SetResolution_Injected_orig)(last_hriz_window_width, last_hriz_window_height, 3, perferredRefreshRate);
-				return;
-			}
-		}
-
-		reinterpret_cast<decltype(SetResolution_Injected_hook)*>(SetResolution_Injected_orig)(
-			fullScreenFl ? r.width : width, fullScreenFl ? r.height : height, fullScreenFl ? 1 : 3, perferredRefreshRate);
-	}
 
 	static bool isExitOpened = false;
 
@@ -5055,8 +4680,6 @@ namespace
 		}
 	}
 
-	bool isPortraitBeforeFullscreen = false;
-
 	WNDPROC oldWndProcPtr = nullptr;
 
 	LRESULT WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
@@ -5223,88 +4846,29 @@ namespace
 			bool altDown = (lParam & (static_cast<long long>(1) << 29)) != 0;
 			if (config::freeform_window)
 			{
-				if ((config::auto_fullscreen || config::unlock_size || config::freeform_window) &&
-					wParam == VK_RETURN &&
-					altDown &&
-					!altEnterPressed)
+				if (wParam == VK_RETURN && altDown && !altEnterPressed)
 				{
 					altEnterPressed = true;
 
-					UnityEngine::Resolution r;
-					get_resolution(&r);
+					UnityEngine::Resolution r = UnityEngine::Screen::currentResolution();
 
-					auto display = display_get_main();
+					auto display = UnityEngine::Display::main();
 
-					auto rendering_ratio = static_cast<float>(get_rendering_width(display)) / static_cast<float>(get_rendering_height(display));
+					auto rendering_ratio = static_cast<float>(display.renderingWidth()) / static_cast<float>(display.renderingHeight());
 					rendering_ratio *= 1000;
 					rendering_ratio = roundf(rendering_ratio) / 1000;
 
-					auto system_ratio = static_cast<float>(get_system_width(display)) / static_cast<float>(get_system_height(display));
+					auto system_ratio = static_cast<float>(display.systemWidth()) / static_cast<float>(display.systemHeight());
 					system_ratio *= 1000;
 					system_ratio = roundf(system_ratio) / 1000;
+					static bool fullScreenFl = false;
 
-					if ((!Gallop::StandaloneWindowResize::IsVirt() && rendering_ratio == system_ratio) ||
-						config::freeform_window)
-					{
-						if (!fullScreenFlOverride)
-						{
-							fullScreenFlOverride = true;
-						}
 						fullScreenFl = !fullScreenFl;
-						if (config::unlock_size || config::freeform_window)
-						{
-							if (!fullScreenFl)
-							{
-								if (isPortraitBeforeFullscreen)
-								{
-									r.width = last_virt_window_width;
-									r.height = last_virt_window_height;
-									if (r.width > r.height)
-									{
-										r.width = last_virt_window_height;
-										r.height = last_virt_window_width;
-									}
-								}
-								else
-								{
-									r.width = last_hriz_window_height;
-									r.height = last_hriz_window_width;
-									if (r.width < r.height)
-									{
-										r.width = last_hriz_window_width;
-										r.height = last_hriz_window_height;
-									}
-								}
-							}
-							else
-							{
-								RECT windowRect;
-								GetClientRect(hWnd, &windowRect);
-								if (get_rendering_width(display) > get_rendering_height(display))
-								{
-									isPortraitBeforeFullscreen = false;
-									last_hriz_window_width = windowRect.right - windowRect.left;
-									last_hriz_window_height = windowRect.bottom - windowRect.top;
-								}
-								else
-								{
-									isPortraitBeforeFullscreen = true;
-									last_virt_window_width = windowRect.right - windowRect.left;
-									last_virt_window_height = windowRect.bottom - windowRect.top;
-								}
-							}
-						}
-						else if (!fullScreenFl)
-						{
-							r.width *= 0.825f;
-							r.height = r.width / config::runtime::ratioHorizontal;
-						}
 
 						auto refreshRate = RefreshRate{ 0, 1 };
 						reinterpret_cast<decltype(SetResolution_Injected_hook)*>(SetResolution_Injected_orig)(r.width, r.height, fullScreenFl ? 1 : 3, &refreshRate);
-					}
-					return TRUE;
 
+					return TRUE;
 				}
 			}
 
@@ -5349,13 +4913,13 @@ namespace
 		{
 			if (wParam == SC_MAXIMIZE)
 			{
-				il2cpp_symbols::get_method_pointer<void (*)()>("umamusume.dll", "Gallop", "StandaloneWindowResize", "DisableMaximizebox", IgnoreNumberOfArguments)();
+				Gallop::StandaloneWindowResize::DisableMaximizebox();
 				return TRUE;
 			}
 		}
 
 
-		if (config::auto_fullscreen || config::unlock_size || config::freeform_window)
+		if (config::unlock_size || config::freeform_window)
 		{
 			if (uMsg == WM_SYSKEYUP)
 			{
@@ -5369,8 +4933,7 @@ namespace
 
 		if (uMsg == WM_NCHITTEST)
 		{
-			auto StandaloneWindowResize = il2cpp_symbols::get_class("umamusume.dll", "Gallop", "StandaloneWindowResize");
-			if (!il2cpp_class_get_method_from_name_type<bool (*)()>(StandaloneWindowResize, "get_IsEnableWindowHitTest", IgnoreNumberOfArguments)->methodPointer())
+			if (!Gallop::StandaloneWindowResize::IsEnableWindowHitTest())
 			{
 				return FALSE;
 			}
@@ -5378,24 +4941,16 @@ namespace
 
 		if (uMsg == WM_ENTERSIZEMOVE)
 		{
-			auto StandaloneWindowResize = il2cpp_symbols::get_class("umamusume.dll", "Gallop", "StandaloneWindowResize");
-			auto _isWindowSizeChangingField = il2cpp_class_get_field_from_name(StandaloneWindowResize->klass, "_isWindowSizeChanging");
-			bool _isWindowSizeChanging = true;
-			il2cpp_field_static_set_value(_isWindowSizeChangingField, &_isWindowSizeChanging);
+			Gallop::StandaloneWindowResize::_isWindowSizeChanging(true);
 		}
 
 		if (uMsg == WM_MOVING)
 		{
-			auto StandaloneWindowResize = il2cpp_symbols::get_class("umamusume.dll", "Gallop", "StandaloneWindowResize");
-			auto _isWindowDraggingField = il2cpp_class_get_field_from_name(StandaloneWindowResize->klass, "_isWindowDragging");
-			bool _isWindowDragging = true;
-			il2cpp_field_static_set_value(_isWindowDraggingField, &_isWindowDragging);
+			Gallop::StandaloneWindowResize::_isWindowDragging(true);
 		}
 
 		if (uMsg == WM_SIZE)
 		{
-			auto StandaloneWindowResize = il2cpp_symbols::get_class("umamusume.dll", "Gallop", "StandaloneWindowResize");
-
 			switch (wParam)
 			{
 			case SIZE_RESTORED:
@@ -5403,15 +4958,13 @@ namespace
 				auto uiManager = Gallop::UIManager::Instance();
 				if (uiManager)
 				{
-					uiManager.StartCoroutineManaged2(il2cpp_class_get_method_from_name_type<Il2CppObject * (*)()>(StandaloneWindowResize->klass, "ClearStopFlagAfterWhile", 0)->methodPointer());
+					uiManager.StartCoroutineManaged2(Gallop::StandaloneWindowResize::ClearStopFlagAfterWhile());
 				}
 				break;
 			}
 			case SIZE_MINIMIZED:
 			{
-				auto _isWindowDraggingField = il2cpp_class_get_field_from_name(StandaloneWindowResize->klass, "_isWindowDragging");
-				bool _isWindowDragging = true;
-				il2cpp_field_static_set_value(_isWindowDraggingField, &_isWindowDragging);
+				Gallop::StandaloneWindowResize::_isWindowDragging(true);
 				break;
 			}
 			}
@@ -5419,19 +4972,15 @@ namespace
 
 		if (uMsg == WM_EXITSIZEMOVE)
 		{
-			auto StandaloneWindowResize = il2cpp_symbols::get_class("umamusume.dll", "Gallop", "StandaloneWindowResize");
-			auto _isWindowDraggingField = il2cpp_class_get_field_from_name(StandaloneWindowResize->klass, "_isWindowDragging");
-			auto _isWindowSizeChangingField = il2cpp_class_get_field_from_name(StandaloneWindowResize->klass, "_isWindowSizeChanging");
-			bool _isWindowSizeChanging = false;
-			il2cpp_field_static_set_value(_isWindowDraggingField, &_isWindowSizeChanging);
-			il2cpp_field_static_set_value(_isWindowSizeChangingField, &_isWindowSizeChanging);
+			Gallop::StandaloneWindowResize::_isWindowDragging(false);
+			Gallop::StandaloneWindowResize::_isWindowSizeChanging(false);
 
 			if (config::freeform_window)
 			{
 				RECT windowRect;
 				GetWindowRect(hWnd, &windowRect);
-				int windowWidth = windowRect.right - windowRect.left,
-					windowHeight = windowRect.bottom - windowRect.top;
+				int windowWidth = windowRect.right - windowRect.left;
+				int windowHeight = windowRect.bottom - windowRect.top;
 				ResizeWindow(hWnd, windowWidth, windowHeight);
 			}
 
@@ -5457,27 +5006,21 @@ namespace
 					}))->delegate;
 
 				il2cpp_symbols::get_method_pointer<Il2CppObject* (*)(float, Il2CppDelegate*, bool)>("DOTween.dll", "DG.Tweening", "DOVirtual", "DelayedCall", 3)(0.01, callback, true);
-				});
+		}
+			);
 		}
 
 		if (uMsg == WM_SIZE && config::freeform_window)
 		{
-			auto StandaloneWindowResize = il2cpp_symbols::get_class("umamusume.dll", "Gallop", "StandaloneWindowResize");
-
-			auto lastWidthField = il2cpp_class_get_field_from_name(StandaloneWindowResize, "windowLastWidth");
-			auto lastHeightField = il2cpp_class_get_field_from_name(StandaloneWindowResize, "windowLastHeight");
-
-			int lastWidth, lastHeight;
-
-			il2cpp_field_static_get_value(lastWidthField, &lastWidth);
-			il2cpp_field_static_get_value(lastHeightField, &lastHeight);
+			int lastWidth = Gallop::StandaloneWindowResize::windowLastWidth();
+			int lastHeight = Gallop::StandaloneWindowResize::windowLastHeight();
 
 			if (lastWidth != LOWORD(lParam) || lastHeight != HIWORD(lParam))
 			{
 				RECT windowRect;
 				GetWindowRect(hWnd, &windowRect);
-				int windowWidth = windowRect.right - windowRect.left,
-					windowHeight = windowRect.bottom - windowRect.top;
+				int windowWidth = windowRect.right - windowRect.left;
+				int windowHeight = windowRect.bottom - windowRect.top;
 				ResizeWindow(hWnd, windowWidth, windowHeight);
 				ResizeWebView();
 
@@ -5492,14 +5035,8 @@ namespace
 
 		if (uMsg == WM_SIZING && config::freeform_window)
 		{
-			auto StandaloneWindowResize = il2cpp_symbols::get_class("umamusume.dll", "Gallop", "StandaloneWindowResize");
-			auto lastWidthField = il2cpp_class_get_field_from_name(StandaloneWindowResize, "windowLastWidth");
-			auto lastHeightField = il2cpp_class_get_field_from_name(StandaloneWindowResize, "windowLastHeight");
-
-			int lastWidth, lastHeight;
-
-			il2cpp_field_static_get_value(lastWidthField, &lastWidth);
-			il2cpp_field_static_get_value(lastHeightField, &lastHeight);
+			int lastWidth = Gallop::StandaloneWindowResize::windowLastWidth();
+			int lastHeight = Gallop::StandaloneWindowResize::windowLastHeight();
 
 			RECT* rect = reinterpret_cast<RECT*>(lParam);
 
@@ -5507,8 +5044,8 @@ namespace
 			{
 				RECT windowRect;
 				GetWindowRect(hWnd, &windowRect);
-				int windowWidth = windowRect.right - windowRect.left,
-					windowHeight = windowRect.bottom - windowRect.top;
+				int windowWidth = windowRect.right - windowRect.left;
+				int windowHeight = windowRect.bottom - windowRect.top;
 
 				RECT clientRect;
 				GetClientRect(hWnd, &clientRect);
@@ -5543,17 +5080,16 @@ namespace
 				lastWidth = rect->right - rect->left;
 				lastHeight = rect->bottom - rect->top;
 
-				il2cpp_field_static_set_value(lastWidthField, &lastWidth);
-				il2cpp_field_static_set_value(lastHeightField, &lastHeight);
+				Gallop::StandaloneWindowResize::windowLastWidth(lastWidth);
+				Gallop::StandaloneWindowResize::windowLastHeight(lastHeight);
 
 				int width = UnityEngine::Screen::width();
 				int height = UnityEngine::Screen::height();
 
-				il2cpp_class_get_method_from_name_type<void (*)(float, float)>(StandaloneWindowResize, "SaveChangedWidth", 2)->methodPointer(width, height);
+				Gallop::StandaloneWindowResize::SaveChangedWidth(width, height);
 
-				auto _aspectRatioField = il2cpp_class_get_field_from_name(StandaloneWindowResize, "_aspectRatio");
 				float _aspectRatio = contentWidth / contentHeight;
-				il2cpp_field_static_set_value(_aspectRatioField, &_aspectRatio);
+				Gallop::StandaloneWindowResize::AspectRatio(_aspectRatio);
 
 				auto uiManager = Gallop::UIManager::Instance();
 				uiManager.ChangeResolution();
@@ -5575,38 +5111,37 @@ namespace
 
 			float ratio = (Gallop::StandaloneWindowResize::IsVirt() && !isLandscape) ? config::runtime::ratioVertical : config::runtime::ratioHorizontal;
 
-			auto StandaloneWindowResize = il2cpp_symbols::get_class("umamusume.dll", "Gallop", "StandaloneWindowResize");
-
-			if (Gallop::StandaloneWindowResize::IsVirt() && ratio != (9.0 / 16.0))
+			/*if (Gallop::StandaloneWindowResize::IsVirt() && ratio != (9.0 / 16.0))
 			{
-				il2cpp_class_get_method_from_name_type<void (*)(bool)>(StandaloneWindowResize, "set_IsPreventReShape", 1)->methodPointer(true);
+				Gallop::StandaloneWindowResize::IsPreventReShape(true);
 			}
 
 			if (!Gallop::StandaloneWindowResize::IsVirt() && ratio != (16.0 / 9.0))
 			{
-				il2cpp_class_get_method_from_name_type<void (*)(bool)>(StandaloneWindowResize, "set_IsPreventReShape", 1)->methodPointer(true);
-			}
+				Gallop::StandaloneWindowResize::IsPreventReShape(true);
+			}*/
 
 			RECT windowRect;
 			GetWindowRect(hWnd, &windowRect);
-			int windowWidth = windowRect.right - windowRect.left,
-				windowHeight = windowRect.bottom - windowRect.top;
+			int windowWidth = windowRect.right - windowRect.left;
+			int windowHeight = windowRect.bottom - windowRect.top;
 
 			RECT clientRect;
 			GetClientRect(hWnd, &clientRect);
-			int clientWidth = (clientRect.right - clientRect.left),
-				clientHeight = (clientRect.bottom - clientRect.top);
-			auto lastWidthField = il2cpp_class_get_field_from_name(StandaloneWindowResize, "windowLastWidth");
-			auto lastHeightField = il2cpp_class_get_field_from_name(StandaloneWindowResize, "windowLastHeight");
+			int clientWidth = (clientRect.right - clientRect.left);
+			int clientHeight = (clientRect.bottom - clientRect.top);
 
 			auto tapEffectController = GetSingletonInstance(il2cpp_symbols::get_class("umamusume.dll", "Gallop", "TapEffectController"));
+			if (tapEffectController)
+			{
 			il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*)>(tapEffectController->klass, "Disable", 0)->methodPointer(tapEffectController);
+			}
 
 			int width = rect->right - rect->left;
 			int height = rect->bottom - rect->top;
 
-			il2cpp_field_static_set_value(lastWidthField, &width);
-			il2cpp_field_static_set_value(lastHeightField, &height);
+			Gallop::StandaloneWindowResize::windowLastWidth(width);
+			Gallop::StandaloneWindowResize::windowLastHeight(height);
 
 			int borderWidth = windowWidth - clientWidth;
 			int borderHeight = windowHeight - clientHeight;
@@ -5644,18 +5179,10 @@ namespace
 				break;
 			}
 
-			if (width > height)
+			if (tapEffectController)
 			{
-				last_hriz_window_width = rect->right - rect->left;
-				last_hriz_window_height = rect->bottom - rect->top;
+				il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*)>(tapEffectController->klass, "Enable", 0)->methodPointer(tapEffectController);
 			}
-			else
-			{
-				last_virt_window_width = rect->right - rect->left;
-				last_virt_window_height = rect->bottom - rect->top;
-			}
-
-			il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*)>(tapEffectController->klass, "Enable", 0)->methodPointer(tapEffectController);
 
 			rect->right += borderWidth;
 			rect->bottom += borderHeight;
@@ -5663,11 +5190,10 @@ namespace
 			width = rect->right - rect->left;
 			height = rect->bottom - rect->top;
 
-			il2cpp_class_get_method_from_name_type<void (*)(float, float)>(StandaloneWindowResize, "SaveChangedWidth", 2)->methodPointer(width, height);
+			Gallop::StandaloneWindowResize::SaveChangedWidth(width, height);
 
-			auto _aspectRatioField = il2cpp_class_get_field_from_name(StandaloneWindowResize, "_aspectRatio");
 			float _aspectRatio = static_cast<float>(width) / static_cast<float>(height);
-			il2cpp_field_static_set_value(_aspectRatioField, &_aspectRatio);
+			Gallop::StandaloneWindowResize::AspectRatio(_aspectRatio);
 
 			auto uiManager = Gallop::UIManager::Instance();
 			if (uiManager)
@@ -5675,8 +5201,22 @@ namespace
 				bool isVirt = width < height;
 				if (config::unlock_size || isLandscape)
 				{
-					uiManager.ChangeResizeUIForPC(isVirt ? min(last_display_width, last_display_height) : max(last_display_width, last_display_height),
-						isVirt ? max(last_display_width, last_display_height) : min(last_display_width, last_display_height));
+					int minSize;
+					int maxSize;
+
+					if (config::initial_width >= 72 && config::initial_height >= 72)
+					{
+						minSize = min(config::initial_width, config::initial_height);
+						maxSize = max(config::initial_width, config::initial_height);
+				}
+				else
+				{
+						auto display = UnityEngine::Display::main();
+						minSize = min(display.systemWidth(), display.systemHeight());
+						maxSize = max(display.systemWidth(), display.systemHeight());
+					}
+
+					uiManager.ChangeResizeUIForPC(isVirt ? minSize : maxSize, isVirt ? maxSize : minSize);
 				}
 				else
 				{
@@ -5691,10 +5231,7 @@ namespace
 				il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, float)>(anRootManager->klass, "set_ScreenRate", 1)->methodPointer(anRootManager, _aspectRatio);
 			}
 
-			il2cpp_symbols::get_method_pointer<void (*)()>(
-				"umamusume.dll", "Gallop",
-				"StandaloneWindowResize", "DisableMaximizebox", IgnoreNumberOfArguments
-			)();
+			Gallop::StandaloneWindowResize::DisableMaximizebox();
 
 			uiManager.ChangeResolution();
 
@@ -5726,65 +5263,6 @@ namespace
 		}
 
 		return DefWindowProcW(hWnd, uMsg, wParam, lParam);
-	}
-
-	void* StandaloneWindowResize_DisableMaximizebox_orig = nullptr;
-
-	void StandaloneWindowResize_DisableMaximizebox_hook()
-	{
-		auto hWnd = GetHWND();
-
-		long style = GetWindowLongW(hWnd, GWL_STYLE);
-		if (Gallop::Screen::IsLandscapeMode() && !config::freeform_window)
-		{
-			style &= ~WS_MAXIMIZEBOX;
-		}
-		else
-		{
-			style |= WS_MAXIMIZEBOX;
-		}
-		SetWindowLongPtrW(hWnd, GWL_STYLE, style);
-	}
-
-	void* StandaloneWindowResize_ReshapeAspectRatio_orig = nullptr;
-
-	void StandaloneWindowResize_ReshapeAspectRatio_hook()
-	{
-
-	}
-
-	void* StandaloneWindowResize_KeepAspectRatio_orig = nullptr;
-
-	void StandaloneWindowResize_KeepAspectRatio_hook(float currentWidth, float currentHeight)
-	{
-		auto hWnd = GetHWND();
-
-		long style = GetWindowLongW(hWnd, GWL_STYLE);
-		style |= WS_MAXIMIZEBOX;
-		SetWindowLongPtrW(hWnd, GWL_STYLE, style);
-	}
-
-	void* GallopInput_mousePosition_orig = nullptr;
-
-	UnityEngine::Vector3 GallopInput_mousePosition_hook()
-	{
-		if (auto WindowsGamepadControl = Gallop::WindowsGamepadControl::Instance())
-		{
-			WindowsGamepadControl.UpdateInputControls();
-		}
-
-		auto position = il2cpp_symbols::get_method_pointer<UnityEngine::Vector3(*)()>("UnityEngine.InputLegacyModule.dll", "UnityEngine", "Input", "get_mousePosition", IgnoreNumberOfArguments)();
-
-		if (!config::freeform_window)
-		{
-			if (Gallop::Screen::IsSplitWindow())
-			{
-				return position * Gallop::Screen::Height() / static_cast<float>(UnityEngine::Screen::height());
-			}
-
-			return position * Gallop::Screen::Height() / static_cast<float>(UnityEngine::Screen::height());
-		}
-		return position;
 	}
 
 	vector<Il2CppObject*> frameBuffers;
@@ -5924,25 +5402,6 @@ namespace
 		text_set_text(_this, local::get_localized_string(text_get_text(_this)));
 		reinterpret_cast<decltype(textcommon_awake_hook)*>(textcommon_awake_orig)(_this);
 	}
-
-	void* textcommon_SetTextWithLineHeadWrap_orig = nullptr;
-	void textcommon_SetTextWithLineHeadWrap_hook(Il2CppObject* _this, Il2CppString* str, int maxCharacter)
-	{
-		reinterpret_cast<decltype(textcommon_SetTextWithLineHeadWrap_hook)*>(textcommon_SetTextWithLineHeadWrap_orig)(_this, str, maxCharacter * 2);
-	}
-
-	void* textcommon_SetTextWithLineHeadWrapWithColorTag_orig = nullptr;
-	void textcommon_SetTextWithLineHeadWrapWithColorTag_hook(Il2CppObject* _this, Il2CppString* str, int maxCharacter)
-	{
-		reinterpret_cast<decltype(textcommon_SetTextWithLineHeadWrapWithColorTag_hook)*>(textcommon_SetTextWithLineHeadWrapWithColorTag_orig)(_this, str, maxCharacter * 2);
-	}
-
-	void* textcommon_SetSystemTextWithLineHeadWrap_orig = nullptr;
-	void textcommon_SetSystemTextWithLineHeadWrap_hook(Il2CppObject* _this, Il2CppObject* systemText, int maxCharacter)
-	{
-		reinterpret_cast<decltype(textcommon_SetSystemTextWithLineHeadWrap_hook)*>(textcommon_SetSystemTextWithLineHeadWrap_orig)(_this, systemText, maxCharacter * 2);
-	}
-
 
 	void* TMP_Settings_get_instance_orig = nullptr;
 
@@ -6105,34 +5564,28 @@ namespace
 			int width = UnityEngine::Screen::width() * config::resolution_3d_scale;
 			int height = UnityEngine::Screen::height() * config::resolution_3d_scale;
 
-			/*auto GallopScreen = il2cpp_symbols::get_class("umamusume.dll", "Gallop", "Screen");
-
-			auto NUMBER1920_Field = il2cpp_class_get_field_from_name(GallopScreen, "NUMBER1920");
-
-			auto NUMBER1080_Field = il2cpp_class_get_field_from_name(GallopScreen, "NUMBER1080");
-
-			int number1920;
-			int number1080;
-
-			il2cpp_field_static_get_value(NUMBER1920_Field, &number1920);
-			il2cpp_field_static_get_value(NUMBER1080_Field, &number1080);
-
-			if (width < height)
-			{
-				return UnityEngine::Vector2Int{ number1080, number1920 };
-			}
-
-			return UnityEngine::Vector2Int{ number1920, number1080 };*/
-
-			if (Gallop::Screen::IsSplitWindow())
-			{
-				width = height * ratio_3_4;
-			}
-
 			return UnityEngine::Vector2Int{ width, height };
 		}
 
-		return reinterpret_cast<decltype(GraphicSettings_GetVirtualResolution_hook)*>(GraphicSettings_GetVirtualResolution_orig)(_this);
+		auto resolution = reinterpret_cast<decltype(GraphicSettings_GetVirtualResolution_hook)*>(GraphicSettings_GetVirtualResolution_orig)(_this);
+		if (config::unlock_size)
+			{
+			int width = Gallop::Screen::Width();
+			int height = Gallop::Screen::Height();
+			if (resolution.m_X > resolution.m_Y)
+			{
+				resolution.m_X = width;
+				resolution.m_Y = height;
+			}
+			else
+			{
+				resolution.m_X = height;
+				resolution.m_Y = width;
+			}
+		}
+		resolution.m_X *= config::resolution_3d_scale;
+		resolution.m_Y *= config::resolution_3d_scale;
+		return resolution;
 	}
 
 	void* GraphicSettings_GetVirtualResolution3D_orig = nullptr;
@@ -6143,50 +5596,23 @@ namespace
 			int width = UnityEngine::Screen::width() * config::resolution_3d_scale;
 			int height = UnityEngine::Screen::height() * config::resolution_3d_scale;
 
-			/*auto GallopScreen = il2cpp_symbols::get_class("umamusume.dll", "Gallop", "Screen");
-
-			auto NUMBER1920_Field = il2cpp_class_get_field_from_name(GallopScreen, "NUMBER1920");
-
-			auto NUMBER1080_Field = il2cpp_class_get_field_from_name(GallopScreen, "NUMBER1080");
-
-			int number1920;
-			int number1080;
-
-			il2cpp_field_static_get_value(NUMBER1920_Field, &number1920);
-			il2cpp_field_static_get_value(NUMBER1080_Field, &number1080);
-
-			number1920 *= config::resolution_3d_scale;
-			number1080 *= config::resolution_3d_scale;
-
-			if (width < height)
-			{
-				return UnityEngine::Vector2Int{ number1080, number1920 };
-			}
-
-			return UnityEngine::Vector2Int{ number1920, number1080 };*/
-
-			if (Gallop::Screen::IsSplitWindow())
-			{
-				width = height * ratio_3_4;
-			}
-
 			return UnityEngine::Vector2Int{ width, height };
 		}
 
 		auto resolution = reinterpret_cast<decltype(GraphicSettings_GetVirtualResolution3D_hook)*>(GraphicSettings_GetVirtualResolution3D_orig)(_this, isForcedWideAspect);
 		if (config::unlock_size)
 		{
-			UnityEngine::Resolution res;
-			get_resolution(&res);
+			int width = Gallop::Screen::Width();
+			int height = Gallop::Screen::Height();
 			if (resolution.m_X > resolution.m_Y)
 			{
-				resolution.m_X = res.width;
-				resolution.m_Y = res.height;
+				resolution.m_X = width;
+				resolution.m_Y = height;
 			}
 			else
 			{
-				resolution.m_X = res.height;
-				resolution.m_Y = res.width;
+				resolution.m_X = height;
+				resolution.m_Y = width;
 			}
 		}
 		resolution.m_X *= config::resolution_3d_scale;
@@ -6203,28 +5629,23 @@ namespace
 			int width = UnityEngine::Screen::width() * config::resolution_3d_scale;
 			int height = UnityEngine::Screen::height() * config::resolution_3d_scale;
 
-			if (Gallop::Screen::IsSplitWindow())
-			{
-				width = height * ratio_3_4;
-			}
-
 			return UnityEngine::Vector2Int{ width, height };
 		}
 
 		auto resolution2 = reinterpret_cast<decltype(GraphicSettings_GetVirtualResolution3D2_hook)*>(GraphicSettings_GetVirtualResolution3D2_orig)(_this, resolution, isForcedWideAspect);
 		if (config::unlock_size)
 		{
-			UnityEngine::Resolution res;
-			get_resolution(&res);
+			int width = Gallop::Screen::Width();
+			int height = Gallop::Screen::Height();
 			if (resolution2.m_X > resolution2.m_Y)
 			{
-				resolution2.m_X = res.width;
-				resolution2.m_Y = res.height;
+				resolution2.m_X = width;
+				resolution2.m_Y = height;
 			}
 			else
 			{
-				resolution2.m_X = res.height;
-				resolution2.m_Y = res.width;
+				resolution2.m_X = height;
+				resolution2.m_Y = width;
 			}
 		}
 		resolution2.m_X *= config::resolution_3d_scale;
@@ -8138,11 +7559,6 @@ namespace
 	{
 		try
 		{
-			if (config::unlock_size || config::freeform_window)
-			{
-				SetBGCanvasScalerSize();
-			}
-
 			if (config::freeform_window)
 			{
 				ResizeMoviePlayer();
@@ -8370,23 +7786,6 @@ namespace
 		return CallNextHookEx(hCBTHook, nCode, wParam, lParam);
 	}
 
-	void adjust_size()
-	{
-		thread([]()
-			{
-				auto tr = il2cpp_thread_attach(il2cpp_domain_get());
-
-				UnityEngine::Resolution r;
-				get_resolution_stub(&r);
-
-				auto target_height = r.height - 100;
-
-				set_resolution(target_height * config::runtime::ratioVertical, target_height, false);
-
-				il2cpp_thread_detach(tr);
-			}).detach();
-	}
-
 	void* load_scene_internal_orig = nullptr;
 	void* load_scene_internal_hook(Il2CppString* sceneName, int sceneBuildIndex, void* parameters, bool mustCompleteNextFrame)
 	{
@@ -8404,7 +7803,7 @@ namespace
 
 			auto ratio = static_cast<float>(width) / static_cast<float>(height);
 
-			auto newWidth = UnityEngine::Screen::height();
+			auto newWidth = Gallop::Screen::Height();
 			auto newHeight = static_cast<int>(static_cast<float>(newWidth) / ratio);
 
 			il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, int)>(renderTexture->klass, "set_width", 1)->methodPointer(renderTexture, newWidth);
@@ -8888,25 +8287,6 @@ namespace
 			"CySpringUpdater", "get_SpringUpdateMode", 0
 		);
 
-		auto StandaloneWindowResize_DisableMaximizebox_addr = il2cpp_symbols::get_method_pointer(
-			"umamusume.dll", "Gallop",
-			"StandaloneWindowResize", "DisableMaximizebox", IgnoreNumberOfArguments
-		);
-
-		auto StandaloneWindowResize_ReshapeAspectRatio_addr = il2cpp_symbols::get_method_pointer(
-			"umamusume.dll", "Gallop",
-			"StandaloneWindowResize", "ReshapeAspectRatio", IgnoreNumberOfArguments
-		);
-
-		auto StandaloneWindowResize_KeepAspectRatio_addr = il2cpp_symbols::get_method_pointer(
-			"umamusume.dll", "Gallop",
-			"StandaloneWindowResize", "KeepAspectRatio", 2
-		);
-
-		auto GallopInput_mousePosition_addr = il2cpp_symbols::get_method_pointer(
-			"umamusume.dll", "Gallop", "GallopInput", "mousePosition", 0
-		);
-
 		auto GallopFrameBuffer_Initialize_addr = il2cpp_symbols::get_method_pointer(
 			"umamusume.dll", "Gallop", "GallopFrameBuffer", "Initialize", 1
 		);
@@ -8922,33 +8302,6 @@ namespace
 		auto GallopFrameBuffer_ResizeRenderTexture_addr = il2cpp_symbols::get_method_pointer(
 			"umamusume.dll", "Gallop", "GallopFrameBuffer", "ResizeRenderTexture", 0
 		);
-
-		display_get_main = il2cpp_symbols::get_method_pointer<Il2CppObject * (*)()>(
-			"UnityEngine.CoreModule.dll",
-			"UnityEngine",
-			"Display", "get_main", IgnoreNumberOfArguments);
-
-		get_system_width = il2cpp_symbols::get_method_pointer<int (*)(Il2CppObject*)>(
-			"UnityEngine.CoreModule.dll",
-			"UnityEngine",
-			"Display", "get_systemWidth", 0);
-
-		get_system_height = il2cpp_symbols::get_method_pointer<int (*)(Il2CppObject*)>(
-			"UnityEngine.CoreModule.dll",
-			"UnityEngine",
-			"Display", "get_systemHeight", 0);
-
-		get_rendering_width = il2cpp_symbols::get_method_pointer<int (*)(Il2CppObject*)>(
-			"UnityEngine.CoreModule.dll",
-			"UnityEngine",
-			"Display", "get_renderingWidth", 0);
-
-		get_rendering_height = il2cpp_symbols::get_method_pointer<int (*)(Il2CppObject*)>(
-			"UnityEngine.CoreModule.dll",
-			"UnityEngine",
-			"Display", "get_renderingHeight", 0);
-
-		get_resolution = reinterpret_cast<decltype(get_resolution)>(il2cpp_resolve_icall("UnityEngine.Screen::get_currentResolution_Injected(UnityEngine.Resolution&)"));
 
 		auto story_race_textasset_load_addr = il2cpp_symbols::get_method_pointer("umamusume.dll", "Gallop", "StoryRaceTextAsset", "Load", 0);
 
@@ -8975,21 +8328,6 @@ namespace
 		auto TextMeshProUguiCommon_Awake_addr = il2cpp_symbols::get_method_pointer(
 			"umamusume.dll", "Gallop",
 			"TextMeshProUguiCommon", "Awake", 0
-		);
-
-		auto textcommon_SetSystemTextWithLineHeadWrap_addr = il2cpp_symbols::get_method_pointer(
-			"umamusume.dll", "Gallop",
-			"TextCommon", "SetSystemTextWithLineHeadWrap", 2
-		);
-
-		auto textcommon_SetTextWithLineHeadWrapWithColorTag_addr = il2cpp_symbols::get_method_pointer(
-			"umamusume.dll", "Gallop",
-			"TextCommon", "SetTextWithLineHeadWrapWithColorTag", 2
-		);
-
-		auto textcommon_SetTextWithLineHeadWrap_addr = il2cpp_symbols::get_method_pointer(
-			"umamusume.dll", "Gallop",
-			"TextCommon", "SetTextWithLineHeadWrap", 2
 		);
 
 		textcommon_get_TextId = il2cpp_symbols::get_method_pointer<int (*)(void*)>(
@@ -9056,11 +8394,6 @@ namespace
 			"Text", "set_verticalOverflow", 1
 		);
 
-		set_resolution = il2cpp_symbols::get_method_pointer<void (*)(int, int, bool)>(
-			"UnityEngine.CoreModule.dll", "UnityEngine",
-			"Screen", "SetResolution", 3
-		);
-
 		auto an_text_fix_data_addr = il2cpp_symbols::get_method_pointer("Plugins.dll", "AnimateToUnity", "AnText", "_FixData", 0);
 
 		auto an_text_set_material_to_textmesh_addr = il2cpp_symbols::get_method_pointer("Plugins.dll", "AnimateToUnity", "AnText", "_SetMaterialToTextMesh", 0);
@@ -9122,13 +8455,7 @@ namespace
 
 		auto FrameRateController_ReflectionFrameRate_addr = il2cpp_symbols::get_method_pointer("umamusume.dll", "Gallop", "FrameRateController", "ReflectionFrameRate", 0);
 
-		auto BGManager_CalcBgScale_addr = il2cpp_symbols::get_method_pointer("umamusume.dll", "Gallop", "BGManager", "CalcBgScale", 4);
-
-		auto GallopUtil_GotoTitleOnError_addr = il2cpp_symbols::get_method_pointer("umamusume.dll", "Gallop", "GallopUtil", "GotoTitleOnError", 1);
-
-		auto DialogCommon_Close_addr = il2cpp_symbols::get_method_pointer("umamusume.dll", "Gallop", "DialogCommon", "Close", 0);
-
-		auto StoryViewController_ctor_addr = il2cpp_symbols::get_method_pointer("umamusume.dll", "Gallop", "StoryViewController", ".ctor", 0);
+		auto BGManager_SetMainBg_addr = il2cpp_symbols::get_method_pointer("umamusume.dll", "Gallop", "BGManager", "SetMainBg", 6);
 
 		auto DialogCircleItemDonate_Initialize_addr = il2cpp_symbols::get_method_pointer("umamusume.dll", "Gallop", "DialogCircleItemDonate", "Initialize", 2);
 
@@ -9145,10 +8472,6 @@ namespace
 		auto HttpHelper_DecompressResponse_addr = il2cpp_symbols::get_method_pointer("umamusume.dll", "Gallop", "HttpHelper", "DecompressResponse", 1);
 
 		auto LiveTheaterCharaSelect_CheckSwapChara_addr = il2cpp_symbols::get_method_pointer("umamusume.dll", "Gallop", "LiveTheaterCharaSelect", "CheckSwapChara", 7);
-
-		auto GallopStandaloneInputModule_SetPointerPosition_addr = il2cpp_symbols::get_method_pointer("umamusume.dll", "UnityEngine.EventSystems", "GallopStandaloneInputModule", "SetPointerPosition", 0);
-
-		auto GallopStandaloneInputModule_ProcessTouchEvents_addr = il2cpp_symbols::get_method_pointer("umamusume.dll", "UnityEngine.EventSystems", "GallopStandaloneInputModule", "ProcessTouchEvents", 0);
 
 		auto CollectRaidBgCutinHelper_InstantiateTimeline_addr = il2cpp_symbols::get_method_pointer("umamusume.dll", "Gallop", "CollectRaidBgCutinHelper", "InstantiateTimeline", 4);
 
@@ -9182,8 +8505,6 @@ namespace
 
 		auto DialogHomeMenuMain_ChangeView2_addr = il2cpp_symbols::get_method_pointer("umamusume.dll", "Gallop", "DialogHomeMenuMain", "ChangeView", 2);
 
-		auto SceneManager_BootView_addr = il2cpp_symbols::get_method_pointer("umamusume.dll", "Gallop", "SceneManager", "BootView", 0);
-
 		auto load_scene_internal_addr = il2cpp_resolve_icall("UnityEngine.SceneManagement.SceneManager::LoadSceneAsyncNameIndexInternal_Injected(System.String,System.Int32,UnityEngine.SceneManagement.LoadSceneParameters&,System.bool)");
 
 #pragma endregion
@@ -9193,17 +8514,9 @@ namespace
 			ADD_HOOK(Certification_initDmmPlatformData, "Gallop.Certification::initDmmPlatformData at %p\n");
 		}
 
-		// ADD_HOOK(GallopStandaloneInputModule_SetPointerPosition, "UnityEngine.EventSystems.GallopStandaloneInputModule::SetPointerPosition at %p\n");
-
-		// ADD_HOOK(GallopStandaloneInputModule_ProcessTouchEvents, "UnityEngine.EventSystems.GallopStandaloneInputModule::ProcessTouchEvents at %p\n");
-
 		ADD_HOOK(Object_Internal_CloneSingleWithParent, "UnityEngine.Object::Internal_CloneSingleWithParent at %p\n");
 
 		ADD_HOOK(DialogCircleItemDonate_Initialize, "Gallop.DialogCircleItemDonate::Initialize at %p\n");
-
-		// ADD_HOOK(DialogCommon_Close, "Gallop.DialogCommon.Close() at %p\n");
-
-		// ADD_HOOK(GallopUtil_GotoTitleOnError, "Gallop.GallopUtil.GotoTitleOnError() at %p\n");
 
 		if (Game::CurrentGameRegion == Game::Region::KOR)
 		{
@@ -9240,16 +8553,8 @@ namespace
 			ADD_HOOK(an_text_fix_data, "AnimateToUnity.AnText::_FixData at %p\n");
 			ADD_HOOK(an_text_set_material_to_textmesh, "AnimateToUnity.AnText::_SetMaterialToTextMesh at %p\n");
 
-			// ADD_HOOK(get_preferred_width, "UnityEngine.TextGenerator::GetPreferredWidth at %p\n");
-
 			// hook UnityEngine.TextGenerator::PopulateWithErrors to modify text
 			ADD_HOOK(populate_with_errors, "UnityEngine.TextGenerator::PopulateWithErrors at %p\n");
-
-			// ADD_HOOK(text_get_text, "UnityEngine.UI.Text::get_text at %p\n");
-
-			ADD_HOOK(textcommon_SetTextWithLineHeadWrap, "Gallop.TextCommon::SetTextWithLineHeadWrap at %p\n");
-			ADD_HOOK(textcommon_SetTextWithLineHeadWrapWithColorTag, "Gallop.TextCommon::SetTextWithLineHeadWrapWithColorTag at %p\n");
-			ADD_HOOK(textcommon_SetSystemTextWithLineHeadWrap, "Gallop.TextCommon::SetSystemTextWithLineHeadWrap at %p\n");
 		}
 
 		ADD_HOOK(story_race_textasset_load, "StoryRaceTextAsset.Load at %p\n");
@@ -9317,19 +8622,11 @@ namespace
 			ADD_HOOK(GallopFrameBuffer_Initialize2, "Gallop.GallopFrameBuffer::Initialize2 at %p\n");
 			ADD_HOOK(GallopFrameBuffer_Release, "Gallop.GallopFrameBuffer::Release at %p\n");
 			ADD_HOOK(GallopFrameBuffer_ResizeRenderTexture, "Gallop.GallopFrameBuffer::ResizeRenderTexture at %p\n");
-			ADD_HOOK(GallopInput_mousePosition, "Gallop.GallopInput::mousePosition at %p\n");
-		}
-
-		if (config::freeform_window || Game::CurrentGameStore == Game::Store::Steam)
-		{
-			ADD_HOOK(StandaloneWindowResize_DisableMaximizebox, "Gallop.StandaloneWindowResize::DisableMaximizebox at %p\n");
+			ADD_HOOK(CollectRaidBgCutinHelper_InstantiateTimeline, "Gallop.CollectRaidBgCutinHelper::InstantiateTimeline at %p\n");
 		}
 
 		if (config::freeform_window)
 		{
-			ADD_HOOK(StandaloneWindowResize_ReshapeAspectRatio, "Gallop.StandaloneWindowResize::ReshapeAspectRatio at %p\n");
-			ADD_HOOK(StandaloneWindowResize_KeepAspectRatio, "Gallop.StandaloneWindowResize::KeepAspectRatio at %p\n");
-
 			ADD_HOOK(DialogSingleModeTopMenu_SetupButtonPositions, "Gallop.DialogSingleModeTopMenu::SetupButtonPositions at %p\n");
 			ADD_HOOK(DialogSingleModeTopMenu_Setup, "Gallop.DialogSingleModeTopMenu::Setup at %p\n");
 			ADD_HOOK(DialogSingleModeTopMenu_Setup1, "Gallop.DialogSingleModeTopMenu::Setup1 at %p\n");
@@ -9346,42 +8643,16 @@ namespace
 			ADD_HOOK(DialogHomeMenuMain_ChangeView, "Gallop.DialogHomeMenuMain::ChangeView at %p\n");
 			ADD_HOOK(DialogHomeMenuMain_ChangeView2, "Gallop.DialogHomeMenuMain::ChangeView2 at %p\n");
 
-			auto StandaloneWindowResize = il2cpp_symbols::get_class("umamusume.dll", "Gallop", "StandaloneWindowResize");
-			il2cpp_class_get_method_from_name_type<void (*)(bool)>(StandaloneWindowResize, "set_IsPreventReShape", 1)->methodPointer(true);
+			Gallop::StandaloneWindowResize::IsPreventReShape(true);
 
 			int width = UnityEngine::Screen::width();
 			int height = UnityEngine::Screen::height();
 
 			Gallop::StandaloneWindowResize::IsVirt(width <= height);
 
-			auto GallopScreen = il2cpp_symbols::get_class("umamusume.dll", "Gallop", "Screen");
-
-			auto NUMBER1920_Field = il2cpp_class_get_field_from_name(GallopScreen, "NUMBER1920");
-
-			auto NUMBER1080_Field = il2cpp_class_get_field_from_name(GallopScreen, "NUMBER1080");
-
-			auto _originalScreenWidth_Field = il2cpp_class_get_field_from_name(GallopScreen, "_originalScreenWidth");
-
-			auto _originalScreenHeight_Field = il2cpp_class_get_field_from_name(GallopScreen, "_originalScreenHeight");
-
-			if (width < height)
-			{
-				il2cpp_field_static_set_value(NUMBER1080_Field, &width);
-				il2cpp_field_static_set_value(NUMBER1920_Field, &height);
-				il2cpp_field_static_set_value(_originalScreenHeight_Field, &width);
-				il2cpp_field_static_set_value(_originalScreenWidth_Field, &height);
-			}
-			else
-			{
-				il2cpp_field_static_set_value(NUMBER1920_Field, &width);
-				il2cpp_field_static_set_value(NUMBER1080_Field, &height);
-				il2cpp_field_static_set_value(_originalScreenWidth_Field, &width);
-				il2cpp_field_static_set_value(_originalScreenHeight_Field, &height);
-			}
-
-			auto WaitDeviceOrientation_addr = il2cpp_symbols::get_method_pointer(
-				"umamusume.dll",
-				"Gallop", "Screen", "WaitDeviceOrientation", 1);
+			bool isPortrait = width <= height;
+			Gallop::Screen::OriginalScreenWidth(isPortrait ? height : width);
+			Gallop::Screen::OriginalScreenHeight(isPortrait ? width : height);
 
 			auto DeviceOrientationGuide_Show_addr = il2cpp_symbols::get_method_pointer(
 				"umamusume.dll",
@@ -9390,7 +8661,6 @@ namespace
 			auto MoviePlayerForUI_AdjustScreenSize_addr = il2cpp_symbols::get_method_pointer(
 				"Cute.Cri.Assembly.dll", "Cute.Cri", "MoviePlayerForUI", "AdjustScreenSize", 2);
 
-			// ADD_HOOK(WaitDeviceOrientation, "Gallop.Screen::WaitDeviceOrientation at %p\n");
 			ADD_HOOK(DeviceOrientationGuide_Show, "DeviceOrientationGuide::Show at %p\n");
 			ADD_HOOK(MoviePlayerForUI_AdjustScreenSize, "MoviePlayerForUI::AdjustScreenSize at %p\n");
 		}
@@ -9402,7 +8672,7 @@ namespace
 
 		if (config::freeform_window || config::unlock_size || config::resolution_3d_scale != 1.0f)
 		{
-			// ADD_HOOK(BGManager_CalcBgScale, "Gallop.BGManager::CalcBgScale at %p\n");
+			ADD_HOOK(BGManager_SetMainBg, "Gallop.BGManager::SetMainBg at %p\n");
 		}
 
 		if (config::resolution_3d_scale != 1.0f || config::freeform_window)
@@ -9463,16 +8733,6 @@ namespace
 		DesktopNotificationManagerCompat::get_History(&history);
 		history->Clear();
 
-		auto gallop_get_screenwidth_addr = il2cpp_symbols::get_method_pointer(
-			"umamusume.dll", "Gallop",
-			"Screen", "get_Width", 0
-		);
-
-		auto gallop_get_screenheight_addr = il2cpp_symbols::get_method_pointer(
-			"umamusume.dll", "Gallop",
-			"Screen", "get_Height", 0
-		);
-
 		auto SetResolution_Injected_addr = il2cpp_resolve_icall("UnityEngine.Screen::SetResolution_Injected(System.Int32,System.Int32,UnityEngine.FullScreenMode,UnityEngine.RefreshRate)");
 
 		auto Sprite_get_texture_addr = il2cpp_resolve_icall("UnityEngine.Sprite::get_texture(UnityEngine.Sprite)");
@@ -9529,56 +8789,32 @@ namespace
 			Gallop::Localize::DumpAllEntries();
 		}
 
-		if (config::auto_fullscreen || config::unlock_size || config::freeform_window)
+		if (config::unlock_size || config::freeform_window)
 		{
 			ADD_HOOK(SetResolution_Injected, "UnityEngine.Screen.SetResolution_Injected(int, int, FullScreenMode, RefreshRate) at %p\n");
 		}
 
 		if (config::unlock_size || config::freeform_window)
 		{
-			ADD_HOOK(gallop_get_screenwidth, "Gallop.Screen::get_Width at %p\n");
-			ADD_HOOK(gallop_get_screenheight, "Gallop.Screen::get_Height at %p\n");
+			auto display = UnityEngine::Display::main();
 
-			auto display = display_get_main();
 			if (config::initial_width > 72 && config::initial_height > 72)
 			{
-				auto StandaloneWindowResize = il2cpp_symbols::get_class("umamusume.dll", "Gallop", "StandaloneWindowResize");
-				il2cpp_class_get_method_from_name_type<void (*)(bool)>(StandaloneWindowResize, "set_IsPreventReShape", 1)->methodPointer(true);
-
 				auto ratio = static_cast<float>(config::initial_width) / static_cast<float>(config::initial_height);
 
 				if (config::initial_width < config::initial_height)
 				{
 					config::runtime::ratioVertical = static_cast<float>(config::initial_width) / static_cast<float>(config::initial_height);
 					config::runtime::ratioHorizontal = static_cast<float>(config::initial_height) / static_cast<float>(config::initial_width);
-
-					if (config::unlock_size_use_system_resolution)
-					{
-						last_display_width = static_cast<float>(get_system_width(display)) * ratio;
-						last_display_height = get_system_width(display);
-					}
-					else
-					{
-						last_display_width = config::initial_width;
-						last_display_height = config::initial_height;
-					}
 				}
 				else
 				{
 					config::runtime::ratioVertical = static_cast<float>(config::initial_height) / static_cast<float>(config::initial_width);
 					config::runtime::ratioHorizontal = static_cast<float>(config::initial_width) / static_cast<float>(config::initial_height);
-
-					if (config::unlock_size_use_system_resolution)
-					{
-						last_display_width = get_system_width(display);
-						last_display_height = static_cast<float>(get_system_width(display)) * ratio;
-					}
-					else
-					{
-						last_display_width = config::initial_width;
-						last_display_height = config::initial_height;
-					}
 				}
+
+				config::runtime::initialWidth = config::initial_width;
+				config::runtime::initialHeight = config::initial_height;
 			}
 			else
 			{
@@ -9589,113 +8825,20 @@ namespace
 					RECT clientRect;
 					GetClientRect(hWnd, &clientRect);
 
-					last_display_width = clientRect.right - clientRect.left;
-					last_display_height = clientRect.bottom - clientRect.top;
+					config::runtime::initialWidth = clientRect.right - clientRect.left;
+					config::runtime::initialHeight = clientRect.bottom - clientRect.top;
 				}
 				else
 				{
-					last_display_width = get_system_width(display);
-					last_display_height = ceil(last_display_width / ratio_16_9);
+					config::runtime::initialWidth = display.systemWidth();
+					config::runtime::initialHeight = ceil(config::runtime::initialWidth / ratio_16_9);
 				}
 			}
 
-			auto GallopScreen = il2cpp_symbols::get_class("umamusume.dll", "Gallop", "Screen");
+			bool isPortrait = config::runtime::initialWidth < config::runtime::initialHeight;
 
-			auto NUMBER1920_Field = il2cpp_class_get_field_from_name(GallopScreen, "NUMBER1920");
-
-			auto NUMBER1080_Field = il2cpp_class_get_field_from_name(GallopScreen, "NUMBER1080");
-
-			auto _originalScreenWidth_Field = il2cpp_class_get_field_from_name(GallopScreen, "_originalScreenWidth");
-
-			auto _originalScreenHeight_Field = il2cpp_class_get_field_from_name(GallopScreen, "_originalScreenHeight");
-
-			bool isPortrait = last_display_width < last_display_height;
-
-			if (isPortrait)
-			{
-				il2cpp_field_static_set_value(NUMBER1080_Field, &last_display_width);
-				il2cpp_field_static_set_value(NUMBER1920_Field, &last_display_height);
-				il2cpp_field_static_set_value(_originalScreenHeight_Field, &last_display_width);
-				il2cpp_field_static_set_value(_originalScreenWidth_Field, &last_display_height);
-			}
-			else
-			{
-				il2cpp_field_static_set_value(NUMBER1920_Field, &last_display_width);
-				il2cpp_field_static_set_value(NUMBER1080_Field, &last_display_height);
-				il2cpp_field_static_set_value(_originalScreenWidth_Field, &last_display_width);
-				il2cpp_field_static_set_value(_originalScreenHeight_Field, &last_display_height);
-			}
-		}
-
-		if (config::auto_fullscreen || config::unlock_size || config::freeform_window)
-		{
-			if (config::initial_width > 72 && config::initial_height > 72)
-			{
-				auto display = display_get_main();
-				if (config::initial_width < config::initial_height)
-				{
-					last_hriz_window_width = last_display_height - 400;
-					last_hriz_window_height = last_hriz_window_width / config::runtime::ratioHorizontal;
-
-					if (last_hriz_window_height >= get_system_height(display))
-					{
-						last_hriz_window_height = get_system_height(display) - 400;
-						last_hriz_window_width = last_hriz_window_height * config::runtime::ratioHorizontal;
-					}
-
-					last_virt_window_height = last_display_width - 400;
-					last_virt_window_width = last_virt_window_height * config::runtime::ratioVertical;
-
-					if (last_virt_window_height >= get_system_height(display))
-					{
-						last_virt_window_height = get_system_height(display) - 400;
-						last_virt_window_width = last_virt_window_height * config::runtime::ratioVertical;
-					}
-				}
-				else
-				{
-					last_hriz_window_width = last_display_width - 400;
-					last_hriz_window_height = last_hriz_window_width / config::runtime::ratioHorizontal;
-
-					if (last_hriz_window_height >= get_system_height(display))
-					{
-						last_hriz_window_height = get_system_height(display) - 400;
-						last_hriz_window_width = last_hriz_window_height * config::runtime::ratioHorizontal;
-					}
-
-					last_virt_window_height = last_display_height - 400;
-					last_virt_window_width = last_virt_window_height * config::runtime::ratioVertical;
-
-					if (last_virt_window_height >= get_system_height(display))
-					{
-						last_virt_window_height = get_system_height(display) - 400;
-						last_virt_window_width = last_virt_window_height * config::runtime::ratioVertical;
-					}
-				}
-			}
-			else
-			{
-				if (config::freeform_window)
-				{
-					last_hriz_window_width = last_display_width;
-					last_hriz_window_height = last_display_height;
-					last_virt_window_height = last_display_height;
-					last_virt_window_width = last_display_width;
-				}
-				else
-				{
-					last_hriz_window_width = last_display_width - 400;
-					last_hriz_window_height = last_hriz_window_width / config::runtime::ratioHorizontal;
-					last_virt_window_height = last_display_height - 400;
-					last_virt_window_width = last_virt_window_height * config::runtime::ratioVertical;
-				}
-			}
-
-
-			if (config::auto_fullscreen)
-			{
-				// adjust_size();
-			}
+			Gallop::Screen::OriginalScreenWidth(isPortrait ? config::runtime::initialHeight : config::runtime::initialWidth);
+			Gallop::Screen::OriginalScreenHeight(isPortrait ? config::runtime::initialWidth : config::runtime::initialHeight);
 		}
 
 		if (!config::unlock_live_chara)
@@ -9714,8 +8857,6 @@ namespace
 				wcerr << L"Failed to remove master_orig.mdb: " << ex.what() << endl;
 			}
 		}
-
-		fullScreenFl = UnityEngine::Screen::fullScreen();
 
 		if (config::discord_rich_presence)
 		{
@@ -9750,8 +8891,6 @@ namespace
 				}
 
 				il2cppstring sceneName = handleName->chars;
-
-				isPortraitBeforeFullscreen = false;
 
 				auto uiManager = Gallop::UIManager::Instance();
 
@@ -9957,7 +9096,7 @@ namespace
 						Gallop::StandaloneWindowResize::IsVirt(isVirt);
 					}
 
-					if (uiManager && (config::unlock_size || config::freeform_window))
+					/*if (uiManager && (config::unlock_size || config::freeform_window))
 					{
 						int width = UnityEngine::Screen::width();
 						int height = UnityEngine::Screen::height();
@@ -9974,8 +9113,8 @@ namespace
 							uiManager.ChangeResizeUIForPC(isVirt ? min(last_display_width, last_display_height) : max(last_display_width, last_display_height),
 								isVirt ? max(last_display_width, last_display_height) : min(last_display_width, last_display_height));
 						}
+					}*/
 					}
-				}
 
 				if (sceneName == IL2CPP_STRING("Home"))
 				{
@@ -10287,14 +9426,8 @@ SetWindowLongPtrW_hook(
 		if ((config::unlock_size || config::freeform_window) && config::initial_width > 72 && config::initial_height > 72)
 		{
 			auto refreshRate = RefreshRate{ 0, 1 };
-			if (config::initial_width < config::initial_height)
-			{
-				reinterpret_cast<decltype(SetResolution_Injected_hook)*>(SetResolution_Injected_orig)(last_virt_window_width, last_virt_window_height, 3, &refreshRate);
-			}
-			else
-			{
-				reinterpret_cast<decltype(SetResolution_Injected_hook)*>(SetResolution_Injected_orig)(last_hriz_window_width, last_hriz_window_height, 3, &refreshRate);
-			}
+			reinterpret_cast<decltype(SetResolution_Injected_hook)*>(SetResolution_Injected_orig)(config::runtime::initialWidth, config::runtime::initialHeight, 3, &refreshRate);
+
 		}
 
 		if (config::freeform_window)
@@ -10331,14 +9464,7 @@ SetWindowLongPtrA_hook(
 		if ((config::unlock_size || config::freeform_window) && config::initial_width > 72 && config::initial_height > 72)
 		{
 			auto refreshRate = RefreshRate{ 0, 1 };
-			if (config::initial_width < config::initial_height)
-			{
-				reinterpret_cast<decltype(SetResolution_Injected_hook)*>(SetResolution_Injected_orig)(last_virt_window_width, last_virt_window_height, 3, &refreshRate);
-			}
-			else
-			{
-				reinterpret_cast<decltype(SetResolution_Injected_hook)*>(SetResolution_Injected_orig)(last_hriz_window_width, last_hriz_window_height, 3, &refreshRate);
-			}
+			reinterpret_cast<decltype(SetResolution_Injected_hook)*>(SetResolution_Injected_orig)(config::runtime::initialWidth, config::runtime::initialHeight, 3, &refreshRate);
 		}
 
 		if (config::freeform_window)
@@ -10819,8 +9945,6 @@ void init_hook(filesystem::path module_path)
 	auto GetProcAddress_addr = GetProcAddress(GetModuleHandleW(L"kernel32.dll"), "GetProcAddress");
 	MH_CreateHook(GetProcAddress_addr, GetProcAddress_hook, &GetProcAddress_orig);
 	MH_EnableHook(GetProcAddress_addr);
-
-	fullScreenFl = config::auto_fullscreen && !config::freeform_window;
 
 	MH_CreateHook(SetWindowLongPtrW, SetWindowLongPtrW_hook, &SetWindowLongPtrW_orig);
 	MH_EnableHook(SetWindowLongPtrW);

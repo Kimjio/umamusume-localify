@@ -22,6 +22,11 @@ namespace UnityEngine
 			return Vector3(x / v, y / v, z / v);
 		}
 
+		Vector3 operator+(Vector3 v) const noexcept
+		{
+			return Vector3(x + v.x, y + v.y, z + v.z);
+		}
+
 		operator Vector2() const
 		{
 			return Vector2{ x, y };

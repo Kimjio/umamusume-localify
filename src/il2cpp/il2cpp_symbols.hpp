@@ -170,6 +170,13 @@ namespace il2cpp_symbols
 		return reinterpret_cast<const MethodInfo_t<T>*>(get_method(assemblyName, namespaze, klassName, name, argsCount));
 	}
 
+	const MethodInfo* get_method(Il2CppClass* klass, const char* name, int argsCount);
+
+	template<typename T>
+	MethodInfo_t<T>* get_method(Il2CppClass* klass, const char* name, int argsCount) {
+		return reinterpret_cast<MethodInfo_t<T>*>(get_method(klass, name, argsCount));
+	}
+
 	const Il2CppClass* find_class(const char* assemblyName, const char* namespaze,
 		const std::function<bool(const Il2CppClass*)>& predict);
 

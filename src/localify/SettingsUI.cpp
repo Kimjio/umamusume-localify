@@ -474,8 +474,6 @@ namespace Localify
 #endif
 				AddOrSet(configDocument, IL2CPP_STRING("unlockSize"), UIParts::GetOptionItemOnOffIsOn("unlock_size"));
 
-				AddOrSet(configDocument, IL2CPP_STRING("unlockSizeUseSystemResolution"), UIParts::GetOptionItemOnOffIsOn("use_system_resolution"));
-
 				AddOrSet(configDocument, IL2CPP_STRING("uiScale"), static_cast<int>(round(UIParts::GetOptionSliderValue("ui_scale") * 100)) / 100.0);
 
 				AddOrSet(configDocument, IL2CPP_STRING("autoFullscreen"), UIParts::GetOptionItemOnOffIsOn("auto_fullscreen"));
@@ -543,11 +541,7 @@ namespace Localify
 				il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*)>(nowLoading->klass, "DeleteMiniCharacter", 0)->methodPointer(nowLoading);
 				il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*)>(nowLoading->klass, "CreateMiniCharacter", 0)->methodPointer(nowLoading);
 
-				config::unlock_size_use_system_resolution = configDocument[IL2CPP_STRING("unlockSizeUseSystemResolution")].GetBool();
-
 				config::ui_scale = configDocument[IL2CPP_STRING("uiScale")].GetFloat();
-
-				config::auto_fullscreen = configDocument[IL2CPP_STRING("autoFullscreen")].GetBool();
 
 				config::freeform_ui_scale_portrait = configDocument[IL2CPP_STRING("freeFormUiScalePortrait")].GetFloat();
 
@@ -702,7 +696,6 @@ namespace Localify
 		bool useThirdPartyNews = false;
 		bool unlockLiveChara = false;
 		bool unlockSize = false;
-		bool unlockSizeUseSystemResolution = false;
 		float uiScale = 0;
 		bool autoFullscreen = false;
 		bool freeFormWindow = false;
@@ -830,11 +823,6 @@ namespace Localify
 			if (configDocument.HasMember(IL2CPP_STRING("unlockSize")))
 			{
 				unlockSize = configDocument[IL2CPP_STRING("unlockSize")].GetBool();
-			}
-
-			if (configDocument.HasMember(IL2CPP_STRING("unlockSizeUseSystemResolution")))
-			{
-				unlockSizeUseSystemResolution = configDocument[IL2CPP_STRING("unlockSizeUseSystemResolution")].GetBool();
 			}
 
 			if (configDocument.HasMember(IL2CPP_STRING("uiScale")))
@@ -967,9 +955,7 @@ namespace Localify
 				UIParts::GetOptionItemTitle(LocalifySettings::GetText("screen")),
 				UIParts::GetOptionItemOnOff("unlock_size", LocalifySettings::GetText("unlock_size")),
 				UIParts::GetOptionItemAttention(LocalifySettings::GetText("applied_after_restart")),
-				UIParts::GetOptionItemOnOff("use_system_resolution", LocalifySettings::GetText("use_system_resolution")),
 				UIParts::GetOptionSlider("ui_scale", LocalifySettings::GetText("ui_scale"), uiScale, 0.1, 2.0, false),
-				UIParts::GetOptionItemOnOff("auto_fullscreen", LocalifySettings::GetText("auto_fullscreen")),
 				UIParts::GetOptionItemOnOff("freeform_window", LocalifySettings::GetText("freeform_window")),
 				UIParts::GetOptionItemAttention(LocalifySettings::GetText("applied_after_restart")),
 				UIParts::GetOptionSlider("ui_scale_portrait", LocalifySettings::GetText("ui_scale_portrait"), freeFormUiScalePortrait, 0.1, 2.0, false),
@@ -1150,16 +1136,6 @@ namespace Localify
 		);
 
 		UIParts::SetOptionItemOnOffAction("unlock_size", unlockSize, *([](Il2CppObject*, bool isOn)
-			{
-			})
-		);
-
-		UIParts::SetOptionItemOnOffAction("use_system_resolution", unlockSizeUseSystemResolution, *([](Il2CppObject*, bool isOn)
-			{
-			})
-		);
-
-		UIParts::SetOptionItemOnOffAction("auto_fullscreen", autoFullscreen, *([](Il2CppObject*, bool isOn)
 			{
 			})
 		);

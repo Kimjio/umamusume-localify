@@ -55,7 +55,6 @@ namespace config
 	extern bool enable_console;
 	extern int max_fps;
 	extern bool unlock_size;
-	extern bool unlock_size_use_system_resolution;
 	extern float ui_scale;
 	extern bool freeform_window;
 	extern float freeform_ui_scale_portrait;
@@ -71,7 +70,6 @@ namespace config
 	extern il2cppstring font_asset_name;
 	extern il2cppstring tmpro_font_asset_name;
 	extern unordered_map<il2cppstring, ReplaceFontAsset> font_asset_by_path;
-	extern bool auto_fullscreen;
 	extern int graphics_quality;
 	extern int anti_aliasing;
 	extern int anisotropic_filtering;
@@ -150,6 +148,8 @@ namespace config
 
 	namespace runtime
 	{
+		extern int initialWidth;
+		extern int initialHeight;
 		extern bool useDefaultFPS;
 		extern float ratioVertical;
 		extern float ratioHorizontal;

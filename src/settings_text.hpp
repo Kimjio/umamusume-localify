@@ -497,19 +497,6 @@ namespace LocalifySettings
 			return IL2CPP_STRING("解像度固定解除");
 		}
 
-		if (id == "use_system_resolution")
-		{
-			if (isKor)
-			{
-				return IL2CPP_STRING("시스템 해상도 사용");
-			}
-			if (isEng)
-			{
-				return IL2CPP_STRING("Use system resolution");
-			}
-			return IL2CPP_STRING("システムの解像度を使用する");
-		}
-
 		if (id == "ui_scale")
 		{
 			if (isKor)
@@ -521,19 +508,6 @@ namespace LocalifySettings
 				return IL2CPP_STRING("UI scale");
 			}
 			return IL2CPP_STRING("UIスケール");
-		}
-
-		if (id == "auto_fullscreen")
-		{
-			if (isKor)
-			{
-				return IL2CPP_STRING("자동 전체화면");
-			}
-			if (isEng)
-			{
-				return IL2CPP_STRING("Auto fullscreen");
-			}
-			return IL2CPP_STRING("自動全画面");
 		}
 
 		if (id == "freeform_window")

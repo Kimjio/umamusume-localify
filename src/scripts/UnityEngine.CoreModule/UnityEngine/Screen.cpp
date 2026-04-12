@@ -42,7 +42,7 @@ static void InitAddress()
 	get_width_addr = il2cpp_resolve_icall("UnityEngine.Screen::get_width()");
 	get_height_addr = il2cpp_resolve_icall("UnityEngine.Screen::get_height()");
 	get_fullScreen_addr = il2cpp_resolve_icall("UnityEngine.Screen::get_fullScreen()");
-	get_currentResolution_Injected_addr = il2cpp_resolve_icall("UnityEngine.Screen::get_currentResolution_Injected()");
+	get_currentResolution_Injected_addr = il2cpp_resolve_icall("UnityEngine.Screen::get_currentResolution_Injected(UnityEngine.Resolution&)");
 	RequestOrientation_addr = il2cpp_resolve_icall("UnityEngine.Screen::RequestOrientation()");
 }
 

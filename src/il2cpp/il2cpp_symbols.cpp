@@ -606,6 +606,15 @@ namespace il2cpp_symbols
 		return nullptr;
 	}
 
+	const MethodInfo* get_method(Il2CppClass* klass, const char* name, int argsCount)
+	{
+		if (klass)
+		{
+			return il2cpp_class_get_method_from_name(klass, name, argsCount);
+		}
+		return nullptr;
+	}
+
 	const Il2CppClass* find_class(const char* assemblyName, const char* namespaze,
 		const std::function<bool(const Il2CppClass*)>& predict)
 	{

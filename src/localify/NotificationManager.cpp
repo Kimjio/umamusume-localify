@@ -107,12 +107,7 @@ namespace Localify
 
 	void NotificationManager::Show(Il2CppString* text)
 	{
-		if (!notification)
-		{
-			return;
-		}
-
-		if (!UnityEngine::Object::IsNativeObjectAlive(notification))
+		if (!notification || !UnityEngine::Object::IsNativeObjectAlive(notification))
 		{
 			return;
 		}
@@ -120,6 +115,11 @@ namespace Localify
 		auto canvasGroupField = il2cpp_class_get_field_from_name(notification->klass, "canvasGroup");
 		Il2CppObject* canvasGroup;
 		il2cpp_field_get_value(notification, canvasGroupField, &canvasGroup);
+		
+		if (!canvasGroup)
+		{
+			return;
+		}
 
 		auto _tweenerField = il2cpp_class_get_field_from_name(notification->klass, "_tweener");
 		Il2CppObject* _tweener;
@@ -178,12 +178,7 @@ namespace Localify
 
 	void NotificationManager::SetDisplayTime(float time)
 	{
-		if (!notification)
-		{
-			return;
-		}
-
-		if (!UnityEngine::Object::IsNativeObjectAlive(notification))
+		if (!notification || !UnityEngine::Object::IsNativeObjectAlive(notification))
 		{
 			return;
 		}
@@ -194,12 +189,7 @@ namespace Localify
 
 	void NotificationManager::SetFontSize(int size)
 	{
-		if (!notification)
-		{
-			return;
-		}
-
-		if (!UnityEngine::Object::IsNativeObjectAlive(notification))
+		if (!notification || !UnityEngine::Object::IsNativeObjectAlive(notification))
 		{
 			return;
 		}
@@ -214,12 +204,7 @@ namespace Localify
 
 	void NotificationManager::SetFontColor(il2cppstring color)
 	{
-		if (!notification)
-		{
-			return;
-		}
-
-		if (!UnityEngine::Object::IsNativeObjectAlive(notification))
+		if (!notification || !UnityEngine::Object::IsNativeObjectAlive(notification))
 		{
 			return;
 		}
@@ -233,12 +218,7 @@ namespace Localify
 
 	void NotificationManager::SetOutlineSize(il2cppstring size)
 	{
-		if (!notification)
-		{
-			return;
-		}
-
-		if (!UnityEngine::Object::IsNativeObjectAlive(notification))
+		if (!notification || !UnityEngine::Object::IsNativeObjectAlive(notification))
 		{
 			return;
 		}
@@ -253,12 +233,7 @@ namespace Localify
 
 	void NotificationManager::SetOutlineColor(il2cppstring color)
 	{
-		if (!notification)
-		{
-			return;
-		}
-
-		if (!UnityEngine::Object::IsNativeObjectAlive(notification))
+		if (!notification || !UnityEngine::Object::IsNativeObjectAlive(notification))
 		{
 			return;
 		}
@@ -273,12 +248,7 @@ namespace Localify
 
 	void NotificationManager::SetBackgroundAlpha(float alpha)
 	{
-		if (!notification)
-		{
-			return;
-		}
-
-		if (!UnityEngine::Object::IsNativeObjectAlive(notification))
+		if (!notification || !UnityEngine::Object::IsNativeObjectAlive(notification))
 		{
 			return;
 		}
@@ -290,19 +260,25 @@ namespace Localify
 
 	void NotificationManager::SetPosition(float x, float y)
 	{
-		if (!notification)
-		{
-			return;
-		}
-
-		if (!UnityEngine::Object::IsNativeObjectAlive(notification))
+		if (!notification || !UnityEngine::Object::IsNativeObjectAlive(notification))
 		{
 			return;
 		}
 
 		auto canvasGroupField = il2cpp_class_get_field_from_name(notification->klass, "canvasGroup");
+
+		if (!canvasGroupField)
+		{
+			return;
+		}
+
 		Il2CppObject* canvasGroup;
 		il2cpp_field_get_value(notification, canvasGroupField, &canvasGroup);
+
+		if (!canvasGroup || !UnityEngine::Object::IsNativeObjectAlive(canvasGroup))
+		{
+			return;
+		}
 
 		auto canvasGroupTransform = il2cpp_class_get_method_from_name_type<Il2CppObject * (*)(Il2CppObject*)>(canvasGroup->klass, "get_transform", 0)->methodPointer(canvasGroup);
 

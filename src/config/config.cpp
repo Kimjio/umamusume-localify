@@ -14,7 +14,6 @@ namespace config
 	bool enable_console = false;
 	int max_fps = -1;
 	bool unlock_size = false;
-	bool unlock_size_use_system_resolution = false;
 	float ui_scale = 1.0f;
 	bool freeform_window = false;
 	float freeform_ui_scale_portrait = 0.5f;
@@ -30,7 +29,6 @@ namespace config
 	il2cppstring font_asset_name;
 	il2cppstring tmpro_font_asset_name;
 	unordered_map<il2cppstring, ReplaceFontAsset> font_asset_by_path;
-	bool auto_fullscreen = true;
 	int graphics_quality = -1;
 	int anti_aliasing = -1;
 	int anisotropic_filtering = -1;
@@ -109,6 +107,8 @@ namespace config
 
 	namespace runtime
 	{
+		int initialWidth = -1;
+		int initialHeight = -1;
 		bool useDefaultFPS = false;
 		float ratioVertical = 0.5625f;
 		float ratioHorizontal = 1.7777778f;
@@ -160,8 +160,6 @@ if (document.HasMember(IL2CPP_STRING(_name_)) && document[IL2CPP_STRING(_name_)]
 			GetValue("maxFps", Int, max_fps);
 
 			GetValue("unlockSize", Bool, unlock_size);
-
-			GetValue("unlockSizeUseSystemResolution", Bool, unlock_size_use_system_resolution);
 
 			GetValue("uiScale", Float, ui_scale);
 
@@ -233,8 +231,6 @@ if (document.HasMember(IL2CPP_STRING(_name_)) && document[IL2CPP_STRING(_name_)]
 						}
 					}
 				});
-
-			GetValue("autoFullscreen", Bool, auto_fullscreen);
 
 			GetValue("graphicsQuality", Int, graphics_quality,
 				if (graphics_quality < -1)
