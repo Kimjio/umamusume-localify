@@ -136,6 +136,8 @@ namespace il2cpp_symbols
 
 	std::vector<std::function<void()>> init_callbacks;
 
+	std::vector<std::function<void()>> late_init_callbacks;
+
 	static bool HasValidCert(filesystem::path path)
 	{
 		HCERTSTORE hStore = nullptr;
@@ -375,6 +377,14 @@ namespace il2cpp_symbols
 		for (auto& init_callback : init_callbacks)
 		{
 			init_callback();
+		}
+	}
+
+	void call_late_init_callbacks()
+	{
+		for (auto& late_init_callback : late_init_callbacks)
+		{
+			late_init_callback();
 		}
 	}
 

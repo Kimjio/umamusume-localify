@@ -28,7 +28,7 @@ static Il2CppString* UnityWebRequest_get_error_hook(Il2CppObject* self)
 
 static void InitAddress()
 {
-	UnityWebRequest_get_error_addr = il2cpp_symbols::get_method_pointer("UnityEngine.UnityWebRequestModule.dll", "UnityEngine.Networking", "UnityWebRequest", "get_error", 0);
+	UnityWebRequest_get_error_addr = il2cpp_symbols::get_method_pointer(ASSEMBLY_NAME, "UnityEngine.Networking", "UnityWebRequest", "get_error", 0);
 }
 
 static void HookMethods()

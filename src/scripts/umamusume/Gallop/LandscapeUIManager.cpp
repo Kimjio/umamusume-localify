@@ -82,10 +82,10 @@ static float LandscapeUIManager_get_WindowScaleRate_hook()
 
 static void InitAddress()
 {
-	auto LandscapeUIManager_klass = il2cpp_symbols::get_class("umamusume.dll", "Gallop", "LandscapeUIManager");
+	auto LandscapeUIManager_klass = il2cpp_symbols::get_class(ASSEMBLY_NAME, "Gallop", "LandscapeUIManager");
 	if (!LandscapeUIManager_klass)
 	{
-		LandscapeUIManager_klass = il2cpp_symbols::get_class("umamusume.dll", "Gallop", "SteamUIManager");
+		LandscapeUIManager_klass = il2cpp_symbols::get_class(ASSEMBLY_NAME, "Gallop", "SteamUIManager");
 	}
 	LandscapeUIManager_Initialize_addr = il2cpp_symbols::get_method_pointer(LandscapeUIManager_klass, "Initialize", 2);
 	LandscapeUIManager_get_WindowScaleRate_addr = il2cpp_symbols::get_method_pointer(LandscapeUIManager_klass, "get_WindowScaleRate", 0);

@@ -29,6 +29,8 @@ namespace
 
 	void* get_targetFrameRate_addr = nullptr;
 
+	void* get_systemLanguage_addr = nullptr;
+
 	void* get_internetReachability_addr = nullptr;
 }
 
@@ -53,6 +55,7 @@ static void InitAddress()
 	get_persistentDataPath_addr = il2cpp_resolve_icall("UnityEngine.Application::get_persistentDataPath()");
 	set_targetFrameRate_addr = il2cpp_resolve_icall("UnityEngine.Application::set_targetFrameRate(System.Int32)");
 	get_targetFrameRate_addr = il2cpp_resolve_icall("UnityEngine.Application::get_targetFrameRate()");
+	get_systemLanguage_addr = il2cpp_resolve_icall("UnityEngine.Application::get_systemLanguage()");
 	get_internetReachability_addr = il2cpp_resolve_icall("UnityEngine.Application::get_internetReachability()");
 }
 
@@ -117,6 +120,11 @@ namespace UnityEngine
 	int Application::targetFrameRate()
 	{
 		return reinterpret_cast<int (*)()>(get_targetFrameRate_addr)();
+	}
+
+	SystemLanguage Application::systemLanguage()
+	{
+		return reinterpret_cast<SystemLanguage(*)()>(get_systemLanguage_addr)();
 	}
 
 	NetworkReachability Application::internetReachability()

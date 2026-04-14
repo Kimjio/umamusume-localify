@@ -92,6 +92,7 @@
 
 #include "scripts/UnityEngine.CoreModule/UnityEngine/Application.hpp"
 #include "scripts/UnityEngine.CoreModule/UnityEngine/CastHelper.hpp"
+#include "scripts/UnityEngine.CoreModule/UnityEngine/Color32.hpp"
 #include "scripts/UnityEngine.CoreModule/UnityEngine/Display.hpp"
 #include "scripts/UnityEngine.CoreModule/UnityEngine/Object.hpp"
 #include "scripts/UnityEngine.CoreModule/UnityEngine/Shader.hpp"
@@ -123,15 +124,21 @@
 #include "scripts/umamusume/Gallop/RaceCameraManager.hpp"
 #include "scripts/umamusume/Gallop/WebViewManager.hpp"
 #include "scripts/umamusume/Gallop/TitleViewController.hpp"
+#include "scripts/umamusume/Gallop/TextCommon.hpp"
 #include "scripts/umamusume/Gallop/TextFontManager.hpp"
 #include "scripts/umamusume/Gallop/Screen.hpp"
 #include "scripts/umamusume/Gallop/StoryViewController.hpp"
+#include "scripts/umamusume/Gallop/FrameRateController.hpp"
 #include "scripts/umamusume/Gallop/GameSystem.hpp"
+#include "scripts/umamusume/Gallop/GallopUtil.hpp"
+#include "scripts/umamusume/Gallop/GraphicSettings.hpp"
 #ifdef _MSC_VER
 #include "scripts/umamusume/Gallop/StandaloneWindowResize.hpp"
 #include "scripts/umamusume/Gallop/WindowsGamepadControl.hpp"
 #include "scripts/umamusume/Gallop/LandscapeUIManager.hpp"
 #endif
+
+#include "scripts/Plugins/AnimateToUnity/AnRootManager.hpp"
 
 #include "scripts/Plugins/CodeStage/AntiCheat/ObscuredTypes/ObscuredBool.hpp"
 #include "scripts/Plugins/CodeStage/AntiCheat/ObscuredTypes/ObscuredInt.hpp"
@@ -190,103 +197,6 @@ namespace
 		printf("\n\n");
 	}
 
-	void DecryptManifestDB()
-	{
-		auto CuteCoreDevice = il2cpp_symbols::get_class("Cute.Core.Assembly.dll", "Cute.Core", "Device");
-		Il2CppString* persistentDataPath = il2cpp_class_get_method_from_name_type<Il2CppString * (*)()>(CuteCoreDevice, "GetPersistentDataPath", 0)->methodPointer();
-
-		il2cppstring path = persistentDataPath->chars + il2cppstring(IL2CPP_STRING("/meta"));
-
-		if (!filesystem::exists(path))
-		{
-			return;
-		}
-
-		ifstream file{ filesystem::path(path).string(), ios::binary };
-		string magic = string(16, '\0');
-		file.read(magic.data(), 16);
-		file.close();
-
-		if (!magic.starts_with("SQLite format 3"))
-		{
-			sqlite3* db;
-			sqlite3_open(il2cpp_u8(path).data(), &db);
-
-			sqlite3mc_config(db, "cipher", CODEC_TYPE_CHACHA20);
-
-			vector<char> key;
-
-			if (Game::CurrentGameRegion == Game::Region::JPN)
-			{
-				key = { 0x6D, 0x5B, 0x65, 0x33, 0x63, 0x36, 0x63, 0x25, 0x54, 0x71, 0x2D, 0x73, 0x50, 0x53, 0x63, 0x38, 0x6D, 0x34, 0x37, 0x7B, 0x35, 0x63, 0x70, 0x23, 0x37, 0x34, 0x53, 0x29, 0x73, 0x43, 0x36, 0x33 };
-			}
-			else if (Game::CurrentGameRegion == Game::Region::ENG)
-			{
-				key = { 0x56, 0x63, 0x6B, 0x63, 0x42, 0x72, 0x37, 0x76, 0x65, 0x70, 0x41, 0x62 };
-			}
-
-			if (!key.empty())
-			{
-				sqlite3_key(db, key.data(), key.size());
-				sqlite3_rekey(db, nullptr, 0);
-			}
-
-			sqlite3_close(db);
-		}
-	}
-
-	void* InitializeApplication_orig = nullptr;
-	void InitializeApplication_hook()
-	{
-		if (Game::CurrentGameRegion == Game::Region::KOR)
-		{
-			auto CuteCoreDevice = il2cpp_symbols::get_class("Cute.Core.Assembly.dll", "Cute.Core", "Device");
-			auto persistentDataPathField = il2cpp_class_get_field_from_name(CuteCoreDevice, "persistentDataPath");
-
-			il2cpp_field_static_set_value(persistentDataPathField, UnityEngine::Application::persistentDataPath());
-		}
-
-		if (!config::persistent_data_path.empty())
-		{
-			auto CuteCoreDevice = il2cpp_symbols::get_class("Cute.Core.Assembly.dll", "Cute.Core", "Device");
-			auto persistentDataPathField = il2cpp_class_get_field_from_name(CuteCoreDevice, "persistentDataPath");
-			if (filesystem::path(config::persistent_data_path.data()).is_relative())
-			{
-				config::persistent_data_path.insert(0, filesystem::current_path().IL2CPP_BASIC_STRING().append(IL2CPP_STRING("/")));
-			}
-			if (filesystem::exists(config::persistent_data_path))
-			{
-				if (filesystem::is_directory(config::persistent_data_path))
-				{
-					il2cpp_field_static_set_value(persistentDataPathField, il2cpp_string_new16(config::persistent_data_path.data()));
-				}
-			}
-			else if (filesystem::create_directories(config::persistent_data_path))
-			{
-				il2cpp_field_static_set_value(persistentDataPathField, il2cpp_string_new16(config::persistent_data_path.data()));
-			}
-		}
-
-		DecryptManifestDB();
-
-		patch_game_assembly();
-
-		reinterpret_cast<decltype(InitializeApplication_hook)*>(InitializeApplication_orig)();
-	}
-
-	void* UpdateDispatcher_Initialize_orig = nullptr;
-	void UpdateDispatcher_Initialize_hook()
-	{
-		auto klass = il2cpp_symbols::get_class("Cute.Core.Assembly.dll", "Cute.Core", "UpdateDispatcher");
-		auto isQuitField = il2cpp_class_get_field_from_name(klass, "isQuit");
-		bool isQuit = false;
-
-		il2cpp_field_static_set_value(isQuitField, &isQuit);
-	}
-
-	void* SetResolution_Injected_orig;
-	void SetResolution_Injected_hook(int width, int height, int fullscreenMode, UnityEngine::RefreshRate* perferredRefreshRate);
-
 	void init_il2cpp()
 	{
 		if (config::dump_il2cpp)
@@ -297,13 +207,7 @@ namespace
 		il2cpp_symbols::init_defaults();
 		il2cpp_symbols::call_init_callbacks();
 
-		auto InitializeApplication = il2cpp_symbols::get_method_pointer("umamusume.dll", "Gallop", "GameSystem", "InitializeApplication", 0);
-		MH_CreateHook(InitializeApplication, InitializeApplication_hook, &InitializeApplication_orig);
-		MH_EnableHook(InitializeApplication);
-
-		auto UpdateDispatcher_Initialize_addr = il2cpp_symbols::get_method_pointer("Cute.Core.Assembly.dll", "Cute.Core", "UpdateDispatcher", "Initialize", 0);
-		MH_CreateHook(UpdateDispatcher_Initialize_addr, UpdateDispatcher_Initialize_hook, &UpdateDispatcher_Initialize_orig);
-		MH_EnableHook(UpdateDispatcher_Initialize_addr);
+		il2cpp_symbols::late_init_callbacks.emplace_back(patch_game_assembly);
 
 		il2cpp_runtime_class_init(il2cpp_symbols::get_class("UnityEngine.SubsystemsModule.dll", "UnityEngine", "SubsystemManager"));
 		il2cpp_runtime_class_init(il2cpp_symbols::get_class("UnityEngine.SubsystemsModule.dll", "UnityEngine.SubsystemsImplementation", "SubsystemDescriptorStore"));
@@ -313,8 +217,6 @@ namespace
 		{
 			KillProcessByName(L"ucldr_Umamusume_KR_loader_x64.exe");
 		}
-
-		init_sqlite3();
 	}
 
 	void* il2cpp_init_orig = nullptr;
@@ -339,8 +241,6 @@ namespace
 	void* currentPlayerHandle;
 
 	Il2CppObject* currentElem;
-
-
 
 	void ShowCaptionByNotification(Il2CppObject* audioManager, Il2CppObject* elem)
 	{
@@ -425,17 +325,12 @@ namespace
 				}
 			}
 
-			auto LineHeadWrap =
-				il2cpp_symbols::get_method_pointer<Il2CppString * (*)(Il2CppString*, int)>("umamusume.dll", "Gallop", "GallopUtil",
-					"LineHeadWrap", 2);
-
 			float length =
-				il2cpp_class_get_method_from_name_type<float (*)(Il2CppObject*, Il2CppString*, int)>(audioManager->klass, "GetCueLength",
-					2)->methodPointer(audioManager, cueSheet, cueId);
+				il2cpp_class_get_method_from_name_type<float (*)(Il2CppObject*, Il2CppString*, int)>(audioManager->klass, "GetCueLength", 2)->methodPointer(audioManager, cueSheet, cueId);
 
 			Localify::NotificationManager::SetDisplayTime(length);
 
-			Localify::NotificationManager::Show(LineHeadWrap(il2cpp_string_new16(u16Text.data()), config::character_system_text_caption_line_char_count));
+			Localify::NotificationManager::Show(Gallop::GallopUtil::LineHeadWrap(il2cpp_string_new16(u16Text.data()), config::character_system_text_caption_line_char_count));
 		}
 	}
 
@@ -1043,486 +938,12 @@ namespace
 		return reinterpret_cast<decltype(GetProcAddress_hook)*>(GetProcAddress_orig)(hModule, lpProcName);
 	}
 
-	Il2CppObject* GetInt32Instance(int value)
-	{
-		return il2cpp_value_box(il2cpp_defaults.int32_class, &value);
-	}
-
-	void* populate_with_errors_orig = nullptr;
-	bool populate_with_errors_hook(Il2CppObject* _this, Il2CppString* str, UnityEngine::TextGenerationSettings* settings, void* context)
-	{
-		return reinterpret_cast<decltype(populate_with_errors_hook)*>(populate_with_errors_orig) (
-			_this, local::get_localized_string(str), settings, context
-			);
-	}
-
-	void ReplaceTextMeshFont(Il2CppObject* textMesh, Il2CppObject* meshRenderer)
-	{
-		Il2CppObject* font = GetCustomFont();
-
-		if (!font)
-		{
-			return;
-		}
-
-		Il2CppObject* fontMaterial = il2cpp_class_get_method_from_name_type<Il2CppObject * (*)(Il2CppObject * _this)>(font->klass, "get_material", 0)->methodPointer(font);
-		Il2CppObject* fontTexture = il2cpp_class_get_method_from_name_type<Il2CppObject * (*)(Il2CppObject * _this)>(fontMaterial->klass, "get_mainTexture", 0)->methodPointer(fontMaterial);
-
-		il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject* _this, Il2CppObject* font)>(textMesh->klass, "set_font", 1)->methodPointer(textMesh, font);
-		if (meshRenderer)
-		{
-			auto get_sharedMaterial = il2cpp_class_get_method_from_name_type<Il2CppObject * (*)(Il2CppObject * _this)>(meshRenderer->klass, "GetSharedMaterial", 0)->methodPointer;
-
-			Il2CppObject* sharedMaterial = get_sharedMaterial(meshRenderer);
-			il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject* _this, Il2CppObject* texture)>(sharedMaterial->klass, "set_mainTexture", 1)->methodPointer(sharedMaterial, fontTexture);
-		}
-	}
-
-	void* get_preferred_width_orig = nullptr;
-	float get_preferred_width_hook(void* _this, Il2CppString* str, UnityEngine::TextGenerationSettings* settings)
-	{
-		return reinterpret_cast<decltype(get_preferred_width_hook)*>(get_preferred_width_orig) (
-			_this, local::get_localized_string(str), settings
-			);
-	}
-
-	void* an_text_set_material_to_textmesh_orig = nullptr;
-	void an_text_set_material_to_textmesh_hook(Il2CppObject* _this)
-	{
-		reinterpret_cast<decltype(an_text_set_material_to_textmesh_hook)*>(an_text_set_material_to_textmesh_orig)(_this);
-		if (!(config::replace_to_custom_font && config::runtime::fontAssets)) return;
-
-		FieldInfo* mainField = il2cpp_class_get_field_from_name(_this->klass, "_mainTextMesh");
-		FieldInfo* mainRenderer = il2cpp_class_get_field_from_name(_this->klass, "_mainTextMeshRenderer");
-
-		FieldInfo* outlineField = il2cpp_class_get_field_from_name(_this->klass, "_outlineTextMeshList"); //List<TextMesh>
-		FieldInfo* outlineFieldRenderers = il2cpp_class_get_field_from_name(_this->klass, "_outlineTextMeshRendererList"); //List<MeshRenderer>
-
-		FieldInfo* shadowField = il2cpp_class_get_field_from_name(_this->klass, "_shadowTextMesh");
-		FieldInfo* shadowFieldRenderer = il2cpp_class_get_field_from_name(_this->klass, "_shadowTextMeshRenderer");
-
-		Il2CppObject* mainMesh;
-		Il2CppObject* mainMeshRenderer;
-
-		Il2CppObject* outlineMeshes;
-		Il2CppObject* outlineMeshRenderers;
-
-		Il2CppObject* shadowMesh;
-		Il2CppObject* shadowMeshRenderer;
-
-		il2cpp_field_get_value(_this, mainField, &mainMesh);
-		il2cpp_field_get_value(_this, mainRenderer, &mainMeshRenderer);
-
-		ReplaceTextMeshFont(mainMesh, mainMeshRenderer);
-
-		vector<Il2CppObject*> textMeshies;
-		il2cpp_field_get_value(_this, outlineField, &outlineMeshes);
-		if (outlineMeshes)
-		{
-			FieldInfo* itemsField = il2cpp_class_get_field_from_name(outlineMeshes->klass, "_items");
-			Il2CppArraySize* arr;
-			il2cpp_field_get_value(outlineMeshes, itemsField, &arr);
-			if (arr)
-			{
-				for (int i = 0; i < arr->max_length; i++)
-				{
-					Il2CppObject* mesh = reinterpret_cast<Il2CppObject*>(arr->vector[i]);
-					if (!mesh)
-					{
-						break;
-					}
-					textMeshies.emplace_back(mesh);
-				}
-			}
-		}
-
-		il2cpp_field_get_value(_this, outlineFieldRenderers, &outlineMeshRenderers);
-		if (outlineMeshRenderers)
-		{
-			FieldInfo* itemsField = il2cpp_class_get_field_from_name(outlineMeshRenderers->klass, "_items");
-			Il2CppArraySize* arr;
-			il2cpp_field_get_value(outlineMeshRenderers, itemsField, &arr);
-			if (arr)
-			{
-				for (int i = 0; i < textMeshies.size(); i++)
-				{
-					Il2CppObject* meshRenderer = reinterpret_cast<Il2CppObject*>(arr->vector[i]);
-					ReplaceTextMeshFont(textMeshies[i], meshRenderer);
-				}
-			}
-		}
-
-		il2cpp_field_get_value(_this, shadowField, &shadowMesh);
-		if (shadowMesh)
-		{
-			il2cpp_field_get_value(_this, shadowFieldRenderer, &shadowMeshRenderer);
-			ReplaceTextMeshFont(shadowMesh, shadowMeshRenderer);
-		}
-	}
-
-	void* an_text_fix_data_orig = nullptr;
-	void an_text_fix_data_hook(Il2CppObject* _this)
-	{
-		reinterpret_cast<decltype(an_text_fix_data_hook)*>(an_text_fix_data_orig)(_this);
-		FieldInfo* field = il2cpp_class_get_field_from_name(_this->klass, "_text");
-		Il2CppString* str;
-		il2cpp_field_get_value(_this, field, &str);
-		il2cpp_field_set_value(_this, field, local::get_localized_string(str));
-	}
-
-	void* update_orig = nullptr;
-	void* update_hook(Il2CppObject* _this, void* updateType, float deltaTime, float independentTime)
-	{
-		return reinterpret_cast<decltype(update_hook)*>(update_orig)(_this, updateType, deltaTime * config::ui_animation_scale, independentTime * config::ui_animation_scale);
-	}
-
-	unordered_map<sqlite3_stmt*, tuple<sqlite3_stmt*, string, bool>> text_queries;
-	unordered_map<sqlite3_stmt*, bool> replacement_queries_can_next;
-
-	sqlite3_stmt* select_character_system_text_characterId;
-	tuple<sqlite3_stmt*, bool> select_character_system_text_characterId_replacement;
-	bool select_character_system_text_characterId_replacement_can_next = true;
-
-	void* sqlite3_prepare_v2_orig = nullptr;
-	int sqlite3_prepare_v2_hook(sqlite3* db, const char* zSql, int nBytes, sqlite3_stmt** ppStmt, const char** pzTail)
-	{
-		auto result = reinterpret_cast<decltype(sqlite3_prepare_v2_hook)*>(sqlite3_prepare_v2_orig)(db, zSql, nBytes, ppStmt, pzTail);
-
-		string sql = string(zSql, nBytes);
-
-		if (sql.find("text_data") != string::npos ||
-			sql.find("race_jikkyo_comment") != string::npos ||
-			sql.find("race_jikkyo_message") != string::npos)
-		{
-			sqlite3_stmt* pStmt = *ppStmt;
-
-			if (MasterDB::replacementMasterDB)
-			{
-				sqlite3_stmt* stmt;
-				auto res = reinterpret_cast<decltype(sqlite3_prepare_v2_hook)*>(sqlite3_prepare_v2_orig)(MasterDB::replacementMasterDB, zSql, nBytes, &stmt, pzTail);
-				text_queries.emplace(pStmt, make_tuple(stmt, sql, false));
-
-				if (res != SQLITE_OK)
-				{
-					cout << "ERROR: sqlite3_prepare_v2_hook SQL:" << sql << endl;
-				}
-			}
-		}
-
-		if (sql.find("character_system_text") != string::npos)
-		{
-			sqlite3_stmt* pStmt = *ppStmt;
-
-			if (sql.find("`voice_id`=?") != string::npos)
-			{
-				if (MasterDB::replacementMasterDB)
-				{
-					sqlite3_stmt* stmt;
-					auto res = reinterpret_cast<decltype(sqlite3_prepare_v2_hook)*>(sqlite3_prepare_v2_orig)(MasterDB::replacementMasterDB, zSql, nBytes, &stmt, pzTail);
-					text_queries.emplace(pStmt, make_tuple(stmt, sql, false));
-
-					if (res != SQLITE_OK)
-					{
-						cout << "ERROR: sqlite3_prepare_v2_hook SQL:" << sql << endl;
-					}
-				}
-			}
-			else
-			{
-				select_character_system_text_characterId = pStmt;
-
-
-				if (MasterDB::replacementMasterDB)
-				{
-					auto res = reinterpret_cast<decltype(sqlite3_prepare_v2_hook)*>(sqlite3_prepare_v2_orig)(MasterDB::replacementMasterDB, zSql, nBytes, &get<0>(select_character_system_text_characterId_replacement), pzTail);
-					if (res != SQLITE_OK)
-					{
-						cout << "ERROR: sqlite3_prepare_v2_hook SQL:" << sql << endl;
-					}
-				}
-			}
-		}
-
-		return result;
-	}
-
-	int sqlite3_step_hook(sqlite3_stmt* pStmt)
-	{
-		if (text_queries.contains(pStmt))
-		{
-			auto& stmt = text_queries.at(pStmt);
-			if (get<1>(stmt).find("`race_jikkyo_message`;") != string::npos ||
-				get<1>(stmt).find("`race_jikkyo_comment`;") != string::npos)
-			{
-				if (replacement_queries_can_next.find(pStmt) == replacement_queries_can_next.end())
-				{
-					replacement_queries_can_next.emplace(pStmt, true);
-				}
-				if (replacement_queries_can_next.at(pStmt))
-				{
-					get<2>(stmt) = (reinterpret_cast<decltype(sqlite3_step_hook)*>(sqlite3_step_orig)(get<0>(stmt)) == SQLITE_ROW);
-				}
-			}
-			else
-			{
-				get<2>(stmt) = (reinterpret_cast<decltype(sqlite3_step_hook)*>(sqlite3_step_orig)(get<0>(stmt)) == SQLITE_ROW);
-			}
-		}
-
-		if (pStmt == select_character_system_text_characterId)
-		{
-			if (get<0>(select_character_system_text_characterId_replacement))
-			{
-				auto res = reinterpret_cast<decltype(sqlite3_step_hook)*>(sqlite3_step_orig)(pStmt);
-
-				if (res == SQLITE_ROW)
-				{
-					int voiceId = sqlite3_column_int(pStmt, 0);
-
-					if (select_character_system_text_characterId_replacement_can_next)
-					{
-						get<1>(select_character_system_text_characterId_replacement) = (sqlite3_step(get<0>(select_character_system_text_characterId_replacement)) == SQLITE_ROW);
-					}
-
-					if (get<1>(select_character_system_text_characterId_replacement))
-					{
-						select_character_system_text_characterId_replacement_can_next = voiceId == sqlite3_column_int(get<0>(select_character_system_text_characterId_replacement), 0);
-					}
-				}
-
-				return res;
-			}
-		}
-
-		return reinterpret_cast<decltype(sqlite3_step_hook)*>(sqlite3_step_orig)(pStmt);
-	}
-
-	int sqlite3_reset_hook(sqlite3_stmt* pStmt)
-	{
-		if (text_queries.contains(pStmt))
-		{
-			auto& stmt = text_queries.at(pStmt);
-			reinterpret_cast<decltype(sqlite3_reset_hook)*>(sqlite3_reset_orig)(get<0>(stmt));
-			get<2>(stmt) = false;
-			replacement_queries_can_next.insert_or_assign(pStmt, true);
-		}
-
-		if (pStmt == select_character_system_text_characterId && get<0>(select_character_system_text_characterId_replacement))
-		{
-			reinterpret_cast<decltype(sqlite3_reset_hook)*>(sqlite3_reset_orig)(get<0>(select_character_system_text_characterId_replacement));
-			get<1>(select_character_system_text_characterId_replacement) = false;
-			select_character_system_text_characterId_replacement_can_next = true;
-		}
-
-		return reinterpret_cast<decltype(sqlite3_reset_hook)*>(sqlite3_reset_orig)(pStmt);
-	}
-
-	int sqlite3_bind_text_hook(sqlite3_stmt* pStmt, int i, const char* zData, int nData, void (*xDel)(void*))
-	{
-		if (text_queries.contains(pStmt))
-		{
-			auto& stmt = text_queries.at(pStmt);
-			reinterpret_cast<decltype(sqlite3_bind_text_hook)*>(sqlite3_bind_text_orig)(get<0>(stmt), i, zData, nData, xDel);
-		}
-
-		if (pStmt == select_character_system_text_characterId && get<0>(select_character_system_text_characterId_replacement))
-		{
-			reinterpret_cast<decltype(sqlite3_bind_text_hook)*>(sqlite3_bind_text_orig)(get<0>(select_character_system_text_characterId_replacement), i, zData, nData, xDel);
-		}
-
-		return reinterpret_cast<decltype(sqlite3_bind_text_hook)*>(sqlite3_bind_text_orig)(pStmt, i, zData, nData, xDel);
-	}
-
-	int sqlite3_bind_int_hook(sqlite3_stmt* pStmt, int i, int iValue)
-	{
-		if (text_queries.contains(pStmt))
-		{
-			auto& stmt = text_queries.at(pStmt);
-			reinterpret_cast<decltype(sqlite3_bind_int_hook)*>(sqlite3_bind_int_orig)(get<0>(stmt), i, iValue);
-		}
-
-		if (pStmt == select_character_system_text_characterId && get<0>(select_character_system_text_characterId_replacement))
-		{
-			reinterpret_cast<decltype(sqlite3_bind_int_hook)*>(sqlite3_bind_int_orig)(get<0>(select_character_system_text_characterId_replacement), i, iValue);
-		}
-
-		return reinterpret_cast<decltype(sqlite3_bind_int_hook)*>(sqlite3_bind_int_orig)(pStmt, i, iValue);
-	}
-
-	int sqlite3_bind_int64_hook(sqlite3_stmt* pStmt, int i, sqlite_int64 iValue)
-	{
-		if (text_queries.contains(pStmt))
-		{
-			auto& stmt = text_queries.at(pStmt);
-			reinterpret_cast<decltype(sqlite3_bind_int64_hook)*>(sqlite3_bind_int64_orig)(get<0>(stmt), i, iValue);
-		}
-
-		if (pStmt == select_character_system_text_characterId && get<0>(select_character_system_text_characterId_replacement))
-		{
-			reinterpret_cast<decltype(sqlite3_bind_int64_hook)*>(sqlite3_bind_int64_orig)(get<0>(select_character_system_text_characterId_replacement), i, iValue);
-		}
-
-		return reinterpret_cast<decltype(sqlite3_bind_int64_hook)*>(sqlite3_bind_int64_orig)(pStmt, i, iValue);
-	}
-
-	int sqlite3_bind_double_hook(sqlite3_stmt* pStmt, int i, double rValue)
-	{
-		if (text_queries.contains(pStmt))
-		{
-			auto& stmt = text_queries.at(pStmt);
-			reinterpret_cast<decltype(sqlite3_bind_double_hook)*>(sqlite3_bind_double_orig)(get<0>(stmt), i, rValue);
-		}
-
-		if (pStmt == select_character_system_text_characterId && get<0>(select_character_system_text_characterId_replacement))
-		{
-			reinterpret_cast<decltype(sqlite3_bind_int64_hook)*>(sqlite3_bind_int64_orig)(get<0>(select_character_system_text_characterId_replacement), i, rValue);
-		}
-
-		return reinterpret_cast<decltype(sqlite3_bind_double_hook)*>(sqlite3_bind_double_orig)(pStmt, i, rValue);
-	}
-
-	int sqlite3_finalize_hook(sqlite3_stmt* pStmt)
-	{
-		if (text_queries.contains(pStmt))
-		{
-			auto& stmt = text_queries.at(pStmt);
-			reinterpret_cast<decltype(sqlite3_finalize_hook)*>(sqlite3_finalize_orig)(get<0>(stmt));
-			text_queries.erase(pStmt);
-		}
-
-		if (pStmt == select_character_system_text_characterId && get<0>(select_character_system_text_characterId_replacement))
-		{
-			reinterpret_cast<decltype(sqlite3_finalize_hook)*>(sqlite3_finalize_orig)(get<0>(select_character_system_text_characterId_replacement));
-			get<0>(select_character_system_text_characterId_replacement) = nullptr;
-		}
-
-		return reinterpret_cast<decltype(sqlite3_finalize_hook)*>(sqlite3_finalize_orig)(pStmt);
-	}
-
-	int sqlite3_key_hook(sqlite3* db, const void* pKey, int nKey)
-	{
-		// no-op
-		return SQLITE_OK;
-	}
-
-	const unsigned char* sqlite3_column_text_hook(sqlite3_stmt* pStmt, int i)
-	{
-		auto result = reinterpret_cast<decltype(sqlite3_column_text_hook)*>(sqlite3_column_text_orig)(pStmt, i);
-
-		if (text_queries.contains(pStmt))
-		{
-			auto& stmt = text_queries.at(pStmt);
-			const char* text;
-			if (get<2>(stmt))
-			{
-				text = reinterpret_cast<const char*>(reinterpret_cast<decltype(sqlite3_column_text_hook)*>(sqlite3_column_text_orig)(get<0>(stmt), i));
-				if (text && !string(text).empty())
-				{
-					if (get<1>(stmt).find("`race_jikkyo_message`;") != string::npos ||
-						get<1>(stmt).find("`race_jikkyo_comment`;") != string::npos)
-					{
-						int id = sqlite3_column_int(pStmt, 0);
-						int id1 = sqlite3_column_int(get<0>(stmt), 0);
-						int groupId = sqlite3_column_int(pStmt, 1);
-						int groupId1 = sqlite3_column_int(get<0>(stmt), 1);
-
-						if (id == id1 && groupId == groupId1)
-						{
-							replacement_queries_can_next.insert_or_assign(pStmt, true);
-							return reinterpret_cast<const unsigned char*>(text);
-						}
-						else
-						{
-							replacement_queries_can_next.insert_or_assign(pStmt, false);
-						}
-					}
-					else
-					{
-						return reinterpret_cast<const unsigned char*>(text);
-					}
-				}
-			}
-
-			return reinterpret_cast<const unsigned char*>(local::get_localized_string(reinterpret_cast<const char*>(result)));
-		}
-
-		if (pStmt == select_character_system_text_characterId)
-		{
-			if (get<1>(select_character_system_text_characterId_replacement) && select_character_system_text_characterId_replacement_can_next)
-			{
-				return reinterpret_cast<decltype(sqlite3_column_text_hook)*>(sqlite3_column_text_orig)(get<0>(select_character_system_text_characterId_replacement), i);
-			}
-
-			return reinterpret_cast<const unsigned char*>(local::get_localized_string(reinterpret_cast<const char*>(result)));
-		}
-
-		return reinterpret_cast<const unsigned char*>(local::get_localized_string(reinterpret_cast<const char*>(result)));
-	}
-
-	void* CySpringUpdater_set_SpringUpdateMode_orig = nullptr;
-	void CySpringUpdater_set_SpringUpdateMode_hook(Il2CppObject* _this, int value)
-	{
-		reinterpret_cast<decltype(CySpringUpdater_set_SpringUpdateMode_hook)*>(CySpringUpdater_set_SpringUpdateMode_orig)(_this, config::cyspring_update_mode);
-	}
-
-	void* CySpringUpdater_get_SpringUpdateMode_orig = nullptr;
-	int CySpringUpdater_get_SpringUpdateMode_hook(Il2CppObject* _this)
-	{
-		return config::cyspring_update_mode;
-	}
-
-	void* story_race_textasset_load_orig;
-	void story_race_textasset_load_hook(Il2CppObject* _this)
-	{
-		FieldInfo* textDataField = { il2cpp_class_get_field_from_name(_this->klass, "textData") };
-		Il2CppObject* textData;
-		il2cpp_field_get_value(_this, textDataField, &textData);
-
-		auto enumerator = il2cpp_class_get_method_from_name_type<Il2CppObject * (*)(Il2CppObject * _this)>(textData->klass, "GetEnumerator", 0)->methodPointer(textData);
-		auto get_current = il2cpp_class_get_method_from_name_type<Il2CppObject * (*)(Il2CppObject * _this)>(enumerator->klass, "get_Current", 0)->methodPointer;
-		auto move_next = il2cpp_class_get_method_from_name_type<bool (*)(Il2CppObject * _this)>(enumerator->klass, "MoveNext", 0)->methodPointer;
-
-		while (move_next(enumerator))
-		{
-			auto key = get_current(enumerator);
-			FieldInfo* textField = { il2cpp_class_get_field_from_name(key->klass, "text") };
-			Il2CppString* text;
-			il2cpp_field_get_value(key, textField, &text);
-			il2cpp_field_set_value(key, textField, local::get_localized_string(text));
-		}
-
-		reinterpret_cast<decltype(story_race_textasset_load_hook)*>(story_race_textasset_load_orig)(_this);
-	}
-
 	bool useDefaultFPS = false;
 
 	constexpr float ratio_16_9 = 1.7777f;
 	constexpr float ratio_9_16 = 0.5625f;
 	constexpr float ratio_4_3 = 1.3333f;
 	constexpr float ratio_3_4 = 0.75f;
-
-	void (*set_scale_factor)(void*, float);
-
-	void* BGManager_SetMainBg_orig = nullptr;
-	void BGManager_SetMainBg_hook(Il2CppObject* self, Il2CppString* path, int width, int height, float posX, float posY, bool isSetScale)
-	{
-		float ratio = static_cast<float>(width) / static_cast<float>(height);
-		int width1 = Gallop::Screen::Width();
-		int height1 = Gallop::Screen::Height();
-
-		if (width < height)
-	{
-			height = height1;
-			width = static_cast<int>(height * ratio);
-			}
-					else
-					{
-			width = width1;
-			height = static_cast<int>(width / ratio);
-			}
-
-		reinterpret_cast<decltype(BGManager_SetMainBg_hook)*>(BGManager_SetMainBg_orig)(self, path, width, height, 0, 0, isSetScale);
-		}
 
 	void SetBGCanvasScalerSize()
 	{
@@ -1542,6 +963,11 @@ namespace
 				auto _currentBgHeightField = il2cpp_class_get_field_from_name(bgManager->klass, "_currentBgHeight");
 				int _currentBgHeight;
 				il2cpp_field_get_value(bgManager, _currentBgHeightField, &_currentBgHeight);
+
+				if (!_currentBgWidth || !_currentBgHeight)
+				{
+					return;
+				}
 
 				float ratio = static_cast<float>(_currentBgWidth) / static_cast<float>(_currentBgHeight);
 
@@ -1623,13 +1049,13 @@ namespace
 	{
 		auto uiManager = Gallop::UIManager::Instance();
 
-		auto graphicSettings = GetSingletonInstance(il2cpp_symbols::get_class("umamusume.dll", "Gallop", "GraphicSettings"));
+		auto graphicSettings = Gallop::GraphicSettings::Instance();
 		if (!graphicSettings)
 		{
 			return;
 		}
 
-		il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*)>(graphicSettings->klass, "Update3DRenderTexture", 0)->methodPointer(graphicSettings);
+		graphicSettings.Update3DRenderTexture();
 
 		Il2CppArraySize_t<Il2CppObject*>* renders;
 		renders = UnityEngine::Object::FindObjectsByType(
@@ -1824,7 +1250,7 @@ namespace
 				il2cpp_symbols::get_method_pointer<void (*)(Il2CppObject*, bool)>("DOTween.dll", "DG.Tweening", "TweenExtensions", "Complete", 2)(delayTweener, true);
 			}
 
-			auto callback = CreateDelegateWithClass(il2cpp_symbols::get_class("DOTween.dll", "DG.Tweening", "TweenCallback"), uiManager, *([](Il2CppObject* _this)
+			auto callback = CreateDelegateWithClass(il2cpp_symbols::get_class("DOTween.dll", "DG.Tweening", "TweenCallback"), uiManager, *([](Il2CppObject* self)
 				{
 					ResizeMiniDirector();
 					delayTweener = nullptr;
@@ -1838,6 +1264,44 @@ namespace
 
 		if (controller)
 		{
+			if (controller->klass->name == "SingleModeMainViewController"s)
+			{
+				auto ScenarioController = il2cpp_class_get_method_from_name_type<Il2CppObject * (*)(Il2CppObject*)>(controller->klass, "get_ScenarioController", 0)->methodPointer(controller);
+
+				if (ScenarioController && ScenarioController->klass->name == "SingleModeMainViewScenarioBreedersController"s)
+				{
+					auto IsStoryActive = il2cpp_class_get_method_from_name_type<bool (*)(Il2CppObject*)>(controller->klass, "get_IsStoryActive", 0)->methodPointer(controller);
+
+					if (!IsStoryActive)
+					{
+						auto trainingController = il2cpp_class_get_method_from_name_type<Il2CppObject * (*)(Il2CppObject*)>(controller->klass, "get_TrainingController", 0)->methodPointer(controller);
+						if (!il2cpp_class_get_method_from_name_type<bool (*)(Il2CppObject*)>(trainingController->klass, "get_IsInTraining", 0)->methodPointer(trainingController))
+						{
+							il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*)>(ScenarioController->klass, "PlayCutIn", 0)->methodPointer(ScenarioController);
+						}
+					}
+				}
+			}
+
+			if (controller->klass->name == "PhotoStudioViewController"s)
+			{
+				auto _photoStudioTopCharaViewerField = il2cpp_class_get_field_from_name(controller->klass, "_photoStudioTopCharaViewer");
+				Il2CppObject* _photoStudioTopCharaViewer;
+				il2cpp_field_get_value(controller, _photoStudioTopCharaViewerField, &_photoStudioTopCharaViewer);
+
+				if (_photoStudioTopCharaViewer)
+				{
+					auto _lowResolutionCameraField = il2cpp_class_get_field_from_name(_photoStudioTopCharaViewer->klass, "_lowResolutionCamera");
+					Il2CppObject* _lowResolutionCamera;
+					il2cpp_field_get_value(_photoStudioTopCharaViewer, _lowResolutionCameraField, &_lowResolutionCamera);
+
+					if (_lowResolutionCamera)
+					{
+						il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, Il2CppObject*)>(_photoStudioTopCharaViewer->klass, "OnCreateTexture", 1)->methodPointer(_photoStudioTopCharaViewer, _lowResolutionCamera);
+					}
+				}
+			}
+
 			if (controller->klass->name == "FanRaidViewController"s)
 			{
 				auto _fanRaidTopSequenceField = il2cpp_class_get_field_from_name(controller->klass, "_fanRaidTopSequence");
@@ -2024,7 +1488,7 @@ namespace
 		}
 	}
 
-	void MoviePlayerForUI_AdjustScreenSize_hook(Il2CppObject* _this, UnityEngine::Vector2 dispRectWH, bool isPanScan);
+	void MoviePlayerForUI_AdjustScreenSize_hook(Il2CppObject* self, UnityEngine::Vector2 dispRectWH, bool isPanScan);
 
 	void ResizeMoviePlayer()
 	{
@@ -2194,7 +1658,6 @@ namespace
 	{
 		try
 		{
-			// auto uiManager = Gallop::UIManager::Instance();
 			auto gameSystem = Gallop::GameSystem::Instance();
 			il2cpp_symbols::get_method_pointer<void (*)(Il2CppObject*, Il2CppDelegate*)>("umamusume.dll", "Gallop", "MonoBehaviourExtension", "WaitForEndFrame", 2)(gameSystem, CreateDelegateStatic(fn));
 		}
@@ -2205,11 +1668,10 @@ namespace
 		}
 	}
 
-	void WaitForEndOfFrame(Il2CppObject* target, void (*fn)(Il2CppObject* _this))
+	void WaitForEndOfFrame(Il2CppObject* target, void (*fn)(Il2CppObject* self))
 	{
 		try
 		{
-			// auto uiManager = Gallop::UIManager::Instance();
 			auto delegate = &CreateUnityAction(target, fn)->delegate;
 			auto gameSystem = Gallop::GameSystem::Instance();
 			il2cpp_symbols::get_method_pointer<void (*)(Il2CppObject*, Il2CppDelegate*)>("umamusume.dll", "Gallop", "MonoBehaviourExtension", "WaitForEndFrame", 2)(gameSystem, delegate);
@@ -2311,128 +1773,25 @@ namespace
 
 						if (uiManager)
 						{
-							//auto loadingCanvas = il2cpp_class_get_method_from_name_type<Il2CppObject * (*)()>(uiManager, "get_LoadingCanvas", IgnoreNumberOfArguments)->methodPointer();
-							//if (loadingCanvas)
-							//{
-							//	auto canvas = il2cpp_class_get_method_from_name_type<Il2CppObject * (*)(Il2CppObject*)>(loadingCanvas->klass, "get_Canvas", 0)->methodPointer(loadingCanvas);
-
-							//	il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, Il2CppString*)>(canvas->klass, "set_sortingLayerName", 1)->methodPointer(canvas, il2cpp_string_new("Default"));
-							//	il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, int)>(canvas->klass, "set_sortingOrder", 1)->methodPointer(canvas, 0);
-							//	il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, bool)>(canvas->klass, "set_overrideSorting", 1)->methodPointer(canvas, true);
-							//}
-
-							//auto nowLoading = il2cpp_symbols::get_method_pointer<Il2CppObject * (*)()>("umamusume.dll", "Gallop", "NowLoading", "get_Instance", IgnoreNumberOfArguments)();
-							//if (nowLoading)
-							//{
-							//	auto _bgImageField = il2cpp_class_get_field_from_name(nowLoading->klass, "_bgImage");
-							//	Il2CppObject* _bgImage;
-							//	il2cpp_field_get_value(nowLoading, _bgImageField, &_bgImage);
-
-							//	if (_bgImage)
-							//	{
-							//		auto gameObject = il2cpp_class_get_method_from_name_type<Il2CppObject * (*)(Il2CppObject*)>(_bgImage->klass, "get_gameObject", 0)->methodPointer(_bgImage);
-							//		if (gameObject)
-							//		{
-							//			// il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, bool)>(gameObject->klass, "SetActive", 1)->methodPointer(gameObject, true);
-							//		}
-							//	}
-
-							//	auto _backCanvasGroupField = il2cpp_class_get_field_from_name(nowLoading->klass, "_backCanvasGroup");
-							//	Il2CppObject* _backCanvasGroup;
-							//	il2cpp_field_get_value(nowLoading, _backCanvasGroupField, &_backCanvasGroup);
-
-							//	if (_backCanvasGroup)
-							//	{
-							//		il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, float)>(_backCanvasGroup->klass, "set_alpha", 1)->methodPointer(_backCanvasGroup, 1);
-							//	}
-
-							//	auto ids = il2cpp_symbols::get_method_pointer<Il2CppArraySize * (*)()>("UnityEngine.CoreModule.dll", "UnityEngine", "SortingLayer", "GetSortingLayerIDsInternal", IgnoreNumberOfArguments)();
-							//	for (int i = 0; i < ids->max_length; i++)
-							//	{
-							//		auto id = reinterpret_cast<int>(ids->vector[i]);
-							//		cout << "Layer Id: " << id << endl;
-							//		cout << "Layer name: " << wide_u8(il2cpp_symbols::get_method_pointer<Il2CppString * (*)(int)>("UnityEngine.CoreModule.dll", "UnityEngine", "SortingLayer", "IDToName", 1)(id)->chars) << endl;
-							//	}
-
-							//	auto _activeHorseShoeParticleField = il2cpp_class_get_field_from_name(nowLoading->klass, isPortrait ? "_horseShoeParticleVertical" : "_horseShoeParticleHorizontal");
-							//	Il2CppObject* _activeHorseShoeParticle;
-							//	il2cpp_field_get_value(nowLoading, _activeHorseShoeParticleField, &_activeHorseShoeParticle);
-
-							//	if (_activeHorseShoeParticle)
-							//	{
-							//		il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, bool)>(_activeHorseShoeParticle->klass, "SetActive", 1)->methodPointer(_activeHorseShoeParticle, true);
-							//		il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, float)>(_activeHorseShoeParticle->klass, "SetParticleAlpha", 1)->methodPointer(_activeHorseShoeParticle, 1);
-							//		il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, Il2CppString*, int)>(_activeHorseShoeParticle->klass, "SetLayer", 2)->methodPointer(_activeHorseShoeParticle, il2cpp_string_new("Default"), 0);
-
-							//		auto _particleRendererField = il2cpp_class_get_field_from_name(_activeHorseShoeParticle->klass, "_particleRenderer");
-							//		Il2CppObject* _particleRenderer;
-							//		il2cpp_field_get_value(_activeHorseShoeParticle, _particleRendererField, &_particleRenderer);
-
-							//		if (_particleRenderer)
-							//		{
-							//			reinterpret_cast<void (*)(Il2CppObject*, int)>(il2cpp_resolve_icall("UnityEngine.Renderer::set_rendererPriority(System.Int32)"))(_particleRenderer, 0);
-							//		}
-							//	}
-
-							//	auto _activeHorseShoeParticle1Field = il2cpp_class_get_field_from_name(nowLoading->klass, isPortrait ? "_horseShoeParticleHorizontal" : "_horseShoeParticleVertical");
-							//	Il2CppObject* _activeHorseShoeParticle1;
-							//	il2cpp_field_get_value(nowLoading, _activeHorseShoeParticle1Field, &_activeHorseShoeParticle1);
-
-							//	if (_activeHorseShoeParticle1)
-							//	{
-							//		il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, bool)>(_activeHorseShoeParticle1->klass, "SetActive", 1)->methodPointer(_activeHorseShoeParticle1, false);
-							//	}
-							//}
-
-							/*auto _bgCameraSettingsField = il2cpp_class_get_field_from_name(GallopScreen, "_bgCameraSettings");
-
-							Il2CppObject* _bgCameraSettings;
-							il2cpp_symbols::get_method_pointer<void (*)(bool, Il2CppObject**)>("umamusume.dll", "Gallop", "Screen", "InitializeChangeScaleForPC", 2)(isPortrait, &_bgCameraSettings);
-
-							il2cpp_field_static_set_value(_bgCameraSettingsField, &_bgCameraSettings);*/
-							/*auto _bgCameraField = il2cpp_class_get_field_from_name(uiManager, "_bgCamera");
-							Il2CppObject* _bgCamera;
-
-							il2cpp_field_get_value(uiManager, _bgCameraField, &_bgCamera);
-
-							il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, Color_t)>(_bgCamera->klass, "set_backgroundColor", 1)->methodPointer(_bgCamera,
-								il2cpp_symbols::get_method_pointer<Color_t(*)()>("UnityEngine.CoreModule.dll", "UnityEngine", "Color", "get_clear", IgnoreNumberOfArguments)());*/
-
 							il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*)>(tapEffectController->klass, "Disable", 0)->methodPointer(tapEffectController);
 
 							uiManager.SetCameraSizeByOrientation(UnityEngine::ScreenOrientation::Portrait);
 						}
 
-						auto anRootManager = GetSingletonInstance(il2cpp_symbols::get_class("Plugins.dll", "AnimateToUnity", "AnRootManager"));
+						auto anRootManager = AnimateToUnity::AnRootManager::Instance();
 
 						if (anRootManager)
 						{
-							il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, float)>(anRootManager->klass, "set_ScreenRate", 1)->methodPointer(anRootManager, _aspectRatio);
+							anRootManager.ScreenRate(_aspectRatio);
 						}
-
-						// il2cpp_class_get_method_from_name_type<void (*)()>(GallopScreen, "UpdateForPC", IgnoreNumberOfArguments)->methodPointer();
 
 						if (uiManager)
 						{
-							// il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, int, int)>(uiManager, "ChangeResizeUIForPC", 2)->methodPointer(uiManager, lastWidth, lastHeight);
-
-							// AutoRotation
-							// il2cpp_symbols::get_method_pointer<void (*)(int)>("UnityEngine.CoreModule.dll", "UnityEngine", "Screen", "set_orientation", 1)(5);
-
 							auto gameObject = uiManager.gameObject();
 
 							auto transform = il2cpp_class_get_method_from_name_type<Il2CppObject * (*)(Il2CppObject*)>(gameObject, "get_transform", 0)->methodPointer(gameObject);
 
 							il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, UnityEngine::Vector3)>(transform->klass, "set_localScale", 1)->methodPointer(transform, UnityEngine::Vector3{ 1, 1, 1 });
-
-							// auto _bgCameraSettingsField = il2cpp_class_get_field_from_name(GallopScreen, "_bgCameraSettings");
-
-							// Il2CppObject* _bgCameraSettings;
-							// il2cpp_field_static_get_value(_bgCameraSettingsField, &_bgCameraSettings);
-
-							// il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, Il2CppObject**)>(uiManager, "EndOrientation", 1)->methodPointer(uiManager, &_bgCameraSettings);
-
-							// il2cpp_field_static_set_value(_bgCameraSettingsField, &_bgCameraSettings);
 
 							if (tapEffectController)
 							{
@@ -2442,7 +1801,6 @@ namespace
 							Il2CppArraySize_t<Il2CppObject*>* canvasScalerList;
 							canvasScalerList = UnityEngine::Object::FindObjectsByType(
 								GetRuntimeType("UnityEngine.UI.dll", "UnityEngine.UI", "CanvasScaler"), UnityEngine::FindObjectsInactive::Include, UnityEngine::FindObjectsSortMode::None);
-							// auto canvasScalerList = il2cpp_class_get_method_from_name_type<Il2CppArraySize_t<Il2CppObject*> *(*)(Il2CppObject*)>(uiManager, "GetCanvasScalerList", 0)->methodPointer(uiManager);
 
 							for (int i = 0; i < canvasScalerList->max_length; i++)
 							{
@@ -2454,21 +1812,6 @@ namespace
 									bool keepActive = il2cpp_class_get_method_from_name_type<bool (*)(Il2CppObject*)>(gameObject->klass, "get_activeSelf", 0)->methodPointer(gameObject);
 
 									il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, bool)>(gameObject->klass, "SetActive", 1)->methodPointer(gameObject, true);
-
-									/*if (isPortrait)
-									{
-										float scale = min(config::freeform_ui_scale_portrait, max(1.0f, contentHeight * config::runtime::ratioVertical) * config::freeform_ui_scale_portrait);
-										il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, UnityEngine::Vector2)>(canvasScaler->klass, "set_referenceResolution", 1)->methodPointer(canvasScaler, UnityEngine::Vector2{ static_cast<float>(contentWidth / scale), static_cast<float>(contentHeight / scale) });
-									}
-									else
-									{
-										float scale = min(config::freeform_ui_scale_landscape, max(1.0f, contentWidth / config::runtime::ratioHorizontal) * config::freeform_ui_scale_landscape);
-										il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, UnityEngine::Vector2)>(canvasScaler->klass, "set_referenceResolution", 1)->methodPointer(canvasScaler, UnityEngine::Vector2{ static_cast<float>(contentWidth / scale), static_cast<float>(contentHeight / scale) });
-									}*/
-
-									// il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, int)>(canvasScaler->klass, "set_uiScaleMode", 1)->methodPointer(canvasScaler, 0);
-
-									// il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, int)>(canvasScaler->klass, "set_screenMatchMode", 1)->methodPointer(canvasScaler, 0);
 
 									il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, bool)>(gameObject->klass, "SetActive", 1)->methodPointer(gameObject, keepActive);
 
@@ -2660,81 +2003,6 @@ namespace
 		style |= WS_MAXIMIZEBOX;
 		SetWindowLongPtrW(hWnd, GWL_STYLE, style);
 	}
-
-	bool isRequestChangeResolution = false;
-
-	bool IsChangingResolution()
-	{
-		bool IsRunChangeView = false;
-		bool IsRunChangeScene = false;
-
-		auto sceneManager = GetSingletonInstance(il2cpp_symbols::get_class("umamusume.dll", "Gallop", "SceneManager"));
-		if (sceneManager)
-		{
-			IsRunChangeView = il2cpp_class_get_method_from_name_type<bool (*)(Il2CppObject*)>(sceneManager->klass, "get_IsRunChangeView", 0)->methodPointer(sceneManager);
-			IsRunChangeScene = il2cpp_class_get_method_from_name_type<bool (*)(Il2CppObject*)>(sceneManager->klass, "get_IsRunChangeScene", 0)->methodPointer(sceneManager);
-		}
-
-		auto uiManager = Gallop::UIManager::Instance();
-		if (uiManager)
-		{
-			Il2CppObject* _noImageEffectCanvas = uiManager._noImageEffectCanvas();
-
-			if (_noImageEffectCanvas)
-			{
-				auto camera = il2cpp_class_get_method_from_name_type<Il2CppObject * (*)(Il2CppObject*)>(_noImageEffectCanvas->klass, "get_worldCamera", 0)->methodPointer(_noImageEffectCanvas);
-				if (camera)
-				{
-					return IsRunChangeView || IsRunChangeScene || il2cpp_class_get_method_from_name_type<bool (*)(Il2CppObject*)>(camera->klass, "get_enabled", 0)->methodPointer(camera);
-				}
-			}
-		}
-
-		return false;
-	}
-
-	void SetResolution_Injected_hook(int width, int height, int fullscreenMode, UnityEngine::RefreshRate* perferredRefreshRate)
-	{
-		if (width < 72)
-		{
-			if (Gallop::StandaloneWindowResize::IsVirt())
-			{
-				width = 72;
-			}
-			else
-			{
-				width = 128;
-			}
-		}
-
-		if (height < 72)
-		{
-			if (Gallop::StandaloneWindowResize::IsVirt())
-			{
-				height = 128;
-			}
-			else
-			{
-				height = 72;
-			}
-		}
-
-		if (config::freeform_window)
-		{
-			auto hWnd = GetHWND();
-
-			long style = GetWindowLongW(hWnd, GWL_STYLE);
-			style |= WS_MAXIMIZEBOX;
-			SetWindowLongPtrW(hWnd, GWL_STYLE, style);
-
-			Gallop::StandaloneWindowResize::IsPreventReShape(true);
-
-			isRequestChangeResolution = true;
-			return;
-		}
-
-		reinterpret_cast<decltype(SetResolution_Injected_hook)*>(SetResolution_Injected_orig)(width, height, fullscreenMode, perferredRefreshRate);
-			}
 
 	static bool isExitOpened = false;
 
@@ -3991,7 +3259,6 @@ namespace
 		return false;
 	}
 
-
 	static vector<int8_t> KONAMI_COMMAND{ VK_UP, VK_UP, VK_DOWN, VK_DOWN, VK_LEFT, VK_RIGHT, VK_LEFT, VK_RIGHT, 'B', 'A' };
 
 	static int konamiCommandIndex = 0;
@@ -4443,7 +3710,6 @@ namespace
 				auto JukeboxBgmDic = il2cpp_class_get_method_from_name_type<Il2CppObject * (*)(Il2CppObject*)>(JukeboxBgmSelector->klass, "get_JukeboxBgmDic", 0)->methodPointer(JukeboxBgmSelector);
 				auto get_Keys = il2cpp_class_get_method_from_name_type<Il2CppObject * (*)(Il2CppObject*, const MethodInfo*)>(JukeboxBgmDic->klass, "get_Keys", 0);
 				auto Keys = get_Keys->methodPointer(JukeboxBgmDic, reinterpret_cast<const MethodInfo*>(get_Keys));
-				auto get_Count = il2cpp_class_get_method_from_name_type<int (*)(Il2CppObject*, const MethodInfo*)>(Keys->klass, "get_Count", 0);
 				auto bgmList = il2cpp_object_new(GetGenericClass(GetRuntimeType("mscorlib.dll", "System.Collections.Generic", "List`1"), GetRuntimeType(il2cpp_defaults.int32_class)));
 				void* iter = nullptr;
 				while (const MethodInfo* method = il2cpp_class_get_methods(bgmList->klass, &iter))
@@ -4852,21 +4118,12 @@ namespace
 
 					UnityEngine::Resolution r = UnityEngine::Screen::currentResolution();
 
-					auto display = UnityEngine::Display::main();
-
-					auto rendering_ratio = static_cast<float>(display.renderingWidth()) / static_cast<float>(display.renderingHeight());
-					rendering_ratio *= 1000;
-					rendering_ratio = roundf(rendering_ratio) / 1000;
-
-					auto system_ratio = static_cast<float>(display.systemWidth()) / static_cast<float>(display.systemHeight());
-					system_ratio *= 1000;
-					system_ratio = roundf(system_ratio) / 1000;
 					static bool fullScreenFl = false;
 
 						fullScreenFl = !fullScreenFl;
 
 						auto refreshRate = RefreshRate{ 0, 1 };
-						reinterpret_cast<decltype(SetResolution_Injected_hook)*>(SetResolution_Injected_orig)(r.width, r.height, fullScreenFl ? 1 : 3, &refreshRate);
+					UnityEngine::Screen::SetResolution_Injected(r.width, r.height, fullScreenFl ? UnityEngine::FullScreenMode::FullScreenWindow : UnityEngine::FullScreenMode::Windowed, &refreshRate);
 
 					return TRUE;
 				}
@@ -4875,7 +4132,7 @@ namespace
 			if (config::max_fps > -1 && wParam == 'F' && altDown)
 			{
 				config::runtime::useDefaultFPS = !config::runtime::useDefaultFPS;
-				UnityEngine::Application::targetFrameRate(30);
+				Gallop::FrameRateController::Instance().ReflectionFrameRate();
 				return TRUE;
 			}
 
@@ -5224,11 +4481,11 @@ namespace
 				}
 			}
 
-			auto anRootManager = GetSingletonInstance(il2cpp_symbols::get_class("Plugins.dll", "AnimateToUnity", "AnRootManager"));
+			auto anRootManager = AnimateToUnity::AnRootManager::Instance();
 
 			if (anRootManager)
 			{
-				il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, float)>(anRootManager->klass, "set_ScreenRate", 1)->methodPointer(anRootManager, _aspectRatio);
+				anRootManager.ScreenRate(_aspectRatio);
 			}
 
 			Gallop::StandaloneWindowResize::DisableMaximizebox();
@@ -5263,155 +4520,6 @@ namespace
 		}
 
 		return DefWindowProcW(hWnd, uMsg, wParam, lParam);
-	}
-
-	vector<Il2CppObject*> frameBuffers;
-
-	void* GallopFrameBuffer_Initialize_orig = nullptr;
-
-	void GallopFrameBuffer_Initialize_hook(Il2CppObject* _this, Il2CppObject* parent)
-	{
-		auto value = find(frameBuffers.begin(), frameBuffers.end(), _this);
-		if (value == frameBuffers.end())
-		{
-			frameBuffers.emplace_back(_this);
-		}
-
-		reinterpret_cast<decltype(GallopFrameBuffer_Initialize_hook)*>(GallopFrameBuffer_Initialize_orig)(_this, parent);
-	}
-
-	void* GallopFrameBuffer_Initialize2_orig = nullptr;
-
-	void GallopFrameBuffer_Initialize2_hook(Il2CppObject* _this, Il2CppObject* parent, bool copyUIFrameBuffer)
-	{
-		auto value = find(frameBuffers.begin(), frameBuffers.end(), _this);
-		if (value == frameBuffers.end())
-		{
-			frameBuffers.emplace_back(_this);
-		}
-
-		reinterpret_cast<decltype(GallopFrameBuffer_Initialize2_hook)*>(GallopFrameBuffer_Initialize2_orig)(_this, parent, copyUIFrameBuffer);
-	}
-
-	void* GallopFrameBuffer_Release_orig = nullptr;
-
-	void GallopFrameBuffer_Release_hook(Il2CppObject* _this)
-	{
-		auto value = find(frameBuffers.begin(), frameBuffers.end(), _this);
-		if (value != frameBuffers.end())
-		{
-			frameBuffers.erase(value);
-		}
-
-		reinterpret_cast<decltype(GallopFrameBuffer_Release_hook)*>(GallopFrameBuffer_Release_orig)(_this);
-	}
-
-	void* GallopFrameBuffer_ResizeRenderTexture_orig = nullptr;
-
-	void GallopFrameBuffer_ResizeRenderTexture_hook()
-	{
-		for (auto buffer : frameBuffers)
-		{
-			if (buffer && il2cpp_class_get_method_from_name_type<Il2CppObject * (*)(Il2CppObject*)>(buffer->klass, "get_ColorBuffer", 0)->methodPointer(buffer))
-			{
-				auto _drawPathField = il2cpp_class_get_field_from_name(buffer->klass, "_drawPass");
-				Il2CppObject* _drawPath;
-				il2cpp_field_get_value(buffer, _drawPathField, &_drawPath);
-
-				il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, Il2CppObject*)>(buffer->klass, "RemakeRenderTexture", 1)->methodPointer(buffer, _drawPath);
-			}
-		}
-	}
-
-	void (*text_assign_font)(void*);
-	void (*text_set_font)(void*, Il2CppObject*);
-	Il2CppObject* (*text_get_font)(void*);
-	int (*text_get_size)(void*);
-	void (*text_set_size)(void*, int);
-	float (*text_get_linespacing)(void*);
-	void (*text_set_style)(void*, int);
-	void (*text_set_linespacing)(void*, float);
-	Il2CppString* (*text_get_text)(void*);
-	void (*text_set_text)(void*, Il2CppString*);
-	void (*text_set_horizontalOverflow)(void*, int);
-	void (*text_set_verticalOverflow)(void*, int);
-	int (*textcommon_get_TextId)(void*);
-
-	void* on_populate_orig = nullptr;
-	void on_populate_hook(Il2CppObject* _this, void* toFill)
-	{
-		if (config::replace_to_builtin_font && text_get_linespacing(_this) != 1.05f)
-		{
-			text_set_style(_this, 1);
-			text_set_size(_this, text_get_size(_this) - 4);
-			text_set_linespacing(_this, 1.05f);
-		}
-		if (config::replace_to_custom_font)
-		{
-			auto font = text_get_font(_this);
-			Il2CppString* name = UnityEngine::Object::Name(font);
-			if (config::font_asset_name.find(name->chars) == il2cppstring::npos)
-			{
-				auto customFont = GetCustomFont();
-				if (customFont)
-				{
-					text_set_font(_this, customFont);
-				}
-			}
-		}
-		auto textId = textcommon_get_TextId(_this);
-		if (textId)
-		{
-			if (GetTextIdByName(IL2CPP_STRING("Common0121")) == textId ||
-				GetTextIdByName(IL2CPP_STRING("Common0186")) == textId ||
-				GetTextIdByName(IL2CPP_STRING("Outgame0028")) == textId ||
-				GetTextIdByName(IL2CPP_STRING("Outgame0231")) == textId ||
-				GetTextIdByName(IL2CPP_STRING("Outgame0393")) == textId ||
-				GetTextIdByName(IL2CPP_STRING("SingleMode0265")) == textId ||
-				GetTextIdByName(IL2CPP_STRING("Character0039")) == textId ||
-				GetTextIdByName(IL2CPP_STRING("Character0325")) == textId)
-			{
-				text_set_horizontalOverflow(_this, 1);
-				text_set_verticalOverflow(_this, 1);
-			}
-
-		}
-		return reinterpret_cast<decltype(on_populate_hook)*>(on_populate_orig)(_this, toFill);
-	}
-
-	void* textcommon_awake_orig = nullptr;
-	void textcommon_awake_hook(Il2CppObject* _this)
-	{
-		if (config::replace_to_builtin_font)
-		{
-			text_assign_font(_this);
-		}
-		if (config::replace_to_custom_font)
-		{
-			if (text_get_font(_this))
-			{
-				text_set_font(_this, nullptr);
-			}
-
-			auto customFont = GetCustomFont();
-			if (customFont)
-			{
-				text_set_font(_this, customFont);
-			}
-		}
-		text_set_text(_this, local::get_localized_string(text_get_text(_this)));
-		reinterpret_cast<decltype(textcommon_awake_hook)*>(textcommon_awake_orig)(_this);
-	}
-
-	void* TMP_Settings_get_instance_orig = nullptr;
-
-	Il2CppObject* TMP_Settings_get_instance_hook()
-	{
-		auto tmpSettings = reinterpret_cast<decltype(TMP_Settings_get_instance_hook)*>(TMP_Settings_get_instance_orig)();
-		auto fontAssetField = il2cpp_class_get_field_from_name(tmpSettings->klass,
-			"m_defaultFontAsset");
-		il2cpp_field_set_value(tmpSettings, fontAssetField, GetCustomTMPFont());
-		return tmpSettings;
 	}
 
 	void* TextMeshProUguiCommon_Awake_orig = nullptr;
@@ -5483,751 +4591,6 @@ namespace
 		il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, bool, bool)>(_this->klass, "ForceMeshUpdate", 2)->methodPointer(_this, true, false);
 	}
 
-	void* load_zekken_composite_resource_orig = nullptr;
-	void load_zekken_composite_resource_hook(Il2CppObject* _this)
-	{
-		if (config::replace_to_custom_font && config::runtime::fontAssets)
-		{
-			auto font = GetCustomFont();
-			if (font)
-			{
-				FieldInfo* zekkenFontField = il2cpp_class_get_field_from_name(_this->klass, "_fontZekken");
-				il2cpp_field_set_value(_this, zekkenFontField, font);
-			}
-		}
-		reinterpret_cast<decltype(load_zekken_composite_resource_hook)*>(load_zekken_composite_resource_orig)(_this);
-	}
-
-	void* get_modified_string_orig = nullptr;
-	Il2CppString* get_modified_string_hook(Il2CppString* text, Il2CppObject* input, bool allowNewLine)
-	{
-		if (!allowNewLine)
-		{
-			auto str = il2cppstring(text->chars);
-			replaceAll(str, IL2CPP_STRING("\n"), IL2CPP_STRING(""));
-			return il2cpp_string_new16(str.data());
-		}
-		return text;
-	}
-
-	void* set_vSyncCount_orig = nullptr;
-	void set_vSyncCount_hook(int level)
-	{
-		reinterpret_cast<decltype(set_vSyncCount_hook)*>(set_vSyncCount_orig)(config::vsync_count);
-	}
-
-	void* set_anti_aliasing_orig = nullptr;
-	void set_anti_aliasing_hook(int level)
-	{
-		if (config::anti_aliasing < 0)
-		{
-			reinterpret_cast<decltype(set_anti_aliasing_hook)*>(set_anti_aliasing_orig)(level);
-			return;
-		}
-
-		reinterpret_cast<decltype(set_anti_aliasing_hook)*>(set_anti_aliasing_orig)(config::anti_aliasing);
-	}
-
-	void* set_anisotropicFiltering_orig = nullptr;
-	void set_anisotropicFiltering_hook(int mode)
-	{
-		reinterpret_cast<decltype(set_anisotropicFiltering_hook)*>(set_anisotropicFiltering_orig)(config::anisotropic_filtering);
-	}
-
-	void* apply_graphics_quality_orig = nullptr;
-	void apply_graphics_quality_hook(Il2CppObject* _this, int quality, bool force)
-	{
-		reinterpret_cast<decltype(apply_graphics_quality_hook)*>(apply_graphics_quality_orig)(_this, config::graphics_quality, true);
-	}
-
-	void* GraphicSettings_Get3DAntiAliasingLevel_orig = nullptr;
-	int GraphicSettings_Get3DAntiAliasingLevel_hook(Il2CppObject* self, bool allowMSAA)
-	{
-		if (config::anti_aliasing < 0)
-		{
-			return reinterpret_cast<decltype(GraphicSettings_Get3DAntiAliasingLevel_hook)*>(GraphicSettings_Get3DAntiAliasingLevel_orig)(self, allowMSAA);
-		}
-
-		if (!allowMSAA)
-		{
-			return 1;
-		}
-
-		return config::anti_aliasing;
-	}
-
-	void* GraphicSettings_GetVirtualResolution_orig = nullptr;
-	UnityEngine::Vector2Int GraphicSettings_GetVirtualResolution_hook(Il2CppObject* _this)
-	{
-		if (config::freeform_window)
-		{
-			int width = UnityEngine::Screen::width() * config::resolution_3d_scale;
-			int height = UnityEngine::Screen::height() * config::resolution_3d_scale;
-
-			return UnityEngine::Vector2Int{ width, height };
-		}
-
-		auto resolution = reinterpret_cast<decltype(GraphicSettings_GetVirtualResolution_hook)*>(GraphicSettings_GetVirtualResolution_orig)(_this);
-		if (config::unlock_size)
-			{
-			int width = Gallop::Screen::Width();
-			int height = Gallop::Screen::Height();
-			if (resolution.m_X > resolution.m_Y)
-			{
-				resolution.m_X = width;
-				resolution.m_Y = height;
-			}
-			else
-			{
-				resolution.m_X = height;
-				resolution.m_Y = width;
-			}
-		}
-		resolution.m_X *= config::resolution_3d_scale;
-		resolution.m_Y *= config::resolution_3d_scale;
-		return resolution;
-	}
-
-	void* GraphicSettings_GetVirtualResolution3D_orig = nullptr;
-	UnityEngine::Vector2Int GraphicSettings_GetVirtualResolution3D_hook(Il2CppObject* _this, bool isForcedWideAspect)
-	{
-		if (config::freeform_window)
-		{
-			int width = UnityEngine::Screen::width() * config::resolution_3d_scale;
-			int height = UnityEngine::Screen::height() * config::resolution_3d_scale;
-
-			return UnityEngine::Vector2Int{ width, height };
-		}
-
-		auto resolution = reinterpret_cast<decltype(GraphicSettings_GetVirtualResolution3D_hook)*>(GraphicSettings_GetVirtualResolution3D_orig)(_this, isForcedWideAspect);
-		if (config::unlock_size)
-		{
-			int width = Gallop::Screen::Width();
-			int height = Gallop::Screen::Height();
-			if (resolution.m_X > resolution.m_Y)
-			{
-				resolution.m_X = width;
-				resolution.m_Y = height;
-			}
-			else
-			{
-				resolution.m_X = height;
-				resolution.m_Y = width;
-			}
-		}
-		resolution.m_X *= config::resolution_3d_scale;
-		resolution.m_Y *= config::resolution_3d_scale;
-		return resolution;
-	}
-
-
-	void* GraphicSettings_GetVirtualResolution3D2_orig = nullptr;
-	UnityEngine::Vector2Int GraphicSettings_GetVirtualResolution3D2_hook(Il2CppObject* _this, UnityEngine::Vector2Int resolution, bool isForcedWideAspect)
-	{
-		if (config::freeform_window)
-		{
-			int width = UnityEngine::Screen::width() * config::resolution_3d_scale;
-			int height = UnityEngine::Screen::height() * config::resolution_3d_scale;
-
-			return UnityEngine::Vector2Int{ width, height };
-		}
-
-		auto resolution2 = reinterpret_cast<decltype(GraphicSettings_GetVirtualResolution3D2_hook)*>(GraphicSettings_GetVirtualResolution3D2_orig)(_this, resolution, isForcedWideAspect);
-		if (config::unlock_size)
-		{
-			int width = Gallop::Screen::Width();
-			int height = Gallop::Screen::Height();
-			if (resolution2.m_X > resolution2.m_Y)
-			{
-				resolution2.m_X = width;
-				resolution2.m_Y = height;
-			}
-			else
-			{
-				resolution2.m_X = height;
-				resolution2.m_Y = width;
-			}
-		}
-		resolution2.m_X *= config::resolution_3d_scale;
-		resolution2.m_Y *= config::resolution_3d_scale;
-		return resolution2;
-	}
-
-	void* Renderer_get_material_orig = nullptr;
-
-	Il2CppObject* Material_GetTextureImpl_hook(Il2CppObject* _this, int nameID);
-	Il2CppObject* Renderer_get_material_hook(Il2CppObject* _this);
-	Il2CppArraySize_t<Il2CppObject*>* Renderer_get_materials_hook(Il2CppObject* _this);
-	Il2CppObject* Renderer_get_sharedMaterial_hook(Il2CppObject* _this);
-	Il2CppArraySize_t<Il2CppObject*>* Renderer_get_sharedMaterials_hook(Il2CppObject* _this);
-
-	void ReplaceMaterialTexture(Il2CppObject* material);
-
-	void ReplaceRendererTexture(Il2CppObject* renderer)
-	{
-		if (!UnityEngine::Object::IsNativeObjectAlive(renderer))
-		{
-			return;
-		}
-
-		auto count = il2cpp_resolve_icall_type<int (*)(Il2CppObject*)>("UnityEngine.Renderer::GetMaterialCount()")(renderer);
-
-		if (count > 0)
-		{
-			Il2CppArraySize_t<Il2CppObject*>* materials = il2cpp_array_new_type<Il2CppObject*>(il2cpp_symbols::get_class("UnityEngine.CoreModule.dll", "UnityEngine", "Material"), count);
-			il2cpp_resolve_icall_type<void (*)(Il2CppObject*, Il2CppArraySize_t<Il2CppObject*>*)>("UnityEngine.Renderer::CopySharedMaterialArray()")(renderer, materials);
-
-			for (int i = 0; i < materials->max_length; i++)
-			{
-				auto material = materials->vector[i];
-				if (material)
-				{
-					ReplaceMaterialTexture(material);
-				}
-			}
-		}
-	}
-
-	void ReplaceMaterialTexture(Il2CppObject* material)
-	{
-		if (!UnityEngine::Object::IsNativeObjectAlive(material))
-		{
-			return;
-		}
-
-		ReplaceMaterialTextureProperty(material, il2cpp_string_new("_DirtTex"));
-		ReplaceMaterialTextureProperty(material, il2cpp_string_new("_EmissiveTex"));
-		ReplaceMaterialTextureProperty(material, il2cpp_string_new("_EnvMap"));
-		ReplaceMaterialTextureProperty(material, il2cpp_string_new("_MainTex"));
-		ReplaceMaterialTextureProperty(material, il2cpp_string_new("_MaskColorTex"));
-		ReplaceMaterialTextureProperty(material, il2cpp_string_new("_OptionMaskMap"));
-		ReplaceMaterialTextureProperty(material, il2cpp_string_new("_ToonMap"));
-		ReplaceMaterialTextureProperty(material, il2cpp_string_new("_TripleMaskMap"));
-	}
-
-	void ReplaceAssetHolderTextures(Il2CppObject* holder)
-	{
-		if (!UnityEngine::Object::IsNativeObjectAlive(holder))
-		{
-			return;
-		}
-
-		auto objectList = il2cpp_class_get_method_from_name_type<Il2CppObject * (*)(Il2CppObject*)>(holder->klass, "get_ObjectList", 0)->methodPointer(holder);
-
-		FieldInfo* itemsField = il2cpp_class_get_field_from_name(objectList->klass, "_items");
-		Il2CppArraySize_t<Il2CppObject*>* arr;
-		il2cpp_field_get_value(objectList, itemsField, &arr);
-
-		for (int i = 0; i < arr->max_length; i++)
-		{
-			auto pair = arr->vector[i];
-
-			if (!pair)
-			{
-				continue;
-			}
-
-			auto field = il2cpp_class_get_field_from_name(pair->klass, "Value");
-			Il2CppObject* obj;
-			il2cpp_field_get_value(pair, field, &obj);
-
-			if (obj)
-			{
-				// cout << "AssetHolder: " << i << " " << obj->klass->name << " " << wide_u8(UnityEngine::Object::Name(obj)->chars) << endl;
-				if (obj->klass->name == "GameObject"s && UnityEngine::Object::IsNativeObjectAlive(obj))
-				{
-					// auto getComponent = il2cpp_class_get_method_from_name_type<Il2CppObject * (*)(Il2CppObject*, Il2CppType*)>(component->klass, "GetComponent", 1)->methodPointer;
-					auto getComponents = il2cpp_class_get_method_from_name_type<Il2CppArraySize * (*)(Il2CppObject*, Il2CppType*, bool, bool, bool, bool, Il2CppObject*)>(obj->klass, "GetComponentsInternal", 6)->methodPointer;
-
-					auto array = getComponents(obj, reinterpret_cast<Il2CppType*>(GetRuntimeType(
-						"UnityEngine.CoreModule.dll", "UnityEngine", "Object")), true, true, true, false, nullptr);
-
-					if (array)
-					{
-						for (int j = 0; j < array->max_length; j++)
-						{
-							auto obj =
-								il2cpp_symbols::get_method_pointer<Il2CppObject * (*)(Il2CppObject*, long index)>("mscorlib.dll", "System", "Array", "GetValue", 1)(array, j);
-							if (!obj)
-							{
-								continue;
-							}
-
-							/*if (obj && obj->klass && obj->klass->name != "Transform"s)
-							{
-								cout << "AssetHolder GameObject -> " << obj->klass->name << endl;
-							}*/
-							if (string(obj->klass->name).find("MeshRenderer") != string::npos)
-							{
-								// ReplaceRendererTexture(obj);
-							}
-						}
-					}
-				}
-				if (obj->klass->name == "Texture2D"s)
-				{
-					auto uobject_name = UnityEngine::Object::Name(obj);
-					if (!il2cppstring(uobject_name->chars).empty())
-					{
-						auto newTexture = GetReplacementAssets(
-							uobject_name,
-							GetRuntimeType("UnityEngine.CoreModule.dll", "UnityEngine", "Texture2D"));
-						if (newTexture)
-						{
-							il2cpp_symbols::get_method_pointer<void (*)(Il2CppObject*, int)>("UnityEngine.CoreModule.dll", "UnityEngine", "Object", "set_hideFlags", 1)
-								(newTexture, 32);
-							il2cpp_field_set_value(pair, field, newTexture);
-						}
-					}
-				}
-				if (obj->klass->name == "Material"s)
-				{
-					ReplaceMaterialTexture(obj);
-				}
-			}
-		}
-	}
-
-	void ReplaceRawImageTexture(Il2CppObject* rawImage)
-	{
-		if (!UnityEngine::Object::IsNativeObjectAlive(rawImage))
-		{
-			return;
-		}
-
-		auto textureField = il2cpp_class_get_field_from_name(rawImage->klass, "m_Texture");
-		Il2CppObject* texture;
-		il2cpp_field_get_value(rawImage, textureField, &texture);
-
-		if (texture)
-		{
-			auto uobject_name = UnityEngine::Object::Name(texture);
-			if (uobject_name)
-			{
-				auto nameU8 = il2cpp_u8(uobject_name->chars);
-				if (!nameU8.empty())
-				{
-					do
-					{
-						stringstream pathStream(nameU8);
-						string segment;
-						vector<string> split;
-						while (getline(pathStream, segment, '/'))
-						{
-							split.emplace_back(segment);
-						}
-						auto& textureName = split.back();
-						if (!textureName.empty())
-						{
-							auto texture2D = GetReplacementAssets(il2cpp_string_new(split.back().data()),
-								GetRuntimeType("UnityEngine.CoreModule.dll", "UnityEngine", "Texture2D"));
-							if (texture2D)
-							{
-								il2cpp_field_set_value(rawImage, textureField, texture2D);
-							}
-						}
-					} while (false);
-				}
-			}
-		}
-	}
-
-	void ReplaceAnimateToUnityTextures(Il2CppObject* anRoot)
-	{
-		if (!UnityEngine::Object::IsNativeObjectAlive(anRoot))
-		{
-			return;
-		}
-
-		auto meshParameterGroup = il2cpp_class_get_method_from_name_type<Il2CppObject * (*)(Il2CppObject*)>(anRoot->klass, "get_MeshParameterGroup", 0)->methodPointer(anRoot);
-
-		if (meshParameterGroup)
-		{
-			auto meshParameterList = il2cpp_class_get_method_from_name_type<Il2CppObject * (*)(Il2CppObject*)>(meshParameterGroup->klass, "get_MeshParameterList", 0)->methodPointer(meshParameterGroup);
-
-			if (meshParameterList)
-			{
-				FieldInfo* itemsField = il2cpp_class_get_field_from_name(meshParameterList->klass, "_items");
-				Il2CppArraySize_t<Il2CppObject*>* items;
-				il2cpp_field_get_value(meshParameterList, itemsField, &items);
-
-				if (items)
-				{
-					for (int i = 0; i < items->max_length; i++)
-					{
-						auto parameter = items->vector[i];
-
-						if (parameter)
-						{
-							auto meshParameterGroupList = il2cpp_class_get_method_from_name_type<Il2CppObject * (*)(Il2CppObject*)>(parameter->klass, "get_MeshParameterGroupList", 0)->methodPointer(parameter);
-
-							if (meshParameterGroupList)
-							{
-								FieldInfo* items1Field = il2cpp_class_get_field_from_name(meshParameterGroupList->klass, "_items");
-								Il2CppArraySize_t<Il2CppObject*>* items1;
-								il2cpp_field_get_value(meshParameterGroupList, items1Field, &items1);
-
-								if (items1)
-								{
-									for (int j = 0; j < items1->max_length; j++)
-									{
-										auto group = items1->vector[j];
-
-										if (group)
-										{
-											auto textureSetColor = il2cpp_class_get_method_from_name_type<Il2CppObject * (*)(Il2CppObject*)>(group->klass, "get_TextureSetColor", 0)->methodPointer(group);
-
-											if (textureSetColor)
-											{
-												auto uobject_name = UnityEngine::Object::Name(textureSetColor);
-												if (!il2cppstring(uobject_name->chars).empty())
-												{
-													auto newTexture = GetReplacementAssets(
-														uobject_name,
-														GetRuntimeType("UnityEngine.CoreModule.dll", "UnityEngine", "Texture2D"));
-													if (newTexture)
-													{
-														il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, Il2CppObject*)>(group->klass, "set_TextureSetColor", 1)->methodPointer(group, newTexture);
-													}
-												}
-											}
-
-											auto textureSetAlpha = il2cpp_class_get_method_from_name_type<Il2CppObject * (*)(Il2CppObject*)>(group->klass, "get_TextureSetAlpha", 0)->methodPointer(group);
-
-											if (textureSetAlpha)
-											{
-												auto uobject_name = UnityEngine::Object::Name(textureSetAlpha);
-												if (!il2cppstring(uobject_name->chars).empty())
-												{
-													auto newTexture = GetReplacementAssets(
-														uobject_name,
-														GetRuntimeType("UnityEngine.CoreModule.dll", "UnityEngine", "Texture2D"));
-													if (newTexture)
-													{
-														il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, Il2CppObject*)>(group->klass, "set_TextureSetAlpha", 1)->methodPointer(group, newTexture);
-													}
-												}
-											}
-										}
-									}
-								}
-							}
-
-							auto customMeshInfoParameterList = il2cpp_class_get_method_from_name_type<Il2CppObject * (*)(Il2CppObject*)>(parameter->klass, "get_CustomMeshInfoParameterList", 0)->methodPointer(parameter);
-
-							if (customMeshInfoParameterList)
-							{
-								FieldInfo* items1Field = il2cpp_class_get_field_from_name(customMeshInfoParameterList->klass, "_items");
-								Il2CppArraySize_t<Il2CppObject*>* items1;
-								il2cpp_field_get_value(customMeshInfoParameterList, items1Field, &items1);
-
-								if (items1)
-								{
-									for (int j = 0; j < items1->max_length; j++)
-									{
-										auto customParameter = items1->vector[j];
-
-										if (customParameter)
-										{
-											auto textureColor = il2cpp_class_get_method_from_name_type<Il2CppObject * (*)(Il2CppObject*)>(customParameter->klass, "get_TextureColor", 0)->methodPointer(customParameter);
-
-											if (textureColor)
-											{
-												auto uobject_name = UnityEngine::Object::Name(textureColor);
-												if (!il2cppstring(uobject_name->chars).empty())
-												{
-													auto newTexture = GetReplacementAssets(
-														uobject_name,
-														GetRuntimeType("UnityEngine.CoreModule.dll", "UnityEngine", "Texture2D"));
-													if (newTexture)
-													{
-														il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, Il2CppObject*)>(customParameter->klass, "set_TextureColor", 1)->methodPointer(customParameter, newTexture);
-													}
-												}
-											}
-
-											auto textureAlpha = il2cpp_class_get_method_from_name_type<Il2CppObject * (*)(Il2CppObject*)>(customParameter->klass, "get_TextureAlpha", 0)->methodPointer(customParameter);
-
-											if (textureAlpha)
-											{
-												auto uobject_name = UnityEngine::Object::Name(textureAlpha);
-												if (!il2cppstring(uobject_name->chars).empty())
-												{
-													auto newTexture = GetReplacementAssets(
-														uobject_name,
-														GetRuntimeType("UnityEngine.CoreModule.dll", "UnityEngine", "Texture2D"));
-													if (newTexture)
-													{
-														il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, Il2CppObject*)>(customParameter->klass, "set_TextureAlpha", 1)->methodPointer(customParameter, newTexture);
-													}
-												}
-											}
-										}
-									}
-								}
-							}
-						}
-					}
-				}
-			}
-		}
-	}
-
-	void ReplaceGameObjectTextures(Il2CppObject* gameObject, bool isChild = false);
-
-	void ReplaceTransformTextures(Il2CppObject* transform)
-	{
-		if (!UnityEngine::Object::IsNativeObjectAlive(transform))
-		{
-			return;
-		}
-
-		auto childCount = il2cpp_class_get_method_from_name_type<int(*)(Il2CppObject*)>(transform->klass, "get_childCount", 0)->methodPointer(transform);
-
-		if (!childCount)
-		{
-			auto gameObject = il2cpp_class_get_method_from_name_type<Il2CppObject * (*)(Il2CppObject*)>(transform->klass, "get_gameObject", 0)->methodPointer(transform);
-			ReplaceGameObjectTextures(gameObject, true);
-		}
-
-		for (int i = 0; i < childCount; i++)
-		{
-			auto child = il2cpp_class_get_method_from_name_type<Il2CppObject * (*)(Il2CppObject*, int)>(transform->klass, "GetChild", 1)->methodPointer(transform, i);
-
-			// auto gameObject = il2cpp_class_get_method_from_name_type<Il2CppObject * (*)(Il2CppObject*)>(child->klass, "get_gameObject", 0)->methodPointer(child);
-
-			// cout << "Transform gameObject " << wide_u8(UnityEngine::Object::Name(gameObject)->chars) << endl;
-
-			ReplaceTransformTextures(child);
-		}
-	}
-
-	void ReplaceCutInTimelineControllerTextures(Il2CppObject* controller)
-	{
-		if (!UnityEngine::Object::IsNativeObjectAlive(controller))
-		{
-			return;
-		}
-
-		auto data = il2cpp_class_get_method_from_name_type<Il2CppObject * (*)(Il2CppObject*)>(controller->klass, "get_Data", 0)->methodPointer(controller);
-
-		if (data)
-		{
-			auto worksheetList = il2cpp_class_get_method_from_name_type<Il2CppObject * (*)(Il2CppObject*)>(data->klass, "GetWorkSheetList", 0)->methodPointer(data);
-
-			if (worksheetList)
-			{
-				FieldInfo* itemsField = il2cpp_class_get_field_from_name(worksheetList->klass, "_items");
-				Il2CppArraySize_t<Il2CppObject*>* items;
-				il2cpp_field_get_value(worksheetList, itemsField, &items);
-
-				if (items)
-				{
-					for (int i = 0; i < items->max_length; i++)
-					{
-						auto worksheet = items->vector[i];
-
-						if (worksheet)
-						{
-							auto effectListField = il2cpp_class_get_field_from_name(worksheet->klass, "_effectList");
-							Il2CppObject* effectList;
-							il2cpp_field_get_value(worksheet, effectListField, &effectList);
-
-							if (effectList)
-							{
-								FieldInfo* items1Field = il2cpp_class_get_field_from_name(effectList->klass, "_items");
-								Il2CppArraySize_t<Il2CppObject*>* items1;
-								il2cpp_field_get_value(effectList, items1Field, &items1);
-
-
-								if (items1)
-								{
-									for (int j = 0; j < items1->max_length; j++)
-									{
-										auto effectData = items1->vector[j];
-
-										if (effectData)
-										{
-											auto keysField = il2cpp_class_get_field_from_name(effectData->klass, "_keys");
-											Il2CppObject* keys;
-											il2cpp_field_get_value(effectData, keysField, &keys);
-
-											if (keys)
-											{
-												auto gameObject = il2cpp_class_get_method_from_name_type<Il2CppObject * (*)(Il2CppObject*)>(keys->klass, "get_Prefab", 0)->methodPointer(keys);
-
-												if (gameObject)
-												{
-													ReplaceGameObjectTextures(gameObject);
-												}
-											}
-										}
-									}
-								}
-							}
-
-							auto bgListField = il2cpp_class_get_field_from_name(worksheet->klass, "_bgList");
-							Il2CppObject* bgList;
-							il2cpp_field_get_value(worksheet, bgListField, &bgList);
-
-							if (bgList)
-							{
-								FieldInfo* items1Field = il2cpp_class_get_field_from_name(bgList->klass, "_items");
-								Il2CppArraySize_t<Il2CppObject*>* items1;
-								il2cpp_field_get_value(bgList, items1Field, &items1);
-
-
-								if (items1)
-								{
-									for (int j = 0; j < items1->max_length; j++)
-									{
-										auto effectData = items1->vector[j];
-
-										if (effectData)
-										{
-											auto keysField = il2cpp_class_get_field_from_name(effectData->klass, "_keys");
-											Il2CppObject* keys;
-											il2cpp_field_get_value(effectData, keysField, &keys);
-
-											if (keys)
-											{
-												auto gameObject = il2cpp_class_get_method_from_name_type<Il2CppObject * (*)(Il2CppObject*)>(keys->klass, "get_Prefab", 0)->methodPointer(keys);
-
-												if (gameObject)
-												{
-													ReplaceGameObjectTextures(gameObject);
-												}
-											}
-										}
-									}
-								}
-							}
-						}
-					}
-				}
-			}
-		}
-	}
-
-	void ReplaceGameObjectTextures(Il2CppObject* gameObject, bool isChild)
-	{
-		auto getComponent = il2cpp_class_get_method_from_name_type<Il2CppObject * (*)(Il2CppObject*, Il2CppReflectionType*)>(gameObject->klass, "GetComponent", 1)->methodPointer;
-		auto getComponents =
-			il2cpp_class_get_method_from_name_type<Il2CppArraySize_t<Il2CppObject*> *(*)(Il2CppObject*, Il2CppReflectionType*, bool, bool, bool, bool, Il2CppObject*)>(gameObject->klass, "GetComponentsInternal", 6)->methodPointer;
-
-		auto array = getComponents(gameObject, GetRuntimeType(
-			"UnityEngine.CoreModule.dll", "UnityEngine", "Object"), true, true, true, false, nullptr);
-
-		if (array)
-		{
-			for (int j = 0; j < array->max_length; j++)
-			{
-				auto obj =
-					il2cpp_symbols::get_method_pointer<Il2CppObject * (*)(Il2CppObject*, long index)>("mscorlib.dll", "System", "Array", "GetValue", 1)(array, j);
-				if (!obj) continue;
-				/*if (obj->klass && obj->klass->name != "Transform"s)
-				{
-					cout << "GameObject -> " << obj->klass->name << endl;
-				}*/
-
-				/*if ("AssetHolder"s == obj->klass->name)
-				{
-					ReplaceAssetHolderTextures(obj);
-				}*/
-
-				if (string(obj->klass->name).find("MeshRenderer") != string::npos)
-				{
-					ReplaceRendererTexture(obj);
-				}
-			}
-		}
-
-		auto rawImages = getComponents(gameObject, GetRuntimeType("umamusume.dll", "Gallop", "RawImageCommon"),
-			true, true, true, false, nullptr);
-
-		if (rawImages && rawImages->max_length)
-		{
-			for (int i = 0; i < rawImages->max_length; i++)
-			{
-				auto rawImage = rawImages->vector[i];
-				if (rawImage)
-				{
-					ReplaceRawImageTexture(rawImage);
-				}
-			}
-		}
-
-		auto anRoots = getComponents(gameObject, GetRuntimeType("Plugins.dll", "AnimateToUnity", "AnRoot"),
-			true, true, true, false, nullptr);
-
-		if (anRoots && anRoots->max_length)
-		{
-			for (int i = 0; i < anRoots->max_length; i++)
-			{
-				auto anRoot = anRoots->vector[i];
-				if (anRoot)
-				{
-					ReplaceAnimateToUnityTextures(anRoot);
-				}
-			}
-		}
-
-		auto cutInTimelineControllers = getComponents(gameObject, GetRuntimeType("umamusume.dll", "Gallop.CutIn.Cutt", "CutInTimelineController"),
-			true, true, true, false, nullptr);
-
-		if (cutInTimelineControllers && cutInTimelineControllers->max_length)
-		{
-			for (int i = 0; i < cutInTimelineControllers->max_length; i++)
-			{
-				auto cutInTimelineController = cutInTimelineControllers->vector[i];
-				if (cutInTimelineController)
-				{
-					ReplaceCutInTimelineControllerTextures(cutInTimelineController);
-				}
-			}
-		}
-
-		if (!isChild)
-		{
-			auto transforms = getComponents(gameObject, GetRuntimeType("UnityEngine.CoreModule.dll", "UnityEngine", "Transform"),
-				true, true, true, false, nullptr);
-
-			if (transforms && transforms->max_length)
-			{
-				for (int i = 0; i < transforms->max_length; i++)
-				{
-					auto transform = transforms->vector[i];
-					if (transform)
-					{
-						ReplaceTransformTextures(transform);
-					}
-				}
-			}
-		}
-
-		auto assetholder = getComponent(gameObject, GetRuntimeType("umamusume.dll", "Gallop", "AssetHolder"));
-
-		if (assetholder)
-		{
-			ReplaceAssetHolderTextures(assetholder);
-		}
-	}
-
-	void ReplaceFontTexture(Il2CppObject* font)
-	{
-		if (!UnityEngine::Object::IsNativeObjectAlive(font))
-		{
-			return;
-		}
-
-		auto material = il2cpp_class_get_method_from_name_type<Il2CppObject * (*)(Il2CppObject*)>(font->klass, "get_material", 0)->methodPointer(font);
-
-		if (material)
-		{
-			ReplaceMaterialTexture(material);
-		}
-	}
-
 	void InitOptionLayout(Il2CppObject* parentRectTransform)
 	{
 		Localify::UIParts::AddToLayout(parentRectTransform,
@@ -6254,108 +4617,10 @@ namespace
 			}));
 	}
 
-	bool UpdateViewerIdText()
-	{
-		if (Game::CurrentGameRegion != Game::Region::KOR)
-		{
-			return true;
-		}
-
-		auto controller = GetCurrentViewController();
-
-		if (controller)
-		{
-			auto view = il2cpp_class_get_method_from_name_type<Il2CppObject * (*)(Il2CppObject*)>(controller->klass, "GetViewBase", 0)->methodPointer(controller);
-
-			auto ViewerIdTextField = il2cpp_class_get_field_from_name(view->klass, "ViewerIdText");
-			Il2CppObject* ViewerIdText;
-			il2cpp_field_get_value(view, ViewerIdTextField, &ViewerIdText);
-
-			auto CopyIdButtonField = il2cpp_class_get_field_from_name(view->klass, "CopyIdButton");
-			Il2CppObject* CopyIdButton;
-			il2cpp_field_get_value(view, CopyIdButtonField, &CopyIdButton);
-
-			if (!GetButtonCommonOnClickDelegate(CopyIdButton))
-			{
-				return false;
-			}
-
-			auto workDataManager = GetSingletonInstance(il2cpp_symbols::get_class("umamusume.dll", "Gallop", "WorkDataManager"));
-
-			auto workUserData = il2cpp_class_get_method_from_name_type<Il2CppObject * (*)(Il2CppObject*)>(workDataManager->klass, "get_UserData", 0)->methodPointer(workDataManager);
-			auto viewerIdStringObscured = il2cpp_class_get_method_from_name_type<Il2CppObject * (*)(Il2CppObject*)>(workUserData->klass, "get_ViewerIdString", 0)->methodPointer(workUserData);
-
-			auto viewerId = il2cpp_class_get_method_from_name_type<Il2CppString * (*)(Il2CppObject*)>(viewerIdStringObscured->klass, "InternalDecrypt", 0)->methodPointer(viewerIdStringObscured);
-
-			if (viewerId)
-			{
-				auto text = text_get_text(ViewerIdText);
-				auto newText = text->chars + il2cppstring(IL2CPP_STRING("\n(")) + viewerId->chars + IL2CPP_STRING(")");
-				text_set_text(ViewerIdText, il2cpp_string_new16(newText.data()));
-			}
-
-			auto fn = *[](void*)
-				{
-					auto viewerIdCopyFn = *[](void*)
-						{
-							auto workDataManager = GetSingletonInstance(il2cpp_symbols::get_class("umamusume.dll", "Gallop", "WorkDataManager"));
-
-							auto workUserData = il2cpp_class_get_method_from_name_type<Il2CppObject * (*)(Il2CppObject*)>(workDataManager->klass, "get_UserData", 0)->methodPointer(workDataManager);
-							auto viewerIdObscured = il2cpp_class_get_method_from_name_type<CodeStage::AntiCheat::ObscuredTypes::ObscuredLong(*)(Il2CppObject*)>(workUserData->klass, "get_ViewerId", 0)->methodPointer(workUserData);
-							auto viewerId = viewerIdObscured.GetDecrypted();
-
-							il2cpp_symbols::get_method_pointer<void (*)(Il2CppString*)>("UnityEngine.IMGUIModule.dll", "UnityEngine", "GUIUtility", "set_systemCopyBuffer", 1)(il2cpp_string_new(to_string(viewerId).data()));
-
-							auto dialogData = Gallop::DialogCommon::Data();
-							dialogData.SetSimpleOneButtonMessage(GetTextIdByName(IL2CPP_STRING("Outgame0031")), il2cpp_string_new16(IL2CPP_STRING("트레이너 ID를 복사했습니다.")), nullptr, GetTextIdByName(IL2CPP_STRING("Common0007")));
-
-							Gallop::DialogManager::PushDialog(dialogData);
-						};
-
-					auto playerIdCopyFn = *[](void*)
-						{
-							auto controller = GetCurrentViewController();
-							il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*)>(controller->klass, "OnClickCopyIdButton", 0)->methodPointer(controller);
-						};
-
-					auto dialogData = Gallop::DialogCommon::Data();
-					dialogData.SetSimpleTwoButtonMessage(
-						Gallop::Localize::Get(GetTextIdByName(IL2CPP_STRING("Outgame0031"))),
-						il2cpp_string_new("트레이너 ID를 복사하시겠습니까?"),
-						CreateDelegateStatic(viewerIdCopyFn),
-						GetTextIdByName(IL2CPP_STRING("Outgame0002")),
-						GetTextIdByName(IL2CPP_STRING("Common0003")),
-						CreateDelegateStatic(playerIdCopyFn)
-					);
-
-					Gallop::DialogManager::PushDialog(dialogData);
-				};
-
-			il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, Il2CppDelegate*)>(CopyIdButton->klass, "SetOnClick", 1)->methodPointer(CopyIdButton, &CreateUnityActionStatic(fn)->delegate);
-			return true;
-		}
-		return false;
-	}
-
 	void* Object_Internal_CloneSingleWithParent_orig = nullptr;
 	Il2CppObject* Object_Internal_CloneSingleWithParent_hook(Il2CppObject* data, Il2CppObject* parent, bool worldPositionStays)
 	{
 		auto cloned = reinterpret_cast<decltype(Object_Internal_CloneSingleWithParent_hook)*>(Object_Internal_CloneSingleWithParent_orig)(data, parent, worldPositionStays);
-
-		if (Game::CurrentGameRegion == Game::Region::KOR && il2cppstring(UnityEngine::Object::Name(cloned)->chars).find(IL2CPP_STRING("ProfileTopView")) != wstring::npos)
-		{
-			static Il2CppDelegate* updateViewerIdText;
-			updateViewerIdText = &CreateDelegateWithClassStatic(il2cpp_symbols::get_class("DOTween.dll", "DG.Tweening", "TweenCallback"), *([](void*)
-				{
-					if (!UpdateViewerIdText())
-					{
-						il2cpp_symbols::get_method_pointer<Il2CppObject* (*)(float, Il2CppDelegate*, bool)>("DOTween.dll", "DG.Tweening", "DOVirtual", "DelayedCall", 3)(0.05, updateViewerIdText, true);
-					}
-				}))->delegate;
-
-			// Delay 50ms
-			il2cpp_symbols::get_method_pointer<Il2CppObject* (*)(float, Il2CppDelegate*, bool)>("DOTween.dll", "DG.Tweening", "DOVirtual", "DelayedCall", 3)(0.05, updateViewerIdText, true);
-		}
 
 		if (il2cppstring(UnityEngine::Object::Name(cloned)->chars).find(IL2CPP_STRING("DialogOptionHome")) != wstring::npos)
 		{
@@ -6417,8 +4682,9 @@ namespace
 
 					if (targetText)
 					{
-						text_set_horizontalOverflow(targetText, 1);
-						text_set_verticalOverflow(targetText, 1);
+						auto textCommon = Gallop::TextCommon(targetText);
+						textCommon.horizontalOverflow(UnityEngine::HorizontalWrapMode::Overflow);
+						textCommon.verticalOverflow(UnityEngine::VerticalWrapMode::Overflow);
 					}
 				}
 			}
@@ -6428,7 +4694,7 @@ namespace
 		{
 			auto gameObject = UnityEngine::GameObject(cloned);
 			auto contentsRoot = gameObject.transform().Find(il2cpp_string_new(config::live_slider_always_show ? "ContentsRoot" : "ContentsRoot/MenuRoot"));
-			auto slider = Localify::UIParts::GetSlider("live_slider", 0, 0, 180, false,
+			auto slider = Localify::UIParts::GetLiveSlider("live_slider", 0, 0, 180, false,
 				*[](Il2CppObject* sliderCommon)
 				{
 					auto value = Localify::UIParts::GetOptionSliderValue("live_slider");
@@ -6484,7 +4750,7 @@ namespace
 
 		if (il2cppstring(UnityEngine::Object::Name(cloned)->chars).find(IL2CPP_STRING("LiveChampionsTextController")) != wstring::npos)
 		{
-			auto updateScreenReferenceSize = CreateDelegateWithClass(il2cpp_symbols::get_class("DOTween.dll", "DG.Tweening", "TweenCallback"), cloned, *([](Il2CppObject* _this)
+			auto updateScreenReferenceSize = CreateDelegateWithClass(il2cpp_symbols::get_class("DOTween.dll", "DG.Tweening", "TweenCallback"), cloned, *([](Il2CppObject* self)
 				{
 					auto director = GetSingletonInstance(il2cpp_symbols::get_class("umamusume.dll", "Gallop.Live", "Director"));
 					if (director)
@@ -6590,9 +4856,9 @@ namespace
 	}
 
 	void* Sprite_get_texture_orig = nullptr;
-	Il2CppObject* Sprite_get_texture_hook(Il2CppObject* _this)
+	Il2CppObject* Sprite_get_texture_hook(Il2CppObject* self)
 	{
-		auto texture2D = reinterpret_cast<decltype(Sprite_get_texture_hook)*>(Sprite_get_texture_orig)(_this);
+		auto texture2D = reinterpret_cast<decltype(Sprite_get_texture_hook)*>(Sprite_get_texture_orig)(self);
 		auto uobject_name = UnityEngine::Object::Name(texture2D);
 		if (!il2cppstring(uobject_name->chars).empty())
 		{
@@ -6609,9 +4875,33 @@ namespace
 		return texture2D;
 	}
 
-	Il2CppObject* Renderer_get_material_hook(Il2CppObject* _this)
+	Il2CppObject* Material_GetTextureImpl_hook(Il2CppObject* self, int nameID);
+	Il2CppObject* Renderer_get_material_hook(Il2CppObject* self);
+	Il2CppArraySize_t<Il2CppObject*>* Renderer_get_materials_hook(Il2CppObject* self);
+	Il2CppObject* Renderer_get_sharedMaterial_hook(Il2CppObject* self);
+	Il2CppArraySize_t<Il2CppObject*>* Renderer_get_sharedMaterials_hook(Il2CppObject* self);
+
+	void ReplaceMaterialTexture(Il2CppObject* material)
 	{
-		auto material = reinterpret_cast<decltype(Renderer_get_material_hook)*>(Renderer_get_material_orig)(_this);
+		if (!UnityEngine::Object::IsNativeObjectAlive(material))
+		{
+			return;
+		}
+
+		ReplaceMaterialTextureProperty(material, il2cpp_string_new("_DirtTex"));
+		ReplaceMaterialTextureProperty(material, il2cpp_string_new("_EmissiveTex"));
+		ReplaceMaterialTextureProperty(material, il2cpp_string_new("_EnvMap"));
+		ReplaceMaterialTextureProperty(material, il2cpp_string_new("_MainTex"));
+		ReplaceMaterialTextureProperty(material, il2cpp_string_new("_MaskColorTex"));
+		ReplaceMaterialTextureProperty(material, il2cpp_string_new("_OptionMaskMap"));
+		ReplaceMaterialTextureProperty(material, il2cpp_string_new("_ToonMap"));
+		ReplaceMaterialTextureProperty(material, il2cpp_string_new("_TripleMaskMap"));
+	}
+
+	void* Renderer_get_material_orig = nullptr;
+	Il2CppObject* Renderer_get_material_hook(Il2CppObject* self)
+	{
+		auto material = reinterpret_cast<decltype(Renderer_get_material_hook)*>(Renderer_get_material_orig)(self);
 		if (material)
 		{
 			ReplaceMaterialTexture(material);
@@ -6620,9 +4910,9 @@ namespace
 	}
 
 	void* Renderer_get_materials_orig = nullptr;
-	Il2CppArraySize_t<Il2CppObject*>* Renderer_get_materials_hook(Il2CppObject* _this)
+	Il2CppArraySize_t<Il2CppObject*>* Renderer_get_materials_hook(Il2CppObject* self)
 	{
-		auto materials = reinterpret_cast<decltype(Renderer_get_materials_hook)*>(Renderer_get_materials_orig)(_this);
+		auto materials = reinterpret_cast<decltype(Renderer_get_materials_hook)*>(Renderer_get_materials_orig)(self);
 		for (int i = 0; i < materials->max_length; i++)
 		{
 			auto material = materials->vector[i];
@@ -6635,9 +4925,9 @@ namespace
 	}
 
 	void* Renderer_get_sharedMaterial_orig = nullptr;
-	Il2CppObject* Renderer_get_sharedMaterial_hook(Il2CppObject* _this)
+	Il2CppObject* Renderer_get_sharedMaterial_hook(Il2CppObject* self)
 	{
-		auto material = reinterpret_cast<decltype(Renderer_get_sharedMaterial_hook)*>(Renderer_get_sharedMaterial_orig)(_this);
+		auto material = reinterpret_cast<decltype(Renderer_get_sharedMaterial_hook)*>(Renderer_get_sharedMaterial_orig)(self);
 		if (material)
 		{
 			ReplaceMaterialTexture(material);
@@ -6646,9 +4936,9 @@ namespace
 	}
 
 	void* Renderer_get_sharedMaterials_orig = nullptr;
-	Il2CppArraySize_t<Il2CppObject*>* Renderer_get_sharedMaterials_hook(Il2CppObject* _this)
+	Il2CppArraySize_t<Il2CppObject*>* Renderer_get_sharedMaterials_hook(Il2CppObject* self)
 	{
-		auto materials = reinterpret_cast<decltype(Renderer_get_sharedMaterials_hook)*>(Renderer_get_sharedMaterials_orig)(_this);
+		auto materials = reinterpret_cast<decltype(Renderer_get_sharedMaterials_hook)*>(Renderer_get_sharedMaterials_orig)(self);
 		for (int i = 0; i < materials->max_length; i++)
 		{
 			auto material = materials->vector[i];
@@ -6661,17 +4951,17 @@ namespace
 	}
 
 	void* Renderer_set_material_orig = nullptr;
-	void Renderer_set_material_hook(Il2CppObject* _this, Il2CppObject* material)
+	void Renderer_set_material_hook(Il2CppObject* self, Il2CppObject* material)
 	{
 		if (material)
 		{
 			ReplaceMaterialTexture(material);
 		}
-		reinterpret_cast<decltype(Renderer_set_material_hook)*>(Renderer_set_material_orig)(_this, material);
+		reinterpret_cast<decltype(Renderer_set_material_hook)*>(Renderer_set_material_orig)(self, material);
 	}
 
 	void* Renderer_set_materials_orig = nullptr;
-	void Renderer_set_materials_hook(Il2CppObject* _this, Il2CppArraySize* materials)
+	void Renderer_set_materials_hook(Il2CppObject* self, Il2CppArraySize* materials)
 	{
 		for (int i = 0; i < materials->max_length; i++)
 		{
@@ -6681,11 +4971,11 @@ namespace
 				ReplaceMaterialTexture(material);
 			}
 		}
-		reinterpret_cast<decltype(Renderer_set_materials_hook)*>(Renderer_set_materials_orig)(_this, materials);
+		reinterpret_cast<decltype(Renderer_set_materials_hook)*>(Renderer_set_materials_orig)(self, materials);
 	}
 
 	void* Material_SetTextureI4_orig = nullptr;
-	void Material_SetTextureI4_hook(Il2CppObject* _this, int nameID, Il2CppObject* texture)
+	void Material_SetTextureI4_hook(Il2CppObject* self, int nameID, Il2CppObject* texture)
 	{
 		if (texture && !il2cppstring(UnityEngine::Object::Name(texture)->chars).empty())
 		{
@@ -6696,17 +4986,17 @@ namespace
 			{
 				il2cpp_symbols::get_method_pointer<void (*)(Il2CppObject*, int)>("UnityEngine.CoreModule.dll", "UnityEngine", "Object", "set_hideFlags", 1)
 					(newTexture, 32);
-				reinterpret_cast<decltype(Material_SetTextureI4_hook)*>(Material_SetTextureI4_orig)(_this, nameID, newTexture);
+				reinterpret_cast<decltype(Material_SetTextureI4_hook)*>(Material_SetTextureI4_orig)(self, nameID, newTexture);
 				return;
 			}
 		}
-		reinterpret_cast<decltype(Material_SetTextureI4_hook)*>(Material_SetTextureI4_orig)(_this, nameID, texture);
+		reinterpret_cast<decltype(Material_SetTextureI4_hook)*>(Material_SetTextureI4_orig)(self, nameID, texture);
 	}
 
 	void* Material_GetTextureImpl_orig = nullptr;
-	Il2CppObject* Material_GetTextureImpl_hook(Il2CppObject* _this, int nameID)
+	Il2CppObject* Material_GetTextureImpl_hook(Il2CppObject* self, int nameID)
 	{
-		auto texture = reinterpret_cast<decltype(Material_GetTextureImpl_hook)*>(Material_GetTextureImpl_orig)(_this, nameID);
+		auto texture = reinterpret_cast<decltype(Material_GetTextureImpl_hook)*>(Material_GetTextureImpl_orig)(self, nameID);
 		if (texture && !il2cppstring(UnityEngine::Object::Name(texture)->chars).empty())
 		{
 			auto newTexture = GetReplacementAssets(
@@ -6723,7 +5013,7 @@ namespace
 	}
 
 	void* Material_SetTextureImpl_orig = nullptr;
-	void Material_SetTextureImpl_hook(Il2CppObject* _this, int nameID, Il2CppObject* texture)
+	void Material_SetTextureImpl_hook(Il2CppObject* self, int nameID, Il2CppObject* texture)
 	{
 		if (texture && !il2cppstring(UnityEngine::Object::Name(texture)->chars).empty())
 		{
@@ -6734,15 +5024,42 @@ namespace
 			{
 				il2cpp_symbols::get_method_pointer<void (*)(Il2CppObject*, int)>("UnityEngine.CoreModule.dll", "UnityEngine", "Object", "set_hideFlags", 1)
 					(newTexture, 32);
-				reinterpret_cast<decltype(Material_SetTextureImpl_hook)*>(Material_SetTextureImpl_orig)(_this, nameID, newTexture);
+				reinterpret_cast<decltype(Material_SetTextureImpl_hook)*>(Material_SetTextureImpl_orig)(self, nameID, newTexture);
 				return;
 			}
 		}
-		reinterpret_cast<decltype(Material_SetTextureImpl_hook)*>(Material_SetTextureImpl_orig)(_this, nameID, texture);
+		reinterpret_cast<decltype(Material_SetTextureImpl_hook)*>(Material_SetTextureImpl_orig)(self, nameID, texture);
 	}
 
+	void* BGManager_SetMainBg_orig = nullptr;
+	void BGManager_SetMainBg_hook(Il2CppObject* self, Il2CppString* path, int width, int height, float posX, float posY, bool isSetScale)
+	{
+		float ratio = static_cast<float>(width) / static_cast<float>(height);
+		int width1 = Gallop::Screen::Width();
+		int height1 = Gallop::Screen::Height();
+
+		if (width < height)
+				{
+			width = width1;
+			height = static_cast<int>(width / ratio);
+				}
+		else
+			{
+			height = height1;
+			width = static_cast<int>(height * ratio);
+			}
+
+		reinterpret_cast<decltype(BGManager_SetMainBg_hook)*>(BGManager_SetMainBg_orig)(self, path, width, height, 0, 0, true);
+	}
+
+	void* BGManager_SetMainBgLocalPos_orig = nullptr;
+	void BGManager_SetMainBgLocalPos_hook(Il2CppObject* self, UnityEngine::Vector2 pos)
+	{
+		// no-op
+		}
+
 	void* CharaPropRendererAccessor_SetTexture_orig = nullptr;
-	void CharaPropRendererAccessor_SetTexture_hook(Il2CppObject* _this, Il2CppObject* texture)
+	void CharaPropRendererAccessor_SetTexture_hook(Il2CppObject* self, Il2CppObject* texture)
 	{
 		if (!il2cppstring(UnityEngine::Object::Name(texture)->chars).empty())
 		{
@@ -6750,187 +5067,29 @@ namespace
 				UnityEngine::Object::Name(texture),
 				GetRuntimeType("UnityEngine.CoreModule.dll", "UnityEngine", "Texture2D"));
 			if (newTexture)
-			{
+		{
 				il2cpp_symbols::get_method_pointer<void (*)(Il2CppObject*, int)>("UnityEngine.CoreModule.dll", "UnityEngine", "Object", "set_hideFlags", 1)
 					(newTexture, 32);
-				reinterpret_cast<decltype(CharaPropRendererAccessor_SetTexture_hook)*>(CharaPropRendererAccessor_SetTexture_orig)(_this, newTexture);
+				reinterpret_cast<decltype(CharaPropRendererAccessor_SetTexture_hook)*>(CharaPropRendererAccessor_SetTexture_orig)(self, newTexture);
 				return;
-			}
 		}
-		reinterpret_cast<decltype(CharaPropRendererAccessor_SetTexture_hook)*>(CharaPropRendererAccessor_SetTexture_orig)(_this, texture);
-	}
-
-	void* GameObject_GetComponent_orig = nullptr;
-	Il2CppObject* GameObject_GetComponent_hook(Il2CppObject* _this, const Il2CppType* type)
-	{
-		auto component = reinterpret_cast<decltype(GameObject_GetComponent_hook)*>(GameObject_GetComponent_orig)(_this, type);
-		if (component)
-		{
-			// cout << "Component: " << component->klass->name << endl;
-			if ("AssetHolder"s == component->klass->name)
-			{
-				ReplaceAssetHolderTextures(component);
-			}
 		}
-		return component;
-	}
-
-	void* GameObject_GetComponentFastPath_orig = nullptr;
-	void GameObject_GetComponentFastPath_hook(Il2CppObject* _this, Il2CppObject* type, uintptr_t oneFurtherThanResultValue)
-	{
-		/*auto name = il2cpp_class_get_method_from_name_type<Il2CppString* (*)(Il2CppObject*)>(type->klass, "get_FullName", 0)->methodPointer(type);
-		cout << "GameObject_GetComponentFastPath " << wide_u8(name->chars) << endl;*/
-		reinterpret_cast<decltype(GameObject_GetComponentFastPath_hook)*>(GameObject_GetComponentFastPath_orig)(_this, type, oneFurtherThanResultValue);
-		auto helper = UnityEngine::CastHelper{};
-		int objSize = sizeof(helper.obj);
-		memmove(&helper, reinterpret_cast<void*>(oneFurtherThanResultValue - objSize), sizeof(UnityEngine::CastHelper<>));
-		if (helper.obj)
-		{
-			// cout << "Helper " << helper.obj->klass->name << endl;
-			if (string(helper.obj->klass->name).find("MeshRenderer") != string::npos)
-			{
-				// ReplaceRendererTexture(helper.obj);
-			}
-			if (string(helper.obj->klass->name).find("RawImage") != string::npos)
-			{
-				ReplaceRawImageTexture(helper.obj);
-			}
-			if (helper.obj->klass->name == "ImageCommon"s)
-			{
-				auto material = il2cpp_class_get_method_from_name_type<Il2CppObject * (*)(Il2CppObject*)>(helper.obj->klass, "get_material", 0)->methodPointer(helper.obj);
-				if (material)
-				{
-					ReplaceMaterialTexture(material);
-				}
-			}
-			if (helper.obj->klass->name == "AssetHolder"s)
-			{
-				ReplaceAssetHolderTextures(helper.obj);
-			}
-			memmove(reinterpret_cast<void*>(oneFurtherThanResultValue - objSize), &helper, sizeof(UnityEngine::CastHelper<>));
-		}
-	}
-
-	void* Screen_set_orientation_orig = nullptr;
-
-	void Screen_set_orientation_hook(UnityEngine::ScreenOrientation orientation)
-	{
-		if (!config::freeform_window)
-		{
-			reinterpret_cast<decltype(Screen_set_orientation_hook)*>(Screen_set_orientation_orig)(orientation);
-		}
+		reinterpret_cast<decltype(CharaPropRendererAccessor_SetTexture_hook)*>(CharaPropRendererAccessor_SetTexture_orig)(self, texture);
 	}
 
 	void* DeviceOrientationGuide_Show_orig = nullptr;
-
-	void DeviceOrientationGuide_Show_hook(Il2CppObject* _this, bool isTargetOrientationPortrait, int target)
+	void DeviceOrientationGuide_Show_hook(Il2CppObject* self, bool isTargetOrientationPortrait, int target)
 	{
 		if (!config::freeform_window)
 		{
-			reinterpret_cast<decltype(DeviceOrientationGuide_Show_hook)*>(DeviceOrientationGuide_Show_orig)(_this, isTargetOrientationPortrait, target);
-		}
+			reinterpret_cast<decltype(DeviceOrientationGuide_Show_hook)*>(DeviceOrientationGuide_Show_orig)(self, isTargetOrientationPortrait, target);
+	}
 	}
 
-	void* NowLoading_Show_orig = nullptr;
-
-	void NowLoading_Show_hook(Il2CppObject* _this, int type, Il2CppDelegate* onComplete, Il2CppObject* overrideDuration, int easeType, Il2CppObject* customInEffect, Il2CppObject* customLoopEffect, Il2CppObject* customOutEffect, int charaId)
-	{
-		// NowLoadingOrientation
-		if (type == 2 && (config::freeform_window || !config::ui_loading_show_orientation_guide))
-		{
-			// NowLoadingTips
-			type = 0;
-		}
-		if (!config::hide_now_loading)
-		{
-			reinterpret_cast<decltype(NowLoading_Show_hook)*>(NowLoading_Show_orig)(
-				_this,
-				type,
-				onComplete, overrideDuration, easeType,
-				customInEffect, customLoopEffect, customOutEffect, charaId);
-		}
-		if (onComplete && config::hide_now_loading)
-		{
-			reinterpret_cast<void (*)(Il2CppObject*)>(onComplete->method_ptr)(onComplete->target);
-		}
-	}
-
-	void* NowLoading_Show3_orig = nullptr;
-
-	void NowLoading_Show3_hook(Il2CppObject* _this, int type, Il2CppDelegate* onComplete, Il2CppObject* overrideDuration)
-	{
-		// NowLoadingOrientation
-		if (type == 2 && (config::freeform_window || !config::ui_loading_show_orientation_guide))
-		{
-			// NowLoadingTips
-			type = 0;
-		}
-		if (!config::hide_now_loading)
-		{
-			reinterpret_cast<decltype(NowLoading_Show3_hook)*>(NowLoading_Show3_orig)(
-				_this,
-				type,
-				onComplete, overrideDuration);
-		}
-		if (onComplete && config::hide_now_loading)
-		{
-			reinterpret_cast<void (*)(Il2CppObject*)>(onComplete->method_ptr)(onComplete->target);
-		}
-	}
-
-	void* NowLoading_Hide_orig = nullptr;
-
-	void NowLoading_Hide_hook(Il2CppObject* _this, Il2CppDelegate* onComplete, Il2CppObject* overrideDuration, int easeType, Il2CppDelegate* onUnloadCustomEffectResourcesComplete)
-	{
-		if (!config::hide_now_loading)
-		{
-			reinterpret_cast<decltype(NowLoading_Hide_hook)*>(NowLoading_Hide_orig)(_this, onComplete, overrideDuration, easeType, onUnloadCustomEffectResourcesComplete);
-		}
-		if (onComplete && config::hide_now_loading)
-		{
-			reinterpret_cast<void (*)(Il2CppObject*)>(onComplete->method_ptr)(onComplete->target);
-		}
-	}
-
-	void* NowLoading_Hide1_orig = nullptr;
-
-	void NowLoading_Hide1_hook(Il2CppObject* _this, Il2CppDelegate* onComplete)
-	{
-		if (!config::hide_now_loading)
-		{
-			reinterpret_cast<decltype(NowLoading_Hide1_hook)*>(NowLoading_Hide1_orig)(_this, onComplete);
-		}
-		if (onComplete && config::hide_now_loading)
-		{
-			reinterpret_cast<void (*)(Il2CppObject*)>(onComplete->method_ptr)(onComplete->target);
-		}
-	}
-
-	void* WaitDeviceOrientation_orig = nullptr;
-
-	Il2CppObject* WaitDeviceOrientation_hook(UnityEngine::ScreenOrientation targetOrientation)
-	{
-		if (!config::freeform_window)
-		{
-			return reinterpret_cast<decltype(WaitDeviceOrientation_hook)*>(WaitDeviceOrientation_orig)(targetOrientation);
-		}
-
-		auto yield = il2cpp_object_new(il2cpp_symbols::get_class("UnityEngine.CoreModule.dll", "UnityEngine", "WaitWhile"));
-		il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, Il2CppDelegate*)>(yield->klass, ".ctor", 1)->methodPointer(yield, CreateDelegateStatic(*[]() { return false; }));
-		return yield;
-	}
-
-	void* SplashViewController_KakaoStart_orig;
-	void SplashViewController_KakaoStart_hook(Il2CppObject* _this)
-	{
-		// no-op
-	}
-
-	CriWare::CriMana::MovieInfo* (*MoviePlayerBase_get_MovieInfo)(Il2CppObject* _this);
-	CriWare::CriMana::MovieInfo* (*MovieManager_GetMovieInfo)(Il2CppObject* _this, Cute::Cri::MoviePlayerHandle playerHandle);
+	CriWare::CriMana::MovieInfo* (*MoviePlayerBase_get_MovieInfo)(Il2CppObject* self);
+	CriWare::CriMana::MovieInfo* (*MovieManager_GetMovieInfo)(Il2CppObject* self, Cute::Cri::MoviePlayerHandle playerHandle);
 
 	void* MoviePlayerForUI_AdjustScreenSize_orig = nullptr;
-
 	void MoviePlayerForUI_AdjustScreenSize_hook(Il2CppObject* self, UnityEngine::Vector2 dispRectWH, bool isPanScan)
 	{
 		auto movieInfo = MoviePlayerBase_get_MovieInfo(self);
@@ -6948,506 +5107,11 @@ namespace
 		reinterpret_cast<decltype(MoviePlayerForUI_AdjustScreenSize_hook)*>(MoviePlayerForUI_AdjustScreenSize_orig)(self, dispRectWH, isPanScan);
 	}
 
-	void* FrameRateController_GetLayerFrameRate_orig = nullptr;
-	int FrameRateController_GetLayerFrameRate_hook(Il2CppObject* _this, int layer)
-	{
-		return UnityEngine::Application::targetFrameRate();
-	}
-
-	void* FrameRateController_OverrideByNormalFrameRate_orig = nullptr;
-	void FrameRateController_OverrideByNormalFrameRate_hook(Il2CppObject* _this, int layer)
-	{
-		// FrameRateOverrideLayer.SystemValue
-		reinterpret_cast<decltype(FrameRateController_OverrideByNormalFrameRate_hook)*>(FrameRateController_OverrideByNormalFrameRate_orig)(_this, 0);
-	}
-
-	void* FrameRateController_OverrideByMaxFrameRate_orig = nullptr;
-	void FrameRateController_OverrideByMaxFrameRate_hook(Il2CppObject* _this, int layer)
-	{
-		// FrameRateOverrideLayer.SystemValue
-		reinterpret_cast<decltype(FrameRateController_OverrideByMaxFrameRate_hook)*>(FrameRateController_OverrideByMaxFrameRate_orig)(_this, 0);
-	}
-
-	void* FrameRateController_ResetOverride_orig = nullptr;
-	void FrameRateController_ResetOverride_hook(Il2CppObject* _this, int layer)
-	{
-		// FrameRateOverrideLayer.SystemValue
-		reinterpret_cast<decltype(FrameRateController_ResetOverride_hook)*>(FrameRateController_ResetOverride_orig)(_this, 0);
-	}
-
-	void* FrameRateController_ReflectionFrameRate_orig = nullptr;
-	void FrameRateController_ReflectionFrameRate_hook(Il2CppObject* _this)
-	{
-		UnityEngine::Application::targetFrameRate(30);
-	}
-
-	Il2CppDelegate* updateFriendSearchButton = nullptr;
-
-	bool UpdateFriendSearchButton()
-	{
-		if (Game::CurrentGameRegion != Game::Region::KOR)
-		{
-			return true;
-		}
-
-		auto controller = GetCurrentViewController();
-
-		if (controller)
-		{
-			auto view = il2cpp_class_get_method_from_name_type<Il2CppObject * (*)(Il2CppObject*)>(controller->klass, "GetViewBase", 0)->methodPointer(controller);
-
-			Il2CppObject* ButtonIDSearch = il2cpp_class_get_method_from_name_type<Il2CppObject * (*)(Il2CppObject*)>(view->klass, "get_ButtonIDSearch", 0)->methodPointer(view);
-
-			if (!GetButtonCommonOnClickDelegate(ButtonIDSearch))
-			{
-				return false;
-			}
-
-			auto fn = *[](void*)
-				{
-					auto viewerIdSearchFn = *[](void*)
-						{
-							auto fn = *[](void*, Il2CppString* text)
-								{
-									auto dialog = GetFrontDialog();
-									auto data = il2cpp_class_get_method_from_name_type<Il2CppObject * (*)(Il2CppObject*)>(dialog->klass, "get_DialogData", 0)->methodPointer(dialog);
-
-									auto ContentsObjectField = il2cpp_class_get_field_from_name(data->klass, "ContentsObject");
-									Il2CppObject* ContentsObject;
-									il2cpp_field_get_value(data, ContentsObjectField, &ContentsObject);
-
-									auto idSearch = il2cpp_class_get_method_from_name_type<Il2CppObject * (*)(Il2CppObject*, Il2CppReflectionType*)>(ContentsObject->klass, "GetComponent", 1)->methodPointer(ContentsObject, GetRuntimeType("umamusume.dll", "Gallop", "DialogIDSearch"));
-
-									auto _inputFieldField = il2cpp_class_get_field_from_name(idSearch->klass, "_inputField");
-									Il2CppObject* _inputField;
-									il2cpp_field_get_value(idSearch, _inputFieldField, &_inputField);
-
-									auto text1 = il2cpp_class_get_method_from_name_type<Il2CppString * (*)(Il2CppObject*)>(_inputField->klass, "get_text", 0)->methodPointer(_inputField);
-
-									string searchId = il2cpp_u8(text1->chars);
-
-									auto workDataManager = GetSingletonInstance(il2cpp_symbols::get_class("umamusume.dll", "Gallop", "WorkDataManager"));
-
-									auto workUserData = il2cpp_class_get_method_from_name_type<Il2CppObject * (*)(Il2CppObject*)>(workDataManager->klass, "get_UserData", 0)->methodPointer(workDataManager);
-									auto viewerIdObscured = il2cpp_class_get_method_from_name_type<CodeStage::AntiCheat::ObscuredTypes::ObscuredLong(*)(Il2CppObject*)>(workUserData->klass, "get_ViewerId", 0)->methodPointer(workUserData);
-									auto viewerId = viewerIdObscured.GetDecrypted();
-
-									if (searchId == to_string(viewerId))
-									{
-										il2cpp_symbols::get_method_pointer("umamusume.dll", "Gallop", "FriendViewController", "PushErrorSearchOwn", IgnoreNumberOfArguments)();
-										return;
-									}
-
-									auto onModifyFriendCloseFn = *[]()
-										{
-											auto controller = GetCurrentViewController();
-											il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*)>(controller->klass, "UpdateCurrentTabView", 0)->methodPointer(controller);
-										};
-
-									il2cpp_symbols::get_method_pointer<void (*)(int64_t, Il2CppDelegate*, Il2CppDelegate*, Il2CppDelegate*, Il2CppDelegate*, Il2CppObject*, bool, Il2CppDelegate*, bool, Il2CppDelegate*)>("umamusume.dll", "Gallop", "DialogTrainerInfo", "PushDialog", 10)
-										(stoll(searchId.data()), CreateDelegateStatic(onModifyFriendCloseFn), nullptr, nullptr, nullptr, nullptr, false, nullptr, false, nullptr);
-								};
-							il2cpp_symbols::get_method_pointer<void (*)(Il2CppDelegate*)>("umamusume.dll", "Gallop", "DialogIDSearch", "PushDialog", 1)(CreateDelegateStatic(fn));
-
-							auto dialog = GetFrontDialog();
-							auto data = il2cpp_class_get_method_from_name_type<Il2CppObject * (*)(Il2CppObject*)>(dialog->klass, "get_DialogData", 0)->methodPointer(dialog);
-
-							auto ContentsObjectField = il2cpp_class_get_field_from_name(data->klass, "ContentsObject");
-							Il2CppObject* ContentsObject;
-							il2cpp_field_get_value(data, ContentsObjectField, &ContentsObject);
-
-							auto idSearch = il2cpp_class_get_method_from_name_type<Il2CppObject * (*)(Il2CppObject*, Il2CppReflectionType*)>(ContentsObject->klass, "GetComponent", 1)->methodPointer(ContentsObject, GetRuntimeType("umamusume.dll", "Gallop", "DialogIDSearch"));
-
-							auto _inputFieldField = il2cpp_class_get_field_from_name(idSearch->klass, "_inputField");
-							Il2CppObject* _inputField;
-							il2cpp_field_get_value(idSearch, _inputFieldField, &_inputField);
-
-							auto onValueChanged = il2cpp_class_get_method_from_name_type<Il2CppObject * (*)(Il2CppObject*)>(_inputField->klass, "get_onValueChanged", 0)->methodPointer(_inputField);
-							il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*)>(onValueChanged->klass, "RemoveAllListeners", 0)->methodPointer(onValueChanged);
-							il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*)>(_inputField->klass, "Start", 0)->methodPointer(_inputField);
-
-
-							auto valueChangeFn = *[](Il2CppObject* obj)
-								{
-									auto dialog = GetFrontDialog();
-									auto data = il2cpp_class_get_method_from_name_type<Il2CppObject * (*)(Il2CppObject*)>(dialog->klass, "get_DialogData", 0)->methodPointer(dialog);
-
-									auto ContentsObjectField = il2cpp_class_get_field_from_name(data->klass, "ContentsObject");
-									Il2CppObject* ContentsObject;
-									il2cpp_field_get_value(data, ContentsObjectField, &ContentsObject);
-
-									auto idSearch = il2cpp_class_get_method_from_name_type<Il2CppObject * (*)(Il2CppObject*, Il2CppReflectionType*)>(ContentsObject->klass, "GetComponent", 1)->methodPointer(ContentsObject, GetRuntimeType("umamusume.dll", "Gallop", "DialogIDSearch"));
-
-									auto _inputFieldField = il2cpp_class_get_field_from_name(idSearch->klass, "_inputField");
-									Il2CppObject* _inputField;
-									il2cpp_field_get_value(idSearch, _inputFieldField, &_inputField);
-
-									auto value = il2cpp_class_get_method_from_name_type<Il2CppString * (*)(Il2CppObject*)>(_inputField->klass, "get_text", 0)->methodPointer(_inputField);
-
-									Il2CppObject* rightButton = il2cpp_class_get_method_from_name_type<Il2CppObject * (*)(Il2CppObject*, uint64_t)>(dialog->klass, "GetButtonObj", 1)->methodPointer(dialog, 2);
-
-									bool valid = false;
-
-									if (value && value->length >= 9)
-									{
-										try
-										{
-											stoll(il2cpp_u8(value->chars).data());
-											valid = true;
-										}
-										catch (invalid_argument e)
-										{
-										}
-									}
-
-									if (rightButton)
-									{
-										il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, bool)>(rightButton->klass, "set_interactable", 1)->methodPointer(rightButton, valid);
-										il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, Il2CppString*)>(rightButton->klass, "SetNotificationMessage", 1)->methodPointer(rightButton, valid ? il2cpp_string_new("") : Gallop::Localize::Get(GetTextIdByName(IL2CPP_STRING("Friend0013"))));
-									}
-								};
-
-							auto delegateClass = GetGenericClass(GetRuntimeType("UnityEngine.CoreModule.dll", "UnityEngine.Events", "UnityAction`1"), GetRuntimeType(il2cpp_defaults.string_class));
-
-							void** params = new void* [1];
-							params[0] = CreateDelegateWithClass(delegateClass, _inputField, valueChangeFn);
-
-							Il2CppException* exception;
-
-							il2cpp_runtime_invoke_type<void>(il2cpp_class_get_method_from_name(onValueChanged->klass, "AddListener", 1), onValueChanged, params, &exception);
-
-							auto _myIdTextField = il2cpp_class_get_field_from_name(idSearch->klass, "_myIdText");
-							Il2CppObject* _myIdText;
-							il2cpp_field_get_value(idSearch, _myIdTextField, &_myIdText);
-
-							auto workDataManager = GetSingletonInstance(il2cpp_symbols::get_class("umamusume.dll", "Gallop", "WorkDataManager"));
-
-							auto workUserData = il2cpp_class_get_method_from_name_type<Il2CppObject * (*)(Il2CppObject*)>(workDataManager->klass, "get_UserData", 0)->methodPointer(workDataManager);
-							auto viewerIdStringObscured = il2cpp_class_get_method_from_name_type<Il2CppObject * (*)(Il2CppObject*)>(workUserData->klass, "get_ViewerIdString", 0)->methodPointer(workUserData);
-
-							auto viewerId = il2cpp_class_get_method_from_name_type<Il2CppString * (*)(Il2CppObject*)>(viewerIdStringObscured->klass, "InternalDecrypt", 0)->methodPointer(viewerIdStringObscured);
-
-							text_set_text(_myIdText, viewerId);
-						};
-
-					auto playerIdSearchFn = *[](void*)
-						{
-							auto controller = GetCurrentViewController();
-							il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*)>(controller->klass, "OnClickIDSearch", 0)->methodPointer(controller);
-						};
-
-					auto dialogData = Gallop::DialogCommon::Data();
-					dialogData.SetSimpleTwoButtonMessage(
-						Gallop::Localize::Get(GetTextIdByName(IL2CPP_STRING("Friend0039"))),
-						il2cpp_string_new("트레이너 ID로 검색하시겠습니까?"),
-						CreateDelegateStatic(viewerIdSearchFn),
-						GetTextIdByName(IL2CPP_STRING("Outgame0002")),
-						GetTextIdByName(IL2CPP_STRING("Common0003")),
-						CreateDelegateStatic(playerIdSearchFn)
-					);
-
-					Gallop::DialogManager::PushDialog(dialogData);
-				};
-
-			il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, Il2CppDelegate*)>(ButtonIDSearch->klass, "SetOnClick", 1)->methodPointer(ButtonIDSearch, &CreateUnityActionStatic(fn)->delegate);
-			return true;
-
-		}
-		return false;
-	}
-
-	void* DialogCircleItemDonate_Initialize_orig = nullptr;
-
-	void DialogCircleItemDonate_Initialize_hook(Il2CppObject* _this, Il2CppObject* dialog, Il2CppObject* itemRequestInfo)
-	{
-		reinterpret_cast<decltype(DialogCircleItemDonate_Initialize_hook)*>(DialogCircleItemDonate_Initialize_orig)(
-			_this, dialog, itemRequestInfo);
-		auto donateCountField = il2cpp_class_get_field_from_name(_this->klass, "_donateCount");
-		il2cpp_field_set_value(_this, donateCountField,
-			GetInt32Instance(
-				il2cpp_class_get_method_from_name_type<int (*)(Il2CppObject*)>(
-					_this->klass, "CalcDonateItemMax",
-					0)->methodPointer
-					(_this)));
-
-		il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*)>(_this->klass, "ValidateDonateItemCount",
-			0)->methodPointer
-			(_this);
-		il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*)>(_this->klass, "ApplyDonateItemCountText",
-			0)->methodPointer
-			(_this);
-		il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*)>(_this->klass, "OnClickPlusButton",
-			0)->methodPointer
-			(_this);
-	}
-
-	void* Certification_initDmmPlatformData_orig = nullptr;
-
-	void Certification_initDmmPlatformData_hook()
-	{
-		reinterpret_cast<decltype(Certification_initDmmPlatformData_hook)*>(Certification_initDmmPlatformData_orig)();
-
-		if (!Gallop::TitleViewController::viewerId.empty() && !Gallop::TitleViewController::onetimeToken.empty())
-		{
-			il2cpp_symbols::get_method_pointer<void (*)(Il2CppString*)>("umamusume.dll", "Gallop", "Certification", "set_dmmViewerId", 1)(il2cpp_string_new(Gallop::TitleViewController::viewerId.data()));
-			il2cpp_symbols::get_method_pointer<void (*)(Il2CppString*)>("umamusume.dll", "Gallop", "Certification", "set_dmmOnetimeToken", 1)(il2cpp_string_new(Gallop::TitleViewController::onetimeToken.data()));
-		}
-	}
-
 	void* LiveTheaterCharaSelect_CheckSwapChara_orig = nullptr;
-
 	void LiveTheaterCharaSelect_CheckSwapChara_hook(Il2CppObject* self, int index, int oldCharaId, int oldDressId, int oldDressColorId, int oldDressId2, int oldDressColorId2, int newCharaId)
 	{
 
-	}
-
-	void DumpMsgPackFile(const string& file_path, const char* buffer, const size_t len) {
-		auto parent_path = filesystem::path(file_path).parent_path();
-		if (!filesystem::exists(parent_path)) {
-			filesystem::create_directories(parent_path);
-		}
-		ofstream file{ file_path, ios::binary };
-		file.write(buffer, static_cast<int>(len));
-		file.flush();
-		file.close();
-	}
-
-	int64_t current_time() {
-		auto ms = chrono::duration_cast<chrono::milliseconds>(
-			chrono::system_clock::now().time_since_epoch());
-		return ms.count();
-	}
-
-	void* UploadHandlerRaw_Create_orig = nullptr;
-
-	void* UploadHandlerRaw_Create_hook(Il2CppObject* self, const char* data, int dataLength)
-	{
-		try
-		{
-			if (config::msgpack_notifier && config::msgpack_notifier_request)
-			{
-				notifier::notify_request(string(data, dataLength));
 			}
-
-			if (config::dump_msgpack && config::dump_msgpack_request)
-			{
-				string out_path =
-					"msgpack_dump/"s.append(to_string(current_time())).append("Q.msgpack");
-
-				DumpMsgPackFile(out_path, data, dataLength);
-			}
-
-			MsgPackData::ReadRequest(data, dataLength);
-
-#ifdef EXPERIMENTS
-			if (config::unlock_live_chara)
-			{
-				auto modified = MsgPackModify::ModifyRequest(data, dataLength);
-
-				if (!modified.empty())
-				{
-					data = new char[modified.size()];
-					memcpy(const_cast<char*>(data), modified.data(), modified.size());
-				}
-			}
-#endif
-		}
-		catch (...)
-		{
-		}
-
-		return reinterpret_cast<decltype(UploadHandlerRaw_Create_hook)*>(UploadHandlerRaw_Create_orig)(self, data, dataLength);
-	}
-
-	void* DownloadHandler_InternalGetByteArray_orig = nullptr;
-
-	const char* DownloadHandler_InternalGetByteArray_hook(Il2CppObject* self, int* length)
-	{
-		auto data = reinterpret_cast<decltype(DownloadHandler_InternalGetByteArray_hook)*>(DownloadHandler_InternalGetByteArray_orig)(self, length);
-
-		try
-		{
-			if (config::msgpack_notifier)
-			{
-				notifier::notify_response(string(data, *length));
-			}
-
-			if (config::dump_msgpack)
-			{
-				string out_path =
-					"msgpack_dump/"s.append(to_string(current_time())).append("R.msgpack");
-
-				DumpMsgPackFile(out_path, data, *length);
-			}
-
-			MsgPackData::ReadResponse(data, *length);
-
-#ifdef EXPERIMENTS
-			if (config::unlock_live_chara)
-			{
-				auto modified = MsgPackModify::ModifyResponse(data, *length);
-
-				if (!modified.empty())
-				{
-					data = new char[modified.size()];
-					memcpy(const_cast<char*>(data), modified.data(), modified.size());
-				}
-			}
-#endif
-		}
-		catch (...)
-		{
-		}
-
-		return data;
-	}
-
-	void* HttpHelper_CompressRequest_orig = nullptr;
-
-	Il2CppArraySize_t<int8_t>* HttpHelper_CompressRequest_hook(Il2CppArraySize_t<int8_t>* data)
-	{
-		auto buf = reinterpret_cast<const char*>(data) + kIl2CppSizeOfArray;
-
-		try
-		{
-			if (config::msgpack_notifier && config::msgpack_notifier_request)
-			{
-				notifier::notify_request(string(buf, data->max_length));
-			}
-
-			if (config::dump_msgpack && config::dump_msgpack_request)
-			{
-				string out_path =
-					"msgpack_dump/"s.append(to_string(current_time())).append("Q.msgpack");
-
-				DumpMsgPackFile(out_path, buf, data->max_length);
-			}
-
-			MsgPackData::ReadRequest(buf, data->max_length);
-
-#ifdef EXPERIMENTS
-			if (config::unlock_live_chara)
-			{
-				auto modified = MsgPackModify::ModifyRequest(buf, data->max_length);
-
-				if (!modified.empty())
-				{
-					data = il2cpp_array_new_type<int8_t>(il2cpp_defaults.byte_class, modified.size());
-
-					char* buf1 = reinterpret_cast<char*>(data) + kIl2CppSizeOfArray;
-					memcpy(buf1, modified.data(), modified.size());
-				}
-			}
-#endif
-		}
-		catch (...)
-		{
-		}
-
-		return reinterpret_cast<decltype(HttpHelper_CompressRequest_hook)*>(HttpHelper_CompressRequest_orig)(data);
-	}
-
-	void* HttpHelper_DecompressResponse_orig = nullptr;
-
-	Il2CppArraySize_t<int8_t>* HttpHelper_DecompressResponse_hook(Il2CppArraySize_t<int8_t>* compressed)
-	{
-		auto data = reinterpret_cast<decltype(HttpHelper_DecompressResponse_hook)*>(HttpHelper_DecompressResponse_orig)(compressed);
-
-		try
-		{
-			auto buf = reinterpret_cast<const char*>(data) + kIl2CppSizeOfArray;
-
-			if (config::msgpack_notifier)
-			{
-				notifier::notify_response(string(buf, data->max_length));
-			}
-
-			if (config::dump_msgpack)
-			{
-				string out_path =
-					"msgpack_dump/"s.append(to_string(current_time())).append("R.msgpack");
-
-				DumpMsgPackFile(out_path, buf, data->max_length);
-			}
-
-			MsgPackData::ReadResponse(buf, data->max_length);
-
-#ifdef EXPERIMENTS
-			if (config::unlock_live_chara)
-			{
-				auto modified = MsgPackModify::ModifyResponse(buf, data->max_length);
-
-				if (!modified.empty())
-				{
-					data = il2cpp_array_new_type<int8_t>(il2cpp_defaults.byte_class, modified.size());
-
-					char* buf1 = reinterpret_cast<char*>(data) + kIl2CppSizeOfArray;
-					memcpy(buf1, modified.data(), modified.size());
-				}
-			}
-#endif
-		}
-		catch (...)
-		{
-		}
-
-		return data;
-	}
-
-	Il2CppObject* GetRaceManager()
-	{
-		return GetSingletonInstance(il2cpp_symbols::get_class("umamusume.dll", "Gallop", "RaceManager"));
-	}
-
-	Il2CppObject* GetRaceHorseManager()
-	{
-		auto instance = GetRaceManager();
-		if (!instance)
-		{
-			return nullptr;
-		}
-
-		auto _horseManagerField = il2cpp_class_get_field_from_name(instance->klass, "_horseManager");
-		Il2CppObject* _horseManager;
-		il2cpp_field_get_value(instance, _horseManagerField, &_horseManager);
-
-		return _horseManager;
-	}
-
-	il2cppstring GetRaceState()
-	{
-		auto instance = GetRaceManager();
-		if (!instance)
-		{
-			return IL2CPP_STRING("");
-		}
-
-		auto state = il2cpp_class_get_method_from_name_type<int (*)(Il2CppObject*)>(instance->klass, "get_State", 0)->methodPointer(instance);
-		auto stateName = GetEnumName(GetRuntimeType("umamusume.dll", "Gallop", "RaceDefine/RaceState"), state);
-		return stateName->chars;
-	}
-
-	il2cppstring GetRaceCameraMode()
-	{
-		auto instance = GetSingletonInstance(il2cpp_symbols::get_class("umamusume.dll", "Gallop", "RaceCameraManager"));
-		if (!instance)
-		{
-			return IL2CPP_STRING("");
-		}
-
-		auto mode = il2cpp_class_get_method_from_name_type<int (*)(Il2CppObject*)>(instance->klass, "GetCameraMode", 0)->methodPointer(instance);
-		auto modeName = GetEnumName(GetRuntimeType("umamusume.dll", "Gallop", "RaceCameraManager/CameraMode"), mode);
-		return modeName->chars;
-	}
-
-	bool IsRace() {
-		auto stateName = GetRaceState();
-		if (!stateName.empty())
-		{
-			return IL2CPP_STRING("Race") == stateName;
-		}
-		return false;
-	}
 
 	discord::Core* discord;
 
@@ -7476,7 +5140,7 @@ namespace
 					il2cpp_field_get_value(title, textField, &text);
 					if (text)
 					{
-						name = il2cpp_u8(text_get_text(text)->chars);
+						name = il2cpp_u8(Gallop::TextCommon(text).text()->chars);
 						if (name.empty())
 						{
 							name = "Live (unknown)";
@@ -7559,6 +5223,11 @@ namespace
 	{
 		try
 		{
+			if (config::unlock_size || config::freeform_window)
+			{
+				SetBGCanvasScalerSize();
+			}
+
 			if (config::freeform_window)
 			{
 				ResizeMoviePlayer();
@@ -7604,7 +5273,7 @@ namespace
 								il2cppstringstream str;
 								str << setw(2) << setfill(IL2CPP_STRING('0')) << timeSecIl2Cpp;
 
-								Localify::UIParts::SetTextCommonText(textCommon, (timeMinIl2Cpp + IL2CPP_STRING(":") + str.str()).data());
+								textCommon.text(il2cpp_string_new16((timeMinIl2Cpp + IL2CPP_STRING(":") + str.str()).data()));
 							}
 
 							auto textCommonTotal = Localify::UIParts::GetTextCommon("live_slider_total");
@@ -7620,7 +5289,7 @@ namespace
 								il2cppstringstream str;
 								str << setw(2) << setfill(IL2CPP_STRING('0')) << timeSecIl2Cpp;
 
-								Localify::UIParts::SetTextCommonText(textCommonTotal, (timeMinIl2Cpp + IL2CPP_STRING(":") + str.str()).data());
+								textCommonTotal.text(il2cpp_string_new16((timeMinIl2Cpp + IL2CPP_STRING(":") + str.str()).data()));
 							}
 
 							if (config::live_playback_loop)
@@ -7786,439 +5455,12 @@ namespace
 		return CallNextHookEx(hCBTHook, nCode, wParam, lParam);
 	}
 
-	void* load_scene_internal_orig = nullptr;
-	void* load_scene_internal_hook(Il2CppString* sceneName, int sceneBuildIndex, void* parameters, bool mustCompleteNextFrame)
-	{
-		printf("%ls\n", sceneName->chars);
-		return reinterpret_cast<decltype(load_scene_internal_hook)*>(load_scene_internal_orig)(sceneName, sceneBuildIndex, parameters, mustCompleteNextFrame);
-	}
-
-	void* CollectRaidBgCutinHelper_InstantiateTimeline_orig = nullptr;
-	bool CollectRaidBgCutinHelper_InstantiateTimeline_hook(Il2CppObject* self, Il2CppString* path, Il2CppObject* parent, Il2CppObject* renderTexture, float fovFactor)
-	{
-		if (renderTexture)
-		{
-			auto width = il2cpp_class_get_method_from_name_type<int (*)(Il2CppObject*)>(renderTexture->klass, "get_width", 0)->methodPointer(renderTexture);
-			auto height = il2cpp_class_get_method_from_name_type<int (*)(Il2CppObject*)>(renderTexture->klass, "get_height", 0)->methodPointer(renderTexture);
-
-			auto ratio = static_cast<float>(width) / static_cast<float>(height);
-
-			auto newWidth = Gallop::Screen::Height();
-			auto newHeight = static_cast<int>(static_cast<float>(newWidth) / ratio);
-
-			il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, int)>(renderTexture->klass, "set_width", 1)->methodPointer(renderTexture, newWidth);
-			il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, int)>(renderTexture->klass, "set_height", 1)->methodPointer(renderTexture, newHeight);
-		}
-
-		return reinterpret_cast<decltype(CollectRaidBgCutinHelper_InstantiateTimeline_hook)*>(CollectRaidBgCutinHelper_InstantiateTimeline_orig)(self, path, parent, renderTexture, fovFactor);
-	}
-
-	void* Header_Initialize_orig = nullptr;
-	void Header_Initialize_hook(Il2CppObject* self)
-	{
-		reinterpret_cast<decltype(Header_Initialize_hook)*>(Header_Initialize_orig)(self);
-
-		if (config::freeform_window && Gallop::Screen::IsLandscapeMode())
-		{
-			auto _menuButtonField = il2cpp_class_get_field_from_name(self->klass, "_menuButton");
-			Il2CppObject* _menuButton;
-			il2cpp_field_get_value(self, _menuButtonField, &_menuButton);
-
-			UnityEngine::MonoBehaviour(_menuButton).gameObject().SetActive(true);
-
-			il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, Il2CppDelegate*)>(_menuButton->klass, "SetOnClick", 1)->methodPointer(_menuButton,
-				&CreateUnityAction(self, *[](Il2CppObject* self)
-					{
-						il2cpp_symbols::get_method_pointer<void (*)(Il2CppObject*, Il2CppObject*, Gallop::DialogCommon::DispStackType, Gallop::DialogCommonBase::FormType)>("umamusume.dll", "Gallop", "DialogHomeMenuMain", "Open", 4)(nullptr, nullptr, Gallop::DialogCommon::DispStackType::DialogOnDialog, Gallop::DialogCommonBase::FormType::BIG_ONE_BUTTON);
-					})->delegate);
-		}
-	}
-
-	void* DialogHomeMenuMain_ChangeView_orig = nullptr;
-	void DialogHomeMenuMain_ChangeView_hook(Il2CppObject* self, uint64_t viewId)
-	{
-		reinterpret_cast<decltype(DialogHomeMenuMain_ChangeView_hook)*>(DialogHomeMenuMain_ChangeView_orig)(self, viewId);
-
-		if (!Gallop::Screen::IsLandscapeMode())
-		{
-			return;
-		}
-
-		auto _menuDialogField = il2cpp_class_get_field_from_name(self->klass, "_menuDialog");
-		Il2CppObject* _menuDialog;
-		il2cpp_field_static_get_value(_menuDialogField, &_menuDialog);
-
-		if (_menuDialog)
-		{
-			auto dialogCommon = UnityEngine::GameObject(_menuDialog).GetComponent(GetRuntimeType("umamusume.dll", "Gallop", "DialogCommon"));
-			il2cpp_symbols::get_method_pointer<void (*)(Il2CppObject*, Il2CppDelegate*)>("umamusume.dll", "Gallop", "DialogManager", "PopDialog", 2)(dialogCommon, nullptr);
-			_menuDialog = nullptr;
-			il2cpp_field_static_set_value(_menuDialogField, _menuDialog);
-		}
-	}
-
-	void* DialogHomeMenuMain_ChangeView2_orig = nullptr;
-	void DialogHomeMenuMain_ChangeView2_hook(Il2CppObject* self, uint64_t viewId, Il2CppObject* viewInfo)
-	{
-		reinterpret_cast<decltype(DialogHomeMenuMain_ChangeView2_hook)*>(DialogHomeMenuMain_ChangeView2_orig)(self, viewId, viewInfo);
-
-		if (!Gallop::Screen::IsLandscapeMode())
-		{
-			return;
-		}
-
-		auto _menuDialogField = il2cpp_class_get_field_from_name(self->klass, "_menuDialog");
-		Il2CppObject* _menuDialog;
-		il2cpp_field_static_get_value(_menuDialogField, &_menuDialog);
-
-		if (_menuDialog)
-		{
-			auto dialogCommon = UnityEngine::GameObject(_menuDialog).GetComponent(GetRuntimeType("umamusume.dll", "Gallop", "DialogCommon"));
-			il2cpp_symbols::get_method_pointer<void (*)(Il2CppObject*, Il2CppDelegate*)>("umamusume.dll", "Gallop", "DialogManager", "PopDialog", 2)(dialogCommon, nullptr);
-			_menuDialog = nullptr;
-			il2cpp_field_static_set_value(_menuDialogField, _menuDialog);
-		}
-	}
-
-	void* PartsSingleModeCommonFooter_Setup_orig = nullptr;
-	void PartsSingleModeCommonFooter_Setup_hook(Il2CppObject* self)
-	{
-		reinterpret_cast<decltype(PartsSingleModeCommonFooter_Setup_hook)*>(PartsSingleModeCommonFooter_Setup_orig)(self);
-
-		if (config::freeform_window && Gallop::Screen::IsLandscapeMode())
-		{
-			auto _logButtonField = il2cpp_class_get_field_from_name(self->klass, "_logButton");
-			Il2CppObject* _logButton;
-			il2cpp_field_get_value(self, _logButtonField, &_logButton);
-
-			UnityEngine::MonoBehaviour(_logButton).gameObject().SetActive(true);
-
-			il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, Il2CppDelegate*)>(_logButton->klass, "SetOnClick", 1)->methodPointer(_logButton,
-				&CreateUnityAction(self, *[](Il2CppObject* self)
-					{
-						il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*)>(self->klass, "OnClickLog", 0)->methodPointer(self);
-					})->delegate);
-		}
-	}
-
-	void* DialogSingleModeTopMenu_Setup_orig = nullptr;
-	void DialogSingleModeTopMenu_Setup_hook(Il2CppObject* self)
-	{
-		reinterpret_cast<decltype(DialogSingleModeTopMenu_Setup_hook)*>(DialogSingleModeTopMenu_Setup_orig)(self);
-
-		if (config::freeform_window && Gallop::Screen::IsLandscapeMode())
-		{
-			auto _infoButtonField = il2cpp_class_get_field_from_name(self->klass, "_infoButton");
-			Il2CppObject* _infoButton;
-			il2cpp_field_get_value(self, _infoButtonField, &_infoButton);
-
-			UnityEngine::MonoBehaviour(_infoButton).gameObject().SetActive(true);
-
-			il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, Il2CppDelegate*)>(_infoButton->klass, "SetOnClick", 1)->methodPointer(_infoButton,
-				&CreateUnityAction(self, *[](Il2CppObject* self)
-					{
-						il2cpp_symbols::get_method_pointer<void (*)(Gallop::DialogCommon::DispStackType, Gallop::DialogCommonBase::FormType)>("umamusume.dll", "Gallop", "DialogSingleModeStartConfirmEntry", "OpenPlayingSingleMode", 2)(Gallop::DialogCommon::DispStackType::DialogOnDialog, Gallop::DialogCommonBase::FormType::BIG_ONE_BUTTON);
-					})->delegate);
-		}
-	}
-
-	void* DialogSingleModeTopMenu_Setup1_orig = nullptr;
-	void DialogSingleModeTopMenu_Setup1_hook(Il2CppObject* self, uint64_t dialogType)
-	{
-		reinterpret_cast<decltype(DialogSingleModeTopMenu_Setup1_hook)*>(DialogSingleModeTopMenu_Setup1_orig)(self, dialogType);
-
-		if (config::freeform_window && Gallop::Screen::IsLandscapeMode())
-		{
-			auto _infoButtonField = il2cpp_class_get_field_from_name(self->klass, "_infoButton");
-			Il2CppObject* _infoButton;
-			il2cpp_field_get_value(self, _infoButtonField, &_infoButton);
-
-			UnityEngine::MonoBehaviour(_infoButton).gameObject().SetActive(true);
-
-			il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, Il2CppDelegate*)>(_infoButton->klass, "SetOnClick", 1)->methodPointer(_infoButton,
-				&CreateUnityAction(self, *[](Il2CppObject* self)
-					{
-						il2cpp_symbols::get_method_pointer<void (*)(Gallop::DialogCommon::DispStackType, Gallop::DialogCommonBase::FormType)>("umamusume.dll", "Gallop", "DialogSingleModeStartConfirmEntry", "OpenPlayingSingleMode", 2)(Gallop::DialogCommon::DispStackType::DialogOnDialog, Gallop::DialogCommonBase::FormType::BIG_ONE_BUTTON);
-					})->delegate);
-		}
-	}
-
-	void* DialogSingleModeTopMenu_SetupButtonPositions_orig = nullptr;
-	void DialogSingleModeTopMenu_SetupButtonPositions_hook(Il2CppObject* self)
-	{
-		if (config::freeform_window && Gallop::Screen::IsLandscapeMode())
-		{
-			return;
-		}
-
-		reinterpret_cast<decltype(DialogSingleModeTopMenu_SetupButtonPositions_hook)*>(DialogSingleModeTopMenu_SetupButtonPositions_orig)(self);
-	}
-
-	void* SingleModeRaceEntryViewController_SetupBottomButtons_orig = nullptr;
-	void SingleModeRaceEntryViewController_SetupBottomButtons_hook(Il2CppObject* self, uint64_t degree)
-	{
-		reinterpret_cast<decltype(SingleModeRaceEntryViewController_SetupBottomButtons_hook)*>(SingleModeRaceEntryViewController_SetupBottomButtons_orig)(self, degree);
-
-		if (config::freeform_window && Gallop::Screen::IsLandscapeMode())
-		{
-			auto _viewField = il2cpp_class_get_field_from_name(self->klass, "_view");
-			Il2CppObject* _view;
-			il2cpp_field_get_value(self, _viewField, &_view);
-
-			auto ReserveListButton = il2cpp_class_get_method_from_name_type<Il2CppObject * (*)(Il2CppObject*)>(_view->klass, "get_ReserveListButton", 0)->methodPointer(_view);
-
-			UnityEngine::MonoBehaviour(ReserveListButton).gameObject().SetActive(true);
-
-			il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, Il2CppDelegate*)>(ReserveListButton->klass, "SetOnClick", 1)->methodPointer(ReserveListButton,
-				&CreateUnityAction(self, *[](Il2CppObject* self)
-					{
-						il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*)>(self->klass, "OnClickReserveListButton", 0)->methodPointer(self);
-					})->delegate);
-		}
-	}
-
-	void* StaticVariableDefine_Circle_CircleChat_STAMP_ANCHORED_POS_AFTER_orig = nullptr;
-	Vector3 StaticVariableDefine_Circle_CircleChat_STAMP_ANCHORED_POS_AFTER_hook()
-	{
-		auto klass = il2cpp_symbols::get_class("umamusume.dll", "Gallop", "StaticVariableDefine/Circle/CircleChat");
-		auto field = il2cpp_class_get_field_from_name(klass, "STAMP_ANCHORED_POS_AFTER_BASE");
-		Vector3 value;
-
-		il2cpp_field_static_get_value(field, &value);
-
-		return value;
-	}
-
-	void* StaticVariableDefine_Circle_CircleChat_INPUT_LOCAL_POS_AFTER_orig = nullptr;
-	Vector3 StaticVariableDefine_Circle_CircleChat_INPUT_LOCAL_POS_AFTER_hook()
-	{
-		auto klass = il2cpp_symbols::get_class("umamusume.dll", "Gallop", "StaticVariableDefine/Circle/CircleChat");
-		auto field = il2cpp_class_get_field_from_name(klass, "INPUT_LOCAL_POS_AFTER_BASE");
-		Vector3 value;
-
-		il2cpp_field_static_get_value(field, &value);
-
-		return value;
-	}
-
-	void* StaticVariableDefine_Circle_CircleChat_INPUT_ANCHORED_POS_AFTER_orig = nullptr;
-	Vector3 StaticVariableDefine_Circle_CircleChat_INPUT_ANCHORED_POS_AFTER_hook()
-	{
-		auto klass = il2cpp_symbols::get_class("umamusume.dll", "Gallop", "StaticVariableDefine/Circle/CircleChat");
-		auto field = il2cpp_class_get_field_from_name(klass, "INPUT_ANCHORED_POS_AFTER_BASE");
-		Vector3 value;
-
-		il2cpp_field_static_get_value(field, &value);
-
-		return value;
-	}
-
-	void* StaticVariableDefine_Circle_CircleChat_INPUT_SIZE_DELTA_POS_AFTER_orig = nullptr;
-	Vector3 StaticVariableDefine_Circle_CircleChat_INPUT_SIZE_DELTA_POS_AFTER_hook()
-	{
-		auto klass = il2cpp_symbols::get_class("umamusume.dll", "Gallop", "StaticVariableDefine/Circle/CircleChat");
-		auto field = il2cpp_class_get_field_from_name(klass, "INPUT_SIZE_DELTA_POS_AFTER_BASE");
-		Vector3 value;
-
-		il2cpp_field_static_get_value(field, &value);
-
-		return value;
-	}
-
-	void* ResourcePath_GetPreInTitleMoviePath_orig = nullptr;
-	Il2CppString* ResourcePath_GetPreInTitleMoviePath_hook()
-	{
-		auto GameDefine = il2cpp_symbols::get_class("umamusume.dll", "Gallop", "GameDefine");
-		auto PREIN_TITLE_OP_VERSION_Field = il2cpp_class_get_field_from_name(GameDefine, "PREIN_TITLE_OP_VERSION");
-		uint64_t PREIN_TITLE_OP_VERSION;
-		il2cpp_field_static_get_value(PREIN_TITLE_OP_VERSION_Field, &PREIN_TITLE_OP_VERSION);
-
-		auto ResourcePath = il2cpp_symbols::get_class("umamusume.dll", "Gallop", "ResourcePath");
-
-		auto _stringBuilderField = il2cpp_class_get_field_from_name(ResourcePath, "_stringBuilder");
-		Il2CppObject* _stringBuilder;
-		il2cpp_field_static_get_value(_stringBuilderField, &_stringBuilder);
-		il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, int)>(_stringBuilder->klass, "set_Length", 1)->methodPointer(_stringBuilder, 0);
-
-		auto boxedOpVersion = il2cpp_value_box(il2cpp_defaults.int32_class, &PREIN_TITLE_OP_VERSION);
-
-		Il2CppString* titleMovieFormat = nullptr;
-
-		auto TITLE_MOVIE_FORMAT_DEFAULT_Field = il2cpp_class_get_field_from_name(ResourcePath, "TITLE_MOVIE_FORMAT_DEFAULT");
-
-		if (TITLE_MOVIE_FORMAT_DEFAULT_Field)
-		{
-			Il2CppString* TITLE_MOVIE_FORMAT_DEFAULT;
-			il2cpp_field_static_get_value(TITLE_MOVIE_FORMAT_DEFAULT_Field, &TITLE_MOVIE_FORMAT_DEFAULT);
-
-			auto TITLE_MOVIE_FORMAT_LANDSCAPE_Field = il2cpp_class_get_field_from_name(ResourcePath, "TITLE_MOVIE_FORMAT_LANDSCAPE");
-			Il2CppString* TITLE_MOVIE_FORMAT_LANDSCAPE;
-			il2cpp_field_static_get_value(TITLE_MOVIE_FORMAT_LANDSCAPE_Field, &TITLE_MOVIE_FORMAT_LANDSCAPE);
-
-			if (UnityEngine::Screen::width() > UnityEngine::Screen::height())
-			{
-				titleMovieFormat = TITLE_MOVIE_FORMAT_LANDSCAPE;
-			}
-			else
-			{
-				titleMovieFormat = TITLE_MOVIE_FORMAT_DEFAULT;
-			}
-		}
-		else
-		{
-			auto TITLE_MOVIE_FORMAT_Field = il2cpp_class_get_field_from_name(ResourcePath, "TITLE_MOVIE_FORMAT");
-			Il2CppString* TITLE_MOVIE_FORMAT;
-			il2cpp_field_static_get_value(TITLE_MOVIE_FORMAT_Field, &TITLE_MOVIE_FORMAT);
-
-			titleMovieFormat = TITLE_MOVIE_FORMAT;
-
-			if (UnityEngine::Screen::width() > UnityEngine::Screen::height())
-			{
-				auto streamingAssetsPath = UnityEngine::Application::streamingAssetsPath()->chars;
-
-				il2cpp_class_get_method_from_name_type<Il2CppObject* (*)(Il2CppObject*, Il2CppString*, Il2CppObject*)>(_stringBuilder->klass, "AppendFormat", 2)->methodPointer(_stringBuilder, titleMovieFormat, boxedOpVersion);
-				auto titleMovie = il2cpp_class_get_method_from_name_type<Il2CppString * (*)(Il2CppObject*)>(_stringBuilder->klass, "ToString", 0)->methodPointer(_stringBuilder)->chars;
-				il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, int)>(_stringBuilder->klass, "set_Length", 1)->methodPointer(_stringBuilder, 0);
-
-				if (filesystem::exists(streamingAssetsPath + il2cppstring(IL2CPP_STRING("/PreinResource/Movie/m/")) + titleMovie + IL2CPP_STRING("_landscape.usm")))
-				{
-					titleMovieFormat = il2cpp_string_new("Title/title_movie_{0:D2}_landscape");
-				}
-				else
-				{
-					titleMovieFormat = TITLE_MOVIE_FORMAT;
-				}
-			}
-			else
-			{
-				titleMovieFormat = TITLE_MOVIE_FORMAT;
-			}
-		}
-
-		il2cpp_class_get_method_from_name_type<Il2CppObject* (*)(Il2CppObject*, Il2CppString*, Il2CppObject*)>(_stringBuilder->klass, "AppendFormat", 2)->methodPointer(_stringBuilder, titleMovieFormat, boxedOpVersion);
-
-		return il2cpp_class_get_method_from_name_type<Il2CppString * (*)(Il2CppObject*)>(_stringBuilder->klass, "ToString", 0)->methodPointer(_stringBuilder);
-	}
-
-	void* ResourcePath_GetLatestAssetBundleTitleMoviePath_orig = nullptr;
-	Il2CppString* ResourcePath_GetLatestAssetBundleTitleMoviePath_hook()
-	{
-		auto SaveDataManager = GetSingletonInstance(il2cpp_symbols::get_class("umamusume.dll", "Gallop", "SaveDataManager"));
-		auto SaveLoader = il2cpp_class_get_method_from_name_type<Il2CppObject * (*)(Il2CppObject*)>(SaveDataManager->klass, "get_SaveLoader", 0)->methodPointer(SaveDataManager);
-		int NewOpProgress = il2cpp_class_get_method_from_name_type<int (*)(Il2CppObject*)>(SaveLoader->klass, "get_NewOpProgress", 0)->methodPointer(SaveLoader);
-
-		auto ResourcePath = il2cpp_symbols::get_class("umamusume.dll", "Gallop", "ResourcePath");
-
-		auto _stringBuilderField = il2cpp_class_get_field_from_name(ResourcePath, "_stringBuilder");
-		Il2CppObject* _stringBuilder;
-		il2cpp_field_static_get_value(_stringBuilderField, &_stringBuilder);
-		il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, int)>(_stringBuilder->klass, "set_Length", 1)->methodPointer(_stringBuilder, 0);
-
-		auto boxedOpVersion = il2cpp_value_box(il2cpp_defaults.int32_class, &NewOpProgress);
-
-		Il2CppString* titleMovieFormat = nullptr;
-
-		auto ASSET_BUNDLE_TITLE_MOVIE_FORMAT_Field = il2cpp_class_get_field_from_name(ResourcePath, "ASSET_BUNDLE_TITLE_MOVIE_FORMAT");
-		Il2CppString* ASSET_BUNDLE_TITLE_MOVIE_FORMAT;
-		il2cpp_field_static_get_value(ASSET_BUNDLE_TITLE_MOVIE_FORMAT_Field, &ASSET_BUNDLE_TITLE_MOVIE_FORMAT);
-
-		titleMovieFormat = ASSET_BUNDLE_TITLE_MOVIE_FORMAT;
-
-		if (UnityEngine::Screen::width() > UnityEngine::Screen::height())
-		{
-			auto streamingAssetsPath = UnityEngine::Application::streamingAssetsPath()->chars;
-
-			il2cpp_class_get_method_from_name_type<Il2CppObject* (*)(Il2CppObject*, Il2CppString*, Il2CppObject*)>(_stringBuilder->klass, "AppendFormat", 2)->methodPointer(_stringBuilder, titleMovieFormat, boxedOpVersion);
-			auto titleMovie = il2cpp_class_get_method_from_name_type<Il2CppString * (*)(Il2CppObject*)>(_stringBuilder->klass, "ToString", 0)->methodPointer(_stringBuilder)->chars;
-			il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, int)>(_stringBuilder->klass, "set_Length", 1)->methodPointer(_stringBuilder, 0);
-
-			if (filesystem::exists(streamingAssetsPath + il2cppstring(IL2CPP_STRING("/PreinResource/Movie/m/")) + titleMovie + IL2CPP_STRING("_landscape.usm")))
-			{
-				titleMovieFormat = il2cpp_string_new("Title/title_movie_{0:D2}_landscape");
-			}
-			else
-			{
-				titleMovieFormat = ASSET_BUNDLE_TITLE_MOVIE_FORMAT;
-			}
-		}
-		else
-		{
-			titleMovieFormat = ASSET_BUNDLE_TITLE_MOVIE_FORMAT;
-		}
-
-		il2cpp_class_get_method_from_name_type<Il2CppObject* (*)(Il2CppObject*, Il2CppString*, Il2CppObject*)>(_stringBuilder->klass, "AppendFormat", 2)->methodPointer(_stringBuilder, titleMovieFormat, boxedOpVersion);
-
-		return il2cpp_class_get_method_from_name_type<Il2CppString * (*)(Il2CppObject*)>(_stringBuilder->klass, "ToString", 0)->methodPointer(_stringBuilder);
-	}
-
-	void* CircleChat_Initialize_orig = nullptr;
-	void CircleChat_Initialize_hook(Il2CppObject* self)
-	{
-		reinterpret_cast<decltype(CircleChat_Initialize_hook)*>(CircleChat_Initialize_orig)(self);
-
-		if (config::freeform_window && Gallop::Screen::IsLandscapeMode())
-		{
-			auto _itemRequestButtonField = il2cpp_class_get_field_from_name(self->klass, "_itemRequestButton");
-			Il2CppObject* _itemRequestButton;
-			il2cpp_field_get_value(self, _itemRequestButtonField, &_itemRequestButton);
-
-			UnityEngine::MonoBehaviour(_itemRequestButton).gameObject().SetActive(true);
-
-			il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, Il2CppDelegate*)>(_itemRequestButton->klass, "SetOnClick", 1)->methodPointer(_itemRequestButton,
-				&CreateUnityAction(self, *[](Il2CppObject* self)
-					{
-						il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*)>(self->klass, "OnClickItemRequest", 0)->methodPointer(self);
-					})->delegate);
-		}
-	}
-
-
-	void* LiveTempData_ctor_orig = nullptr;
-	void LiveTempData_ctor_hook(Il2CppObject* self)
-	{
-		reinterpret_cast<decltype(LiveTempData_ctor_hook)*>(LiveTempData_ctor_orig)(self);
-
-		auto _screenModeDicField = il2cpp_class_get_field_from_name(self->klass, "_cachedLiveScreenModeDic");
-		Il2CppObject* _screenModeDic;
-		il2cpp_field_get_value(self, _screenModeDicField, &_screenModeDic);
-
-		auto entriesField = il2cpp_class_get_field_from_name(_screenModeDic->klass, "_entries");
-		if (!entriesField)
-		{
-			entriesField = il2cpp_class_get_field_from_name(_screenModeDic->klass, "entries");
-		}
-
-		Il2CppArraySize_t<System::Collections::Generic::Dictionary<int, int>::Entry>* entries;
-		il2cpp_field_get_value(_screenModeDic, entriesField, &entries);
-
-		vector<int> musicIds;
-
-		if (entries)
-		{
-			for (int i = 0; i < entries->max_length; i++)
-			{
-				auto entry = entries->vector[i];
-
-				if (entry.key)
-				{
-					musicIds.emplace_back(entry.key);
-				}
-			}
-		}
-
-		il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*)>(_screenModeDic->klass, "Clear", 0)->methodPointer(_screenModeDic);
-
-		for (auto musicId : musicIds)
-		{
-			il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, int, int)>(_screenModeDic->klass, "Add", 2)->methodPointer(_screenModeDic, musicId, 0);
-		}
-	}
-
 	void patch_game_assembly()
 	{
 		if (Game::CurrentGameRegion == Game::Region::KOR)
 		{
-			auto binData = il2cpp_symbols::get_class("uncheatercsd.dll", "Uncheater", "SystemBins64");
+			if (auto binData = il2cpp_symbols::get_class("uncheatercsd.dll", "Uncheater", "SystemBins64"))
+			{
 			auto binArrayField = il2cpp_class_get_field_from_name(binData->klass, "UNCHEATER_DATA");
 			auto array = il2cpp_array_new(il2cpp_defaults.object_class, 128);
 
@@ -8228,6 +5470,7 @@ namespace
 			il2cpp_array_setref(array, 9, byteArray);
 
 			il2cpp_field_static_set_value(binArrayField, array);
+		}
 		}
 
 		if (!mh_inited)
@@ -8257,394 +5500,24 @@ namespace
 	}
 #pragma endregion
 #pragma region HOOK_ADDRESSES
-		auto populate_with_errors_addr = il2cpp_symbols::get_method_pointer(
-			"UnityEngine.TextRenderingModule.dll",
-			"UnityEngine", "TextGenerator",
-			"PopulateWithErrors", 3
-		);
 
-		auto get_preferred_width_addr = il2cpp_symbols::get_method_pointer(
-			"UnityEngine.TextRenderingModule.dll",
-			"UnityEngine", "TextGenerator",
-			"GetPreferredWidth", 2
-		);
+		MoviePlayerBase_get_MovieInfo = il2cpp_symbols::get_method_pointer<decltype(MoviePlayerBase_get_MovieInfo)>("Cute.Cri.Assembly.dll", "Cute.Cri", "MoviePlayerBase", "get_MovieInfo", 0);
 
-		auto localizeextension_text_addr = il2cpp_symbols::get_method_pointer(
-			"umamusume.dll", "Gallop", "LocalizeExtention", "Text", 1
-		);
-
-		auto update_addr = il2cpp_symbols::get_method_pointer(
-			"DOTween.dll", "DG.Tweening.Core", "TweenManager", "Update", 3
-		);
-
-		auto CySpringUpdater_set_SpringUpdateMode_addr = il2cpp_symbols::get_method_pointer(
-			"umamusume.dll", "Gallop.Model.Component",
-			"CySpringUpdater", "set_SpringUpdateMode", 1
-		);
-
-		auto CySpringUpdater_get_SpringUpdateMode_addr = il2cpp_symbols::get_method_pointer(
-			"umamusume.dll", "Gallop.Model.Component",
-			"CySpringUpdater", "get_SpringUpdateMode", 0
-		);
-
-		auto GallopFrameBuffer_Initialize_addr = il2cpp_symbols::get_method_pointer(
-			"umamusume.dll", "Gallop", "GallopFrameBuffer", "Initialize", 1
-		);
-
-		auto GallopFrameBuffer_Initialize2_addr = il2cpp_symbols::get_method_pointer(
-			"umamusume.dll", "Gallop", "GallopFrameBuffer", "Initialize", 2
-		);
-
-		auto GallopFrameBuffer_Release_addr = il2cpp_symbols::get_method_pointer(
-			"umamusume.dll", "Gallop", "GallopFrameBuffer", "Release", 0
-		);
-
-		auto GallopFrameBuffer_ResizeRenderTexture_addr = il2cpp_symbols::get_method_pointer(
-			"umamusume.dll", "Gallop", "GallopFrameBuffer", "ResizeRenderTexture", 0
-		);
-
-		auto story_race_textasset_load_addr = il2cpp_symbols::get_method_pointer("umamusume.dll", "Gallop", "StoryRaceTextAsset", "Load", 0);
-
-		auto get_modified_string_addr = il2cpp_symbols::get_method_pointer("umamusume.dll", "Gallop", "GallopUtil", "GetModifiedString", IgnoreNumberOfArguments);
-
-		set_scale_factor = il2cpp_symbols::get_method_pointer<void(*)(void*, float)>(
-			"UnityEngine.UI.dll", "UnityEngine.UI",
-			"CanvasScaler", "set_scaleFactor", 1
-		);
-
-		auto on_populate_addr = il2cpp_symbols::get_method_pointer(
-			"umamusume.dll", "Gallop",
-			"TextCommon", "OnPopulateMesh", 1
-		);
-
-		auto textcommon_awake_addr = il2cpp_symbols::get_method_pointer(
-			"umamusume.dll", "Gallop",
-			"TextCommon", "Awake", 0
-		);
-
-		auto TMP_Settings_get_instance_addr = il2cpp_symbols::get_method_pointer(
-			"Unity.TextMeshPro.dll", "TMPro", "TMP_Settings", "get_instance", IgnoreNumberOfArguments);
-
-		auto TextMeshProUguiCommon_Awake_addr = il2cpp_symbols::get_method_pointer(
-			"umamusume.dll", "Gallop",
-			"TextMeshProUguiCommon", "Awake", 0
-		);
-
-		textcommon_get_TextId = il2cpp_symbols::get_method_pointer<int (*)(void*)>(
-			"umamusume.dll", "Gallop",
-			"TextCommon", "get_TextId", 0
-		);
-
-		text_get_text = il2cpp_symbols::get_method_pointer<Il2CppString * (*)(void*)>(
-			"UnityEngine.UI.dll", "UnityEngine.UI",
-			"Text", "get_text", 0
-		);
-		text_set_text = il2cpp_symbols::get_method_pointer<void (*)(void*, Il2CppString*)>(
-			"UnityEngine.UI.dll", "UnityEngine.UI",
-			"Text", "set_text", 1
-		);
-
-		text_assign_font = il2cpp_symbols::get_method_pointer<void(*)(void*)>(
-			"UnityEngine.UI.dll", "UnityEngine.UI",
-			"Text", "AssignDefaultFont", 0
-		);
-
-		text_set_font = il2cpp_symbols::get_method_pointer<void (*)(void*, Il2CppObject*)>(
-			"UnityEngine.UI.dll", "UnityEngine.UI",
-			"Text", "set_font", 1
-		);
-
-		text_get_font = il2cpp_symbols::get_method_pointer<Il2CppObject * (*)(void*)>(
-			"UnityEngine.UI.dll", "UnityEngine.UI",
-			"Text", "get_font", 0
-		);
-
-		text_get_size = il2cpp_symbols::get_method_pointer<int(*)(void*)>(
-			"umamusume.dll", "Gallop",
-			"TextCommon", "get_FontSize", 0
-		);
-
-		text_set_size = il2cpp_symbols::get_method_pointer<void(*)(void*, int)>(
-			"umamusume.dll", "Gallop",
-			"TextCommon", "set_FontSize", 1
-		);
-
-		text_get_linespacing = il2cpp_symbols::get_method_pointer<float(*)(void*)>(
-			"UnityEngine.UI.dll", "UnityEngine.UI",
-			"Text", "get_lineSpacing", 0
-		);
-
-		text_set_style = il2cpp_symbols::get_method_pointer<void(*)(void*, int)>(
-			"UnityEngine.UI.dll", "UnityEngine.UI",
-			"Text", "set_fontStyle", 1
-		);
-
-		text_set_linespacing = il2cpp_symbols::get_method_pointer<void(*)(void*, float)>(
-			"UnityEngine.UI.dll", "UnityEngine.UI",
-			"Text", "set_lineSpacing", 1
-		);
-
-		text_set_horizontalOverflow = il2cpp_symbols::get_method_pointer<void(*)(void*, int)>(
-			"UnityEngine.UI.dll", "UnityEngine.UI",
-			"Text", "set_horizontalOverflow", 1
-		);
-
-		text_set_verticalOverflow = il2cpp_symbols::get_method_pointer<void(*)(void*, int)>(
-			"UnityEngine.UI.dll", "UnityEngine.UI",
-			"Text", "set_verticalOverflow", 1
-		);
-
-		auto an_text_fix_data_addr = il2cpp_symbols::get_method_pointer("Plugins.dll", "AnimateToUnity", "AnText", "_FixData", 0);
-
-		auto an_text_set_material_to_textmesh_addr = il2cpp_symbols::get_method_pointer("Plugins.dll", "AnimateToUnity", "AnText", "_SetMaterialToTextMesh", 0);
-
-		auto load_zekken_composite_resource_addr = il2cpp_symbols::get_method_pointer("umamusume.dll", "Gallop", "ModelLoader", "LoadZekkenCompositeResourceInternal", 0);
-
-		auto set_anti_aliasing_addr = il2cpp_resolve_icall("UnityEngine.QualitySettings::set_antiAliasing(System.Int32)");
-
-		auto set_vSyncCount_addr = il2cpp_resolve_icall("UnityEngine.QualitySettings::set_vSyncCount()");
-
-		auto set_anisotropicFiltering_addr = il2cpp_resolve_icall("UnityEngine.QualitySettings::set_anisotropicFiltering(UnityEngine.AnisotropicFiltering)");
-
-		auto apply_graphics_quality_addr = il2cpp_symbols::get_method_pointer(
-			"umamusume.dll",
-			"Gallop",
-			"GraphicSettings", "ApplyGraphicsQuality", 2);
-
-		auto GraphicSettings_Get3DAntiAliasingLevel_addr = il2cpp_symbols::get_method_pointer(
-			"umamusume.dll",
-			"Gallop",
-			"GraphicSettings", "Get3DAntiAliasingLevel", 1);
-
-		auto GraphicSettings_GetVirtualResolution3D_addr = il2cpp_symbols::get_method_pointer(
-			"umamusume.dll",
-			"Gallop",
-			"GraphicSettings", "GetVirtualResolution3D", 1);
-
-		auto GraphicSettings_GetVirtualResolution3D2_addr = il2cpp_symbols::get_method_pointer(
-			"umamusume.dll",
-			"Gallop",
-			"GraphicSettings", "GetVirtualResolution3D", 2);
-
-		auto GraphicSettings_GetVirtualResolution_addr = il2cpp_symbols::get_method_pointer(
-			"umamusume.dll",
-			"Gallop",
-			"GraphicSettings", "GetVirtualResolution", 0);
-
-		auto NowLoading_Show_addr = il2cpp_symbols::get_method_pointer(
-			"umamusume.dll",
-			"Gallop", "NowLoading", "Show", 8);
-
-		auto NowLoading_Hide_addr = il2cpp_symbols::get_method_pointer(
-			"umamusume.dll",
-			"Gallop", "NowLoading", "Hide", 4);
-
-		MoviePlayerBase_get_MovieInfo = il2cpp_symbols::get_method_pointer<CriWare::CriMana::MovieInfo * (*)(Il2CppObject*)>(
-			"Cute.Cri.Assembly.dll", "Cute.Cri", "MoviePlayerBase", "get_MovieInfo", 0);
-
-		MovieManager_GetMovieInfo = il2cpp_symbols::get_method_pointer<CriWare::CriMana::MovieInfo * (*)(Il2CppObject*, Cute::Cri::MoviePlayerHandle)>(
-			"Cute.Cri.Assembly.dll", "Cute.Cri", "MovieManager", "GetMovieInfo", 1);
-
-		auto FrameRateController_GetLayerFrameRate_addr = il2cpp_symbols::get_method_pointer("umamusume.dll", "Gallop", "FrameRateController", "GetLayerFrameRate", 1);
-
-		auto FrameRateController_OverrideByNormalFrameRate_addr = il2cpp_symbols::get_method_pointer("umamusume.dll", "Gallop", "FrameRateController", "OverrideByNormalFrameRate", 1);
-
-		auto FrameRateController_OverrideByMaxFrameRate_addr = il2cpp_symbols::get_method_pointer("umamusume.dll", "Gallop", "FrameRateController", "OverrideByMaxFrameRate", 1);
-
-		auto FrameRateController_ResetOverride_addr = il2cpp_symbols::get_method_pointer("umamusume.dll", "Gallop", "FrameRateController", "ResetOverride", 1);
-
-		auto FrameRateController_ReflectionFrameRate_addr = il2cpp_symbols::get_method_pointer("umamusume.dll", "Gallop", "FrameRateController", "ReflectionFrameRate", 0);
-
-		auto BGManager_SetMainBg_addr = il2cpp_symbols::get_method_pointer("umamusume.dll", "Gallop", "BGManager", "SetMainBg", 6);
-
-		auto DialogCircleItemDonate_Initialize_addr = il2cpp_symbols::get_method_pointer("umamusume.dll", "Gallop", "DialogCircleItemDonate", "Initialize", 2);
-
-		auto Object_Internal_CloneSingleWithParent_addr = il2cpp_resolve_icall("UnityEngine.Object::Internal_CloneSingleWithParent()");
-
-		auto Certification_initDmmPlatformData_addr = il2cpp_symbols::get_method_pointer("umamusume.dll", "Gallop", "Certification", "initDmmPlatformData", IgnoreNumberOfArguments);
-
-		auto UploadHandlerRaw_Create_addr = il2cpp_resolve_icall("UnityEngine.Networking.UploadHandlerRaw::Create()");
-
-		auto DownloadHandler_InternalGetByteArray_addr = il2cpp_resolve_icall("UnityEngine.Networking.DownloadHandler::InternalGetByteArray()");
-
-		auto HttpHelper_CompressRequest_addr = il2cpp_symbols::get_method_pointer("umamusume.dll", "Gallop", "HttpHelper", "CompressRequest", 1);
-
-		auto HttpHelper_DecompressResponse_addr = il2cpp_symbols::get_method_pointer("umamusume.dll", "Gallop", "HttpHelper", "DecompressResponse", 1);
-
-		auto LiveTheaterCharaSelect_CheckSwapChara_addr = il2cpp_symbols::get_method_pointer("umamusume.dll", "Gallop", "LiveTheaterCharaSelect", "CheckSwapChara", 7);
-
-		auto CollectRaidBgCutinHelper_InstantiateTimeline_addr = il2cpp_symbols::get_method_pointer("umamusume.dll", "Gallop", "CollectRaidBgCutinHelper", "InstantiateTimeline", 4);
-
-		auto Header_Initialize_addr = il2cpp_symbols::get_method_pointer("umamusume.dll", "Gallop", "Header", "Initialize", 0);
-
-		auto PartsSingleModeCommonFooter_Setup_addr = il2cpp_symbols::get_method_pointer("umamusume.dll", "Gallop", "PartsSingleModeCommonFooter", "Setup", 0);
-
-		auto DialogSingleModeTopMenu_Setup_addr = il2cpp_symbols::get_method_pointer("umamusume.dll", "Gallop", "DialogSingleModeTopMenu", "Setup", 0);
-
-		auto DialogSingleModeTopMenu_Setup1_addr = il2cpp_symbols::get_method_pointer("umamusume.dll", "Gallop", "DialogSingleModeTopMenu", "Setup", 1);
-
-		auto DialogSingleModeTopMenu_SetupButtonPositions_addr = il2cpp_symbols::get_method_pointer("umamusume.dll", "Gallop", "DialogSingleModeTopMenu", "SetupButtonPositions", 0);
-
-		auto SingleModeRaceEntryViewController_SetupBottomButtons_addr = il2cpp_symbols::get_method_pointer("umamusume.dll", "Gallop", "SingleModeRaceEntryViewController", "SetupBottomButtons", 1);
-
-		auto StaticVariableDefine_Circle_CircleChat_STAMP_ANCHORED_POS_AFTER_addr = il2cpp_symbols::get_method_pointer("umamusume.dll", "Gallop", "StaticVariableDefine/Circle/CircleChat", "get_STAMP_ANCHORED_POS_AFTER", 0);
-
-		auto StaticVariableDefine_Circle_CircleChat_INPUT_LOCAL_POS_AFTER_addr = il2cpp_symbols::get_method_pointer("umamusume.dll", "Gallop", "StaticVariableDefine/Circle/CircleChat", "get_INPUT_LOCAL_POS_AFTER", 0);
-
-		auto StaticVariableDefine_Circle_CircleChat_INPUT_ANCHORED_POS_AFTER_addr = il2cpp_symbols::get_method_pointer("umamusume.dll", "Gallop", "StaticVariableDefine/Circle/CircleChat", "get_INPUT_ANCHORED_POS_AFTER", 0);
-
-		auto StaticVariableDefine_Circle_CircleChat_INPUT_SIZE_DELTA_POS_AFTER_addr = il2cpp_symbols::get_method_pointer("umamusume.dll", "Gallop", "StaticVariableDefine/Circle/CircleChat", "get_INPUT_SIZE_DELTA_POS_AFTER", 0);
-
-		auto CircleChat_Initialize_addr = il2cpp_symbols::get_method_pointer("umamusume.dll", "Gallop", "CircleChat", "Initialize", 0);
-
-		auto ResourcePath_GetPreInTitleMoviePath_addr = il2cpp_symbols::get_method_pointer("umamusume.dll", "Gallop", "ResourcePath", "GetPreInTitleMoviePath", 0);
-
-		auto ResourcePath_GetLatestAssetBundleTitleMoviePath_addr = il2cpp_symbols::get_method_pointer("umamusume.dll", "Gallop", "ResourcePath", "GetLatestAssetBundleTitleMoviePath", 0);
-
-		auto DialogHomeMenuMain_ChangeView_addr = il2cpp_symbols::get_method_pointer("umamusume.dll", "Gallop", "DialogHomeMenuMain", "ChangeView", 1);
-
-		auto DialogHomeMenuMain_ChangeView2_addr = il2cpp_symbols::get_method_pointer("umamusume.dll", "Gallop", "DialogHomeMenuMain", "ChangeView", 2);
-
-		auto load_scene_internal_addr = il2cpp_resolve_icall("UnityEngine.SceneManagement.SceneManager::LoadSceneAsyncNameIndexInternal_Injected(System.String,System.Int32,UnityEngine.SceneManagement.LoadSceneParameters&,System.bool)");
+		MovieManager_GetMovieInfo = il2cpp_symbols::get_method_pointer<decltype(MovieManager_GetMovieInfo)>("Cute.Cri.Assembly.dll", "Cute.Cri", "MovieManager", "GetMovieInfo", 1);
 
 #pragma endregion
 
-		if (Game::CurrentGameStore != Game::Store::Steam)
-		{
-			ADD_HOOK(Certification_initDmmPlatformData, "Gallop.Certification::initDmmPlatformData at %p\n");
-		}
-
+		auto Object_Internal_CloneSingleWithParent_addr = il2cpp_resolve_icall("UnityEngine.Object::Internal_CloneSingleWithParent()");
 		ADD_HOOK(Object_Internal_CloneSingleWithParent, "UnityEngine.Object::Internal_CloneSingleWithParent at %p\n");
-
-		ADD_HOOK(DialogCircleItemDonate_Initialize, "Gallop.DialogCircleItemDonate::Initialize at %p\n");
-
-		if (Game::CurrentGameRegion == Game::Region::KOR)
-		{
-			ADD_HOOK(DownloadHandler_InternalGetByteArray, "UnityEngine.Networking.DownloadHandler::InternalGetByteArray at %p\n");
-			ADD_HOOK(UploadHandlerRaw_Create, "UnityEngine.Networking.UploadHandlerRaw::Create at %p\n");
-		}
-		else
-		{
-			ADD_HOOK(HttpHelper_DecompressResponse, "Gallop.HttpHelper::DecompressResponse at %p\n");
-			ADD_HOOK(HttpHelper_CompressRequest, "Gallop.HttpHelper::CompressRequest at %p\n");
-		}
-
-		if (config::anisotropic_filtering != -1)
-		{
-			ADD_HOOK(set_anisotropicFiltering, "UnityEngine.QualitySettings.set_anisotropicFiltering(UnityEngine.AnisotropicFiltering) at %p\n");
-			set_anisotropicFiltering_hook(config::anisotropic_filtering);
-		}
-
-		if (config::vsync_count != -1)
-		{
-			ADD_HOOK(set_vSyncCount, "UnityEngine.QualitySettings.set_vSyncCount() at %p\n");
-			set_vSyncCount_hook(config::vsync_count);
-		}
-
-		// TODO Gallop.NowLoading::ShowCustomWipeFlash
-		ADD_HOOK(NowLoading_Show, "Gallop.NowLoading::Show at %p\n");
-
-		ADD_HOOK(NowLoading_Hide, "Gallop.NowLoading::Hide at %p\n");
-
-		ADD_HOOK(load_zekken_composite_resource, "Gallop.ModelLoader::LoadZekkenCompositeResource at %p\n");
-
-		if (Game::CurrentGameRegion != Game::Region::KOR)
-		{
-			ADD_HOOK(an_text_fix_data, "AnimateToUnity.AnText::_FixData at %p\n");
-			ADD_HOOK(an_text_set_material_to_textmesh, "AnimateToUnity.AnText::_SetMaterialToTextMesh at %p\n");
-
-			// hook UnityEngine.TextGenerator::PopulateWithErrors to modify text
-			ADD_HOOK(populate_with_errors, "UnityEngine.TextGenerator::PopulateWithErrors at %p\n");
-		}
-
-		ADD_HOOK(story_race_textasset_load, "StoryRaceTextAsset.Load at %p\n");
-
-		ADD_HOOK(get_modified_string, "GallopUtil_GetModifiedString at %p\n");
-
-		ADD_HOOK(update, "DG.Tweening.Core.TweenManager::Update at %p\n");
-
-		ADD_HOOK(sqlite3_key, "Plugin::sqlite3_key at %p\n");
-
-		if (!config::replace_text_db_path.empty())
-		{
-			if (MasterDB::InitReplacementMasterDB(il2cpp_u8(config::replace_text_db_path.data())))
-			{
-				ADD_HOOK(sqlite3_prepare_v2, "Plugin::sqlite3_prepare_v2 at %p\n");
-				ADD_HOOK(sqlite3_step, "Plugin::sqlite3_step at %p\n");
-				ADD_HOOK(sqlite3_reset, "Plugin::sqlite3_reset at %p\n");
-				ADD_HOOK(sqlite3_bind_text, "Plugin::sqlite3_bind_text at %p\n");
-				ADD_HOOK(sqlite3_bind_int, "Plugin::sqlite3_bind_int at %p\n");
-				ADD_HOOK(sqlite3_bind_int64, "Plugin::sqlite3_bind_int64 at %p\n");
-				ADD_HOOK(sqlite3_bind_double, "Plugin::sqlite3_bind_double at %p\n");
-				ADD_HOOK(sqlite3_column_text, "Plugin::sqlite3_column_text at %p\n");
-				ADD_HOOK(sqlite3_finalize, "Plugin::sqlite3_finalize at %p\n");
-			}
-		}
-
-		if (config::cyspring_update_mode != -1)
-		{
-			ADD_HOOK(CySpringUpdater_set_SpringUpdateMode, "CySpringUpdater::set_SpringUpdateMode at %p\n");
-			ADD_HOOK(CySpringUpdater_get_SpringUpdateMode, "CySpringUpdater::get_SpringUpdateMode at %p\n");
-		}
-
-		// ADD_HOOK(load_scene_internal, "SceneManager::LoadSceneAsyncNameIndexInternal at %p\n");
-
-		if (Game::CurrentGameRegion == Game::Region::KOR)
-		{
-			/*auto SplashViewController_KakaoStart_addr = il2cpp_symbols::get_method_pointer(
-				"umamusume.dll",
-				"Gallop", "SplashViewController", "KakaoStart", 0);*/
-
-				// ADD_HOOK(SplashViewController_KakaoStart, "SplashViewController::KakaoStart at %p\n");
-		}
 
 		if (config::replace_to_builtin_font || config::replace_to_custom_font)
 		{
-			ADD_HOOK(on_populate, "Gallop.TextCommon::OnPopulateMesh at %p\n");
-			ADD_HOOK(textcommon_awake, "Gallop.TextCommon::Awake at %p\n");
+			auto TextMeshProUguiCommon_Awake_addr = il2cpp_symbols::get_method_pointer("umamusume.dll", "Gallop", "TextMeshProUguiCommon", "Awake", 0);
 			ADD_HOOK(TextMeshProUguiCommon_Awake, "Gallop.TextMeshProUguiCommon::Awake at %p\n");
-			ADD_HOOK(TMP_Settings_get_instance, "TMPro.TMP_Settings::get_instance at %p\n");
-		}
-
-		if (config::max_fps > -1)
-		{
-			// break 30-40fps limit
-			ADD_HOOK(FrameRateController_GetLayerFrameRate, "Gallop.FrameRateController::GetLayerFrameRate at %p\n");
-			ADD_HOOK(FrameRateController_OverrideByNormalFrameRate, "Gallop.FrameRateController::OverrideByNormalFrameRate at %p\n");
-			ADD_HOOK(FrameRateController_OverrideByMaxFrameRate, "Gallop.FrameRateController::OverrideByMaxFrameRate at %p\n");
-			ADD_HOOK(FrameRateController_ResetOverride, "Gallop.FrameRateController::ResetOverride at %p\n");
-			ADD_HOOK(FrameRateController_ReflectionFrameRate, "Gallop.FrameRateController::ReflectionFrameRate at %p\n");
-		}
-
-		if (config::unlock_size || config::freeform_window)
-		{
-			ADD_HOOK(GallopFrameBuffer_Initialize, "Gallop.GallopFrameBuffer::Initialize at %p\n");
-			ADD_HOOK(GallopFrameBuffer_Initialize2, "Gallop.GallopFrameBuffer::Initialize2 at %p\n");
-			ADD_HOOK(GallopFrameBuffer_Release, "Gallop.GallopFrameBuffer::Release at %p\n");
-			ADD_HOOK(GallopFrameBuffer_ResizeRenderTexture, "Gallop.GallopFrameBuffer::ResizeRenderTexture at %p\n");
-			ADD_HOOK(CollectRaidBgCutinHelper_InstantiateTimeline, "Gallop.CollectRaidBgCutinHelper::InstantiateTimeline at %p\n");
 		}
 
 		if (config::freeform_window)
 		{
-			ADD_HOOK(DialogSingleModeTopMenu_SetupButtonPositions, "Gallop.DialogSingleModeTopMenu::SetupButtonPositions at %p\n");
-			ADD_HOOK(DialogSingleModeTopMenu_Setup, "Gallop.DialogSingleModeTopMenu::Setup at %p\n");
-			ADD_HOOK(DialogSingleModeTopMenu_Setup1, "Gallop.DialogSingleModeTopMenu::Setup1 at %p\n");
-			ADD_HOOK(PartsSingleModeCommonFooter_Setup, "Gallop.PartsSingleModeCommonFooter::Setup at %p\n");
-			ADD_HOOK(Header_Initialize, "Gallop.Header::Initialize at %p\n");
-			ADD_HOOK(SingleModeRaceEntryViewController_SetupBottomButtons, "Gallop.SingleModeRaceEntryViewController::SetupBottomButtons at %p\n");
-			ADD_HOOK(CircleChat_Initialize, "Gallop.CircleChat::Initialize at %p\n");
-			ADD_HOOK(StaticVariableDefine_Circle_CircleChat_STAMP_ANCHORED_POS_AFTER, "Gallop.StaticVariableDefine.Circle.CircleChat::get_STAMP_ANCHORED_POS_AFTER at %p\n");
-			ADD_HOOK(StaticVariableDefine_Circle_CircleChat_INPUT_LOCAL_POS_AFTER, "Gallop.StaticVariableDefine.Circle.CircleChat::get_INPUT_LOCAL_POS_AFTER at %p\n");
-			ADD_HOOK(StaticVariableDefine_Circle_CircleChat_INPUT_ANCHORED_POS_AFTER, "Gallop.StaticVariableDefine.Circle.CircleChat::get_INPUT_ANCHORED_POS_AFTER at %p\n");
-			ADD_HOOK(StaticVariableDefine_Circle_CircleChat_INPUT_SIZE_DELTA_POS_AFTER, "Gallop.StaticVariableDefine.Circle.CircleChat::get_INPUT_SIZE_DELTA_POS_AFTER at %p\n");
-			ADD_HOOK(ResourcePath_GetPreInTitleMoviePath, "Gallop.ResourcePath::GetPreInTitleMoviePath at %p\n");
-			ADD_HOOK(ResourcePath_GetLatestAssetBundleTitleMoviePath, "Gallop.ResourcePath::GetLatestAssetBundleTitleMoviePath at %p\n");
-			ADD_HOOK(DialogHomeMenuMain_ChangeView, "Gallop.DialogHomeMenuMain::ChangeView at %p\n");
-			ADD_HOOK(DialogHomeMenuMain_ChangeView2, "Gallop.DialogHomeMenuMain::ChangeView2 at %p\n");
-
-			Gallop::StandaloneWindowResize::IsPreventReShape(true);
-
 			int width = UnityEngine::Screen::width();
 			int height = UnityEngine::Screen::height();
 
@@ -8654,50 +5527,31 @@ namespace
 			Gallop::Screen::OriginalScreenWidth(isPortrait ? height : width);
 			Gallop::Screen::OriginalScreenHeight(isPortrait ? width : height);
 
-			auto DeviceOrientationGuide_Show_addr = il2cpp_symbols::get_method_pointer(
-				"umamusume.dll",
-				"Gallop", "DeviceOrientationGuide", "Show", 2);
-
-			auto MoviePlayerForUI_AdjustScreenSize_addr = il2cpp_symbols::get_method_pointer(
-				"Cute.Cri.Assembly.dll", "Cute.Cri", "MoviePlayerForUI", "AdjustScreenSize", 2);
-
+			auto DeviceOrientationGuide_Show_addr = il2cpp_symbols::get_method_pointer("umamusume.dll", "Gallop", "DeviceOrientationGuide", "Show", 2);
 			ADD_HOOK(DeviceOrientationGuide_Show, "DeviceOrientationGuide::Show at %p\n");
-			ADD_HOOK(MoviePlayerForUI_AdjustScreenSize, "MoviePlayerForUI::AdjustScreenSize at %p\n");
-		}
 
-		if (config::graphics_quality != -1)
-		{
-			apply_graphics_quality_orig = apply_graphics_quality_addr;
+			auto MoviePlayerForUI_AdjustScreenSize_addr = il2cpp_symbols::get_method_pointer("Cute.Cri.Assembly.dll", "Cute.Cri", "MoviePlayerForUI", "AdjustScreenSize", 2);
+			ADD_HOOK(MoviePlayerForUI_AdjustScreenSize, "MoviePlayerForUI::AdjustScreenSize at %p\n");
+
+			auto BGManager_SetMainBgLocalPos_addr = il2cpp_symbols::get_method_pointer("umamusume.dll", "Gallop", "BGManager", "SetMainBgLocalPos", 1);
+			ADD_HOOK(BGManager_SetMainBgLocalPos, "Gallop.BGManager::SetMainBgLocalPos at %p\n");
 		}
 
 		if (config::freeform_window || config::unlock_size || config::resolution_3d_scale != 1.0f)
 		{
+			auto BGManager_SetMainBg_addr = il2cpp_symbols::get_method_pointer("umamusume.dll", "Gallop", "BGManager", "SetMainBg", 6);
 			ADD_HOOK(BGManager_SetMainBg, "Gallop.BGManager::SetMainBg at %p\n");
-		}
-
-		if (config::resolution_3d_scale != 1.0f || config::freeform_window)
-		{
-			ADD_HOOK(GraphicSettings_GetVirtualResolution3D, "Gallop.GraphicSettings::GetVirtualResolution3D at %p\n");
-			ADD_HOOK(GraphicSettings_GetVirtualResolution3D2, "Gallop.GraphicSettings::GetVirtualResolution3D2 at %p\n");
-			ADD_HOOK(GraphicSettings_GetVirtualResolution, "Gallop.GraphicSettings::GetVirtualResolution at %p\n");
-		}
-
-		if (config::anti_aliasing != -1)
-		{
-			ADD_HOOK(set_anti_aliasing, "UnityEngine.QualitySettings::set_antiAliasing at %p\n");
-			ADD_HOOK(GraphicSettings_Get3DAntiAliasingLevel, "Gallop.GraphicSettings::Get3DAntiAliasingLevel at %p\n");
 		}
 
 		if (config::unlock_live_chara)
 		{
+			auto LiveTheaterCharaSelect_CheckSwapChara_addr = il2cpp_symbols::get_method_pointer("umamusume.dll", "Gallop", "LiveTheaterCharaSelect", "CheckSwapChara", 7);
 			ADD_HOOK(LiveTheaterCharaSelect_CheckSwapChara, "Gallop.LiveTheaterCharaSelect::CheckSwapChara at %p\n");
 		}
 
 		const auto nameArray = reinterpret_cast<Il2CppArraySize_t<Il2CppString*>*(*)()>(il2cpp_resolve_icall("UnityEngine.QualitySettings::get_names()"))();
 		reinterpret_cast<void(*)(int)>(il2cpp_resolve_icall("UnityEngine.QualitySettings::SetQualityLevel()"))(nameArray->max_length - 1);
 	}
-
-
 
 	Il2CppDelegate* moviePlayerResize = nullptr;
 
@@ -8733,8 +5587,6 @@ namespace
 		DesktopNotificationManagerCompat::get_History(&history);
 		history->Clear();
 
-		auto SetResolution_Injected_addr = il2cpp_resolve_icall("UnityEngine.Screen::SetResolution_Injected(System.Int32,System.Int32,UnityEngine.FullScreenMode,UnityEngine.RefreshRate)");
-
 		auto Sprite_get_texture_addr = il2cpp_resolve_icall("UnityEngine.Sprite::get_texture(UnityEngine.Sprite)");
 
 		auto Renderer_get_material_addr = il2cpp_symbols::get_method_pointer("UnityEngine.CoreModule.dll", "UnityEngine", "Renderer", "get_material", 0);
@@ -8755,14 +5607,8 @@ namespace
 
 		auto CharaPropRendererAccessor_SetTexture_addr = il2cpp_symbols::get_method_pointer("umamusume.dll", "Gallop", "CharaPropRendererAccessor", "SetTexture", 1);
 
-		auto GameObject_GetComponent_addr = il2cpp_resolve_icall("UnityEngine.GameObject::GetComponent(System.Type)");
-
-		auto GameObject_GetComponentFastPath_addr = il2cpp_resolve_icall("UnityEngine.GameObject::GetComponentFastPath(System.Type,System.IntPtr)");
-
 		if (!config::replace_assetbundle_file_paths.empty())
 		{
-			ADD_HOOK(GameObject_GetComponent, "UnityEngine.GameObject::GetComponent at %p\n");
-
 			ADD_HOOK(Sprite_get_texture, "UnityEngine.Sprite::get_texture at %p\n");
 
 			ADD_HOOK(Renderer_get_material, "UnityEngine.Renderer::get_material at %p\n");
@@ -8791,17 +5637,10 @@ namespace
 
 		if (config::unlock_size || config::freeform_window)
 		{
-			ADD_HOOK(SetResolution_Injected, "UnityEngine.Screen.SetResolution_Injected(int, int, FullScreenMode, RefreshRate) at %p\n");
-		}
-
-		if (config::unlock_size || config::freeform_window)
-		{
 			auto display = UnityEngine::Display::main();
 
 			if (config::initial_width > 72 && config::initial_height > 72)
 			{
-				auto ratio = static_cast<float>(config::initial_width) / static_cast<float>(config::initial_height);
-
 				if (config::initial_width < config::initial_height)
 				{
 					config::runtime::ratioVertical = static_cast<float>(config::initial_width) / static_cast<float>(config::initial_height);
@@ -8949,27 +5788,6 @@ namespace
 					TaskbarManager::SetProgressState(TBPF_NOPROGRESS);
 				}
 
-				if (sceneName == IL2CPP_STRING("OutGame") && Game::CurrentGameRegion == Game::Region::KOR)
-				{
-					auto sceneManager = GetSingletonInstance(il2cpp_symbols::get_class("umamusume.dll", "Gallop", "SceneManager"));
-					auto viewId = il2cpp_class_get_method_from_name_type<int (*)(Il2CppObject*)>(sceneManager->klass, "GetCurrentViewId", 0)->methodPointer(sceneManager);
-					il2cppstring viewName = GetEnumName(GetRuntimeType("umamusume.dll", "Gallop", "SceneDefine/ViewId"), viewId)->chars;
-
-					if (viewName == IL2CPP_STRING("Friend"))
-					{
-						updateFriendSearchButton = &CreateDelegateWithClassStatic(il2cpp_symbols::get_class("DOTween.dll", "DG.Tweening", "TweenCallback"), *([](void*)
-							{
-								if (!UpdateFriendSearchButton())
-								{
-									il2cpp_symbols::get_method_pointer<Il2CppObject* (*)(float, Il2CppDelegate*, bool)>("DOTween.dll", "DG.Tweening", "DOVirtual", "DelayedCall", 3)(0.05, updateFriendSearchButton, true);
-								}
-							}))->delegate;
-
-						// Delay 50ms
-						il2cpp_symbols::get_method_pointer<Il2CppObject* (*)(float, Il2CppDelegate*, bool)>("DOTween.dll", "DG.Tweening", "DOVirtual", "DelayedCall", 3)(0.05, updateFriendSearchButton, true);
-					}
-				}
-
 				if (sceneName == IL2CPP_STRING("Live"))
 				{
 					SystemMediaTransportControlsManager::instance.IsEnabled(true);
@@ -8998,33 +5816,6 @@ namespace
 
 				if (sceneName == IL2CPP_STRING("Title"))
 				{
-					if (Game::CurrentGameRegion == Game::Region::KOR)
-					{
-						auto uncheater = GetSingletonInstanceByMethod(il2cpp_symbols::get_class("umamusume.dll", "", "UncheaterInit"));
-
-						if (uncheater)
-						{
-							auto flagField = il2cpp_class_get_field_from_name(uncheater->klass, "flag");
-							bool flag = true;
-							il2cpp_field_set_value(uncheater, flagField, &flag);
-
-							auto systemField = il2cpp_class_get_field_from_name(uncheater->klass, "uncheater");
-							Il2CppObject* system;
-							il2cpp_field_get_value(uncheater, systemField, &system);
-
-							if (system)
-							{
-								auto pUncSendCommandVa_Field = il2cpp_class_get_field_from_name(system->klass, "pUncSendCommandVa_");
-								auto fn = CreateDelegateStatic(*[](void*, uint32_t cmd, va_list va)
-									{
-										cout << cmd << endl;
-										return 0;
-									});
-								il2cpp_field_set_value(system, pUncSendCommandVa_Field, fn);
-							}
-						}
-					}
-
 					if (config::character_system_text_caption)
 					{
 						Localify::NotificationManager::Reset();
@@ -9294,7 +6085,7 @@ namespace
 										auto view = il2cpp_class_get_method_from_name_type<Il2CppObject * (*)(Il2CppObject*)>(controller->klass, "GetViewBase", 0)->methodPointer(controller);
 										auto coroutine = il2cpp_class_get_method_from_name_type<Il2CppObject * (*)(Il2CppObject*)>(controller->klass, "SkipLive", 0)->methodPointer(controller);
 
-										il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, Il2CppObject*)>(view->klass, "StartCoroutineManaged2", 1)->methodPointer(view, coroutine);
+										UnityEngine::MonoBehaviour(view).StartCoroutineManaged2(coroutine);
 									}
 								});
 							break;
@@ -9352,8 +6143,7 @@ SetWindowLongPtrW_hook(
 		if ((config::unlock_size || config::freeform_window) && config::initial_width > 72 && config::initial_height > 72)
 		{
 			auto refreshRate = RefreshRate{ 0, 1 };
-			reinterpret_cast<decltype(SetResolution_Injected_hook)*>(SetResolution_Injected_orig)(config::runtime::initialWidth, config::runtime::initialHeight, 3, &refreshRate);
-
+			UnityEngine::Screen::SetResolution_Injected(config::runtime::initialWidth, config::runtime::initialHeight, UnityEngine::FullScreenMode::Windowed, &refreshRate);
 		}
 
 		if (config::freeform_window)
@@ -9390,7 +6180,7 @@ SetWindowLongPtrA_hook(
 		if ((config::unlock_size || config::freeform_window) && config::initial_width > 72 && config::initial_height > 72)
 		{
 			auto refreshRate = RefreshRate{ 0, 1 };
-			reinterpret_cast<decltype(SetResolution_Injected_hook)*>(SetResolution_Injected_orig)(config::runtime::initialWidth, config::runtime::initialHeight, 3, &refreshRate);
+			UnityEngine::Screen::SetResolution_Injected(config::runtime::initialWidth, config::runtime::initialHeight, UnityEngine::FullScreenMode::Windowed, &refreshRate);
 		}
 
 		if (config::freeform_window)

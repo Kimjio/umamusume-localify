@@ -194,12 +194,7 @@ static string GetOqupieToken()
 	const auto oqupieAccessKey = "a66427394118bc5e";
 	const auto jwtToken = "f2c9ea20a25a94b7885d75f220cfcbcf";
 
-	auto Application = il2cpp_symbols::get_class("UnityEngine.CoreModule.dll", "UnityEngine",
-		"Application");
-
-	auto systemLanguage = reinterpret_cast<int (*)()>(il2cpp_class_get_method_from_name(Application,
-		"get_systemLanguage",
-		0)->methodPointer)();
+	auto systemLanguage = UnityEngine::Application::systemLanguage();
 
 	auto SystemInfo = il2cpp_symbols::get_class("UnityEngine.CoreModule.dll", "UnityEngine",
 		"SystemInfo");
@@ -250,7 +245,7 @@ static string GetOqupieToken()
 	payload += R"(,)";
 
 	payload += R"("systemLanguage":)";
-	payload += to_string(systemLanguage);
+	payload += to_string(static_cast<int>(systemLanguage));
 	payload += R"(,)";
 
 	payload += R"("operatingSystem":")";
@@ -279,7 +274,7 @@ static void Gallop_WebViewManager_cctor_hook()
 	il2cpp_field_static_get_value(WebViewUrlDictField, &WebViewUrlDict);
 
 	auto WebViewUrlDict_Add = il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, Gallop::WebViewDefine::Url, Il2CppObject*, const MethodInfo*)>(WebViewUrlDict->klass, "Add", 2);
-	void (*WebViewUrlDict_Add_methodPointer)(Il2CppObject*, Gallop::WebViewDefine::Url, Il2CppObject*, const MethodInfo*) = WebViewUrlDict_Add->methodPointer;
+	auto WebViewUrlDict_Add_methodPointer = WebViewUrlDict_Add->methodPointer;
 
 	auto methodInfo = reinterpret_cast<const MethodInfo*>(WebViewUrlDict_Add);
 
@@ -538,8 +533,7 @@ static Il2CppString* Gallop_WebViewManager_GetProductUrl_hook(int productMasterI
 }
 
 static void DialogHomeMenuMain_SetupTrainer_hook(Il2CppObject* self, Il2CppObject* dialog) {
-	reinterpret_cast<decltype(DialogHomeMenuMain_SetupTrainer_hook)*>(DialogHomeMenuMain_SetupTrainer_orig)(
-		self, dialog);
+	reinterpret_cast<decltype(DialogHomeMenuMain_SetupTrainer_hook)*>(DialogHomeMenuMain_SetupTrainer_orig)(self, dialog);
 	auto guideButtonField = il2cpp_class_get_field_from_name(self->klass, "_guideButton");
 	Il2CppObject* guideButton;
 	il2cpp_field_get_value(self, guideButtonField, &guideButton);
@@ -563,8 +557,7 @@ static void DialogHomeMenuMain_SetupTrainer_hook(Il2CppObject* self, Il2CppObjec
 }
 
 static void DialogHomeMenuMain_SetupOther_hook(Il2CppObject* self) {
-	reinterpret_cast<decltype(DialogHomeMenuMain_SetupOther_hook)*>(DialogHomeMenuMain_SetupOther_orig)(
-		self);
+	reinterpret_cast<decltype(DialogHomeMenuMain_SetupOther_hook)*>(DialogHomeMenuMain_SetupOther_orig)(self);
 	auto helpButtonField = il2cpp_class_get_field_from_name(self->klass, "_helpButton");
 	Il2CppObject* helpButton;
 	il2cpp_field_get_value(self, helpButtonField, &helpButton);
@@ -594,8 +587,7 @@ static void DialogHomeMenuSupport_OnSelectMenu_hook(int menu) {
 		auto closeText = GetTextIdByName(IL2CPP_STRING("Common0007"));
 		auto faqText = GetTextIdByName(IL2CPP_STRING("Menu0013"));
 		auto url = string(
-			" https://kakaogames.oqupie.com/portals/1576/categories/3438?jwt=").append(
-				GetOqupieToken());
+			" https://kakaogames.oqupie.com/portals/1576/categories/3438?jwt=").append(GetOqupieToken());
 		OpenWebViewDialog(il2cpp_string_new(url.data()), Gallop::Localize::Get(faqText),
 			closeText);
 		return;
@@ -605,10 +597,8 @@ static void DialogHomeMenuSupport_OnSelectMenu_hook(int menu) {
 		// QNA
 		auto closeText = GetTextIdByName(IL2CPP_STRING("Common0007"));
 		auto qnaText = GetTextIdByName(IL2CPP_STRING("0ommon0050"));
-		auto url = string("https://kakaogames.oqupie.com/portals/finder?jwt=").append(
-			GetOqupieToken());
-		OpenWebViewDialog(il2cpp_string_new(url.data()), Gallop::Localize::Get(qnaText),
-			closeText);
+		auto url = string("https://kakaogames.oqupie.com/portals/finder?jwt=").append(GetOqupieToken());
+		OpenWebViewDialog(il2cpp_string_new(url.data()), Gallop::Localize::Get(qnaText), closeText);
 		return;
 	}
 	case 2:
@@ -630,8 +620,7 @@ static void DialogHomeMenuSupport_OnSelectMenu_hook(int menu) {
 			Gallop::Localize::Get(privacyPolicy), closeText);
 	}
 	default:
-		reinterpret_cast<decltype(DialogHomeMenuSupport_OnSelectMenu_hook)*>(DialogHomeMenuSupport_OnSelectMenu_orig)(
-			menu);
+		reinterpret_cast<decltype(DialogHomeMenuSupport_OnSelectMenu_hook)*>(DialogHomeMenuSupport_OnSelectMenu_orig)(menu);
 	}
 }
 
@@ -653,8 +642,7 @@ static void DialogTitleMenu_OnSelectMenu_hook(int menu)
 		return;
 	}
 	default:
-		reinterpret_cast<decltype(DialogTitleMenu_OnSelectMenu_hook)*>(DialogTitleMenu_OnSelectMenu_orig)(
-			menu);
+		reinterpret_cast<decltype(DialogTitleMenu_OnSelectMenu_hook)*>(DialogTitleMenu_OnSelectMenu_orig)(menu);
 	}
 }
 
@@ -666,8 +654,7 @@ static void DialogTitleMenu_OnSelectMenu_KaKaoNotLogin_hook(int menu)
 		return;
 	}
 
-	reinterpret_cast<decltype(DialogTitleMenu_OnSelectMenu_KaKaoNotLogin_hook)*>(DialogTitleMenu_OnSelectMenu_KaKaoNotLogin_orig)(
-		menu);
+	reinterpret_cast<decltype(DialogTitleMenu_OnSelectMenu_KaKaoNotLogin_hook)*>(DialogTitleMenu_OnSelectMenu_KaKaoNotLogin_orig)(menu);
 }
 
 static void DialogTutorialGuide_OnPushHelpButton_hook(Il2CppObject*)
@@ -851,7 +838,9 @@ static void Gallop_WebViewManager_SetMargin_hook(Il2CppObject* self, UnityEngine
 	auto rectWebView = webViewRect.rect();
 
 	auto _systemCanvas = Gallop::UIManager::Instance()._systemCanvas();
-	float scaleFactor = il2cpp_class_get_method_from_name_type<float (*)(Il2CppObject*)>(_systemCanvas->klass, "get_scaleFactor", 0)->methodPointer(_systemCanvas);
+	float scaleFactor = 1.0f;
+
+	scaleFactor = il2cpp_class_get_method_from_name_type<float (*)(Il2CppObject*)>(_systemCanvas->klass, "get_scaleFactor", 0)->methodPointer(_systemCanvas);
 
 	Il2CppObject* gameCanvas;
 	UnityEngine::Rect leftRect;
@@ -898,9 +887,6 @@ static void Gallop_WebViewManager_SetMargin_hook(Il2CppObject* self, UnityEngine
 	auto rectTransform = static_cast<UnityEngine::RectTransform>(UnityEngine::Behaviour(gameCanvas).transform());
 	auto rect = rectTransform.rect();
 
-	int num = 50;
-	Vector2 vector;
-
 	if (Gallop::Screen::IsLandscapeMode())
 	{
 		if (!IsSplitWindow && !config::freeform_window)
@@ -909,60 +895,58 @@ static void Gallop_WebViewManager_SetMargin_hook(Il2CppObject* self, UnityEngine
 		}
 	}
 
-	vector = UnityEngine::Vector2{ static_cast<float>(Gallop::Screen::Width()) / 2, static_cast<float>(Gallop::Screen::Height()) / 2 + static_cast<float>(num) * scaleFactor };
+	Vector2 vector = UnityEngine::Vector2{ static_cast<float>(Gallop::Screen::Width()) / 2, static_cast<float>(Gallop::Screen::Height()) / 2 + 50.0f * scaleFactor };
 
-	float num2 = rectWebView.width * scaleFactor;
-	float num3 = rectWebView.height * scaleFactor;
+	float width = rectWebView.width * scaleFactor;
+	float height = rectWebView.height * scaleFactor;
 
-	Vector2 vector2 = UnityEngine::Vector2{ vector.x - num2 / 2.0f + offsetRect.xMin() * scaleFactor, vector.y + num3 / 2.0f + offsetRect.yMax() * scaleFactor };
-	Vector2 vector3 = UnityEngine::Vector2{ vector.x + num2 / 2.0f + offsetRect.xMax() * scaleFactor, vector.y - num3 / 2.0f + offsetRect.yMin() * scaleFactor };
-
-	float num4;
-	float num5;
+	Vector2 vector2 = UnityEngine::Vector2{ vector.x - width / 2.0f + offsetRect.xMin() * scaleFactor, vector.y + height / 2.0f + offsetRect.yMax() * scaleFactor };
+	Vector2 vector3 = UnityEngine::Vector2{ vector.x + width / 2.0f + offsetRect.xMax() * scaleFactor, vector.y - height / 2.0f + offsetRect.yMin() * scaleFactor };
 
 	if (Gallop::Screen::IsLandscapeMode() && !config::freeform_window)
 	{
 		if (IsSplitWindow)
 		{
-			num4 = static_cast<float>(UnityEngine::Screen::width());
-			num5 = static_cast<float>(UnityEngine::Screen::height());
+			width = static_cast<float>(UnityEngine::Screen::width());
+			height = static_cast<float>(UnityEngine::Screen::height());
 		}
 		else
 		{
-			num4 = static_cast<float>(Gallop::Screen::OriginalScreenHeight());
-			num5 = static_cast<float>(Gallop::Screen::OriginalScreenWidth());
+			width = static_cast<float>(Gallop::Screen::OriginalScreenHeight());
+			height = static_cast<float>(Gallop::Screen::OriginalScreenWidth());
 		}
 	}
 	else
 	{
-		num4 = static_cast<float>(Gallop::Screen::OriginalScreenWidth());
-		num5 = static_cast<float>(Gallop::Screen::OriginalScreenHeight());
+		width = static_cast<float>(Gallop::Screen::OriginalScreenWidth());
+		height = static_cast<float>(Gallop::Screen::OriginalScreenHeight());
 	}
-	float num6 = num4 / static_cast<float>(Gallop::Screen::Width());
-	float num7 = num5 / static_cast<float>(Gallop::Screen::Height());
+	width /= static_cast<float>(Gallop::Screen::Width());
+	height /= static_cast<float>(Gallop::Screen::Height());
+
 
 	if (Gallop::Screen::IsLandscapeMode() && IsSplitWindow && !config::freeform_window)
 	{
 		auto mainRect = static_cast<UnityEngine::RectTransform>(UnityEngine::Behaviour(Gallop::UIManager::Instance()._mainCanvas()).transform()).rect();
 
-		float wRatio = num4 / 1920.0f;
+		float wRatio = width / 1920.0f;
 
-		auto margin = ((mainRect.width * num7) - (rectWebView.width * num7)) / 2;
+		auto margin = ((mainRect.width * height) - (rectWebView.width * height)) / 2;
 
 		instance.CuteWebView().SetMargins(
 			(static_cast<int>(leftRect.width) * wRatio) + (margin), // l
-			static_cast<int>((static_cast<float>(rect.height) - vector2.y) * num7), // t
+			static_cast<int>((static_cast<float>(rect.height) - vector2.y) * height), // t
 			((evacuationRect.width * wRatio) + (_bandMenuRect.width * wRatio)) + (margin), // r
-			static_cast<int>(vector3.y * num7) // b
+			static_cast<int>(vector3.y * height) // b
 		);
 	}
 	else
 	{
 		instance.CuteWebView().SetMargins(
-			static_cast<int>(ceilf(vector2.x * num6)), // l
-			static_cast<int>(ceilf((static_cast<float>(Gallop::Screen::Height()) - vector2.y) * num7)), // t
-			static_cast<int>(ceilf((static_cast<float>(Gallop::Screen::Width()) - vector3.x) * num6)), // r
-			static_cast<int>(ceilf(vector3.y * num7)) // b
+			static_cast<int>(ceilf(vector2.x * width)), // l
+			static_cast<int>(ceilf((static_cast<float>(Gallop::Screen::Height()) - vector2.y) * height)), // t
+			static_cast<int>(ceilf((static_cast<float>(Gallop::Screen::Width()) - vector3.x) * width)), // r
+			static_cast<int>(ceilf(vector3.y * height)) // b
 		);
 	}
 }

@@ -20,6 +20,10 @@ namespace
 
 	void* Transform_set_localPosition_Injected_addr = nullptr;
 
+	void* Transform_get_rotation_Injected_addr = nullptr;
+
+	void* Transform_set_rotation_Injected_addr = nullptr;
+
 	void* Transform_get_localScale_Injected_addr = nullptr;
 
 	void* Transform_set_localScale_Injected_addr = nullptr;
@@ -41,6 +45,8 @@ static void InitAddress()
 	Transform_set_position_Injected_addr = il2cpp_resolve_icall("UnityEngine.Transform::set_position_Injected()");
 	Transform_get_localPosition_Injected_addr = il2cpp_resolve_icall("UnityEngine.Transform::get_localPosition_Injected()");
 	Transform_set_localPosition_Injected_addr = il2cpp_resolve_icall("UnityEngine.Transform::set_localPosition_Injected()");
+	Transform_get_rotation_Injected_addr = il2cpp_resolve_icall("UnityEngine.Transform::get_rotation_Injected()");
+	Transform_set_rotation_Injected_addr = il2cpp_resolve_icall("UnityEngine.Transform::set_rotation_Injected()");
 	Transform_get_localScale_Injected_addr = il2cpp_resolve_icall("UnityEngine.Transform::get_localScale_Injected()");
 	Transform_set_localScale_Injected_addr = il2cpp_resolve_icall("UnityEngine.Transform::set_localScale_Injected()");
 	Transform_get_childCount_addr = il2cpp_resolve_icall("UnityEngine.Transform::get_childCount()");
@@ -102,6 +108,18 @@ namespace UnityEngine
 	void Transform::localPosition(Vector3 value)
 	{
 		reinterpret_cast<void (*)(Il2CppObject*, Vector3&)>(Transform_set_localPosition_Injected_addr)(instance, value);
+	}
+
+	Quaternion Transform::rotation()
+	{
+		Quaternion quaternion;
+		reinterpret_cast<void (*)(Il2CppObject*, Quaternion*)>(Transform_get_rotation_Injected_addr)(instance, &quaternion);
+		return quaternion;
+	}
+
+	void Transform::rotation(Quaternion value)
+	{
+		reinterpret_cast<void (*)(Il2CppObject*, Quaternion&)>(Transform_set_rotation_Injected_addr)(instance, value);
 	}
 
 	Vector3 Transform::localScale()

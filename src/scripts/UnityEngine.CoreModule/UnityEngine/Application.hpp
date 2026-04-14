@@ -1,6 +1,7 @@
 #pragma once
 #include "il2cpp/il2cpp_symbols.hpp"
 #include "NetworkReachability.hpp"
+#include "SystemLanguage.hpp"
 
 namespace UnityEngine
 {
@@ -16,6 +17,7 @@ namespace UnityEngine
 		static Il2CppString* persistentDataPath();
 		static void targetFrameRate(int value);
 		static int targetFrameRate();
+		static SystemLanguage systemLanguage();
 		static NetworkReachability internetReachability();
 
 		static void Exit(int exitCode);

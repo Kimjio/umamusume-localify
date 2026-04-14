@@ -7,12 +7,15 @@ namespace
 	void* get_enabled_addr = nullptr;
 
 	void* set_enabled_addr = nullptr;
+
+	void* get_isActiveAndEnabled_addr = nullptr;
 }
 
 static void InitAddress()
 {
 	get_enabled_addr = il2cpp_resolve_icall("UnityEngine.Behaviour::get_enabled()");
 	set_enabled_addr = il2cpp_resolve_icall("UnityEngine.Behaviour::set_enabled()");
+	get_isActiveAndEnabled_addr = il2cpp_resolve_icall("UnityEngine.Behaviour::get_isActiveAndEnabled()");
 }
 
 STATIC
@@ -30,5 +33,10 @@ namespace UnityEngine
 	void Behaviour::enabled(bool value)
 	{
 		reinterpret_cast<void (*)(Il2CppObject*, bool)>(set_enabled_addr)(instance, value);
+	}
+	
+	bool Behaviour::isActiveAndEnabled()
+	{
+		return reinterpret_cast<bool (*)(Il2CppObject*)>(get_isActiveAndEnabled_addr)(instance);
 	}
 }

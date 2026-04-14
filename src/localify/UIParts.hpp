@@ -2,18 +2,14 @@
 #include <stdinclude.hpp>
 #include "il2cpp/il2cpp_symbols.hpp"
 
-#include "scripts/UnityEngine.CoreModule//UnityEngine/GameObject.hpp"
+#include "scripts/UnityEngine.CoreModule/UnityEngine/GameObject.hpp"
+#include "scripts/umamusume/Gallop/TextCommon.hpp"
 
 namespace Localify
 {
 	class UIParts
 	{
 	public:
-		static void SetTextCommonText(Il2CppObject* textCommon, const Il2CppChar* text);
-		static void SetTextCommonTextWithCustomTag(Il2CppObject* textCommon, const Il2CppChar* text);
-		static void SetTextCommonFontColor(Il2CppObject* textCommon, const Il2CppChar* color);
-		static void SetTextCommonOutlineSize(Il2CppObject* textCommon, const Il2CppChar* size);
-		static void SetTextCommonOutlineColor(Il2CppObject* textCommon, const Il2CppChar* color);
 		static void SetImageCommonAtlasSprite(Il2CppObject* imageCommon, const Il2CppChar* atlasName, const Il2CppChar* spriteName);
 		static UnityEngine::GameObject GetOptionItemTitle(const Il2CppChar* title);
 		static UnityEngine::GameObject GetOptionItemOnOff(const char* name, const Il2CppChar* title);
@@ -26,7 +22,7 @@ namespace Localify
 		static UnityEngine::GameObject GetOptionItemInfo(const char* name, const Il2CppChar* text);
 		static UnityEngine::GameObject GetOptionItemSimple(const Il2CppChar* title);
 		static UnityEngine::GameObject GetOptionItemSimpleWithButton(const char* name, const Il2CppChar* title, const Il2CppChar* text);
-		static Il2CppObject* GetOptionItemSimpleWithButtonTextCommon(const char* name);
+		static Gallop::TextCommon GetOptionItemSimpleWithButtonTextCommon(const char* name);
 		static Il2CppObject* GetToggleCommon(const char* name);
 		static Il2CppObject* GetToggleGroupCommon(UnityEngine::GameObject toggleGroupObject);
 		static Il2CppObject* GetToggleGroupCommon(const char* name);
@@ -34,7 +30,7 @@ namespace Localify
 		static UnityEngine::GameObject GetOptionItem3ToggleVertical(const char* name, const Il2CppChar* title, const Il2CppChar* option1, const Il2CppChar* option2, const Il2CppChar* option3, int selectedIndex);
 		static UnityEngine::GameObject GetOptionItem3Toggle(const char* name, const Il2CppChar* title, const Il2CppChar* option1, const Il2CppChar* option2, const Il2CppChar* option3, int selectedIndex);
 		static UnityEngine::GameObject GetOptionItem2Toggle(const char* name, const Il2CppChar* title, const Il2CppChar* option1, const Il2CppChar* option2, int selectedIndex);
-		static Il2CppObject* GetOptionSliderNumText(Il2CppObject* slider);
+		static Gallop::TextCommon GetOptionSliderNumText(Il2CppObject* slider);
 		static float GetOptionSliderValue(Il2CppObject* slider);
 		static float GetOptionSliderValue(const char* name);
 		static Il2CppObject* GetOptionSlider(const char* name);
@@ -45,9 +41,9 @@ namespace Localify
 		static UnityEngine::GameObject GetCheckboxWithText(const char* name);
 		static UnityEngine::GameObject GetRadioButtonWithText(const char* name, const Il2CppChar* title);
 		static UnityEngine::GameObject GetRadioButtonWithImageAndText(const char* name, const Il2CppChar* title, const Il2CppChar* atlasName, const Il2CppChar* spriteName);
-		static UnityEngine::GameObject GetSlider(const char* name, float value, float min = 0, float max = 10, bool wholeNumbers = true, void (*onChange)(Il2CppObject*) = nullptr);
+		static UnityEngine::GameObject GetLiveSlider(const char* name, float value, float min = 0, float max = 10, bool wholeNumbers = true, void (*onChange)(Il2CppObject*) = nullptr);
 		
 		static void AddToLayout(Il2CppObject* layout, vector<Il2CppObject*> objects, bool setAsFirstSibling = true);
-		static Il2CppObject* GetTextCommon(const char* name);
+		static Gallop::TextCommon GetTextCommon(const char* name);
 	};
 }

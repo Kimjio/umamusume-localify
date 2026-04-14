@@ -3,6 +3,7 @@
 #include "WindowsGamepadControl.hpp"
 #include "Screen.hpp"
 
+#include "scripts/UnityEngine.CoreModule/UnityEngine/RenderTexture.hpp"
 #include "scripts/UnityEngine.CoreModule/UnityEngine/RenderTextureDescriptor.hpp"
 
 #include "config/config.hpp"
@@ -30,16 +31,15 @@ static void WindowsGamepadControl_CreateRenderTextureFromScreen_hook(Il2CppObjec
 	auto descriptor = UnityEngine::RenderTextureDescriptor{};
 	il2cpp_symbols::get_method_pointer<void (*)(UnityEngine::RenderTextureDescriptor*, int, int, int, int)>("UnityEngine.CoreModule.dll", "UnityEngine", "RenderTextureDescriptor", ".ctor", 4)(&descriptor, Gallop::Screen::Width(), Gallop::Screen::Height(), 8, 24);
 	
-	auto renderTexture = il2cpp_object_new(il2cpp_symbols::get_class("UnityEngine.CoreModule.dll", "UnityEngine", "RenderTexture"));
-	il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, UnityEngine::RenderTextureDescriptor*)>(renderTexture->klass, ".ctor", 1)->methodPointer(renderTexture, &descriptor);
-
-	if (!il2cpp_class_get_method_from_name_type<bool (*)(Il2CppObject*)>(renderTexture->klass, "Create", 0)->methodPointer(renderTexture))
+	auto renderTexture = UnityEngine::RenderTexture(descriptor);
+	
+	if (!renderTexture.Create())
 	{
 		return;
 	}
 
 	il2cpp_field_set_value(control, WindowsGamepadControl__softwareCursorUiTexture, renderTexture);
-	if (!il2cpp_class_get_method_from_name_type<bool (*)(Il2CppObject*)>(renderTexture->klass, "Create", 0)->methodPointer(renderTexture))
+	if (!renderTexture.Create())
 	{
 		control.ReleaseRenderTexture();
 	}

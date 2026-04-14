@@ -3,6 +3,7 @@
 
 #include "Component.hpp"
 #include "Vector3.hpp"
+#include "Quaternion.hpp"
 
 namespace UnityEngine
 {
@@ -37,6 +38,10 @@ namespace UnityEngine
 		Vector3 localPosition();
 
 		void localPosition(Vector3 value);
+
+		Quaternion rotation();
+
+		void rotation(Quaternion value);
 
 		Vector3 localScale();
 

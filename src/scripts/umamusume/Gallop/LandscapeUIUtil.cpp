@@ -25,7 +25,7 @@ static void LandscapeUIUtil_DeactivateWhiteMaskExcludeLog_hook()
 
 static void InitAddress()
 {
-	auto LandscapeUIUtil = il2cpp_symbols::get_class("umamusume.dll", "Gallop", "LandscapeUIUtil");
+	auto LandscapeUIUtil = il2cpp_symbols::get_class(ASSEMBLY_NAME, "Gallop", "LandscapeUIUtil");
 	LandscapeUIUtil_ActivateWhiteMaskExcludeLog_addr = il2cpp_symbols::get_method_pointer(LandscapeUIUtil, "ActivateWhiteMaskExcludeLog", 0);
 	LandscapeUIUtil_DeactivateWhiteMaskExcludeLog_addr = il2cpp_symbols::get_method_pointer(LandscapeUIUtil, "DeactivateWhiteMaskExcludeLog", 0);
 }

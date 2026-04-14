@@ -6,6 +6,7 @@
 #include <random>
 #include <unordered_map>
 #include <queue>
+#include <filesystem>
 #include <msgpack11.hpp>
 
 #include "config/config.hpp"
@@ -21,6 +22,7 @@
 
 #include "scripts/ScriptInternal.hpp"
 #include "scripts/UnityEngine.CoreModule/UnityEngine/Rect.hpp"
+#include "scripts/UnityEngine.CoreModule/UnityEngine/RenderTexture.hpp"
 #include "scripts/umamusume/Gallop/PushNotificationManager.hpp"
 
 using namespace std;
@@ -29,6 +31,17 @@ using namespace Microsoft::WRL;
 
 namespace MsgPackData
 {
+	inline void DumpMsgPackFile(const string& file_path, const char* buffer, const size_t len) {
+		auto parent_path = filesystem::path(file_path).parent_path();
+		if (!filesystem::exists(parent_path)) {
+			filesystem::create_directories(parent_path);
+		}
+		ofstream file{ file_path, ios::binary };
+		file.write(buffer, static_cast<int>(len));
+		file.flush();
+		file.close();
+	}
+
 	inline MsgPack::object user_info;
 
 	inline MsgPack::object tp_info;
@@ -47,13 +60,13 @@ namespace MsgPackData
 
 		auto height = il2cpp_class_get_method_from_name_type<int (*)(Il2CppObject*)>(texture->klass, "get_height", 0)->methodPointer(texture);
 
-		auto renderTexture = il2cpp_symbols::get_method_pointer<Il2CppObject * (*)(int, int, int, int)>("UnityEngine.CoreModule.dll", "UnityEngine", "RenderTexture", "GetTemporary", 4)(width, height, 0, 0);
+		auto renderTexture = UnityEngine::RenderTexture::GetTemporary(width, height);
 
 		il2cpp_symbols::get_method_pointer<void (*)(Il2CppObject*, Il2CppObject*)>("UnityEngine.CoreModule.dll", "UnityEngine", "Graphics", "Blit", 2)(texture, renderTexture);
 
-		auto previous = il2cpp_symbols::get_method_pointer<Il2CppObject * (*)()>("UnityEngine.CoreModule.dll", "UnityEngine", "RenderTexture", "get_active", IgnoreNumberOfArguments)();
+		auto previous = UnityEngine::RenderTexture::GetActive();
 
-		il2cpp_symbols::get_method_pointer<void (*)(Il2CppObject*)>("UnityEngine.CoreModule.dll", "UnityEngine", "RenderTexture", "set_active", 1)(renderTexture);
+		UnityEngine::RenderTexture::SetActive(renderTexture);
 
 		auto readableTexture = il2cpp_object_new(il2cpp_symbols::get_class("UnityEngine.CoreModule.dll", "UnityEngine", "Texture2D"));
 		il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, int, int)>(readableTexture->klass, ".ctor", 2)->methodPointer(readableTexture, width, height);
@@ -61,9 +74,9 @@ namespace MsgPackData
 		il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, UnityEngine::Rect, int, int)>(readableTexture->klass, "ReadPixels", 3)->methodPointer(readableTexture, UnityEngine::Rect{ 0, 0, static_cast<float>(width), static_cast<float>(height) }, 0, 0);
 		il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*)>(readableTexture->klass, "Apply", 0)->methodPointer(readableTexture);
 
-		il2cpp_symbols::get_method_pointer<void (*)(Il2CppObject*)>("UnityEngine.CoreModule.dll", "UnityEngine", "RenderTexture", "set_active", 1)(previous);
+		UnityEngine::RenderTexture::SetActive(previous);
 
-		il2cpp_symbols::get_method_pointer<void (*)(Il2CppObject*)>("UnityEngine.CoreModule.dll", "UnityEngine", "RenderTexture", "ReleaseTemporary", 1)(renderTexture);
+		UnityEngine::RenderTexture::ReleaseTemporary(renderTexture);
 
 		auto method = il2cpp_symbols::get_method("UnityEngine.ImageConversionModule.dll", "UnityEngine", "ImageConversion", "EncodeToPNG", 1);
 
@@ -117,14 +130,13 @@ namespace MsgPackData
 			}
 		}
 
-		auto assetBundle = il2cpp_class_get_method_from_name_type<Il2CppObject * (*)(Il2CppObject*)>(asset->klass, "get_assetBundle", 0)->methodPointer(asset);
+		UnityEngine::AssetBundle assetBundle = il2cpp_class_get_method_from_name_type<Il2CppObject * (*)(Il2CppObject*)>(asset->klass, "get_assetBundle", 0)->methodPointer(asset);
 		if (!assetBundle)
 		{
 			return nullptr;
 		}
 
-		auto texture2DType = reinterpret_cast<Il2CppType*>(::GetRuntimeType("UnityEngine.CoreModule.dll", "UnityEngine", "Texture2D"));
-		return reinterpret_cast<Il2CppObject * (*)(Il2CppObject*, Il2CppString*, const Il2CppType*)>(il2cpp_resolve_icall("UnityEngine.AssetBundle::LoadAsset_Internal(System.String,System.Type)"))(assetBundle, il2cpp_string_new(push_icon.data()), texture2DType);
+		return assetBundle.LoadAsset(il2cpp_string_new(push_icon.data()), GetRuntimeType("UnityEngine.CoreModule.dll", "UnityEngine", "Texture2D"));
 	}
 
 	inline void RegisterTPScheduledToast()

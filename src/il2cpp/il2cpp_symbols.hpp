@@ -133,11 +133,15 @@ namespace il2cpp_symbols
 
 	extern std::vector<std::function<void()>> init_callbacks;
 
+	extern std::vector<std::function<void()>> late_init_callbacks;
+
 	void load_symbols(std::filesystem::path & path);
 
 	void init(HMODULE game_module);
 
 	void call_init_callbacks();
+
+	void call_late_init_callbacks();
 
 	void init_defaults();
 

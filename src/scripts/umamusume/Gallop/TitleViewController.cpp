@@ -1,4 +1,5 @@
 #include "../../ScriptInternal.hpp"
+#include "Certification.hpp"
 #include "TitleViewController.hpp"
 #include "DialogCommon.hpp"
 #include "DialogManager.hpp"
@@ -432,8 +433,8 @@ static DWORD WINAPI WebViewThread(LPVOID)
 
 										auto t = il2cpp_thread_attach(il2cpp_domain_get());
 
-										il2cpp_symbols::get_method_pointer<void (*)(Il2CppString*)>("umamusume.dll", "Gallop", "Certification", "set_dmmViewerId", 1)(il2cpp_string_new(Gallop::TitleViewController::viewerId.data()));
-										il2cpp_symbols::get_method_pointer<void (*)(Il2CppString*)>("umamusume.dll", "Gallop", "Certification", "set_dmmOnetimeToken", 1)(il2cpp_string_new(Gallop::TitleViewController::onetimeToken.data()));
+										Gallop::Certification::dmmViewerId(il2cpp_string_new(Gallop::TitleViewController::viewerId.data()));
+										Gallop::Certification::dmmOnetimeToken(il2cpp_string_new(Gallop::TitleViewController::onetimeToken.data()));
 
 										isLoginWebViewOpen = false;
 
@@ -474,7 +475,7 @@ static DWORD WINAPI WebViewThread(LPVOID)
 
 static void PlaySfxUiDecideL01()
 {
-	const auto AudioManager = GetSingletonInstance(il2cpp_symbols::get_class("umamusume.dll", "Gallop", "AudioManager"));
+	const auto AudioManager = GetSingletonInstance(il2cpp_symbols::get_class(ASSEMBLY_NAME, "Gallop", "AudioManager"));
 
 	Cute::Cri::AudioPlayback res{};
 
@@ -493,8 +494,8 @@ static void PlaySfxUiDecideL01()
 
 static void TitleViewController_OnClickPushStart_hook(Il2CppObject* self)
 {
-	const auto dmmId = il2cpp_symbols::get_method_pointer<Il2CppString * (*)()>("umamusume.dll", "Gallop", "Certification", "get_dmmViewerId", IgnoreNumberOfArguments)();
-	const auto dmmOnetimeToken = il2cpp_symbols::get_method_pointer<Il2CppString * (*)()>("umamusume.dll", "Gallop", "Certification", "get_dmmOnetimeToken", IgnoreNumberOfArguments)();
+	const auto dmmId = Gallop::Certification::dmmViewerId();
+	const auto dmmOnetimeToken = Gallop::Certification::dmmOnetimeToken();
 
 	if ((dmmId && !il2cppstring(dmmId->chars).empty() &&
 		dmmOnetimeToken && !il2cppstring(dmmOnetimeToken->chars).empty()) ||
@@ -507,15 +508,15 @@ static void TitleViewController_OnClickPushStart_hook(Il2CppObject* self)
 		{
 			PlaySfxUiDecideL01();
 
-			if (il2cpp_symbols::get_class("umamusume.dll", "Gallop", "DialogSimpleCheckNoWarning"))
+			if (il2cpp_symbols::get_class(ASSEMBLY_NAME, "Gallop", "DialogSimpleCheckNoWarning"))
 			{
 				il2cpp_symbols::get_method_pointer<Il2CppObject* (*)(Il2CppString*, Il2CppString*, Il2CppString*, uint64_t, Il2CppDelegate*, Il2CppDelegate*, bool, bool, Il2CppString*)>
-					("umamusume.dll", "Gallop", "DialogSimpleCheckNoWarning", "OpenMiddleOneButton", 9)(Gallop::Localize::Get(GetTextIdByName(IL2CPP_STRING("Common0081"))), il2cpp_string_new16(
+					(ASSEMBLY_NAME, "Gallop", "DialogSimpleCheckNoWarning", "OpenMiddleOneButton", 9)(Gallop::Localize::Get(GetTextIdByName(IL2CPP_STRING("Common0081"))), il2cpp_string_new16(
 						(LocalifySettings::GetText("initial_disclaimer_1") + il2cppstring(Gallop::Localize::Get(GetTextIdByName(IL2CPP_STRING("Common187002")))->chars) + LocalifySettings::GetText("initial_disclaimer_2")).data()),
 						Gallop::Localize::Get(GetTextIdByName(IL2CPP_STRING("Common187002"))), GetTextIdByName(IL2CPP_STRING("Common0007")),
 						CreateDelegateStatic(*[](void*, Il2CppObject* dialog)
 							{
-								il2cpp_symbols::get_method_pointer<void (*)(Il2CppObject*)>("umamusume.dll", "Gallop", "DialogCommon", "Close", 0)(GetFrontDialog());
+								il2cpp_symbols::get_method_pointer<void (*)(Il2CppObject*)>(ASSEMBLY_NAME, "Gallop", "DialogCommon", "Close", 0)(GetFrontDialog());
 								il2cpp_symbols::get_method_pointer<void (*)(Il2CppString*, int)>("UnityEngine.CoreModule.dll", "UnityEngine", "PlayerPrefs", "SetInt", 2)(il2cpp_string_new("ReadDisclaimer"), 1);
 								il2cpp_symbols::get_method_pointer<void (*)()>("UnityEngine.CoreModule.dll", "UnityEngine", "PlayerPrefs", "Save", IgnoreNumberOfArguments)();
 							}), nullptr, false, true, nullptr);
@@ -562,7 +563,7 @@ static void TitleViewController_OnClickPushStart_hook(Il2CppObject* self)
 static void TitleViewController_UpdateView_hook(Il2CppObject* self)
 {
 	reinterpret_cast<decltype(TitleViewController_UpdateView_hook)*>(TitleViewController_UpdateView_orig)(self);
-	auto bootProgress = il2cpp_symbols::get_method_pointer<float (*)()>("umamusume.dll", "Gallop", "MainGameInitializer", "GetBootProgress", 0)();
+	auto bootProgress = il2cpp_symbols::get_method_pointer<float (*)()>(ASSEMBLY_NAME, "Gallop", "MainGameInitializer", "GetBootProgress", 0)();
 
 	if (config::taskbar_show_progress_on_download)
 	{
@@ -610,7 +611,7 @@ static Il2CppObject* TitleViewController_InitializeView_hook(Il2CppObject* self)
 	UnityEngine::GameObject(ProgressRootObject).transform().localScale({ 1.0f, 1.0f, 1.0f });
 	UnityEngine::GameObject(StartTapObiect).transform().localScale({ 1.0f, 1.0f, 1.0f });
 
-	auto SaveDataManager = GetSingletonInstance(il2cpp_symbols::get_class("umamusume.dll", "Gallop", "SaveDataManager"));
+	auto SaveDataManager = GetSingletonInstance(il2cpp_symbols::get_class(ASSEMBLY_NAME, "Gallop", "SaveDataManager"));
 	auto SaveLoader = il2cpp_class_get_method_from_name_type<Il2CppObject * (*)(Il2CppObject*)>(SaveDataManager->klass, "get_SaveLoader", 0)->methodPointer(SaveDataManager);
 	auto CampaignTitleLogoChangeId = il2cpp_class_get_method_from_name_type<CodeStage::AntiCheat::ObscuredTypes::ObscuredInt(*)(Il2CppObject*)>(SaveLoader->klass, "get_CampaignTitleLogoChangeId", 0)->methodPointer(SaveLoader);
 
@@ -641,14 +642,15 @@ static Il2CppObject* TitleViewController_InitializeView_hook(Il2CppObject* self)
 		}
 	}
 
-	return il2cpp_symbols::get_method_pointer<Il2CppObject * (*)(Il2CppDelegate*)>("umamusume.dll", "Gallop", "MonoBehaviourExtension", "WaitForEndFrameAsync", 1)(nullptr);
+	return il2cpp_symbols::get_method_pointer<Il2CppObject * (*)(Il2CppDelegate*)>(ASSEMBLY_NAME, "Gallop", "MonoBehaviourExtension", "WaitForEndFrameAsync", 1)(nullptr);
 }
 
 static void InitAddress()
 {
-	TitleViewController_OnClickPushStart_addr = il2cpp_symbols::get_method_pointer("umamusume.dll", "Gallop", "TitleViewController", "OnClickPushStart", 0);
-	TitleViewController_UpdateView_addr = il2cpp_symbols::get_method_pointer("umamusume.dll", "Gallop", "TitleViewController", "UpdateView", 0);
-	TitleViewController_InitializeView_addr = il2cpp_symbols::get_method_pointer("umamusume.dll", "Gallop", "TitleViewController", "InitializeView", 0);
+	auto TitleViewController_klass = il2cpp_symbols::get_class(ASSEMBLY_NAME, "Gallop", "TitleViewController");
+	TitleViewController_OnClickPushStart_addr = il2cpp_symbols::get_method_pointer(TitleViewController_klass, "OnClickPushStart", 0);
+	TitleViewController_UpdateView_addr = il2cpp_symbols::get_method_pointer(TitleViewController_klass, "UpdateView", 0);
+	TitleViewController_InitializeView_addr = il2cpp_symbols::get_method_pointer(TitleViewController_klass, "InitializeView", 0);
 }
 
 static void HookMethods()

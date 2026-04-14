@@ -1,0 +1,51 @@
+#pragma once
+
+namespace UnityEngine
+{
+	enum class SystemLanguage
+	{
+		Afrikaans,
+		Arabic,
+		Basque,
+		Belarusian,
+		Bulgarian,
+		Catalan,
+		Chinese,
+		Czech,
+		Danish,
+		Dutch,
+		English,
+		Estonian,
+		Faroese,
+		Finnish,
+		French,
+		German,
+		Greek,
+		Hebrew,
+		Icelandic = 19,
+		Indonesian,
+		Italian,
+		Japanese,
+		Korean,
+		Latvian,
+		Lithuanian,
+		Norwegian,
+		Polish,
+		Portuguese,
+		Romanian,
+		Russian,
+		SerboCroatian,
+		Slovak,
+		Slovenian,
+		Spanish,
+		Swedish,
+		Thai,
+		Turkish,
+		Ukrainian,
+		Vietnamese,
+		ChineseSimplified,
+		ChineseTraditional,
+		Unknown,
+		Hungarian = 18
+	};
+}

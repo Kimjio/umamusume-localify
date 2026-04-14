@@ -3,10 +3,14 @@
 #include <vector>
 #include <string>
 
-#include "scripts/UnityEngine.CoreModule//UnityEngine/Object.hpp"
-#include "scripts/UnityEngine.CoreModule//UnityEngine/GameObject.hpp"
-#include "scripts/UnityEngine.CoreModule//UnityEngine/ResourcesAPIInternal.hpp"
-#include "scripts/UnityEngine.CoreModule//UnityEngine/RectTransform.hpp"
+#include "scripts/UnityEngine.CoreModule/UnityEngine/Object.hpp"
+#include "scripts/UnityEngine.CoreModule/UnityEngine/GameObject.hpp"
+#include "scripts/UnityEngine.CoreModule/UnityEngine/ResourcesAPIInternal.hpp"
+#include "scripts/UnityEngine.CoreModule/UnityEngine/Color.hpp"
+#include "scripts/UnityEngine.CoreModule/UnityEngine/Rect.hpp"
+#include "scripts/UnityEngine.CoreModule/UnityEngine/RectTransform.hpp"
+#include "scripts/UnityEngine.CoreModule/UnityEngine/RenderTexture.hpp"
+#include "scripts/UnityEngine.CoreModule/UnityEngine/Vector4.hpp"
 
 #include "string_utils.hpp"
 
@@ -31,47 +35,6 @@ namespace Localify
 		return nullptr;
 	}
 
-	void UIParts::SetTextCommonText(Il2CppObject* textCommon, const Il2CppChar* text)
-	{
-		il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, Il2CppString*)>(textCommon->klass, "set_text", 1)->methodPointer(textCommon, il2cpp_string_new16(text));
-
-		auto textIdStrField = il2cpp_class_get_field_from_name(textCommon->klass, "m_textid_str");
-		il2cpp_field_set_value(textCommon, textIdStrField, nullptr);
-	}
-
-	void UIParts::SetTextCommonTextWithCustomTag(Il2CppObject* textCommon, const Il2CppChar* text)
-	{
-		auto SetTextWithCustomTag = il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, Il2CppString*, float, int)>(textCommon->klass, "SetTextWithCustomTag", 3);
-		if (SetTextWithCustomTag)
-		{
-			SetTextWithCustomTag->methodPointer(textCommon, il2cpp_string_new16(text), 1, 0);
-		}
-		else
-		{
-			il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, Il2CppString*, float)>(textCommon->klass, "SetTextWithCustomTag", 2)->methodPointer(textCommon, il2cpp_string_new16(text), 1);
-		}
-
-		auto textIdStrField = il2cpp_class_get_field_from_name(textCommon->klass, "m_textid_str");
-		il2cpp_field_set_value(textCommon, textIdStrField, nullptr);
-	}
-
-	void UIParts::SetTextCommonFontColor(Il2CppObject* textCommon, const Il2CppChar* color)
-	{
-		il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, uint64_t)>(textCommon->klass, "set_FontColor", 1)->methodPointer(textCommon, GetEnumValue(ParseEnum(GetRuntimeType("umamusume.dll", "Gallop", "FontColorType"), color)));
-	}
-
-	void UIParts::SetTextCommonOutlineSize(Il2CppObject* textCommon, const Il2CppChar* size)
-	{
-		il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, uint64_t)>(textCommon->klass, "set_OutlineSize", 1)->methodPointer(textCommon, GetEnumValue(ParseEnum(GetRuntimeType("umamusume.dll", "Gallop", "OutlineSizeType"), size)));
-		il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*)>(textCommon->klass, "UpdateOutline", 0)->methodPointer(textCommon);
-	}
-
-	void UIParts::SetTextCommonOutlineColor(Il2CppObject* textCommon, const Il2CppChar* color)
-	{
-		il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, uint64_t)>(textCommon->klass, "set_OutlineColor", 1)->methodPointer(textCommon, GetEnumValue(ParseEnum(GetRuntimeType("umamusume.dll", "Gallop", "OutlineColorType"), color)));
-		il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*)>(textCommon->klass, "RebuildOutline", 0)->methodPointer(textCommon);
-	}
-
 	void UIParts::SetImageCommonAtlasSprite(Il2CppObject* imageCommon, const Il2CppChar* atlasName, const Il2CppChar* spriteName)
 	{
 		auto _atlasNameField = il2cpp_class_get_field_from_name(imageCommon->klass, "_atlasName");
@@ -89,9 +52,8 @@ namespace Localify
 
 		auto array = optionItemTitle.GetComponentsInChildren(GetRuntimeType("umamusume.dll", "Gallop", "TextCommon"), false);
 
-		auto textCommon = array->vector[0];
-
-		SetTextCommonText(textCommon, title);
+		auto textCommon = Gallop::TextCommon(array->vector[0]);
+		textCommon.text(il2cpp_string_new16(title));
 
 		return optionItemTitle;
 	}
@@ -106,10 +68,9 @@ namespace Localify
 
 		auto array = optionItemOnOff.GetComponentsInChildren(GetRuntimeType("umamusume.dll", "Gallop", "TextCommon"), false);
 
-		auto textCommon = array->vector[0];
-
-		il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, int)>(textCommon->klass, "set_verticalOverflow", 1)->methodPointer(textCommon, 1);
-		SetTextCommonText(textCommon, title);
+		auto textCommon = Gallop::TextCommon(array->vector[0]);
+		textCommon.verticalOverflow(UnityEngine::VerticalWrapMode::Overflow);
+		textCommon.text(il2cpp_string_new16(title));
 
 		return optionItemOnOff;
 	}
@@ -124,10 +85,9 @@ namespace Localify
 
 		auto array = optionItemOnOff.GetComponentsInChildren(GetRuntimeType("umamusume.dll", "Gallop", "TextCommon"), false);
 
-		auto textCommon = array->vector[0];
-
-		il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, int)>(textCommon->klass, "set_verticalOverflow", 1)->methodPointer(textCommon, 1);
-		SetTextCommonText(textCommon, title);
+		auto textCommon = Gallop::TextCommon(array->vector[0]);
+		textCommon.verticalOverflow(UnityEngine::VerticalWrapMode::Overflow);
+		textCommon.text(il2cpp_string_new16(title));
 
 		return optionItemOnOff;
 	}
@@ -174,9 +134,8 @@ namespace Localify
 
 		auto array1 = optionItemButton.GetComponentsInChildren(GetRuntimeType("umamusume.dll", "Gallop", "TextCommon"), false);
 
-		auto textCommon = array1->vector[0];
-
-		SetTextCommonText(textCommon, title);
+		auto textCommon = Gallop::TextCommon(array1->vector[0]);
+		textCommon.text(il2cpp_string_new16(title));
 
 		auto array2 = optionItemButton.GetComponentsInChildren(GetRuntimeType("umamusume.dll", "Gallop", "ButtonCommon"), false);
 
@@ -211,9 +170,8 @@ namespace Localify
 
 		auto array = optionItemAttention.GetComponentsInChildren(GetRuntimeType("umamusume.dll", "Gallop", "TextCommon"), false);
 
-		auto textCommon = array->vector[0];
-
-		SetTextCommonText(textCommon, text);
+		auto textCommon = Gallop::TextCommon(array->vector[0]);
+		textCommon.text(il2cpp_string_new16(text));
 
 		return optionItemAttention;
 	}
@@ -231,9 +189,7 @@ namespace Localify
 
 		auto array = optionItemInfo.GetComponentsInChildren(GetRuntimeType("umamusume.dll", "Gallop", "TextCommon"), false);
 
-		auto textCommon = array->vector[0];
-
-		SetTextCommonTextWithCustomTag(textCommon, text);
+		Gallop::TextCommon(array->vector[0]).SetTextWithCustomTag(il2cpp_string_new16(text));
 
 		auto contentSizeFitter = optionItemInfo.AddComponent(GetRuntimeType("umamusume.dll", "Gallop", "LayoutGroupContentSizeFitter"));
 
@@ -262,9 +218,7 @@ namespace Localify
 
 		auto array = optionItemSimple.GetComponentsInChildren(GetRuntimeType("umamusume.dll", "Gallop", "TextCommon"), false);
 
-		auto textCommon = array->vector[0];
-
-		SetTextCommonText(textCommon, title);
+		Gallop::TextCommon(array->vector[0]).text(il2cpp_string_new16(title));
 
 		return optionItemSimple;
 	}
@@ -303,13 +257,13 @@ namespace Localify
 
 		auto array = optionItemSimple.GetComponentsInChildren(GetRuntimeType("umamusume.dll", "Gallop", "TextCommon"), false);
 
-		SetTextCommonText(array->vector[0], text);
-		SetTextCommonText(array->vector[1], title);
+		Gallop::TextCommon(array->vector[0]).text(il2cpp_string_new16(text));
+		Gallop::TextCommon(array->vector[1]).text(il2cpp_string_new16(title));
 
 		return optionItemSimple;
 	}
 
-	Il2CppObject* UIParts::GetOptionItemSimpleWithButtonTextCommon(const char* name)
+	Gallop::TextCommon UIParts::GetOptionItemSimpleWithButtonTextCommon(const char* name)
 	{
 		UnityEngine::GameObject gameObject = UnityEngine::GameObject::Find(il2cpp_string_new((string(name) + "_simple"s).data())).NativeObject();
 
@@ -386,7 +340,7 @@ namespace Localify
 		}
 	}
 
-	Il2CppObject* UIParts::GetTextCommon(const char* name)
+	Gallop::TextCommon UIParts::GetTextCommon(const char* name)
 	{
 		UnityEngine::GameObject gameObject = UnityEngine::GameObject::Find(il2cpp_string_new(name)).NativeObject();
 		if (gameObject)
@@ -397,8 +351,7 @@ namespace Localify
 		return nullptr;
 	}
 
-	// Helpers for Sliders, etc.
-	Il2CppObject* UIParts::GetOptionSliderNumText(Il2CppObject* slider)
+	Gallop::TextCommon UIParts::GetOptionSliderNumText(Il2CppObject* slider)
 	{
 		UnityEngine::GameObject gameObject = il2cpp_class_get_method_from_name_type<Il2CppObject * (*)(Il2CppObject*)>(slider->klass, "get_gameObject", 0)->methodPointer(slider);
 		auto array = gameObject.GetComponentsInChildren(GetRuntimeType("umamusume.dll", "Gallop", "TextCommon"), false);
@@ -441,10 +394,9 @@ namespace Localify
 
 		auto array = optionSlider.GetComponentsInChildren(GetRuntimeType("umamusume.dll", "Gallop", "TextCommon"), false);
 
-		auto textCommon = array->vector[0];
-
-		il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, int)>(textCommon->klass, "set_verticalOverflow", 1)->methodPointer(textCommon, 1);
-		SetTextCommonText(textCommon, title);
+		auto textCommon = Gallop::TextCommon(array->vector[0]);
+		textCommon.verticalOverflow(UnityEngine::VerticalWrapMode::Overflow);
+		textCommon.text(il2cpp_string_new16(title));
 
 		auto optionSoundVolumeSliderArray = optionSlider.GetComponentsInChildren(GetRuntimeType("umamusume.dll", "Gallop", "OptionSoundVolumeSlider"), false);
 
@@ -464,23 +416,23 @@ namespace Localify
 
 		auto valueChanged = CreateDelegateWithClass(delegateClass, sliderCommon,
 			onChange ? onChange :
-			*[](Il2CppObject* _this)
+			*[](Il2CppObject* self)
 			{
-				auto textCommon = GetOptionSliderNumText(_this);
+				auto textCommon = GetOptionSliderNumText(self);
 
-				if (il2cpp_class_get_method_from_name_type<bool (*)(Il2CppObject*)>(_this->klass, "get_wholeNumbers", 0)->methodPointer(_this))
+				if (il2cpp_class_get_method_from_name_type<bool (*)(Il2CppObject*)>(self->klass, "get_wholeNumbers", 0)->methodPointer(self))
 				{
-					auto value = static_cast<int>(il2cpp_class_get_method_from_name_type<float (*)(Il2CppObject*)>(_this->klass, "get_value", 0)->methodPointer(_this));
+					auto value = static_cast<int>(il2cpp_class_get_method_from_name_type<float (*)(Il2CppObject*)>(self->klass, "get_value", 0)->methodPointer(self));
 
-					SetTextCommonText(textCommon, u8_il2cpp(to_string(value)).data());
+					textCommon.text(il2cpp_string_new16(u8_il2cpp(to_string(value)).data()));
 				}
 				else
 				{
-					auto value = il2cpp_class_get_method_from_name_type<float (*)(Il2CppObject*)>(_this->klass, "get_value", 0)->methodPointer(_this);
+					auto value = il2cpp_class_get_method_from_name_type<float (*)(Il2CppObject*)>(self->klass, "get_value", 0)->methodPointer(self);
 
 					value = roundf(value * 100) / 100;
 
-					SetTextCommonText(textCommon, format(IL2CPP_STRING("{:.2f}"), value).data());
+					textCommon.text(il2cpp_string_new16(format(IL2CPP_STRING("{:.2f}"), value).data()));
 				}
 			});
 
@@ -629,7 +581,7 @@ namespace Localify
 		UnityEngine::GameObject radioButtonWithText = UnityEngine::Object::Internal_CloneSingle(object);
 		UnityEngine::Object::Name(radioButtonWithText, il2cpp_string_new(name));
 		auto array = radioButtonWithText.GetComponentsInChildren(GetRuntimeType("umamusume.dll", "Gallop", "TextCommon"), false);
-		SetTextCommonText(array->vector[0], title);
+		Gallop::TextCommon(array->vector[0]).text(il2cpp_string_new16(title));
 		return radioButtonWithText;
 	}
 
@@ -642,7 +594,7 @@ namespace Localify
 		SetImageCommonAtlasSprite(imageArray->vector[0], atlasName, spriteName);
 
 		auto array = radioButtonWithText.GetComponentsInChildren(GetRuntimeType("umamusume.dll", "Gallop", "TextCommon"), false);
-		SetTextCommonText(array->vector[0], title);
+		Gallop::TextCommon(array->vector[0]).text(il2cpp_string_new16(title));
 		return radioButtonWithText;
 	}
 
@@ -656,10 +608,10 @@ namespace Localify
 
 		auto array = optionItem3ToggleVertical.GetComponentsInChildren(GetRuntimeType("umamusume.dll", "Gallop", "TextCommon"), false);
 
-		SetTextCommonText(array->vector[0], title);
-		SetTextCommonText(array->vector[1], option1);
-		SetTextCommonText(array->vector[2], option2);
-		SetTextCommonText(array->vector[3], option3);
+		Gallop::TextCommon(array->vector[0]).text(il2cpp_string_new16(title));
+		Gallop::TextCommon(array->vector[1]).text(il2cpp_string_new16(option1));
+		Gallop::TextCommon(array->vector[2]).text(il2cpp_string_new16(option2));
+		Gallop::TextCommon(array->vector[3]).text(il2cpp_string_new16(option3));
 
 		auto toggleGroupCommon = GetToggleGroupCommon(optionItem3ToggleVertical);
 		il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, int)>(toggleGroupCommon->klass, "SetToggleOnFromNumber", 1)->methodPointer(toggleGroupCommon, selectedIndex);
@@ -677,10 +629,10 @@ namespace Localify
 
 		auto array = optionItem3Toggle.GetComponentsInChildren(GetRuntimeType("umamusume.dll", "Gallop", "TextCommon"), false);
 
-		SetTextCommonText(array->vector[0], title);
-		SetTextCommonText(array->vector[1], option1);
-		SetTextCommonText(array->vector[2], option2);
-		SetTextCommonText(array->vector[3], option3);
+		Gallop::TextCommon(array->vector[0]).text(il2cpp_string_new16(title));
+		Gallop::TextCommon(array->vector[1]).text(il2cpp_string_new16(option1));
+		Gallop::TextCommon(array->vector[2]).text(il2cpp_string_new16(option2));
+		Gallop::TextCommon(array->vector[3]).text(il2cpp_string_new16(option3));
 
 		auto toggleGroupCommon = GetToggleGroupCommon(optionItem3Toggle);
 		il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, int)>(toggleGroupCommon->klass, "SetToggleOnFromNumber", 1)->methodPointer(toggleGroupCommon, selectedIndex);
@@ -698,9 +650,9 @@ namespace Localify
 
 		auto array = optionItem2Toggle.GetComponentsInChildren(GetRuntimeType("umamusume.dll", "Gallop", "TextCommon"), false);
 
-		SetTextCommonText(array->vector[0], title);
-		SetTextCommonText(array->vector[1], option1);
-		SetTextCommonText(array->vector[2], option2);
+		Gallop::TextCommon(array->vector[0]).text(il2cpp_string_new16(title));
+		Gallop::TextCommon(array->vector[1]).text(il2cpp_string_new16(option1));
+		Gallop::TextCommon(array->vector[2]).text(il2cpp_string_new16(option2));
 
 		auto toggleGroupCommon = GetToggleGroupCommon(optionItem2Toggle);
 		il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, int)>(toggleGroupCommon->klass, "SetToggleOnFromNumber", 1)->methodPointer(toggleGroupCommon, selectedIndex);
@@ -754,7 +706,7 @@ namespace Localify
 		return dropdownGameObject;
 	}
 
-	UnityEngine::GameObject UIParts::GetSlider(const char* name, float value, float min, float max, bool wholeNumbers, void (*onChange)(Il2CppObject*))
+	UnityEngine::GameObject UIParts::GetLiveSlider(const char* name, float value, float min, float max, bool wholeNumbers, void (*onChange)(Il2CppObject*))
 	{
 		UnityEngine::GameObject object = UnityEngine::ResourcesAPIInternal::Load(il2cpp_string_new("ui/parts/outgame/option/optionsoundvolumeslider"), GetRuntimeType("UnityEngine.CoreModule.dll", "UnityEngine", "GameObject"));
 
@@ -860,13 +812,11 @@ namespace Localify
 
 		auto array = numTransform.gameObject().GetComponentsInChildren(GetRuntimeType("umamusume.dll", "Gallop", "TextCommon"), false);
 
-		auto textCommon = array->vector[0];
-
-		Localify::UIParts::SetTextCommonText(textCommon, IL2CPP_STRING("0:00"));
-
-		il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, int)>(textCommon->klass, "set_OutlineSize", 1)->methodPointer(textCommon, GetEnumValue(ParseEnum(GetRuntimeType("umamusume.dll", "Gallop", "OutlineSizeType"), IL2CPP_STRING("M"))));
-		il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, int)>(textCommon->klass, "set_OutlineColor", 1)->methodPointer(textCommon, GetEnumValue(ParseEnum(GetRuntimeType("umamusume.dll", "Gallop", "OutlineColorType"), IL2CPP_STRING("White"))));
-		il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*)>(textCommon->klass, "UpdateOutline", 0)->methodPointer(textCommon);
+		auto textCommon = Gallop::TextCommon(array->vector[0]);
+		textCommon.text(il2cpp_string_new16(IL2CPP_STRING("0:00")));
+		textCommon.OutlineSize(IL2CPP_STRING("M"));
+		textCommon.OutlineColor(IL2CPP_STRING("White"));
+		textCommon.UpdateOutline();
 
 		numTransform.anchoredPosition({ -100, 11 });
 		numTransform.anchorMax({ 0, 0.5 });
@@ -884,13 +834,11 @@ namespace Localify
 
 		auto array1 = clonedText.GetComponentsInChildren(GetRuntimeType("umamusume.dll", "Gallop", "TextCommon"), false);
 
-		auto textCommon1 = array1->vector[0];
-
-		Localify::UIParts::SetTextCommonText(textCommon1, IL2CPP_STRING("1:00"));
-
-		il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, int)>(textCommon1->klass, "set_OutlineSize", 1)->methodPointer(textCommon1, GetEnumValue(ParseEnum(GetRuntimeType("umamusume.dll", "Gallop", "OutlineSizeType"), IL2CPP_STRING("M"))));
-		il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, int)>(textCommon1->klass, "set_OutlineColor", 1)->methodPointer(textCommon1, GetEnumValue(ParseEnum(GetRuntimeType("umamusume.dll", "Gallop", "OutlineColorType"), IL2CPP_STRING("White"))));
-		il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*)>(textCommon1->klass, "UpdateOutline", 0)->methodPointer(textCommon1);
+		auto textCommon1 = Gallop::TextCommon(array1->vector[0]);
+		textCommon1.text(il2cpp_string_new16(IL2CPP_STRING("1:00")));
+		textCommon1.OutlineSize(IL2CPP_STRING("M"));
+		textCommon1.OutlineColor(IL2CPP_STRING("White"));
+		textCommon1.UpdateOutline();
 
 		totalNumTransform.anchoredPosition({ 100, 11 });
 		totalNumTransform.anchorMax({ 1, 0.5 });

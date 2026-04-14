@@ -907,19 +907,19 @@ namespace Localify
 						switch (static_cast<int>(value))
 						{
 						case 0:
-							UIParts::SetTextCommonText(numText, IL2CPP_STRING("Default"));
+							numText.text(il2cpp_string_new16(IL2CPP_STRING("Default")));
 							break;
 						case 1:
-							UIParts::SetTextCommonText(numText, IL2CPP_STRING("OFF"));
+							numText.text(il2cpp_string_new16(IL2CPP_STRING("OFF")));
 							break;
 						case 2:
-							UIParts::SetTextCommonText(numText, IL2CPP_STRING("x2"));
+							numText.text(il2cpp_string_new16(IL2CPP_STRING("x2")));
 							break;
 						case 3:
-							UIParts::SetTextCommonText(numText, IL2CPP_STRING("x4"));
+							numText.text(il2cpp_string_new16(IL2CPP_STRING("x4")));
 							break;
 						case 4:
-							UIParts::SetTextCommonText(numText, IL2CPP_STRING("x8"));
+							numText.text(il2cpp_string_new16(IL2CPP_STRING("x8")));
 							break;
 						}
 					}
@@ -935,19 +935,19 @@ namespace Localify
 						switch (static_cast<int>(value))
 						{
 						case -1:
-							UIParts::SetTextCommonText(numText, IL2CPP_STRING("Default"));
+							numText.text(il2cpp_string_new16(IL2CPP_STRING("Default")));
 							break;
 						case 0:
-							UIParts::SetTextCommonText(numText, IL2CPP_STRING("ModeNormal"));
+							numText.text(il2cpp_string_new16(IL2CPP_STRING("ModeNormal")));
 							break;
 						case 1:
-							UIParts::SetTextCommonText(numText, IL2CPP_STRING("Mode60FPS"));
+							numText.text(il2cpp_string_new16(IL2CPP_STRING("Mode60FPS")));
 							break;
 						case 2:
-							UIParts::SetTextCommonText(numText, IL2CPP_STRING("SkipFrame"));
+							numText.text(il2cpp_string_new16(IL2CPP_STRING("SkipFrame")));
 							break;
 						case 3:
-							UIParts::SetTextCommonText(numText, IL2CPP_STRING("SkipFramePostAlways"));
+							numText.text(il2cpp_string_new16(IL2CPP_STRING("SkipFramePostAlways")));
 							break;
 						}
 					}
@@ -977,7 +977,7 @@ namespace Localify
 						auto numText = UIParts::GetOptionSliderNumText(slider);
 						auto value = static_cast<int>(UIParts::GetOptionSliderValue(slider));
 
-						UIParts::SetTextCommonText(numText, u8_il2cpp(to_string(value)).data());
+						numText.text(il2cpp_string_new16(u8_il2cpp(to_string(value)).data()));
 					}
 				),
 				UIParts::GetOptionSlider("character_system_text_caption_font_size", LocalifySettings::GetText("character_system_text_caption_font_size"), characterSystemTextCaptionFontSize, 0, 128, true,
@@ -986,7 +986,7 @@ namespace Localify
 						auto numText = UIParts::GetOptionSliderNumText(slider);
 						auto value = static_cast<int>(UIParts::GetOptionSliderValue(slider));
 
-						UIParts::SetTextCommonText(numText, u8_il2cpp(to_string(value)).data());
+						numText.text(il2cpp_string_new16(u8_il2cpp(to_string(value)).data()));
 
 						NotificationManager::SetFontSize(value);
 						NotificationManager::SetDisplayTime(1);
@@ -1000,7 +1000,7 @@ namespace Localify
 						auto value = UIParts::GetOptionSliderValue(slider);
 						value = value / 10;
 
-						UIParts::SetTextCommonText(numText, u8_il2cpp(format("{:.2f}", value)).data());
+						numText.text(il2cpp_string_new16(u8_il2cpp(format("{:.2f}", value)).data()));
 
 						NotificationManager::SetPosition(value, UIParts::GetOptionSliderValue("character_system_text_caption_position_y") / 10);
 						NotificationManager::SetDisplayTime(1);
@@ -1014,7 +1014,7 @@ namespace Localify
 						auto value = UIParts::GetOptionSliderValue(slider);
 						value = value / 10;
 
-						UIParts::SetTextCommonText(numText, u8_il2cpp(format("{:.2f}", value)).data());
+						numText.text(il2cpp_string_new16(u8_il2cpp(format("{:.2f}", value)).data()));
 
 						NotificationManager::SetPosition(UIParts::GetOptionSliderValue("character_system_text_caption_position_x") / 10, value);
 						NotificationManager::SetDisplayTime(1);
@@ -1028,7 +1028,7 @@ namespace Localify
 						auto value = UIParts::GetOptionSliderValue(slider);
 						value = value / 100;
 
-						UIParts::SetTextCommonText(numText, u8_il2cpp(format("{:.2f}", value)).data());
+						numText.text(il2cpp_string_new16(u8_il2cpp(format("{:.2f}", value)).data()));
 
 						NotificationManager::SetBackgroundAlpha(value);
 						NotificationManager::SetDisplayTime(1);
@@ -1209,7 +1209,7 @@ namespace Localify
 						AddOrSet(config::config_document, IL2CPP_STRING("graphicsQuality"), value - 1);
 
 						auto textCommon = UIParts::GetOptionItemSimpleWithButtonTextCommon("graphics_quality");
-						UIParts::SetTextCommonText(textCommon, (LocalifySettings::GetText("graphics_quality") + il2cppstring(IL2CPP_STRING(": ")) + u8_il2cpp(GetGraphicsQualityOptions()[config::config_document[IL2CPP_STRING("graphicsQuality")].GetInt() + 1])).data());
+						textCommon.text(il2cpp_string_new16((LocalifySettings::GetText("graphics_quality") + il2cppstring(IL2CPP_STRING(": ")) + u8_il2cpp(GetGraphicsQualityOptions()[config::config_document[IL2CPP_STRING("graphicsQuality")].GetInt() + 1])).data()));
 					}
 				);
 			})
@@ -1223,7 +1223,7 @@ namespace Localify
 						AddOrSet(config::config_document, IL2CPP_STRING("championsLiveResourceId"), value + 1);
 
 						auto textCommon = UIParts::GetOptionItemSimpleWithButtonTextCommon("champions_live_resource_id");
-						UIParts::SetTextCommonText(textCommon, (LocalifySettings::GetText("champions_live_resource_id") + il2cppstring(IL2CPP_STRING(": ")) + u8_il2cpp(MasterDB::GetChampionsResources()[config::config_document[IL2CPP_STRING("championsLiveResourceId")].GetInt() - 1])).data());
+						textCommon.text(il2cpp_string_new16((LocalifySettings::GetText("champions_live_resource_id") + il2cppstring(IL2CPP_STRING(": ")) + u8_il2cpp(MasterDB::GetChampionsResources()[config::config_document[IL2CPP_STRING("championsLiveResourceId")].GetInt() - 1])).data()));
 					}
 				);
 			})
@@ -1248,16 +1248,15 @@ namespace Localify
 						AddOrSet(config::config_document, IL2CPP_STRING("championsLiveYear"), value + 2022);
 
 						auto textCommon = UIParts::GetOptionItemSimpleWithButtonTextCommon("champions_live_year");
-						UIParts::SetTextCommonText(textCommon, (LocalifySettings::GetText("champions_live_year") + il2cppstring(IL2CPP_STRING(": ")) + u8_il2cpp(to_string(config::config_document[IL2CPP_STRING("championsLiveYear")].GetInt()))).data());
+						textCommon.text(il2cpp_string_new16((LocalifySettings::GetText("champions_live_year") + il2cppstring(IL2CPP_STRING(": ")) + u8_il2cpp(to_string(config::config_document[IL2CPP_STRING("championsLiveYear")].GetInt()))).data()));
 					}
 				);
 			})
 		);
 
 		auto fontColorTextCommon = UIParts::GetOptionItemSimpleWithButtonTextCommon("character_system_text_caption_font_color");
-		UIParts::SetTextCommonOutlineColor(fontColorTextCommon, IL2CPP_STRING("Brown"));
-		UIParts::SetTextCommonFontColor(fontColorTextCommon,
-			config::config_document[IL2CPP_STRING("characterSystemTextCaptionFontColor")].GetString());
+		fontColorTextCommon.OutlineColor(IL2CPP_STRING("Brown"));
+		fontColorTextCommon.FontColor(config::config_document[IL2CPP_STRING("characterSystemTextCaptionFontColor")].GetString());
 
 		UIParts::SetOptionItemButtonAction("character_system_text_caption_font_color", *([](Il2CppObject*)
 			{
@@ -1281,23 +1280,22 @@ namespace Localify
 
 						auto textCommon = UIParts::GetOptionItemSimpleWithButtonTextCommon("character_system_text_caption_font_color");
 						auto& colorValue = config::config_document[IL2CPP_STRING("characterSystemTextCaptionFontColor")];
-						UIParts::SetTextCommonText(textCommon, (LocalifySettings::GetText("character_system_text_caption_font_color") + il2cppstring(IL2CPP_STRING(": ")) + il2cppstring(colorValue.GetString(), colorValue.GetStringLength())).data());
-						UIParts::SetTextCommonFontColor(textCommon, color.data());
+						textCommon.text(il2cpp_string_new16((LocalifySettings::GetText("character_system_text_caption_font_color") + il2cppstring(IL2CPP_STRING(": ")) + il2cppstring(colorValue.GetString(), colorValue.GetStringLength())).data()));
+						textCommon.FontColor(color.data());
 						NotificationManager::SetFontColor(color.data());
 					},
 					[](string name, il2cppstring value)
 					{
-						UIParts::SetTextCommonFontColor(UIParts::GetTextCommon(name.data()), value.data());
+						UIParts::GetTextCommon(name.data()).FontColor(value.data());
 					}
 				);
 			})
 		);
 
 		auto outlineSizeTextCommon = UIParts::GetOptionItemSimpleWithButtonTextCommon("character_system_text_caption_outline_size");
-		UIParts::SetTextCommonFontColor(outlineSizeTextCommon, IL2CPP_STRING("White"));
-		UIParts::SetTextCommonOutlineColor(outlineSizeTextCommon, IL2CPP_STRING("Brown"));
-		UIParts::SetTextCommonOutlineSize(outlineSizeTextCommon,
-			config::config_document[IL2CPP_STRING("characterSystemTextCaptionOutlineSize")].GetString());
+		outlineSizeTextCommon.FontColor(IL2CPP_STRING("White"));
+		outlineSizeTextCommon.OutlineColor(IL2CPP_STRING("Brown"));
+		outlineSizeTextCommon.OutlineSize(config::config_document[IL2CPP_STRING("characterSystemTextCaptionOutlineSize")].GetString());
 
 		UIParts::SetOptionItemButtonAction("character_system_text_caption_outline_size", *([](Il2CppObject*)
 			{
@@ -1321,21 +1319,20 @@ namespace Localify
 
 						auto textCommon = UIParts::GetOptionItemSimpleWithButtonTextCommon("character_system_text_caption_outline_size");
 						auto& sizeValue = config::config_document[IL2CPP_STRING("characterSystemTextCaptionOutlineSize")];
-						UIParts::SetTextCommonText(textCommon, (LocalifySettings::GetText("character_system_text_caption_outline_size") + il2cppstring(IL2CPP_STRING(": ")) + il2cppstring(sizeValue.GetString(), sizeValue.GetStringLength())).data());
-						UIParts::SetTextCommonOutlineSize(textCommon, size.data());
+						textCommon.text(il2cpp_string_new16((LocalifySettings::GetText("character_system_text_caption_outline_size") + il2cppstring(IL2CPP_STRING(": ")) + il2cppstring(sizeValue.GetString(), sizeValue.GetStringLength())).data()));
+						textCommon.OutlineSize(size.data());
 						NotificationManager::SetOutlineSize(size.data());
 					},
 					[](string name, il2cppstring value)
 					{
-						UIParts::SetTextCommonOutlineSize(UIParts::GetTextCommon(name.data()), value.data());
+						UIParts::GetTextCommon(name.data()).OutlineSize(value.data());
 					}
 				);
 			})
 		);
 
 		auto outlineColorTextCommon = UIParts::GetOptionItemSimpleWithButtonTextCommon("character_system_text_caption_outline_color");
-		UIParts::SetTextCommonOutlineColor(outlineColorTextCommon,
-			config::config_document[IL2CPP_STRING("characterSystemTextCaptionOutlineColor")].GetString());
+		outlineColorTextCommon.OutlineColor(config::config_document[IL2CPP_STRING("characterSystemTextCaptionOutlineColor")].GetString());
 
 		UIParts::SetOptionItemButtonAction("character_system_text_caption_outline_color", *([](Il2CppObject*)
 			{
@@ -1359,13 +1356,13 @@ namespace Localify
 
 						auto textCommon = UIParts::GetOptionItemSimpleWithButtonTextCommon("character_system_text_caption_outline_color");
 						auto& colorValue = config::config_document[IL2CPP_STRING("characterSystemTextCaptionOutlineColor")];
-						UIParts::SetTextCommonText(textCommon, (LocalifySettings::GetText("character_system_text_caption_outline_color") + il2cppstring(IL2CPP_STRING(": ")) + il2cppstring(colorValue.GetString(), colorValue.GetStringLength())).data());
-						UIParts::SetTextCommonOutlineColor(textCommon, color.data());
+						textCommon.text(il2cpp_string_new16((LocalifySettings::GetText("character_system_text_caption_outline_color") + il2cppstring(IL2CPP_STRING(": ")) + il2cppstring(colorValue.GetString(), colorValue.GetStringLength())).data()));
+						textCommon.OutlineColor(color.data());
 						NotificationManager::SetOutlineColor(color.data());
 					},
 					[](string name, il2cppstring value)
 					{
-						UIParts::SetTextCommonOutlineColor(UIParts::GetTextCommon(name.data()), value.data());
+						UIParts::GetTextCommon(name.data()).OutlineColor(value.data());
 					}
 				);
 			})
@@ -1476,7 +1473,7 @@ namespace Localify
 					il2cppstring pathU16 = result;
 					AddOrSetString(config::config_document, IL2CPP_STRING("persistentDataPath"), result);
 					auto textCommon = UIParts::GetTextCommon("persistent_data_path_detail_info");
-					UIParts::SetTextCommonText(textCommon, pathU16.data());
+					textCommon.text(il2cpp_string_new16(pathU16.data()));
 				}
 			})
 		);
@@ -1712,7 +1709,7 @@ namespace Localify
 					AddOrSet(config::config_document, IL2CPP_STRING("championsLiveResourceId"), value + 1);
 
 					auto textCommon = UIParts::GetOptionItemSimpleWithButtonTextCommon("champions_live_resource_id");
-					UIParts::SetTextCommonText(textCommon, (LocalifySettings::GetText("champions_live_resource_id") + il2cppstring(IL2CPP_STRING(": ")) + u8_il2cpp(MasterDB::GetChampionsResources()[config::config_document[IL2CPP_STRING("championsLiveResourceId")].GetInt() - 1])).data());
+					textCommon.text(il2cpp_string_new16((LocalifySettings::GetText("champions_live_resource_id") + il2cppstring(IL2CPP_STRING(": ")) + u8_il2cpp(MasterDB::GetChampionsResources()[config::config_document[IL2CPP_STRING("championsLiveResourceId")].GetInt() - 1])).data()));
 					});
 			}));
 
@@ -1733,7 +1730,7 @@ namespace Localify
 					AddOrSet(config::config_document, IL2CPP_STRING("championsLiveYear"), value + 2022);
 
 					auto textCommon = UIParts::GetOptionItemSimpleWithButtonTextCommon("champions_live_year");
-					UIParts::SetTextCommonText(textCommon, (LocalifySettings::GetText("champions_live_year") + il2cppstring(IL2CPP_STRING(": ")) + u8_il2cpp(to_string(config::config_document[IL2CPP_STRING("championsLiveYear")].GetInt()))).data());
+					textCommon.text(il2cpp_string_new16((LocalifySettings::GetText("champions_live_year") + il2cppstring(IL2CPP_STRING(": ")) + u8_il2cpp(to_string(config::config_document[IL2CPP_STRING("championsLiveYear")].GetInt()))).data()));
 					});
 			}));
 

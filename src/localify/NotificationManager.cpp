@@ -160,7 +160,7 @@ namespace Localify
 		il2cpp_field_set_value(_tweener, delayCompleteField, &delayComplete);
 
 		auto onCompleteField = il2cpp_class_get_field_from_name(_tweener->klass, "onComplete");
-		auto callback = CreateDelegateWithClass(il2cpp_symbols::get_class("DOTween.dll", "DG.Tweening", "TweenCallback"), notification, *([](Il2CppObject* _this)
+		auto callback = CreateDelegateWithClass(il2cpp_symbols::get_class("DOTween.dll", "DG.Tweening", "TweenCallback"), notification, *([](Il2CppObject* self)
 			{
 				auto gameObject = il2cpp_symbols::get_method_pointer<Il2CppObject * (*)(Il2CppObject*)>("UnityEngine.CoreModule.dll", "UnityEngine", "Component", "get_gameObject", 0)(notification);
 				if (gameObject)

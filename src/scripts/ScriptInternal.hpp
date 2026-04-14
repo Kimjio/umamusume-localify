@@ -5,6 +5,7 @@
 #include <iostream>
 #include <string>
 #include <cstdio>
+#include <chrono>
 #include <MinHook.h>
 
 #include "il2cpp/il2cpp_symbols.hpp"
@@ -578,6 +579,11 @@ inline Il2CppObject* GetCustomTMPFont()
 		return tmpFont ? tmpFont : GetCustomTMPFontFallback();
 	}
 	return GetCustomTMPFontFallback();
+}
+
+inline int64_t current_time() {
+	auto ms = chrono::duration_cast<chrono::milliseconds>(chrono::system_clock::now().time_since_epoch());
+	return ms.count();
 }
 
 #ifdef _MSC_VER

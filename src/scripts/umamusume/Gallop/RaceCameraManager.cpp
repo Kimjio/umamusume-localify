@@ -16,7 +16,7 @@ namespace
 	void* ChangeOrientationCoroutine_orig = nullptr;
 }
 
-static Il2CppObject* ChangeOrientationCoroutine_hook(Il2CppObject* _this, Gallop::LowResolutionCameraUtil::DrawDirection direction, bool isFade,
+static Il2CppObject* ChangeOrientationCoroutine_hook(Il2CppObject* self, Gallop::LowResolutionCameraUtil::DrawDirection direction, bool isFade,
 	Il2CppDelegate_t<void (*)(Gallop::LowResolutionCameraUtil::DrawDirection, bool)>* onChangeResolution)
 {
 	Gallop::LowResolutionCameraUtil::DrawDirection newDirection = direction;
@@ -27,7 +27,7 @@ static Il2CppObject* ChangeOrientationCoroutine_hook(Il2CppObject* _this, Gallop
 
 	return reinterpret_cast<Il2CppObject * (*)
 		(Il2CppObject*, Gallop::LowResolutionCameraUtil::DrawDirection, bool, Il2CppDelegate_t<void (*)(Gallop::LowResolutionCameraUtil::DrawDirection, bool)>*)>
-		(ChangeOrientationCoroutine_orig)(_this, newDirection, isFade, onChangeResolution);
+		(ChangeOrientationCoroutine_orig)(self, newDirection, isFade, onChangeResolution);
 }
 
 static void InitAddress()

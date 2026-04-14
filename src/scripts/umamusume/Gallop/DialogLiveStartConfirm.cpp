@@ -5,6 +5,8 @@
 
 #include "DialogManager.hpp"
 #include "Localize.hpp"
+#include "TextCommon.hpp"
+
 #include "scripts/UnityEngine.CoreModule/UnityEngine/GameObject.hpp"
 #include "scripts/UnityEngine.CoreModule/UnityEngine/ResourcesAPIINternal.hpp"
 #include "scripts/mscorlib/System/ValueTuple.hpp"
@@ -194,8 +196,8 @@ namespace Gallop
 				UnityEngine::GameObject radioButtonPortraitCloned = UnityEngine::Object::Internal_CloneSingle(radioButtonPortrait.gameObject());
 				UnityEngine::Object::Name(radioButtonPortraitCloned, il2cpp_string_new("RadioButtonFullPortrait"));
 
-				auto array = radioButtonPortraitCloned.GetComponentsInChildren(GetRuntimeType("umamusume.dll", "Gallop", "TextCommon"), false);
-				Localify::UIParts::SetTextCommonText(array->vector[0], Gallop::Localize::Get(Live6620008)->chars);
+				auto array = radioButtonPortraitCloned.GetComponentsInChildren(GetRuntimeType(ASSEMBLY_NAME, "Gallop", "TextCommon"), false);
+				Gallop::TextCommon(array->vector[0]).text(Gallop::Localize::Get(Live6620008));
 
 				Localify::UIParts::AddToLayout(radioRootTransform, { radioButtonPortraitCloned }, false);
 

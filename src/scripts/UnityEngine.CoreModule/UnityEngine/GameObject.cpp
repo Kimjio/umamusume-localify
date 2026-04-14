@@ -6,6 +6,8 @@
 
 namespace
 {
+	Il2CppClass* GameObject_klass;
+
 	void* Internal_CreateGameObject_addr = nullptr;
 
 	void* Internal_AddComponentWithType_addr = nullptr;
@@ -111,6 +113,7 @@ static void TryGetComponentFastPath_hook(Il2CppObject* self, Il2CppObject* runti
 
 static void InitAddress()
 {
+	GameObject_klass = il2cpp_symbols::get_class(ASSEMBLY_NAME, "UnityEngine", "GameObject");
 	Internal_CreateGameObject_addr = il2cpp_resolve_icall("UnityEngine.GameObject::Internal_CreateGameObject()");
 	Internal_AddComponentWithType_addr = il2cpp_resolve_icall("UnityEngine.GameObject::Internal_AddComponentWithType()");
 	GetComponentFastPath_addr = il2cpp_resolve_icall("UnityEngine.GameObject::GetComponentFastPath()");
@@ -143,9 +146,8 @@ namespace UnityEngine
 {
 	GameObject::GameObject(Il2CppString* name) : Object::Object(nullptr)
 	{
-		auto gameObject = il2cpp_object_new(il2cpp_symbols::get_class(ASSEMBLY_NAME, "UnityEngine", "GameObject"));
-		Internal_CreateGameObject(gameObject, name);
-		instance = gameObject;
+		instance = il2cpp_object_new(GameObject_klass);
+		Internal_CreateGameObject(instance, name);
 	}
 
 	GameObject GameObject::Find(Il2CppString* name)

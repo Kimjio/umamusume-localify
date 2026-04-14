@@ -3,6 +3,7 @@
 
 #include "ScreenOrientation.hpp"
 #include "Resolution.hpp"
+#include "FullScreenMode.hpp"
 
 namespace UnityEngine
 {
@@ -24,5 +25,7 @@ namespace UnityEngine
 		static Resolution currentResolution();
 
 		static void RequestOrientation(ScreenOrientation orientation);
+
+		static void SetResolution_Injected(int width, int height, UnityEngine::FullScreenMode fullscreenMode, RefreshRate* perferredRefreshRate);
 	};
 }

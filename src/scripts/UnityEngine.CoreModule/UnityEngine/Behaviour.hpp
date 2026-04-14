@@ -12,6 +12,8 @@ namespace UnityEngine
 
 		void enabled(bool value);
 
+		bool isActiveAndEnabled();
+
 		using Component::Component;
 	};
 }
