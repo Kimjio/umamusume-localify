@@ -975,12 +975,12 @@ namespace
 				int height = Gallop::Screen::Height();
 
 				if (_currentBgWidth < _currentBgHeight)
-					{
+				{
 					_currentBgHeight = height;
 					_currentBgWidth = static_cast<int>(_currentBgHeight * ratio);
-			}
+				}
 				else
-			{
+				{
 					_currentBgWidth = width;
 					_currentBgHeight = static_cast<int>(_currentBgWidth / ratio);
 				}
@@ -4120,9 +4120,9 @@ namespace
 
 					static bool fullScreenFl = false;
 
-						fullScreenFl = !fullScreenFl;
+					fullScreenFl = !fullScreenFl;
 
-						auto refreshRate = RefreshRate{ 0, 1 };
+					auto refreshRate = RefreshRate{ 0, 1 };
 					UnityEngine::Screen::SetResolution_Injected(r.width, r.height, fullScreenFl ? UnityEngine::FullScreenMode::FullScreenWindow : UnityEngine::FullScreenMode::Windowed, &refreshRate);
 
 					return TRUE;
@@ -4263,7 +4263,7 @@ namespace
 					}))->delegate;
 
 				il2cpp_symbols::get_method_pointer<Il2CppObject* (*)(float, Il2CppDelegate*, bool)>("DOTween.dll", "DG.Tweening", "DOVirtual", "DelayedCall", 3)(0.01, callback, true);
-		}
+				}
 			);
 		}
 
@@ -4391,7 +4391,7 @@ namespace
 			auto tapEffectController = GetSingletonInstance(il2cpp_symbols::get_class("umamusume.dll", "Gallop", "TapEffectController"));
 			if (tapEffectController)
 			{
-			il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*)>(tapEffectController->klass, "Disable", 0)->methodPointer(tapEffectController);
+				il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*)>(tapEffectController->klass, "Disable", 0)->methodPointer(tapEffectController);
 			}
 
 			int width = rect->right - rect->left;
@@ -4465,9 +4465,9 @@ namespace
 					{
 						minSize = min(config::initial_width, config::initial_height);
 						maxSize = max(config::initial_width, config::initial_height);
-				}
-				else
-				{
+					}
+					else
+					{
 						auto display = UnityEngine::Display::main();
 						minSize = min(display.systemWidth(), display.systemHeight());
 						maxSize = max(display.systemWidth(), display.systemHeight());
@@ -4523,9 +4523,9 @@ namespace
 	}
 
 	void* TextMeshProUguiCommon_Awake_orig = nullptr;
-	void TextMeshProUguiCommon_Awake_hook(Il2CppObject* _this)
+	void TextMeshProUguiCommon_Awake_hook(Il2CppObject* self)
 	{
-		reinterpret_cast<decltype(TextMeshProUguiCommon_Awake_hook)*>(TextMeshProUguiCommon_Awake_orig)(_this);
+		reinterpret_cast<decltype(TextMeshProUguiCommon_Awake_hook)*>(TextMeshProUguiCommon_Awake_orig)(self);
 		auto customFont = GetCustomTMPFont();
 
 		if (!customFont)
@@ -4533,62 +4533,49 @@ namespace
 			return;
 		}
 
+		il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, Il2CppObject*)>(self->klass, "set_font", 1)->methodPointer(self, customFont);
+		il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, bool)>(self->klass, "set_enableWordWrapping", 1)->methodPointer(self, false);
+
 		auto customFontMaterialField = il2cpp_class_get_field_from_name(customFont->klass, "material");
 		Il2CppObject* customFontMaterial;
 		il2cpp_field_get_value(customFont, customFontMaterialField, &customFontMaterial);
+		il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, Il2CppObject*)>(self->klass, "set_fontSharedMaterial", 1)->methodPointer(self, customFontMaterial);
 
-		auto SetFloat = il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, Il2CppString*, float)>(customFontMaterial->klass, "SetFloat", 2)->methodPointer;
-		auto SetColor = il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, Il2CppString*, UnityEngine::Color)>(customFontMaterial->klass, "SetColor", 2)->methodPointer;
-
-		auto origOutlineWidth = il2cpp_class_get_method_from_name_type<float (*)(Il2CppObject*)>(_this->klass, "get_outlineWidth", 0)->methodPointer(_this);
+		auto origOutlineWidth = il2cpp_class_get_method_from_name_type<float (*)(Il2CppObject*)>(self->klass, "get_outlineWidth", 0)->methodPointer(self);
 
 		auto outlineColorDictField = il2cpp_class_get_field_from_name(il2cpp_symbols::get_class("umamusume.dll", "Gallop", "ColorPreset"), "OutlineColorDictionary");
 		Il2CppObject* outlineColorDict;
 		il2cpp_field_static_get_value(outlineColorDictField, &outlineColorDict);
-		auto colorEnum = il2cpp_class_get_method_from_name_type<int (*)(Il2CppObject*)>(_this->klass, "get_OutlineColor", 0)->methodPointer(_this);
+		auto colorEnum = il2cpp_class_get_method_from_name_type<uint32_t(*)(Il2CppObject*)>(self->klass, "get_OutlineColor", 0)->methodPointer(self);
 
 		auto entriesField = il2cpp_class_get_field_from_name(outlineColorDict->klass, "_entries");
 		if (!entriesField)
 		{
 			entriesField = il2cpp_class_get_field_from_name(outlineColorDict->klass, "entries");
 		}
-		Il2CppArraySize* entries;
+		Il2CppArraySize_t<System::Collections::Generic::Dictionary<uint32_t, UnityEngine::Color32>::Entry>* entries;
 		il2cpp_field_get_value(outlineColorDict, entriesField, &entries);
 
-		auto colorType = GetRuntimeType("umamusume.dll", "Gallop", "OutlineColorType");
-
-		auto color32 = 0xFFFFFFFF;
+		UnityEngine::Color32 color32{};
 		for (int i = 0; i < entries->max_length; i++)
 		{
-			auto entry = reinterpret_cast<uint64_t>(entries->vector[i]);
-			auto color = (entry & 0xFFFFFFFF00000000) >> 32;
-			auto key = entry & 0xFFFFFFFF;
-			if (key == colorEnum && (color != 0xFFFFFFFF && color != 0))
+			auto entry = entries->vector[i];
+			if (entry.key == colorEnum)
 			{
-				color32 = color;
-				break;
-			}
-			auto enumName = GetEnumName(colorType, colorEnum)->chars;
-			if (enumName == il2cppstring(IL2CPP_STRING("White")) || enumName == il2cppstring(IL2CPP_STRING("Black")))
-			{
-				color32 = color;
+				color32 = entry.value;
 				break;
 			}
 		}
 
-		float a = ((color32 & 0xFF000000) >> 24) / static_cast<float>(0xff);
-		float b = ((color32 & 0xFF0000) >> 16) / static_cast<float>(0xff);
-		float g = ((color32 & 0xFF00) >> 8) / static_cast<float>(0xff);
-		float r = (color32 & 0xFF) / static_cast<float>(0xff);
+		float a = color32.a / static_cast<float>(0xff);
+		float b = color32.b / static_cast<float>(0xff);
+		float g = color32.g / static_cast<float>(0xff);
+		float r = color32.r / static_cast<float>(0xff);
+
 		auto origOutlineColor = UnityEngine::Color{ r, g, b, a };
 
-		SetFloat(customFontMaterial, il2cpp_string_new("_OutlineWidth"), origOutlineWidth);
-		SetColor(customFontMaterial, il2cpp_string_new("_OutlineColor"), origOutlineColor);
-
-		il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, int)>(_this->klass, "set_fontStyle", 1)->methodPointer(_this, 1);
-		il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, Il2CppObject*)>(_this->klass, "set_font", 1)->methodPointer(_this, customFont);
-		il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, bool)>(_this->klass, "set_enableWordWrapping", 1)->methodPointer(_this, false);
-		il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, bool, bool)>(_this->klass, "ForceMeshUpdate", 2)->methodPointer(_this, true, false);
+		il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, Il2CppString*, float)>(customFontMaterial->klass, "SetFloat", 2)->methodPointer(customFontMaterial, il2cpp_string_new("_OutlineWidth"), origOutlineWidth);
+		il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, Il2CppString*, UnityEngine::Color)>(customFontMaterial->klass, "SetColor", 2)->methodPointer(customFontMaterial, il2cpp_string_new("_OutlineColor"), origOutlineColor);
 	}
 
 	void InitOptionLayout(Il2CppObject* parentRectTransform)
@@ -5039,15 +5026,15 @@ namespace
 		int height1 = Gallop::Screen::Height();
 
 		if (width < height)
-				{
+		{
 			width = width1;
 			height = static_cast<int>(width / ratio);
-				}
+		}
 		else
-			{
+		{
 			height = height1;
 			width = static_cast<int>(height * ratio);
-			}
+		}
 
 		reinterpret_cast<decltype(BGManager_SetMainBg_hook)*>(BGManager_SetMainBg_orig)(self, path, width, height, 0, 0, true);
 	}
@@ -5056,7 +5043,7 @@ namespace
 	void BGManager_SetMainBgLocalPos_hook(Il2CppObject* self, UnityEngine::Vector2 pos)
 	{
 		// no-op
-		}
+	}
 
 	void* CharaPropRendererAccessor_SetTexture_orig = nullptr;
 	void CharaPropRendererAccessor_SetTexture_hook(Il2CppObject* self, Il2CppObject* texture)
@@ -5067,12 +5054,12 @@ namespace
 				UnityEngine::Object::Name(texture),
 				GetRuntimeType("UnityEngine.CoreModule.dll", "UnityEngine", "Texture2D"));
 			if (newTexture)
-		{
+			{
 				il2cpp_symbols::get_method_pointer<void (*)(Il2CppObject*, int)>("UnityEngine.CoreModule.dll", "UnityEngine", "Object", "set_hideFlags", 1)
 					(newTexture, 32);
 				reinterpret_cast<decltype(CharaPropRendererAccessor_SetTexture_hook)*>(CharaPropRendererAccessor_SetTexture_orig)(self, newTexture);
 				return;
-		}
+			}
 		}
 		reinterpret_cast<decltype(CharaPropRendererAccessor_SetTexture_hook)*>(CharaPropRendererAccessor_SetTexture_orig)(self, texture);
 	}
@@ -5083,7 +5070,7 @@ namespace
 		if (!config::freeform_window)
 		{
 			reinterpret_cast<decltype(DeviceOrientationGuide_Show_hook)*>(DeviceOrientationGuide_Show_orig)(self, isTargetOrientationPortrait, target);
-	}
+		}
 	}
 
 	CriWare::CriMana::MovieInfo* (*MoviePlayerBase_get_MovieInfo)(Il2CppObject* self);
@@ -5111,7 +5098,7 @@ namespace
 	void LiveTheaterCharaSelect_CheckSwapChara_hook(Il2CppObject* self, int index, int oldCharaId, int oldDressId, int oldDressColorId, int oldDressId2, int oldDressColorId2, int newCharaId)
 	{
 
-			}
+	}
 
 	discord::Core* discord;
 
@@ -5461,16 +5448,16 @@ namespace
 		{
 			if (auto binData = il2cpp_symbols::get_class("uncheatercsd.dll", "Uncheater", "SystemBins64"))
 			{
-			auto binArrayField = il2cpp_class_get_field_from_name(binData->klass, "UNCHEATER_DATA");
-			auto array = il2cpp_array_new(il2cpp_defaults.object_class, 128);
+				auto binArrayField = il2cpp_class_get_field_from_name(binData->klass, "UNCHEATER_DATA");
+				auto array = il2cpp_array_new(il2cpp_defaults.object_class, 128);
 
-			auto byteArray = il2cpp_array_new(il2cpp_defaults.byte_class, 0);
+				auto byteArray = il2cpp_array_new(il2cpp_defaults.byte_class, 0);
 
-			il2cpp_array_setref(array, 8, byteArray);
-			il2cpp_array_setref(array, 9, byteArray);
+				il2cpp_array_setref(array, 8, byteArray);
+				il2cpp_array_setref(array, 9, byteArray);
 
-			il2cpp_field_static_set_value(binArrayField, array);
-		}
+				il2cpp_field_static_set_value(binArrayField, array);
+			}
 		}
 
 		if (!mh_inited)
@@ -5831,7 +5818,7 @@ namespace
 						Gallop::Screen::OriginalScreenHeight(height);
 						Gallop::StandaloneWindowResize::IsVirt(isVirt);
 					}
-					}
+				}
 
 				if (sceneName == IL2CPP_STRING("Home"))
 				{
