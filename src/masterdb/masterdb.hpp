@@ -287,4 +287,50 @@ namespace MasterDB
 
 		return false;
 	}
+
+	inline string GetLiveTitleColorTop(int musicId)
+	{
+		if (!masterDB)
+		{
+			InitMasterDB();
+		}
+
+		auto query = R"(SELECT title_color_top FROM live_data WHERE "music_id" = ?1)"s;
+		sqlite3_stmt* stmt;
+		sqlite3_prepare_v2(masterDB, query.data(), query.size(), &stmt, nullptr);
+
+		sqlite3_bind_int(stmt, 1, musicId);
+
+		while (sqlite3_step(stmt) == SQLITE_ROW)
+		{
+			string titleColorTop = reinterpret_cast<const char*>(sqlite3_column_text(stmt, 0));
+			sqlite3_finalize(stmt);
+			return titleColorTop;
+		}
+		sqlite3_finalize(stmt);
+		return "";
+	}
+
+	inline string GetLiveTitleColorBottom(int musicId)
+	{
+		if (!masterDB)
+		{
+			InitMasterDB();
+		}
+
+		auto query = R"(SELECT title_color_bottom FROM live_data WHERE "music_id" = ?1)"s;
+		sqlite3_stmt* stmt;
+		sqlite3_prepare_v2(masterDB, query.data(), query.size(), &stmt, nullptr);
+
+		sqlite3_bind_int(stmt, 1, musicId);
+
+		while (sqlite3_step(stmt) == SQLITE_ROW)
+		{
+			string titleColorTop = reinterpret_cast<const char*>(sqlite3_column_text(stmt, 0));
+			sqlite3_finalize(stmt);
+			return titleColorTop;
+		}
+		sqlite3_finalize(stmt);
+		return "";
+	}
 }

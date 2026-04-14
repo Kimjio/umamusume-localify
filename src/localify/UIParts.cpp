@@ -12,6 +12,8 @@
 #include "scripts/UnityEngine.CoreModule/UnityEngine/RenderTexture.hpp"
 #include "scripts/UnityEngine.CoreModule/UnityEngine/Vector4.hpp"
 
+#include "masterdb/masterdb.hpp"
+
 #include "string_utils.hpp"
 
 using namespace std;
@@ -769,6 +771,81 @@ namespace Localify
 					UnityEngine::Object::Name(transform)->chars == il2cppstring(IL2CPP_STRING("Line")))
 				{
 					destroyTargets.emplace_back(transform);
+				}
+				if (UnityEngine::Object::Name(transform)->chars == il2cppstring(IL2CPP_STRING("Fill")))
+				{
+					auto imageCommonArray = UnityEngine::Transform(transform).gameObject().GetComponentsInChildren(GetRuntimeType("umamusume.dll", "Gallop", "ImageCommon"), false);
+
+					for (int j = 0; j < imageCommonArray->max_length; j++)
+					{
+						auto imageCommon = imageCommonArray->vector[j];
+						Il2CppObject* sprite = il2cpp_class_get_method_from_name_type<Il2CppObject * (*)(Il2CppObject*)>(imageCommon->klass, "get_sprite", 0)->methodPointer(imageCommon);
+
+						if (sprite)
+						{
+							auto loadSettings = il2cpp_symbols::get_method_pointer<Il2CppObject * (*)()>("umamusume.dll", "Gallop.Live", "Director", "get_LoadSettings", IgnoreNumberOfArguments)();
+							auto musicId = il2cpp_class_get_method_from_name_type<int (*)(Il2CppObject*)>(loadSettings->klass, "get_MusicId", 0)->methodPointer(loadSettings);
+
+							string topColor = MasterDB::GetLiveTitleColorTop(musicId);
+							string bottomColor = MasterDB::GetLiveTitleColorBottom(musicId);
+							UnityEngine::Color titleColorTop;
+							UnityEngine::Color titleColorBottom;
+
+							auto TryParseHtmlString = il2cpp_symbols::get_method_pointer<bool (*)(Il2CppString*, UnityEngine::Color*)>("UnityEngine.CoreModule.dll", "UnityEngine", "ColorUtility", "TryParseHtmlString", 2);
+							if (TryParseHtmlString(il2cpp_string_new(topColor.data()), &titleColorTop) && TryParseHtmlString(il2cpp_string_new(bottomColor.data()), &titleColorBottom))
+							{
+								auto texture = il2cpp_class_get_method_from_name_type<Il2CppObject * (*)(Il2CppObject*)>(sprite->klass, "get_texture", 0)->methodPointer(sprite);
+
+								int width = il2cpp_class_get_method_from_name_type<int (*)(Il2CppObject*)>(texture->klass, "get_width", 0)->methodPointer(texture);
+								int height = il2cpp_class_get_method_from_name_type<int (*)(Il2CppObject*)>(texture->klass, "get_height", 0)->methodPointer(texture);
+
+								auto renderTexture = UnityEngine::RenderTexture::GetTemporary(width, height);
+
+								il2cpp_symbols::get_method_pointer<void (*)(Il2CppObject*, Il2CppObject*)>("UnityEngine.CoreModule.dll", "UnityEngine", "Graphics", "Blit", 2)(texture, renderTexture);
+
+								auto previous = UnityEngine::RenderTexture::GetActive();
+
+								UnityEngine::RenderTexture::SetActive(renderTexture);
+
+								auto readableTexture = il2cpp_object_new(il2cpp_symbols::get_class("UnityEngine.CoreModule.dll", "UnityEngine", "Texture2D"));
+								il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, int, int)>(readableTexture->klass, ".ctor", 2)->methodPointer(readableTexture, width, height);
+
+								il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, UnityEngine::Rect, int, int)>(readableTexture->klass, "ReadPixels", 3)->methodPointer(readableTexture, UnityEngine::Rect{ 0, 0, static_cast<float>(width), static_cast<float>(height) }, 0, 0);
+								il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*)>(readableTexture->klass, "Apply", 0)->methodPointer(readableTexture);
+
+								UnityEngine::RenderTexture::SetActive(previous);
+
+								UnityEngine::RenderTexture::ReleaseTemporary(renderTexture);
+
+								auto pixels = il2cpp_class_get_method_from_name_type<Il2CppArraySize_t<UnityEngine::Color>*(*)(Il2CppObject*)>(readableTexture->klass, "GetPixels", 0)->methodPointer(readableTexture);
+
+								for (int k = 0; k < pixels->max_length; k++)
+								{
+									auto color = pixels->vector[k];
+									il2cpp_array_setref_type(pixels, UnityEngine::Color, k, UnityEngine::Color(1, 1, 1, color.a));
+								}
+
+								auto newTexture = il2cpp_object_new(il2cpp_symbols::get_class("UnityEngine.CoreModule.dll", "UnityEngine", "Texture2D"));
+								il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, int, int)>(newTexture->klass, ".ctor", 2)->methodPointer(newTexture, width, height);
+								il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, Il2CppArraySize_t<UnityEngine::Color>*)>(newTexture->klass, "SetPixels", 1)->methodPointer(newTexture, pixels);
+								il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*)>(newTexture->klass, "Apply", 0)->methodPointer(newTexture);
+
+								auto rect = il2cpp_class_get_method_from_name_type<UnityEngine::Rect(*)(Il2CppObject*)>(sprite->klass, "get_rect", 0)->methodPointer(sprite);
+								auto pivot = il2cpp_class_get_method_from_name_type<UnityEngine::Vector2(*)(Il2CppObject*)>(sprite->klass, "get_pivot", 0)->methodPointer(sprite);
+								auto pixelsPerUnit = il2cpp_class_get_method_from_name_type<float (*)(Il2CppObject*)>(sprite->klass, "get_pixelsPerUnit", 0)->methodPointer(sprite);
+								auto border = il2cpp_class_get_method_from_name_type<UnityEngine::Vector4(*)(Il2CppObject*)>(sprite->klass, "get_border", 0)->methodPointer(sprite);
+
+								auto newSprite = il2cpp_symbols::get_method_pointer<Il2CppObject * (*)(Il2CppObject*, UnityEngine::Rect, UnityEngine::Vector2, float, uint32_t, int, UnityEngine::Vector4, bool)>("UnityEngine.CoreModule.dll", "UnityEngine", "Sprite", "Create", 8)
+									(newTexture, rect, pivot, pixelsPerUnit, 0, 0, border, false);
+
+								il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, Il2CppObject*)>(imageCommon->klass, "set_sprite", 1)->methodPointer(imageCommon, newSprite);
+
+								auto color = il2cpp_symbols::get_method_pointer<UnityEngine::Color(*)(UnityEngine::Color, UnityEngine::Color, float)>("UnityEngine.CoreModule.dll", "UnityEngine", "Color", "Lerp", 3)(titleColorTop, titleColorBottom, 0.5f);
+
+								il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, UnityEngine::Color)>(imageCommon->klass, "SetMulColor", 1)->methodPointer(imageCommon, color);
+							}
+						}
+					}
 				}
 			}
 		}
