@@ -83,6 +83,7 @@ namespace config
 	extern il2cppstring replace_text_db_path;
 	extern il2cppstring replace_timeline_path;
 	extern il2cppstring replace_race_text_asset_path;
+	extern il2cppstring replace_announce_event_log_path;
 	extern bool character_system_text_caption;
 	extern int character_system_text_caption_line_char_count;
 	extern int character_system_text_caption_font_size;

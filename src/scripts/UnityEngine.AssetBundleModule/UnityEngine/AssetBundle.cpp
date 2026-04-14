@@ -45,6 +45,7 @@ namespace
 	Il2CppClass* MaterialClass;
 	Il2CppClass* FontClass;
 
+	Il2CppClass* AnnounceEventLogUIAssetClass;
 	Il2CppClass* StoryTimelineDataClass;
 	Il2CppClass* StoryRaceTextAssetClass;
 }
@@ -710,6 +711,65 @@ static void ReplaceFontTexture(Il2CppObject* font)
 	}
 }
 
+static void ReplaceAnnounceEventLogData(Il2CppObject* announceEventLogUIAsset)
+{
+	auto objectName = UnityEngine::Object::Name(announceEventLogUIAsset);
+
+	il2cppstring announceEventLogAssetPath = config::replace_announce_event_log_path;
+	if (filesystem::path(announceEventLogAssetPath.data()).is_relative())
+	{
+		announceEventLogAssetPath.insert(0, filesystem::current_path().IL2CPP_BASIC_STRING().append(IL2CPP_STRING("/")));
+	}
+
+	auto filePath = filesystem::path(announceEventLogAssetPath + IL2CPP_STRING("/") + objectName->chars + IL2CPP_STRING(".msgpack"));
+
+	auto object = MsgPack();
+	if (filesystem::exists(filePath))
+	{
+		ifstream fileStream(filePath, ios::in | ios::binary);
+		object = MsgPack::parse(fileStream);
+	}
+
+	MsgPack::array ReplacementDataElementArray = object.is_null() ? MsgPack::array{} : object["DataArray"].array_items();
+
+	auto AnnounceEventLogUIAsset_DataArrayField = il2cpp_class_get_field_from_name(announceEventLogUIAsset->klass, "DataArray");
+
+	typedef struct
+	{
+		int CharaId;
+		Il2CppString* Name;
+		Il2CppString* Text;
+	} AnnounceEventLogUIAsset;
+
+	Il2CppArraySize_t<AnnounceEventLogUIAsset>* DataArray;
+	il2cpp_field_get_value(announceEventLogUIAsset, AnnounceEventLogUIAsset_DataArrayField, &DataArray);
+
+	auto DataArraySize = object.is_null() ? DataArray->max_length : ReplacementDataElementArray.size();
+
+	for (size_t i = 0; i < DataArraySize; i++)
+	{
+		MsgPack::object ReplacementElement = object.is_null() ? MsgPack::object{} : ReplacementDataElementArray[i].object_items();
+		auto data = DataArray->vector[i];
+
+		Il2CppString* Name;
+		Il2CppString* Text;
+		if (object.is_null())
+		{
+			Name = data.Name;
+			Text = data.Text;
+		}
+		else
+		{
+			Name = il2cpp_string_new(ReplacementElement["Name"].string_value().data());
+			Text = il2cpp_string_new(ReplacementElement["Text"].string_value().data());
+		}
+
+		AnnounceEventLogUIAsset newData = { data.CharaId, local::get_localized_string(Name), local::get_localized_string(Text) };
+
+		il2cpp_array_setref_type(DataArray, AnnounceEventLogUIAsset, i, newData);
+	}
+}
+
 static void ReplaceTimelineData(Il2CppObject* timelineData)
 {
 	auto objectName = UnityEngine::Object::Name(timelineData);
@@ -939,7 +999,7 @@ static void ReplaceRaceTextAssetData(Il2CppObject* raceTextAssetData)
 		auto key = textData->vector[i];
 
 		auto textField = il2cpp_class_get_field_from_name(key->klass, "text");
-		
+
 		Il2CppString* text;
 		if (object.is_null())
 		{
@@ -1078,6 +1138,11 @@ static Il2CppObject* LoadAsset_Internal_hook(Il2CppObject* self, Il2CppString* n
 		ReplaceFontTexture(obj);
 	}
 
+	if (obj->klass == AnnounceEventLogUIAssetClass)
+	{
+		ReplaceAnnounceEventLogData(obj);
+	}
+
 	if (obj->klass == StoryTimelineDataClass)
 	{
 		ReplaceTimelineData(obj);
@@ -1166,6 +1231,7 @@ static void InitAddress()
 	GameObjectClass = il2cpp_symbols::get_class("UnityEngine.CoreModule.dll", "UnityEngine", "GameObject");
 	MaterialClass = il2cpp_symbols::get_class("UnityEngine.CoreModule.dll", "UnityEngine", "Material");
 	FontClass = il2cpp_symbols::get_class("UnityEngine.TextRenderingModule.dll", "UnityEngine", "Font");
+	AnnounceEventLogUIAssetClass = il2cpp_symbols::get_class("umamusume.dll", "Gallop", "AnnounceEventLogUIAsset");
 	StoryTimelineDataClass = il2cpp_symbols::get_class("umamusume.dll", "Gallop", "StoryTimelineData");
 	StoryRaceTextAssetClass = il2cpp_symbols::get_class("umamusume.dll", "Gallop", "StoryRaceTextAsset");
 }

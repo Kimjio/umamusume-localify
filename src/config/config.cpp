@@ -42,6 +42,7 @@ namespace config
 	il2cppstring replace_text_db_path;
 	il2cppstring replace_timeline_path;
 	il2cppstring replace_race_text_asset_path;
+	il2cppstring replace_announce_event_log_path;
 	bool character_system_text_caption = false;
 	int character_system_text_caption_line_char_count = 26;
 	int character_system_text_caption_font_size = 50;
@@ -307,6 +308,8 @@ if (document.HasMember(IL2CPP_STRING(_name_)) && document[IL2CPP_STRING(_name_)]
 			GetValue("replaceTimelinePath", String, replace_timeline_path);
 
 			GetValue("replaceRaceTextAssetPath", String, replace_race_text_asset_path);
+
+			GetValue("replaceAnnounceEventLogPath", String, replace_announce_event_log_path);
 
 			GetValue("characterSystemTextCaption", Bool, character_system_text_caption);
 
