@@ -445,19 +445,6 @@ namespace LocalifySettings
 			return IL2CPP_STRING("CySpringネイティブライブラリの無効化");
 		}
 
-		if (id == "cyspring_disable_native_info")
-		{
-			if (isKor)
-			{
-				return IL2CPP_STRING("CySpring 네이티브 라이브러리를 사용하지 않도록 설정합니다. CySpring 관련 오류가 발생할 때 이 옵션을 켜보세요.");
-			}
-			if (isEng)
-			{
-				return IL2CPP_STRING("Set not to use the CySpring native library. If you encounter CySpring-related errors, try turning on this option.");
-			}
-			return IL2CPP_STRING("CySpring関連のエラーが発生したときにこのオプションをオンにしてみてください。");
-		}
-
 		if (id == "cyspring_mono_uncap_frame_scale")
 		{
 			if (isKor)
