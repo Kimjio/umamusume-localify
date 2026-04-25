@@ -18,7 +18,7 @@ namespace Gallop
 			Il2CppString* _url();
 			bool _isVueJs();
 
-			using UnityEngine::Object::Object;
+			using Object::Object;
 		};
 
 		void Open(Il2CppString* url, Il2CppObject* dialogData, Il2CppDelegate* onLoadedCallback = nullptr, Il2CppDelegate* onErrorCallback = nullptr, bool isDirect = false);

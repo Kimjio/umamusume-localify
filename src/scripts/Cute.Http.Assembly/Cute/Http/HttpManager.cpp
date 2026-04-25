@@ -54,10 +54,3 @@ STATIC
 	il2cpp_symbols::init_callbacks.emplace_back(InitAddress);
 	il2cpp_symbols::init_callbacks.emplace_back(HookMethods);
 }
-
-namespace Cute
-{
-	namespace Http
-	{
-	}
-}

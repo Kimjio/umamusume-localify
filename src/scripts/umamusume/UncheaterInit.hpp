@@ -8,6 +8,6 @@ namespace
 	class UncheaterInit : UnityEngine::MonoBehaviour
 	{
 	public:
-		using UnityEngine::MonoBehaviour::MonoBehaviour;
+		using MonoBehaviour::MonoBehaviour;
 	};
 }

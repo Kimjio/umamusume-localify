@@ -1,12 +1,6 @@
 #pragma once
 
-namespace DG
+namespace DG::Tweening::Core
 {
-	namespace Tweening
-	{
-		namespace Core
-		{
-			class TweenManager {};
-		}
-	}
+	class TweenManager {};
 }

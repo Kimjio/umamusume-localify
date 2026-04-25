@@ -1,21 +1,18 @@
 #pragma once
 #include "scripts/UnityEngine.CoreModule/UnityEngine/Object.hpp"
 
-namespace UnityEngine
+namespace UnityEngine::EventSystems
 {
-	namespace EventSystems
+	class PointerEventData : public Object
 	{
-		class PointerEventData : public Object
+	public:
+		enum class InputButton
 		{
-		public:
-			enum class InputButton
-			{
-				Left,
-				Right,
-				Middle
-			};
-
-			using Object::Object;
+			Left,
+			Right,
+			Middle
 		};
-	}
+
+		using Object::Object;
+	};
 }

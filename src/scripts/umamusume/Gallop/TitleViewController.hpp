@@ -15,6 +15,6 @@ namespace Gallop
 		static string viewerId;
 		static string onetimeToken;
 
-		using UnityEngine::MonoBehaviour::MonoBehaviour;
+		using MonoBehaviour::MonoBehaviour;
 	};
 }

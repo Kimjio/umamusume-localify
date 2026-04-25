@@ -1,14 +1,11 @@
 #pragma once
 #include "Graphic.hpp"
 
-namespace UnityEngine
+namespace UnityEngine::UI
 {
-	namespace UI
+	class MaskableGraphic abstract : public Graphic
 	{
-		class MaskableGraphic abstract : public Graphic
-		{
-		public:
-			using Graphic::Graphic;
-		};
-	}
+	public:
+		using Graphic::Graphic;
+	};
 }

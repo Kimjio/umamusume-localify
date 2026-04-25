@@ -6,6 +6,6 @@ namespace Gallop
 	class FriendViewController : public UnityEngine::Object
 	{
 	public:
-		using UnityEngine::Object::Object;
+		using Object::Object;
 	};
 }

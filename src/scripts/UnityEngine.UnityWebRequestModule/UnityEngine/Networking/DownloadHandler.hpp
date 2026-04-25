@@ -1,14 +1,11 @@
 #pragma once
 #include "scripts/UnityEngine.CoreModule/UnityEngine/Object.hpp"
 
-namespace UnityEngine
+namespace UnityEngine::Networking
 {
-	namespace Networking
+	class DownloadHandler : public UnityEngine::Object
 	{
-		class DownloadHandler : public UnityEngine::Object
-		{
-		public:
-			using Object::Object;
-		};
-	}
+	public:
+		using Object::Object;
+	};
 }

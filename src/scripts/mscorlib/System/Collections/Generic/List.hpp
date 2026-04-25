@@ -1,25 +1,19 @@
 #pragma once
 #include "il2cpp/il2cpp_symbols.hpp"
 
-namespace System
+namespace System::Collections::Generic
 {
-	namespace Collections
+	template<typename T>
+	class List
 	{
-		namespace Generic
+	public:
+		struct Enumerator
 		{
-			template<typename T>
-			class List
-			{
-			public:
-				struct Enumerator
-				{
-				public:
-					Il2CppObject* list;
-					int index;
-					int version;
-					T current;
-				};
-			};
-		}
-	}
+		public:
+			Il2CppObject* list;
+			int index;
+			int version;
+			T current;
+		};
+	};
 }

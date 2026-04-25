@@ -50,9 +50,9 @@ static void GameSystem_InitializeApplication_hook()
 		}
 	}
 
-	il2cpp_symbols::call_late_init_callbacks();
-
 	reinterpret_cast<decltype(GameSystem_InitializeApplication_hook)*>(GameSystem_InitializeApplication_orig)();
+
+	il2cpp_symbols::call_late_init_callbacks();
 }
 
 static void InitAddress()

@@ -1,31 +1,25 @@
 #pragma once
 
-namespace CodeStage
+namespace CodeStage::AntiCheat::ObscuredTypes
 {
-	namespace AntiCheat
+	struct ObscuredBool
 	{
-		namespace ObscuredTypes
+		bool GetDecrypted() const
 		{
-			struct ObscuredBool
+			char key = currentCryptoKey;
+			if (!key)
 			{
-				bool GetDecrypted() const
-				{
-					char key = currentCryptoKey;
-					if (!key)
-					{
-						key = 9;
-					}
+				key = 9;
+			}
 
-					return (hiddenValue ^ key) != 181;
-				}
-
-			private:
-				char currentCryptoKey;
-				int hiddenValue;
-				bool inited;
-				bool fakeValue;
-				bool fakeValueActive;
-			};
+			return (hiddenValue ^ key) != 181;
 		}
-	}
+
+	private:
+		char currentCryptoKey;
+		int hiddenValue;
+		bool inited;
+		bool fakeValue;
+		bool fakeValueActive;
+	};
 }

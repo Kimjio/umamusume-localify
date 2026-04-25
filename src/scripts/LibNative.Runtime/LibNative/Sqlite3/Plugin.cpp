@@ -67,7 +67,7 @@ static void DecryptManifestDB()
 	}
 }
 
-int sqlite3_prepare_v2_hook(sqlite3* db, const char* zSql, int nBytes, sqlite3_stmt** ppStmt, const char** pzTail)
+static int sqlite3_prepare_v2_hook(sqlite3* db, const char* zSql, int nBytes, sqlite3_stmt** ppStmt, const char** pzTail)
 {
 	auto result = reinterpret_cast<decltype(sqlite3_prepare_v2_hook)*>(sqlite3_prepare_v2_orig)(db, zSql, nBytes, ppStmt, pzTail);
 
@@ -129,7 +129,7 @@ int sqlite3_prepare_v2_hook(sqlite3* db, const char* zSql, int nBytes, sqlite3_s
 	return result;
 }
 
-int sqlite3_step_hook(sqlite3_stmt* pStmt)
+static int sqlite3_step_hook(sqlite3_stmt* pStmt)
 {
 	if (text_queries.contains(pStmt))
 	{
@@ -180,7 +180,7 @@ int sqlite3_step_hook(sqlite3_stmt* pStmt)
 	return reinterpret_cast<decltype(sqlite3_step_hook)*>(sqlite3_step_orig)(pStmt);
 }
 
-int sqlite3_reset_hook(sqlite3_stmt* pStmt)
+static int sqlite3_reset_hook(sqlite3_stmt* pStmt)
 {
 	if (text_queries.contains(pStmt))
 	{
@@ -200,7 +200,7 @@ int sqlite3_reset_hook(sqlite3_stmt* pStmt)
 	return reinterpret_cast<decltype(sqlite3_reset_hook)*>(sqlite3_reset_orig)(pStmt);
 }
 
-int sqlite3_bind_text_hook(sqlite3_stmt* pStmt, int i, const char* zData, int nData, void (*xDel)(void*))
+static int sqlite3_bind_text_hook(sqlite3_stmt* pStmt, int i, const char* zData, int nData, void (*xDel)(void*))
 {
 	if (text_queries.contains(pStmt))
 	{
@@ -216,7 +216,7 @@ int sqlite3_bind_text_hook(sqlite3_stmt* pStmt, int i, const char* zData, int nD
 	return reinterpret_cast<decltype(sqlite3_bind_text_hook)*>(sqlite3_bind_text_orig)(pStmt, i, zData, nData, xDel);
 }
 
-int sqlite3_bind_int_hook(sqlite3_stmt* pStmt, int i, int iValue)
+static int sqlite3_bind_int_hook(sqlite3_stmt* pStmt, int i, int iValue)
 {
 	if (text_queries.contains(pStmt))
 	{
@@ -232,7 +232,7 @@ int sqlite3_bind_int_hook(sqlite3_stmt* pStmt, int i, int iValue)
 	return reinterpret_cast<decltype(sqlite3_bind_int_hook)*>(sqlite3_bind_int_orig)(pStmt, i, iValue);
 }
 
-int sqlite3_bind_int64_hook(sqlite3_stmt* pStmt, int i, sqlite_int64 iValue)
+static int sqlite3_bind_int64_hook(sqlite3_stmt* pStmt, int i, sqlite_int64 iValue)
 {
 	if (text_queries.contains(pStmt))
 	{
@@ -248,7 +248,7 @@ int sqlite3_bind_int64_hook(sqlite3_stmt* pStmt, int i, sqlite_int64 iValue)
 	return reinterpret_cast<decltype(sqlite3_bind_int64_hook)*>(sqlite3_bind_int64_orig)(pStmt, i, iValue);
 }
 
-int sqlite3_bind_double_hook(sqlite3_stmt* pStmt, int i, double rValue)
+static int sqlite3_bind_double_hook(sqlite3_stmt* pStmt, int i, double rValue)
 {
 	if (text_queries.contains(pStmt))
 	{
@@ -264,7 +264,7 @@ int sqlite3_bind_double_hook(sqlite3_stmt* pStmt, int i, double rValue)
 	return reinterpret_cast<decltype(sqlite3_bind_double_hook)*>(sqlite3_bind_double_orig)(pStmt, i, rValue);
 }
 
-int sqlite3_finalize_hook(sqlite3_stmt* pStmt)
+static int sqlite3_finalize_hook(sqlite3_stmt* pStmt)
 {
 	if (text_queries.contains(pStmt))
 	{
@@ -282,13 +282,13 @@ int sqlite3_finalize_hook(sqlite3_stmt* pStmt)
 	return reinterpret_cast<decltype(sqlite3_finalize_hook)*>(sqlite3_finalize_orig)(pStmt);
 }
 
-int sqlite3_key_hook(sqlite3* db, const void* pKey, int nKey)
+static int sqlite3_key_hook(sqlite3* db, const void* pKey, int nKey)
 {
 	// no-op
 	return SQLITE_OK;
 }
 
-const unsigned char* sqlite3_column_text_hook(sqlite3_stmt* pStmt, int i)
+static const unsigned char* sqlite3_column_text_hook(sqlite3_stmt* pStmt, int i)
 {
 	auto result = reinterpret_cast<decltype(sqlite3_column_text_hook)*>(sqlite3_column_text_orig)(pStmt, i);
 

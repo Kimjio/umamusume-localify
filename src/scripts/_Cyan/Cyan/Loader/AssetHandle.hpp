@@ -4,13 +4,10 @@
 
 using namespace UnityEngine;
 
-namespace Cyan
+namespace Cyan::Loader
 {
-	namespace Loader
+	class AssetHandle : public Object
 	{
-		class AssetHandle : public Object
-		{
-			using Object::Object;
-		};
-	}
+		using Object::Object;
+	};
 }

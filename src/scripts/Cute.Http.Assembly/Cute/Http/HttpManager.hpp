@@ -2,14 +2,11 @@
 #include "il2cpp/il2cpp_symbols.hpp"
 #include "../../../UnityEngine.CoreModule/UnityEngine/Object.hpp"
 
-namespace Cute
+namespace Cute::Http
 {
-	namespace Http
+	class HttpManager : public UnityEngine::Object
 	{
-		class HttpManager : public UnityEngine::Object
-		{
-		public:
-			using UnityEngine::Object::Object;
-		};
-	}
+	public:
+		using Object::Object;
+	};
 }

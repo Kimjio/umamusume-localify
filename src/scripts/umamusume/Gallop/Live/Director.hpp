@@ -1,30 +1,27 @@
 #pragma once
 #include "scripts/UnityEngine.CoreModule/UnityEngine/MonoBehaviour.hpp"
 
-namespace Gallop
+namespace Gallop::Live
 {
-	namespace Live
+	class Director : public UnityEngine::MonoBehaviour
 	{
-		class Director : public UnityEngine::MonoBehaviour
+	public:
+		enum class DisplayMode
+		{
+			None,
+			Landscape,
+			Portrait
+		};
+
+		class Live3DSettings : public UnityEngine::Object
 		{
 		public:
-			enum class DisplayMode
-			{
-				None,
-				Landscape,
-				Portrait
-			};
+			int ScreenMode();
+			void ScreenMode(int value);
 
-			class Live3DSettings : public UnityEngine::Object
-			{
-			public:
-				int ScreenMode();
-				void ScreenMode(int value);
-
-				using Object::Object;
-			};
-
-			using MonoBehaviour::MonoBehaviour;
+			using Object::Object;
 		};
-	}
+
+		using MonoBehaviour::MonoBehaviour;
+	};
 }

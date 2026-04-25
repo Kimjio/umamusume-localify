@@ -2,9 +2,25 @@
 #include "scripts/ScriptInternal.hpp"
 #include "Object.hpp"
 
+#include "RectTransform.hpp"
+#include "Screen.hpp"
+
+#include "scripts/UnityEngine.TextRenderingModule/UnityEngine/HorizontalWrapMode.hpp"
+#include "scripts/UnityEngine.TextRenderingModule/UnityEngine/VerticalWrapMode.hpp"
+
 #include "scripts/umamusume/Gallop/DialogCommon.hpp"
 #include "scripts/umamusume/Gallop/DialogManager.hpp"
+#include "scripts/umamusume/Gallop/TextCommon.hpp"
 #include "scripts/umamusume/Gallop/Localize.hpp"
+
+#include "masterdb/masterdb.hpp"
+
+#include "localify/SettingsUI.hpp"
+#include "localify/UIParts.hpp"
+#include "localify/LiveUtils.hpp"
+
+#include "settings_text.hpp"
+
 #include "string_utils.hpp"
 
 namespace
@@ -129,6 +145,262 @@ static Il2CppObject* Internal_CloneSingle_hook(Il2CppObject* original)
 	return cloned;
 }
 
+
+void InitOptionLayout(Il2CppObject* parentRectTransform)
+{
+	Localify::UIParts::AddToLayout(parentRectTransform,
+		{
+			Localify::UIParts::GetOptionItemTitle(LocalifySettings::GetText("settings_title")),
+			Localify::UIParts::GetOptionItemButton("open_settings", LocalifySettings::GetText("open_settings")),
+		}
+		);
+}
+
+static Il2CppObject* Internal_CloneSingleWithParent_hook(Il2CppObject* data, Il2CppObject* parent, bool worldPositionStays)
+{
+	auto cloned = reinterpret_cast<decltype(Internal_CloneSingleWithParent_hook)*>(Internal_CloneSingleWithParent_orig)(data, parent, worldPositionStays);
+
+	if (il2cppstring(UnityEngine::Object::Name(cloned)->chars).find(IL2CPP_STRING("DialogOptionHome")) != wstring::npos)
+	{
+		auto dialog = UnityEngine::GameObject(cloned).GetComponent(GetRuntimeType("umamusume.dll", "Gallop", "DialogOptionHome"));
+
+		auto _optionPageBasicSettingField = il2cpp_class_get_field_from_name(dialog->klass, "_optionPageBasicSetting");
+		Il2CppObject* _optionPageBasicSetting;
+		il2cpp_field_get_value(dialog, _optionPageBasicSettingField, &_optionPageBasicSetting);
+
+		auto PartsOptionPageBasicSetting = UnityEngine::MonoBehaviour(_optionPageBasicSetting).gameObject();
+		PartsOptionPageBasicSetting.SetActive(true);
+
+		auto rectTransformArray = PartsOptionPageBasicSetting.GetComponentsInChildren(GetRuntimeType("UnityEngine.CoreModule.dll", "UnityEngine", "RectTransform"), false);
+
+		for (int j = 0; j < rectTransformArray->max_length; j++)
+		{
+			auto rectTransform = rectTransformArray->vector[j];
+			if (rectTransform && UnityEngine::Object::Name(rectTransform)->chars == il2cppstring(IL2CPP_STRING("Content")))
+			{
+				InitOptionLayout(rectTransform);
+				break;
+			}
+		}
+
+		Localify::UIParts::SetOptionItemButtonAction("open_settings", *([](Il2CppObject*)
+			{
+				Localify::SettingsUI::OpenSettings();
+			})
+		);
+	}
+
+	if (il2cppstring(UnityEngine::Object::Name(cloned)->chars).find(IL2CPP_STRING("DialogOptionLiveTheater")) != wstring::npos)
+	{
+		auto rectTransformArray = UnityEngine::GameObject(cloned).GetComponentsInChildren(GetRuntimeType("UnityEngine.CoreModule.dll", "UnityEngine", "RectTransform"), false);
+
+		for (int i = 0; i < rectTransformArray->max_length; i++)
+		{
+			auto rectTransform = rectTransformArray->vector[i];
+
+			if (rectTransform && UnityEngine::Object::Name(rectTransform)->chars == il2cppstring(IL2CPP_STRING("Content")))
+			{
+				InitOptionLayout(rectTransform);
+				break;
+			}
+		}
+
+		Localify::UIParts::SetOptionItemButtonAction("open_settings", *([](Il2CppObject*)
+			{
+				Localify::SettingsUI::OpenLiveSettings();
+			})
+		);
+	}
+
+	if (il2cppstring(UnityEngine::Object::Name(cloned)->chars).find(IL2CPP_STRING("CharacterHomeTopUI")) != wstring::npos)
+	{
+		auto CharacterHomeTopUI = UnityEngine::GameObject(cloned).GetComponent(GetRuntimeType("umamusume.dll", "Gallop", "CharacterHomeTopUI"));
+
+		if (CharacterHomeTopUI)
+		{
+			auto _cardRootButtonField = il2cpp_class_get_field_from_name(CharacterHomeTopUI->klass, "_cardRootButton");
+			Il2CppObject* _cardRootButton;
+			il2cpp_field_get_value(CharacterHomeTopUI, _cardRootButtonField, &_cardRootButton);
+
+			if (_cardRootButton)
+			{
+				auto targetText = il2cpp_class_get_method_from_name_type<Il2CppObject * (*)(Il2CppObject*)>(_cardRootButton->klass, "get_TargetText", 0)->methodPointer(_cardRootButton);
+
+				if (targetText)
+				{
+					auto textCommon = Gallop::TextCommon(targetText);
+					textCommon.horizontalOverflow(UnityEngine::HorizontalWrapMode::Overflow);
+					textCommon.verticalOverflow(UnityEngine::VerticalWrapMode::Overflow);
+				}
+			}
+		}
+	}
+
+	if (il2cppstring(UnityEngine::Object::Name(cloned)->chars).find(IL2CPP_STRING("LiveView")) != wstring::npos)
+	{
+		auto gameObject = UnityEngine::GameObject(cloned);
+		auto contentsRoot = gameObject.transform().Find(il2cpp_string_new(config::live_slider_always_show ? "ContentsRoot" : "ContentsRoot/MenuRoot"));
+		auto slider = Localify::UIParts::GetLiveSlider("live_slider", 0, 0, 180, false,
+			*[](Il2CppObject* sliderCommon)
+			{
+				auto value = Localify::UIParts::GetOptionSliderValue("live_slider");
+
+				Localify::LiveUtils::MoveLivePlayback(value);
+			});
+		auto sliderTransform = static_cast<UnityEngine::RectTransform>(slider.transform());
+		sliderTransform.anchoredPosition({ 0, 28 });
+		sliderTransform.anchorMax({ 1, 0 });
+		sliderTransform.anchorMin({ 0, 0 });
+		sliderTransform.pivot({ 0.2, 0.5 });
+		sliderTransform.sizeDelta({ -520, 24 });
+		sliderTransform.SetParent(contentsRoot, false);
+	}
+
+	if (il2cppstring(UnityEngine::Object::Name(cloned)->chars).find(IL2CPP_STRING("RaceResultList")) != wstring::npos)
+	{
+		auto raceInfo = il2cpp_symbols::get_method_pointer<Il2CppObject * (*)()>("umamusume.dll", "Gallop", "RaceManager", "get_RaceInfo", 0)();
+
+		if (raceInfo)
+		{
+			auto raceType = il2cpp_class_get_method_from_name_type<int (*)(Il2CppObject*)>(raceInfo->klass, "get_RaceType", 0)->methodPointer(raceInfo);
+
+			if (raceType == 6 || raceType == 7)
+			{
+				auto raceInstanceId = il2cpp_class_get_method_from_name_type<int (*)(Il2CppObject*)>(raceInfo->klass, "get_RaceInstanceId", 0)->methodPointer(raceInfo);
+				auto grade = il2cpp_class_get_method_from_name_type<int (*)(Il2CppObject*)>(raceInfo->klass, "get_Grade", 0)->methodPointer(raceInfo);
+
+				auto musicId = MasterDB::GetSingleModeRaceLiveMusicId(raceInstanceId, grade);
+
+				auto playerHorseIndex = il2cpp_class_get_method_from_name_type<int (*)(Il2CppObject*)>(raceInfo->klass, "get_PlayerHorseIndex", 0)->methodPointer(raceInfo);
+				auto raceHorse = il2cpp_class_get_method_from_name_type<Il2CppArraySize_t<Il2CppObject*>*(*)(Il2CppObject*)>(raceInfo->klass, "get_RaceHorse", 0)->methodPointer(raceInfo);
+				auto horseData = raceHorse->vector[playerHorseIndex];
+
+				auto charaIdField = il2cpp_class_get_field_from_name(horseData->klass, "charaId");
+
+				int charaId;
+				il2cpp_field_get_value(horseData, charaIdField, &charaId);
+
+				if (MasterDB::HasLivePermission(musicId, charaId))
+				{
+					auto gameObject = UnityEngine::GameObject(cloned);
+					auto raceResultList = gameObject.GetComponent(GetRuntimeType("umamusume.dll", "Gallop", "RaceResultList"));
+					auto _singleModeLiveButtonField = il2cpp_class_get_field_from_name(raceResultList->klass, "_singleModeLiveButton");
+					Il2CppObject* _singleModeLiveButton;
+					il2cpp_field_get_value(raceResultList, _singleModeLiveButtonField, &_singleModeLiveButton);
+
+					il2cpp_symbols::get_method_pointer<Il2CppObject* (*)(Il2CppObject*)>("umamusume.dll", "Gallop", "PartsLiveTheaterVoiceIcon", "FindOrCreate", 1)(MonoBehaviour(_singleModeLiveButton).gameObject().transform());
+				}
+			}
+		}
+	}
+
+	if (il2cppstring(UnityEngine::Object::Name(cloned)->chars).find(IL2CPP_STRING("LiveChampionsTextController")) != wstring::npos)
+	{
+		auto updateScreenReferenceSize = CreateDelegateWithClass(il2cpp_symbols::get_class("DOTween.dll", "DG.Tweening", "TweenCallback"), cloned, *([](Il2CppObject* self)
+			{
+				auto director = GetSingletonInstance(il2cpp_symbols::get_class("umamusume.dll", "Gallop.Live", "Director"));
+				if (director)
+				{
+					auto ChampionsTextControllerField = il2cpp_class_get_field_from_name(director->klass, "ChampionsTextController");
+					Il2CppObject* ChampionsTextController;
+					il2cpp_field_get_value(director, ChampionsTextControllerField, &ChampionsTextController);
+
+					if (ChampionsTextController)
+					{
+						auto _flashPlayerField = il2cpp_class_get_field_from_name(ChampionsTextController->klass, "_flashPlayer");
+						Il2CppObject* _flashPlayer;
+						il2cpp_field_get_value(ChampionsTextController, _flashPlayerField, &_flashPlayer);
+
+						auto root = il2cpp_class_get_method_from_name_type<Il2CppObject * (*)(Il2CppObject*)>(_flashPlayer->klass, "get_Root", 0)->methodPointer(_flashPlayer);
+
+						int unityWidth = UnityEngine::Screen::width();
+
+						int unityHeight = UnityEngine::Screen::height();
+
+						auto _flashCanvasScalerField = il2cpp_class_get_field_from_name(ChampionsTextController->klass, "_flashCanvasScaler");
+						Il2CppObject* _flashCanvasScaler;
+						il2cpp_field_get_value(ChampionsTextController, _flashCanvasScalerField, &_flashCanvasScaler);
+
+						float scale = 1.0f;
+
+						if (unityWidth < unityHeight)
+						{
+							scale = min(config::freeform_ui_scale_portrait, max(1.0f, unityHeight * config::runtime::ratioVertical) * config::freeform_ui_scale_portrait);
+						}
+						else
+						{
+							scale = min(config::freeform_ui_scale_landscape, max(1.0f, unityWidth / config::runtime::ratioHorizontal) * config::freeform_ui_scale_landscape);
+						}
+
+						float availableWidth = static_cast<float>(unityWidth) / scale;
+						float availableHeight = static_cast<float>(unityHeight) / scale;
+
+						float width = ratio_16_9 * availableHeight;
+						float height = availableHeight;
+
+						if (width > availableWidth)
+						{
+							width = availableWidth;
+							height = width / ratio_16_9;
+						}
+
+						il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, UnityEngine::Vector2)>(_flashCanvasScaler->klass, "set_referenceResolution", 1)->methodPointer(_flashCanvasScaler, UnityEngine::Vector2{ width, height });
+						il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, UnityEngine::Vector2)>(root->klass, "SetScreenReferenceSize", 1)->methodPointer(root, UnityEngine::Vector2{ width, height });
+					}
+
+					auto liveFlashController = il2cpp_class_get_method_from_name_type<Il2CppObject * (*)(Il2CppObject*)>(director->klass, "get_LiveFlashController", 0)->methodPointer(director);
+
+					if (liveFlashController)
+					{
+						auto _flashPlayerField = il2cpp_class_get_field_from_name(liveFlashController->klass, "_flashPlayer");
+
+						if (_flashPlayerField)
+						{
+							Il2CppObject* _flashPlayer;
+							il2cpp_field_get_value(liveFlashController, _flashPlayerField, &_flashPlayer);
+
+							auto root = il2cpp_class_get_method_from_name_type<Il2CppObject * (*)(Il2CppObject*)>(_flashPlayer->klass, "get_Root", 0)->methodPointer(_flashPlayer);
+
+							int unityWidth = UnityEngine::Screen::width();
+
+							int unityHeight = UnityEngine::Screen::height();
+
+							float scale = 1.0f;
+
+							if (unityWidth < unityHeight)
+							{
+								scale = min(config::freeform_ui_scale_portrait, max(1.0f, unityHeight * config::runtime::ratioVertical) * config::freeform_ui_scale_portrait);
+							}
+							else
+							{
+								scale = min(config::freeform_ui_scale_landscape, max(1.0f, unityWidth / config::runtime::ratioHorizontal) * config::freeform_ui_scale_landscape);
+							}
+
+							float availableWidth = static_cast<float>(unityWidth) / scale;
+							float availableHeight = static_cast<float>(unityHeight) / scale;
+
+							float width = ratio_16_9 * availableHeight;
+							float height = availableHeight;
+
+							if (width > availableWidth)
+							{
+								width = availableWidth;
+								height = width / ratio_16_9;
+							}
+
+							il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, UnityEngine::Vector2)>(root->klass, "SetScreenReferenceSize", 1)->methodPointer(root, UnityEngine::Vector2{ width, height });
+						}
+					}
+				}
+			}));
+
+		// Delay 50ms
+		il2cpp_symbols::get_method_pointer<Il2CppObject* (*)(float, Il2CppDelegate*, bool)>("DOTween.dll", "DG.Tweening", "DOVirtual", "DelayedCall", 3)(0.05, &updateScreenReferenceSize->delegate, true);
+	}
+
+	return cloned;
+}
+
 static void InitAddress()
 {
 	FindObjectsByType_addr = il2cpp_resolve_icall("UnityEngine.Object::FindObjectsByType()");
@@ -147,6 +419,7 @@ static void InitAddress()
 static void HookMethods()
 {
 	ADD_HOOK(Internal_CloneSingle, "UnityEngine.Object::Internal_CloneSingle at %p\n");
+	ADD_HOOK(Internal_CloneSingleWithParent, "UnityEngine.Object::Internal_CloneSingleWithParent at %p\n");
 }
 
 STATIC

@@ -1,24 +1,18 @@
 #pragma once
 
-namespace System
+namespace System::Collections::Generic
 {
-	namespace Collections
+	template<typename K, typename V>
+	class Dictionary
 	{
-		namespace Generic
+	public:
+		struct Entry
 		{
-			template<typename K, typename V>
-			class Dictionary
-			{
-			public:
-				struct Entry
-				{
-				public:
-					int hashCode;
-					int next;
-					K key;
-					V value;
-				};
-			};
-		}
-	}
+		public:
+			int hashCode;
+			int next;
+			K key;
+			V value;
+		};
+	};
 }

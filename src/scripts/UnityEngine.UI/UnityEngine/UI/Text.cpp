@@ -7,9 +7,9 @@ namespace
 	void* Text_get_font_addr = nullptr;
 
 	void* Text_set_font_addr = nullptr;
-	
+
 	void* Text_get_text_addr = nullptr;
-	
+
 	void* Text_set_text_addr = nullptr;
 
 	void* Text_get_fontSize_addr = nullptr;
@@ -17,7 +17,7 @@ namespace
 	void* Text_set_fontSize_addr = nullptr;
 
 	void* Text_get_horizontalOverflow_addr = nullptr;
-	
+
 	void* Text_set_horizontalOverflow_addr = nullptr;
 
 	void* Text_get_verticalOverflow_addr = nullptr;
@@ -56,8 +56,7 @@ static void InitAddress()
 }
 
 static void HookMethods()
-{
-}
+{}
 
 STATIC
 {
@@ -65,83 +64,80 @@ STATIC
 	il2cpp_symbols::init_callbacks.emplace_back(HookMethods);
 }
 
-namespace UnityEngine
+namespace UnityEngine::UI
 {
-	namespace UI
+	Il2CppObject* Text::font()
 	{
-		Il2CppObject* Text::font()
-		{
-			return reinterpret_cast<Il2CppObject * (*)(Il2CppObject*)>(Text_get_font_addr)(instance);
-		}
+		return reinterpret_cast<Il2CppObject * (*)(Il2CppObject*)>(Text_get_font_addr)(instance);
+	}
 
-		void Text::font(Il2CppObject* value)
-		{
-			reinterpret_cast<void (*)(Il2CppObject*, Il2CppObject*)>(Text_set_font_addr)(instance, value);
-		}
+	void Text::font(Il2CppObject* value)
+	{
+		reinterpret_cast<void (*)(Il2CppObject*, Il2CppObject*)>(Text_set_font_addr)(instance, value);
+	}
 
-		Il2CppString* Text::text()
-		{
-			return reinterpret_cast<Il2CppString * (*)(Il2CppObject*)>(Text_get_text_addr)(instance);
-		}
+	Il2CppString* Text::text()
+	{
+		return reinterpret_cast<Il2CppString * (*)(Il2CppObject*)>(Text_get_text_addr)(instance);
+	}
 
-		void Text::text(Il2CppString* value)
-		{
-			reinterpret_cast<void (*)(Il2CppObject*, Il2CppString*)>(Text_set_text_addr)(instance, value);
-		}
+	void Text::text(Il2CppString* value)
+	{
+		reinterpret_cast<void (*)(Il2CppObject*, Il2CppString*)>(Text_set_text_addr)(instance, value);
+	}
 
-		int Text::fontSize()
-		{
-			return reinterpret_cast<int (*)(Il2CppObject*)>(Text_get_fontSize_addr)(instance);
-		}
+	int Text::fontSize()
+	{
+		return reinterpret_cast<int (*)(Il2CppObject*)>(Text_get_fontSize_addr)(instance);
+	}
 
-		void Text::fontSize(int value)
-		{
-			reinterpret_cast<void (*)(Il2CppObject*, int)>(Text_set_fontSize_addr)(instance, value);
-		}
+	void Text::fontSize(int value)
+	{
+		reinterpret_cast<void (*)(Il2CppObject*, int)>(Text_set_fontSize_addr)(instance, value);
+	}
 
-		HorizontalWrapMode Text::horizontalOverflow()
-		{
-			return reinterpret_cast<HorizontalWrapMode (*)(Il2CppObject*)>(Text_get_horizontalOverflow_addr)(instance);
-		}
+	HorizontalWrapMode Text::horizontalOverflow()
+	{
+		return reinterpret_cast<HorizontalWrapMode(*)(Il2CppObject*)>(Text_get_horizontalOverflow_addr)(instance);
+	}
 
-		void Text::horizontalOverflow(HorizontalWrapMode value)
-		{
-			reinterpret_cast<void (*)(Il2CppObject*, HorizontalWrapMode)>(Text_set_horizontalOverflow_addr)(instance, value);
-		}
+	void Text::horizontalOverflow(HorizontalWrapMode value)
+	{
+		reinterpret_cast<void (*)(Il2CppObject*, HorizontalWrapMode)>(Text_set_horizontalOverflow_addr)(instance, value);
+	}
 
-		VerticalWrapMode Text::verticalOverflow()
-		{
-			return reinterpret_cast<VerticalWrapMode (*)(Il2CppObject*)>(Text_get_verticalOverflow_addr)(instance);
-		}
+	VerticalWrapMode Text::verticalOverflow()
+	{
+		return reinterpret_cast<VerticalWrapMode(*)(Il2CppObject*)>(Text_get_verticalOverflow_addr)(instance);
+	}
 
-		void Text::verticalOverflow(VerticalWrapMode value)
-		{
-			reinterpret_cast<void (*)(Il2CppObject*, VerticalWrapMode)>(Text_set_verticalOverflow_addr)(instance, value);
-		}
+	void Text::verticalOverflow(VerticalWrapMode value)
+	{
+		reinterpret_cast<void (*)(Il2CppObject*, VerticalWrapMode)>(Text_set_verticalOverflow_addr)(instance, value);
+	}
 
-		float Text::lineSpacing()
-		{
-			return reinterpret_cast<float (*)(Il2CppObject*)>(Text_get_lineSpacing_addr)(instance);
-		}
+	float Text::lineSpacing()
+	{
+		return reinterpret_cast<float (*)(Il2CppObject*)>(Text_get_lineSpacing_addr)(instance);
+	}
 
-		void Text::lineSpacing(float value)
-		{
-			reinterpret_cast<void (*)(Il2CppObject*, float)>(Text_set_lineSpacing_addr)(instance, value);
-		}
+	void Text::lineSpacing(float value)
+	{
+		reinterpret_cast<void (*)(Il2CppObject*, float)>(Text_set_lineSpacing_addr)(instance, value);
+	}
 
-		FontStyle Text::fontStyle()
-		{
-			return reinterpret_cast<FontStyle (*)(Il2CppObject*)>(Text_get_fontStyle_addr)(instance);
-		}
+	FontStyle Text::fontStyle()
+	{
+		return reinterpret_cast<FontStyle(*)(Il2CppObject*)>(Text_get_fontStyle_addr)(instance);
+	}
 
-		void Text::fontStyle(FontStyle value)
-		{
-			reinterpret_cast<void (*)(Il2CppObject*, FontStyle)>(Text_set_fontStyle_addr)(instance, value);
-		}
+	void Text::fontStyle(FontStyle value)
+	{
+		reinterpret_cast<void (*)(Il2CppObject*, FontStyle)>(Text_set_fontStyle_addr)(instance, value);
+	}
 
-		void Text::AssignDefaultFont()
-		{
-			reinterpret_cast<void (*)(Il2CppObject*)>(Text_AssignDefaultFont_addr)(instance);
-		}
+	void Text::AssignDefaultFont()
+	{
+		reinterpret_cast<void (*)(Il2CppObject*)>(Text_AssignDefaultFont_addr)(instance);
 	}
 }

@@ -1,11 +1,18 @@
 #pragma once
 #include <stdinclude.hpp>
 
+#include <set>
+
 namespace Localify
 {
 	class NotificationManager
 	{
 	public:
+		static set<void*> currentPlayerHandles;
+		static set<void*> currentAcbHandles;
+		static void* currentPlayerHandle;
+		static Il2CppObject* currentElem;
+
 		static void Init();
 		static void Cleanup();
 		static void Reset();

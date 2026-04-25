@@ -39,7 +39,7 @@ namespace
 	void* PointerEventData_set_pointerCurrentRaycast_addr = nullptr;
 
 	void* PointerEventData_get_scrollDelta_addr = nullptr;
-	
+
 	void* PointerEventData_set_scrollDelta_addr = nullptr;
 
 	void* GallopPointerInputModule_MouseState_GetButtonState_addr = nullptr;
@@ -66,8 +66,6 @@ namespace
 	FieldInfo* GallopStandaloneInputModule_m_MousePosition = nullptr;
 	FieldInfo* GallopStandaloneInputModule_m_LastMousePosition = nullptr;
 	FieldInfo* GallopStandaloneInputModule_CurrentRaycast = nullptr;
-
-	constexpr float ratio_16_9 = 1.7777f;
 }
 
 static Gallop::LandscapeUIManager::CameraType GallopStandaloneInputModule_AdjustSplitWindowTouchPos_hook(UnityEngine::Vector2* touchPos)
@@ -261,56 +259,53 @@ STATIC
 	il2cpp_symbols::init_callbacks.emplace_back(HookMethods);
 }
 
-namespace UnityEngine
+namespace UnityEngine::EventSystems
 {
-	namespace EventSystems
+	Il2CppObject* GallopStandaloneInputModule::GetMousePointerEventData(int id)
 	{
-		Il2CppObject* GallopStandaloneInputModule::GetMousePointerEventData(int id)
-		{
-			return reinterpret_cast<Il2CppObject * (*)(Il2CppObject*, int)>(GallopStandaloneInputModule_GetMousePointerEventData_addr)(instance, id);
-		}
+		return reinterpret_cast<Il2CppObject * (*)(Il2CppObject*, int)>(GallopStandaloneInputModule_GetMousePointerEventData_addr)(instance, id);
+	}
 
-		void GallopStandaloneInputModule::ProcessMousePress(Il2CppObject* data)
-		{
-			reinterpret_cast<void (*)(Il2CppObject*, Il2CppObject*)>(GallopStandaloneInputModule_ProcessMousePress_addr)(instance, data);
-		}
+	void GallopStandaloneInputModule::ProcessMousePress(Il2CppObject* data)
+	{
+		reinterpret_cast<void (*)(Il2CppObject*, Il2CppObject*)>(GallopStandaloneInputModule_ProcessMousePress_addr)(instance, data);
+	}
 
-		void GallopStandaloneInputModule::ProcessMove(Il2CppObject* pointerEvent)
-		{
-			reinterpret_cast<void (*)(Il2CppObject*, Il2CppObject*)>(GallopStandaloneInputModule_ProcessMove_addr)(instance, pointerEvent);
-		}
+	void GallopStandaloneInputModule::ProcessMove(Il2CppObject* pointerEvent)
+	{
+		reinterpret_cast<void (*)(Il2CppObject*, Il2CppObject*)>(GallopStandaloneInputModule_ProcessMove_addr)(instance, pointerEvent);
+	}
 
-		void GallopStandaloneInputModule::ProcessDrag(Il2CppObject* pointerEvent)
-		{
-			reinterpret_cast<void (*)(Il2CppObject*, Il2CppObject*)>(GallopStandaloneInputModule_ProcessDrag_addr)(instance, pointerEvent);
-		}
+	void GallopStandaloneInputModule::ProcessDrag(Il2CppObject* pointerEvent)
+	{
+		reinterpret_cast<void (*)(Il2CppObject*, Il2CppObject*)>(GallopStandaloneInputModule_ProcessDrag_addr)(instance, pointerEvent);
+	}
 
-		Il2CppObject* GallopStandaloneInputModule::pointerEventData()
-		{
-			Il2CppObject* value;
-			il2cpp_field_get_value(instance, GallopStandaloneInputModule_pointerEventData, &value);
-			return value;
-		}
+	Il2CppObject* GallopStandaloneInputModule::pointerEventData()
+	{
+		Il2CppObject* value;
+		il2cpp_field_get_value(instance, GallopStandaloneInputModule_pointerEventData, &value);
+		return value;
+	}
 
-		Vector2 GallopStandaloneInputModule::m_MousePosition()
-		{
-			Vector2 value;
-			il2cpp_field_get_value(instance, GallopStandaloneInputModule_m_MousePosition, &value);
-			return value;
-		}
+	Vector2 GallopStandaloneInputModule::m_MousePosition()
+	{
+		Vector2 value;
+		il2cpp_field_get_value(instance, GallopStandaloneInputModule_m_MousePosition, &value);
+		return value;
+	}
 
-		Vector2 GallopStandaloneInputModule::m_LastMousePosition()
-		{
-			Vector2 value;
-			il2cpp_field_get_value(instance, GallopStandaloneInputModule_m_LastMousePosition, &value);
-			return value;
-		}
+	Vector2 GallopStandaloneInputModule::m_LastMousePosition()
+	{
+		Vector2 value;
+		il2cpp_field_get_value(instance, GallopStandaloneInputModule_m_LastMousePosition, &value);
+		return value;
+	}
 
-		RaycastResult GallopStandaloneInputModule::CurrentRaycast()
-		{
-			RaycastResult value;
-			il2cpp_field_get_value(instance, GallopStandaloneInputModule_CurrentRaycast, &value);
-			return value;
-		}
+	RaycastResult GallopStandaloneInputModule::CurrentRaycast()
+	{
+		RaycastResult value;
+		il2cpp_field_get_value(instance, GallopStandaloneInputModule_CurrentRaycast, &value);
+		return value;
 	}
 }

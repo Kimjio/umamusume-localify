@@ -1,13 +1,10 @@
 #pragma once
 
-namespace Cute
+namespace Cute::Cri
 {
-	namespace Cri
+	struct MoviePlayerHandle
 	{
-		struct MoviePlayerHandle
-		{
-		public:
-			unsigned int id;
-		};
+	public:
+		unsigned int id;
 	};
 }

@@ -630,45 +630,42 @@ STATIC
 	il2cpp_symbols::init_callbacks.emplace_back(HookMethods);
 }
 
-namespace Cute
+namespace Cute::Core
 {
-	namespace Core
+	wil::com_ptr<ICoreWebView2Controller> WebViewManager::webviewController;
+
+	unordered_map<il2cppstring, il2cppstring> WebViewManager::customFontMap;
+
+	WebViewManager WebViewManager::Instance()
 	{
-		wil::com_ptr<ICoreWebView2Controller> WebViewManager::webviewController;
+		return WebViewManager(GetSingletonInstance(Cute_Core_WebViewManager));
+	}
 
-		unordered_map<il2cppstring, il2cppstring> WebViewManager::customFontMap;
+	UnityEngine::Vector4 WebViewManager::marginNow()
+	{
+		UnityEngine::Vector4 value;
+		il2cpp_field_get_value(instance, Cute_Core_WebViewManager_marginNow, &value);
 
-		WebViewManager WebViewManager::Instance()
-		{
-			return WebViewManager(GetSingletonInstance(Cute_Core_WebViewManager));
-		}
+		return value;
+	}
 
-		UnityEngine::Vector4 WebViewManager::marginNow()
-		{
-			UnityEngine::Vector4 value;
-			il2cpp_field_get_value(instance, Cute_Core_WebViewManager_marginNow, &value);
+	void WebViewManager::OpenWeb(Il2CppString* url)
+	{
+		reinterpret_cast<decltype(Cute_Core_WebViewManager_OpenWeb_hook)*>(Cute_Core_WebViewManager_OpenWeb_addr)(instance, url);
+	}
 
-			return value;
-		}
+	void WebViewManager::SetVisible(bool visible)
+	{
+		reinterpret_cast<decltype(Cute_Core_WebViewManager_SetVisible_hook)*>(Cute_Core_WebViewManager_SetVisible_addr)(instance, visible);
+	}
 
-		void WebViewManager::OpenWeb(Il2CppString* url)
-		{
-			reinterpret_cast<decltype(Cute_Core_WebViewManager_OpenWeb_hook)*>(Cute_Core_WebViewManager_OpenWeb_addr)(instance, url);
-		}
+	void WebViewManager::SetMargins(int leftMargin, int topMargin, int rightMargin, int bottomMargin)
+	{
+		reinterpret_cast<decltype(Cute_Core_WebViewManager_SetMargins_hook)*>(Cute_Core_WebViewManager_SetMargins_addr)(instance, leftMargin, topMargin, rightMargin, bottomMargin);
+	}
 
-		void WebViewManager::SetVisible(bool visible)
-		{
-			reinterpret_cast<decltype(Cute_Core_WebViewManager_SetVisible_hook)*>(Cute_Core_WebViewManager_SetVisible_addr)(instance, visible);
-		}
-
-		void WebViewManager::SetMargins(int leftMargin, int topMargin, int rightMargin, int bottomMargin)
-		{
-			reinterpret_cast<decltype(Cute_Core_WebViewManager_SetMargins_hook)*>(Cute_Core_WebViewManager_SetMargins_addr)(instance, leftMargin, topMargin, rightMargin, bottomMargin);
-		}
-
-		Il2CppDelegate* WebViewManager::Callback()
-		{
-			return reinterpret_cast<Il2CppDelegate * (*)(Il2CppObject*)>(Cute_Core_WebViewManager_Callback_addr)(instance);
-		}
+	Il2CppDelegate* WebViewManager::Callback()
+	{
+		return reinterpret_cast<Il2CppDelegate * (*)(Il2CppObject*)>(Cute_Core_WebViewManager_Callback_addr)(instance);
 	}
 }

@@ -137,7 +137,13 @@ namespace Gallop
 
 	void TextCommon::FontColor(const Il2CppChar* value)
 	{
-		reinterpret_cast<void (*)(Il2CppObject*, int)>(TextCommon_set_FontColor_addr)(instance, GetEnumValue(ParseEnum(FontColorType, value)));
+		try
+		{
+			reinterpret_cast<void (*)(Il2CppObject*, int)>(TextCommon_set_FontColor_addr)(instance, GetEnumValue(ParseEnum(FontColorType, value)));
+		}
+		catch (const Il2CppExceptionWrapper&)
+		{
+		}
 	}
 
 	void TextCommon::OutlineColor(int value)
@@ -147,7 +153,13 @@ namespace Gallop
 
 	void TextCommon::OutlineColor(const Il2CppChar* value)
 	{
-		reinterpret_cast<void (*)(Il2CppObject*, int)>(TextCommon_set_OutlineColor_addr)(instance, GetEnumValue(ParseEnum(OutlineColorType, value)));
+		try
+		{
+			reinterpret_cast<void (*)(Il2CppObject*, int)>(TextCommon_set_OutlineColor_addr)(instance, GetEnumValue(ParseEnum(OutlineColorType, value)));
+		}
+		catch (const Il2CppExceptionWrapper&)
+		{
+		}
 	}
 
 	void TextCommon::OutlineSize(int value)
@@ -157,7 +169,13 @@ namespace Gallop
 
 	void TextCommon::OutlineSize(const Il2CppChar* value)
 	{
-		reinterpret_cast<void (*)(Il2CppObject*, int)>(TextCommon_set_OutlineSize_addr)(instance, GetEnumValue(ParseEnum(OutlineSizeType, value)));
+		try
+		{
+			reinterpret_cast<void (*)(Il2CppObject*, int)>(TextCommon_set_OutlineSize_addr)(instance, GetEnumValue(ParseEnum(OutlineSizeType, value)));
+		}
+		catch (const Il2CppExceptionWrapper&)
+		{
+		}
 	}
 
 	void TextCommon::Awake()

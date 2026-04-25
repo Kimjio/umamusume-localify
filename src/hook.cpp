@@ -1,65 +1,9 @@
 ﻿#include "hook.h"
 
-#include <stdinclude.hpp>
-
-#include <Shlobj.h>
-#include <ShObjIdl.h>
-
-#include <array>
-
-#include <algorithm>
-
-#include <chrono>
-
-#include <set>
-#include <sstream>
-
-#include <Tlhelp32.h>
-
-#include <regex>
-
-#include <psapi.h>
+#ifdef _MSC_VER
 #include <wininet.h>
 
-#include <wrl.h>
-#include <wil/com.h>
-
-#include <propkey.h>
-#include <propvarutil.h>
-
-#include <fstream>
-
-#include <WebView2.h>
-#include <WebView2EnvironmentOptions.h>
-
-#include <windows.ui.notifications.h>
-#include <winrt/Windows.Foundation.h>
-
 #include "MINT.h"
-
-#include "config/config.hpp"
-
-#include "notifier/notifier.hpp"
-
-#include "rich_presence.hpp"
-
-#include "il2cpp/il2cpp-tabledefs.h"
-
-#include "il2cpp_dump.h"
-
-#include "discord/core.h"
-#include "discord/activity_manager.h"
-
-#include "libcef.h"
-
-#include "settings_text.hpp"
-
-#include "unity/IUnityInterface.h"
-
-#include "openxr/openxr.hpp"
-
-#include "msgpack/msgpack_modify.hpp"
-#include "masterdb/masterdb.hpp"
 
 #include "notification/DesktopNotificationManagerCompat.h"
 
@@ -67,52 +11,56 @@
 
 #include "taskbar/TaskbarManager.hpp"
 
-#include "localify/SettingsUI.hpp"
+#include "discord/core.h"
+#include "discord/activity_manager.h"
+
+#include "unity/IUnityInterface.h"
+
+#include "openxr/openxr.hpp"
+
+#include "rich_presence.hpp"
+
+#include "libcef.h"
+#endif
+
+#include "config/config.hpp"
+
+#include "il2cpp/il2cpp-tabledefs.h"
+
+#include "il2cpp_dump.h"
+
+#include "settings_text.hpp"
+
+#include "msgpack/msgpack_modify.hpp"
+
 #include "localify/NotificationManager.hpp"
+#include "localify/UIParts.hpp"
+#include "localify/LiveUtils.hpp"
 
 #include "scripts/ScriptInternal.hpp"
 
-#include "scripts/mscorlib/System/Boolean.hpp"
-#include "scripts/mscorlib/System/Enum.hpp"
-#include "scripts/mscorlib/System/Int32.hpp"
 #include "scripts/mscorlib/System/Nullable.hpp"
 #include "scripts/mscorlib/System/ValueTuple.hpp"
 #include "scripts/mscorlib/System/Collections/Generic/Dictionary.hpp"
 #include "scripts/mscorlib/System/Collections/Generic/List.hpp"
 
-#include "scripts/CriMw.CriWare.Runtime/CriWare/CriAtomEx.hpp"
-#include "scripts/CriMw.CriWare.Runtime/CriWare/CriAtomExPlayback.hpp"
-#include "scripts/CriMw.CriWare.Runtime/CriWare/CriMana/MovieInfo.hpp"
-#include "scripts/CriMw.CriWare.Runtime/CriWare/CriMana/FrameInfo.hpp"
-
 #include "scripts/Cute.Cri.Assembly/Cute/Cri/AudioPlayback.hpp"
 #include "scripts/Cute.Cri.Assembly/Cute/Cri/MoviePlayerHandle.hpp"
-
-#include "scripts/UnityEngine.AssetBundleModule/UnityEngine/AssetBundle.hpp"
+#include "scripts/Cute.Cri.Assembly/Cute/Cri/MoviePlayerForUI.hpp"
 
 #include "scripts/UnityEngine.CoreModule/UnityEngine/Application.hpp"
-#include "scripts/UnityEngine.CoreModule/UnityEngine/CastHelper.hpp"
-#include "scripts/UnityEngine.CoreModule/UnityEngine/Color32.hpp"
 #include "scripts/UnityEngine.CoreModule/UnityEngine/Display.hpp"
 #include "scripts/UnityEngine.CoreModule/UnityEngine/Object.hpp"
-#include "scripts/UnityEngine.CoreModule/UnityEngine/Shader.hpp"
-#include "scripts/UnityEngine.CoreModule/UnityEngine/Material.hpp"
 #include "scripts/UnityEngine.CoreModule/UnityEngine/GameObject.hpp"
 #include "scripts/UnityEngine.CoreModule/UnityEngine/RectTransform.hpp"
 #include "scripts/UnityEngine.CoreModule/UnityEngine/Vector2.hpp"
 #include "scripts/UnityEngine.CoreModule/UnityEngine/Vector3.hpp"
-#include "scripts/UnityEngine.CoreModule/UnityEngine/Vector4.hpp"
 #include "scripts/UnityEngine.CoreModule/UnityEngine/Vector2Int.hpp"
-#include "scripts/UnityEngine.CoreModule/UnityEngine/Quaternion.hpp"
 #include "scripts/UnityEngine.CoreModule/UnityEngine/Rect.hpp"
 #include "scripts/UnityEngine.CoreModule/UnityEngine/Resolution.hpp"
-#include "scripts/UnityEngine.CoreModule/UnityEngine/ResourcesAPIInternal.hpp"
 #include "scripts/UnityEngine.CoreModule/UnityEngine/Screen.hpp"
 #include "scripts/UnityEngine.CoreModule/UnityEngine/ScreenOrientation.hpp"
 #include "scripts/UnityEngine.CoreModule/UnityEngine/SceneManagement/Scene.hpp"
-#include "scripts/UnityEngine.CoreModule/UnityEngine/Rendering/RenderTargetIdentifier.hpp"
-#include "scripts/UnityEngine.TextRenderingModule/UnityEngine/TextGenerationSettings.hpp"
-#include "scripts/UnityEngine.InputLegacyModule/UnityEngine/Input.hpp"
 
 #include "scripts/umamusume/Gallop/DialogCommonBase.hpp"
 #include "scripts/umamusume/Gallop/DialogCommon.hpp"
@@ -123,26 +71,19 @@
 #include "scripts/umamusume/Gallop/LowResolutionCameraUtil.hpp"
 #include "scripts/umamusume/Gallop/RaceCameraManager.hpp"
 #include "scripts/umamusume/Gallop/WebViewManager.hpp"
-#include "scripts/umamusume/Gallop/TitleViewController.hpp"
 #include "scripts/umamusume/Gallop/TextCommon.hpp"
-#include "scripts/umamusume/Gallop/TextFontManager.hpp"
 #include "scripts/umamusume/Gallop/Screen.hpp"
 #include "scripts/umamusume/Gallop/StoryViewController.hpp"
 #include "scripts/umamusume/Gallop/FrameRateController.hpp"
 #include "scripts/umamusume/Gallop/GameSystem.hpp"
-#include "scripts/umamusume/Gallop/GallopUtil.hpp"
 #include "scripts/umamusume/Gallop/GraphicSettings.hpp"
 #ifdef _MSC_VER
 #include "scripts/umamusume/Gallop/StandaloneWindowResize.hpp"
-#include "scripts/umamusume/Gallop/WindowsGamepadControl.hpp"
-#include "scripts/umamusume/Gallop/LandscapeUIManager.hpp"
 #endif
 
 #include "scripts/Plugins/AnimateToUnity/AnRootManager.hpp"
 
 #include "scripts/Plugins/CodeStage/AntiCheat/ObscuredTypes/ObscuredBool.hpp"
-#include "scripts/Plugins/CodeStage/AntiCheat/ObscuredTypes/ObscuredInt.hpp"
-#include "scripts/Plugins/CodeStage/AntiCheat/ObscuredTypes/ObscuredLong.hpp"
 
 #include "fpp/fpp.h"
 
@@ -157,19 +98,7 @@ using namespace ABI::Windows::Data::Xml::Dom;
 
 namespace
 {
-	il2cppstring GotoTitleError =
-		IL2CPP_STRING("내부적으로 오류가 발생하여 홈으로 이동합니다.\n\n"
-			"경우에 따라서 <color=#ff911c><i>타이틀</i></color>로 돌아가거나, \n"
-			"게임 <color=#ff911c><i>다시 시작</i></color>이 필요할 수 있습니다.");
-
-	il2cppstring GotoTitleErrorJa =
-		IL2CPP_STRING("内部的にエラーが発生し、ホームに移動します。\n\n"
-			"場合によっては、<color=#ff911c><i>タイトル</i></color>に戻るか、\n"
-			"ゲーム<color=#ff911c><i>再起動</i></color>が必要になる場合がありますあります。");
-
 	void patch_game_assembly();
-
-	void patch_after_criware();
 
 	bool mh_inited = false;
 
@@ -235,340 +164,6 @@ namespace
 		return TRUE;
 	}
 
-	set<void*> currentPlayerHandles;
-	set<void*> currentAcbHandles;
-
-	void* currentPlayerHandle;
-
-	Il2CppObject* currentElem;
-
-	void ShowCaptionByNotification(Il2CppObject* audioManager, Il2CppObject* elem)
-	{
-		if (!audioManager || !elem)
-		{
-			return;
-		}
-
-		auto characterIdField = il2cpp_class_get_field_from_name(elem->klass, "CharacterId");
-		auto voiceIdField = il2cpp_class_get_field_from_name(elem->klass, "VoiceId");
-		auto textField = il2cpp_class_get_field_from_name(elem->klass, "Text");
-		auto cueSheetField = il2cpp_class_get_field_from_name(elem->klass, "CueSheet");
-		auto cueIdField = il2cpp_class_get_field_from_name(elem->klass, "CueId");
-
-		if (!characterIdField ||
-			!voiceIdField ||
-			!textField ||
-			!cueSheetField ||
-			!cueIdField)
-		{
-			return;
-		}
-
-		int characterId;
-		il2cpp_field_get_value(elem, characterIdField, &characterId);
-
-		int voiceId;
-		il2cpp_field_get_value(elem, voiceIdField, &voiceId);
-
-		Il2CppString* text;
-		il2cpp_field_get_value(elem, textField, &text);
-
-		Il2CppString* cueSheet;
-		il2cpp_field_get_value(elem, cueSheetField, &cueSheet);
-
-		int cueId;
-		il2cpp_field_get_value(elem, cueIdField, &cueId);
-
-		if (!cueSheet || !text)
-		{
-			return;
-		}
-
-		auto u16Text = il2cppstring(text->chars);
-		replaceAll(u16Text, IL2CPP_STRING("\n\n"), IL2CPP_STRING(" "));
-		replaceAll(u16Text, IL2CPP_STRING("\n"), IL2CPP_STRING(" "));
-		if (il2cppstring(cueSheet->chars).find(IL2CPP_STRING("_home_")) == il2cppstring::npos &&
-			il2cppstring(cueSheet->chars).find(IL2CPP_STRING("_tc_")) == il2cppstring::npos &&
-			il2cppstring(cueSheet->chars).find(IL2CPP_STRING("_title_")) == il2cppstring::npos &&
-			il2cppstring(cueSheet->chars).find(IL2CPP_STRING("_kakao_")) == il2cppstring::npos &&
-			il2cppstring(cueSheet->chars).find(IL2CPP_STRING("_gacha_")) == il2cppstring::npos &&
-			voiceId != 95001 &&
-			(characterId < 9000 || voiceId == 95005 || voiceId == 95006 || voiceId == 70000))
-		{
-
-			if (il2cppstring(cueSheet->chars).find(IL2CPP_STRING("_training_")) != il2cppstring::npos && (cueId < 29 || cueId == 39))
-			{
-				if (!(voiceId >= 2030 && voiceId <= 2037) && voiceId < 93000 && !(cueId == 8 || cueId == 9 || cueId == 12 || cueId == 13))
-				{
-					if (voiceId == 20025)
-					{
-						auto sceneManager = GetSingletonInstance(il2cpp_symbols::get_class("umamusume.dll", "Gallop", "SceneManager"));
-
-						if (sceneManager)
-						{
-							auto viewId = il2cpp_class_get_method_from_name_type<int (*)(Il2CppObject*)>(sceneManager->klass, "GetCurrentViewId", 0)->methodPointer(sceneManager);
-
-							if (viewId != 5901)
-							{
-								return;
-							}
-						}
-						else
-						{
-							return;
-						}
-					}
-					else
-					{
-						return;
-					}
-				}
-			}
-
-			float length =
-				il2cpp_class_get_method_from_name_type<float (*)(Il2CppObject*, Il2CppString*, int)>(audioManager->klass, "GetCueLength", 2)->methodPointer(audioManager, cueSheet, cueId);
-
-			Localify::NotificationManager::SetDisplayTime(length);
-
-			Localify::NotificationManager::Show(Gallop::GallopUtil::LineHeadWrap(il2cpp_string_new16(u16Text.data()), config::character_system_text_caption_line_char_count));
-		}
-	}
-
-	void* criAtomExPlayer_SetCueId_orig = nullptr;
-	void criAtomExPlayer_SetCueId_hook(void* player, void* acb_hn, int id)
-	{
-		if (currentAcbHandles.contains(acb_hn))
-		{
-			currentPlayerHandles.insert(player);
-		}
-		reinterpret_cast<decltype(criAtomExPlayer_SetCueId_hook)*>(criAtomExPlayer_SetCueId_orig)(player, acb_hn, id);
-	}
-
-	void* criAtomExPlayer_Start_orig = nullptr;
-	UINT criAtomExPlayer_Start_hook(void* player)
-	{
-		if (currentPlayerHandles.contains(player) && currentElem)
-		{
-			currentPlayerHandle = player;
-
-			auto audioManager = GetSingletonInstance(
-				il2cpp_symbols::get_class("umamusume.dll", "Gallop", "AudioManager"));
-
-			ShowCaptionByNotification(audioManager, currentElem);
-		}
-		return reinterpret_cast<decltype(criAtomExPlayer_Start_hook)*>(criAtomExPlayer_Start_orig)(player);
-	}
-
-	void* criAtomExAcb_GetCueInfoById_orig = nullptr;
-	bool criAtomExAcb_GetCueInfoById_hook(void* acb_hn, int id, CriWare::CriAtomEx::CueInfo* info)
-	{
-		auto result = reinterpret_cast<decltype(criAtomExAcb_GetCueInfoById_hook)*>(criAtomExAcb_GetCueInfoById_orig)(acb_hn, id, info);
-
-		if (!info || !info->name)
-		{
-			return result;
-		}
-		const regex r(R"(_(?:9)*(\d{4})(?:\d{2})*_(\d{4})*_*(\d{2})*(?:\d{2})*$)");
-		smatch stringMatch;
-		const auto cueSheet = string(info->name);
-		const auto cueSheet16 = u8_il2cpp(cueSheet);
-		regex_search(cueSheet, stringMatch, r);
-		if (!stringMatch.empty())
-		{
-			auto charaIdStr = stringMatch[1].str();
-			if (!stringMatch[2].str().empty() && !stringMatch[3].str().empty())
-			{
-				auto index = stoi(stringMatch[3].str());
-
-				if (index == 1)
-				{
-					charaIdStr = stringMatch[2].str();
-				}
-			}
-
-			Il2CppObject* textList =
-				il2cpp_symbols::get_method_pointer<Il2CppObject * (*)(int)>("umamusume.dll", "Gallop",
-					"MasterCharacterSystemText", "GetByCharaId", 1)(stoi(charaIdStr));
-			if (textList)
-			{
-				FieldInfo* itemsField = il2cpp_class_get_field_from_name(textList->klass, "_items");
-				Il2CppArraySize_t<Il2CppObject*>* textArr;
-				il2cpp_field_get_value(textList, itemsField, &textArr);
-
-				if (textArr)
-				{
-					for (int i = 0; i < textArr->max_length; i++)
-					{
-						auto elem = textArr->vector[i];
-						if (elem)
-						{
-							auto elemCueIdField = il2cpp_class_get_field_from_name(elem->klass, "CueId");
-							auto elemCueSheetField = il2cpp_class_get_field_from_name(elem->klass, "CueSheet");
-
-							Il2CppString* elemCueSheet;
-							il2cpp_field_get_value(elem, elemCueSheetField, &elemCueSheet);
-
-							int elemCueId;
-							il2cpp_field_get_value(elem, elemCueIdField, &elemCueId);
-
-							if (elemCueSheet && cueSheet16.starts_with(elemCueSheet->chars) && info->id == elemCueId) {
-								currentAcbHandles.insert(acb_hn);
-								currentElem = elem;
-								break;
-							}
-						}
-					}
-				}
-			}
-		}
-
-		return result;
-	}
-
-	void* criAtomExAcb_GetCueInfoByName_orig = nullptr;
-	bool criAtomExAcb_GetCueInfoByName_hook(void* acb_hn, char* name, CriWare::CriAtomEx::CueInfo* info)
-	{
-		auto result = reinterpret_cast<decltype(criAtomExAcb_GetCueInfoByName_hook)*>(criAtomExAcb_GetCueInfoByName_orig)(acb_hn, name, info);
-
-		if (!info || !info->name)
-		{
-			return result;
-		}
-
-		const regex r(R"((\d{4})(?:\d{2})*_(\d{4})*_*(\d{2})*(?:\d{2})*$)");
-		smatch stringMatch;
-		const auto cueSheet = string(info->name);
-		const auto cueSheet16 = u8_il2cpp(cueSheet);
-		regex_search(cueSheet, stringMatch, r);
-		if (!stringMatch.empty())
-		{
-			auto charaIdStr = stringMatch[1].str();
-			if (!stringMatch[2].str().empty() && !stringMatch[3].str().empty())
-			{
-				auto index = stoi(stringMatch[3].str());
-
-				if (index == 1)
-				{
-					charaIdStr = stringMatch[2].str();
-				}
-			}
-
-			Il2CppObject* textList =
-				il2cpp_symbols::get_method_pointer<Il2CppObject * (*)(int)>("umamusume.dll", "Gallop",
-					"MasterCharacterSystemText", "GetByCharaId", 1)(stoi(charaIdStr));
-			if (textList)
-			{
-				FieldInfo* itemsField = il2cpp_class_get_field_from_name(textList->klass, "_items");
-				Il2CppArraySize* textArr;
-				il2cpp_field_get_value(textList, itemsField, &textArr);
-
-
-				if (textArr)
-				{
-					for (int i = 0; i < textArr->max_length; i++)
-					{
-						auto elem = reinterpret_cast<Il2CppObject*>(textArr->vector[i]);
-						if (elem)
-						{
-							auto elemCueIdField = il2cpp_class_get_field_from_name(elem->klass, "CueId");
-							auto elemCueSheetField = il2cpp_class_get_field_from_name(elem->klass, "CueSheet");
-
-							Il2CppString* elemCueSheet;
-							il2cpp_field_get_value(elem, elemCueSheetField, &elemCueSheet);
-
-							int elemCueId;
-							il2cpp_field_get_value(elem, elemCueIdField, &elemCueId);
-
-							if (elemCueSheet && cueSheet16.starts_with(elemCueSheet->chars) && info->id == elemCueId)
-							{
-								currentAcbHandles.insert(acb_hn);
-								currentElem = elem;
-								break;
-							}
-						}
-					}
-				}
-			}
-		}
-
-		return result;
-	}
-
-	void* criAtomExAcb_Release_orig = nullptr;
-	void criAtomExAcb_Release_hook(void* acb_hn)
-	{
-		if (currentAcbHandles.contains(acb_hn))
-		{
-			currentAcbHandles.erase(acb_hn);
-		}
-		reinterpret_cast<decltype(criAtomExAcb_Release_hook)*>(criAtomExAcb_Release_orig)(acb_hn);
-	}
-
-	void* criAtomExPlayer_Stop_orig = nullptr;
-	void criAtomExPlayer_Stop_hook(void* player)
-	{
-		reinterpret_cast<decltype(criAtomExPlayer_Stop_hook)*>(criAtomExPlayer_Stop_orig)(player);
-		if (currentPlayerHandles.contains(player) && currentPlayerHandle == player)
-		{
-			currentElem = nullptr;
-
-			Localify::NotificationManager::Cleanup();
-		}
-	}
-
-	void* criAtomExPlayer_StopWithoutReleaseTime_orig = nullptr;
-	void criAtomExPlayer_StopWithoutReleaseTime_hook(void* player)
-	{
-		reinterpret_cast<decltype(criAtomExPlayer_StopWithoutReleaseTime_hook)*>(criAtomExPlayer_StopWithoutReleaseTime_orig)(player);
-		if (currentPlayerHandles.contains(player) && currentPlayerHandle == player)
-		{
-			currentElem = nullptr;
-
-			Localify::NotificationManager::Cleanup();
-		}
-	}
-
-	void* criAtomExPlayer_Pause_orig = nullptr;
-	void criAtomExPlayer_Pause_hook(void* player, bool sw)
-	{
-		reinterpret_cast<decltype(criAtomExPlayer_Pause_hook)*>(criAtomExPlayer_Pause_orig)(player, sw);
-		if (!sw && currentPlayerHandles.contains(player) && currentPlayerHandle == player)
-		{
-			currentElem = nullptr;
-
-			Localify::NotificationManager::Cleanup();
-		}
-	}
-
-	void* CriMana_SetFileNew_orig = nullptr;
-	void CriMana_SetFileNew_hook(int player_id, void* binder, const char* path)
-	{
-		auto fileName = GetFileName(path);
-
-		if (config::replace_assets.find(fileName) != config::replace_assets.end())
-		{
-			auto& replaceAsset = config::replace_assets.at(fileName);
-			reinterpret_cast<decltype(CriMana_SetFileNew_hook)*>(CriMana_SetFileNew_orig)(player_id, binder, il2cpp_u8(replaceAsset.path).data());
-			return;
-		}
-
-		reinterpret_cast<decltype(CriMana_SetFileNew_hook)*>(CriMana_SetFileNew_orig)(player_id, binder, path);
-	}
-
-	void* CriMana_SetFileAppend_orig = nullptr;
-	bool CriMana_SetFileAppend_hook(int player_id, void* binder, const char* path, bool repeat)
-	{
-		auto fileName = GetFileName(path);
-
-		if (config::replace_assets.find(fileName) != config::replace_assets.end())
-		{
-			auto& replaceAsset = config::replace_assets.at(fileName);
-			return reinterpret_cast<decltype(CriMana_SetFileAppend_hook)*>(CriMana_SetFileAppend_orig)(player_id, binder, il2cpp_u8(replaceAsset.path).data(), repeat);
-		}
-
-		return reinterpret_cast<decltype(CriMana_SetFileAppend_hook)*>(CriMana_SetFileAppend_orig)(player_id, binder, path, repeat);
-	}
-
 	void* delete_cookies_orig = nullptr;
 	int delete_cookies_hook(
 		struct _cef_cookie_manager_t* self,
@@ -601,10 +196,10 @@ namespace
 		return manager;
 	}
 
-	void* load_library_ex_w_orig = nullptr;
+	void* LoadLibraryExW_orig = nullptr;
 	HMODULE
 		WINAPI
-		load_library_ex_w_hook(
+		LoadLibraryExW_hook(
 			_In_ LPCWSTR lpLibFileName,
 			_Reserved_ HANDLE hFile,
 			_In_ DWORD dwFlags
@@ -614,7 +209,7 @@ namespace
 		{
 			if (wstring(lpLibFileName).find(L"KakaoGame.dll") != wstring::npos)
 			{
-				auto KakaoGame = reinterpret_cast<decltype(LoadLibraryExW)*>(load_library_ex_w_orig)(lpLibFileName, hFile, dwFlags);
+				auto KakaoGame = reinterpret_cast<decltype(LoadLibraryExW)*>(LoadLibraryExW_orig)(lpLibFileName, hFile, dwFlags);
 
 				auto cef = GetModuleHandleW(L"libcef.dll");
 
@@ -627,7 +222,7 @@ namespace
 			}
 		}
 
-		return reinterpret_cast<decltype(LoadLibraryExW)*>(load_library_ex_w_orig)(lpLibFileName, hFile, dwFlags);
+		return reinterpret_cast<decltype(LoadLibraryExW)*>(LoadLibraryExW_orig)(lpLibFileName, hFile, dwFlags);
 	}
 
 	IUnityInterfaces* unityInterfaces;
@@ -706,12 +301,12 @@ namespace
 		return data;
 	}
 
-	void* load_library_w_orig = nullptr;
-	HMODULE WINAPI load_library_w_hook(LPCWSTR lpLibFileName)
+	void* LoadLibraryW_orig = nullptr;
+	HMODULE WINAPI LoadLibraryW_hook(LPCWSTR lpLibFileName)
 	{
 		if (lpLibFileName == L"KakaoGameWin.dll"s)
 		{
-			auto KakaoGameWin = reinterpret_cast<decltype(LoadLibraryW)*>(load_library_w_orig)(lpLibFileName);
+			auto KakaoGameWin = reinterpret_cast<decltype(LoadLibraryW)*>(LoadLibraryW_orig)(lpLibFileName);
 
 			MH_DisableHook(LoadLibraryW);
 			MH_RemoveHook(LoadLibraryW);
@@ -725,7 +320,7 @@ namespace
 
 		if (lpLibFileName == L"UmamusumeKr.dll"s)
 		{
-			const auto UmamusumeKr = reinterpret_cast<decltype(LoadLibraryW)*>(load_library_w_orig)(lpLibFileName);
+			const auto UmamusumeKr = reinterpret_cast<decltype(LoadLibraryW)*>(LoadLibraryW_orig)(lpLibFileName);
 			const auto umaFindService_addr = GetProcAddress(UmamusumeKr, "umaFindService");
 			MH_CreateHook(umaFindService_addr, umaFindService_hook, &umaFindService_orig);
 			MH_EnableHook(umaFindService_addr);
@@ -743,12 +338,12 @@ namespace
 				{
 					auto path = config::external_dlls_path[i];
 					wcout << L"Loading " << path << L": ";
-					auto dll = LoadLibraryW(path.data());
+					auto dll = reinterpret_cast<decltype(LoadLibraryW)*>(LoadLibraryW_orig)(path.data());
 					wcout << dll << endl;
 				}
 			}
 
-			const auto il2cpp = reinterpret_cast<decltype(LoadLibraryW)*>(load_library_w_orig)(lpLibFileName);
+			const auto il2cpp = reinterpret_cast<decltype(LoadLibraryW)*>(LoadLibraryW_orig)(lpLibFileName);
 			/*std::ofstream out("./GameAssembly.decrypted.dll", std::ios_base::binary);
 			MODULEINFO info;
 			if (out && GetModuleInformation(GetCurrentProcess(), il2cpp, &info, sizeof(info)))
@@ -785,143 +380,24 @@ namespace
 				cout << "WARN: il2cpp_init Failed: " << MH_StatusToString(result) << " LastError: " << GetLastError() << endl << endl;
 			}
 
-			return il2cpp;
-		}
-
-		if (lpLibFileName == L"UnityOpenXR.dll"s)
-		{
-			auto module = reinterpret_cast<decltype(LoadLibraryW)*>(load_library_w_orig)(lpLibFileName);
-
-			Unity::OpenXR::InitModule(module);
-			return module;
-		}
-
-		static bool criwareInit = false;
-
-		// GameAssembly.dll code must be loaded and decrypted while loading criware library
-		if (lpLibFileName == L"cri_ware_unity.dll"s && !criwareInit)
-		{
-			criwareInit = true;
-
-			patch_after_criware();
-
-			wstring module_name;
-			module_name.resize(MAX_PATH);
-			module_name.resize(GetModuleFileNameW(nullptr, module_name.data(), MAX_PATH));
-
-			filesystem::path module_path(module_name);
-
-			wstring name = module_path.filename().replace_extension();
-
-			SetDllDirectoryW((name + L"_Data\\Plugins\\x86_64\\"s).data());
-
-			// use original function beacuse we have unhooked that
-			auto criware = reinterpret_cast<decltype(LoadLibraryW)*>(load_library_w_orig)(lpLibFileName);
-
 			if (Game::CurrentGameRegion != Game::Region::KOR)
 			{
 				MH_DisableHook(LoadLibraryW);
 				MH_RemoveHook(LoadLibraryW);
 			}
 
-			if (config::character_system_text_caption)
-			{
-				auto criAtomExPlayer_SetCueId_addr = GetProcAddress(criware, "criAtomExPlayer_SetCueId");
-
-				MH_CreateHook(criAtomExPlayer_SetCueId_addr, criAtomExPlayer_SetCueId_hook, &criAtomExPlayer_SetCueId_orig);
-				MH_EnableHook(criAtomExPlayer_SetCueId_addr);
-
-				auto criAtomExPlayer_Start_addr = GetProcAddress(criware, "criAtomExPlayer_Start");
-
-				MH_CreateHook(criAtomExPlayer_Start_addr, criAtomExPlayer_Start_hook, &criAtomExPlayer_Start_orig);
-				MH_EnableHook(criAtomExPlayer_Start_addr);
-
-				auto criAtomExAcb_GetCueInfoById_addr = GetProcAddress(criware, "criAtomExAcb_GetCueInfoById");
-
-				MH_CreateHook(criAtomExAcb_GetCueInfoById_addr, criAtomExAcb_GetCueInfoById_hook, &criAtomExAcb_GetCueInfoById_orig);
-				MH_EnableHook(criAtomExAcb_GetCueInfoById_addr);
-
-				auto criAtomExAcb_GetCueInfoByName_addr = GetProcAddress(criware, "criAtomExAcb_GetCueInfoByName");
-
-				MH_CreateHook(criAtomExAcb_GetCueInfoByName_addr, criAtomExAcb_GetCueInfoByName_hook, &criAtomExAcb_GetCueInfoByName_orig);
-				MH_EnableHook(criAtomExAcb_GetCueInfoByName_addr);
-
-				auto criAtomExAcb_Release_addr = GetProcAddress(criware, "criAtomExAcb_Release");
-
-				MH_CreateHook(criAtomExAcb_Release_addr, criAtomExAcb_Release_hook, &criAtomExAcb_Release_orig);
-				MH_EnableHook(criAtomExAcb_Release_addr);
-
-				auto criAtomExPlayer_Stop_addr = GetProcAddress(criware, "criAtomExPlayer_Stop");
-
-				MH_CreateHook(criAtomExPlayer_Stop_addr, criAtomExPlayer_Stop_hook, &criAtomExPlayer_Stop_orig);
-				MH_EnableHook(criAtomExPlayer_Stop_addr);
-
-				auto criAtomExPlayer_StopWithoutReleaseTime_addr = GetProcAddress(criware, "criAtomExPlayer_StopWithoutReleaseTime");
-
-				MH_CreateHook(criAtomExPlayer_StopWithoutReleaseTime_addr, criAtomExPlayer_StopWithoutReleaseTime_hook, &criAtomExPlayer_StopWithoutReleaseTime_orig);
-				MH_EnableHook(criAtomExPlayer_StopWithoutReleaseTime_addr);
-
-				auto criAtomExPlayer_Pause_addr = GetProcAddress(criware, "criAtomExPlayer_Pause");
-
-				MH_CreateHook(criAtomExPlayer_Pause_addr, criAtomExPlayer_Pause_hook, &criAtomExPlayer_Pause_orig);
-				MH_EnableHook(criAtomExPlayer_Pause_addr);
-			}
-
-			if (!config::replace_assets.empty())
-			{
-				auto CriMana_SetFileNew_addr = GetProcAddress(criware, "CRIWARE310ABCEC");
-				if (!CriMana_SetFileNew_addr)
-				{
-					CriMana_SetFileNew_addr = GetProcAddress(criware, "CRIWAREDA7020AB");
-				}
-
-				if (!CriMana_SetFileNew_addr)
-				{
-					CriMana_SetFileNew_addr = GetProcAddress(criware, "CRIWARE310ABCEC");
-				}
-
-				if (!CriMana_SetFileNew_addr)
-				{
-					CriMana_SetFileNew_addr = GetProcAddress(criware, "CRIWARE6A5D4549");
-				}
-
-				if (!CriMana_SetFileNew_addr)
-				{
-					CriMana_SetFileNew_addr = GetProcAddress(criware, "CRIWAREDF8F52BA");
-				}
-
-				MH_CreateHook(CriMana_SetFileNew_addr, CriMana_SetFileNew_hook, &CriMana_SetFileNew_orig);
-				MH_EnableHook(CriMana_SetFileNew_addr);
-
-				auto CriMana_SetFileAppend_addr = GetProcAddress(criware, "CRIWAREB83D23AD");
-				if (!CriMana_SetFileAppend_addr)
-				{
-					CriMana_SetFileAppend_addr = GetProcAddress(criware, "CRIWAREE7861E0D");
-				}
-
-				if (!CriMana_SetFileAppend_addr)
-				{
-					CriMana_SetFileAppend_addr = GetProcAddress(criware, "CRIWARE925FC233");
-				}
-
-				if (!CriMana_SetFileAppend_addr)
-				{
-					CriMana_SetFileAppend_addr = GetProcAddress(criware, "CRIWARE6F49ABEA");
-				}
-
-				if (!CriMana_SetFileAppend_addr)
-				{
-					CriMana_SetFileAppend_addr = GetProcAddress(criware, "CRIWARE063F9CD6");
-				}
-
-				MH_CreateHook(CriMana_SetFileAppend_addr, CriMana_SetFileAppend_hook, &CriMana_SetFileAppend_orig);
-				MH_EnableHook(CriMana_SetFileAppend_addr);
-			}
-
-			return criware;
+			return il2cpp;
 		}
 
-		return reinterpret_cast<decltype(LoadLibraryW)*>(load_library_w_orig)(lpLibFileName);
+		if (lpLibFileName == L"UnityOpenXR.dll"s)
+		{
+			auto module = reinterpret_cast<decltype(LoadLibraryW)*>(LoadLibraryW_orig)(lpLibFileName);
+
+			Unity::OpenXR::InitModule(module);
+			return module;
+		}
+
+		return reinterpret_cast<decltype(LoadLibraryW)*>(LoadLibraryW_orig)(lpLibFileName);
 	}
 
 	void* GetProcAddress_orig = nullptr;
@@ -939,11 +415,6 @@ namespace
 	}
 
 	bool useDefaultFPS = false;
-
-	constexpr float ratio_16_9 = 1.7777f;
-	constexpr float ratio_9_16 = 0.5625f;
-	constexpr float ratio_4_3 = 1.3333f;
-	constexpr float ratio_3_4 = 0.75f;
 
 	void SetBGCanvasScalerSize()
 	{
@@ -1488,8 +959,6 @@ namespace
 		}
 	}
 
-	void MoviePlayerForUI_AdjustScreenSize_hook(Il2CppObject* self, UnityEngine::Vector2 dispRectWH, bool isPanScan);
-
 	void ResizeMoviePlayer()
 	{
 		auto movieManager = il2cpp_symbols::get_method_pointer<Il2CppObject * (*)()>("Cute.Cri.Assembly.dll", "Cute.Cri", "MovieManager", "get_Instance", IgnoreNumberOfArguments)();
@@ -1606,18 +1075,15 @@ namespace
 												auto status = il2cpp_class_get_method_from_name_type<int (*)(Il2CppObject*)>(criPlayer->klass, "get_status", 0)->methodPointer(criPlayer);
 												if (status == 5)
 												{
-													MoviePlayerForUI_AdjustScreenSize_hook(player, newSize, true);
+													Cute::Cri::MoviePlayerForUI(player).AdjustScreenSize(newSize, true);
 												}
 											}
 
 										}
 										else if (parent->klass->name == "RectTransform"s)
 										{
-											auto parentGameObject = il2cpp_class_get_method_from_name_type<Il2CppObject * (*)(Il2CppObject*)>(parent->klass, "get_gameObject", 0)->methodPointer(parent);
-											auto getComponents = il2cpp_class_get_method_from_name_type<Il2CppArraySize * (*)(Il2CppObject*, Il2CppType*, bool, bool, bool, bool, Il2CppObject*)>(parentGameObject->klass, "GetComponentsInternal", 6)->methodPointer;
-
-											auto array = getComponents(parentGameObject, reinterpret_cast<Il2CppType*>(GetRuntimeType(
-												"umamusume.dll", "Gallop", "PartsEpisodeList")), true, true, false, true, nullptr);
+											auto parentGameObject = UnityEngine::RectTransform(parent).gameObject();
+											auto array = parentGameObject.GetComponentsInChildren(GetRuntimeType("umamusume.dll", "Gallop", "PartsEpisodeList"), false);
 
 											if (array)
 											{
@@ -1638,7 +1104,7 @@ namespace
 														auto status = il2cpp_class_get_method_from_name_type<int (*)(Il2CppObject*)>(criPlayer->klass, "get_status", 0)->methodPointer(criPlayer);
 														if (status == 5)
 														{
-															MoviePlayerForUI_AdjustScreenSize_hook(player, newSize, true);
+															Cute::Cri::MoviePlayerForUI(player).AdjustScreenSize(newSize, true);
 														}
 													}
 												}
@@ -2942,236 +2408,6 @@ namespace
 		return false;
 	}
 
-	static bool IsMovingLivePlayback = false;
-
-	void MoveLivePlayback(float value)
-	{
-		if (IsMovingLivePlayback)
-		{
-			return;
-		}
-
-		IsMovingLivePlayback = true;
-
-		auto director = GetSingletonInstance(il2cpp_symbols::get_class("umamusume.dll", "Gallop.Live", "Director"));
-		if (director)
-		{
-			bool isPauseLive = il2cpp_class_get_method_from_name_type<bool (*)()>(director->klass, "IsPauseLive", 0)->methodPointer();
-
-			auto _liveCurrentTimeField = il2cpp_class_get_field_from_name(director->klass, "_liveCurrentTime");
-			il2cpp_field_set_value(director, _liveCurrentTimeField, &value);
-
-			auto LiveTimeController = il2cpp_class_get_method_from_name_type<Il2CppObject * (*)(Il2CppObject*)>(director->klass, "get_LiveTimeController", 0)->methodPointer(director);
-
-			if (!isPauseLive)
-			{
-				// prevent voice desync
-				il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*)>(LiveTimeController->klass, "PauseLive", 0)->methodPointer(LiveTimeController);
-			}
-
-			auto _elapsedTimeField = il2cpp_class_get_field_from_name(LiveTimeController->klass, "_elapsedTime");
-			il2cpp_field_set_value(LiveTimeController, _elapsedTimeField, &value);
-
-			il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, float)>(LiveTimeController->klass, "set_CurrentTime", 1)->methodPointer(LiveTimeController, value);
-
-			auto AudioManager = GetSingletonInstance(il2cpp_symbols::get_class("umamusume.dll", "Gallop", "AudioManager"));
-			auto CriAudioManager = il2cpp_class_get_method_from_name_type<Il2CppObject * (*)(Il2CppObject*)>(AudioManager->klass, "get_CriAudioManager", 0)->methodPointer(AudioManager);
-
-			auto audioCtrlDictField = il2cpp_class_get_field_from_name(CriAudioManager->klass, "audioCtrlDict");
-			Il2CppObject* audioCtrlDict;
-			il2cpp_field_get_value(CriAudioManager, audioCtrlDictField, &audioCtrlDict);
-
-			auto _songPlaybackField = il2cpp_class_get_field_from_name(AudioManager->klass, "_songPlayback");
-			Cute::Cri::AudioPlayback _songPlayback;
-			il2cpp_field_get_value(AudioManager, _songPlaybackField, &_songPlayback);
-
-			auto _songCharaPlaybacksField = il2cpp_class_get_field_from_name(AudioManager->klass, "_songCharaPlaybacks");
-			Il2CppArraySize_t<Cute::Cri::AudioPlayback>* _songCharaPlaybacks;
-			il2cpp_field_get_value(AudioManager, _songCharaPlaybacksField, &_songCharaPlaybacks);
-
-			void** params = new void* [1];
-			params[0] = &_songPlayback.soundGroup;
-
-			Il2CppException* exception;
-
-			auto audioCtrl = il2cpp_runtime_invoke(il2cpp_class_get_method_from_name(audioCtrlDict->klass, "get_Item", 1), audioCtrlDict, params, &exception);
-
-			delete[] params;
-
-			if (exception)
-			{
-				wcout << exception->message->chars << endl;
-			}
-
-			auto poolField = il2cpp_class_get_field_from_name(audioCtrl->klass, "pool");
-			Il2CppObject* pool;
-			il2cpp_field_get_value(audioCtrl, poolField, &pool);
-
-			if (pool)
-			{
-				FieldInfo* sourceListField = il2cpp_class_get_field_from_name(pool->klass, "sourceList");
-				Il2CppObject* sourceList;
-				il2cpp_field_get_value(pool, sourceListField, &sourceList);
-
-				FieldInfo* itemsField = il2cpp_class_get_field_from_name(sourceList->klass, "_items");
-				Il2CppArraySize_t<Il2CppObject*>* sources;
-				il2cpp_field_get_value(sourceList, itemsField, &sources);
-
-				Il2CppObject* cuteAudioSource = nullptr;
-
-				for (int i = 0; i < sources->max_length; i++)
-				{
-					auto obj = sources->vector[i];
-
-					if (obj)
-					{
-						auto isSame = il2cpp_class_get_method_from_name_type<bool (*)(Il2CppObject*, Cute::Cri::AudioPlayback)>(obj->klass, "IsSamePlaybackId", 1)->methodPointer(obj, _songPlayback);
-						if (isSame)
-						{
-							cuteAudioSource = obj;
-							break;
-						}
-					}
-				}
-
-				if (cuteAudioSource)
-				{
-					auto sourceListField = il2cpp_class_get_field_from_name(cuteAudioSource->klass, "sourceList");
-					Il2CppObject* sourceList;
-					il2cpp_field_get_value(cuteAudioSource, sourceListField, &sourceList);
-
-					auto usingIndexField = il2cpp_class_get_field_from_name(cuteAudioSource->klass, "usingIndex");
-					int usingIndex;
-					il2cpp_field_get_value(cuteAudioSource, usingIndexField, &usingIndex);
-
-					params = new void* [1];
-					params[0] = &usingIndex;
-
-					auto AtomSource = il2cpp_runtime_invoke(il2cpp_class_get_method_from_name(sourceList->klass, "get_Item", 1), sourceList, params, &exception);
-
-					delete[] params;
-
-					if (exception)
-					{
-						wcout << exception->message->chars << endl;
-					}
-
-					auto player = il2cpp_class_get_method_from_name_type<Il2CppObject * (*)(Il2CppObject*)>(AtomSource->klass, "get_player", 0)->methodPointer(AtomSource);
-					il2cpp_class_get_method_from_name_type<CriWare::CriAtomExPlayback(*)(Il2CppObject*)>(player->klass, "StopWithoutReleaseTime", 0)->methodPointer(player);
-					il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, long)>(player->klass, "SetStartTime", 1)->methodPointer(player, static_cast<long>(roundf(value * 1000.0f)));
-					auto playback = il2cpp_class_get_method_from_name_type<CriWare::CriAtomExPlayback(*)(Il2CppObject*)>(player->klass, "Start", 0)->methodPointer(player);
-					il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, CriWare::CriAtomExPlayback)>(player->klass, "Update", 1)->methodPointer(player, playback);
-
-					il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*)>(player->klass, "Pause", 0)->methodPointer(player);
-
-					_songPlayback.criAtomExPlayback = playback;
-					il2cpp_field_set_value(AudioManager, _songPlaybackField, &_songPlayback);
-					il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, CriWare::CriAtomExPlayback)>(AtomSource->klass, "set_Playback", 1)->methodPointer(AtomSource, playback);
-				}
-			}
-
-
-			if (_songCharaPlaybacks)
-			{
-				for (int i = 0; i < _songCharaPlaybacks->max_length; i++)
-				{
-					auto charaPlayback = _songCharaPlaybacks->vector[i];
-
-					void** params = new void* [1];
-					params[0] = &charaPlayback.soundGroup;
-
-					Il2CppException* exception;
-
-					auto audioCtrl = il2cpp_runtime_invoke(il2cpp_class_get_method_from_name(audioCtrlDict->klass, "get_Item", 1), audioCtrlDict, params, &exception);
-
-					delete[] params;
-
-					if (exception)
-					{
-						wcout << exception->message->chars << endl;
-						continue;
-					}
-
-					auto poolField = il2cpp_class_get_field_from_name(audioCtrl->klass, "pool");
-					Il2CppObject* pool;
-					il2cpp_field_get_value(audioCtrl, poolField, &pool);
-
-					if (pool)
-					{
-						FieldInfo* sourceListField = il2cpp_class_get_field_from_name(pool->klass, "sourceList");
-						Il2CppObject* sourceList;
-						il2cpp_field_get_value(pool, sourceListField, &sourceList);
-
-						FieldInfo* itemsField = il2cpp_class_get_field_from_name(sourceList->klass, "_items");
-						Il2CppArraySize_t<Il2CppObject*>* sources;
-						il2cpp_field_get_value(sourceList, itemsField, &sources);
-
-						Il2CppObject* cuteAudioSource = nullptr;
-
-						for (int i = 0; i < sources->max_length; i++)
-						{
-							auto obj = sources->vector[i];
-
-							if (obj)
-							{
-								auto isSame = il2cpp_class_get_method_from_name_type<bool (*)(Il2CppObject*, Cute::Cri::AudioPlayback)>(obj->klass, "IsSamePlaybackId", 1)->methodPointer(obj, charaPlayback);
-								if (isSame)
-								{
-									cuteAudioSource = obj;
-									break;
-								}
-							}
-						}
-
-						if (cuteAudioSource)
-						{
-							auto sourceListField = il2cpp_class_get_field_from_name(cuteAudioSource->klass, "sourceList");
-							Il2CppObject* sourceList;
-							il2cpp_field_get_value(cuteAudioSource, sourceListField, &sourceList);
-
-							auto usingIndexField = il2cpp_class_get_field_from_name(cuteAudioSource->klass, "usingIndex");
-							int usingIndex;
-							il2cpp_field_get_value(cuteAudioSource, usingIndexField, &usingIndex);
-
-							params = new void* [1];
-							params[0] = &usingIndex;
-
-							auto AtomSource = il2cpp_runtime_invoke(il2cpp_class_get_method_from_name(sourceList->klass, "get_Item", 1), sourceList, params, &exception);
-
-							delete[] params;
-
-							if (exception)
-							{
-								wcout << exception->message->chars << endl;
-								continue;
-							}
-
-							auto player = il2cpp_class_get_method_from_name_type<Il2CppObject * (*)(Il2CppObject*)>(AtomSource->klass, "get_player", 0)->methodPointer(AtomSource);
-							il2cpp_class_get_method_from_name_type<CriWare::CriAtomExPlayback(*)(Il2CppObject*)>(player->klass, "StopWithoutReleaseTime", 0)->methodPointer(player);
-							il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, long)>(player->klass, "SetStartTime", 1)->methodPointer(player, static_cast<long>(roundf(value * 1000.0f)));
-							auto playback = il2cpp_class_get_method_from_name_type<CriWare::CriAtomExPlayback(*)(Il2CppObject*)>(player->klass, "Start", 0)->methodPointer(player);
-							il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, CriWare::CriAtomExPlayback)>(player->klass, "Update", 1)->methodPointer(player, playback);
-
-							il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*)>(player->klass, "Pause", 0)->methodPointer(player);
-
-							charaPlayback.criAtomExPlayback = playback;
-
-							il2cpp_array_setref_type_memmove(_songCharaPlaybacks, Cute::Cri::AudioPlayback, i, &playback);
-							il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, CriWare::CriAtomExPlayback)>(AtomSource->klass, "set_Playback", 1)->methodPointer(AtomSource, playback);
-						}
-					}
-				}
-			}
-
-			if (!isPauseLive)
-			{
-				il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*)>(LiveTimeController->klass, "ResumeLive", 0)->methodPointer(LiveTimeController);
-			}
-		}
-
-		IsMovingLivePlayback = false;
-	}
-
 	bool ControlLiveTime(WPARAM wParam)
 	{
 		auto SaveDataManager = GetSingletonInstance(il2cpp_symbols::get_class("umamusume.dll", "Gallop", "SaveDataManager"));
@@ -3226,7 +2462,7 @@ namespace
 					}
 				}
 
-				MoveLivePlayback(LiveCurrentTime);
+				Localify::LiveUtils::MoveLivePlayback(LiveCurrentTime);
 
 				return true;
 			}
@@ -4522,584 +3758,6 @@ namespace
 		return DefWindowProcW(hWnd, uMsg, wParam, lParam);
 	}
 
-	void* TextMeshProUguiCommon_Awake_orig = nullptr;
-	void TextMeshProUguiCommon_Awake_hook(Il2CppObject* self)
-	{
-		reinterpret_cast<decltype(TextMeshProUguiCommon_Awake_hook)*>(TextMeshProUguiCommon_Awake_orig)(self);
-		auto customFont = GetCustomTMPFont();
-
-		if (!customFont)
-		{
-			return;
-		}
-
-		il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, Il2CppObject*)>(self->klass, "set_font", 1)->methodPointer(self, customFont);
-		il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, bool)>(self->klass, "set_enableWordWrapping", 1)->methodPointer(self, false);
-
-		auto customFontMaterialField = il2cpp_class_get_field_from_name(customFont->klass, "material");
-		Il2CppObject* customFontMaterial;
-		il2cpp_field_get_value(customFont, customFontMaterialField, &customFontMaterial);
-		il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, Il2CppObject*)>(self->klass, "set_fontSharedMaterial", 1)->methodPointer(self, customFontMaterial);
-
-		auto origOutlineWidth = il2cpp_class_get_method_from_name_type<float (*)(Il2CppObject*)>(self->klass, "get_outlineWidth", 0)->methodPointer(self);
-
-		auto outlineColorDictField = il2cpp_class_get_field_from_name(il2cpp_symbols::get_class("umamusume.dll", "Gallop", "ColorPreset"), "OutlineColorDictionary");
-		Il2CppObject* outlineColorDict;
-		il2cpp_field_static_get_value(outlineColorDictField, &outlineColorDict);
-		auto colorEnum = il2cpp_class_get_method_from_name_type<uint32_t(*)(Il2CppObject*)>(self->klass, "get_OutlineColor", 0)->methodPointer(self);
-
-		auto entriesField = il2cpp_class_get_field_from_name(outlineColorDict->klass, "_entries");
-		if (!entriesField)
-		{
-			entriesField = il2cpp_class_get_field_from_name(outlineColorDict->klass, "entries");
-		}
-		Il2CppArraySize_t<System::Collections::Generic::Dictionary<uint32_t, UnityEngine::Color32>::Entry>* entries;
-		il2cpp_field_get_value(outlineColorDict, entriesField, &entries);
-
-		UnityEngine::Color32 color32{};
-		for (int i = 0; i < entries->max_length; i++)
-		{
-			auto entry = entries->vector[i];
-			if (entry.key == colorEnum)
-			{
-				color32 = entry.value;
-				break;
-			}
-		}
-
-		float a = color32.a / static_cast<float>(0xff);
-		float b = color32.b / static_cast<float>(0xff);
-		float g = color32.g / static_cast<float>(0xff);
-		float r = color32.r / static_cast<float>(0xff);
-
-		auto origOutlineColor = UnityEngine::Color{ r, g, b, a };
-
-		il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, Il2CppString*, float)>(customFontMaterial->klass, "SetFloat", 2)->methodPointer(customFontMaterial, il2cpp_string_new("_OutlineWidth"), origOutlineWidth);
-		il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, Il2CppString*, UnityEngine::Color)>(customFontMaterial->klass, "SetColor", 2)->methodPointer(customFontMaterial, il2cpp_string_new("_OutlineColor"), origOutlineColor);
-	}
-
-	void InitOptionLayout(Il2CppObject* parentRectTransform)
-	{
-		Localify::UIParts::AddToLayout(parentRectTransform,
-			{
-				Localify::UIParts::GetOptionItemTitle(LocalifySettings::GetText("settings_title")),
-				Localify::UIParts::GetOptionItemButton("open_settings", LocalifySettings::GetText("open_settings")),
-			}
-			);
-	}
-
-	void SetupOptionLayout()
-	{
-		Localify::UIParts::SetOptionItemButtonAction("open_settings", *([](Il2CppObject*)
-			{
-				Localify::SettingsUI::OpenSettings();
-			}));
-	}
-
-	void SetupLiveOptionLayout()
-	{
-		Localify::UIParts::SetOptionItemButtonAction("open_settings", *([](Il2CppObject*)
-			{
-				Localify::SettingsUI::OpenLiveSettings();
-			}));
-	}
-
-	void* Object_Internal_CloneSingleWithParent_orig = nullptr;
-	Il2CppObject* Object_Internal_CloneSingleWithParent_hook(Il2CppObject* data, Il2CppObject* parent, bool worldPositionStays)
-	{
-		auto cloned = reinterpret_cast<decltype(Object_Internal_CloneSingleWithParent_hook)*>(Object_Internal_CloneSingleWithParent_orig)(data, parent, worldPositionStays);
-
-		if (il2cppstring(UnityEngine::Object::Name(cloned)->chars).find(IL2CPP_STRING("DialogOptionHome")) != wstring::npos)
-		{
-			auto dialog = UnityEngine::GameObject(cloned).GetComponent(GetRuntimeType("umamusume.dll", "Gallop", "DialogOptionHome"));
-
-			auto _optionPageBasicSettingField = il2cpp_class_get_field_from_name(dialog->klass, "_optionPageBasicSetting");
-			Il2CppObject* _optionPageBasicSetting;
-			il2cpp_field_get_value(dialog, _optionPageBasicSettingField, &_optionPageBasicSetting);
-
-			auto PartsOptionPageBasicSetting = UnityEngine::MonoBehaviour(_optionPageBasicSetting).gameObject();
-			PartsOptionPageBasicSetting.SetActive(true);
-
-			auto rectTransformArray = PartsOptionPageBasicSetting.GetComponentsInChildren(GetRuntimeType("UnityEngine.CoreModule.dll", "UnityEngine", "RectTransform"), false);
-
-			for (int j = 0; j < rectTransformArray->max_length; j++)
-			{
-				auto rectTransform = rectTransformArray->vector[j];
-				if (rectTransform && UnityEngine::Object::Name(rectTransform)->chars == il2cppstring(IL2CPP_STRING("Content")))
-				{
-					InitOptionLayout(rectTransform);
-					break;
-				}
-			}
-
-			SetupOptionLayout();
-		}
-
-		if (il2cppstring(UnityEngine::Object::Name(cloned)->chars).find(IL2CPP_STRING("DialogOptionLiveTheater")) != wstring::npos)
-		{
-			auto rectTransformArray = UnityEngine::GameObject(cloned).GetComponentsInChildren(GetRuntimeType("UnityEngine.CoreModule.dll", "UnityEngine", "RectTransform"), false);
-
-			for (int i = 0; i < rectTransformArray->max_length; i++)
-			{
-				auto rectTransform = rectTransformArray->vector[i];
-
-				if (rectTransform && UnityEngine::Object::Name(rectTransform)->chars == il2cppstring(IL2CPP_STRING("Content")))
-				{
-					InitOptionLayout(rectTransform);
-					break;
-				}
-			}
-
-			SetupLiveOptionLayout();
-		}
-
-		if (il2cppstring(UnityEngine::Object::Name(cloned)->chars).find(IL2CPP_STRING("CharacterHomeTopUI")) != wstring::npos)
-		{
-			auto CharacterHomeTopUI = UnityEngine::GameObject(cloned).GetComponent(GetRuntimeType("umamusume.dll", "Gallop", "CharacterHomeTopUI"));
-
-			if (CharacterHomeTopUI)
-			{
-				auto _cardRootButtonField = il2cpp_class_get_field_from_name(CharacterHomeTopUI->klass, "_cardRootButton");
-				Il2CppObject* _cardRootButton;
-				il2cpp_field_get_value(CharacterHomeTopUI, _cardRootButtonField, &_cardRootButton);
-
-				if (_cardRootButton)
-				{
-					auto targetText = il2cpp_class_get_method_from_name_type<Il2CppObject * (*)(Il2CppObject*)>(_cardRootButton->klass, "get_TargetText", 0)->methodPointer(_cardRootButton);
-
-					if (targetText)
-					{
-						auto textCommon = Gallop::TextCommon(targetText);
-						textCommon.horizontalOverflow(UnityEngine::HorizontalWrapMode::Overflow);
-						textCommon.verticalOverflow(UnityEngine::VerticalWrapMode::Overflow);
-					}
-				}
-			}
-		}
-
-		if (il2cppstring(UnityEngine::Object::Name(cloned)->chars).find(IL2CPP_STRING("LiveView")) != wstring::npos)
-		{
-			auto gameObject = UnityEngine::GameObject(cloned);
-			auto contentsRoot = gameObject.transform().Find(il2cpp_string_new(config::live_slider_always_show ? "ContentsRoot" : "ContentsRoot/MenuRoot"));
-			auto slider = Localify::UIParts::GetLiveSlider("live_slider", 0, 0, 180, false,
-				*[](Il2CppObject* sliderCommon)
-				{
-					auto value = Localify::UIParts::GetOptionSliderValue("live_slider");
-
-					MoveLivePlayback(value);
-				});
-			auto sliderTransform = static_cast<UnityEngine::RectTransform>(slider.transform());
-			sliderTransform.anchoredPosition({ 0, 28 });
-			sliderTransform.anchorMax({ 1, 0 });
-			sliderTransform.anchorMin({ 0, 0 });
-			sliderTransform.pivot({ 0.2, 0.5 });
-			sliderTransform.sizeDelta({ -520, 24 });
-			sliderTransform.SetParent(contentsRoot, false);
-		}
-
-		if (il2cppstring(UnityEngine::Object::Name(cloned)->chars).find(IL2CPP_STRING("RaceResultList")) != wstring::npos)
-		{
-			auto raceInfo = il2cpp_symbols::get_method_pointer<Il2CppObject * (*)()>("umamusume.dll", "Gallop", "RaceManager", "get_RaceInfo", 0)();
-
-			if (raceInfo)
-			{
-				auto raceType = il2cpp_class_get_method_from_name_type<int (*)(Il2CppObject*)>(raceInfo->klass, "get_RaceType", 0)->methodPointer(raceInfo);
-
-				if (raceType == 6 || raceType == 7)
-				{
-					auto raceInstanceId = il2cpp_class_get_method_from_name_type<int (*)(Il2CppObject*)>(raceInfo->klass, "get_RaceInstanceId", 0)->methodPointer(raceInfo);
-					auto grade = il2cpp_class_get_method_from_name_type<int (*)(Il2CppObject*)>(raceInfo->klass, "get_Grade", 0)->methodPointer(raceInfo);
-
-					auto musicId = MasterDB::GetSingleModeRaceLiveMusicId(raceInstanceId, grade);
-
-					auto playerHorseIndex = il2cpp_class_get_method_from_name_type<int (*)(Il2CppObject*)>(raceInfo->klass, "get_PlayerHorseIndex", 0)->methodPointer(raceInfo);
-					auto raceHorse = il2cpp_class_get_method_from_name_type<Il2CppArraySize_t<Il2CppObject*>*(*)(Il2CppObject*)>(raceInfo->klass, "get_RaceHorse", 0)->methodPointer(raceInfo);
-					auto horseData = raceHorse->vector[playerHorseIndex];
-
-					auto charaIdField = il2cpp_class_get_field_from_name(horseData->klass, "charaId");
-
-					int charaId;
-					il2cpp_field_get_value(horseData, charaIdField, &charaId);
-
-					if (MasterDB::HasLivePermission(musicId, charaId))
-					{
-						auto gameObject = UnityEngine::GameObject(cloned);
-						auto raceResultList = gameObject.GetComponent(GetRuntimeType("umamusume.dll", "Gallop", "RaceResultList"));
-						auto _singleModeLiveButtonField = il2cpp_class_get_field_from_name(raceResultList->klass, "_singleModeLiveButton");
-						Il2CppObject* _singleModeLiveButton;
-						il2cpp_field_get_value(raceResultList, _singleModeLiveButtonField, &_singleModeLiveButton);
-
-						il2cpp_symbols::get_method_pointer<Il2CppObject* (*)(Il2CppObject*)>("umamusume.dll", "Gallop", "PartsLiveTheaterVoiceIcon", "FindOrCreate", 1)(MonoBehaviour(_singleModeLiveButton).gameObject().transform());
-					}
-				}
-			}
-		}
-
-		if (il2cppstring(UnityEngine::Object::Name(cloned)->chars).find(IL2CPP_STRING("LiveChampionsTextController")) != wstring::npos)
-		{
-			auto updateScreenReferenceSize = CreateDelegateWithClass(il2cpp_symbols::get_class("DOTween.dll", "DG.Tweening", "TweenCallback"), cloned, *([](Il2CppObject* self)
-				{
-					auto director = GetSingletonInstance(il2cpp_symbols::get_class("umamusume.dll", "Gallop.Live", "Director"));
-					if (director)
-					{
-						auto ChampionsTextControllerField = il2cpp_class_get_field_from_name(director->klass, "ChampionsTextController");
-						Il2CppObject* ChampionsTextController;
-						il2cpp_field_get_value(director, ChampionsTextControllerField, &ChampionsTextController);
-
-						if (ChampionsTextController)
-						{
-							auto _flashPlayerField = il2cpp_class_get_field_from_name(ChampionsTextController->klass, "_flashPlayer");
-							Il2CppObject* _flashPlayer;
-							il2cpp_field_get_value(ChampionsTextController, _flashPlayerField, &_flashPlayer);
-
-							auto root = il2cpp_class_get_method_from_name_type<Il2CppObject * (*)(Il2CppObject*)>(_flashPlayer->klass, "get_Root", 0)->methodPointer(_flashPlayer);
-
-							int unityWidth = UnityEngine::Screen::width();
-
-							int unityHeight = UnityEngine::Screen::height();
-
-							auto _flashCanvasScalerField = il2cpp_class_get_field_from_name(ChampionsTextController->klass, "_flashCanvasScaler");
-							Il2CppObject* _flashCanvasScaler;
-							il2cpp_field_get_value(ChampionsTextController, _flashCanvasScalerField, &_flashCanvasScaler);
-
-							float scale = 1.0f;
-
-							if (unityWidth < unityHeight)
-							{
-								scale = min(config::freeform_ui_scale_portrait, max(1.0f, unityHeight * config::runtime::ratioVertical) * config::freeform_ui_scale_portrait);
-							}
-							else
-							{
-								scale = min(config::freeform_ui_scale_landscape, max(1.0f, unityWidth / config::runtime::ratioHorizontal) * config::freeform_ui_scale_landscape);
-							}
-
-							float availableWidth = static_cast<float>(unityWidth) / scale;
-							float availableHeight = static_cast<float>(unityHeight) / scale;
-
-							float width = ratio_16_9 * availableHeight;
-							float height = availableHeight;
-
-							if (width > availableWidth)
-							{
-								width = availableWidth;
-								height = width / ratio_16_9;
-							}
-
-							il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, UnityEngine::Vector2)>(_flashCanvasScaler->klass, "set_referenceResolution", 1)->methodPointer(_flashCanvasScaler, UnityEngine::Vector2{ width, height });
-							il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, UnityEngine::Vector2)>(root->klass, "SetScreenReferenceSize", 1)->methodPointer(root, UnityEngine::Vector2{ width, height });
-						}
-
-						auto liveFlashController = il2cpp_class_get_method_from_name_type<Il2CppObject * (*)(Il2CppObject*)>(director->klass, "get_LiveFlashController", 0)->methodPointer(director);
-
-						if (liveFlashController)
-						{
-							auto _flashPlayerField = il2cpp_class_get_field_from_name(liveFlashController->klass, "_flashPlayer");
-
-							if (_flashPlayerField)
-							{
-								Il2CppObject* _flashPlayer;
-								il2cpp_field_get_value(liveFlashController, _flashPlayerField, &_flashPlayer);
-
-								auto root = il2cpp_class_get_method_from_name_type<Il2CppObject * (*)(Il2CppObject*)>(_flashPlayer->klass, "get_Root", 0)->methodPointer(_flashPlayer);
-
-								int unityWidth = UnityEngine::Screen::width();
-
-								int unityHeight = UnityEngine::Screen::height();
-
-								float scale = 1.0f;
-
-								if (unityWidth < unityHeight)
-								{
-									scale = min(config::freeform_ui_scale_portrait, max(1.0f, unityHeight * config::runtime::ratioVertical) * config::freeform_ui_scale_portrait);
-								}
-								else
-								{
-									scale = min(config::freeform_ui_scale_landscape, max(1.0f, unityWidth / config::runtime::ratioHorizontal) * config::freeform_ui_scale_landscape);
-								}
-
-								float availableWidth = static_cast<float>(unityWidth) / scale;
-								float availableHeight = static_cast<float>(unityHeight) / scale;
-
-								float width = ratio_16_9 * availableHeight;
-								float height = availableHeight;
-
-								if (width > availableWidth)
-								{
-									width = availableWidth;
-									height = width / ratio_16_9;
-								}
-
-								il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, UnityEngine::Vector2)>(root->klass, "SetScreenReferenceSize", 1)->methodPointer(root, UnityEngine::Vector2{ width, height });
-							}
-						}
-					}
-				}));
-
-			// Delay 50ms
-			il2cpp_symbols::get_method_pointer<Il2CppObject* (*)(float, Il2CppDelegate*, bool)>("DOTween.dll", "DG.Tweening", "DOVirtual", "DelayedCall", 3)(0.05, &updateScreenReferenceSize->delegate, true);
-		}
-
-		return cloned;
-	}
-
-	void* Sprite_get_texture_orig = nullptr;
-	Il2CppObject* Sprite_get_texture_hook(Il2CppObject* self)
-	{
-		auto texture2D = reinterpret_cast<decltype(Sprite_get_texture_hook)*>(Sprite_get_texture_orig)(self);
-		auto uobject_name = UnityEngine::Object::Name(texture2D);
-		if (!il2cppstring(uobject_name->chars).empty())
-		{
-			auto newTexture = GetReplacementAssets(
-				uobject_name,
-				GetRuntimeType("UnityEngine.CoreModule.dll", "UnityEngine", "Texture2D"));
-			if (newTexture)
-			{
-				il2cpp_symbols::get_method_pointer<void (*)(Il2CppObject*, int)>("UnityEngine.CoreModule.dll", "UnityEngine", "Object", "set_hideFlags", 1)
-					(newTexture, 32);
-				return newTexture;
-			}
-		}
-		return texture2D;
-	}
-
-	Il2CppObject* Material_GetTextureImpl_hook(Il2CppObject* self, int nameID);
-	Il2CppObject* Renderer_get_material_hook(Il2CppObject* self);
-	Il2CppArraySize_t<Il2CppObject*>* Renderer_get_materials_hook(Il2CppObject* self);
-	Il2CppObject* Renderer_get_sharedMaterial_hook(Il2CppObject* self);
-	Il2CppArraySize_t<Il2CppObject*>* Renderer_get_sharedMaterials_hook(Il2CppObject* self);
-
-	void ReplaceMaterialTexture(Il2CppObject* material)
-	{
-		if (!UnityEngine::Object::IsNativeObjectAlive(material))
-		{
-			return;
-		}
-
-		ReplaceMaterialTextureProperty(material, il2cpp_string_new("_DirtTex"));
-		ReplaceMaterialTextureProperty(material, il2cpp_string_new("_EmissiveTex"));
-		ReplaceMaterialTextureProperty(material, il2cpp_string_new("_EnvMap"));
-		ReplaceMaterialTextureProperty(material, il2cpp_string_new("_MainTex"));
-		ReplaceMaterialTextureProperty(material, il2cpp_string_new("_MaskColorTex"));
-		ReplaceMaterialTextureProperty(material, il2cpp_string_new("_OptionMaskMap"));
-		ReplaceMaterialTextureProperty(material, il2cpp_string_new("_ToonMap"));
-		ReplaceMaterialTextureProperty(material, il2cpp_string_new("_TripleMaskMap"));
-	}
-
-	void* Renderer_get_material_orig = nullptr;
-	Il2CppObject* Renderer_get_material_hook(Il2CppObject* self)
-	{
-		auto material = reinterpret_cast<decltype(Renderer_get_material_hook)*>(Renderer_get_material_orig)(self);
-		if (material)
-		{
-			ReplaceMaterialTexture(material);
-		}
-		return material;
-	}
-
-	void* Renderer_get_materials_orig = nullptr;
-	Il2CppArraySize_t<Il2CppObject*>* Renderer_get_materials_hook(Il2CppObject* self)
-	{
-		auto materials = reinterpret_cast<decltype(Renderer_get_materials_hook)*>(Renderer_get_materials_orig)(self);
-		for (int i = 0; i < materials->max_length; i++)
-		{
-			auto material = materials->vector[i];
-			if (material)
-			{
-				ReplaceMaterialTexture(material);
-			}
-		}
-		return materials;
-	}
-
-	void* Renderer_get_sharedMaterial_orig = nullptr;
-	Il2CppObject* Renderer_get_sharedMaterial_hook(Il2CppObject* self)
-	{
-		auto material = reinterpret_cast<decltype(Renderer_get_sharedMaterial_hook)*>(Renderer_get_sharedMaterial_orig)(self);
-		if (material)
-		{
-			ReplaceMaterialTexture(material);
-		}
-		return material;
-	}
-
-	void* Renderer_get_sharedMaterials_orig = nullptr;
-	Il2CppArraySize_t<Il2CppObject*>* Renderer_get_sharedMaterials_hook(Il2CppObject* self)
-	{
-		auto materials = reinterpret_cast<decltype(Renderer_get_sharedMaterials_hook)*>(Renderer_get_sharedMaterials_orig)(self);
-		for (int i = 0; i < materials->max_length; i++)
-		{
-			auto material = materials->vector[i];
-			if (material)
-			{
-				ReplaceMaterialTexture(material);
-			}
-		}
-		return materials;
-	}
-
-	void* Renderer_set_material_orig = nullptr;
-	void Renderer_set_material_hook(Il2CppObject* self, Il2CppObject* material)
-	{
-		if (material)
-		{
-			ReplaceMaterialTexture(material);
-		}
-		reinterpret_cast<decltype(Renderer_set_material_hook)*>(Renderer_set_material_orig)(self, material);
-	}
-
-	void* Renderer_set_materials_orig = nullptr;
-	void Renderer_set_materials_hook(Il2CppObject* self, Il2CppArraySize* materials)
-	{
-		for (int i = 0; i < materials->max_length; i++)
-		{
-			auto material = (Il2CppObject*)materials->vector[i];
-			if (material)
-			{
-				ReplaceMaterialTexture(material);
-			}
-		}
-		reinterpret_cast<decltype(Renderer_set_materials_hook)*>(Renderer_set_materials_orig)(self, materials);
-	}
-
-	void* Material_SetTextureI4_orig = nullptr;
-	void Material_SetTextureI4_hook(Il2CppObject* self, int nameID, Il2CppObject* texture)
-	{
-		if (texture && !il2cppstring(UnityEngine::Object::Name(texture)->chars).empty())
-		{
-			auto newTexture = GetReplacementAssets(
-				UnityEngine::Object::Name(texture),
-				GetRuntimeType("UnityEngine.CoreModule.dll", "UnityEngine", "Texture2D"));
-			if (newTexture)
-			{
-				il2cpp_symbols::get_method_pointer<void (*)(Il2CppObject*, int)>("UnityEngine.CoreModule.dll", "UnityEngine", "Object", "set_hideFlags", 1)
-					(newTexture, 32);
-				reinterpret_cast<decltype(Material_SetTextureI4_hook)*>(Material_SetTextureI4_orig)(self, nameID, newTexture);
-				return;
-			}
-		}
-		reinterpret_cast<decltype(Material_SetTextureI4_hook)*>(Material_SetTextureI4_orig)(self, nameID, texture);
-	}
-
-	void* Material_GetTextureImpl_orig = nullptr;
-	Il2CppObject* Material_GetTextureImpl_hook(Il2CppObject* self, int nameID)
-	{
-		auto texture = reinterpret_cast<decltype(Material_GetTextureImpl_hook)*>(Material_GetTextureImpl_orig)(self, nameID);
-		if (texture && !il2cppstring(UnityEngine::Object::Name(texture)->chars).empty())
-		{
-			auto newTexture = GetReplacementAssets(
-				UnityEngine::Object::Name(texture),
-				GetRuntimeType("UnityEngine.CoreModule.dll", "UnityEngine", "Texture2D"));
-			if (newTexture)
-			{
-				il2cpp_symbols::get_method_pointer<void (*)(Il2CppObject*, int)>("UnityEngine.CoreModule.dll", "UnityEngine", "Object", "set_hideFlags", 1)
-					(newTexture, 32);
-				return newTexture;
-			}
-		}
-		return texture;
-	}
-
-	void* Material_SetTextureImpl_orig = nullptr;
-	void Material_SetTextureImpl_hook(Il2CppObject* self, int nameID, Il2CppObject* texture)
-	{
-		if (texture && !il2cppstring(UnityEngine::Object::Name(texture)->chars).empty())
-		{
-			auto newTexture = GetReplacementAssets(
-				UnityEngine::Object::Name(texture),
-				GetRuntimeType("UnityEngine.CoreModule.dll", "UnityEngine", "Texture2D"));
-			if (newTexture)
-			{
-				il2cpp_symbols::get_method_pointer<void (*)(Il2CppObject*, int)>("UnityEngine.CoreModule.dll", "UnityEngine", "Object", "set_hideFlags", 1)
-					(newTexture, 32);
-				reinterpret_cast<decltype(Material_SetTextureImpl_hook)*>(Material_SetTextureImpl_orig)(self, nameID, newTexture);
-				return;
-			}
-		}
-		reinterpret_cast<decltype(Material_SetTextureImpl_hook)*>(Material_SetTextureImpl_orig)(self, nameID, texture);
-	}
-
-	void* BGManager_SetMainBg_orig = nullptr;
-	void BGManager_SetMainBg_hook(Il2CppObject* self, Il2CppString* path, int width, int height, float posX, float posY, bool isSetScale)
-	{
-		float ratio = static_cast<float>(width) / static_cast<float>(height);
-		int width1 = Gallop::Screen::Width();
-		int height1 = Gallop::Screen::Height();
-
-		if (width < height)
-		{
-			width = width1;
-			height = static_cast<int>(width / ratio);
-		}
-		else
-		{
-			height = height1;
-			width = static_cast<int>(height * ratio);
-		}
-
-		reinterpret_cast<decltype(BGManager_SetMainBg_hook)*>(BGManager_SetMainBg_orig)(self, path, width, height, 0, 0, true);
-	}
-
-	void* BGManager_SetMainBgLocalPos_orig = nullptr;
-	void BGManager_SetMainBgLocalPos_hook(Il2CppObject* self, UnityEngine::Vector2 pos)
-	{
-		// no-op
-	}
-
-	void* CharaPropRendererAccessor_SetTexture_orig = nullptr;
-	void CharaPropRendererAccessor_SetTexture_hook(Il2CppObject* self, Il2CppObject* texture)
-	{
-		if (!il2cppstring(UnityEngine::Object::Name(texture)->chars).empty())
-		{
-			auto newTexture = GetReplacementAssets(
-				UnityEngine::Object::Name(texture),
-				GetRuntimeType("UnityEngine.CoreModule.dll", "UnityEngine", "Texture2D"));
-			if (newTexture)
-			{
-				il2cpp_symbols::get_method_pointer<void (*)(Il2CppObject*, int)>("UnityEngine.CoreModule.dll", "UnityEngine", "Object", "set_hideFlags", 1)
-					(newTexture, 32);
-				reinterpret_cast<decltype(CharaPropRendererAccessor_SetTexture_hook)*>(CharaPropRendererAccessor_SetTexture_orig)(self, newTexture);
-				return;
-			}
-		}
-		reinterpret_cast<decltype(CharaPropRendererAccessor_SetTexture_hook)*>(CharaPropRendererAccessor_SetTexture_orig)(self, texture);
-	}
-
-	void* DeviceOrientationGuide_Show_orig = nullptr;
-	void DeviceOrientationGuide_Show_hook(Il2CppObject* self, bool isTargetOrientationPortrait, int target)
-	{
-		if (!config::freeform_window)
-		{
-			reinterpret_cast<decltype(DeviceOrientationGuide_Show_hook)*>(DeviceOrientationGuide_Show_orig)(self, isTargetOrientationPortrait, target);
-		}
-	}
-
-	CriWare::CriMana::MovieInfo* (*MoviePlayerBase_get_MovieInfo)(Il2CppObject* self);
-	CriWare::CriMana::MovieInfo* (*MovieManager_GetMovieInfo)(Il2CppObject* self, Cute::Cri::MoviePlayerHandle playerHandle);
-
-	void* MoviePlayerForUI_AdjustScreenSize_orig = nullptr;
-	void MoviePlayerForUI_AdjustScreenSize_hook(Il2CppObject* self, UnityEngine::Vector2 dispRectWH, bool isPanScan)
-	{
-		auto movieInfo = MoviePlayerBase_get_MovieInfo(self);
-		if (!movieInfo)
-		{
-			return;
-		}
-
-		if (movieInfo->width < movieInfo->height && !Gallop::StandaloneWindowResize::IsVirt())
-		{
-			auto ratio1 = static_cast<float>(movieInfo->width) / static_cast<float>(movieInfo->height);
-			dispRectWH.x = dispRectWH.y * ratio1;
-		}
-
-		reinterpret_cast<decltype(MoviePlayerForUI_AdjustScreenSize_hook)*>(MoviePlayerForUI_AdjustScreenSize_orig)(self, dispRectWH, isPanScan);
-	}
-
-	void* LiveTheaterCharaSelect_CheckSwapChara_orig = nullptr;
-	void LiveTheaterCharaSelect_CheckSwapChara_hook(Il2CppObject* self, int index, int oldCharaId, int oldDressId, int oldDressColorId, int oldDressId2, int oldDressColorId2, int newCharaId)
-	{
-
-	}
-
 	discord::Core* discord;
 
 	uint64_t startTime;
@@ -5284,7 +3942,7 @@ namespace
 								if (LiveCurrentTime >= LiveTotalTime - 0.1f)
 								{
 									LiveCurrentTime = 0;
-									MoveLivePlayback(LiveCurrentTime);
+									Localify::LiveUtils::MoveLivePlayback(LiveCurrentTime);
 								}
 							}
 
@@ -5465,44 +4123,6 @@ namespace
 			return;
 		}
 
-		printf("Trying to patch GameAssembly.dll...\n");
-
-#pragma region HOOK_MACRO
-#define ADD_HOOK(_name_, _fmt_) \
-	auto _name_##_offset = reinterpret_cast<void*>(_name_##_addr); \
-	\
-	printf(_fmt_, _name_##_offset); \
-	dump_bytes(_name_##_offset); \
-	\
-	auto _name_##_create_result = MH_CreateHook(_name_##_offset, _name_##_hook, &_name_##_orig); \
-	if (_name_##_create_result != MH_OK) \
-	{\
-		cout << "WARN: " << #_name_ << " Create Failed: " << MH_StatusToString(_name_##_create_result) << endl; \
-	}\
-	auto _name_##_result = MH_EnableHook(_name_##_offset); \
-	if (_name_##_result != MH_OK) \
-	{\
-		cout << "WARN: " << #_name_ << " Failed: " << MH_StatusToString(_name_##_result) << " LastError: " << GetLastError() << endl << endl; \
-		_name_##_orig = _name_##_addr; \
-	}
-#pragma endregion
-#pragma region HOOK_ADDRESSES
-
-		MoviePlayerBase_get_MovieInfo = il2cpp_symbols::get_method_pointer<decltype(MoviePlayerBase_get_MovieInfo)>("Cute.Cri.Assembly.dll", "Cute.Cri", "MoviePlayerBase", "get_MovieInfo", 0);
-
-		MovieManager_GetMovieInfo = il2cpp_symbols::get_method_pointer<decltype(MovieManager_GetMovieInfo)>("Cute.Cri.Assembly.dll", "Cute.Cri", "MovieManager", "GetMovieInfo", 1);
-
-#pragma endregion
-
-		auto Object_Internal_CloneSingleWithParent_addr = il2cpp_resolve_icall("UnityEngine.Object::Internal_CloneSingleWithParent()");
-		ADD_HOOK(Object_Internal_CloneSingleWithParent, "UnityEngine.Object::Internal_CloneSingleWithParent at %p\n");
-
-		if (config::replace_to_builtin_font || config::replace_to_custom_font)
-		{
-			auto TextMeshProUguiCommon_Awake_addr = il2cpp_symbols::get_method_pointer("umamusume.dll", "Gallop", "TextMeshProUguiCommon", "Awake", 0);
-			ADD_HOOK(TextMeshProUguiCommon_Awake, "Gallop.TextMeshProUguiCommon::Awake at %p\n");
-		}
-
 		if (config::freeform_window)
 		{
 			int width = UnityEngine::Screen::width();
@@ -5513,37 +4133,11 @@ namespace
 			bool isPortrait = width <= height;
 			Gallop::Screen::OriginalScreenWidth(isPortrait ? height : width);
 			Gallop::Screen::OriginalScreenHeight(isPortrait ? width : height);
-
-			auto DeviceOrientationGuide_Show_addr = il2cpp_symbols::get_method_pointer("umamusume.dll", "Gallop", "DeviceOrientationGuide", "Show", 2);
-			ADD_HOOK(DeviceOrientationGuide_Show, "DeviceOrientationGuide::Show at %p\n");
-
-			auto MoviePlayerForUI_AdjustScreenSize_addr = il2cpp_symbols::get_method_pointer("Cute.Cri.Assembly.dll", "Cute.Cri", "MoviePlayerForUI", "AdjustScreenSize", 2);
-			ADD_HOOK(MoviePlayerForUI_AdjustScreenSize, "MoviePlayerForUI::AdjustScreenSize at %p\n");
-
-			auto BGManager_SetMainBgLocalPos_addr = il2cpp_symbols::get_method_pointer("umamusume.dll", "Gallop", "BGManager", "SetMainBgLocalPos", 1);
-			ADD_HOOK(BGManager_SetMainBgLocalPos, "Gallop.BGManager::SetMainBgLocalPos at %p\n");
-		}
-
-		if (config::freeform_window || config::unlock_size || config::resolution_3d_scale != 1.0f)
-		{
-			auto BGManager_SetMainBg_addr = il2cpp_symbols::get_method_pointer("umamusume.dll", "Gallop", "BGManager", "SetMainBg", 6);
-			ADD_HOOK(BGManager_SetMainBg, "Gallop.BGManager::SetMainBg at %p\n");
-		}
-
-		if (config::unlock_live_chara)
-		{
-			auto LiveTheaterCharaSelect_CheckSwapChara_addr = il2cpp_symbols::get_method_pointer("umamusume.dll", "Gallop", "LiveTheaterCharaSelect", "CheckSwapChara", 7);
-			ADD_HOOK(LiveTheaterCharaSelect_CheckSwapChara, "Gallop.LiveTheaterCharaSelect::CheckSwapChara at %p\n");
 		}
 
 		const auto nameArray = reinterpret_cast<Il2CppArraySize_t<Il2CppString*>*(*)()>(il2cpp_resolve_icall("UnityEngine.QualitySettings::get_names()"))();
 		reinterpret_cast<void(*)(int)>(il2cpp_resolve_icall("UnityEngine.QualitySettings::SetQualityLevel()"))(nameArray->max_length - 1);
-	}
 
-	Il2CppDelegate* moviePlayerResize = nullptr;
-
-	void patch_after_criware()
-	{
 		il2cppstring amuid = UnityEngine::Application::companyName()->chars;
 		amuid += IL2CPP_STRING(".Gallop");
 
@@ -5574,48 +4168,7 @@ namespace
 		DesktopNotificationManagerCompat::get_History(&history);
 		history->Clear();
 
-		auto Sprite_get_texture_addr = il2cpp_resolve_icall("UnityEngine.Sprite::get_texture(UnityEngine.Sprite)");
-
-		auto Renderer_get_material_addr = il2cpp_symbols::get_method_pointer("UnityEngine.CoreModule.dll", "UnityEngine", "Renderer", "get_material", 0);
-
-		auto Renderer_get_materials_addr = il2cpp_symbols::get_method_pointer("UnityEngine.CoreModule.dll", "UnityEngine", "Renderer", "get_materials", 0);
-
-		auto Renderer_get_sharedMaterial_addr = il2cpp_symbols::get_method_pointer("UnityEngine.CoreModule.dll", "UnityEngine", "Renderer", "get_sharedMaterial", 0);
-
-		auto Renderer_get_sharedMaterials_addr = il2cpp_symbols::get_method_pointer("UnityEngine.CoreModule.dll", "UnityEngine", "Renderer", "get_sharedMaterials", 0);
-
-		auto Renderer_set_material_addr = il2cpp_symbols::get_method_pointer("UnityEngine.CoreModule.dll", "UnityEngine", "Renderer", "set_material", 1);
-
-		auto Renderer_set_materials_addr = il2cpp_symbols::get_method_pointer("UnityEngine.CoreModule.dll", "UnityEngine", "Renderer", "set_materials", 1);
-
-		auto Material_GetTextureImpl_addr = il2cpp_resolve_icall("UnityEngine.Material::GetTextureImpl(System.String,System.Int32)");
-
-		auto Material_SetTextureImpl_addr = il2cpp_resolve_icall("UnityEngine.Material::SetTextureImpl(System.String,System.Int32,UnityEngine.Texture)");
-
-		auto CharaPropRendererAccessor_SetTexture_addr = il2cpp_symbols::get_method_pointer("umamusume.dll", "Gallop", "CharaPropRendererAccessor", "SetTexture", 1);
-
-		if (!config::replace_assetbundle_file_paths.empty())
-		{
-			ADD_HOOK(Sprite_get_texture, "UnityEngine.Sprite::get_texture at %p\n");
-
-			ADD_HOOK(Renderer_get_material, "UnityEngine.Renderer::get_material at %p\n");
-
-			ADD_HOOK(Renderer_get_materials, "UnityEngine.Renderer::get_materials at %p\n");
-
-			ADD_HOOK(Renderer_get_sharedMaterial, "UnityEngine.Renderer::get_sharedMaterial at %p\n");
-
-			ADD_HOOK(Renderer_get_sharedMaterials, "UnityEngine.Renderer::get_sharedMaterials at %p\n");
-
-			ADD_HOOK(Renderer_set_material, "UnityEngine.Renderer::set_material at %p\n");
-
-			ADD_HOOK(Renderer_set_materials, "UnityEngine.Renderer::set_materials at %p\n");
-
-			ADD_HOOK(Material_GetTextureImpl, "UnityEngine.Material::GetTextureImpl at %p\n");
-
-			ADD_HOOK(Material_SetTextureImpl, "UnityEngine.Material::SetTextureImpl at %p\n");
-
-			ADD_HOOK(CharaPropRendererAccessor_SetTexture, "Gallop.CharaPropRendererAccessor::SetTexture at %p\n");
-		}
+		TaskbarManager::Initialze(GetHWND());
 
 		if (config::dump_entries)
 		{
@@ -5691,6 +4244,140 @@ namespace
 		}
 
 		StartTickFrame();
+
+		try
+		{
+			wstring newTitle = title;
+
+			if (Game::CurrentGameRegion == Game::Region::JPN &&
+				Game::CurrentGameStore == Game::Store::Steam)
+			{
+				newTitle.append(L" (Steam)");
+			}
+
+			SystemMediaTransportControlsManager::CreateShortcutForSMTC(newTitle.data());
+			SystemMediaTransportControlsManager::Initialze(GetHWND());
+
+			auto& smtc = SystemMediaTransportControlsManager::instance;
+			if (smtc)
+			{
+				smtc.ButtonPressed([](winrt::Windows::Media::SystemMediaTransportControls smtc, winrt::Windows::Media::SystemMediaTransportControlsButtonPressedEventArgs args)
+					{
+						auto button = args.Button();
+						switch (button)
+						{
+						case winrt::Windows::Media::SystemMediaTransportControlsButton::Play:
+							WaitForEndOfFrame(*[]()
+								{
+									auto controller = GetCurrentViewController();
+									auto hubViewController = GetCurrentHubViewChildController();
+
+									if (hubViewController && hubViewController->klass->name == "HomeViewController"s)
+									{
+										auto topUi = il2cpp_class_get_method_from_name_type<Il2CppObject * (*)(Il2CppObject*, int)>(hubViewController->klass, "GetTopUI", 1)->methodPointer(hubViewController, 10);
+										if (topUi)
+										{
+											auto data = il2cpp_class_get_method_from_name_type<Il2CppObject * (*)(Il2CppObject*)>(topUi->klass, "get_TempSetListPlayingData", 0)->methodPointer(topUi);
+
+											auto SetListIdField = il2cpp_class_get_field_from_name(data->klass, "SetListId");
+											int SetListId;
+											il2cpp_field_get_value(data, SetListIdField, &SetListId);
+
+											if (SetListId > 0)
+											{
+												auto _jukeboxBgmSelectorField = il2cpp_class_get_field_from_name(topUi->klass, "_jukeboxBgmSelector");
+												Il2CppObject* _jukeboxBgmSelector;
+												il2cpp_field_get_value(topUi, _jukeboxBgmSelectorField, &_jukeboxBgmSelector);
+
+												il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, bool, float, bool)>(_jukeboxBgmSelector->klass, "PlayCoroutinePlaySetList", 3)->methodPointer(_jukeboxBgmSelector, true, 0.0f, true);
+											}
+											else
+											{
+												il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*)>(topUi->klass, "PlayRequestSong", 0)->methodPointer(topUi);
+											}
+										}
+									}
+
+									if (controller && controller->klass->name == "LiveViewController"s)
+									{
+										il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*)>(controller->klass, "ResumeLive", 0)->methodPointer(controller);
+									}
+								});
+							break;
+
+						case winrt::Windows::Media::SystemMediaTransportControlsButton::Pause:
+							WaitForEndOfFrame(*[]()
+								{
+									auto controller = GetCurrentViewController();
+									auto hubViewController = GetCurrentHubViewChildController();
+
+									if (hubViewController && hubViewController->klass->name == "HomeViewController"s)
+									{
+										auto topUi = il2cpp_class_get_method_from_name_type<Il2CppObject * (*)(Il2CppObject*, int)>(hubViewController->klass, "GetTopUI", 1)->methodPointer(hubViewController, 10);
+										il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, bool)>(topUi->klass, "SetPlayMusicFlag", 1)->methodPointer(topUi, false);
+									}
+
+									if (controller && controller->klass->name == "LiveViewController"s)
+									{
+										il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*)>(controller->klass, "PauseLive", 0)->methodPointer(controller);
+									}
+								});
+							break;
+
+						case winrt::Windows::Media::SystemMediaTransportControlsButton::Previous:
+							WaitForEndOfFrame(*[]()
+								{
+									auto controller = GetCurrentViewController();
+									auto hubViewController = GetCurrentHubViewChildController();
+
+									if (hubViewController && hubViewController->klass->name == "HomeViewController"s)
+									{
+										auto topUi = il2cpp_class_get_method_from_name_type<Il2CppObject * (*)(Il2CppObject*, int)>(hubViewController->klass, "GetTopUI", 1)->methodPointer(hubViewController, 10);
+										il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, bool)>(topUi->klass, "OnClickSetListArrow", 1)->methodPointer(topUi, false);
+									}
+								});
+							break;
+
+						case winrt::Windows::Media::SystemMediaTransportControlsButton::Next:
+							WaitForEndOfFrame(*[]()
+								{
+									auto controller = GetCurrentViewController();
+									auto hubViewController = GetCurrentHubViewChildController();
+
+									if (hubViewController && hubViewController->klass->name == "HomeViewController"s)
+									{
+										auto topUi = il2cpp_class_get_method_from_name_type<Il2CppObject * (*)(Il2CppObject*, int)>(hubViewController->klass, "GetTopUI", 1)->methodPointer(hubViewController, 10);
+
+										auto data = il2cpp_class_get_method_from_name_type<Il2CppObject * (*)(Il2CppObject*)>(topUi->klass, "get_TempSetListPlayingData", 0)->methodPointer(topUi);
+
+										auto IsPlayingField = il2cpp_class_get_field_from_name(data->klass, "IsPlaying");
+										bool IsPlaying;
+										il2cpp_field_get_value(data, IsPlayingField, &IsPlaying);
+
+										if (IsPlaying)
+										{
+											il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, bool)>(topUi->klass, "OnClickSetListArrow", 1)->methodPointer(topUi, true);
+										}
+									}
+
+									if (controller && controller->klass->name == "LiveViewController"s)
+									{
+										auto view = il2cpp_class_get_method_from_name_type<Il2CppObject * (*)(Il2CppObject*)>(controller->klass, "GetViewBase", 0)->methodPointer(controller);
+										auto coroutine = il2cpp_class_get_method_from_name_type<Il2CppObject * (*)(Il2CppObject*)>(controller->klass, "SkipLive", 0)->methodPointer(controller);
+
+										UnityEngine::MonoBehaviour(view).StartCoroutineManaged2(coroutine);
+									}
+								});
+							break;
+						}
+
+						return S_OK;
+					});
+			}
+		}
+		catch (...)
+		{
+		}
 
 		auto sceneManagerClass = il2cpp_symbols::get_class("UnityEngine.CoreModule.dll", "UnityEngine.SceneManagement", "SceneManager");
 
@@ -5949,142 +4636,6 @@ namespace
 			})
 		);
 		il2cpp_field_static_set_value(activeSceneChangedField, action);
-
-		TaskbarManager::Initialze(GetHWND());
-
-		try
-		{
-			wstring newTitle = title;
-
-			if (Game::CurrentGameRegion == Game::Region::JPN &&
-				Game::CurrentGameStore == Game::Store::Steam)
-			{
-				newTitle.append(L" (Steam)");
-			}
-
-			SystemMediaTransportControlsManager::CreateShortcutForSMTC(newTitle.data());
-			SystemMediaTransportControlsManager::Initialze(GetHWND());
-
-			auto& smtc = SystemMediaTransportControlsManager::instance;
-			if (smtc)
-			{
-				smtc.ButtonPressed([](winrt::Windows::Media::SystemMediaTransportControls smtc, winrt::Windows::Media::SystemMediaTransportControlsButtonPressedEventArgs args)
-					{
-						auto button = args.Button();
-						switch (button)
-						{
-						case winrt::Windows::Media::SystemMediaTransportControlsButton::Play:
-							WaitForEndOfFrame(*[]()
-								{
-									auto controller = GetCurrentViewController();
-									auto hubViewController = GetCurrentHubViewChildController();
-
-									if (hubViewController && hubViewController->klass->name == "HomeViewController"s)
-									{
-										auto topUi = il2cpp_class_get_method_from_name_type<Il2CppObject * (*)(Il2CppObject*, int)>(hubViewController->klass, "GetTopUI", 1)->methodPointer(hubViewController, 10);
-										if (topUi)
-										{
-											auto data = il2cpp_class_get_method_from_name_type<Il2CppObject * (*)(Il2CppObject*)>(topUi->klass, "get_TempSetListPlayingData", 0)->methodPointer(topUi);
-
-											auto SetListIdField = il2cpp_class_get_field_from_name(data->klass, "SetListId");
-											int SetListId;
-											il2cpp_field_get_value(data, SetListIdField, &SetListId);
-
-											if (SetListId > 0)
-											{
-												auto _jukeboxBgmSelectorField = il2cpp_class_get_field_from_name(topUi->klass, "_jukeboxBgmSelector");
-												Il2CppObject* _jukeboxBgmSelector;
-												il2cpp_field_get_value(topUi, _jukeboxBgmSelectorField, &_jukeboxBgmSelector);
-
-												il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, bool, float, bool)>(_jukeboxBgmSelector->klass, "PlayCoroutinePlaySetList", 3)->methodPointer(_jukeboxBgmSelector, true, 0.0f, true);
-											}
-											else
-											{
-												il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*)>(topUi->klass, "PlayRequestSong", 0)->methodPointer(topUi);
-											}
-										}
-									}
-
-									if (controller && controller->klass->name == "LiveViewController"s)
-									{
-										il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*)>(controller->klass, "ResumeLive", 0)->methodPointer(controller);
-									}
-								});
-							break;
-
-						case winrt::Windows::Media::SystemMediaTransportControlsButton::Pause:
-							WaitForEndOfFrame(*[]()
-								{
-									auto controller = GetCurrentViewController();
-									auto hubViewController = GetCurrentHubViewChildController();
-
-									if (hubViewController && hubViewController->klass->name == "HomeViewController"s)
-									{
-										auto topUi = il2cpp_class_get_method_from_name_type<Il2CppObject * (*)(Il2CppObject*, int)>(hubViewController->klass, "GetTopUI", 1)->methodPointer(hubViewController, 10);
-										il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, bool)>(topUi->klass, "SetPlayMusicFlag", 1)->methodPointer(topUi, false);
-									}
-
-									if (controller && controller->klass->name == "LiveViewController"s)
-									{
-										il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*)>(controller->klass, "PauseLive", 0)->methodPointer(controller);
-									}
-								});
-							break;
-
-						case winrt::Windows::Media::SystemMediaTransportControlsButton::Previous:
-							WaitForEndOfFrame(*[]()
-								{
-									auto controller = GetCurrentViewController();
-									auto hubViewController = GetCurrentHubViewChildController();
-
-									if (hubViewController && hubViewController->klass->name == "HomeViewController"s)
-									{
-										auto topUi = il2cpp_class_get_method_from_name_type<Il2CppObject * (*)(Il2CppObject*, int)>(hubViewController->klass, "GetTopUI", 1)->methodPointer(hubViewController, 10);
-										il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, bool)>(topUi->klass, "OnClickSetListArrow", 1)->methodPointer(topUi, false);
-									}
-								});
-							break;
-
-						case winrt::Windows::Media::SystemMediaTransportControlsButton::Next:
-							WaitForEndOfFrame(*[]()
-								{
-									auto controller = GetCurrentViewController();
-									auto hubViewController = GetCurrentHubViewChildController();
-
-									if (hubViewController && hubViewController->klass->name == "HomeViewController"s)
-									{
-										auto topUi = il2cpp_class_get_method_from_name_type<Il2CppObject * (*)(Il2CppObject*, int)>(hubViewController->klass, "GetTopUI", 1)->methodPointer(hubViewController, 10);
-
-										auto data = il2cpp_class_get_method_from_name_type<Il2CppObject * (*)(Il2CppObject*)>(topUi->klass, "get_TempSetListPlayingData", 0)->methodPointer(topUi);
-
-										auto IsPlayingField = il2cpp_class_get_field_from_name(data->klass, "IsPlaying");
-										bool IsPlaying;
-										il2cpp_field_get_value(data, IsPlayingField, &IsPlaying);
-
-										if (IsPlaying)
-										{
-											il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, bool)>(topUi->klass, "OnClickSetListArrow", 1)->methodPointer(topUi, true);
-										}
-									}
-
-									if (controller && controller->klass->name == "LiveViewController"s)
-									{
-										auto view = il2cpp_class_get_method_from_name_type<Il2CppObject * (*)(Il2CppObject*)>(controller->klass, "GetViewBase", 0)->methodPointer(controller);
-										auto coroutine = il2cpp_class_get_method_from_name_type<Il2CppObject * (*)(Il2CppObject*)>(controller->klass, "SkipLive", 0)->methodPointer(controller);
-
-										UnityEngine::MonoBehaviour(view).StartCoroutineManaged2(coroutine);
-									}
-								});
-							break;
-						}
-
-						return S_OK;
-					});
-			}
-		}
-		catch (...)
-		{
-		}
 	}
 }
 
@@ -6638,11 +5189,11 @@ void init_hook(filesystem::path module_path)
 	MH_EnableHook(NtQueryDirectoryFile);
 
 	auto LoadLibraryExW_addr = GetProcAddress(GetModuleHandleW(L"KernelBase.dll"), "LoadLibraryExW");
-	MH_CreateHook(LoadLibraryExW_addr, load_library_ex_w_hook, &load_library_ex_w_orig);
+	MH_CreateHook(LoadLibraryExW_addr, LoadLibraryExW_hook, &LoadLibraryExW_orig);
 	MH_EnableHook(LoadLibraryExW_addr);
 
 	auto LoadLibraryW_addr = GetProcAddress(GetModuleHandleW(L"KernelBase.dll"), "LoadLibraryW");
-	MH_CreateHook(LoadLibraryW_addr, load_library_w_hook, &load_library_w_orig);
+	MH_CreateHook(LoadLibraryW_addr, LoadLibraryW_hook, &LoadLibraryW_orig);
 	MH_EnableHook(LoadLibraryW_addr);
 
 	auto GetProcAddress_addr = GetProcAddress(GetModuleHandleW(L"kernel32.dll"), "GetProcAddress");

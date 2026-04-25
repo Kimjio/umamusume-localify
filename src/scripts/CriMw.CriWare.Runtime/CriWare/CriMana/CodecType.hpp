@@ -1,15 +1,12 @@
 #pragma once
 
-namespace CriWare
+namespace CriWare::CriMana
 {
-	namespace CriMana
+	enum class CodecType
 	{
-		enum class CodecType
-		{
-			Unknown,
-			SofdecPrime,
-			H264 = 5,
-			VP9 = 9
-		};
-	}
+		Unknown,
+		SofdecPrime,
+		H264 = 5,
+		VP9 = 9
+	};
 }

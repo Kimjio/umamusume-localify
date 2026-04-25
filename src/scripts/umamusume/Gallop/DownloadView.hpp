@@ -9,6 +9,6 @@ namespace Gallop
 	public:
 		void UpdateView(float downloadSize, float allDownloadSize);
 
-		using UnityEngine::MonoBehaviour::MonoBehaviour;
+		using MonoBehaviour::MonoBehaviour;
 	};
 }

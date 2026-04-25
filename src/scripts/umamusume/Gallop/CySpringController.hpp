@@ -14,6 +14,6 @@ namespace Gallop
 			SkipFramePostAlways
 		};
 
-		using UnityEngine::MonoBehaviour::MonoBehaviour;
+		using MonoBehaviour::MonoBehaviour;
 	};
 }

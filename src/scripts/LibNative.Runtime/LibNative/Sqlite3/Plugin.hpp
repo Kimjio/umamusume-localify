@@ -1,9 +1,6 @@
 #pragma once
 
-namespace LibNative
+namespace LibNative::Sqlite3
 {
-	namespace Sqlite3
-	{
-		class Plugin {};
-	}
+	class Plugin {};
 }

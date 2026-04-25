@@ -9,6 +9,8 @@ static Il2CppObject* GetReplacementAtlasAssets(Il2CppString* name, Il2CppReflect
 
 extern void ReplaceMaterialTextureProperty(Il2CppObject* material, Il2CppString* property);
 
+extern void ReplaceMaterialTexture(Il2CppObject* material);
+
 namespace UnityEngine
 {
 	class AssetBundle : public Object

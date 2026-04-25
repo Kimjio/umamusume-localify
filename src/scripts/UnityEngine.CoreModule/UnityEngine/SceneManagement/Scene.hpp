@@ -2,14 +2,11 @@
 
 #include "il2cpp/il2cpp-object-internals.h"
 
-namespace UnityEngine
+namespace UnityEngine::SceneManagement
 {
-	namespace SceneManagement
+	struct Scene
 	{
-		struct Scene
-		{
-		public:
-			int handle;
-		};
+	public:
+		int handle;
 	};
 }

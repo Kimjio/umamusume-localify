@@ -83,9 +83,6 @@ namespace
 
 	float ratio_vertical = 0.5625f;
 	float ratio_horizontal = 1.7777778f;
-
-	constexpr float ratio_4_3 = 1.3333f;
-	constexpr float ratio_3_4 = 0.75f;
 }
 
 static void SetBGCanvasScalerSize()

@@ -24,12 +24,12 @@ static void ModelLoader_LoadZekkenCompositeResourceInternal_hook(Il2CppObject* s
 
 static void InitAddress()
 {
-	ModelLoader_LoadZekkenCompositeResourceInternal_addr = il2cpp_symbols::get_method_pointer(ASSEMBLY_NAME, "Gallop", "ModelLoader", "LoadZekkenCompositeResourceInternal", 1);
+	ModelLoader_LoadZekkenCompositeResourceInternal_addr = il2cpp_symbols::get_method_pointer(ASSEMBLY_NAME, "Gallop", "ModelLoader", "LoadZekkenCompositeResourceInternal", 0);
 }
 
 static void HookMethods()
 {
-	ADD_HOOK(ModelLoader_LoadZekkenCompositeResourceInternal, "Gallop.ModelLoader::LoadZekkenCompositeResource at %p\n");
+	ADD_HOOK(ModelLoader_LoadZekkenCompositeResourceInternal, "Gallop.ModelLoader::LoadZekkenCompositeResourceInternal at %p\n");
 }
 
 STATIC

@@ -8,30 +8,27 @@
 #include <WebView2.h>
 #include <wil/com.h>
 
-namespace Cute
+namespace Cute::Core
 {
-	namespace Core
+	class WebViewManager : public UnityEngine::MonoBehaviour
 	{
-		class WebViewManager : public UnityEngine::MonoBehaviour
-		{
-		public:
-			static WebViewManager Instance();
+	public:
+		static WebViewManager Instance();
 
-			static wil::com_ptr<ICoreWebView2Controller> webviewController;
+		static wil::com_ptr<ICoreWebView2Controller> webviewController;
 
-			static unordered_map<il2cppstring, il2cppstring> customFontMap;
+		static unordered_map<il2cppstring, il2cppstring> customFontMap;
 
-			void OpenWeb(Il2CppString* url);
+		void OpenWeb(Il2CppString* url);
 
-			void SetVisible(bool visible);
+		void SetVisible(bool visible);
 
-			void SetMargins(int leftMargin, int topMargin, int rightMargin, int bottomMargin);
+		void SetMargins(int leftMargin, int topMargin, int rightMargin, int bottomMargin);
 
-			Il2CppDelegate* Callback();
+		Il2CppDelegate* Callback();
 
-			UnityEngine::Vector4 marginNow();
+		UnityEngine::Vector4 marginNow();
 
-			using UnityEngine::MonoBehaviour::MonoBehaviour;
-		};
-	}
+		using MonoBehaviour::MonoBehaviour;
+	};
 }

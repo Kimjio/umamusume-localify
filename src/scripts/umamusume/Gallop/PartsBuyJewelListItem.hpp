@@ -7,6 +7,6 @@ namespace Gallop
 	class PartsBuyJewelListItem : public UnityEngine::MonoBehaviour
 	{
 	public:
-		using UnityEngine::MonoBehaviour::MonoBehaviour;
+		using MonoBehaviour::MonoBehaviour;
 	};
 }

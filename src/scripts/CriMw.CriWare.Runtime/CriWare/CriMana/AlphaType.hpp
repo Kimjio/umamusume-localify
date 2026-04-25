@@ -1,15 +1,12 @@
 #pragma once
 
-namespace CriWare
+namespace CriWare::CriMana
 {
-	namespace CriMana
+	enum class AlphaType
 	{
-		enum class AlphaType
-		{
-			CompoOpaq,
-			CompoAlphaFull,
-			CompoAlpha3Step,
-			CompoAlpha32Bit,
-		};
-	}
+		CompoOpaq,
+		CompoAlphaFull,
+		CompoAlpha3Step,
+		CompoAlpha32Bit,
+	};
 }

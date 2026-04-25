@@ -4,21 +4,18 @@
 
 #include "scripts/CriMw.CriWare.Runtime/CriWare/CriAtomExPlayback.hpp"
 
-namespace Cute
+namespace Cute::Cri
 {
-	namespace Cri
+	struct AudioPlayback
 	{
-		struct AudioPlayback
-		{
-		public:
-			CriWare::CriAtomExPlayback criAtomExPlayback;
-			bool isError;
-			int soundGroup;
-			bool is3dSound;
-			int atomSourceListIndex;
-			Il2CppString* cueSheetName;
-			Il2CppString* cueName;
-			int cueId;
-		};
+	public:
+		CriWare::CriAtomExPlayback criAtomExPlayback;
+		bool isError;
+		int soundGroup;
+		bool is3dSound;
+		int atomSourceListIndex;
+		Il2CppString* cueSheetName;
+		Il2CppString* cueName;
+		int cueId;
 	};
 }

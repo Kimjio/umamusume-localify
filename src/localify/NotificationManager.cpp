@@ -17,6 +17,10 @@ using namespace UnityEngine;
 
 namespace Localify
 {
+	set<void*> NotificationManager::currentPlayerHandles;
+	set<void*> NotificationManager::currentAcbHandles;
+	void* NotificationManager::currentPlayerHandle;
+	Il2CppObject* NotificationManager::currentElem;
 	Il2CppObject* NotificationManager::notification = nullptr;
 	bool NotificationManager::isRequiredInit = true;
 

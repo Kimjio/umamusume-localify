@@ -73,11 +73,6 @@ namespace
 
 	void* get_IsVertical_addr = nullptr;
 	void* get_IsVertical_orig = nullptr;
-
-	constexpr float ratio_16_9 = 1.7777f;
-	constexpr float ratio_9_16 = 0.5625f;
-	constexpr float ratio_4_3 = 1.3333f;
-	constexpr float ratio_3_4 = 0.75f;
 }
 
 static int get_Width_hook()

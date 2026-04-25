@@ -1148,7 +1148,7 @@ namespace Gallop
 		return result;
 	}
 
-	WebViewManager::WebViewInfo::WebViewInfo(Il2CppString* url, Il2CppString* partsPath, bool isVueJs, WebViewDefine::DmmUrlType urlType) : UnityEngine::Object::Object(instance)
+	WebViewManager::WebViewInfo::WebViewInfo(Il2CppString* url, Il2CppString* partsPath, bool isVueJs, WebViewDefine::DmmUrlType urlType) : Object::Object(instance)
 	{
 		instance = il2cpp_object_new(Gallop_WebViewManager_WebViewInfo);
 		reinterpret_cast<void (*)(Il2CppObject*, Il2CppString*, Il2CppString*, bool, WebViewDefine::DmmUrlType)>(Gallop_WebViewManager_WebViewInfo_ctor_addr)

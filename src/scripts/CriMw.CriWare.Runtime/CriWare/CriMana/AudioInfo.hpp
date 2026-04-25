@@ -1,18 +1,15 @@
 #pragma once
 #include <cstdint>
 
-namespace CriWare
+namespace CriWare::CriMana
 {
-	namespace CriMana
+	struct AudioInfo
 	{
-		struct AudioInfo
-		{
-		public:
-			uint32_t samplingRate;
+	public:
+		uint32_t samplingRate;
 
-			uint32_t numChannels;
+		uint32_t numChannels;
 
-			uint32_t totalSamples;
-		};
-	}
+		uint32_t totalSamples;
+	};
 }

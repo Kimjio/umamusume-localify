@@ -34,41 +34,38 @@ STATIC
 	il2cpp_symbols::init_callbacks.emplace_back(InitAddress);
 }
 
-namespace Gallop
+namespace Gallop::Live
 {
-	namespace Live
+	Master3dLive::Master3dLive(int musicId) : Object(nullptr)
 	{
-		Master3dLive::Master3dLive(int musicId) : Object(nullptr)
+		instance = il2cpp_object_new(Master3dLive_klass);
+		reinterpret_cast<void (*)(Il2CppObject*, int)>(Master3dLive_ctor_addr)(instance, musicId);
+	}
+
+	Master3dLive::Live3dData Master3dLive::LiveData()
+	{
+		Il2CppObject* LiveData;
+		il2cpp_field_get_value(instance, Master3dLive_LiveData, &LiveData);
+		return LiveData;
+	}
+
+	void Master3dLive::Live3dData::ScreenMode(int value)
+	{
+		if (!Master3dLive_Live3dData_set_ScreenMode_addr)
 		{
-			instance = il2cpp_object_new(Master3dLive_klass);
-			reinterpret_cast<void (*)(Il2CppObject*, int)>(Master3dLive_ctor_addr)(instance, musicId);
+			return;
 		}
 
-		Master3dLive::Live3dData Master3dLive::LiveData()
+		reinterpret_cast<void (*)(Il2CppObject*, int)>(Master3dLive_Live3dData_set_ScreenMode_addr)(instance, value);
+	}
+
+	int Master3dLive::Live3dData::ScreenMode()
+	{
+		if (!Master3dLive_Live3dData_get_ScreenMode_addr)
 		{
-			Il2CppObject* LiveData;
-			il2cpp_field_get_value(instance, Master3dLive_LiveData, &LiveData);
-			return LiveData;
+			return 0;
 		}
 
-		void Master3dLive::Live3dData::ScreenMode(int value)
-		{
-			if (!Master3dLive_Live3dData_set_ScreenMode_addr)
-			{
-				return;
-			}
-
-			reinterpret_cast<void (*)(Il2CppObject*, int)>(Master3dLive_Live3dData_set_ScreenMode_addr)(instance, value);
-		}
-
-		int Master3dLive::Live3dData::ScreenMode()
-		{
-			if (!Master3dLive_Live3dData_get_ScreenMode_addr)
-			{
-				return 0;
-			}
-
-			return reinterpret_cast<int (*)(Il2CppObject*)>(Master3dLive_Live3dData_get_ScreenMode_addr)(instance);
-		}
+		return reinterpret_cast<int (*)(Il2CppObject*)>(Master3dLive_Live3dData_get_ScreenMode_addr)(instance);
 	}
 }

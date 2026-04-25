@@ -71,28 +71,25 @@ STATIC
 	il2cpp_symbols::init_callbacks.emplace_back(HookMethods);
 }
 
-namespace Gallop
+namespace Gallop::Live
 {
-	namespace Live
+	void Director::Live3DSettings::ScreenMode(int value)
 	{
-		void Director::Live3DSettings::ScreenMode(int value)
+		if (!Director_Live3DSettings_set_ScreenMode_addr)
 		{
-			if (!Director_Live3DSettings_set_ScreenMode_addr)
-			{
-				return;
-			}
-
-			reinterpret_cast<void (*)(Il2CppObject*, int)>(Director_Live3DSettings_set_ScreenMode_addr)(instance, value);
+			return;
 		}
 
-		int Director::Live3DSettings::ScreenMode()
-		{
-			if (!Director_Live3DSettings_get_ScreenMode_addr)
-			{
-				return 0;
-			}
+		reinterpret_cast<void (*)(Il2CppObject*, int)>(Director_Live3DSettings_set_ScreenMode_addr)(instance, value);
+	}
 
-			return reinterpret_cast<int (*)(Il2CppObject*)>(Director_Live3DSettings_get_ScreenMode_addr)(instance);
+	int Director::Live3DSettings::ScreenMode()
+	{
+		if (!Director_Live3DSettings_get_ScreenMode_addr)
+		{
+			return 0;
 		}
+
+		return reinterpret_cast<int (*)(Il2CppObject*)>(Director_Live3DSettings_get_ScreenMode_addr)(instance);
 	}
 }
