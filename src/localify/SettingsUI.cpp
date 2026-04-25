@@ -22,6 +22,7 @@
 #include "scripts/UnityEngine.CoreModule/UnityEngine/Application.hpp"
 #include "scripts/UnityEngine.CoreModule/UnityEngine/ResourcesAPIInternal.hpp"
 #include "scripts/UnityEngine.CoreModule/UnityEngine/RectTransform.hpp"
+#include "scripts/umamusume/Gallop/CySpringNative.hpp"
 #include "scripts/umamusume/Gallop/DialogCommon.hpp"
 #include "scripts/umamusume/Gallop/DialogManager.hpp"
 #include "scripts/umamusume/Gallop/UIManager.hpp"
@@ -453,6 +454,10 @@ namespace Localify
 
 				AddOrSet(configDocument, IL2CPP_STRING("cySpringUpdateMode"), static_cast<int>(UIParts::GetOptionSliderValue("cyspring_update_mode")));
 
+				AddOrSet(configDocument, IL2CPP_STRING("cySpringDisableNative"), UIParts::GetOptionItemOnOffIsOn("cyspring_disable_native"));
+
+				AddOrSet(configDocument, IL2CPP_STRING("cySpringMonoUncapFrameScale"), UIParts::GetOptionItemOnOffIsOn("cyspring_mono_uncap_frame_scale"));
+
 				AddOrSet(configDocument, IL2CPP_STRING("uiAnimationScale"), static_cast<int>(round(UIParts::GetOptionSliderValue("ui_animation_scale") * 100)) / 100.0);
 
 				AddOrSet(configDocument, IL2CPP_STRING("resolution3dScale"), static_cast<int>(round(UIParts::GetOptionSliderValue("resolution_3d_scale") * 100)) / 100.0);
@@ -519,6 +524,12 @@ namespace Localify
 				config::champions_live_resource_id = configDocument[IL2CPP_STRING("championsLiveResourceId")].GetInt();
 
 				config::cyspring_update_mode = configDocument[IL2CPP_STRING("cySpringUpdateMode")].GetInt();
+
+				config::cyspring_disable_native = configDocument[IL2CPP_STRING("cySpringDisableNative")].GetBool();
+
+				Gallop::CySpringNative::isNative(!config::cyspring_disable_native);
+
+				config::cyspring_mono_uncap_frame_scale = configDocument[IL2CPP_STRING("cySpringMonoUncapFrameScale")].GetBool();
 
 				config::ui_animation_scale = configDocument[IL2CPP_STRING("uiAnimationScale")].GetFloat();
 
@@ -686,6 +697,8 @@ namespace Localify
 		float characterSystemTextCaptionBackgroundAlpha = 0;
 		bool allowDeleteCookie = false;
 		int cySpringUpdateMode = -1;
+		bool cySpringDisableNative = false;
+		bool cySpringMonoUncapFrameScale = false;
 		float resolution3dScale = 1;
 		float uiAnimationScale = 1;
 		bool notificationTp = false;
@@ -772,6 +785,16 @@ namespace Localify
 			if (configDocument.HasMember(IL2CPP_STRING("cySpringUpdateMode")))
 			{
 				cySpringUpdateMode = configDocument[IL2CPP_STRING("cySpringUpdateMode")].GetInt();
+			}
+
+			if (configDocument.HasMember(IL2CPP_STRING("cySpringDisableNative")))
+			{
+				cySpringDisableNative = configDocument[IL2CPP_STRING("cySpringDisableNative")].GetBool();
+			}
+
+			if (configDocument.HasMember(IL2CPP_STRING("cySpringMonoUncapFrameScale")))
+			{
+				cySpringMonoUncapFrameScale = configDocument[IL2CPP_STRING("cySpringMonoUncapFrameScale")].GetBool();
 			}
 
 			if (configDocument.HasMember(IL2CPP_STRING("resolution3dScale")))
@@ -952,6 +975,9 @@ namespace Localify
 						}
 					}
 				),
+				UIParts::GetOptionItemOnOff("cyspring_disable_native", LocalifySettings::GetText("cyspring_disable_native")),
+				UIParts::GetOptionItemOnOff("cyspring_mono_uncap_frame_scale", LocalifySettings::GetText("cyspring_mono_uncap_frame_scale")),
+				UIParts::GetOptionItemInfo(nullptr, LocalifySettings::GetText("cyspring_mono_uncap_frame_scale_info")),
 				UIParts::GetOptionItemTitle(LocalifySettings::GetText("screen")),
 				UIParts::GetOptionItemOnOff("unlock_size", LocalifySettings::GetText("unlock_size")),
 				UIParts::GetOptionItemAttention(LocalifySettings::GetText("applied_after_restart")),
@@ -1131,6 +1157,16 @@ namespace Localify
 		);
 
 		UIParts::SetOptionItemOnOffAction("use_third_party_news", useThirdPartyNews, *([](Il2CppObject*, bool isOn)
+			{
+			})
+		);
+
+		UIParts::SetOptionItemOnOffAction("cyspring_disable_native", cySpringDisableNative, *([](Il2CppObject*, bool isOn)
+			{
+			})
+		);
+
+		UIParts::SetOptionItemOnOffAction("cyspring_mono_uncap_frame_scale", cySpringMonoUncapFrameScale, *([](Il2CppObject*, bool isOn)
 			{
 			})
 		);

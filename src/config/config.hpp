@@ -105,6 +105,8 @@ namespace config
 	 * SkipFramePostAlways 3
 	 */
 	extern int cyspring_update_mode;
+	extern bool cyspring_disable_native;
+	extern bool cyspring_mono_uncap_frame_scale;
 	extern bool hide_now_loading;
 	extern bool discord_rich_presence;
 	extern bool allow_delete_cookie;

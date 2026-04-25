@@ -432,6 +432,58 @@ namespace LocalifySettings
 			return IL2CPP_STRING("CySpringアップデートモード");
 		}
 
+		if (id == "cyspring_disable_native")
+		{
+			if (isKor)
+			{
+				return IL2CPP_STRING("CySpring 네이티브 라이브러리 비활성화");
+			}
+			if (isEng)
+			{
+				return IL2CPP_STRING("Disable CySpring native library");
+			}
+			return IL2CPP_STRING("CySpringネイティブライブラリの無効化");
+		}
+
+		if (id == "cyspring_disable_native_info")
+		{
+			if (isKor)
+			{
+				return IL2CPP_STRING("CySpring 네이티브 라이브러리를 사용하지 않도록 설정합니다. CySpring 관련 오류가 발생할 때 이 옵션을 켜보세요.");
+			}
+			if (isEng)
+			{
+				return IL2CPP_STRING("Set not to use the CySpring native library. If you encounter CySpring-related errors, try turning on this option.");
+			}
+			return IL2CPP_STRING("CySpring関連のエラーが発生したときにこのオプションをオンにしてみてください。");
+		}
+
+		if (id == "cyspring_mono_uncap_frame_scale")
+		{
+			if (isKor)
+			{
+				return IL2CPP_STRING("CySpring Mono 프레임 스케일 제한 해제");
+			}
+			if (isEng)
+			{
+				return IL2CPP_STRING("Remove CySpring Mono frame scale limit");
+			}
+			return IL2CPP_STRING("CySpring Monoフレームスケール制限の解除");
+		}
+
+		if (id == "cyspring_mono_uncap_frame_scale_info")
+		{
+			if (isKor)
+			{
+				return IL2CPP_STRING("프레임 스케일을 현재 FPS 설정 기반으로 변경합니다.\nFPS 설정에 따라 물리 효과가 과도하게 작용될 수 있습니다.");
+			}
+			if (isEng)
+			{
+				return IL2CPP_STRING("Change the frame scale based on the current FPS settings.\nDepending on the FPS settings, the physical effects may be excessively applied.");
+			}
+			return IL2CPP_STRING("フレームスケールを現在のFPS設定に基づいて変更します。\nFPS設定によっては物理効果が過度に作用する可能性があります。");
+		}
+
 		if (id == "graphics")
 		{
 			if (isKor)

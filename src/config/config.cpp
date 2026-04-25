@@ -64,6 +64,8 @@ namespace config
 	 * SkipFramePostAlways 3
 	 */
 	int cyspring_update_mode = -1;
+	bool cyspring_disable_native = false;
+	bool cyspring_mono_uncap_frame_scale = false;
 	bool hide_now_loading = false;
 	bool discord_rich_presence = false;
 	bool allow_delete_cookie = false;
@@ -352,6 +354,10 @@ if (document.HasMember(IL2CPP_STRING(_name_)) && document[IL2CPP_STRING(_name_)]
 				{
 					cyspring_update_mode = 1;
 				}
+
+			GetValue("cySpringDisableNative", Bool, cyspring_disable_native);
+
+			GetValue("cySpringMonoUncapFrameScale", Bool, cyspring_mono_uncap_frame_scale);
 
 			GetValue("hideNowLoading", Bool, hide_now_loading);
 
