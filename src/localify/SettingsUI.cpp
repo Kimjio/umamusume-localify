@@ -995,7 +995,7 @@ namespace Localify
 				UIParts::GetOptionItemSimpleWithButton("champions_live_year", (LocalifySettings::GetText("champions_live_year") + il2cppstring(IL2CPP_STRING(": ")) + u8_il2cpp(to_string(championsLiveYear))).data(),
 					Gallop::Localize::Get(GetTextIdByName(IL2CPP_STRING("Circle0206")))->chars),
 				UIParts::GetOptionItemSimple(IL2CPP_STRING("")),
-				UIParts::GetOptionItemTitle(LocalifySettings::GetText("character_system_text_caption")),
+				UIParts::GetOptionItemTitle(LocalifySettings::GetText("character_system_text_caption_title")),
 				UIParts::GetOptionItemOnOff("character_system_text_caption", LocalifySettings::GetText("character_system_text_caption")),
 				UIParts::GetOptionSlider("character_system_text_caption_line_char_count", LocalifySettings::GetText("character_system_text_caption_line_char_count"), characterSystemTextCaptionLineCharCount, 0, 100, true,
 					*[](Il2CppObject* slider)

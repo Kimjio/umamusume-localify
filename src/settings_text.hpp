@@ -13,8 +13,8 @@ namespace LocalifySettings
 {
 	inline const Il2CppChar* GetText(string id)
 	{
-		bool isKor = Game::CurrentGameRegion == Game::Region::KOR || config::localify_settings_force_korean;
-		bool isEng = Game::CurrentGameRegion == Game::Region::ENG;
+		bool isKor = Game::CurrentGameRegion == Game::Region::KOR || config::localify_settings_language == IL2CPP_STRING("ko");
+		bool isEng = Game::CurrentGameRegion == Game::Region::ENG || config::localify_settings_language == IL2CPP_STRING("en");
 
 		if (id == "settings_title")
 		{
@@ -92,6 +92,19 @@ namespace LocalifySettings
 				return IL2CPP_STRING("Graphics quality");
 			}
 			return IL2CPP_STRING("グラフィックの品質");
+		}
+
+		if (id == "character_system_text_caption_title")
+		{
+			if (isKor)
+			{
+				return  IL2CPP_STRING("캐릭터 대사 자막");
+			}
+			if (isEng)
+			{
+				return  IL2CPP_STRING("Character dialogue caption");
+			}
+			return IL2CPP_STRING("キャラクターのダイアログテキストをキャプションで表示");
 		}
 
 		if (id == "character_system_text_caption")

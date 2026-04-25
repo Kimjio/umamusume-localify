@@ -191,7 +191,9 @@ namespace Localify
 
 		auto array = optionItemInfo.GetComponentsInChildren(GetRuntimeType("umamusume.dll", "Gallop", "TextCommon"), false);
 
-		Gallop::TextCommon(array->vector[0]).SetTextWithCustomTag(il2cpp_string_new16(text));
+		auto textCommon = Gallop::TextCommon(array->vector[0]);
+		textCommon.SetTextWithCustomTag(il2cpp_string_new16(text));
+		textCommon.verticalOverflow(UnityEngine::VerticalWrapMode::Overflow);
 
 		auto contentSizeFitter = optionItemInfo.AddComponent(GetRuntimeType("umamusume.dll", "Gallop", "LayoutGroupContentSizeFitter"));
 
@@ -201,8 +203,10 @@ namespace Localify
 		il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, bool)>(verticalLayoutGroup->klass, "set_childControlWidth", 1)->methodPointer(verticalLayoutGroup, true);
 
 		auto padding = il2cpp_class_get_method_from_name_type<Il2CppObject * (*)(Il2CppObject*)>(verticalLayoutGroup->klass, "get_padding", 0)->methodPointer(verticalLayoutGroup);
+		il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, int)>(padding->klass, "set_top", 1)->methodPointer(padding, 16);
 		il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, int)>(padding->klass, "set_left", 1)->methodPointer(padding, 64);
 		il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, int)>(padding->klass, "set_right", 1)->methodPointer(padding, 64);
+		il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, int)>(padding->klass, "set_bottom", 1)->methodPointer(padding, 16);
 
 		auto _layoutField = il2cpp_class_get_field_from_name(contentSizeFitter->klass, "_layout");
 		il2cpp_field_set_value(contentSizeFitter, _layoutField, verticalLayoutGroup);

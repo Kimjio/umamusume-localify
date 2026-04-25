@@ -110,7 +110,7 @@ namespace config
 	extern bool hide_now_loading;
 	extern bool discord_rich_presence;
 	extern bool allow_delete_cookie;
-	extern bool localify_settings_force_korean;
+	extern il2cppstring localify_settings_language;
 	extern bool dump_msgpack;
 	extern bool dump_msgpack_request;
 	extern bool unlock_live_chara;

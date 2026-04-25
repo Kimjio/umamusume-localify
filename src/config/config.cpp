@@ -69,7 +69,7 @@ namespace config
 	bool hide_now_loading = false;
 	bool discord_rich_presence = false;
 	bool allow_delete_cookie = false;
-	bool localify_settings_force_korean = false;
+	il2cppstring localify_settings_language = IL2CPP_STRING("ja");
 	bool dump_msgpack = false;
 	bool dump_msgpack_request = false;
 	bool unlock_live_chara = false;
@@ -424,7 +424,7 @@ if (document.HasMember(IL2CPP_STRING(_name_)) && document[IL2CPP_STRING(_name_)]
 
 			GetValue("allowDeleteCookie", Bool, allow_delete_cookie);
 
-			GetValue("localifySettingsForceKorean", Bool, localify_settings_force_korean);
+			GetValue("localifySettingsLanguage", String, localify_settings_language);
 
 			GetValue("dumpMsgPack", Bool, dump_msgpack);
 
