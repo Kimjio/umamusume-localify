@@ -18,40 +18,75 @@ static bool RegionIsMappedView(HANDLE ProcessHandle, PVOID BaseAddress, SIZE_T R
 		mbi.Type == MEM_MAPPED;
 }
 
-static bool ViewHasProtectedProtection(HANDLE ProcessHandle,
+static bool ViewHasProtectedProtection(
+	HANDLE ProcessHandle,
 	PVOID BaseAddress,
 	SIZE_T RegionSize,
-	DWORD NewProtection)
+	DWORD NewProtection
+)
 {
 	PVOID regionBase = BaseAddress;
 	SIZE_T regionSize = RegionSize;
 	DWORD oldProtection = 0;
 	NTSTATUS status = NtProtectVirtualMemory(ProcessHandle, &regionBase, &regionSize, NewProtection, &oldProtection);
-	return status == STATUS_INVALID_PAGE_PROTECTION ||
-		status == STATUS_SECTION_PROTECTION;
+	return status == STATUS_INVALID_PAGE_PROTECTION || status == STATUS_SECTION_PROTECTION;
 }
 
-static DWORD GetSyscallNumber(const char* functionName)
-{
-	HMODULE hNtdll = GetModuleHandleA("ntdll.dll");
-	if (!hNtdll)
+static void UnhookNtdll() {
+	auto hookedNtdll = GetModuleHandleA("ntdll.dll");
+	if (!hookedNtdll)
 	{
-		return 0;
+		return;
 	}
 
-	FARPROC funcAddr = GetProcAddress(hNtdll, functionName);
-	if (!funcAddr)
+	auto file = CreateFileA(R"(C:\Windows\System32\ntdll.dll)", GENERIC_READ, FILE_SHARE_READ, NULL, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
+	if (file == INVALID_HANDLE_VALUE)
 	{
-		return 0;
+		return;
 	}
 
-	BYTE* pByte = reinterpret_cast<BYTE*>(funcAddr);
-	if (pByte[0] == 0x4C && pByte[1] == 0x8B && pByte[2] == 0xD1 && pByte[3] == 0xB8)
+	auto mapping = CreateFileMappingA(file, NULL, PAGE_READONLY | SEC_IMAGE, 0, 0, NULL);
+	if (!mapping)
 	{
-		return *reinterpret_cast<DWORD*>(pByte + 4);
+		CloseHandle(file);
+		return;
 	}
 
-	return 0;
+	auto cleanNtdll = MapViewOfFile(mapping, FILE_MAP_READ, 0, 0, 0);
+	if (!cleanNtdll)
+	{
+		CloseHandle(mapping);
+		CloseHandle(file);
+		return;
+	}
+
+	auto dosHeader = reinterpret_cast<PIMAGE_DOS_HEADER>(hookedNtdll);
+	auto ntHeaders = reinterpret_cast<PIMAGE_NT_HEADERS>(reinterpret_cast<DWORD_PTR>(hookedNtdll) + dosHeader->e_lfanew);
+
+	for (WORD i = 0; i < ntHeaders->FileHeader.NumberOfSections; i++)
+	{
+		auto sectionHeader = reinterpret_cast<PIMAGE_SECTION_HEADER>(reinterpret_cast<DWORD_PTR>(IMAGE_FIRST_SECTION(ntHeaders)) + (static_cast<DWORD_PTR>(i) * IMAGE_SIZEOF_SECTION_HEADER));
+
+		if (strcmp(reinterpret_cast<const char*>(sectionHeader->Name), ".text") == 0)
+		{
+			auto hookedTextSection = reinterpret_cast<LPVOID>(reinterpret_cast<DWORD_PTR>(hookedNtdll) + sectionHeader->VirtualAddress);
+			auto cleanTextSection = reinterpret_cast<LPVOID>(reinterpret_cast<DWORD_PTR>(cleanNtdll) + sectionHeader->VirtualAddress);
+			SIZE_T size = sectionHeader->Misc.VirtualSize;
+
+			DWORD oldProtect;
+			if (VirtualProtect(hookedTextSection, size, PAGE_EXECUTE_READWRITE, &oldProtect))
+			{
+				memcpy(hookedTextSection, cleanTextSection, size);
+				VirtualProtect(hookedTextSection, size, oldProtect, &oldProtect);
+				break;
+			}
+		}
+	}
+
+	UnmapViewOfFile(cleanNtdll);
+	CloseHandle(mapping);
+	CloseHandle(file);
+	return;
 }
 
 static bool RemapViewOfSection(HANDLE ProcessHandle,
@@ -74,37 +109,30 @@ static bool RemapViewOfSection(HANDLE ProcessHandle,
 		LARGE_INTEGER sectionMaxSize{};
 		sectionMaxSize.QuadPart = RegionSize;
 
+		UnhookNtdll();
+
 		if (NT_SUCCESS(NtCreateSection(&hSection, SECTION_ALL_ACCESS, nullptr, &sectionMaxSize, PAGE_EXECUTE_READWRITE, SEC_COMMIT, nullptr)))
 		{
-			static DWORD ssnNtUnmap = 0;
-			NTSTATUS status;
-			if (ssnNtUnmap == 0)
-			{
-				ssnNtUnmap = GetSyscallNumber("NtUnmapViewOfSectionEx");
-			}
+			NTSTATUS status = NtUnmapViewOfSection(ProcessHandle, BaseAddress);
 
-			if (ssnNtUnmap == 0)
-			{
-				// ntdll corrupted
-				result = false;
-			}
-			else
+			if (!NT_SUCCESS(status))
 			{
 				status = NtUnmapViewOfSectionEx(ProcessHandle, BaseAddress, 0);
+			}
 
-				if (NT_SUCCESS(status))
+			if (NT_SUCCESS(status))
+			{
+				PVOID viewBase = BaseAddress;
+				LARGE_INTEGER sectionOffset{};
+				SIZE_T viewSize = 0;
+				if (NT_SUCCESS(NtMapViewOfSection(hSection, ProcessHandle, &viewBase, 0, RegionSize, &sectionOffset, &viewSize, ViewUnmap, 0, NewProtection)))
 				{
-					PVOID viewBase = BaseAddress;
-					LARGE_INTEGER sectionOffset{};
-					SIZE_T viewSize = 0;
-					if (NT_SUCCESS(NtMapViewOfSection(hSection, ProcessHandle, &viewBase, 0, RegionSize, &sectionOffset, &viewSize, ViewUnmap, 0, NewProtection)))
+					SIZE_T numberOfBytesWritten = 0;
+					if (WriteProcessMemory(ProcessHandle, viewBase, CopyBuffer, viewSize, &numberOfBytesWritten))
 					{
-						SIZE_T numberOfBytesWritten = 0;
-						if (WriteProcessMemory(ProcessHandle, viewBase, CopyBuffer, viewSize, &numberOfBytesWritten))
-						{
-							result = true;
-						}
+						result = true;
 					}
+
 				}
 			}
 		}
