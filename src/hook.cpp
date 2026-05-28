@@ -227,34 +227,16 @@ namespace
 
 	IUnityInterfaces* unityInterfaces;
 
-	void UnityOpenXR_UnityPluginLoad_hook(IUnityInterfaces* unityInterfaces);
-
 	void* UnityPluginLoad_orig = nullptr;
 	void UnityPluginLoad_hook(IUnityInterfaces* unityInterfaces)
 	{
 		reinterpret_cast<decltype(UnityPluginLoad_hook)*>(UnityPluginLoad_orig)(unityInterfaces);
 
-
 		::unityInterfaces = unityInterfaces;
-		// Unity::OpenXR::InitLibrary(unityInterfaces);
+		Unity::OpenXR::UnityPluginLoad(unityInterfaces);
 
-		//Unity::OpenXR::DiagnosticReport::StartReport();
-		// Unity::OpenXR::Init();
-		// Unity::OpenXR::Start();
-	}
-
-	void* UnityOpenXR_UnityPluginLoad_orig = nullptr;
-	void UnityOpenXR_UnityPluginLoad_hook(IUnityInterfaces* unityInterfaces)
-	{
-		reinterpret_cast<decltype(UnityOpenXR_UnityPluginLoad_hook)*>(UnityOpenXR_UnityPluginLoad_orig)(unityInterfaces);
-
-		::unityInterfaces = unityInterfaces;
-		// Unity::OpenXR::Init();
-
-		// Unity::OpenXR::InitLibrary(unityInterfaces);
-
-		//Unity::OpenXR::DiagnosticReport::StartReport();
-		// Unity::OpenXR::Init();
+		Unity::OpenXR::DiagnosticReport::StartReport();
+		Unity::OpenXR::Init();
 		// Unity::OpenXR::Start();
 	}
 
@@ -380,14 +362,27 @@ namespace
 				cout << "WARN: il2cpp_init Failed: " << MH_StatusToString(result) << " LastError: " << GetLastError() << endl << endl;
 			}
 
-			if (Game::CurrentGameRegion != Game::Region::KOR)
-			{
-				MH_DisableHook(LoadLibraryW);
-				MH_RemoveHook(LoadLibraryW);
-			}
+			//if (Game::CurrentGameRegion != Game::Region::KOR)
+			//{
+			//	MH_DisableHook(LoadLibraryW);
+			//	MH_RemoveHook(LoadLibraryW);
+			//}
 
 			return il2cpp;
 		}
+
+		/*static bool criWareInit = false;
+		if (lpLibFileName == L"cri_ware_unity.dll"s && !criWareInit)
+		{
+			criWareInit = true;
+			auto module = reinterpret_cast<decltype(LoadLibraryW)*>(LoadLibraryW_orig)(lpLibFileName);
+
+			const auto UnityPluginLoad_addr = GetProcAddress(module, "UnityPluginLoad");
+
+			MH_CreateHook(UnityPluginLoad_addr, UnityPluginLoad_hook, &UnityPluginLoad_orig);
+			MH_EnableHook(UnityPluginLoad_addr);
+			return module;
+		}*/
 
 		if (lpLibFileName == L"UnityOpenXR.dll"s)
 		{
@@ -513,6 +508,7 @@ namespace
 	}
 
 	bool altEnterPressed = false;
+	bool fullScreenFl = false;
 
 	Il2CppObject* delayTweener;
 
@@ -3332,6 +3328,18 @@ namespace
 			{
 				return TRUE;
 			}
+
+			if (wParam == VK_F11)
+			{
+				UnityEngine::Resolution r = UnityEngine::Screen::currentResolution();
+
+				fullScreenFl = !fullScreenFl;
+
+				auto refreshRate = RefreshRate{ 0, 1 };
+				UnityEngine::Screen::SetResolution_Injected(r.width, r.height, fullScreenFl ? UnityEngine::FullScreenMode::FullScreenWindow : UnityEngine::FullScreenMode::Windowed, &refreshRate);
+
+				return TRUE;
+			}
 		}
 
 		if (uMsg == WM_KEYUP)
@@ -3353,8 +3361,6 @@ namespace
 					altEnterPressed = true;
 
 					UnityEngine::Resolution r = UnityEngine::Screen::currentResolution();
-
-					static bool fullScreenFl = false;
 
 					fullScreenFl = !fullScreenFl;
 

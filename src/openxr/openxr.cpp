@@ -424,8 +424,27 @@ namespace Unity
 	{
 		if (!module)
 		{
-			return;
+			wstring module_name;
+			module_name.resize(MAX_PATH);
+			module_name.resize(GetModuleFileNameW(nullptr, module_name.data(), MAX_PATH));
+
+			filesystem::path module_path(module_name);
+
+			wstring name = module_path.filename().replace_extension();
+
+			SetDllDirectoryW((name + L"_Data\\Plugins\\x86_64\\"s).data());
+
+			module = LoadLibraryExW(L"UnityOpenXR.dll", nullptr, 0);
+
+			SetDllDirectoryW(nullptr);
+
+			if (!module)
+			{
+				return;
+			}
 		}
+
+		Internal_SetSuccessfullyInitialized(false);
 
 		if (!Internal_LoadOpenXRLibrary(L"openxr_loader"))
 		{
@@ -441,37 +460,9 @@ namespace Unity
 			return;
 		}
 
-		auto productName = il2cpp_u8(il2cpp_resolve_icall_type<Il2CppString * (*)()>("UnityEngine.Application::get_productName")()->chars);
-
-		auto version = il2cpp_u8(il2cpp_symbols::get_method_pointer<Il2CppString * (*)()>(
-			"UnityEngine.CoreModule.dll", "UnityEngine",
-			"Application", "get_version", IgnoreNumberOfArguments)()->chars);
-
-		auto unityVersion = il2cpp_u8(il2cpp_symbols::get_method_pointer<Il2CppString * (*)()>(
-			"UnityEngine.CoreModule.dll", "UnityEngine",
-			"Application", "get_unityVersion", IgnoreNumberOfArguments)()->chars);
-
-		cout << productName << " " << version << " " << unityVersion << endl;
-
-		auto MD5 = il2cpp_symbols::get_method_pointer<Il2CppObject * (*)()>("mscorlib.dll", "System.Security.Cryptography", "MD5", "Create", IgnoreNumberOfArguments)();
-
-		auto versionByteArray = il2cpp_array_new_type<int8_t>(il2cpp_symbols::get_class("mscorlib.dll", "System", "Byte"), version.size());
-
-		for (int i = 0; i < version.size(); i++)
-		{
-			auto c = version.at(i);
-			il2cpp_array_setref(versionByteArray, i, &c);
-		}
-
-		auto versionMD5Data = il2cpp_class_get_method_from_name_type<Il2CppArraySize_t<int8_t>*(*)(Il2CppObject*, Il2CppArraySize_t<int8_t>*, int, int)>(MD5->klass, "ComputeHash", 3)->methodPointer(MD5, versionByteArray, 0, versionByteArray->max_length);
-
-		auto versionHash = il2cpp_symbols::get_method_pointer<uint32_t(*)(Il2CppArraySize_t<int8_t>*, int)>("mscorlib.dll", "System", "BitConverter", "ToUInt32", 2)(versionMD5Data, 0);
-
-		Internal_SetApplicationInfo(productName.data(), version.data(), versionHash, unityVersion.data());
+		Internal_SetCallbacks(*ReceiveNativeEvent);
 
 		// Internal_RequestEnableExtensionString("XR_FB_touch_controller_pro");
-
-		Internal_SetCallbacks(*ReceiveNativeEvent);
 
 		Settings::ApplyRenderSettings();
 
@@ -538,6 +529,34 @@ namespace Unity
 			cout << "xrDisplaySubsystem or xrInputSubsystem is null" << endl;
 			return;
 		}
+
+		auto productName = il2cpp_u8(il2cpp_resolve_icall_type<Il2CppString * (*)()>("UnityEngine.Application::get_productName")()->chars);
+
+		auto version = il2cpp_u8(il2cpp_symbols::get_method_pointer<Il2CppString * (*)()>(
+			"UnityEngine.CoreModule.dll", "UnityEngine",
+			"Application", "get_version", IgnoreNumberOfArguments)()->chars);
+
+		auto unityVersion = il2cpp_u8(il2cpp_symbols::get_method_pointer<Il2CppString * (*)()>(
+			"UnityEngine.CoreModule.dll", "UnityEngine",
+			"Application", "get_unityVersion", IgnoreNumberOfArguments)()->chars);
+
+		cout << productName << " " << version << " " << unityVersion << endl;
+
+		auto MD5 = il2cpp_symbols::get_method_pointer<Il2CppObject * (*)()>("mscorlib.dll", "System.Security.Cryptography", "MD5", "Create", IgnoreNumberOfArguments)();
+
+		auto versionByteArray = il2cpp_array_new_type<int8_t>(il2cpp_symbols::get_class("mscorlib.dll", "System", "Byte"), version.size());
+
+		for (int i = 0; i < version.size(); i++)
+		{
+			auto c = version.at(i);
+			il2cpp_array_setref(versionByteArray, i, &c);
+		}
+
+		auto versionMD5Data = il2cpp_class_get_method_from_name_type<Il2CppArraySize_t<int8_t>*(*)(Il2CppObject*, Il2CppArraySize_t<int8_t>*, int, int)>(MD5->klass, "ComputeHash", 3)->methodPointer(MD5, versionByteArray, 0, versionByteArray->max_length);
+
+		auto versionHash = il2cpp_symbols::get_method_pointer<uint32_t(*)(Il2CppArraySize_t<int8_t>*, int)>("mscorlib.dll", "System", "BitConverter", "ToUInt32", 2)(versionMD5Data, 0);
+
+		Internal_SetApplicationInfo(productName.data(), version.data(), versionHash, unityVersion.data());
 
 		auto beforeRenderHelper = il2cpp_symbols::get_class("UnityEngine.CoreModule.dll", "UnityEngine", "BeforeRenderHelper");
 		auto s_OrderBlocksField = il2cpp_class_get_field_from_name(beforeRenderHelper->klass, "s_OrderBlocks");
@@ -646,7 +665,7 @@ namespace Unity
 
 	bool OpenXR::Internal_LoadOpenXRLibrary(const wchar_t* loaderPath)
 	{
-		return reinterpret_cast<bool (*)(const char* loaderPath)>(GetProcAddress(module, "main_LoadOpenXRLibrary"))(wide_u8(loaderPath).data());
+		return reinterpret_cast<bool (*)(const wchar_t* loaderPath)>(GetProcAddress(module, "main_LoadOpenXRLibrary"))(loaderPath);
 	}
 
 	void OpenXR::Internal_UnloadOpenXRLibrary()
@@ -752,6 +771,15 @@ namespace Unity
 		}
 
 		reinterpret_cast<decltype(Internal_PumpMessageLoop)*>(GetProcAddress(module, "messagepump_PumpMessageLoop"))();
+	}
+
+	void OpenXR::Internal_SetSuccessfullyInitialized(bool value)
+	{
+		if (!module)
+		{
+			return;
+		}
+		reinterpret_cast<decltype(Internal_SetSuccessfullyInitialized)*>(GetProcAddress(module, "session_SetSuccessfullyInitialized"))(value);
 	}
 
 	bool OpenXR::Internal_RequestEnableExtensionString(const char* extensionString)
