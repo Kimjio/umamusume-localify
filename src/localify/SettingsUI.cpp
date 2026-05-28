@@ -20,6 +20,7 @@
 #include "notification/DesktopNotificationManagerCompat.h"
 
 #include "scripts/UnityEngine.CoreModule/UnityEngine/Application.hpp"
+#include "scripts/UnityEngine.CoreModule/UnityEngine/Color.hpp"
 #include "scripts/UnityEngine.CoreModule/UnityEngine/ResourcesAPIInternal.hpp"
 #include "scripts/UnityEngine.CoreModule/UnityEngine/RectTransform.hpp"
 #include "scripts/umamusume/Gallop/CySpringNative.hpp"
@@ -458,9 +459,19 @@ namespace Localify
 
 				AddOrSet(configDocument, IL2CPP_STRING("cySpringMonoUncapFrameScale"), UIParts::GetOptionItemOnOffIsOn("cyspring_mono_uncap_frame_scale"));
 
-				AddOrSet(configDocument, IL2CPP_STRING("uiAnimationScale"), static_cast<int>(round(UIParts::GetOptionSliderValue("ui_animation_scale") * 100)) / 100.0);
+				AddOrSet(configDocument, IL2CPP_STRING("cySpringLegacyBehavior"), UIParts::GetOptionItemOnOffIsOn("cyspring_legacy_behavior"));
 
-				AddOrSet(configDocument, IL2CPP_STRING("resolution3dScale"), static_cast<int>(round(UIParts::GetOptionSliderValue("resolution_3d_scale") * 100)) / 100.0);
+				AddOrSet(configDocument, IL2CPP_STRING("cySpringDragForceRateScale"), static_cast<int>(UIParts::GetOptionSliderValue("cyspring_drag_force_rate_scale") * 100) / 100.0 / 10.0);
+
+				AddOrSet(configDocument, IL2CPP_STRING("cySpringStiffnessForceRateScale"), static_cast<int>(UIParts::GetOptionSliderValue("cyspring_stiffness_force_rate_scale") * 100.0) / 100 / 10.0);
+
+				AddOrSet(configDocument, IL2CPP_STRING("cySpringMoveRateScale"), static_cast<int>(UIParts::GetOptionSliderValue("cyspring_move_rate_scale") * 100) / 100.0 / 10.0);
+
+				AddOrSet(configDocument, IL2CPP_STRING("cySpringAddMoveRateScale"), static_cast<int>(UIParts::GetOptionSliderValue("cyspring_add_move_rate_scale") * 100) / 100.0 / 10.0);
+
+				AddOrSet(configDocument, IL2CPP_STRING("uiAnimationScale"), static_cast<int>(round(UIParts::GetOptionSliderValue("ui_animation_scale") * 100)) / 100.0 / 10.0);
+
+				AddOrSet(configDocument, IL2CPP_STRING("resolution3dScale"), static_cast<int>(round(UIParts::GetOptionSliderValue("resolution_3d_scale") * 100)) / 100.0 / 10.0);
 
 				AddOrSet(configDocument, IL2CPP_STRING("notificationTp"), UIParts::GetOptionItemOnOffIsOn("notification_tp"));
 
@@ -479,15 +490,15 @@ namespace Localify
 #endif
 				AddOrSet(configDocument, IL2CPP_STRING("unlockSize"), UIParts::GetOptionItemOnOffIsOn("unlock_size"));
 
-				AddOrSet(configDocument, IL2CPP_STRING("uiScale"), static_cast<int>(round(UIParts::GetOptionSliderValue("ui_scale") * 100)) / 100.0);
+				AddOrSet(configDocument, IL2CPP_STRING("uiScale"), static_cast<int>(round(UIParts::GetOptionSliderValue("ui_scale") * 100)) / 100.0 / 10.0);
 
 				AddOrSet(configDocument, IL2CPP_STRING("autoFullscreen"), UIParts::GetOptionItemOnOffIsOn("auto_fullscreen"));
 
 				AddOrSet(configDocument, IL2CPP_STRING("freeFormWindow"), UIParts::GetOptionItemOnOffIsOn("freeform_window"));
 
-				AddOrSet(configDocument, IL2CPP_STRING("freeFormUiScalePortrait"), static_cast<int>(round(UIParts::GetOptionSliderValue("ui_scale_portrait") * 100)) / 100.0);
+				AddOrSet(configDocument, IL2CPP_STRING("freeFormUiScalePortrait"), static_cast<int>(round(UIParts::GetOptionSliderValue("ui_scale_portrait") * 100)) / 100.0 / 10.0);
 
-				AddOrSet(configDocument, IL2CPP_STRING("freeFormUiScaleLandscape"), static_cast<int>(round(UIParts::GetOptionSliderValue("ui_scale_landscape") * 100)) / 100.0);
+				AddOrSet(configDocument, IL2CPP_STRING("freeFormUiScaleLandscape"), static_cast<int>(round(UIParts::GetOptionSliderValue("ui_scale_landscape") * 100)) / 100.0 / 10.0);
 
 				AddOrSet(configDocument, IL2CPP_STRING("taskbarShowProgressOnDownload"), UIParts::GetOptionItemOnOffIsOn("taskbar_show_progress_on_download"));
 
@@ -530,6 +541,16 @@ namespace Localify
 				Gallop::CySpringNative::isNative(!config::cyspring_disable_native);
 
 				config::cyspring_mono_uncap_frame_scale = configDocument[IL2CPP_STRING("cySpringMonoUncapFrameScale")].GetBool();
+
+				config::cyspring_legacy_behavior = configDocument[IL2CPP_STRING("cySpringLegacyBehavior")].GetBool();
+
+				config::cyspring_drag_force_rate_scale = configDocument[IL2CPP_STRING("cySpringDragForceRateScale")].GetFloat();
+
+				config::cyspring_stiffness_force_rate_scale = configDocument[IL2CPP_STRING("cySpringStiffnessForceRateScale")].GetFloat();
+
+				config::cyspring_move_rate_scale = configDocument[IL2CPP_STRING("cySpringMoveRateScale")].GetFloat();
+
+				config::cyspring_add_move_rate_scale = configDocument[IL2CPP_STRING("cySpringAddMoveRateScale")].GetFloat();
 
 				config::ui_animation_scale = configDocument[IL2CPP_STRING("uiAnimationScale")].GetFloat();
 
@@ -699,6 +720,11 @@ namespace Localify
 		int cySpringUpdateMode = -1;
 		bool cySpringDisableNative = false;
 		bool cySpringMonoUncapFrameScale = false;
+		bool cySpringLegacyBehavior = false;
+		float cySpringDragForceRateScale = 1;
+		float cySpringStiffnessForceRateScale = 1;
+		float cySpringMoveRateScale = 1;
+		float cySpringAddMoveRateScale = 1;
 		float resolution3dScale = 1;
 		float uiAnimationScale = 1;
 		bool notificationTp = false;
@@ -795,6 +821,31 @@ namespace Localify
 			if (configDocument.HasMember(IL2CPP_STRING("cySpringMonoUncapFrameScale")))
 			{
 				cySpringMonoUncapFrameScale = configDocument[IL2CPP_STRING("cySpringMonoUncapFrameScale")].GetBool();
+			}
+
+			if (configDocument.HasMember(IL2CPP_STRING("cySpringLegacyBehavior")))
+			{
+				cySpringLegacyBehavior = configDocument[IL2CPP_STRING("cySpringLegacyBehavior")].GetBool();
+			}
+
+			if (configDocument.HasMember(IL2CPP_STRING("cySpringDragForceRateScale")))
+			{
+				cySpringDragForceRateScale = configDocument[IL2CPP_STRING("cySpringDragForceRateScale")].GetFloat();
+			}
+
+			if (configDocument.HasMember(IL2CPP_STRING("cySpringStiffnessForceRateScale")))
+			{
+				cySpringStiffnessForceRateScale = configDocument[IL2CPP_STRING("cySpringStiffnessForceRateScale")].GetFloat();
+			}
+
+			if (configDocument.HasMember(IL2CPP_STRING("cySpringMoveRateScale")))
+			{
+				cySpringMoveRateScale = configDocument[IL2CPP_STRING("cySpringMoveRateScale")].GetFloat();
+			}
+
+			if (configDocument.HasMember(IL2CPP_STRING("cySpringAddMoveRateScale")))
+			{
+				cySpringAddMoveRateScale = configDocument[IL2CPP_STRING("cySpringAddMoveRateScale")].GetFloat();
 			}
 
 			if (configDocument.HasMember(IL2CPP_STRING("resolution3dScale")))
@@ -947,8 +998,27 @@ namespace Localify
 						}
 					}
 				),
-				UIParts::GetOptionSlider("ui_animation_scale", LocalifySettings::GetText("ui_animation_scale"), uiAnimationScale, 0.1, 10.0, false),
-				UIParts::GetOptionSlider("resolution_3d_scale", LocalifySettings::GetText("resolution_3d_scale"), resolution3dScale, 0.1, 2.0, false),
+				UIParts::GetOptionSlider("ui_animation_scale", LocalifySettings::GetText("ui_animation_scale"), uiAnimationScale * 10, 1, 100, false,
+					*[](Il2CppObject* slider)
+					{
+						auto numText = UIParts::GetOptionSliderNumText(slider);
+						auto value = UIParts::GetOptionSliderValue(slider);
+						value = value / 10;
+
+						numText.text(il2cpp_string_new16(u8_il2cpp(format("{:.2f}", value)).data()));
+					}
+				),
+				UIParts::GetOptionSlider("resolution_3d_scale", LocalifySettings::GetText("resolution_3d_scale"), resolution3dScale * 10, 1, 20, false,
+					*[](Il2CppObject* slider)
+					{
+						auto numText = UIParts::GetOptionSliderNumText(slider);
+						auto value = UIParts::GetOptionSliderValue(slider);
+						value = value / 10;
+
+						numText.text(il2cpp_string_new16(u8_il2cpp(format("{:.2f}", value)).data()));
+					}
+				),
+				UIParts::GetOptionItemTitle(LocalifySettings::GetText("cyspring")),
 				UIParts::GetOptionSlider("cyspring_update_mode", LocalifySettings::GetText("cyspring_update_mode"), cySpringUpdateMode, -1, 3, true,
 					*[](Il2CppObject* slider)
 					{
@@ -978,14 +1048,82 @@ namespace Localify
 				UIParts::GetOptionItemOnOff("cyspring_disable_native", LocalifySettings::GetText("cyspring_disable_native")),
 				UIParts::GetOptionItemOnOff("cyspring_mono_uncap_frame_scale", LocalifySettings::GetText("cyspring_mono_uncap_frame_scale")),
 				UIParts::GetOptionItemInfo(nullptr, LocalifySettings::GetText("cyspring_mono_uncap_frame_scale_info")),
+				UIParts::GetOptionItemOnOff("cyspring_legacy_behavior", LocalifySettings::GetText("cyspring_legacy_behavior")),
+				UIParts::GetOptionSlider("cyspring_drag_force_rate_scale", LocalifySettings::GetText("cyspring_drag_force_rate_scale"), cySpringDragForceRateScale * 10, 1, 30, true,
+					*[](Il2CppObject* slider)
+					{
+						auto numText = UIParts::GetOptionSliderNumText(slider);
+						auto value = UIParts::GetOptionSliderValue(slider);
+						value = value / 10;
+
+						numText.text(il2cpp_string_new16(u8_il2cpp(format("{:.2f}", value)).data()));
+					}
+				),
+				UIParts::GetOptionSlider("cyspring_stiffness_force_rate_scale", LocalifySettings::GetText("cyspring_stiffness_force_rate_scale"), cySpringStiffnessForceRateScale * 10, 1, 30, true,
+					*[](Il2CppObject* slider)
+					{
+						auto numText = UIParts::GetOptionSliderNumText(slider);
+						auto value = UIParts::GetOptionSliderValue(slider);
+						value = value / 10;
+
+						numText.text(il2cpp_string_new16(u8_il2cpp(format("{:.2f}", value)).data()));
+					}
+				),
+				UIParts::GetOptionSlider("cyspring_move_rate_scale", LocalifySettings::GetText("cyspring_move_rate_scale"), cySpringMoveRateScale * 10, 0, 50, true,
+					*[](Il2CppObject* slider)
+					{
+						auto numText = UIParts::GetOptionSliderNumText(slider);
+						auto value = UIParts::GetOptionSliderValue(slider);
+						value = value / 10;
+
+						numText.text(il2cpp_string_new16(u8_il2cpp(format("{:.2f}", value)).data()));
+					}
+				),
+				UIParts::GetOptionSlider("cyspring_add_move_rate_scale", LocalifySettings::GetText("cyspring_add_move_rate_scale"), cySpringAddMoveRateScale * 10, 0, 50, true,
+					*[](Il2CppObject* slider)
+					{
+						auto numText = UIParts::GetOptionSliderNumText(slider);
+						auto value = UIParts::GetOptionSliderValue(slider);
+						value = value / 10;
+
+						numText.text(il2cpp_string_new16(u8_il2cpp(format("{:.2f}", value)).data()));
+					}
+				),
 				UIParts::GetOptionItemTitle(LocalifySettings::GetText("screen")),
 				UIParts::GetOptionItemOnOff("unlock_size", LocalifySettings::GetText("unlock_size")),
 				UIParts::GetOptionItemAttention(LocalifySettings::GetText("applied_after_restart")),
-				UIParts::GetOptionSlider("ui_scale", LocalifySettings::GetText("ui_scale"), uiScale, 0.1, 2.0, false),
+				UIParts::GetOptionSlider("ui_scale", LocalifySettings::GetText("ui_scale"), uiScale * 10, 1, 20, false,
+					*[](Il2CppObject* slider)
+					{
+						auto numText = UIParts::GetOptionSliderNumText(slider);
+						auto value = UIParts::GetOptionSliderValue(slider);
+						value = value / 10;
+
+						numText.text(il2cpp_string_new16(u8_il2cpp(format("{:.2f}", value)).data()));
+					}
+				),
 				UIParts::GetOptionItemOnOff("freeform_window", LocalifySettings::GetText("freeform_window")),
 				UIParts::GetOptionItemAttention(LocalifySettings::GetText("applied_after_restart")),
-				UIParts::GetOptionSlider("ui_scale_portrait", LocalifySettings::GetText("ui_scale_portrait"), freeFormUiScalePortrait, 0.1, 2.0, false),
-				UIParts::GetOptionSlider("ui_scale_landscape", LocalifySettings::GetText("ui_scale_landscape"), freeFormUiScaleLandscape, 0.1, 2.0, false),
+				UIParts::GetOptionSlider("ui_scale_portrait", LocalifySettings::GetText("ui_scale_portrait"), freeFormUiScalePortrait * 10, 1, 20, false,
+					*[](Il2CppObject* slider)
+					{
+						auto numText = UIParts::GetOptionSliderNumText(slider);
+						auto value = UIParts::GetOptionSliderValue(slider);
+						value = value / 10;
+
+						numText.text(il2cpp_string_new16(u8_il2cpp(format("{:.2f}", value)).data()));
+					}
+				),
+				UIParts::GetOptionSlider("ui_scale_landscape", LocalifySettings::GetText("ui_scale_landscape"), freeFormUiScaleLandscape * 10, 1, 20, false,
+					*[](Il2CppObject* slider)
+					{
+						auto numText = UIParts::GetOptionSliderNumText(slider);
+						auto value = UIParts::GetOptionSliderValue(slider);
+						value = value / 10;
+
+						numText.text(il2cpp_string_new16(u8_il2cpp(format("{:.2f}", value)).data()));
+					}
+				),
 				UIParts::GetOptionItemTitle(Gallop::Localize::Get(GetTextIdByName(IL2CPP_STRING("Common0035")))->chars),
 				UIParts::GetOptionItemOnOff("live_slider_always_show", LocalifySettings::GetText("live_slider_always_show")),
 				UIParts::GetOptionItemOnOff("live_playback_loop", LocalifySettings::GetText("live_playback_loop")),
@@ -1163,6 +1301,49 @@ namespace Localify
 
 		UIParts::SetOptionItemOnOffAction("cyspring_disable_native", cySpringDisableNative, *([](Il2CppObject*, bool isOn)
 			{
+				auto cySpringMonoUncapFrameScaleToggle = UIParts::GetPartsOnOffToggleSwitch("cyspring_mono_uncap_frame_scale");
+				il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, bool)>(cySpringMonoUncapFrameScaleToggle->klass, "SetOnInteractable", 1)->methodPointer(cySpringMonoUncapFrameScaleToggle, isOn);
+				il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, Il2CppString*)>(cySpringMonoUncapFrameScaleToggle->klass, "SetNotificationMessage", 1)->methodPointer(cySpringMonoUncapFrameScaleToggle, !isOn ? il2cpp_string_new16(LocalifySettings::GetText("cyspring_mono_uncap_frame_scale_disabled")) : nullptr);
+
+				auto cySpringLegacyBehaviorToggle = UIParts::GetPartsOnOffToggleSwitch("cyspring_legacy_behavior");
+				il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, bool)>(cySpringLegacyBehaviorToggle->klass, "SetOnInteractable", 1)->methodPointer(cySpringLegacyBehaviorToggle, !isOn);
+				il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, Il2CppString*)>(cySpringLegacyBehaviorToggle->klass, "SetNotificationMessage", 1)->methodPointer(cySpringLegacyBehaviorToggle, isOn ? il2cpp_string_new16(LocalifySettings::GetText("cyspring_legacy_behavior_disabled")) : nullptr);
+
+				auto cySpringDragForceRateScaleSlider = UIParts::GetOptionSlider("cyspring_drag_force_rate_scale");
+				il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, bool)>(cySpringDragForceRateScaleSlider->klass, "set_interactable", 1)->methodPointer(cySpringDragForceRateScaleSlider, !isOn);
+				
+				auto cySpringDragForceRateScaleSliderFillImageField = il2cpp_class_get_field_from_name(cySpringDragForceRateScaleSlider->klass, "m_FillImage");
+				Il2CppObject* cySpringDragForceRateScaleSliderFillImage;
+				il2cpp_field_get_value(cySpringDragForceRateScaleSlider, cySpringDragForceRateScaleSliderFillImageField, &cySpringDragForceRateScaleSliderFillImage);
+
+				il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, UnityEngine::Color)>(cySpringDragForceRateScaleSliderFillImage->klass, "set_color", 1)->methodPointer(cySpringDragForceRateScaleSliderFillImage, !isOn ? UnityEngine::Color::white() : UnityEngine::Color::gray());
+
+				auto cySpringStiffnessForceRateScaleSlider = UIParts::GetOptionSlider("cyspring_stiffness_force_rate_scale");
+				il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, bool)>(cySpringStiffnessForceRateScaleSlider->klass, "set_interactable", 1)->methodPointer(cySpringStiffnessForceRateScaleSlider, !isOn);
+
+				auto cySpringStiffnessForceRateScaleSliderFillImageField = il2cpp_class_get_field_from_name(cySpringStiffnessForceRateScaleSlider->klass, "m_FillImage");
+				Il2CppObject* cySpringStiffnessForceRateScaleSliderFillImage;
+				il2cpp_field_get_value(cySpringStiffnessForceRateScaleSlider, cySpringStiffnessForceRateScaleSliderFillImageField, &cySpringStiffnessForceRateScaleSliderFillImage);
+
+				il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, UnityEngine::Color)>(cySpringStiffnessForceRateScaleSliderFillImage->klass, "set_color", 1)->methodPointer(cySpringStiffnessForceRateScaleSliderFillImage, !isOn ? UnityEngine::Color::white() : UnityEngine::Color::gray());
+
+				auto cySpringMoveRateScaleSlider = UIParts::GetOptionSlider("cyspring_move_rate_scale");
+				il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, bool)>(cySpringMoveRateScaleSlider->klass, "set_interactable", 1)->methodPointer(cySpringMoveRateScaleSlider, !isOn);
+
+				auto cySpringMoveRateScaleSliderFillImageField = il2cpp_class_get_field_from_name(cySpringMoveRateScaleSlider->klass, "m_FillImage");
+				Il2CppObject* cySpringMoveRateScaleSliderFillImage;
+				il2cpp_field_get_value(cySpringMoveRateScaleSlider, cySpringMoveRateScaleSliderFillImageField, &cySpringMoveRateScaleSliderFillImage);
+
+				il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, UnityEngine::Color)>(cySpringMoveRateScaleSliderFillImage->klass, "set_color", 1)->methodPointer(cySpringMoveRateScaleSliderFillImage, !isOn ? UnityEngine::Color::white() : UnityEngine::Color::gray());
+
+				auto cySpringAddMoveRateScaleSlider = UIParts::GetOptionSlider("cyspring_add_move_rate_scale");
+				il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, bool)>(cySpringAddMoveRateScaleSlider->klass, "set_interactable", 1)->methodPointer(cySpringAddMoveRateScaleSlider, !isOn);
+
+				auto cySpringAddMoveRateScaleSliderFillImageField = il2cpp_class_get_field_from_name(cySpringAddMoveRateScaleSlider->klass, "m_FillImage");
+				Il2CppObject* cySpringAddMoveRateScaleSliderFillImage;
+				il2cpp_field_get_value(cySpringAddMoveRateScaleSlider, cySpringAddMoveRateScaleSliderFillImageField, &cySpringAddMoveRateScaleSliderFillImage);
+
+				il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, UnityEngine::Color)>(cySpringAddMoveRateScaleSliderFillImage->klass, "set_color", 1)->methodPointer(cySpringAddMoveRateScaleSliderFillImage, !isOn ? UnityEngine::Color::white() : UnityEngine::Color::gray());
 			})
 		);
 
@@ -1170,6 +1351,55 @@ namespace Localify
 			{
 			})
 		);
+
+		auto cySpringMonoUncapFrameScaleToggle = UIParts::GetPartsOnOffToggleSwitch("cyspring_mono_uncap_frame_scale");
+		il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, bool)>(cySpringMonoUncapFrameScaleToggle->klass, "SetOnInteractable", 1)->methodPointer(cySpringMonoUncapFrameScaleToggle, cySpringMonoUncapFrameScale);
+		il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, Il2CppString*)>(cySpringMonoUncapFrameScaleToggle->klass, "SetNotificationMessage", 1)->methodPointer(cySpringMonoUncapFrameScaleToggle, !cySpringMonoUncapFrameScale ? il2cpp_string_new16(LocalifySettings::GetText("cyspring_mono_uncap_frame_scale_disabled")) : nullptr);
+
+		auto cySpringDragForceRateScaleSlider = UIParts::GetOptionSlider("cyspring_drag_force_rate_scale");
+		il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, bool)>(cySpringDragForceRateScaleSlider->klass, "set_interactable", 1)->methodPointer(cySpringDragForceRateScaleSlider, !cySpringDisableNative);
+
+		auto cySpringDragForceRateScaleSliderFillImageField = il2cpp_class_get_field_from_name(cySpringDragForceRateScaleSlider->klass, "m_FillImage");
+		Il2CppObject* cySpringDragForceRateScaleSliderFillImage;
+		il2cpp_field_get_value(cySpringDragForceRateScaleSlider, cySpringDragForceRateScaleSliderFillImageField, &cySpringDragForceRateScaleSliderFillImage);
+
+		il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, UnityEngine::Color)>(cySpringDragForceRateScaleSliderFillImage->klass, "set_color", 1)->methodPointer(cySpringDragForceRateScaleSliderFillImage, !cySpringDisableNative ? UnityEngine::Color::white() : UnityEngine::Color::gray());
+
+		auto cySpringStiffnessForceRateScaleSlider = UIParts::GetOptionSlider("cyspring_stiffness_force_rate_scale");
+		il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, bool)>(cySpringStiffnessForceRateScaleSlider->klass, "set_interactable", 1)->methodPointer(cySpringStiffnessForceRateScaleSlider, !cySpringDisableNative);
+
+		auto cySpringStiffnessForceRateScaleSliderFillImageField = il2cpp_class_get_field_from_name(cySpringStiffnessForceRateScaleSlider->klass, "m_FillImage");
+		Il2CppObject* cySpringStiffnessForceRateScaleSliderFillImage;
+		il2cpp_field_get_value(cySpringStiffnessForceRateScaleSlider, cySpringStiffnessForceRateScaleSliderFillImageField, &cySpringStiffnessForceRateScaleSliderFillImage);
+
+		il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, UnityEngine::Color)>(cySpringStiffnessForceRateScaleSliderFillImage->klass, "set_color", 1)->methodPointer(cySpringStiffnessForceRateScaleSliderFillImage, !cySpringDisableNative ? UnityEngine::Color::white() : UnityEngine::Color::gray());
+
+		auto cySpringMoveRateScaleSlider = UIParts::GetOptionSlider("cyspring_move_rate_scale");
+		il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, bool)>(cySpringMoveRateScaleSlider->klass, "set_interactable", 1)->methodPointer(cySpringMoveRateScaleSlider, !cySpringDisableNative);
+
+		auto cySpringMoveRateScaleSliderFillImageField = il2cpp_class_get_field_from_name(cySpringMoveRateScaleSlider->klass, "m_FillImage");
+		Il2CppObject* cySpringMoveRateScaleSliderFillImage;
+		il2cpp_field_get_value(cySpringMoveRateScaleSlider, cySpringMoveRateScaleSliderFillImageField, &cySpringMoveRateScaleSliderFillImage);
+
+		il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, UnityEngine::Color)>(cySpringMoveRateScaleSliderFillImage->klass, "set_color", 1)->methodPointer(cySpringMoveRateScaleSliderFillImage, !cySpringDisableNative ? UnityEngine::Color::white() : UnityEngine::Color::gray());
+
+		auto cySpringAddMoveRateScaleSlider = UIParts::GetOptionSlider("cyspring_add_move_rate_scale");
+		il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, bool)>(cySpringAddMoveRateScaleSlider->klass, "set_interactable", 1)->methodPointer(cySpringAddMoveRateScaleSlider, !cySpringDisableNative);
+
+		auto cySpringAddMoveRateScaleSliderFillImageField = il2cpp_class_get_field_from_name(cySpringAddMoveRateScaleSlider->klass, "m_FillImage");
+		Il2CppObject* cySpringAddMoveRateScaleSliderFillImage;
+		il2cpp_field_get_value(cySpringAddMoveRateScaleSlider, cySpringAddMoveRateScaleSliderFillImageField, &cySpringAddMoveRateScaleSliderFillImage);
+
+		il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, UnityEngine::Color)>(cySpringAddMoveRateScaleSliderFillImage->klass, "set_color", 1)->methodPointer(cySpringAddMoveRateScaleSliderFillImage, !cySpringDisableNative ? UnityEngine::Color::white() : UnityEngine::Color::gray());
+
+		UIParts::SetOptionItemOnOffAction("cyspring_legacy_behavior", cySpringLegacyBehavior, *([](Il2CppObject*, bool isOn)
+			{
+			})
+		);
+
+		auto cySpringLegacyBehaviorToggle = UIParts::GetPartsOnOffToggleSwitch("cyspring_legacy_behavior");
+		il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, bool)>(cySpringLegacyBehaviorToggle->klass, "SetOnInteractable", 1)->methodPointer(cySpringLegacyBehaviorToggle, !cySpringDisableNative);
+		il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, Il2CppString*)>(cySpringLegacyBehaviorToggle->klass, "SetNotificationMessage", 1)->methodPointer(cySpringLegacyBehaviorToggle, cySpringDisableNative ? il2cpp_string_new16(LocalifySettings::GetText("cyspring_legacy_behavior_disabled")) : nullptr);
 
 		UIParts::SetOptionItemOnOffAction("unlock_size", unlockSize, *([](Il2CppObject*, bool isOn)
 			{
@@ -1190,20 +1420,9 @@ namespace Localify
 		{
 			UIParts::SetOptionItemOnOffAction("allow_delete_cookie", allowDeleteCookie, *([](Il2CppObject*, bool isOn)
 				{
-					// TODO
 				})
 			);
 		}
-
-		UIParts::SetOptionItemOnOffAction("on_off", false, *([](Il2CppObject*, bool isOn)
-			{
-				stringstream text;
-
-				text << "Changed to " << (isOn ? "On" : "Off");
-
-				Gallop::UIManager::Instance().ShowNotification(il2cpp_string_new(text.str().data()));
-			})
-		);
 
 		UIParts::SetOptionItemButtonAction("show_caption", *([](Il2CppObject*)
 			{
@@ -1416,15 +1635,15 @@ namespace Localify
 
 		UIParts::SetOptionItemButtonAction("toggle_vr", *([](Il2CppObject*)
 			{
-				/*if (!Unity::OpenXR::initialized)
+				if (!Unity::OpenXR::initialized)
 				{
-					Unity::OpenXR::InitLibrary(unityInterfaces);
+					// Unity::OpenXR::InitLibrary(unityInterfaces);
 					Unity::OpenXR::Init();
-				}*/
+				}
 
 				if (Unity::OpenXR::initialized)
 				{
-					static auto currentCamera = UnityEngine::Behaviour(il2cpp_resolve_icall_type<Il2CppObject * (*)()>("UnityEngine.Camera::get_current()")());
+					// static auto currentCamera = UnityEngine::Behaviour(il2cpp_resolve_icall_type<Il2CppObject * (*)()>("UnityEngine.Camera::get_current()")());
 					//wcout << UnityEngine::Object::Name(currentCamera)->chars << endl;
 					//wcout << il2cpp_resolve_icall_type<float (*)(Il2CppObject*)>("UnityEngine.Camera::get_depth()")(currentCamera) << endl;
 					//Vector3 origPos{};
@@ -1453,8 +1672,10 @@ namespace Localify
 
 					//il2cpp_resolve_icall_type<void (*)(Il2CppObject*, Vector3)>("UnityEngine.Transform::set_position_Injected()")(cameraOffset.transform(), origPos);
 
-					auto gameObject = currentCamera.gameObject();
+					auto gameObject = UnityEngine::GameObject();
 					gameObject.tag(il2cpp_string_new("MainCamera"));
+
+					gameObject.AddComponent(GetRuntimeType("UnityEngine.CoreModule.dll", "UnityEngine", "Camera"));
 
 					// il2cpp_resolve_icall_type<void (*)(Il2CppObject*, float)>("UnityEngine.Camera::set_depth()")(camera, 23);
 

@@ -432,6 +432,11 @@ namespace LocalifySettings
 			return IL2CPP_STRING("削除しました");
 		}
 
+		if (id == "cyspring")
+		{
+			return IL2CPP_STRING("CySpring");
+		}
+
 		if (id == "cyspring_update_mode")
 		{
 			if (isKor)
@@ -471,6 +476,19 @@ namespace LocalifySettings
 			return IL2CPP_STRING("CySpring Monoフレームスケール制限の解除");
 		}
 
+		if (id == "cyspring_mono_uncap_frame_scale_disabled")
+		{
+			if (isKor)
+			{
+				return IL2CPP_STRING("CySpring 네이티브 라이브러리 비활성화를 ON으로 하면 사용할 수 있습니다");
+			}
+			if (isEng)
+			{
+				return IL2CPP_STRING("Turn Disable CySpring native library ON to use");
+			}
+			return IL2CPP_STRING("CySpringネイティブライブラリのONにすると、使用できます");
+		}
+
 		if (id == "cyspring_mono_uncap_frame_scale_info")
 		{
 			if (isKor)
@@ -482,6 +500,84 @@ namespace LocalifySettings
 				return IL2CPP_STRING("Change the frame scale based on the current FPS settings.\nDepending on the FPS settings, the physical effects may be excessively applied.");
 			}
 			return IL2CPP_STRING("フレームスケールを現在のFPS設定に基づいて変更します。\nFPS設定によっては物理効果が過度に作用する可能性があります。");
+		}
+
+		if (id == "cyspring_legacy_behavior")
+		{
+			if (isKor)
+			{
+				return IL2CPP_STRING("CySpring 레거시 동작");
+			}
+			if (isEng)
+			{
+				return IL2CPP_STRING("CySpring legacy behavior");
+			}
+			return IL2CPP_STRING("CySpringレガシー動作");
+		}
+
+		if (id == "cyspring_legacy_behavior_disabled")
+		{
+			if (isKor)
+			{
+				return IL2CPP_STRING("CySpring 네이티브 라이브러리 비활성화를 OFF으로 하면 사용할 수 있습니다");
+			}
+			if (isEng)
+			{
+				return IL2CPP_STRING("Turn Disable CySpring native library OFF to use");
+			}
+			return IL2CPP_STRING("CySpringネイティブライブラリのOFFにすると、使用できます");
+		}
+
+		if (id == "cyspring_drag_force_rate_scale")
+		{
+			if (isKor)
+			{
+				return IL2CPP_STRING("공기 저항");
+			}
+			if (isEng)
+			{
+				return IL2CPP_STRING("Air Resistance");
+			}
+			return IL2CPP_STRING("空気抵抗");
+		}
+
+		if (id == "cyspring_stiffness_force_rate_scale")
+		{
+			if (isKor)
+			{
+				return IL2CPP_STRING("형태 복원력");
+			}
+			if (isEng)
+			{
+				return IL2CPP_STRING("Stiffness Force Rate");
+			}
+			return IL2CPP_STRING("形状復元力レート");
+		}
+
+		if (id == "cyspring_move_rate_scale")
+		{
+			if (isKor)
+			{
+				return IL2CPP_STRING("이동 관성");
+			}
+			if (isEng)
+			{
+				return IL2CPP_STRING("Movement Inertia");
+			}
+			return IL2CPP_STRING("移動慣性");
+		}
+
+		if (id == "cyspring_add_move_rate_scale")
+		{
+			if (isKor)
+			{
+				return IL2CPP_STRING("모션 관성");
+			}
+			if (isEng)
+			{
+				return IL2CPP_STRING("Motion Inertia");
+			}
+			return IL2CPP_STRING("モーション慣性");
 		}
 
 		if (id == "graphics")

@@ -107,6 +107,11 @@ namespace config
 	extern int cyspring_update_mode;
 	extern bool cyspring_disable_native;
 	extern bool cyspring_mono_uncap_frame_scale;
+	extern bool cyspring_legacy_behavior;
+	extern float cyspring_drag_force_rate_scale;
+	extern float cyspring_stiffness_force_rate_scale;
+	extern float cyspring_move_rate_scale;
+	extern float cyspring_add_move_rate_scale;
 	extern bool hide_now_loading;
 	extern bool discord_rich_presence;
 	extern bool allow_delete_cookie;

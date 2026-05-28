@@ -145,6 +145,10 @@ namespace UnityEngine
 
 	void Screen::SetResolution_Injected(int width, int height, UnityEngine::FullScreenMode fullscreenMode, UnityEngine::RefreshRate* perferredRefreshRate)
 	{
+		if (SetResolution_Injected_orig)
+		{
+			return reinterpret_cast<decltype(SetResolution_Injected)*>(SetResolution_Injected_orig)(width, height, fullscreenMode, perferredRefreshRate);
+		}
 		return reinterpret_cast<decltype(SetResolution_Injected)*>(SetResolution_Injected_addr)(width, height, fullscreenMode, perferredRefreshRate);
 	}
 }

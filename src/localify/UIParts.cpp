@@ -326,6 +326,17 @@ namespace Localify
 		return -1;
 	}
 
+	Il2CppObject* UIParts::GetPartsOnOffToggleSwitch(const char* name)
+	{
+		UnityEngine::GameObject toggleObject = UnityEngine::GameObject::Find(il2cpp_string_new(name)).NativeObject();
+		if (toggleObject)
+		{
+			auto array = toggleObject.GetComponentsInChildren(GetRuntimeType("umamusume.dll", "Gallop", "PartsOnOffToggleSwitch"), false);
+			return array->vector[0];
+		}
+		return nullptr;
+	}
+
 	void UIParts::AddToLayout(Il2CppObject* parentRectTransform, vector<Il2CppObject*> objects, bool setAsFirstSibling)
 	{
 		for (int i = objects.size() - 1; i >= 0; i--)

@@ -26,6 +26,7 @@ namespace Localify
 		static Il2CppObject* GetToggleCommon(const char* name);
 		static Il2CppObject* GetToggleGroupCommon(UnityEngine::GameObject toggleGroupObject);
 		static Il2CppObject* GetToggleGroupCommon(const char* name);
+		static Il2CppObject* GetPartsOnOffToggleSwitch(const char* name);
 		static int GetToggleGroupCommonValue(const char* name);
 		static UnityEngine::GameObject GetOptionItem3ToggleVertical(const char* name, const Il2CppChar* title, const Il2CppChar* option1, const Il2CppChar* option2, const Il2CppChar* option3, int selectedIndex);
 		static UnityEngine::GameObject GetOptionItem3Toggle(const char* name, const Il2CppChar* title, const Il2CppChar* option1, const Il2CppChar* option2, const Il2CppChar* option3, int selectedIndex);

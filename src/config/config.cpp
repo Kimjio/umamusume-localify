@@ -66,6 +66,11 @@ namespace config
 	int cyspring_update_mode = -1;
 	bool cyspring_disable_native = false;
 	bool cyspring_mono_uncap_frame_scale = false;
+	bool cyspring_legacy_behavior = false;
+	float cyspring_drag_force_rate_scale = 1;
+	float cyspring_stiffness_force_rate_scale = 1;
+	float cyspring_move_rate_scale = 1;
+	float cyspring_add_move_rate_scale = 1;
 	bool hide_now_loading = false;
 	bool discord_rich_presence = false;
 	bool allow_delete_cookie = false;
@@ -167,39 +172,44 @@ if (document.HasMember(IL2CPP_STRING(_name_)) && document[IL2CPP_STRING(_name_)]
 			GetValue("uiScale", Float, ui_scale);
 
 			GetValue("freeFormWindow", Bool, freeform_window,
-				if (freeform_window)
 				{
-					unlock_size = true;
-				}
-					);
+					if (freeform_window)
+					{
+						unlock_size = true;
+					}
+				});
 
 			GetValue("freeFormUiScalePortrait", Float, freeform_ui_scale_portrait,
-				if (freeform_ui_scale_portrait <= 0)
 				{
-					freeform_ui_scale_portrait = 0.5f;
-				}
-					);
+					if (freeform_ui_scale_portrait <= 0)
+					{
+						freeform_ui_scale_portrait = 0.5f;
+					}
+				});
 
 			GetValue("freeFormUiScaleLandscape", Float, freeform_ui_scale_landscape,
-				if (freeform_ui_scale_landscape <= 0)
 				{
-					freeform_ui_scale_landscape = 0.5f;
-				}
-					);
+					if (freeform_ui_scale_landscape <= 0)
+					{
+						freeform_ui_scale_landscape = 0.5f;
+					}
+				});
 
 			GetValue("initialWidth", Int, initial_width,
-				if (initial_width <= 72)
 				{
-					initial_width = -1;
-				}
-					);
+					if (initial_width <= 72)
+					{
+						initial_width = -1;
+					}
+				});
 
 			GetValue("initialHeight", Int, initial_height,
-				if (initial_height <= 72)
 				{
-					initial_height = -1;
-				}
-					);
+					if (initial_height <= 72)
+					{
+						initial_height = -1;
+					}
+				});
 
 			GetValue("uiAnimationScale", Float, ui_animation_scale);
 
@@ -236,74 +246,80 @@ if (document.HasMember(IL2CPP_STRING(_name_)) && document[IL2CPP_STRING(_name_)]
 				});
 
 			GetValue("graphicsQuality", Int, graphics_quality,
-				if (graphics_quality < -1)
 				{
-					graphics_quality = -1;
-				}
-			if (graphics_quality > 4)
-			{
-				graphics_quality = 3;
-			}
-				);
+					if (graphics_quality < -1)
+					{
+						graphics_quality = -1;
+					}
+					if (graphics_quality > 4)
+					{
+						graphics_quality = 3;
+					}
+				});
 
 			GetValue("antiAliasing", Int, anti_aliasing,
-				vector<int> options = { 0, 2, 4, 8, -1 };
-			anti_aliasing = options[find(options.begin(), options.end(), anti_aliasing) - options.begin()];
-				);
+				{
+					vector<int> options = { 0, 2, 4, 8, -1 };
+					anti_aliasing = options[find(options.begin(), options.end(), anti_aliasing) - options.begin()];
+				});
 
 			GetValue("anisotropicFiltering", Int, anisotropic_filtering,
-				vector<int> options = { 0, 1, 2, -1 };
-			anisotropic_filtering = options[find(options.begin(), options.end(), anisotropic_filtering) - options.begin()];
-				);
+				{
+					vector<int> options = { 0, 1, 2, -1 };
+					anisotropic_filtering = options[find(options.begin(), options.end(), anisotropic_filtering) - options.begin()];
+				});
 
 			GetValue("vSyncCount", Int, vsync_count,
-				vector<int> options = { 0, 1, 2, 3, 4, -1 };
-			vsync_count = options[find(options.begin(), options.end(), vsync_count) - options.begin()];
-				);
+				{
+					vector<int> options = { 0, 1, 2, 3, 4, -1 };
+					vsync_count = options[find(options.begin(), options.end(), vsync_count) - options.begin()];
+				});
 
 			GetValue("uiLoadingShowOrientationGuide", Bool, ui_loading_show_orientation_guide);
 
 			GetValue("customTitleName", String, custom_title_name);
 
 			GetValue("replaceAssetsPaths", Array, auto array,
-				for (auto it = array.Begin(); it != array.End(); it++)
 				{
-					if (it->IsString())
+					for (auto it = array.Begin(); it != array.End(); it++)
 					{
-						il2cppstring value = it->GetString();
+						if (it->IsString())
+						{
+							il2cppstring value = it->GetString();
 
-						if (filesystem::path(value.data()).is_relative())
-						{
-							value.insert(0, filesystem::current_path().IL2CPP_BASIC_STRING().append(IL2CPP_STRING("/")));
-						}
-						if (filesystem::exists(value) && filesystem::is_directory(value))
-						{
-							for (auto& file : filesystem::directory_iterator(value))
+							if (filesystem::path(value.data()).is_relative())
 							{
-								if (file.is_regular_file())
+								value.insert(0, filesystem::current_path().IL2CPP_BASIC_STRING().append(IL2CPP_STRING("/")));
+							}
+							if (filesystem::exists(value) && filesystem::is_directory(value))
+							{
+								for (auto& file : filesystem::directory_iterator(value))
 								{
-									replace_assets.emplace(file.path().filename().IL2CPP_BASIC_STRING(), ReplaceAsset{ file.path().IL2CPP_BASIC_STRING(), nullptr });
+									if (file.is_regular_file())
+									{
+										replace_assets.emplace(file.path().filename().IL2CPP_BASIC_STRING(), ReplaceAsset{ file.path().IL2CPP_BASIC_STRING(), nullptr });
+									}
 								}
 							}
 						}
 					}
-				}
-					);
+				});
 
 			GetValue("replaceAssetBundleFilePath", String, replace_assetbundle_file_path);
 
 			GetValue("replaceAtlasAssetBundleFilePath", String, replace_atlas_assetbundle_file_path);
 
 			GetValue("replaceAssetBundleFilePaths", Array, auto array,
-				for (auto it = array.Begin(); it != array.End(); it++)
 				{
-					if (it->IsString())
+					for (auto it = array.Begin(); it != array.End(); it++)
 					{
-						il2cppstring value = it->GetString();
-						replace_assetbundle_file_paths.emplace_back(value);
+						if (it->IsString())
+						{
+							il2cppstring value = it->GetString();
+							replace_assetbundle_file_paths.emplace_back(value);
+						}
 					}
-				}
-					);
+				});
 
 			GetValue("replaceTextDBPath", String, replace_text_db_path);
 
@@ -338,26 +354,39 @@ if (document.HasMember(IL2CPP_STRING(_name_)) && document[IL2CPP_STRING(_name_)]
 			GetValue("championsLiveShowText", Bool, champions_live_show_text);
 
 			GetValue("championsLiveResourceId", Int, champions_live_resource_id,
-				if (champions_live_resource_id < 1)
 				{
-					champions_live_resource_id = 1;
-				}
-					);
+					if (champions_live_resource_id < 1)
+					{
+						champions_live_resource_id = 1;
+					}
+				});
 
 			GetValue("championsLiveYear", Int, champions_live_year);
 
-			GetValue("cySpringUpdateMode", Int, cyspring_update_mode,
+			if (document.HasMember(L"cySpringUpdateMode") && document[L"cySpringUpdateMode"].IsInt())
+			{
+				cyspring_update_mode = document[L"cySpringUpdateMode"].GetInt();
 				vector<int> options = { 0, 1, 2, 3, -1 };
-			cyspring_update_mode = options[find(options.begin(), options.end(), cyspring_update_mode) - options.begin()];
-				)
-				else if (max_fps > 30)
-				{
-					cyspring_update_mode = 1;
-				}
+				cyspring_update_mode = options[find(options.begin(), options.end(), cyspring_update_mode) - options.begin()];
+			}
+			else if (max_fps > 30)
+			{
+				cyspring_update_mode = 1;
+			}
 
 			GetValue("cySpringDisableNative", Bool, cyspring_disable_native);
 
 			GetValue("cySpringMonoUncapFrameScale", Bool, cyspring_mono_uncap_frame_scale);
+
+			GetValue("cySpringLegacyBehavior", Bool, cyspring_legacy_behavior);
+
+			GetValue("cySpringDragForceRateScale", Float, cyspring_drag_force_rate_scale);
+
+			GetValue("cySpringStiffnessForceRateScale", Float, cyspring_stiffness_force_rate_scale);
+
+			GetValue("cySpringMoveRateScale", Float, cyspring_move_rate_scale);
+
+			GetValue("cySpringAddMoveRateScale", Float, cyspring_add_move_rate_scale);
 
 			GetValue("hideNowLoading", Bool, hide_now_loading);
 
@@ -367,52 +396,53 @@ if (document.HasMember(IL2CPP_STRING(_name_)) && document[IL2CPP_STRING(_name_)]
 			GetValue("textIdDict", String, text_id_dict);
 
 			GetValue("codeMapPath", String, auto path,
-				ifstream code_map_stream{ il2cpp_u8(path) };
+				{
+					ifstream code_map_stream{ il2cpp_u8(path) };
 
-			if (code_map_stream.is_open())
-			{
-				rapidjson::IStreamWrapper wrapper{ code_map_stream };
-				code_map.ParseStream(wrapper);
+					if (code_map_stream.is_open())
+					{
+						rapidjson::IStreamWrapper wrapper{ code_map_stream };
+						code_map.ParseStream(wrapper);
 
-				code_map_stream.close();
-			}
-				);
+						code_map_stream.close();
+					}
+						);
 
-			GetValue("il2cppFnMapPath", String, auto path,
-				ifstream fn_map_stream{ il2cpp_u8(path) };
+					GetValue("il2cppFnMapPath", String, auto path,
+						ifstream fn_map_stream{ il2cpp_u8(path) };
 
-			if (fn_map_stream.is_open())
-			{
-				rapidjson::IStreamWrapper wrapper{ fn_map_stream };
-				fn_map.ParseStream(wrapper);
+					if (fn_map_stream.is_open())
+					{
+						rapidjson::IStreamWrapper wrapper{ fn_map_stream };
+						fn_map.ParseStream(wrapper);
 
-				fn_map_stream.close();
-			}
-				);
+						fn_map_stream.close();
+					}
+						);
 
-			GetValue("faqIndexPath", String, auto path,
-				ifstream faq_index_stream{ il2cpp_u8(path) };
+					GetValue("faqIndexPath", String, auto path,
+						ifstream faq_index_stream{ il2cpp_u8(path) };
 
-			if (faq_index_stream.is_open())
-			{
-				rapidjson::IStreamWrapper wrapper{ faq_index_stream };
-				faq_index.ParseStream(wrapper);
+					if (faq_index_stream.is_open())
+					{
+						rapidjson::IStreamWrapper wrapper{ faq_index_stream };
+						faq_index.ParseStream(wrapper);
 
-				faq_index_stream.close();
-			}
-				);
+						faq_index_stream.close();
+					}
+						);
 
-			GetValue("glossaryIndexPath", String, auto path,
-				ifstream glossary_index_stream{ il2cpp_u8(path) };
+					GetValue("glossaryIndexPath", String, auto path,
+						ifstream glossary_index_stream{ il2cpp_u8(path) };
 
-			if (glossary_index_stream.is_open())
-			{
-				rapidjson::IStreamWrapper wrapper{ glossary_index_stream };
-				glossary_index.ParseStream(wrapper);
+					if (glossary_index_stream.is_open())
+					{
+						rapidjson::IStreamWrapper wrapper{ glossary_index_stream };
+						glossary_index.ParseStream(wrapper);
 
-				glossary_index_stream.close();
-			}
-				);
+						glossary_index_stream.close();
+					}
+						});
 
 			GetValue("webIconSpritePath", String, web_icon_sprite_path);
 
@@ -459,26 +489,28 @@ if (document.HasMember(IL2CPP_STRING(_name_)) && document[IL2CPP_STRING(_name_)]
 			GetValue("persistentDataPath", String, persistent_data_path);
 
 			GetValue("dicts", Array, auto array,
-				for (auto it = array.Begin(); it != array.End(); it++)
 				{
-					if (it->IsString())
+					for (auto it = array.Begin(); it != array.End(); it++)
 					{
-						auto value = it->GetString();
-						dicts.emplace_back(value);
+						if (it->IsString())
+						{
+							auto value = it->GetString();
+							dicts.emplace_back(value);
+						}
 					}
-				}
-					);
+				});
 
 			GetValue("externalDlls", Array, auto array,
-				for (auto it = array.Begin(); it != array.End(); it++)
 				{
-					if (it->IsString())
+					for (auto it = array.Begin(); it != array.End(); it++)
 					{
-						auto value = it->GetString();
-						external_dlls_path.emplace_back(value);
+						if (it->IsString())
+						{
+							auto value = it->GetString();
+							external_dlls_path.emplace_back(value);
+						}
 					}
-				}
-					);
+				});
 		}
 		else
 		{

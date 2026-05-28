@@ -9,6 +9,7 @@ namespace Gallop
 	struct NativeRootParentWork
 	{
 		Vector3 WorldPosition;
+		int : 32;
 		Quaternion WorldRotation;
 	};
 }
