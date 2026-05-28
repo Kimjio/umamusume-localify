@@ -22,51 +22,6 @@ namespace
 	bool select_character_system_text_characterId_replacement_can_next = true;
 }
 
-static void DecryptManifestDB()
-{
-	auto CuteCoreDevice = il2cpp_symbols::get_class("Cute.Core.Assembly.dll", "Cute.Core", "Device");
-	Il2CppString* persistentDataPath = il2cpp_class_get_method_from_name_type<Il2CppString * (*)()>(CuteCoreDevice, "GetPersistentDataPath", 0)->methodPointer();
-
-	il2cppstring path = persistentDataPath->chars + il2cppstring(IL2CPP_STRING("/meta"));
-
-	if (!filesystem::exists(path))
-	{
-		return;
-	}
-
-	ifstream file{ filesystem::path(path).string(), ios::binary };
-	string magic = string(16, '\0');
-	file.read(magic.data(), 16);
-	file.close();
-
-	if (!magic.starts_with("SQLite format 3"))
-	{
-		sqlite3* db;
-		sqlite3_open(il2cpp_u8(path).data(), &db);
-
-		sqlite3mc_config(db, "cipher", CODEC_TYPE_CHACHA20);
-
-		vector<char> key;
-
-		if (Game::CurrentGameRegion == Game::Region::JPN)
-		{
-			key = { 0x6D, 0x5B, 0x65, 0x33, 0x63, 0x36, 0x63, 0x25, 0x54, 0x71, 0x2D, 0x73, 0x50, 0x53, 0x63, 0x38, 0x6D, 0x34, 0x37, 0x7B, 0x35, 0x63, 0x70, 0x23, 0x37, 0x34, 0x53, 0x29, 0x73, 0x43, 0x36, 0x33 };
-		}
-		else if (Game::CurrentGameRegion == Game::Region::ENG)
-		{
-			key = { 0x56, 0x63, 0x6B, 0x63, 0x42, 0x72, 0x37, 0x76, 0x65, 0x70, 0x41, 0x62 };
-		}
-
-		if (!key.empty())
-		{
-			sqlite3_key(db, key.data(), key.size());
-			sqlite3_rekey(db, nullptr, 0);
-		}
-
-		sqlite3_close(db);
-	}
-}
-
 static int sqlite3_prepare_v2_hook(sqlite3* db, const char* zSql, int nBytes, sqlite3_stmt** ppStmt, const char** pzTail)
 {
 	auto result = reinterpret_cast<decltype(sqlite3_prepare_v2_hook)*>(sqlite3_prepare_v2_orig)(db, zSql, nBytes, ppStmt, pzTail);
@@ -284,8 +239,9 @@ static int sqlite3_finalize_hook(sqlite3_stmt* pStmt)
 
 static int sqlite3_key_hook(sqlite3* db, const void* pKey, int nKey)
 {
-	// no-op
-	return SQLITE_OK;
+	auto result = reinterpret_cast<decltype(sqlite3_key_hook)*>(sqlite3_key_orig)(db, pKey, nKey);
+	sqlite3_rekey(db, nullptr, 0);
+	return result;
 }
 
 static const unsigned char* sqlite3_column_text_hook(sqlite3_stmt* pStmt, int i)
@@ -349,7 +305,10 @@ static void InitAddress()
 
 static void HookMethods()
 {
-	ADD_HOOK(sqlite3_key, "Plugin::sqlite3_key at %p\n");
+	if (config::decrypt_manifest_db)
+	{
+		ADD_HOOK(sqlite3_key, "Plugin::sqlite3_key at %p\n");
+	}
 
 	if (!config::replace_text_db_path.empty())
 	{

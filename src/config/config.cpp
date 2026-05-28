@@ -89,6 +89,7 @@ namespace config
 	bool use_third_party_news = false;
 	bool taskbar_show_progress_on_download = true;
 	bool taskbar_show_progress_on_connecting = true;
+	bool decrypt_manifest_db = false;
 
 	il2cppstring text_id_dict;
 
@@ -475,6 +476,8 @@ if (document.HasMember(IL2CPP_STRING(_name_)) && document[IL2CPP_STRING(_name_)]
 			GetValue("taskbarShowProgressOnDownload", Bool, taskbar_show_progress_on_download);
 
 			GetValue("taskbarShowProgressOnConnecting", Bool, taskbar_show_progress_on_connecting);
+
+			GetValue("decryptManifestDB", Bool, decrypt_manifest_db);
 
 			GetValue("msgpackNotifier", Bool, msgpack_notifier);
 

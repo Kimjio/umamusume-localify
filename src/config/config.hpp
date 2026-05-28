@@ -130,6 +130,7 @@ namespace config
 	extern bool use_third_party_news;
 	extern bool taskbar_show_progress_on_download;
 	extern bool taskbar_show_progress_on_connecting;
+	extern bool decrypt_manifest_db;
 
 	extern il2cppstring text_id_dict;
 
