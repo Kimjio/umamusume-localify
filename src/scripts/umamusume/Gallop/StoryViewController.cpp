@@ -24,12 +24,15 @@ namespace
 
 static void StoryViewController_ApplyBackgroundOffset_hook(Il2CppObject* self, UnityEngine::Vector3 position, UnityEngine::Quaternion rotation, UnityEngine::Vector3 localScale)
 {
-	bool _use3DBg;
-	il2cpp_field_get_value(self, StoryViewController__use3DBgField, &_use3DBg);
-
-	if (_use3DBg)
+	if (StoryViewController__use3DBgField)
 	{
-		return;
+		bool _use3DBg;
+		il2cpp_field_get_value(self, StoryViewController__use3DBgField, &_use3DBg);
+
+		if (_use3DBg)
+		{
+			return;
+		}
 	}
 
 	Il2CppObject* _controller;

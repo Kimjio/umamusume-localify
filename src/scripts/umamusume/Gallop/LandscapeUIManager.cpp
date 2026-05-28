@@ -23,6 +23,12 @@ namespace
 	void* LandscapeUIManager_GetWindowsHeightMax_addr = nullptr;
 	void* LandscapeUIManager_GetWindowsHeightMax_orig = nullptr;
 
+	void* LandscapeUIManager_OnPushBandUIButton_addr = nullptr;
+	void* LandscapeUIManager_OnPushBandUIButton_orig = nullptr;
+
+	void* LandscapeUIManager_RestorePrevSelectedBandMenu_addr = nullptr;
+	void* LandscapeUIManager_RestorePrevSelectedBandMenu_orig = nullptr;
+
 	void* LandscapeUIManager_GetTouchPositionCameraType_addr = nullptr;
 
 	void* LandscapeUIManager_GetTouchPositionOffsetX_addr = nullptr;
@@ -80,6 +86,16 @@ static float LandscapeUIManager_get_WindowScaleRate_hook()
 	return static_cast<float>(UnityEngine::Screen::width()) / LandscapeUIManager_GetWindowsWidthMax_hook();
 }
 
+static void LandscapeUIManager_OnPushBandUIButton_hook(Il2CppObject* self, uint64_t buttonType)
+{
+	// no-op
+}
+
+static void LandscapeUIManager_RestorePrevSelectedBandMenu_hook(Il2CppObject* self)
+{
+	// no-op
+}
+
 static void InitAddress()
 {
 	auto LandscapeUIManager_klass = il2cpp_symbols::get_class(ASSEMBLY_NAME, "Gallop", "LandscapeUIManager");
@@ -94,6 +110,8 @@ static void InitAddress()
 	LandscapeUIManager_GetTouchPositionCameraType_addr = il2cpp_symbols::get_method_pointer(LandscapeUIManager_klass, "GetTouchPositionCameraType", 1);
 	LandscapeUIManager_GetTouchPositionOffsetX_addr = il2cpp_symbols::get_method_pointer(LandscapeUIManager_klass, "GetTouchPositionOffsetX", 1);
 	LandscapeUIManager__displayOrientationButtonField = il2cpp_class_get_field_from_name(LandscapeUIManager_klass, "_displayOrientationButton");
+	LandscapeUIManager_OnPushBandUIButton_addr = il2cpp_symbols::get_method_pointer(LandscapeUIManager_klass, "OnPushBandUIButton", 1);
+	LandscapeUIManager_RestorePrevSelectedBandMenu_addr = il2cpp_symbols::get_method_pointer(LandscapeUIManager_klass, "RestorePrevSelectedBandMenu", 0);
 }
 
 static void HookMethods()
@@ -105,6 +123,8 @@ static void HookMethods()
 		ADD_HOOK(LandscapeUIManager_GetWindowsWidthMax, "Gallop.LandscapeUIManager::GetWindowsWidthMax at %p\n");
 		ADD_HOOK(LandscapeUIManager_GetWindowsHeightMax, "Gallop.LandscapeUIManager::GetWindowsHeightMax at %p\n");
 		ADD_HOOK(LandscapeUIManager_get_WindowScaleRate, "Gallop.LandscapeUIManager::get_WindowScaleRate at %p\n");
+		ADD_HOOK(LandscapeUIManager_OnPushBandUIButton, "Gallop.LandscapeUIManager::OnPushBandUIButton at %p\n");
+		ADD_HOOK(LandscapeUIManager_RestorePrevSelectedBandMenu, "Gallop.LandscapeUIManager::RestorePrevSelectedBandMenu at %p\n");
 	}
 }
 
