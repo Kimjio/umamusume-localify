@@ -115,11 +115,6 @@ static bool RemapViewOfSection(HANDLE ProcessHandle,
 		{
 			NTSTATUS status = NtUnmapViewOfSection(ProcessHandle, BaseAddress);
 
-			if (!NT_SUCCESS(status))
-			{
-				status = NtUnmapViewOfSectionEx(ProcessHandle, BaseAddress, 0);
-			}
-
 			if (NT_SUCCESS(status))
 			{
 				PVOID viewBase = BaseAddress;
@@ -132,7 +127,21 @@ static bool RemapViewOfSection(HANDLE ProcessHandle,
 					{
 						result = true;
 					}
-
+				}
+				else
+				{
+					status = NtUnmapViewOfSectionEx(ProcessHandle, BaseAddress, 0);
+					if (NT_SUCCESS(status))
+					{
+						if (NT_SUCCESS(NtMapViewOfSection(hSection, ProcessHandle, &viewBase, 0, RegionSize, &sectionOffset, &viewSize, ViewUnmap, 0, NewProtection)))
+						{
+							SIZE_T numberOfBytesWritten = 0;
+							if (WriteProcessMemory(ProcessHandle, viewBase, CopyBuffer, viewSize, &numberOfBytesWritten))
+							{
+								result = true;
+							}
+						}
+					}
 				}
 			}
 		}

@@ -96,6 +96,38 @@ using namespace Microsoft::WRL::Wrappers;
 using namespace Windows::Foundation;
 using namespace ABI::Windows::Data::Xml::Dom;
 
+void* NtCreateFile_orig = nullptr;
+NTSTATUS
+NTAPI
+NtCreateFile_hook(
+	_Out_ PHANDLE FileHandle,
+	_In_ ACCESS_MASK DesiredAccess,
+	_In_ POBJECT_ATTRIBUTES ObjectAttributes,
+	_Out_ PIO_STATUS_BLOCK IoStatusBlock,
+	_In_opt_ PLARGE_INTEGER AllocationSize,
+	_In_ ULONG FileAttributes,
+	_In_ ULONG ShareAccess,
+	_In_ ULONG CreateDisposition,
+	_In_ ULONG CreateOptions,
+	_In_reads_bytes_opt_(EaLength) PVOID EaBuffer,
+	_In_ ULONG EaLength
+);
+
+void* NtQueryDirectoryFile_orig = nullptr;
+NTSTATUS NTAPI NtQueryDirectoryFile_hook(
+	_In_ HANDLE FileHandle,
+	_In_opt_ HANDLE Event,
+	_In_opt_ PIO_APC_ROUTINE ApcRoutine,
+	_In_opt_ PVOID ApcContext,
+	_Out_ PIO_STATUS_BLOCK IoStatusBlock,
+	_Out_writes_bytes_(Length) PVOID FileInformation,
+	_In_ ULONG Length,
+	_In_ FILE_INFORMATION_CLASS FileInformationClass,
+	_In_ BOOLEAN ReturnSingleEntry,
+	_In_opt_ PUNICODE_STRING FileName,
+	_In_ BOOLEAN RestartScan
+);
+
 namespace
 {
 	void patch_game_assembly();
@@ -141,6 +173,12 @@ namespace
 		il2cpp_runtime_class_init(il2cpp_symbols::get_class("UnityEngine.SubsystemsModule.dll", "UnityEngine", "SubsystemManager"));
 		il2cpp_runtime_class_init(il2cpp_symbols::get_class("UnityEngine.SubsystemsModule.dll", "UnityEngine.SubsystemsImplementation", "SubsystemDescriptorStore"));
 		//il2cpp_runtime_class_init(il2cpp_symbols::get_class("UnityEngine.CoreModule.dll", "UnityEngine", "BeforeRenderHelper"));
+
+		auto NtCreateFile_addr = NtCreateFile;
+		ADD_HOOK(NtCreateFile, "NtCreateFile at %p\n");
+
+		auto NtQueryDirectoryFile_addr = NtQueryDirectoryFile;
+		ADD_HOOK(NtQueryDirectoryFile, "NtQueryDirectoryFile at %p\n");
 
 		if (Game::CurrentGameRegion == Game::Region::KOR)
 		{
@@ -1652,617 +1690,7 @@ namespace
 		return false;
 	}
 
-	bool PressSingleModeButton(WPARAM wParam)
-	{
-		if (!(wParam == 'Q' || wParam == 'W' || wParam == 'E' ||
-			wParam == 'A' || wParam == 'S' || wParam == 'D' || wParam == 'F'))
-		{
-			return false;
-		}
-
-		if (GetFrontDialog())
-		{
-			return false;
-		}
-
-		auto sceneManager = GetSingletonInstance(il2cpp_symbols::get_class("umamusume.dll", "Gallop", "SceneManager"));
-
-		if (!sceneManager)
-		{
-			return false;
-		}
-
-		auto controller = GetCurrentViewController();
-
-		if (controller)
-		{
-			if (controller->klass->name == "SingleModeMainViewController"s)
-			{
-				auto IsStoryActive = il2cpp_class_get_method_from_name_type<bool (*)(Il2CppObject*)>(controller->klass, "get_IsStoryActive", 0)->methodPointer(controller);
-
-				if (IsStoryActive)
-				{
-					return false;
-				}
-
-				auto view = il2cpp_class_get_method_from_name_type<Il2CppObject * (*)(Il2CppObject*)>(controller->klass, "GetViewBase", 0)->methodPointer(controller);
-				if (view)
-				{
-					auto stablesPanel = il2cpp_class_get_method_from_name_type<Il2CppObject * (*)(Il2CppObject*)>(view->klass, "get_StablesPanel", 0)->methodPointer(view);
-					if (stablesPanel)
-					{
-						auto get_gameObject = il2cpp_symbols::get_method_pointer<Il2CppObject * (*)(Il2CppObject*)>("UnityEngine.CoreModule.dll", "UnityEngine", "Component", "get_gameObject", 0);
-						auto get_activeSelf = il2cpp_symbols::get_method_pointer<bool (*)(Il2CppObject*)>("UnityEngine.CoreModule.dll", "UnityEngine", "GameObject", "get_activeSelf", 0);
-
-						auto panelIsActive = get_activeSelf(get_gameObject(stablesPanel));
-
-						if (!panelIsActive)
-						{
-							return false;
-						}
-
-						auto _nextMonthButtonField = il2cpp_class_get_field_from_name(stablesPanel->klass, "_nextMonthButton");
-						Il2CppObject* _nextMonthButton;
-						il2cpp_field_get_value(stablesPanel, _nextMonthButtonField, &_nextMonthButton);
-
-						auto _skillGetButtonField = il2cpp_class_get_field_from_name(stablesPanel->klass, "_skillGetButton");
-						Il2CppObject* _skillGetButton;
-						il2cpp_field_get_value(stablesPanel, _skillGetButtonField, &_skillGetButton);
-
-						auto _outingSummerButtonField = il2cpp_class_get_field_from_name(stablesPanel->klass, "_outingSummerButton");
-						Il2CppObject* _outingSummerButton;
-						il2cpp_field_get_value(stablesPanel, _outingSummerButtonField, &_outingSummerButton);
-
-						auto _trainingButtonField = il2cpp_class_get_field_from_name(stablesPanel->klass, "_trainingButton");
-						Il2CppObject* _trainingButton;
-						il2cpp_field_get_value(stablesPanel, _trainingButtonField, &_trainingButton);
-
-						auto _outingButtonField = il2cpp_class_get_field_from_name(stablesPanel->klass, "_outingButton");
-						Il2CppObject* _outingButton;
-						il2cpp_field_get_value(stablesPanel, _outingButtonField, &_outingButton);
-
-						Il2CppObject* outingButton = nullptr;
-						if (_outingButton)
-						{
-							outingButton = il2cpp_class_get_method_from_name_type<Il2CppObject * (*)(Il2CppObject*)>(_outingButton->klass, "get_Button", 0)->methodPointer(_outingButton);
-						}
-
-						auto _hospitalButtonField = il2cpp_class_get_field_from_name(stablesPanel->klass, "_hospitalButton");
-						Il2CppObject* _hospitalButton;
-						il2cpp_field_get_value(stablesPanel, _hospitalButtonField, &_hospitalButton);
-
-						Il2CppObject* hospitalButton = nullptr;
-						if (_hospitalButton)
-						{
-							hospitalButton = il2cpp_class_get_method_from_name_type<Il2CppObject * (*)(Il2CppObject*)>(_hospitalButton->klass, "get_Button", 0)->methodPointer(_hospitalButton);
-						}
-
-						auto _raceRegistButtonField = il2cpp_class_get_field_from_name(stablesPanel->klass, "_raceRegistButton");
-						Il2CppObject* _raceRegistButton;
-						il2cpp_field_get_value(stablesPanel, _raceRegistButtonField, &_raceRegistButton);
-
-						Il2CppObject* raceRegistButton = nullptr;
-						if (_raceRegistButton)
-						{
-							raceRegistButton = il2cpp_class_get_method_from_name_type<Il2CppObject * (*)(Il2CppObject*)>(_raceRegistButton->klass, "get_Button", 0)->methodPointer(_raceRegistButton);
-						}
-
-						auto _targetRaceSkillGetButtonField = il2cpp_class_get_field_from_name(stablesPanel->klass, "_targetRaceSkillGetButton");
-						Il2CppObject* _targetRaceSkillGetButton;
-						il2cpp_field_get_value(stablesPanel, _targetRaceSkillGetButtonField, &_targetRaceSkillGetButton);
-
-						Il2CppObject* targetRaceSkillGetButton = nullptr;
-						if (_targetRaceSkillGetButton)
-						{
-							targetRaceSkillGetButton = il2cpp_class_get_method_from_name_type<Il2CppObject * (*)(Il2CppObject*)>(_targetRaceSkillGetButton->klass, "get_Button", 0)->methodPointer(_targetRaceSkillGetButton);
-						}
-
-						auto _targetRaceRegistButtonField = il2cpp_class_get_field_from_name(stablesPanel->klass, "_targetRaceRegistButton");
-						Il2CppObject* _targetRaceRegistButton;
-						il2cpp_field_get_value(stablesPanel, _targetRaceRegistButtonField, &_targetRaceRegistButton);
-
-						auto _addonScenarioButtonField = il2cpp_class_get_field_from_name(stablesPanel->klass, "_addonScenarioButton");
-						Il2CppObject* _addonScenarioButton;
-						il2cpp_field_get_value(stablesPanel, _addonScenarioButtonField, &_addonScenarioButton);
-
-						Il2CppObject* addonScenarioButton = nullptr;
-						if (_addonScenarioButton)
-						{
-							addonScenarioButton = il2cpp_class_get_method_from_name_type<Il2CppObject * (*)(Il2CppObject*)>(_addonScenarioButton->klass, "get_Button", 0)->methodPointer(_addonScenarioButton);
-						}
-
-						auto model = il2cpp_class_get_method_from_name_type<Il2CppObject * (*)(Il2CppObject*)>(stablesPanel->klass, "get_Model", 0)->methodPointer(stablesPanel);
-						auto isOnlyRaceEntry = il2cpp_class_get_method_from_name_type<bool (*)(Il2CppObject*)>(model->klass, "get_IsOnlyRaceEntry", 0)->methodPointer(model);
-
-						if (isOnlyRaceEntry)
-						{
-							if (wParam == 'Q')
-							{
-								PressButton(targetRaceSkillGetButton);
-								return true;
-							}
-
-							if (wParam == 'W')
-							{
-								PressButton(_targetRaceRegistButton);
-								return true;
-							}
-
-							if (wParam == 'E' && addonScenarioButton)
-							{
-								PressButton(addonScenarioButton);
-								return true;
-							}
-						}
-						else
-						{
-							if (wParam == 'Q')
-							{
-								PressButton(_nextMonthButton);
-								return true;
-							}
-
-							if (wParam == 'W')
-							{
-								PressButton(_trainingButton);
-								return true;
-							}
-
-							if (wParam == 'E')
-							{
-								PressButton(_skillGetButton);
-								return true;
-							}
-
-							if (wParam == 'A')
-							{
-								PressButton(hospitalButton);
-								return true;
-							}
-
-							if (wParam == 'S')
-							{
-								auto isActive = get_activeSelf(get_gameObject(outingButton));
-
-								if (isActive)
-								{
-									PressButton(outingButton);
-								}
-								else
-								{
-									PressButton(_outingSummerButton);
-								}
-								return true;
-							}
-
-							if (wParam == 'D' && addonScenarioButton)
-							{
-								PressButton(addonScenarioButton);
-								return true;
-							}
-
-							if (wParam == 'F')
-							{
-								PressButton(raceRegistButton);
-								return true;
-							}
-						}
-					}
-				}
-			}
-		}
-
-		return false;
-	}
-
-	bool PressSingleModeRaceEntry(WPARAM wParam)
-	{
-		if (!(wParam == VK_RETURN || wParam == VK_SPACE || wParam == VK_LEFT || wParam == VK_RIGHT || wParam == VK_UP || wParam == VK_DOWN))
-		{
-			return false;
-		}
-
-		if (GetFrontDialog())
-		{
-			return false;
-		}
-
-		auto controller = GetCurrentViewController();
-
-		if (controller)
-		{
-			if (controller->klass->name == "SingleModeRaceEntryViewController"s)
-			{
-				auto view = il2cpp_class_get_method_from_name_type<Il2CppObject * (*)(Il2CppObject*)>(controller->klass, "GetViewBase", 0)->methodPointer(controller);
-				if (view)
-				{
-					auto get_gameObject = il2cpp_symbols::get_method_pointer<Il2CppObject * (*)(Il2CppObject*)>("UnityEngine.CoreModule.dll", "UnityEngine", "Component", "get_gameObject", 0);
-					auto get_activeSelf = il2cpp_symbols::get_method_pointer<bool (*)(Il2CppObject*)>("UnityEngine.CoreModule.dll", "UnityEngine", "GameObject", "get_activeSelf", 0);
-
-					if (wParam == VK_RETURN || wParam == VK_SPACE)
-					{
-						auto entryButton = il2cpp_class_get_method_from_name_type<Il2CppObject * (*)(Il2CppObject*)>(view->klass, "get_EntryButton", 0)->methodPointer(view);
-						auto entryIsActive = get_activeSelf(get_gameObject(entryButton));
-
-						auto reserveButton = il2cpp_class_get_method_from_name_type<Il2CppObject * (*)(Il2CppObject*)>(view->klass, "get_ReserveButton", 0)->methodPointer(view);
-						auto reserveIsActive = get_activeSelf(get_gameObject(reserveButton));
-
-						auto cancelReserveButton = il2cpp_class_get_method_from_name_type<Il2CppObject * (*)(Il2CppObject*)>(view->klass, "get_CancelReserveButton", 0)->methodPointer(view);
-						auto cancelReserveIsActive = get_activeSelf(get_gameObject(cancelReserveButton));
-
-						if (entryIsActive)
-						{
-							PressButton(entryButton);
-							return true;
-						}
-
-						if (reserveIsActive)
-						{
-							PressButton(reserveButton);
-							return true;
-						}
-
-						if (cancelReserveIsActive)
-						{
-							PressButton(cancelReserveButton);
-							return true;
-						}
-					}
-
-					bool shiftKeyDown = GetKeyState(VK_SHIFT) < 0;
-
-					if (wParam == VK_LEFT || wParam == VK_RIGHT)
-					{
-						auto leftArrowButton = il2cpp_class_get_method_from_name_type<Il2CppObject * (*)(Il2CppObject*)>(view->klass, "get_LeftArrowButton", 0)->methodPointer(view);
-
-						Il2CppObject* leftSkipArrowButton = nullptr;
-
-						auto get_LeftSkipArrowButton = il2cpp_class_get_method_from_name_type<Il2CppObject * (*)(Il2CppObject*)>(view->klass, "get_LeftSkipArrowButton", 0);
-						if (get_LeftSkipArrowButton)
-						{
-							leftSkipArrowButton = get_LeftSkipArrowButton->methodPointer(view);
-						}
-
-						auto rightArrowButton = il2cpp_class_get_method_from_name_type<Il2CppObject * (*)(Il2CppObject*)>(view->klass, "get_RightArrowButton", 0)->methodPointer(view);
-
-						Il2CppObject* rightSkipArrowButton = nullptr;
-
-						auto get_RightSkipArrowButton = il2cpp_class_get_method_from_name_type<Il2CppObject * (*)(Il2CppObject*)>(view->klass, "get_RightSkipArrowButton", 0);
-						if (get_RightSkipArrowButton)
-						{
-							rightSkipArrowButton = get_RightSkipArrowButton->methodPointer(view);
-						}
-
-						if (wParam == VK_LEFT)
-						{
-							if (shiftKeyDown && leftSkipArrowButton)
-							{
-								PressButton(leftSkipArrowButton);
-							}
-							else
-							{
-								PressButton(leftArrowButton);
-							}
-
-							return true;
-						}
-
-						if (wParam == VK_RIGHT)
-						{
-							if (shiftKeyDown && rightSkipArrowButton)
-							{
-								PressButton(rightSkipArrowButton);
-							}
-							else
-							{
-								PressButton(rightArrowButton);
-							}
-
-							return true;
-						}
-					}
-				}
-
-				if (wParam == VK_UP || wParam == VK_DOWN)
-				{
-					auto _itemListField = il2cpp_class_get_field_from_name(controller->klass, "_itemList");
-					Il2CppObject* _itemList;
-					il2cpp_field_get_value(controller, _itemListField, &_itemList);
-
-					if (_itemList)
-					{
-						FieldInfo* itemsField = il2cpp_class_get_field_from_name(_itemList->klass, "_items");
-						Il2CppArraySize_t<Il2CppObject*>* arr;
-						il2cpp_field_get_value(_itemList, itemsField, &arr);
-					}
-				}
-			}
-		}
-
-		return false;
-	}
-
-	bool PressSingleModePaddock(WPARAM wParam)
-	{
-		if (!(wParam == VK_RETURN || wParam == VK_SPACE))
-		{
-			return false;
-		}
-
-		if (GetFrontDialog())
-		{
-			return false;
-		}
-
-		auto controller = GetCurrentViewController();
-
-		if (controller)
-		{
-			if (controller->klass->name == "SingleModePaddockViewController"s)
-			{
-				auto view = il2cpp_class_get_method_from_name_type<Il2CppObject * (*)(Il2CppObject*)>(controller->klass, "GetViewBase", 0)->methodPointer(controller);
-				if (view)
-				{
-					auto holder = il2cpp_class_get_method_from_name_type<Il2CppObject * (*)(Il2CppObject*)>(view->klass, "get_PaddockContentsHolder", 0)->methodPointer(view);
-
-					if (holder)
-					{
-						auto get_gameObject = il2cpp_symbols::get_method_pointer<Il2CppObject * (*)(Il2CppObject*)>("UnityEngine.CoreModule.dll", "UnityEngine", "Component", "get_gameObject", 0);
-						auto get_activeSelf = il2cpp_symbols::get_method_pointer<bool (*)(Il2CppObject*)>("UnityEngine.CoreModule.dll", "UnityEngine", "GameObject", "get_activeSelf", 0);
-
-						auto raceStartButtonCenter = il2cpp_class_get_method_from_name_type<Il2CppObject * (*)(Il2CppObject*)>(holder->klass, "get_RaceStartButtonCenter", 0)->methodPointer(holder);
-						auto raceStartButtonCenterIsActive = get_activeSelf(get_gameObject(raceStartButtonCenter));
-
-						auto raceSkipButton = il2cpp_class_get_method_from_name_type<Il2CppObject * (*)(Il2CppObject*)>(holder->klass, "get_RaceSkipButton", 0)->methodPointer(holder);
-
-						auto raceStartButtonRight = il2cpp_class_get_method_from_name_type<Il2CppObject * (*)(Il2CppObject*)>(holder->klass, "get_RaceStartButtonRight", 0)->methodPointer(holder);
-
-						if (raceStartButtonCenterIsActive)
-						{
-							PressButton(raceStartButtonCenter);
-							return true;
-						}
-						else if (wParam == VK_SPACE)
-						{
-							PressButton(raceSkipButton);
-							return true;
-						}
-						else if (wParam == VK_RETURN)
-						{
-							PressButton(raceStartButtonRight);
-							return true;
-						}
-					}
-				}
-			}
-		}
-
-		return false;
-	}
-
 	bool isNumKeyDown = false;
-
-	bool PressSingleModeLiveSelect(WPARAM wParam)
-	{
-		bool keydownNumber = 0 < (wParam - 48) && (wParam - 48) <= 3;
-		if (!keydownNumber)
-		{
-			return false;
-		}
-
-		if (isNumKeyDown)
-		{
-			return false;
-		}
-
-		if (GetFrontDialog())
-		{
-			return false;
-		}
-
-		auto controller = GetCurrentViewController();
-
-		if (controller)
-		{
-			if (controller->klass->name == "SingleModeScenarioLiveSelectViewController"s)
-			{
-				isNumKeyDown = true;
-
-				int choiceIndex = (wParam - 48) - 1;
-
-				auto view = il2cpp_class_get_method_from_name_type<Il2CppObject * (*)(Il2CppObject*)>(controller->klass, "GetViewBase", 0)->methodPointer(controller);
-				if (view)
-				{
-					auto treeList = il2cpp_class_get_method_from_name_type<Il2CppObject * (*)(Il2CppObject*)>(view->klass, "get_TreeList", 0)->methodPointer(view);
-					if (treeList)
-					{
-						auto _treeArrayField = il2cpp_class_get_field_from_name(treeList->klass, "_treeArray");
-						Il2CppArraySize_t<Il2CppObject*>* _treeArray;
-						il2cpp_field_get_value(treeList, _treeArrayField, &_treeArray);
-
-						if (_treeArray)
-						{
-							auto treeItem = _treeArray->vector[choiceIndex];
-							if (treeItem)
-							{
-								auto _buttonField = il2cpp_class_get_field_from_name(treeItem->klass, "_button");
-								Il2CppObject* _button;
-
-								il2cpp_field_get_value(treeItem, _buttonField, &_button);
-
-								if (_button)
-								{
-									PressButton(_button);
-									return true;
-								}
-							}
-						}
-					}
-				}
-			}
-		}
-
-		return false;
-	}
-
-	bool StepTrainingItem(WPARAM wParam)
-	{
-		if (Game::CurrentGameStore == Game::Store::Steam)
-		{
-			return false;
-		}
-
-		bool keydownNumber = 0 < (wParam - 48) && (wParam - 48) <= 9;
-		if (!(wParam == VK_LEFT || wParam == VK_RIGHT || wParam == VK_RETURN || keydownNumber))
-		{
-			return false;
-		}
-
-		auto controller = GetCurrentViewController();
-
-		if (controller)
-		{
-			if (controller->klass->name == "SingleModeMainViewController"s)
-			{
-				auto IsStoryActive = il2cpp_class_get_method_from_name_type<bool (*)(Il2CppObject*)>(controller->klass, "get_IsStoryActive", 0)->methodPointer(controller);
-
-				if (IsStoryActive)
-				{
-					return false;
-				}
-
-				auto view = il2cpp_class_get_method_from_name_type<Il2CppObject * (*)(Il2CppObject*)>(controller->klass, "GetViewBase", 0)->methodPointer(controller);
-				if (view)
-				{
-					auto trainingController = il2cpp_class_get_method_from_name_type<Il2CppObject * (*)(Il2CppObject*)>(controller->klass, "get_TrainingController", 0)->methodPointer(controller);
-					if (il2cpp_class_get_method_from_name_type<bool (*)(Il2CppObject*)>(trainingController->klass, "get_IsInTraining", 0)->methodPointer(trainingController))
-					{
-						auto footer = il2cpp_class_get_method_from_name_type<Il2CppObject * (*)(Il2CppObject*)>(view->klass, "get_TrainingFooter", 0)->methodPointer(view);
-						if (footer)
-						{
-							auto _itemsField = il2cpp_class_get_field_from_name(footer->klass, "_items");
-							Il2CppObject* _items;
-							il2cpp_field_get_value(footer, _itemsField, &_items);
-
-							int count = il2cpp_class_get_method_from_name_type<int (*)(Il2CppObject*)>(_items->klass, "get_Count", 0)->methodPointer(_items);
-
-							FieldInfo* itemsField = il2cpp_class_get_field_from_name(_items->klass, "_items");
-							Il2CppArraySize_t<Il2CppObject*>* arr;
-							il2cpp_field_get_value(_items, itemsField, &arr);
-
-							auto selectedItem = il2cpp_class_get_method_from_name_type<Il2CppObject * (*)(Il2CppObject*)>(footer->klass, "get_SelectItem", 0)->methodPointer(footer);
-							auto selectedMenu = il2cpp_class_get_method_from_name_type<Il2CppObject * (*)(Il2CppObject*)>(footer->klass, "get_SelectedMenu", 0)->methodPointer(footer);
-
-							if (wParam == VK_RETURN)
-							{
-								auto enabledObscured = il2cpp_class_get_method_from_name_type<CodeStage::AntiCheat::ObscuredTypes::ObscuredBool(*)(Il2CppObject*)>(selectedMenu->klass, "get_IsEnable", 0)->methodPointer(selectedMenu);
-								auto enabled = enabledObscured.GetDecrypted();
-
-								if (enabled)
-								{
-									auto _onClickEnableField = il2cpp_class_get_field_from_name(footer->klass, "_onClickEnable");
-									bool _onClickEnable = true;
-									il2cpp_field_set_value(footer, _onClickEnableField, &_onClickEnable);
-
-									auto button = il2cpp_class_get_method_from_name_type<Il2CppObject * (*)(Il2CppObject*)>(selectedItem->klass, "get_Button", 0)->methodPointer(selectedItem);
-
-									auto delegate = GetButtonCommonOnClickDelegate(button);
-									reinterpret_cast<void (*)(Il2CppObject*)>(delegate->method_ptr)(delegate->target);
-									return true;
-								}
-							}
-							else if (keydownNumber)
-							{
-								if (isNumKeyDown)
-								{
-									return false;
-								}
-
-								int number = wParam - 48;
-
-								if (number > count) {
-									number = count;
-								}
-
-								auto _preSelectedMenuField = il2cpp_class_get_field_from_name(footer->klass, "_preSelectedMenu");
-								Il2CppObject* footerItem = arr->vector[number - 1];
-
-								auto trainingMenu = il2cpp_class_get_method_from_name_type<Il2CppObject * (*)(Il2CppObject*)>(footerItem->klass, "get_TrainingMenu", 0)->methodPointer(footerItem);
-								il2cpp_field_set_value(footer, _preSelectedMenuField, trainingMenu);
-
-								isNumKeyDown = true;
-
-								if (selectedMenu == trainingMenu)
-								{
-									auto enabledObscured = il2cpp_class_get_method_from_name_type<CodeStage::AntiCheat::ObscuredTypes::ObscuredBool(*)(Il2CppObject*)>(selectedMenu->klass, "get_IsEnable", 0)->methodPointer(selectedMenu);
-									auto enabled = enabledObscured.GetDecrypted();
-
-									if (enabled)
-									{
-										auto _onClickEnableField = il2cpp_class_get_field_from_name(footer->klass, "_onClickEnable");
-										bool _onClickEnable = true;
-										il2cpp_field_set_value(footer, _onClickEnableField, &_onClickEnable);
-
-
-										auto button = il2cpp_class_get_method_from_name_type<Il2CppObject * (*)(Il2CppObject*)>(selectedItem->klass, "get_Button", 0)->methodPointer(selectedItem);
-
-										auto delegate = GetButtonCommonOnClickDelegate(button);
-										reinterpret_cast<void (*)(Il2CppObject*)>(delegate->method_ptr)(delegate->target);
-									}
-									return true;
-								}
-
-								il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, Il2CppObject*, Il2CppObject*, bool, bool)>(footer->klass, "Select", 4)->methodPointer(footer, footerItem, trainingMenu, false, false);
-								return true;
-							}
-							else
-							{
-								int selectedIndex = 0;
-
-								for (int i = 0; i < count; i++)
-								{
-									if (arr->vector[i] == selectedItem)
-									{
-										selectedIndex = i;
-										break;
-									}
-								}
-
-								if (wParam == VK_LEFT)
-								{
-									selectedIndex--;
-									if (selectedIndex < 0)
-									{
-										selectedIndex = count - 1;
-									}
-								}
-
-								if (wParam == VK_RIGHT)
-								{
-									selectedIndex++;
-									if (selectedIndex >= count)
-									{
-										selectedIndex = 0;
-									}
-								}
-
-								auto _preSelectedMenuField = il2cpp_class_get_field_from_name(footer->klass, "_preSelectedMenu");
-								Il2CppObject* footerItem = arr->vector[selectedIndex];
-
-								auto trainingMenu = il2cpp_class_get_method_from_name_type<Il2CppObject * (*)(Il2CppObject*)>(footerItem->klass, "get_TrainingMenu", 0)->methodPointer(footerItem);
-								il2cpp_field_set_value(footer, _preSelectedMenuField, trainingMenu);
-
-								il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, Il2CppObject*, Il2CppObject*, bool, bool)>(footer->klass, "Select", 4)->methodPointer(footer, footerItem, trainingMenu, false, false);
-								return true;
-							}
-						}
-					}
-				}
-			}
-		}
-
-		return false;
-	}
 
 	bool SelectStoryChoice(WPARAM wParam)
 	{
@@ -3186,28 +2614,31 @@ namespace
 			uMsg == WM_RBUTTONDOWN)
 		{
 			auto backKeyInputManager = GetSingletonInstance(il2cpp_symbols::get_class("umamusume.dll", "Gallop", "BackKeyInputManager"));
-			auto ExecuteBackKeyAction = il2cpp_class_get_method_from_name_type<void(*)(Il2CppObject*)>(backKeyInputManager->klass, "ExecuteBackKeyAction", 0);
-
-			if (ExecuteBackKeyAction)
+			if (backKeyInputManager)
 			{
-				ExecuteBackKeyAction->methodPointer(backKeyInputManager);
-			}
-			else
-			{
-				array<INPUT, 2> inputs = {
-					INPUT
-					{
-						INPUT_KEYBOARD,
-						.ki = KEYBDINPUT{ VK_ESCAPE }
-					},
-					INPUT
-					{
-						INPUT_KEYBOARD,
-						.ki = KEYBDINPUT{ VK_ESCAPE, .dwFlags = KEYEVENTF_KEYUP }
-					}
-				};
+				auto ExecuteBackKeyAction = il2cpp_class_get_method_from_name_type<void(*)(Il2CppObject*)>(backKeyInputManager->klass, "ExecuteBackKeyAction", 0);
 
-				SendInput(inputs.size(), inputs.data(), sizeof(INPUT));
+				if (ExecuteBackKeyAction)
+				{
+					ExecuteBackKeyAction->methodPointer(backKeyInputManager);
+				}
+				else
+				{
+					array<INPUT, 2> inputs = {
+						INPUT
+						{
+							INPUT_KEYBOARD,
+							.ki = KEYBDINPUT{ VK_ESCAPE }
+						},
+						INPUT
+						{
+							INPUT_KEYBOARD,
+							.ki = KEYBDINPUT{ VK_ESCAPE, .dwFlags = KEYEVENTF_KEYUP }
+						}
+					};
+
+					SendInput(inputs.size(), inputs.data(), sizeof(INPUT));
+				}
 			}
 
 			return TRUE;
@@ -4444,19 +3875,6 @@ namespace
 					}
 				}*/
 
-				//if (sceneName == IL2CPP_STRING("Race")
-				//{
-				//	auto delayCallback = &CreateDelegateWithClassStatic(il2cpp_symbols::get_class("DOTween.dll", "DG.Tweening", "TweenCallback"), *([](void*)
-				//		{
-				//			auto horseManager = GetRaceHorseManager();
-
-				//			cout << "horseManager " << horseManager << endl;
-				//		}))->delegate;
-
-				//	// Delay 50ms
-				//	il2cpp_symbols::get_method_pointer<Il2CppObject* (*)(float, Il2CppDelegate*, bool)>("DOTween.dll", "DG.Tweening", "DOVirtual", "DelayedCall", 3)(0.05, delayCallback, true);
-				//}
-
 				if (sceneName == IL2CPP_STRING("_Boot"))
 				{
 					Gallop::StandaloneWindowResize::IsVirt(!Gallop::Screen::IsLandscapeMode());
@@ -4650,10 +4068,7 @@ constexpr wchar_t* CUSTOM_WARNING_CAPTION = L"Warning";
 constexpr wchar_t* CUSTOM_WARNING_TEXT = L"Wellbia AppSign이 의도치 않은 동작을 감지하여 프로그램이 종료됩니다.\n\n문제가 지속되는 경우 https://wellbia.com/ 에 방문하거나, support@wellbia.com 으로 문의하시기 바랍니다.";
 
 void* MessageBoxW_orig = nullptr;
-
-int
-WINAPI
-MessageBoxW_hook(
+static int WINAPI MessageBoxW_hook(
 	_In_opt_ HWND hWnd,
 	_In_opt_ LPCWSTR lpText,
 	_In_opt_ LPCWSTR lpCaption,
@@ -4669,10 +4084,7 @@ MessageBoxW_hook(
 }
 
 void* SetWindowLongPtrW_orig = nullptr;
-
-LONG_PTR
-WINAPI
-SetWindowLongPtrW_hook(
+static LONG_PTR WINAPI SetWindowLongPtrW_hook(
 	_In_ HWND hWnd,
 	_In_ int nIndex,
 	_In_ LONG_PTR dwNewLong)
@@ -4706,10 +4118,7 @@ SetWindowLongPtrW_hook(
 }
 
 void* SetWindowLongPtrA_orig = nullptr;
-
-LONG_PTR
-WINAPI
-SetWindowLongPtrA_hook(
+static LONG_PTR WINAPI SetWindowLongPtrA_hook(
 	_In_ HWND hWnd,
 	_In_ int nIndex,
 	_In_ LONG_PTR dwNewLong)
@@ -4743,9 +4152,7 @@ SetWindowLongPtrA_hook(
 }
 
 void* ShowWindow_orig = nullptr;
-BOOL
-WINAPI
-ShowWindow_hook(
+static BOOL WINAPI ShowWindow_hook(
 	_In_ HWND hWnd,
 	_In_ int nCmdShow)
 {
@@ -4772,7 +4179,7 @@ ShowWindow_hook(
 }
 
 void* HttpSendRequestW_orig = nullptr;
-BOOL WINAPI HttpSendRequestW_hook(
+static BOOL WINAPI HttpSendRequestW_hook(
 	_In_ HINTERNET hRequest,
 	_In_reads_opt_(dwHeadersLength) LPCWSTR lpszHeaders,
 	_In_ DWORD dwHeadersLength,
@@ -4811,7 +4218,7 @@ BOOL WINAPI HttpSendRequestW_hook(
 }
 
 void* InternetCrackUrlW_orig = nullptr;
-BOOL InternetCrackUrlW_hook(
+static BOOL InternetCrackUrlW_hook(
 	_In_reads_(dwUrlLength) LPCWSTR lpszUrl,
 	_In_ DWORD dwUrlLength,
 	_In_ DWORD dwFlags,
@@ -4842,9 +4249,7 @@ int dllCount;
 int rootFileCount;
 
 void* CreateFileW_orig = nullptr;
-HANDLE
-WINAPI
-CreateFileW_hook(
+static HANDLE WINAPI CreateFileW_hook(
 	_In_ LPCWSTR lpFileName,
 	_In_ DWORD dwDesiredAccess,
 	_In_ DWORD dwShareMode,
@@ -4865,10 +4270,7 @@ CreateFileW_hook(
 	return hFile;
 }
 
-void* NtCreateFile_orig = nullptr;
-NTSTATUS
-NTAPI
-NtCreateFile_hook(
+static NTSTATUS NTAPI NtCreateFile_hook(
 	_Out_ PHANDLE FileHandle,
 	_In_ ACCESS_MASK DesiredAccess,
 	_In_ POBJECT_ATTRIBUTES ObjectAttributes,
@@ -4905,8 +4307,7 @@ NtCreateFile_hook(
 	return status;
 }
 
-void* NtQueryDirectoryFile_orig = nullptr;
-NTSTATUS NTAPI NtQueryDirectoryFile_hook(
+static NTSTATUS NTAPI NtQueryDirectoryFile_hook(
 	_In_ HANDLE FileHandle,
 	_In_opt_ HANDLE Event,
 	_In_opt_ PIO_APC_ROUTINE ApcRoutine,
@@ -5009,9 +4410,7 @@ NTSTATUS NTAPI NtQueryDirectoryFile_hook(
 }
 
 void* FindNextFileW_orig = nullptr;
-BOOL
-WINAPI
-FindNextFileW_hook(
+static BOOL WINAPI FindNextFileW_hook(
 	_In_ HANDLE hFindFile,
 	_Out_ LPWIN32_FIND_DATAW lpFindFileData
 )
@@ -5086,9 +4485,7 @@ FindNextFileW_hook(
 }
 
 void* FindFirstFileExW_orig = nullptr;
-HANDLE
-WINAPI
-FindFirstFileExW_hook(
+static HANDLE WINAPI FindFirstFileExW_hook(
 	_In_ LPCWSTR lpFileName,
 	_In_ FINDEX_INFO_LEVELS fInfoLevelId,
 	_Out_writes_bytes_(sizeof(WIN32_FIND_DATAW)) LPVOID lpFindFileData,
@@ -5187,12 +4584,6 @@ void init_hook(filesystem::path module_path)
 
 	MH_CreateHook(CreateFileW, CreateFileW_hook, &CreateFileW_orig);
 	MH_EnableHook(CreateFileW);
-
-	MH_CreateHook(NtCreateFile, NtCreateFile_hook, &NtCreateFile_orig);
-	MH_EnableHook(NtCreateFile);
-
-	MH_CreateHook(NtQueryDirectoryFile, NtQueryDirectoryFile_hook, &NtQueryDirectoryFile_orig);
-	MH_EnableHook(NtQueryDirectoryFile);
 
 	auto LoadLibraryExW_addr = GetProcAddress(GetModuleHandleW(L"KernelBase.dll"), "LoadLibraryExW");
 	MH_CreateHook(LoadLibraryExW_addr, LoadLibraryExW_hook, &LoadLibraryExW_orig);
