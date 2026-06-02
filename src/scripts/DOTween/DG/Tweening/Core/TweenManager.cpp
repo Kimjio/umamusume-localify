@@ -17,7 +17,7 @@ static void* TweenManager_Update_hook(int updateType, float deltaTime, float ind
 
 static void InitAddress()
 {
-	TweenManager_Update_addr = il2cpp_symbols::get_method_pointer("DOTween.dll", "DG.Tweening.Core", "TweenManager", "Update", 3);
+	TweenManager_Update_addr = il2cpp_symbols::get_method_pointer(ASSEMBLY_NAME, "DG.Tweening.Core", "TweenManager", "Update", 3);
 }
 
 static void HookMethods()

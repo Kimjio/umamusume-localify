@@ -13,6 +13,7 @@
 #include "scripts/umamusume/Gallop/StandaloneWindowResize.hpp"
 #include "scripts/umamusume/Gallop/DialogCommon.hpp"
 #include "scripts/umamusume/Gallop/DialogManager.hpp"
+#include "scripts/umamusume/Gallop/TextCommon.hpp"
 #include "scripts/umamusume/Gallop/TextFontManager.hpp"
 #include "scripts/umamusume/Gallop/Localize.hpp"
 
@@ -56,7 +57,7 @@ static void LoadAssets()
 			il2cppstringstream ss;
 			ss << IL2CPP_STRING("Loading font asset: ") << assetbundlePath << IL2CPP_STRING("... ");
 			wcout << ss.str();
-			il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, Il2CppString*)>(text->klass, "set_text", 1)->methodPointer(text, il2cpp_string_new16(ss.str().data()));
+			Gallop::TextCommon(text).text(il2cpp_string_new16(ss.str().data()));
 
 			std::thread([text, assetbundlePath]()
 				{
@@ -70,7 +71,7 @@ static void LoadAssets()
 					{
 						if (filesystem::exists(assetbundlePath))
 						{
-							wcout << L"Asset founded but not loaded. Maybe Asset BuildTarget is not for Windows" << endl;
+							wcout << endl << L"Asset founded but not loaded. Maybe Asset BuildTarget is not for Windows" << endl;
 						}
 						else
 						{
@@ -109,7 +110,7 @@ static void LoadAssets()
 			il2cppstringstream ss;
 			ss << IL2CPP_STRING("Loading replacement AssetBundle: ") << assetbundlePath << IL2CPP_STRING("... ");
 			wcout << ss.str();
-			il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, Il2CppString*)>(text->klass, "set_text", 1)->methodPointer(text, il2cpp_string_new16(ss.str().data()));
+			Gallop::TextCommon(text).text(il2cpp_string_new16(ss.str().data()));
 
 			std::thread([text, assetbundlePath]()
 				{
@@ -162,7 +163,7 @@ static void LoadAssets()
 			il2cppstringstream ss;
 			ss << IL2CPP_STRING("Loading replacement atlas AssetBundle: ") << assetbundlePath << IL2CPP_STRING("... ");
 			wcout << ss.str();
-			il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, Il2CppString*)>(text->klass, "set_text", 1)->methodPointer(text, il2cpp_string_new16(ss.str().data()));
+			Gallop::TextCommon(text).text(il2cpp_string_new16(ss.str().data()));
 
 			std::thread([text, assetbundlePath]()
 				{
@@ -218,7 +219,7 @@ static void LoadAssets()
 				il2cppstringstream ss;
 				ss << IL2CPP_STRING("Loading replacement AssetBundle: ") << assetbundlePath << IL2CPP_STRING("... ");
 				wcout << ss.str();
-				il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, Il2CppString*)>(text->klass, "set_text", 1)->methodPointer(text, il2cpp_string_new16(ss.str().data()));
+				Gallop::TextCommon(text).text(il2cpp_string_new16(ss.str().data()));
 
 				std::thread([text, assetbundlePath]()
 					{
