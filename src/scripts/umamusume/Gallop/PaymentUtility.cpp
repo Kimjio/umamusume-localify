@@ -4,12 +4,12 @@
 
 namespace
 {
-	void* PaymentUtility_OpenBuyJewelDialog_1_addr = nullptr;
+	Il2CppMethodPointer PaymentUtility_OpenBuyJewelDialog_1_addr = nullptr;
 
-	void* PaymentUtility_OpenBuyJewelDialog_addr = nullptr;
+	Il2CppMethodPointer PaymentUtility_OpenBuyJewelDialog_addr = nullptr;
 	void* PaymentUtility_OpenBuyJewelDialog_orig = nullptr;
 
-	void* PaymentUtility_SendRequestPaymentItemList_addr = nullptr;
+	Il2CppMethodPointer PaymentUtility_SendRequestPaymentItemList_addr = nullptr;
 
 	FieldInfo* PaymentUtility__finishBuyJewelCallbackForUserField;
 
@@ -44,22 +44,25 @@ static void PaymentUtility_OpenBuyJewelDialog_hook(Il2CppObject* self, Il2CppDel
 
 static void InitAddress()
 {
-	PaymentUtility_OpenBuyJewelDialog_1_addr = il2cpp_symbols::get_method_pointer(ASSEMBLY_NAME, "Gallop", "PaymentUtility", "OpenBuyJewelDialog", 1);
-	PaymentUtility_OpenBuyJewelDialog_addr = il2cpp_symbols::get_method_pointer(ASSEMBLY_NAME, "Gallop", "PaymentUtility", "OpenBuyJewelDialog", 6);
-	PaymentUtility_SendRequestPaymentItemList_addr = il2cpp_symbols::get_method_pointer(ASSEMBLY_NAME, "Gallop", "PaymentUtility", "SendRequestPaymentItemList", 4);
-	PaymentUtility__finishBuyJewelCallbackForUserField = il2cpp_class_get_field_from_name(il2cpp_symbols::get_class(ASSEMBLY_NAME, "Gallop", "PaymentUtility"), "_finishBuyJewelCallbackForUser");
-	PaymentUtility__onCloseShopDialogField = il2cpp_class_get_field_from_name(il2cpp_symbols::get_class(ASSEMBLY_NAME, "Gallop", "PaymentUtility"), "_onCloseShopDialog");
-	PaymentUtility__checkOpenShopDialogField = il2cpp_class_get_field_from_name(il2cpp_symbols::get_class(ASSEMBLY_NAME, "Gallop", "PaymentUtility"), "_checkOpenShopDialog");
-	PaymentUtility__autoScrollIdListField = il2cpp_class_get_field_from_name(il2cpp_symbols::get_class(ASSEMBLY_NAME, "Gallop", "PaymentUtility"), "_autoScrollIdList");
-	PaymentUtility__removeAllOnFinishField = il2cpp_class_get_field_from_name(il2cpp_symbols::get_class(ASSEMBLY_NAME, "Gallop", "PaymentUtility"), "_removeAllOnFinish");
+    auto PaymentUtility_klass = il2cpp_symbols::get_class(ASSEMBLY_NAME, "Gallop", "PaymentUtility");
+	PaymentUtility_OpenBuyJewelDialog_1_addr = il2cpp_symbols::get_method_pointer(PaymentUtility_klass, "OpenBuyJewelDialog", 1);
+	PaymentUtility_OpenBuyJewelDialog_addr = il2cpp_symbols::get_method_pointer(PaymentUtility_klass, "OpenBuyJewelDialog", 6);
+	PaymentUtility_SendRequestPaymentItemList_addr = il2cpp_symbols::get_method_pointer(PaymentUtility_klass, "SendRequestPaymentItemList", 4);
+	PaymentUtility__finishBuyJewelCallbackForUserField = il2cpp_class_get_field_from_name(PaymentUtility_klass, "_finishBuyJewelCallbackForUser");
+	PaymentUtility__onCloseShopDialogField = il2cpp_class_get_field_from_name(PaymentUtility_klass, "_onCloseShopDialog");
+	PaymentUtility__checkOpenShopDialogField = il2cpp_class_get_field_from_name(PaymentUtility_klass, "_checkOpenShopDialog");
+	PaymentUtility__autoScrollIdListField = il2cpp_class_get_field_from_name(PaymentUtility_klass, "_autoScrollIdList");
+	PaymentUtility__removeAllOnFinishField = il2cpp_class_get_field_from_name(PaymentUtility_klass, "_removeAllOnFinish");
 }
 
 static void HookMethods()
 {
+#ifdef _MSC_VER
 	if (Game::CurrentGameRegion == Game::Region::KOR)
 	{
 		ADD_HOOK(PaymentUtility_OpenBuyJewelDialog, "Gallop.PaymentUtility::OpenBuyJewelDialog at %p\n");
 	}
+#endif
 }
 
 STATIC

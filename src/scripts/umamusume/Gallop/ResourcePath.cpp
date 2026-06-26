@@ -1,3 +1,4 @@
+#ifdef _MSC_VER
 #include "../umamusume.hpp"
 #include "../../ScriptInternal.hpp"
 #include "ResourcePath.hpp"
@@ -9,10 +10,10 @@
 
 namespace
 {
-	void* ResourcePath_GetPreInTitleMoviePath_addr = nullptr;
+	Il2CppMethodPointer ResourcePath_GetPreInTitleMoviePath_addr = nullptr;
 	void* ResourcePath_GetPreInTitleMoviePath_orig = nullptr;
 
-	void* ResourcePath_GetLatestAssetBundleTitleMoviePath_addr = nullptr;
+	Il2CppMethodPointer ResourcePath_GetLatestAssetBundleTitleMoviePath_addr = nullptr;
 	void* ResourcePath_GetLatestAssetBundleTitleMoviePath_orig = nullptr;
 }
 
@@ -28,7 +29,7 @@ static Il2CppString* ResourcePath_GetPreInTitleMoviePath_hook()
 	auto _stringBuilderField = il2cpp_class_get_field_from_name(ResourcePath, "_stringBuilder");
 	Il2CppObject* _stringBuilder;
 	il2cpp_field_static_get_value(_stringBuilderField, &_stringBuilder);
-	il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, int)>(_stringBuilder->klass, "set_Length", 1)->methodPointer(_stringBuilder, 0);
+	il2cpp_symbols::get_method_pointer<void (*)(Il2CppObject*, int)>(_stringBuilder->klass, "set_Length", 1)(_stringBuilder, 0);
 
 	auto boxedOpVersion = il2cpp_value_box(il2cpp_defaults.int32_class, &PREIN_TITLE_OP_VERSION);
 
@@ -66,9 +67,9 @@ static Il2CppString* ResourcePath_GetPreInTitleMoviePath_hook()
 		{
 			auto streamingAssetsPath = UnityEngine::Application::streamingAssetsPath()->chars;
 
-			il2cpp_class_get_method_from_name_type<Il2CppObject* (*)(Il2CppObject*, Il2CppString*, Il2CppObject*)>(_stringBuilder->klass, "AppendFormat", 2)->methodPointer(_stringBuilder, titleMovieFormat, boxedOpVersion);
-			auto titleMovie = il2cpp_class_get_method_from_name_type<Il2CppString * (*)(Il2CppObject*)>(_stringBuilder->klass, "ToString", 0)->methodPointer(_stringBuilder)->chars;
-			il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, int)>(_stringBuilder->klass, "set_Length", 1)->methodPointer(_stringBuilder, 0);
+			il2cpp_symbols::get_method_pointer<Il2CppObject* (*)(Il2CppObject*, Il2CppString*, Il2CppObject*)>(_stringBuilder->klass, "AppendFormat", 2)(_stringBuilder, titleMovieFormat, boxedOpVersion);
+			auto titleMovie = il2cpp_symbols::get_method_pointer<Il2CppString * (*)(Il2CppObject*)>(_stringBuilder->klass, "ToString", 0)(_stringBuilder)->chars;
+			il2cpp_symbols::get_method_pointer<void (*)(Il2CppObject*, int)>(_stringBuilder->klass, "set_Length", 1)(_stringBuilder, 0);
 
 			if (filesystem::exists(streamingAssetsPath + il2cppstring(IL2CPP_STRING("/PreinResource/Movie/m/")) + titleMovie + IL2CPP_STRING("_landscape.usm")))
 			{
@@ -85,23 +86,23 @@ static Il2CppString* ResourcePath_GetPreInTitleMoviePath_hook()
 		}
 	}
 
-	il2cpp_class_get_method_from_name_type<Il2CppObject* (*)(Il2CppObject*, Il2CppString*, Il2CppObject*)>(_stringBuilder->klass, "AppendFormat", 2)->methodPointer(_stringBuilder, titleMovieFormat, boxedOpVersion);
+	il2cpp_symbols::get_method_pointer<Il2CppObject* (*)(Il2CppObject*, Il2CppString*, Il2CppObject*)>(_stringBuilder->klass, "AppendFormat", 2)(_stringBuilder, titleMovieFormat, boxedOpVersion);
 
-	return il2cpp_class_get_method_from_name_type<Il2CppString * (*)(Il2CppObject*)>(_stringBuilder->klass, "ToString", 0)->methodPointer(_stringBuilder);
+	return il2cpp_symbols::get_method_pointer<Il2CppString * (*)(Il2CppObject*)>(_stringBuilder->klass, "ToString", 0)(_stringBuilder);
 }
 
 static Il2CppString* ResourcePath_GetLatestAssetBundleTitleMoviePath_hook()
 {
 	auto SaveDataManager = GetSingletonInstance(il2cpp_symbols::get_class(ASSEMBLY_NAME, "Gallop", "SaveDataManager"));
-	auto SaveLoader = il2cpp_class_get_method_from_name_type<Il2CppObject * (*)(Il2CppObject*)>(SaveDataManager->klass, "get_SaveLoader", 0)->methodPointer(SaveDataManager);
-	int NewOpProgress = il2cpp_class_get_method_from_name_type<int (*)(Il2CppObject*)>(SaveLoader->klass, "get_NewOpProgress", 0)->methodPointer(SaveLoader);
+	auto SaveLoader = il2cpp_symbols::get_method_pointer<Il2CppObject * (*)(Il2CppObject*)>(SaveDataManager->klass, "get_SaveLoader", 0)(SaveDataManager);
+	int NewOpProgress = il2cpp_symbols::get_method_pointer<int (*)(Il2CppObject*)>(SaveLoader->klass, "get_NewOpProgress", 0)(SaveLoader);
 
 	auto ResourcePath = il2cpp_symbols::get_class(ASSEMBLY_NAME, "Gallop", "ResourcePath");
 
 	auto _stringBuilderField = il2cpp_class_get_field_from_name(ResourcePath, "_stringBuilder");
 	Il2CppObject* _stringBuilder;
 	il2cpp_field_static_get_value(_stringBuilderField, &_stringBuilder);
-	il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, int)>(_stringBuilder->klass, "set_Length", 1)->methodPointer(_stringBuilder, 0);
+	il2cpp_symbols::get_method_pointer<void (*)(Il2CppObject*, int)>(_stringBuilder->klass, "set_Length", 1)(_stringBuilder, 0);
 
 	auto boxedOpVersion = il2cpp_value_box(il2cpp_defaults.int32_class, &NewOpProgress);
 
@@ -117,9 +118,9 @@ static Il2CppString* ResourcePath_GetLatestAssetBundleTitleMoviePath_hook()
 	{
 		auto streamingAssetsPath = UnityEngine::Application::streamingAssetsPath()->chars;
 
-		il2cpp_class_get_method_from_name_type<Il2CppObject* (*)(Il2CppObject*, Il2CppString*, Il2CppObject*)>(_stringBuilder->klass, "AppendFormat", 2)->methodPointer(_stringBuilder, titleMovieFormat, boxedOpVersion);
-		auto titleMovie = il2cpp_class_get_method_from_name_type<Il2CppString * (*)(Il2CppObject*)>(_stringBuilder->klass, "ToString", 0)->methodPointer(_stringBuilder)->chars;
-		il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, int)>(_stringBuilder->klass, "set_Length", 1)->methodPointer(_stringBuilder, 0);
+		il2cpp_symbols::get_method_pointer<Il2CppObject* (*)(Il2CppObject*, Il2CppString*, Il2CppObject*)>(_stringBuilder->klass, "AppendFormat", 2)(_stringBuilder, titleMovieFormat, boxedOpVersion);
+		auto titleMovie = il2cpp_symbols::get_method_pointer<Il2CppString * (*)(Il2CppObject*)>(_stringBuilder->klass, "ToString", 0)(_stringBuilder)->chars;
+		il2cpp_symbols::get_method_pointer<void (*)(Il2CppObject*, int)>(_stringBuilder->klass, "set_Length", 1)(_stringBuilder, 0);
 
 		if (filesystem::exists(streamingAssetsPath + il2cppstring(IL2CPP_STRING("/PreinResource/Movie/m/")) + titleMovie + IL2CPP_STRING("_landscape.usm")))
 		{
@@ -135,9 +136,9 @@ static Il2CppString* ResourcePath_GetLatestAssetBundleTitleMoviePath_hook()
 		titleMovieFormat = ASSET_BUNDLE_TITLE_MOVIE_FORMAT;
 	}
 
-	il2cpp_class_get_method_from_name_type<Il2CppObject* (*)(Il2CppObject*, Il2CppString*, Il2CppObject*)>(_stringBuilder->klass, "AppendFormat", 2)->methodPointer(_stringBuilder, titleMovieFormat, boxedOpVersion);
+	il2cpp_symbols::get_method_pointer<Il2CppObject* (*)(Il2CppObject*, Il2CppString*, Il2CppObject*)>(_stringBuilder->klass, "AppendFormat", 2)(_stringBuilder, titleMovieFormat, boxedOpVersion);
 
-	return il2cpp_class_get_method_from_name_type<Il2CppString * (*)(Il2CppObject*)>(_stringBuilder->klass, "ToString", 0)->methodPointer(_stringBuilder);
+	return il2cpp_symbols::get_method_pointer<Il2CppString * (*)(Il2CppObject*)>(_stringBuilder->klass, "ToString", 0)(_stringBuilder);
 }
 
 static void InitAddress()
@@ -161,3 +162,4 @@ STATIC
 	il2cpp_symbols::init_callbacks.emplace_back(InitAddress);
 	il2cpp_symbols::init_callbacks.emplace_back(HookMethods);
 }
+#endif

@@ -4,64 +4,60 @@
 
 namespace
 {
-	void* Text_get_font_addr = nullptr;
+	Il2CppMethodPointer Text_get_font_addr = nullptr;
 
-	void* Text_set_font_addr = nullptr;
+	Il2CppMethodPointer Text_set_font_addr = nullptr;
 
-	void* Text_get_text_addr = nullptr;
+	Il2CppMethodPointer Text_get_text_addr = nullptr;
 
-	void* Text_set_text_addr = nullptr;
+	Il2CppMethodPointer Text_set_text_addr = nullptr;
 
-	void* Text_get_fontSize_addr = nullptr;
+	Il2CppMethodPointer Text_get_fontSize_addr = nullptr;
 
-	void* Text_set_fontSize_addr = nullptr;
+	Il2CppMethodPointer Text_set_fontSize_addr = nullptr;
 
-	void* Text_get_horizontalOverflow_addr = nullptr;
+	Il2CppMethodPointer Text_get_horizontalOverflow_addr = nullptr;
 
-	void* Text_set_horizontalOverflow_addr = nullptr;
+	Il2CppMethodPointer Text_set_horizontalOverflow_addr = nullptr;
 
-	void* Text_get_verticalOverflow_addr = nullptr;
+	Il2CppMethodPointer Text_get_verticalOverflow_addr = nullptr;
 
-	void* Text_set_verticalOverflow_addr = nullptr;
+	Il2CppMethodPointer Text_set_verticalOverflow_addr = nullptr;
 
-	void* Text_get_lineSpacing_addr = nullptr;
+	Il2CppMethodPointer Text_get_lineSpacing_addr = nullptr;
 
-	void* Text_set_lineSpacing_addr = nullptr;
+	Il2CppMethodPointer Text_set_lineSpacing_addr = nullptr;
 
-	void* Text_get_fontStyle_addr = nullptr;
+	Il2CppMethodPointer Text_get_fontStyle_addr = nullptr;
 
-	void* Text_set_fontStyle_addr = nullptr;
+	Il2CppMethodPointer Text_set_fontStyle_addr = nullptr;
 
-	void* Text_AssignDefaultFont_addr = nullptr;
+	Il2CppMethodPointer Text_AssignDefaultFont_addr = nullptr;
 }
 
 static void InitAddress()
 {
 	auto Text_klass = il2cpp_symbols::get_class("UnityEngine.UI.dll", "UnityEngine.UI", "Text");
-	Text_get_font_addr = il2cpp_class_get_method_from_name(Text_klass, "get_font", 0)->methodPointer;
-	Text_set_font_addr = il2cpp_class_get_method_from_name(Text_klass, "set_font", 1)->methodPointer;
-	Text_get_text_addr = il2cpp_class_get_method_from_name(Text_klass, "get_text", 0)->methodPointer;
-	Text_set_text_addr = il2cpp_class_get_method_from_name(Text_klass, "set_text", 1)->methodPointer;
-	Text_get_fontSize_addr = il2cpp_class_get_method_from_name(Text_klass, "get_fontSize", 0)->methodPointer;
-	Text_set_fontSize_addr = il2cpp_class_get_method_from_name(Text_klass, "set_fontSize", 1)->methodPointer;
-	Text_get_horizontalOverflow_addr = il2cpp_class_get_method_from_name(Text_klass, "get_horizontalOverflow", 0)->methodPointer;
-	Text_set_horizontalOverflow_addr = il2cpp_class_get_method_from_name(Text_klass, "set_horizontalOverflow", 1)->methodPointer;
-	Text_get_verticalOverflow_addr = il2cpp_class_get_method_from_name(Text_klass, "get_verticalOverflow", 0)->methodPointer;
-	Text_set_verticalOverflow_addr = il2cpp_class_get_method_from_name(Text_klass, "set_verticalOverflow", 1)->methodPointer;
-	Text_get_lineSpacing_addr = il2cpp_class_get_method_from_name(Text_klass, "get_lineSpacing", 0)->methodPointer;
-	Text_set_lineSpacing_addr = il2cpp_class_get_method_from_name(Text_klass, "set_lineSpacing", 1)->methodPointer;
-	Text_get_fontStyle_addr = il2cpp_class_get_method_from_name(Text_klass, "get_fontStyle", 0)->methodPointer;
-	Text_set_fontStyle_addr = il2cpp_class_get_method_from_name(Text_klass, "set_fontStyle", 1)->methodPointer;
-	Text_AssignDefaultFont_addr = il2cpp_class_get_method_from_name(Text_klass, "AssignDefaultFont", 0)->methodPointer;
+	Text_get_font_addr = il2cpp_symbols::get_method_pointer(Text_klass, "get_font", 0);
+	Text_set_font_addr = il2cpp_symbols::get_method_pointer(Text_klass, "set_font", 1);
+	Text_get_text_addr = il2cpp_symbols::get_method_pointer(Text_klass, "get_text", 0);
+	Text_set_text_addr = il2cpp_symbols::get_method_pointer(Text_klass, "set_text", 1);
+	Text_get_fontSize_addr = il2cpp_symbols::get_method_pointer(Text_klass, "get_fontSize", 0);
+	Text_set_fontSize_addr = il2cpp_symbols::get_method_pointer(Text_klass, "set_fontSize", 1);
+	Text_get_horizontalOverflow_addr = il2cpp_symbols::get_method_pointer(Text_klass, "get_horizontalOverflow", 0);
+	Text_set_horizontalOverflow_addr = il2cpp_symbols::get_method_pointer(Text_klass, "set_horizontalOverflow", 1);
+	Text_get_verticalOverflow_addr = il2cpp_symbols::get_method_pointer(Text_klass, "get_verticalOverflow", 0);
+	Text_set_verticalOverflow_addr = il2cpp_symbols::get_method_pointer(Text_klass, "set_verticalOverflow", 1);
+	Text_get_lineSpacing_addr = il2cpp_symbols::get_method_pointer(Text_klass, "get_lineSpacing", 0);
+	Text_set_lineSpacing_addr = il2cpp_symbols::get_method_pointer(Text_klass, "set_lineSpacing", 1);
+	Text_get_fontStyle_addr = il2cpp_symbols::get_method_pointer(Text_klass, "get_fontStyle", 0);
+	Text_set_fontStyle_addr = il2cpp_symbols::get_method_pointer(Text_klass, "set_fontStyle", 1);
+	Text_AssignDefaultFont_addr = il2cpp_symbols::get_method_pointer(Text_klass, "AssignDefaultFont", 0);
 }
-
-static void HookMethods()
-{}
 
 STATIC
 {
 	il2cpp_symbols::init_callbacks.emplace_back(InitAddress);
-	il2cpp_symbols::init_callbacks.emplace_back(HookMethods);
 }
 
 namespace UnityEngine::UI

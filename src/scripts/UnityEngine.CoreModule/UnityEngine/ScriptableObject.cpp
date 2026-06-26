@@ -4,11 +4,11 @@
 
 namespace
 {
-	void* CreateScriptableObject_addr = nullptr;
+	Il2CppMethodPointer CreateScriptableObject_addr = nullptr;
 
 	void* CreateScriptableObject_orig = nullptr;
 
-	void* CreateScriptableObjectInstanceFromType_addr = nullptr;
+	Il2CppMethodPointer CreateScriptableObjectInstanceFromType_addr = nullptr;
 
 	void* CreateScriptableObjectInstanceFromType_orig = nullptr;
 }
@@ -21,7 +21,7 @@ static void CreateScriptableObject_hook(Il2CppObject* self)
 
 	if (self->klass->name == "UniversalRenderPipelineAsset"s)
 	{
-		il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, int)>(self->klass, "set_msaaSampleCount", 1)->methodPointer(self, 8);
+		il2cpp_symbols::get_method_pointer<void (*)(Il2CppObject*, int)>(self->klass, "set_msaaSampleCount", 1)(self, 8);
 	}
 }
 
@@ -36,8 +36,8 @@ static Il2CppObject* CreateScriptableObjectInstanceFromType_hook(Il2CppObject* r
 
 static void InitAddress()
 {
-	CreateScriptableObject_addr = il2cpp_resolve_icall("UnityEngine.ScriptableObject::CreateScriptableObject()");
-	CreateScriptableObjectInstanceFromType_addr = il2cpp_resolve_icall("UnityEngine.ScriptableObject::CreateScriptableObjectInstanceFromType()");
+	CreateScriptableObject_addr = il2cpp_resolve_icall("UnityEngine.ScriptableObject::CreateScriptableObject");
+	CreateScriptableObjectInstanceFromType_addr = il2cpp_resolve_icall("UnityEngine.ScriptableObject::CreateScriptableObjectInstanceFromType");
 }
 
 static void HookMethods()

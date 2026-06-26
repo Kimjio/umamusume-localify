@@ -18,7 +18,7 @@
 #include <windows.foundation.h>
 #include <wrl.h>
 
-#include <winrt/Windows.Foundation.h>
+#include <winrt/windows.foundation.h>
 
 namespace ABI {
     using namespace Windows::UI::Notifications;

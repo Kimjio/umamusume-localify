@@ -4,7 +4,7 @@
 
 namespace Gallop
 {
-	class DialogCommonBase abstract : public LockableBehaviour
+	class DialogCommonBase : public LockableBehaviour
 	{
 	public:
 		enum class FormType
@@ -25,7 +25,7 @@ namespace Gallop
 			WITHOUT_FRAME
 		};
 
-		virtual void Close() abstract;
+		virtual void Close() = 0;
 
 		using LockableBehaviour::LockableBehaviour;
 	};

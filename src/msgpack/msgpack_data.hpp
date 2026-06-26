@@ -18,7 +18,9 @@
 
 #include "masterdb/masterdb.hpp"
 
+#ifdef _MSC_VER
 #include "notification/DesktopNotificationManagerCompat.h"
+#endif
 
 #include "scripts/ScriptInternal.hpp"
 #include "scripts/UnityEngine.CoreModule/UnityEngine/Rect.hpp"
@@ -27,11 +29,20 @@
 
 using namespace std;
 using namespace msgpack11;
+
+#ifdef _MSC_VER
 using namespace Microsoft::WRL;
+#endif
 
 namespace MsgPackData
 {
-	inline void DumpMsgPackFile(const string& file_path, const char* buffer, const size_t len) {
+	inline void DumpMsgPackFile(string& file_path, const char* buffer, const size_t len) {
+#ifndef _MSC_VER
+		if (filesystem::path(file_path).is_relative()) {
+			file_path.insert(0, "/sdcard/Android/data/"s.append(Game::GetCurrentPackageName()).append("/"));
+		}
+#endif
+
 		auto parent_path = filesystem::path(file_path).parent_path();
 		if (!filesystem::exists(parent_path)) {
 			filesystem::create_directories(parent_path);
@@ -49,6 +60,7 @@ namespace MsgPackData
 
 	inline MsgPack::array jobs_going_info_array;
 
+#ifdef _MSC_VER
 	inline Il2CppString* GetIconPath(Gallop::LocalPushDefine::LocalPushType localPushType)
 	{
 		return Gallop::PushNotificationManager::Instance().CreatePushIconFilePath(localPushType);
@@ -56,9 +68,9 @@ namespace MsgPackData
 
 	inline void DumpTexture2D(int unitId, Gallop::LocalPushDefine::LocalPushType localPushType, Il2CppObject* texture)
 	{
-		auto width = il2cpp_class_get_method_from_name_type<int (*)(Il2CppObject*)>(texture->klass, "get_width", 0)->methodPointer(texture);
+		auto width = il2cpp_symbols::get_method_pointer<int (*)(Il2CppObject*)>(texture->klass, "get_width", 0)(texture);
 
-		auto height = il2cpp_class_get_method_from_name_type<int (*)(Il2CppObject*)>(texture->klass, "get_height", 0)->methodPointer(texture);
+		auto height = il2cpp_symbols::get_method_pointer<int (*)(Il2CppObject*)>(texture->klass, "get_height", 0)(texture);
 
 		auto renderTexture = UnityEngine::RenderTexture::GetTemporary(width, height);
 
@@ -69,10 +81,10 @@ namespace MsgPackData
 		UnityEngine::RenderTexture::SetActive(renderTexture);
 
 		auto readableTexture = il2cpp_object_new(il2cpp_symbols::get_class("UnityEngine.CoreModule.dll", "UnityEngine", "Texture2D"));
-		il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, int, int)>(readableTexture->klass, ".ctor", 2)->methodPointer(readableTexture, width, height);
+		il2cpp_symbols::get_method_pointer<void (*)(Il2CppObject*, int, int)>(readableTexture->klass, ".ctor", 2)(readableTexture, width, height);
 
-		il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, UnityEngine::Rect, int, int)>(readableTexture->klass, "ReadPixels", 3)->methodPointer(readableTexture, UnityEngine::Rect{ 0, 0, static_cast<float>(width), static_cast<float>(height) }, 0, 0);
-		il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*)>(readableTexture->klass, "Apply", 0)->methodPointer(readableTexture);
+		il2cpp_symbols::get_method_pointer<void (*)(Il2CppObject*, UnityEngine::Rect, int, int)>(readableTexture->klass, "ReadPixels", 3)(readableTexture, UnityEngine::Rect{ 0, 0, static_cast<float>(width), static_cast<float>(height) }, 0, 0);
+		il2cpp_symbols::get_method_pointer<void (*)(Il2CppObject*)>(readableTexture->klass, "Apply", 0)(readableTexture);
 
 		UnityEngine::RenderTexture::SetActive(previous);
 
@@ -118,11 +130,11 @@ namespace MsgPackData
 		auto path2 = "chara/chr"s + to_string(charaId) + "/" + push_icon + "_01";
 
 		auto loader = il2cpp_symbols::get_method_pointer<Il2CppObject * (*)()>("umamusume.dll", "Gallop", "AssetManager", "get_Loader", IgnoreNumberOfArguments)();
-		auto asset = il2cpp_class_get_method_from_name_type<Il2CppObject * (*)(Il2CppObject*, Il2CppString*, bool)>(loader->klass, "LoadAssetHandle", 2)->methodPointer(loader, il2cpp_string_new(path.data()), false);
+		auto asset = il2cpp_symbols::get_method_pointer<Il2CppObject * (*)(Il2CppObject*, Il2CppString*, bool)>(loader->klass, "LoadAssetHandle", 2)(loader, il2cpp_string_new(path.data()), false);
 
 		if (!asset)
 		{
-			auto asset = il2cpp_class_get_method_from_name_type<Il2CppObject * (*)(Il2CppObject*, Il2CppString*, bool)>(loader->klass, "LoadAssetHandle", 2)->methodPointer(loader, il2cpp_string_new(path2.data()), false);
+			auto asset = il2cpp_symbols::get_method_pointer<Il2CppObject * (*)(Il2CppObject*, Il2CppString*, bool)>(loader->klass, "LoadAssetHandle", 2)(loader, il2cpp_string_new(path2.data()), false);
 
 			if (!asset)
 			{
@@ -130,7 +142,7 @@ namespace MsgPackData
 			}
 		}
 
-		UnityEngine::AssetBundle assetBundle = il2cpp_class_get_method_from_name_type<Il2CppObject * (*)(Il2CppObject*)>(asset->klass, "get_assetBundle", 0)->methodPointer(asset);
+		UnityEngine::AssetBundle assetBundle = il2cpp_symbols::get_method_pointer<Il2CppObject * (*)(Il2CppObject*)>(asset->klass, "get_assetBundle", 0)(asset);
 		if (!assetBundle)
 		{
 			return nullptr;
@@ -250,6 +262,7 @@ namespace MsgPackData
 			}
 		}
 	}
+#endif
 
 	inline void ReadRequest(const char* data, size_t size)
 	{
@@ -276,6 +289,7 @@ namespace MsgPackData
 			{
 				MsgPack::object object = parsed.object_items();
 
+#ifdef _MSC_VER
 				if (object["data"].is_object())
 				{
 					MsgPack::object data = object["data"].object_items();
@@ -388,6 +402,7 @@ namespace MsgPackData
 						}
 					}
 				}
+#endif
 			}
 		}
 	}

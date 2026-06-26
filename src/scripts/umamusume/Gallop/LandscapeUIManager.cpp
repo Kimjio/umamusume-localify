@@ -1,3 +1,4 @@
+#ifdef _MSC_VER
 #include "../umamusume.hpp"
 #include "../../ScriptInternal.hpp"
 #include "LandscapeUIManager.hpp"
@@ -11,27 +12,27 @@
 
 namespace
 {
-	void* LandscapeUIManager_Initialize_addr = nullptr;
+	Il2CppMethodPointer LandscapeUIManager_Initialize_addr = nullptr;
 	void* LandscapeUIManager_Initialize_orig = nullptr;
 
-	void* LandscapeUIManager_get_WindowScaleRate_addr = nullptr;
+	Il2CppMethodPointer LandscapeUIManager_get_WindowScaleRate_addr = nullptr;
 	void* LandscapeUIManager_get_WindowScaleRate_orig = nullptr;
 
-	void* LandscapeUIManager_GetWindowsWidthMax_addr = nullptr;
+	Il2CppMethodPointer LandscapeUIManager_GetWindowsWidthMax_addr = nullptr;
 	void* LandscapeUIManager_GetWindowsWidthMax_orig = nullptr;
 
-	void* LandscapeUIManager_GetWindowsHeightMax_addr = nullptr;
+	Il2CppMethodPointer LandscapeUIManager_GetWindowsHeightMax_addr = nullptr;
 	void* LandscapeUIManager_GetWindowsHeightMax_orig = nullptr;
 
-	void* LandscapeUIManager_OnPushBandUIButton_addr = nullptr;
+	Il2CppMethodPointer LandscapeUIManager_OnPushBandUIButton_addr = nullptr;
 	void* LandscapeUIManager_OnPushBandUIButton_orig = nullptr;
 
-	void* LandscapeUIManager_RestorePrevSelectedBandMenu_addr = nullptr;
+	Il2CppMethodPointer LandscapeUIManager_RestorePrevSelectedBandMenu_addr = nullptr;
 	void* LandscapeUIManager_RestorePrevSelectedBandMenu_orig = nullptr;
 
-	void* LandscapeUIManager_GetTouchPositionCameraType_addr = nullptr;
+	Il2CppMethodPointer LandscapeUIManager_GetTouchPositionCameraType_addr = nullptr;
 
-	void* LandscapeUIManager_GetTouchPositionOffsetX_addr = nullptr;
+	Il2CppMethodPointer LandscapeUIManager_GetTouchPositionOffsetX_addr = nullptr;
 
 	FieldInfo* LandscapeUIManager__displayOrientationButtonField = nullptr;
 }
@@ -47,10 +48,10 @@ static void LandscapeUIManager_Initialize_hook(Il2CppObject* self, float leftUiO
 
 		UnityEngine::MonoBehaviour(_displayOrientationButton).gameObject().SetActive(true);
 
-		il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, Il2CppDelegate*)>(_displayOrientationButton->klass, "SetOnClick", 1)->methodPointer(_displayOrientationButton,
+		il2cpp_symbols::get_method_pointer<void (*)(Il2CppObject*, Il2CppDelegate*)>(_displayOrientationButton->klass, "SetOnClick", 1)(_displayOrientationButton,
 			&CreateUnityAction(self, *[](Il2CppObject* self)
 				{
-					il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*)>(self->klass, "OnClickDisplayOrientationButton", 0)->methodPointer(self);
+					il2cpp_symbols::get_method_pointer<void (*)(Il2CppObject*)>(self->klass, "OnClickDisplayOrientationButton", 0)(self);
 				})->delegate
 		);
 	}
@@ -103,6 +104,12 @@ static void InitAddress()
 	{
 		LandscapeUIManager_klass = il2cpp_symbols::get_class(ASSEMBLY_NAME, "Gallop", "SteamUIManager");
 	}
+
+	if (!LandscapeUIManager_klass)
+	{
+		return;
+	}
+
 	LandscapeUIManager_Initialize_addr = il2cpp_symbols::get_method_pointer(LandscapeUIManager_klass, "Initialize", 2);
 	LandscapeUIManager_get_WindowScaleRate_addr = il2cpp_symbols::get_method_pointer(LandscapeUIManager_klass, "get_WindowScaleRate", 0);
 	LandscapeUIManager_GetWindowsWidthMax_addr = il2cpp_symbols::get_method_pointer(LandscapeUIManager_klass, "GetWindowsWidthMax", 0);
@@ -152,3 +159,4 @@ namespace Gallop
 		return reinterpret_cast<float (*)(CameraType)>(LandscapeUIManager_GetTouchPositionOffsetX_addr)(cameraType);
 	}
 }
+#endif

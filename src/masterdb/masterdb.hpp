@@ -23,8 +23,16 @@ namespace MasterDB
 	inline void InitMasterDB()
 	{
 		auto path = il2cpp_u8(il2cpp_symbols::get_method_pointer<Il2CppString * (*)()>("Cute.Core.Assembly.dll", "Cute.Core", "Device", "GetPersistentDataPath", IgnoreNumberOfArguments)()->chars);
-		auto metaDBPath = path + R"(\meta)";
-		masterDBPath = path + R"(\master\master.mdb)";
+#ifdef _MSC_VER
+		auto metaDBPath = path + "\\" + "meta";
+		masterDBPath = path + "\\" + "master" + "\\" + "master.mdb";
+#else
+		auto metaDBPath = path +
+			filesystem::path::preferred_separator + "meta";
+		masterDBPath = path +
+			filesystem::path::preferred_separator + "master" +
+			filesystem::path::preferred_separator + "master.mdb";
+#endif
 
 		auto res = sqlite3_open_v2(metaDBPath.data(), &metaDB, SQLITE_OPEN_READONLY, nullptr);
 		if (res != SQLITE_OK)
@@ -34,7 +42,13 @@ namespace MasterDB
 
 		if (config::unlock_live_chara)
 		{
-			auto masterDBOrigPath = path + R"(\master\master_orig.mdb)";
+#ifdef _MSC_VER
+			auto masterDBOrigPath = path + "\\" + "master" + "\\" + "master_orig.mdb";
+#else
+			auto masterDBOrigPath = path +
+				filesystem::path::preferred_separator + "master" +
+				filesystem::path::preferred_separator + "master_orig.mdb";
+#endif
 
 			filesystem::copy(masterDBPath, masterDBOrigPath, filesystem::copy_options::skip_existing);
 

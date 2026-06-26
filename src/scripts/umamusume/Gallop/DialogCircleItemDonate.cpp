@@ -4,16 +4,16 @@
 
 namespace
 {
-	void* DialogCircleItemDonate_Initialize_addr = nullptr;
+	Il2CppMethodPointer DialogCircleItemDonate_Initialize_addr = nullptr;
 	void* DialogCircleItemDonate_Initialize_orig = nullptr;
 
-	void* DialogCircleItemDonate_CalcDonateItemMax_addr = nullptr;
+	Il2CppMethodPointer DialogCircleItemDonate_CalcDonateItemMax_addr = nullptr;
 
-	void* DialogCircleItemDonate_ValidateDonateItemCount_addr = nullptr;
+	Il2CppMethodPointer DialogCircleItemDonate_ValidateDonateItemCount_addr = nullptr;
 
-	void* DialogCircleItemDonate_ApplyDonateItemCountText_addr = nullptr;
+	Il2CppMethodPointer DialogCircleItemDonate_ApplyDonateItemCountText_addr = nullptr;
 
-	void* DialogCircleItemDonate_OnClickPlusButton_addr = nullptr;
+	Il2CppMethodPointer DialogCircleItemDonate_OnClickPlusButton_addr = nullptr;
 
 	FieldInfo* DialogCircleItemDonate__donateCountField = nullptr;
 }

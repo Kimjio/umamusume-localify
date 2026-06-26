@@ -2,7 +2,7 @@
 #include "MoviePlayerBase.hpp"
 #include "MoviePlayerHandle.hpp"
 #include "scripts/UnityEngine.CoreModule/UnityEngine/MonoBehaviour.hpp"
-#include "scripts/CriMw.CriWare.RUntime/CriWare/CriMana/MovieInfo.hpp"
+#include "scripts/CriMw.CriWare.Runtime/CriWare/CriMana/MovieInfo.hpp"
 
 namespace Cute::Cri
 {

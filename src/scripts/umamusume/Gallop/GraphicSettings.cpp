@@ -11,21 +11,21 @@
 
 namespace
 {
-	void* GraphicSettings_ApplyGraphicsQuality_addr = nullptr;
+	Il2CppMethodPointer GraphicSettings_ApplyGraphicsQuality_addr = nullptr;
 	void* GraphicSettings_ApplyGraphicsQuality_orig = nullptr;
 
-	void* GraphicSettings_Get3DAntiAliasingLevel_addr = nullptr;
+	Il2CppMethodPointer GraphicSettings_Get3DAntiAliasingLevel_addr = nullptr;
 	void* GraphicSettings_Get3DAntiAliasingLevel_orig = nullptr;
 
-	void* GraphicSettings_Update3DRenderTexture_addr = nullptr;
+	Il2CppMethodPointer GraphicSettings_Update3DRenderTexture_addr = nullptr;
 
-	void* GraphicSettings_GetVirtualResolution_addr = nullptr;
+	Il2CppMethodPointer GraphicSettings_GetVirtualResolution_addr = nullptr;
 	void* GraphicSettings_GetVirtualResolution_orig = nullptr;
 
-	void* GraphicSettings_GetVirtualResolution3D_addr = nullptr;
+	Il2CppMethodPointer GraphicSettings_GetVirtualResolution3D_addr = nullptr;
 	void* GraphicSettings_GetVirtualResolution3D_orig = nullptr;
 
-	void* GraphicSettings_GetVirtualResolution3D2_addr = nullptr;
+	Il2CppMethodPointer GraphicSettings_GetVirtualResolution3D2_addr = nullptr;
 	void* GraphicSettings_GetVirtualResolution3D2_orig = nullptr;
 }
 

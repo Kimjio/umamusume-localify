@@ -8,10 +8,10 @@
 
 namespace
 {
-	void* DialogHomeMenuMain_ChangeView_addr = nullptr;
+	Il2CppMethodPointer DialogHomeMenuMain_ChangeView_addr = nullptr;
 	void* DialogHomeMenuMain_ChangeView_orig = nullptr;
 
-	void* DialogHomeMenuMain_ChangeView2_addr = nullptr;
+	Il2CppMethodPointer DialogHomeMenuMain_ChangeView2_addr = nullptr;
 	void* DialogHomeMenuMain_ChangeView2_orig = nullptr;
 }
 

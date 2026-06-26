@@ -4,54 +4,54 @@
 
 namespace
 {
-	void* set_anchoredPosition_Injected_addr = nullptr;
+	Il2CppMethodPointer set_anchoredPosition_Injected_addr = nullptr;
 
-	void* get_anchoredPosition_Injected_addr = nullptr;
+	Il2CppMethodPointer get_anchoredPosition_Injected_addr = nullptr;
 
-	void* set_anchorMax_Injected_addr = nullptr;
+	Il2CppMethodPointer set_anchorMax_Injected_addr = nullptr;
 
-	void* get_anchorMax_Injected_addr = nullptr;
+	Il2CppMethodPointer get_anchorMax_Injected_addr = nullptr;
 
-	void* set_anchorMin_Injected_addr = nullptr;
+	Il2CppMethodPointer set_anchorMin_Injected_addr = nullptr;
 
-	void* get_anchorMin_Injected_addr = nullptr;
+	Il2CppMethodPointer get_anchorMin_Injected_addr = nullptr;
 
-	void* set_pivot_Injected_addr = nullptr;
+	Il2CppMethodPointer set_pivot_Injected_addr = nullptr;
 
-	void* get_pivot_Injected_addr = nullptr;
+	Il2CppMethodPointer get_pivot_Injected_addr = nullptr;
 
-	void* set_sizeDelta_Injected_addr = nullptr;
+	Il2CppMethodPointer set_sizeDelta_Injected_addr = nullptr;
 
-	void* get_sizeDelta_Injected_addr = nullptr;
+	Il2CppMethodPointer get_sizeDelta_Injected_addr = nullptr;
 
-	void* set_offsetMin_addr = nullptr;
+	Il2CppMethodPointer set_offsetMin_addr = nullptr;
 
-	void* get_offsetMin_addr = nullptr;
+	Il2CppMethodPointer get_offsetMin_addr = nullptr;
 
-	void* set_offsetMax_addr = nullptr;
+	Il2CppMethodPointer set_offsetMax_addr = nullptr;
 
-	void* get_offsetMax_addr = nullptr;
+	Il2CppMethodPointer get_offsetMax_addr = nullptr;
 
-	void* get_rect_Injected_addr = nullptr;
+	Il2CppMethodPointer get_rect_Injected_addr = nullptr;
 }
 
 static void InitAddress()
 {
-	set_anchoredPosition_Injected_addr = il2cpp_resolve_icall("UnityEngine.RectTransform::set_anchoredPosition_Injected()");
-	get_anchoredPosition_Injected_addr = il2cpp_resolve_icall("UnityEngine.RectTransform::get_anchoredPosition_Injected()");
-	set_anchorMax_Injected_addr = il2cpp_resolve_icall("UnityEngine.RectTransform::set_anchorMax_Injected()");
-	get_anchorMax_Injected_addr = il2cpp_resolve_icall("UnityEngine.RectTransform::get_anchorMax_Injected()");
-	set_anchorMin_Injected_addr = il2cpp_resolve_icall("UnityEngine.RectTransform::set_anchorMin_Injected()");
-	get_anchorMin_Injected_addr = il2cpp_resolve_icall("UnityEngine.RectTransform::get_anchorMin_Injected()");
-	set_pivot_Injected_addr = il2cpp_resolve_icall("UnityEngine.RectTransform::set_pivot_Injected()");
-	get_pivot_Injected_addr = il2cpp_resolve_icall("UnityEngine.RectTransform::get_pivot_Injected()");
-	set_sizeDelta_Injected_addr = il2cpp_resolve_icall("UnityEngine.RectTransform::set_sizeDelta_Injected()");
-	get_sizeDelta_Injected_addr = il2cpp_resolve_icall("UnityEngine.RectTransform::get_sizeDelta_Injected()");
+	set_anchoredPosition_Injected_addr = il2cpp_resolve_icall("UnityEngine.RectTransform::set_anchoredPosition_Injected");
+	get_anchoredPosition_Injected_addr = il2cpp_resolve_icall("UnityEngine.RectTransform::get_anchoredPosition_Injected");
+	set_anchorMax_Injected_addr = il2cpp_resolve_icall("UnityEngine.RectTransform::set_anchorMax_Injected");
+	get_anchorMax_Injected_addr = il2cpp_resolve_icall("UnityEngine.RectTransform::get_anchorMax_Injected");
+	set_anchorMin_Injected_addr = il2cpp_resolve_icall("UnityEngine.RectTransform::set_anchorMin_Injected");
+	get_anchorMin_Injected_addr = il2cpp_resolve_icall("UnityEngine.RectTransform::get_anchorMin_Injected");
+	set_pivot_Injected_addr = il2cpp_resolve_icall("UnityEngine.RectTransform::set_pivot_Injected");
+	get_pivot_Injected_addr = il2cpp_resolve_icall("UnityEngine.RectTransform::get_pivot_Injected");
+	set_sizeDelta_Injected_addr = il2cpp_resolve_icall("UnityEngine.RectTransform::set_sizeDelta_Injected");
+	get_sizeDelta_Injected_addr = il2cpp_resolve_icall("UnityEngine.RectTransform::get_sizeDelta_Injected");
 	set_offsetMin_addr = il2cpp_symbols::get_method_pointer(ASSEMBLY_NAME, "UnityEngine", "RectTransform", "set_offsetMin", 1);
 	get_offsetMin_addr = il2cpp_symbols::get_method_pointer(ASSEMBLY_NAME, "UnityEngine", "RectTransform", "get_offsetMin", 0);
 	set_offsetMax_addr = il2cpp_symbols::get_method_pointer(ASSEMBLY_NAME, "UnityEngine", "RectTransform", "set_offsetMax", 1);
 	get_offsetMax_addr = il2cpp_symbols::get_method_pointer(ASSEMBLY_NAME, "UnityEngine", "RectTransform", "get_offsetMax", 0);
-	get_rect_Injected_addr = il2cpp_resolve_icall("UnityEngine.RectTransform::get_rect_Injected()");
+	get_rect_Injected_addr = il2cpp_resolve_icall("UnityEngine.RectTransform::get_rect_Injected");
 }
 
 STATIC

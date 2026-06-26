@@ -3,13 +3,13 @@
 
 #include "scripts/UnityEngine.CoreModule/UnityEngine/Object.hpp"
 
-extern Il2CppObject* GetReplacementAssets(Il2CppString* name, Il2CppReflectionType* type);
+Il2CppObject* GetReplacementAssets(Il2CppString* name, Il2CppReflectionType* type);
 
-static Il2CppObject* GetReplacementAtlasAssets(Il2CppString* name, Il2CppReflectionType* type);
+Il2CppObject* GetReplacementAtlasAssets(Il2CppString* name, Il2CppReflectionType* type);
 
-extern void ReplaceMaterialTextureProperty(Il2CppObject* material, Il2CppString* property);
+void ReplaceMaterialTextureProperty(Il2CppObject* material, Il2CppString* property);
 
-extern void ReplaceMaterialTexture(Il2CppObject* material);
+void ReplaceMaterialTexture(Il2CppObject* material);
 
 namespace UnityEngine
 {

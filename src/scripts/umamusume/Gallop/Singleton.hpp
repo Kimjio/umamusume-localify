@@ -6,7 +6,7 @@
 namespace Gallop
 {
 	template<class T>
-	class Singleton abstract : public UnityEngine::Object
+	class Singleton : public UnityEngine::Object
 	{
 	public:
 		static T Instance()

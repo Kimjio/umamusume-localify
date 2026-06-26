@@ -6,7 +6,7 @@
 
 namespace
 {
-	void* CharacterBg_SetupDefaultPosition_addr = nullptr;
+	Il2CppMethodPointer CharacterBg_SetupDefaultPosition_addr = nullptr;
 	void* CharacterBg_SetupDefaultPosition_orig = nullptr;
 }
 

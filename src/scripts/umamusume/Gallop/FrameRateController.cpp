@@ -6,13 +6,13 @@
 
 namespace
 {
-	void* FrameRateController_GetLayerFrameRate_addr = nullptr;
+	Il2CppMethodPointer FrameRateController_GetLayerFrameRate_addr = nullptr;
 	void* FrameRateController_GetLayerFrameRate_orig = nullptr;
 
-	void* FrameRateController_ReflectionFrameRate_addr = nullptr;
+	Il2CppMethodPointer FrameRateController_ReflectionFrameRate_addr = nullptr;
 	void* FrameRateController_ReflectionFrameRate_orig = nullptr;
 
-	void* FrameRateController_OnFinalize_addr = nullptr;
+	Il2CppMethodPointer FrameRateController_OnFinalize_addr = nullptr;
 	void* FrameRateController_OnFinalize_orig = nullptr;
 }
 

@@ -10,27 +10,27 @@ namespace UnityEngine
 
 		Vector2 operator*(float v) const noexcept
 		{
-			return Vector2(x * v, y * v);
+			return Vector2{.x=x * v, .y=y * v};
 		}
 
 		Vector2 operator/(float v) const noexcept
 		{
-			return Vector2(x / v, y / v);
+			return Vector2{.x=x / v, .y=y / v};
 		}
 
 		Vector2 operator-(float v) const noexcept
 		{
-			return Vector2(x - v, y - v);
+			return Vector2{.x=x - v, .y=y - v};
 		}
 
 		Vector2 operator-(Vector2 v) const noexcept
 		{
-			return Vector2(x - v.x, y - v.y);
+			return Vector2{.x=x - v.x, .y=y - v.y};
 		}
 
-		float sqrMagnitude() const
+		[[nodiscard]] float sqrMagnitude() const
 		{
-			return x * x + y * y;
+			return (x * x) + (y * y);
 		}
 	};
 }

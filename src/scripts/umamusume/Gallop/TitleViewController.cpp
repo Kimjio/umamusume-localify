@@ -1,9 +1,11 @@
+#ifdef _MSC_VER
 #include "../../ScriptInternal.hpp"
 #include "Certification.hpp"
 #include "TitleViewController.hpp"
 #include "DialogCommon.hpp"
 #include "DialogManager.hpp"
 #include "Screen.hpp"
+#include "SceneManager.hpp"
 #include "UIManager.hpp"
 #include "Localize.hpp"
 #include "../../Cute.Cri.Assembly/Cute/Cri/AudioPlayback.hpp"
@@ -15,7 +17,6 @@
 #include "settings_text.hpp"
 
 #include <string>
-
 #include <wininet.h>
 
 #include <wrl.h>
@@ -38,13 +39,13 @@ using namespace Microsoft::WRL::Wrappers;
 
 namespace
 {
-	void* TitleViewController_OnClickPushStart_addr = nullptr;
+	Il2CppMethodPointer TitleViewController_OnClickPushStart_addr = nullptr;
 	void* TitleViewController_OnClickPushStart_orig = nullptr;
 
-	void* TitleViewController_UpdateView_addr = nullptr;
+	Il2CppMethodPointer TitleViewController_UpdateView_addr = nullptr;
 	void* TitleViewController_UpdateView_orig = nullptr;
 
-	void* TitleViewController_InitializeView_addr = nullptr;
+	Il2CppMethodPointer TitleViewController_InitializeView_addr = nullptr;
 	void* TitleViewController_InitializeView_orig = nullptr;
 
 	wil::com_ptr<ICoreWebView2Controller> webviewController;
@@ -438,8 +439,8 @@ static DWORD WINAPI WebViewThread(LPVOID)
 
 										isLoginWebViewOpen = false;
 
-										auto viewController = GetCurrentViewController();
-										il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*)>(viewController->klass, "OnClickPushStart", 0)->methodPointer(viewController);
+										auto viewController = Gallop::SceneManager::Instance().GetCurrentViewController();
+										il2cpp_symbols::get_method_pointer<void (*)(Il2CppObject*)>(viewController->klass, "OnClickPushStart", 0)(viewController);
 
 										il2cpp_thread_detach(t);
 									}
@@ -479,17 +480,17 @@ static void PlaySfxUiDecideL01()
 
 	Cute::Cri::AudioPlayback res{};
 
-	if (auto legacy = il2cpp_class_get_method_from_name_type<Il2CppObject * (*)(Cute::Cri::AudioPlayback*, Il2CppObject*, uint64_t, bool, float, Il2CppObject*,
+	if (auto legacy = il2cpp_symbols::get_method_pointer<Il2CppObject * (*)(Cute::Cri::AudioPlayback*, Il2CppObject*, uint64_t, bool, float, Il2CppObject*,
 		float, float, float, float, float, float, bool, float, uint64_t, int
 		)>(AudioManager->klass, "PlaySe", 14))
 	{
-		legacy->methodPointer(&res, AudioManager, 200000000L, false, 0.0, nullptr, 0.0, 10.0, 100.0, 0.0, 0.0, 1.0, false, 1.0, 0, INT_MAX);
+		legacy(&res, AudioManager, 200000000L, false, 0.0, nullptr, 0.0, 10.0, 100.0, 0.0, 0.0, 1.0, false, 1.0, 0, INT_MAX);
 		return;
 	}
 
-	il2cpp_class_get_method_from_name_type<Il2CppObject* (*)(Cute::Cri::AudioPlayback*, Il2CppObject*, uint64_t, bool, float, Il2CppObject*,
+	il2cpp_symbols::get_method_pointer<Il2CppObject* (*)(Cute::Cri::AudioPlayback*, Il2CppObject*, uint64_t, bool, float, Il2CppObject*,
 		float, float, float, float, float, float, float, float, float, bool, float, uint64_t, int
-		)>(AudioManager->klass, "PlaySe", 17)->methodPointer(&res, AudioManager, 200000000L, false, 0.0, nullptr, 0.0, 10.0, 100.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, false, 1.0, 0, INT_MAX);
+		)>(AudioManager->klass, "PlaySe", 17)(&res, AudioManager, 200000000L, false, 0.0, nullptr, 0.0, 10.0, 100.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, false, 1.0, 0, INT_MAX);
 }
 
 static void TitleViewController_OnClickPushStart_hook(Il2CppObject* self)
@@ -590,7 +591,7 @@ static Il2CppObject* TitleViewController_InitializeView_hook(Il2CppObject* self)
 		return res;
 	}
 
-	auto viewBase = il2cpp_class_get_method_from_name_type<Il2CppObject * (*)(Il2CppObject*)>(self->klass, "GetViewBase", 0)->methodPointer(self);
+	auto viewBase = il2cpp_symbols::get_method_pointer<Il2CppObject * (*)(Il2CppObject*)>(self->klass, "GetViewBase", 0)(self);
 	auto TitleLogoTransformField = il2cpp_class_get_field_from_name(viewBase->klass, "TitleLogoTransform");
 	Il2CppObject* TitleLogoTransform;
 	il2cpp_field_get_value(viewBase, TitleLogoTransformField, &TitleLogoTransform);
@@ -612,8 +613,8 @@ static Il2CppObject* TitleViewController_InitializeView_hook(Il2CppObject* self)
 	UnityEngine::GameObject(StartTapObiect).transform().localScale({ 1.0f, 1.0f, 1.0f });
 
 	auto SaveDataManager = GetSingletonInstance(il2cpp_symbols::get_class(ASSEMBLY_NAME, "Gallop", "SaveDataManager"));
-	auto SaveLoader = il2cpp_class_get_method_from_name_type<Il2CppObject * (*)(Il2CppObject*)>(SaveDataManager->klass, "get_SaveLoader", 0)->methodPointer(SaveDataManager);
-	auto CampaignTitleLogoChangeId = il2cpp_class_get_method_from_name_type<CodeStage::AntiCheat::ObscuredTypes::ObscuredInt(*)(Il2CppObject*)>(SaveLoader->klass, "get_CampaignTitleLogoChangeId", 0)->methodPointer(SaveLoader);
+	auto SaveLoader = il2cpp_symbols::get_method_pointer<Il2CppObject * (*)(Il2CppObject*)>(SaveDataManager->klass, "get_SaveLoader", 0)(SaveDataManager);
+	auto CampaignTitleLogoChangeId = il2cpp_symbols::get_method_pointer<CodeStage::AntiCheat::ObscuredTypes::ObscuredInt(*)(Il2CppObject*)>(SaveLoader->klass, "get_CampaignTitleLogoChangeId", 0)(SaveLoader);
 
 	if (CampaignTitleLogoChangeId.GetDecrypted() > 0)
 	{
@@ -675,3 +676,4 @@ namespace Gallop
 	string TitleViewController::viewerId;
 	string TitleViewController::onetimeToken;
 }
+#endif

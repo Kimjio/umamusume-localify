@@ -3,7 +3,7 @@
 
 namespace UnityEngine::UI
 {
-	class Graphic abstract : public EventSystems::UIBehaviour
+	class Graphic : public EventSystems::UIBehaviour
 	{
 	public:
 		using EventSystems::UIBehaviour::UIBehaviour;

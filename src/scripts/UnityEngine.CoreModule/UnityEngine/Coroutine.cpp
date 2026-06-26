@@ -6,7 +6,7 @@ namespace
 {
 	Il2CppClass* CoroutineClass = nullptr;
 	
-	void* ReleaseCoroutine_addr = nullptr;
+	Il2CppMethodPointer ReleaseCoroutine_addr = nullptr;
 
 	FieldInfo* m_PtrField = nullptr;
 }
@@ -14,7 +14,7 @@ namespace
 static void InitAddress()
 {
 	CoroutineClass = il2cpp_symbols::get_class(ASSEMBLY_NAME, "UnityEngine", "Coroutine");
-	ReleaseCoroutine_addr = il2cpp_resolve_icall("UnityEngine.Coroutine::ReleaseCoroutine()");
+	ReleaseCoroutine_addr = il2cpp_resolve_icall("UnityEngine.Coroutine::ReleaseCoroutine");
 	m_PtrField = il2cpp_class_get_field_from_name(CoroutineClass, "m_Ptr");
 }
 

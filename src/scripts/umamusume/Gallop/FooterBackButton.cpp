@@ -11,7 +11,7 @@
 
 namespace
 {
-	void* FooterBackButton_Open_addr = nullptr;
+	Il2CppMethodPointer FooterBackButton_Open_addr = nullptr;
 	void* FooterBackButton_Open_orig = nullptr;
 
 	FieldInfo* FooterBackButton__backButtonRect_Field = nullptr;

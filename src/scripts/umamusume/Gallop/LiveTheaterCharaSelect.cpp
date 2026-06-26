@@ -6,7 +6,7 @@
 
 namespace
 {
-	void* LiveTheaterCharaSelect_CheckSwapChara_addr = nullptr;
+	Il2CppMethodPointer LiveTheaterCharaSelect_CheckSwapChara_addr = nullptr;
 	void* LiveTheaterCharaSelect_CheckSwapChara_orig = nullptr;
 }
 

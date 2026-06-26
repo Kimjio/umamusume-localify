@@ -1,3 +1,4 @@
+#ifdef _MSC_VER
 #include "../umamusume.hpp"
 #include "../../ScriptInternal.hpp"
 #include "DownloadErrorProcessor.hpp"
@@ -6,7 +7,7 @@
 
 namespace
 {
-	void* DownloadErrorProcessor_ExecDownloadErrorProcess_addr = nullptr;
+	Il2CppMethodPointer DownloadErrorProcessor_ExecDownloadErrorProcess_addr = nullptr;
 	void* DownloadErrorProcessor_ExecDownloadErrorProcess_orig = nullptr;
 }
 
@@ -41,3 +42,4 @@ namespace Gallop
 		reinterpret_cast<void (*)(Il2CppObject *, Il2CppDelegate *, Il2CppDelegate *)>(DownloadErrorProcessor_ExecDownloadErrorProcess_addr)(error, onRetry, onGotoTitle);
 	}
 }
+#endif

@@ -6,38 +6,38 @@ namespace
 {
 	Il2CppClass* RenderTexture_klass = nullptr;
 
-	void* RenderTexture_ctor_RenderTextureDescriptor_addr = nullptr;
+	Il2CppMethodPointer RenderTexture_ctor_RenderTextureDescriptor_addr = nullptr;
 
-	void* RenderTexture_get_width_addr = nullptr;
+	Il2CppMethodPointer RenderTexture_get_width_addr = nullptr;
 
-	void* RenderTexture_set_width_addr = nullptr;
+	Il2CppMethodPointer RenderTexture_set_width_addr = nullptr;
 
-	void* RenderTexture_get_height_addr = nullptr;
+	Il2CppMethodPointer RenderTexture_get_height_addr = nullptr;
 
-	void* RenderTexture_set_height_addr = nullptr;
+	Il2CppMethodPointer RenderTexture_set_height_addr = nullptr;
 
-	void* RenderTexture_Create_addr = nullptr;
+	Il2CppMethodPointer RenderTexture_Create_addr = nullptr;
 
-	void* RenderTexture_GetTemporary_addr = nullptr;
+	Il2CppMethodPointer RenderTexture_GetTemporary_addr = nullptr;
 		
-	void* RenderTexture_GetActive_addr = nullptr;
+	Il2CppMethodPointer RenderTexture_GetActive_addr = nullptr;
 	
-	void* RenderTexture_SetActive_addr = nullptr;
+	Il2CppMethodPointer RenderTexture_SetActive_addr = nullptr;
 
-	void* RenderTexture_ReleaseTemporary_addr = nullptr;
+	Il2CppMethodPointer RenderTexture_ReleaseTemporary_addr = nullptr;
 }
 
 static void InitAddress()
 {
 	RenderTexture_klass = il2cpp_symbols::get_class(ASSEMBLY_NAME, "UnityEngine", "RenderTexture");
 	RenderTexture_ctor_RenderTextureDescriptor_addr = il2cpp_symbols::get_method_pointer(RenderTexture_klass, ".ctor", 1);
-	RenderTexture_get_width_addr = il2cpp_resolve_icall("UnityEngine.RenderTexture::get_width()");
+	RenderTexture_get_width_addr = il2cpp_resolve_icall("UnityEngine.RenderTexture::get_width");
 	RenderTexture_set_width_addr = il2cpp_resolve_icall("UnityEngine.RenderTexture::set_width(System.Int32)");
-	RenderTexture_get_height_addr = il2cpp_resolve_icall("UnityEngine.RenderTexture::get_height()");
+	RenderTexture_get_height_addr = il2cpp_resolve_icall("UnityEngine.RenderTexture::get_height");
 	RenderTexture_set_height_addr = il2cpp_resolve_icall("UnityEngine.RenderTexture::set_height(System.Int32)");
 	RenderTexture_Create_addr = il2cpp_symbols::get_method_pointer(RenderTexture_klass, "Create", 0);
 	RenderTexture_GetTemporary_addr = il2cpp_symbols::get_method_pointer(RenderTexture_klass, "GetTemporary", 2);
-	RenderTexture_GetActive_addr = il2cpp_resolve_icall("UnityEngine.RenderTexture::GetActive()");
+	RenderTexture_GetActive_addr = il2cpp_resolve_icall("UnityEngine.RenderTexture::GetActive");
 	RenderTexture_SetActive_addr = il2cpp_resolve_icall("UnityEngine.RenderTexture::SetActive(UnityEngine.RenderTexture)");
 	RenderTexture_ReleaseTemporary_addr = il2cpp_resolve_icall("UnityEngine.RenderTexture::ReleaseTemporary(UnityEngine.RenderTexture)");
 }

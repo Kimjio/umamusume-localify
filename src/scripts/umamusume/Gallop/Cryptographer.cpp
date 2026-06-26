@@ -4,7 +4,7 @@
 
 namespace
 {
-	void* MakeMd5_addr = nullptr;
+	Il2CppMethodPointer MakeMd5_addr = nullptr;
 }
 
 static void InitAddress()

@@ -7,14 +7,14 @@ namespace
 {
 	Il2CppClass* LiveTheaterViewController_klass = nullptr;
 
-	void* LiveTheaterViewController_OnClickNext_addr = nullptr;
+	Il2CppMethodPointer LiveTheaterViewController_OnClickNext_addr = nullptr;
 	void* LiveTheaterViewController_OnClickNext_orig = nullptr;
 
-	void* LiveTheaterViewController_ChangeMenu_addr = nullptr;
+	Il2CppMethodPointer LiveTheaterViewController_ChangeMenu_addr = nullptr;
 
-	void* LiveTheaterViewController_ChangeLive_addr = nullptr;
+	Il2CppMethodPointer LiveTheaterViewController_ChangeLive_addr = nullptr;
 
-	void* LiveTheaterViewController_get_CurrentInfo_addr = nullptr;
+	Il2CppMethodPointer LiveTheaterViewController_get_CurrentInfo_addr = nullptr;
 
 	FieldInfo* LiveTheaterViewController__currentMenu = nullptr;
 }
@@ -29,7 +29,7 @@ static void LiveTheaterViewController_OnClickNext_hook(Il2CppObject* self)
 	if (nextMenu == Gallop::LiveTheaterViewController::Menu::Max)
 	{
 		auto CurrentInfo = reinterpret_cast<Il2CppObject * (*) (Il2CppObject*)>(LiveTheaterViewController_get_CurrentInfo_addr)(self);
-		auto Id = il2cpp_class_get_method_from_name_type<int (*)(Il2CppObject*)>(CurrentInfo->klass, "get_Id", 0)->methodPointer(CurrentInfo);
+		auto Id = il2cpp_symbols::get_method_pointer<int (*)(Il2CppObject*)>(CurrentInfo->klass, "get_Id", 0)(CurrentInfo);
 		Gallop::DialogLiveStartConfirm::PushDialog(Id, false, CreateDelegate(self, *[](Il2CppObject* self)
 			{
 				reinterpret_cast<void (*)(Il2CppObject*)>(LiveTheaterViewController_ChangeLive_addr)(self);

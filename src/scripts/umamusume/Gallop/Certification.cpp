@@ -1,3 +1,4 @@
+#ifdef _MSC_VER
 #include "../umamusume.hpp"
 #include "../../ScriptInternal.hpp"
 #include "Certification.hpp"
@@ -7,16 +8,16 @@
 
 namespace
 {
-	void* Certification_initDmmPlatformData_addr = nullptr;
+	Il2CppMethodPointer Certification_initDmmPlatformData_addr = nullptr;
 	void* Certification_initDmmPlatformData_orig = nullptr;
 
-	void* Certification_get_dmmViewerId_addr = nullptr;
+	Il2CppMethodPointer Certification_get_dmmViewerId_addr = nullptr;
 
-	void* Certification_set_dmmViewerId_addr = nullptr;
+	Il2CppMethodPointer Certification_set_dmmViewerId_addr = nullptr;
 
-	void* Certification_get_dmmOnetimeToken_addr = nullptr;
+	Il2CppMethodPointer Certification_get_dmmOnetimeToken_addr = nullptr;
 
-	void* Certification_set_dmmOnetimeToken_addr = nullptr;
+	Il2CppMethodPointer Certification_set_dmmOnetimeToken_addr = nullptr;
 }
 
 static void Certification_initDmmPlatformData_hook()
@@ -84,3 +85,4 @@ namespace Gallop
 		reinterpret_cast<void (*)(Il2CppString*)>(Certification_set_dmmOnetimeToken_addr)(onetimeToken);
 	}
 }
+#endif

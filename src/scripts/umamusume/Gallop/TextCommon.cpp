@@ -6,22 +6,24 @@
 
 namespace
 {
-	void* TextCommon_get_TextId_addr = nullptr;
+	Il2CppMethodPointer TextCommon_get_TextId_addr = nullptr;
 
-	void* TextCommon_set_FontColor_addr = nullptr;
+	Il2CppMethodPointer TextCommon_set_TextId_addr = nullptr;
 
-	void* TextCommon_set_OutlineColor_addr = nullptr;
+	Il2CppMethodPointer TextCommon_set_FontColor_addr = nullptr;
 
-	void* TextCommon_set_OutlineSize_addr = nullptr;
+	Il2CppMethodPointer TextCommon_set_OutlineColor_addr = nullptr;
 
-	void* TextCommon_Awake_addr = nullptr;
+	Il2CppMethodPointer TextCommon_set_OutlineSize_addr = nullptr;
+
+	Il2CppMethodPointer TextCommon_Awake_addr = nullptr;
 	void* TextCommon_Awake_orig = nullptr;
 
-	void* TextCommon_UpdateOutline_addr = nullptr;
+	Il2CppMethodPointer TextCommon_UpdateOutline_addr = nullptr;
 
-	void* TextCommon_SetTextWithCustomTag_addr = nullptr;
+	Il2CppMethodPointer TextCommon_SetTextWithCustomTag_addr = nullptr;
 
-	void* TextCommon_ApplyFont_addr = nullptr;
+	Il2CppMethodPointer TextCommon_ApplyFont_addr = nullptr;
 	void* TextCommon_ApplyFont_orig = nullptr;
 
 	Il2CppReflectionType* FontColorType = nullptr;
@@ -94,14 +96,15 @@ static void TextCommon_ApplyFont_hook(Il2CppObject* self)
 static void InitAddress()
 {
 	auto TextCommon_klass = il2cpp_symbols::get_class(ASSEMBLY_NAME, "Gallop", "TextCommon");
-	TextCommon_get_TextId_addr = il2cpp_class_get_method_from_name(TextCommon_klass, "get_TextId", 0)->methodPointer;
-	TextCommon_set_FontColor_addr = il2cpp_class_get_method_from_name(TextCommon_klass, "set_FontColor", 1)->methodPointer;
-	TextCommon_set_OutlineColor_addr = il2cpp_class_get_method_from_name(TextCommon_klass, "set_OutlineColor", 1)->methodPointer;
-	TextCommon_set_OutlineSize_addr = il2cpp_class_get_method_from_name(TextCommon_klass, "set_OutlineSize", 1)->methodPointer;
-	TextCommon_Awake_addr = il2cpp_class_get_method_from_name(TextCommon_klass, "Awake", 0)->methodPointer;
-	TextCommon_ApplyFont_addr = il2cpp_class_get_method_from_name(TextCommon_klass, "ApplyFont", 0)->methodPointer;
-	TextCommon_UpdateOutline_addr = il2cpp_class_get_method_from_name(TextCommon_klass, "UpdateOutline", 0)->methodPointer;
-	TextCommon_SetTextWithCustomTag_addr = il2cpp_class_get_method_from_name(TextCommon_klass, "SetTextWithCustomTag", 3)->methodPointer;
+	TextCommon_get_TextId_addr = il2cpp_symbols::get_method_pointer(TextCommon_klass, "get_TextId", 0);
+	TextCommon_set_TextId_addr = il2cpp_symbols::get_method_pointer(TextCommon_klass, "set_TextId", 1);
+	TextCommon_set_FontColor_addr = il2cpp_symbols::get_method_pointer(TextCommon_klass, "set_FontColor", 1);
+	TextCommon_set_OutlineColor_addr = il2cpp_symbols::get_method_pointer(TextCommon_klass, "set_OutlineColor", 1);
+	TextCommon_set_OutlineSize_addr = il2cpp_symbols::get_method_pointer(TextCommon_klass, "set_OutlineSize", 1);
+	TextCommon_Awake_addr = il2cpp_symbols::get_method_pointer(TextCommon_klass, "Awake", 0);
+	TextCommon_ApplyFont_addr = il2cpp_symbols::get_method_pointer(TextCommon_klass, "ApplyFont", 0);
+	TextCommon_UpdateOutline_addr = il2cpp_symbols::get_method_pointer(TextCommon_klass, "UpdateOutline", 0);
+	TextCommon_SetTextWithCustomTag_addr = il2cpp_symbols::get_method_pointer(TextCommon_klass, "SetTextWithCustomTag", 3);
 
 	FontColorType = GetRuntimeType(ASSEMBLY_NAME, "Gallop", "FontColorType");
 	OutlineSizeType = GetRuntimeType(ASSEMBLY_NAME, "Gallop", "OutlineSizeType");
@@ -128,6 +131,11 @@ namespace Gallop
 	int TextCommon::TextId()
 	{
 		return reinterpret_cast<int (*)(Il2CppObject*)>(TextCommon_get_TextId_addr)(instance);
+	}
+
+	void TextCommon::TextId(int value)
+	{
+		reinterpret_cast<void (*)(Il2CppObject*, int)>(TextCommon_set_TextId_addr)(instance, value);
 	}
 
 	void TextCommon::FontColor(int value)

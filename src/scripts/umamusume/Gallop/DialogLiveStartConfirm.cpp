@@ -8,7 +8,7 @@
 #include "TextCommon.hpp"
 
 #include "scripts/UnityEngine.CoreModule/UnityEngine/GameObject.hpp"
-#include "scripts/UnityEngine.CoreModule/UnityEngine/ResourcesAPIINternal.hpp"
+#include "scripts/UnityEngine.CoreModule/UnityEngine/ResourcesAPIInternal.hpp"
 #include "scripts/mscorlib/System/ValueTuple.hpp"
 
 #include "config/config.hpp"
@@ -19,19 +19,19 @@ namespace
 {
 	Il2CppClass* DialogLiveStartConfirm_klass = nullptr;
 
-	void* DialogLiveStartConfirm_Setup_addr = nullptr;
+	Il2CppMethodPointer DialogLiveStartConfirm_Setup_addr = nullptr;
 	void* DialogLiveStartConfirm_Setup_orig = nullptr;
 
-	void* DialogLiveStartConfirm_SetupToggle_addr = nullptr;
+	Il2CppMethodPointer DialogLiveStartConfirm_SetupToggle_addr = nullptr;
 	void* DialogLiveStartConfirm_SetupToggle_orig = nullptr;
 
-	void* DialogLiveStartConfirm_OnClickOK_addr = nullptr;
+	Il2CppMethodPointer DialogLiveStartConfirm_OnClickOK_addr = nullptr;
 	void* DialogLiveStartConfirm_OnClickOK_orig = nullptr;
 
-	void* DialogLiveStartConfirm_SendApi_addr = nullptr;
+	Il2CppMethodPointer DialogLiveStartConfirm_SendApi_addr = nullptr;
 	void* DialogLiveStartConfirm_SendApi_orig = nullptr;
 
-	void* DialogLiveStartConfirm_PushDialog_addr = nullptr;
+	Il2CppMethodPointer DialogLiveStartConfirm_PushDialog_addr = nullptr;
 	void* DialogLiveStartConfirm_PushDialog_orig = nullptr;
 
 	FieldInfo* DialogLiveStartConfirm__icon = nullptr;
@@ -50,7 +50,7 @@ static void DialogLiveStartConfirm_SetupToggle_hook(Il2CppObject* self)
 		if (Gallop::Live::Master3dLive(_musicId).LiveData().ScreenMode() > 0 || config::runtime::LiveStartSettingIsOrientationFullPortrait.value_or(false))
 		{
 			auto _toggleOrientationFullPortrait = RadioButtonFullPortrait.GetComponent(GetRuntimeType(ASSEMBLY_NAME, "Gallop", "ToggleCommon"));
-			il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, bool)>(_toggleOrientationFullPortrait->klass, "set_isOn", 1)->methodPointer(_toggleOrientationFullPortrait, true);
+			il2cpp_symbols::get_method_pointer<void (*)(Il2CppObject*, bool)>(_toggleOrientationFullPortrait->klass, "set_isOn", 1)(_toggleOrientationFullPortrait, true);
 			return;
 		}
 	}
@@ -64,7 +64,7 @@ static void DialogLiveStartConfirm_OnClickOK_hook(Il2CppObject* self)
 	if (RadioButtonFullPortrait)
 	{
 		auto _toggleOrientationFullPortrait = RadioButtonFullPortrait.GetComponent(GetRuntimeType(ASSEMBLY_NAME, "Gallop", "ToggleCommon"));
-		bool isOn = il2cpp_class_get_method_from_name_type<bool (*)(Il2CppObject*)>(_toggleOrientationFullPortrait->klass, "get_isOn", 0)->methodPointer(_toggleOrientationFullPortrait);
+		bool isOn = il2cpp_symbols::get_method_pointer<bool (*)(Il2CppObject*)>(_toggleOrientationFullPortrait->klass, "get_isOn", 0)(_toggleOrientationFullPortrait);
 
 		if (isOn)
 		{
@@ -84,7 +84,7 @@ static void DialogLiveStartConfirm_SendApi_hook(Il2CppObject* self, Il2CppDelega
 	if (RadioButtonFullPortrait)
 	{
 		auto _toggleOrientationFullPortrait = RadioButtonFullPortrait.GetComponent(GetRuntimeType(ASSEMBLY_NAME, "Gallop", "ToggleCommon"));
-		bool isOn = il2cpp_class_get_method_from_name_type<bool (*)(Il2CppObject*)>(_toggleOrientationFullPortrait->klass, "get_isOn", 0)->methodPointer(_toggleOrientationFullPortrait);
+		bool isOn = il2cpp_symbols::get_method_pointer<bool (*)(Il2CppObject*)>(_toggleOrientationFullPortrait->klass, "get_isOn", 0)(_toggleOrientationFullPortrait);
 
 		if (isOn)
 		{
@@ -153,14 +153,14 @@ namespace Gallop
 		Il2CppObject* _icon;
 		il2cpp_field_get_value(instance, DialogLiveStartConfirm__icon, &_icon);
 
-		auto jacketTexture = reinterpret_cast<Il2CppObject * (*)(Il2CppString*, uint32_t, const MethodInfo*)>(LoadOnView->methodPointer)(jacketPath, 0, LoadOnView);
-		il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, Il2CppObject*)>(_icon->klass, "set_texture", 1)->methodPointer(_icon, jacketTexture);
+		auto jacketTexture = reinterpret_cast<Il2CppObject * (*)(Il2CppString*, uint32_t, const MethodInfo*)>(il2cpp_symbols::get_method_pointer(LoadOnView))(jacketPath, 0, LoadOnView);
+		il2cpp_symbols::get_method_pointer<void (*)(Il2CppObject*, Il2CppObject*)>(_icon->klass, "set_texture", 1)(_icon, jacketTexture);
 
 		Il2CppObject* _name;
 		il2cpp_field_get_value(instance, DialogLiveStartConfirm__name, &_name);
 
 		auto masterLiveTitle = il2cpp_symbols::get_method_pointer<Il2CppString * (*)(uint64_t, int)>(ASSEMBLY_NAME, "Gallop", "TextUtil", "GetMasterText", 2)(GetEnumValue(ParseEnum(GetRuntimeType(ASSEMBLY_NAME, "Gallop", "MasterString/Category"), IL2CPP_STRING("MasterLiveTitle"))), musicId);
-		il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, Il2CppString*)>(_name->klass, "set_text", 1)->methodPointer(_name, masterLiveTitle);
+		il2cpp_symbols::get_method_pointer<void (*)(Il2CppObject*, Il2CppString*)>(_name->klass, "set_text", 1)(_name, masterLiveTitle);
 
 		SetupToggle();
 	}
@@ -183,11 +183,11 @@ namespace Gallop
 	void DialogLiveStartConfirm::PushDialog(int musicId, bool isSendApi, Il2CppDelegate* onDecide)
 	{
 		UnityEngine::GameObject gameObject = UnityEngine::Object::Internal_CloneSingle(UnityEngine::ResourcesAPIInternal::Load(il2cpp_string_new("UI/Parts/Live/DialogLiveStartConfirm"), GetRuntimeType("UnityEngine.CoreModule.dll", "UnityEngine", "GameObject")));
-		
-		try
+
+		if (IsTextIdDefined(IL2CPP_STRING("Live6620008")))
 		{
 			auto Live6620008 = GetTextIdByName(IL2CPP_STRING("Live6620008"));
-		
+
 			auto radioRootTransform = gameObject.transform().Find(il2cpp_string_new("orientation_radio_root"));
 
 			if (radioRootTransform)
@@ -203,20 +203,16 @@ namespace Gallop
 
 				UnityEngine::Object::DestroyImmediate(radioRootTransform.gameObject().GetComponent(GetRuntimeType("UnityEngine.UI.dll", "UnityEngine.UI", "HorizontalLayoutGroup")));
 				auto gridLayoutGroup = radioRootTransform.gameObject().AddComponent(GetRuntimeType("UnityEngine.UI.dll", "UnityEngine.UI", "GridLayoutGroup"));
-				il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, int)>(gridLayoutGroup->klass, "set_childAlignment", 1)->methodPointer(gridLayoutGroup, 0);
-				il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, int)>(gridLayoutGroup->klass, "set_constraintCount", 1)->methodPointer(gridLayoutGroup, 2);
-				il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, UnityEngine::Vector2)>(gridLayoutGroup->klass, "set_cellSize", 1)->methodPointer(gridLayoutGroup, UnityEngine::Vector2{ 400, 50 });
-				il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, UnityEngine::Vector2)>(gridLayoutGroup->klass, "set_spacing", 1)->methodPointer(gridLayoutGroup, UnityEngine::Vector2{ 34, 32 });
+				il2cpp_symbols::get_method_pointer<void (*)(Il2CppObject*, int)>(gridLayoutGroup->klass, "set_childAlignment", 1)(gridLayoutGroup, 0);
+				il2cpp_symbols::get_method_pointer<void (*)(Il2CppObject*, int)>(gridLayoutGroup->klass, "set_constraintCount", 1)(gridLayoutGroup, 2);
+				il2cpp_symbols::get_method_pointer<void (*)(Il2CppObject*, UnityEngine::Vector2)>(gridLayoutGroup->klass, "set_cellSize", 1)(gridLayoutGroup, UnityEngine::Vector2{ 400, 50 });
+				il2cpp_symbols::get_method_pointer<void (*)(Il2CppObject*, UnityEngine::Vector2)>(gridLayoutGroup->klass, "set_spacing", 1)(gridLayoutGroup, UnityEngine::Vector2{ 34, 32 });
 
-				auto padding = il2cpp_class_get_method_from_name_type<Il2CppObject * (*)(Il2CppObject*)>(gridLayoutGroup->klass, "get_padding", 0)->methodPointer(gridLayoutGroup);
-				il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, int)>(padding->klass, "set_left", 1)->methodPointer(padding, 48);
+				auto padding = il2cpp_symbols::get_method_pointer<Il2CppObject * (*)(Il2CppObject*)>(gridLayoutGroup->klass, "get_padding", 0)(gridLayoutGroup);
+				il2cpp_symbols::get_method_pointer<void (*)(Il2CppObject*, int)>(padding->klass, "set_left", 1)(padding, 48);
 			}
 		}
-		catch (const Il2CppExceptionWrapper& ex)
-		{
-			wcout << ex.ex->message->chars << endl;
-		}
-		
+
 		DialogLiveStartConfirm dialogContent = gameObject.GetComponent(GetRuntimeType(DialogLiveStartConfirm_klass));
 		dialogContent.Setup(musicId, isSendApi);
 

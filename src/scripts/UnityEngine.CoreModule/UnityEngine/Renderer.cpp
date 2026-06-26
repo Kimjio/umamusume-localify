@@ -6,28 +6,22 @@
 
 namespace
 {
-	void* Renderer_GetMaterial_addr = nullptr;
-	void* Renderer_GetMaterial_orig = nullptr;
+	Il2CppMethodPointer Renderer_GetMaterial_addr = nullptr;
 
-	void* Renderer_GetSharedMaterial_addr = nullptr;
-	void* Renderer_GetSharedMaterial_orig = nullptr;
+	Il2CppMethodPointer Renderer_GetSharedMaterial_addr = nullptr;
 
-	void* Renderer_SetMaterial_addr = nullptr;
-	void* Renderer_SetMaterial_orig = nullptr;
+	Il2CppMethodPointer Renderer_SetMaterial_addr = nullptr;
 
-	void* Renderer_GetMaterialArray_addr = nullptr;
-	void* Renderer_GetMaterialArray_orig = nullptr;
+	Il2CppMethodPointer Renderer_GetMaterialArray_addr = nullptr;
 
-	void* Renderer_SetMaterialArray_addr = nullptr;
-	void* Renderer_SetMaterialArray_orig = nullptr;
+	Il2CppMethodPointer Renderer_SetMaterialArray_addr = nullptr;
 
-	void* Renderer_GetSharedMaterialArray_addr = nullptr;
-	void* Renderer_GetSharedMaterialArray_orig = nullptr;
+	Il2CppMethodPointer Renderer_GetSharedMaterialArray_addr = nullptr;
 }
 
 static Il2CppObject* Renderer_GetMaterial_hook(Il2CppObject* self)
 {
-	auto material = reinterpret_cast<decltype(Renderer_GetMaterial_hook)*>(Renderer_GetMaterial_orig)(self);
+	auto material = reinterpret_cast<decltype(Renderer_GetMaterial_hook)*>(Renderer_GetMaterial_addr)(self);
 	if (material)
 	{
 		ReplaceMaterialTexture(material);
@@ -37,7 +31,7 @@ static Il2CppObject* Renderer_GetMaterial_hook(Il2CppObject* self)
 
 static Il2CppArraySize_t<Il2CppObject*>* Renderer_GetMaterialArray_hook(Il2CppObject* self)
 {
-	auto materials = reinterpret_cast<decltype(Renderer_GetMaterialArray_hook)*>(Renderer_GetMaterialArray_orig)(self);
+	auto materials = reinterpret_cast<decltype(Renderer_GetMaterialArray_hook)*>(Renderer_GetMaterialArray_addr)(self);
 	for (int i = 0; i < materials->max_length; i++)
 	{
 		auto material = materials->vector[i];
@@ -51,7 +45,7 @@ static Il2CppArraySize_t<Il2CppObject*>* Renderer_GetMaterialArray_hook(Il2CppOb
 
 static Il2CppObject* Renderer_GetSharedMaterial_hook(Il2CppObject* self)
 {
-	auto material = reinterpret_cast<decltype(Renderer_GetSharedMaterial_hook)*>(Renderer_GetSharedMaterial_orig)(self);
+	auto material = reinterpret_cast<decltype(Renderer_GetSharedMaterial_hook)*>(Renderer_GetSharedMaterial_addr)(self);
 	if (material)
 	{
 		ReplaceMaterialTexture(material);
@@ -61,7 +55,7 @@ static Il2CppObject* Renderer_GetSharedMaterial_hook(Il2CppObject* self)
 
 static Il2CppArraySize_t<Il2CppObject*>* Renderer_GetSharedMaterialArray_hook(Il2CppObject* self)
 {
-	auto materials = reinterpret_cast<decltype(Renderer_GetSharedMaterialArray_hook)*>(Renderer_GetSharedMaterialArray_orig)(self);
+	auto materials = reinterpret_cast<decltype(Renderer_GetSharedMaterialArray_hook)*>(Renderer_GetSharedMaterialArray_addr)(self);
 	for (int i = 0; i < materials->max_length; i++)
 	{
 		auto material = materials->vector[i];
@@ -79,7 +73,7 @@ static void Renderer_SetMaterial_hook(Il2CppObject* self, Il2CppObject* material
 	{
 		ReplaceMaterialTexture(material);
 	}
-	reinterpret_cast<decltype(Renderer_SetMaterial_hook)*>(Renderer_SetMaterial_orig)(self, material);
+	reinterpret_cast<decltype(Renderer_SetMaterial_hook)*>(Renderer_SetMaterial_addr)(self, material);
 }
 
 static void Renderer_SetMaterialArray_hook(Il2CppObject* self, Il2CppArraySize* materials, int length)
@@ -92,29 +86,29 @@ static void Renderer_SetMaterialArray_hook(Il2CppObject* self, Il2CppArraySize* 
 			ReplaceMaterialTexture(material);
 		}
 	}
-	reinterpret_cast<decltype(Renderer_SetMaterialArray_hook)*>(Renderer_SetMaterialArray_orig)(self, materials, length);
+	reinterpret_cast<decltype(Renderer_SetMaterialArray_hook)*>(Renderer_SetMaterialArray_addr)(self, materials, length);
 }
 
 static void InitAddress()
 {
-	Renderer_GetMaterial_addr = il2cpp_resolve_icall("UnityEngine.Renderer::GetMaterial()");
-	Renderer_GetSharedMaterial_addr = il2cpp_resolve_icall("UnityEngine.Renderer::GetSharedMaterial()");
+	Renderer_GetMaterial_addr = il2cpp_resolve_icall("UnityEngine.Renderer::GetMaterial");
+	Renderer_GetSharedMaterial_addr = il2cpp_resolve_icall("UnityEngine.Renderer::GetSharedMaterial");
 	Renderer_SetMaterial_addr = il2cpp_resolve_icall("UnityEngine.Renderer::SetMaterial(UnityEngine.Material)");
-	Renderer_GetMaterialArray_addr = il2cpp_resolve_icall("UnityEngine.Renderer::GetMaterialArray()");
+	Renderer_GetMaterialArray_addr = il2cpp_resolve_icall("UnityEngine.Renderer::GetMaterialArray");
 	Renderer_SetMaterialArray_addr = il2cpp_resolve_icall("UnityEngine.Renderer::SetMaterialArray(UnityEngine.Material[])");
-	Renderer_GetSharedMaterialArray_addr = il2cpp_resolve_icall("UnityEngine.Renderer::GetSharedMaterialArray()");
+	Renderer_GetSharedMaterialArray_addr = il2cpp_resolve_icall("UnityEngine.Renderer::GetSharedMaterialArray");
 }
 
 static void HookMethods()
 {
 	if (!config::replace_assetbundle_file_paths.empty())
 	{
-		ADD_HOOK(Renderer_GetMaterial, "UnityEngine.Renderer::GetMaterial at %p\n");
-		ADD_HOOK(Renderer_GetSharedMaterial, "UnityEngine.Renderer::GetSharedMaterial at %p\n");
-		ADD_HOOK(Renderer_SetMaterial, "UnityEngine.Renderer::SetMaterial at %p\n");
-		ADD_HOOK(Renderer_GetMaterialArray, "UnityEngine.Renderer::GetMaterialArray at %p\n");
-		ADD_HOOK(Renderer_SetMaterialArray, "UnityEngine.Renderer::SetMaterialArray at %p\n");
-		ADD_HOOK(Renderer_GetSharedMaterialArray, "UnityEngine.Renderer::GetSharedMaterialArray at %p\n");
+		il2cpp_add_internal_call("UnityEngine.Renderer::GetMaterial", reinterpret_cast<Il2CppMethodPointer>(Renderer_GetMaterial_hook));
+		il2cpp_add_internal_call("UnityEngine.Renderer::GetSharedMaterial", reinterpret_cast<Il2CppMethodPointer>(Renderer_GetSharedMaterial_hook));
+		il2cpp_add_internal_call("UnityEngine.Renderer::SetMaterial", reinterpret_cast<Il2CppMethodPointer>(Renderer_SetMaterial_hook));
+		il2cpp_add_internal_call("UnityEngine.Renderer::GetMaterialArray", reinterpret_cast<Il2CppMethodPointer>(Renderer_GetMaterialArray_hook));
+		il2cpp_add_internal_call("UnityEngine.Renderer::SetMaterialArray", reinterpret_cast<Il2CppMethodPointer>(Renderer_SetMaterialArray_hook));
+		il2cpp_add_internal_call("UnityEngine.Renderer::GetSharedMaterialArray", reinterpret_cast<Il2CppMethodPointer>(Renderer_GetSharedMaterialArray_hook));
 	}
 }
 

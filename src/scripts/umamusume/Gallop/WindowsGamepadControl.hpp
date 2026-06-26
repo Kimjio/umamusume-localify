@@ -1,3 +1,4 @@
+#ifdef _MSC_VER
 #pragma once
 #include "MonoSingleton.hpp"
 
@@ -37,3 +38,4 @@ namespace Gallop
 		static const char* klassNameLegacy;
 	};
 }
+#endif

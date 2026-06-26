@@ -8,26 +8,26 @@
 
 namespace
 {
-	void* get_width_addr = nullptr;
+	Il2CppMethodPointer get_width_addr = nullptr;
 
-	void* get_height_addr = nullptr;
+	Il2CppMethodPointer get_height_addr = nullptr;
 
-	void* get_fullScreen_addr = nullptr;
+	Il2CppMethodPointer get_fullScreen_addr = nullptr;
 
-	void* get_currentResolution_Injected_addr = nullptr;
+	Il2CppMethodPointer get_currentResolution_Injected_addr = nullptr;
 
-	void* RequestOrientation_addr = nullptr;
-	void* RequestOrientation_orig = nullptr;
+    Il2CppMethodPointer SetOrientationEnabled_addr = nullptr;
 
-	void* SetResolution_Injected_addr = nullptr;
-	void* SetResolution_Injected_orig = nullptr;
+	Il2CppMethodPointer RequestOrientation_addr = nullptr;
+
+	Il2CppMethodPointer SetResolution_Injected_addr = nullptr;
 }
 
 static void RequestOrientation_hook(UnityEngine::ScreenOrientation orientation)
 {
 	if (config::freeform_window)
 	{
-		reinterpret_cast<decltype(RequestOrientation_hook)*>(RequestOrientation_orig)(UnityEngine::ScreenOrientation::AutoRotation);
+		reinterpret_cast<decltype(RequestOrientation_hook)*>(RequestOrientation_addr)(UnityEngine::ScreenOrientation::AutoRotation);
 #ifdef _MSC_VER
 		auto hWnd = GetHWND();
 
@@ -38,14 +38,13 @@ static void RequestOrientation_hook(UnityEngine::ScreenOrientation orientation)
 	}
 	else
 	{
-		reinterpret_cast<decltype(RequestOrientation_hook)*>(RequestOrientation_orig)(orientation);
+		reinterpret_cast<decltype(RequestOrientation_hook)*>(RequestOrientation_addr)(orientation);
 	}
 }
 
-
-
 void SetResolution_Injected_hook(int width, int height, int fullscreenMode, UnityEngine::RefreshRate* perferredRefreshRate)
 {
+#ifdef _MSC_VER
 	if (width < 72)
 	{
 		if (Gallop::StandaloneWindowResize::IsVirt())
@@ -81,30 +80,33 @@ void SetResolution_Injected_hook(int width, int height, int fullscreenMode, Unit
 		Gallop::StandaloneWindowResize::IsPreventReShape(true);
 		return;
 	}
+#endif
 
-	reinterpret_cast<decltype(SetResolution_Injected_hook)*>(SetResolution_Injected_orig)(width, height, fullscreenMode, perferredRefreshRate);
+    PrintStackTrace();
+	reinterpret_cast<decltype(SetResolution_Injected_hook)*>(SetResolution_Injected_addr)(width, height, fullscreenMode, perferredRefreshRate);
 }
 
 static void InitAddress()
 {
-	get_width_addr = il2cpp_resolve_icall("UnityEngine.Screen::get_width()");
-	get_height_addr = il2cpp_resolve_icall("UnityEngine.Screen::get_height()");
-	get_fullScreen_addr = il2cpp_resolve_icall("UnityEngine.Screen::get_fullScreen()");
-	get_currentResolution_Injected_addr = il2cpp_resolve_icall("UnityEngine.Screen::get_currentResolution_Injected(UnityEngine.Resolution&)");
-	RequestOrientation_addr = il2cpp_resolve_icall("UnityEngine.Screen::RequestOrientation()");
-	SetResolution_Injected_addr = il2cpp_resolve_icall("UnityEngine.Screen::SetResolution_Injected(System.Int32,System.Int32,UnityEngine.FullScreenMode,UnityEngine.RefreshRate)");
+	get_width_addr = il2cpp_resolve_icall("UnityEngine.Screen::get_width");
+	get_height_addr = il2cpp_resolve_icall("UnityEngine.Screen::get_height");
+	get_fullScreen_addr = il2cpp_resolve_icall("UnityEngine.Screen::get_fullScreen");
+	get_currentResolution_Injected_addr = il2cpp_resolve_icall("UnityEngine.Screen::get_currentResolution_Injected");
+	RequestOrientation_addr = il2cpp_resolve_icall("UnityEngine.Screen::RequestOrientation");
+    SetOrientationEnabled_addr = il2cpp_resolve_icall("UnityEngine.Screen::SetOrientationEnabled");
+	SetResolution_Injected_addr = il2cpp_resolve_icall("UnityEngine.Screen::SetResolution_Injected");
 }
 
 static void HookMethods()
 {
 	if (config::freeform_window)
 	{
-		ADD_HOOK(RequestOrientation, "UnityEngine.Screen::RequestOrientation at %p\n");
+		il2cpp_add_internal_call("UnityEngine.Screen::RequestOrientation", reinterpret_cast<Il2CppMethodPointer>(RequestOrientation_hook));
 	}
 
 	if (config::unlock_size || config::freeform_window)
 	{
-		ADD_HOOK(SetResolution_Injected, "UnityEngine.Screen.SetResolution_Injected(int, int, FullScreenMode, RefreshRate) at %p\n");
+		il2cpp_add_internal_call("UnityEngine.Screen.SetResolution_Injected", reinterpret_cast<Il2CppMethodPointer>(SetResolution_Injected_hook));
 	}
 }
 
@@ -134,21 +136,42 @@ namespace UnityEngine
 	Resolution Screen::currentResolution()
 	{
 		Resolution resolution;
-		reinterpret_cast<void (*)(UnityEngine::Resolution*)>(get_currentResolution_Injected_addr)(&resolution);
+		reinterpret_cast<void (*)(Resolution*)>(get_currentResolution_Injected_addr)(&resolution);
 		return resolution;
+	}
+
+    void Screen::SetOrientationEnabled(EnabledOrientation orient, bool enabled)
+    {
+        reinterpret_cast<decltype(SetOrientationEnabled)*>(SetOrientationEnabled_addr)(orient, enabled);
+    }
+
+    void Screen::autorotateToPortrait(bool value)
+    {
+        SetOrientationEnabled(EnabledOrientation::kAutorotateToPortrait, value);
+    }
+
+	void Screen::autorotateToPortraitUpsideDown(bool value)
+	{
+		SetOrientationEnabled(EnabledOrientation::kAutorotateToPortraitUpsideDown, value);
+	}
+
+    void Screen::autorotateToLandscapeLeft(bool value)
+	{
+        SetOrientationEnabled(EnabledOrientation::kAutorotateToLandscapeLeft, value);
+	}
+
+	void Screen::autorotateToLandscapeRight(bool value)
+	{
+        SetOrientationEnabled(EnabledOrientation::kAutorotateToLandscapeRight, value);
 	}
 	
 	void Screen::RequestOrientation(ScreenOrientation orientation)
 	{
-		return reinterpret_cast<decltype(RequestOrientation)*>(RequestOrientation_addr)(orientation);
+		reinterpret_cast<decltype(RequestOrientation)*>(RequestOrientation_addr)(orientation);
 	}
 
 	void Screen::SetResolution_Injected(int width, int height, UnityEngine::FullScreenMode fullscreenMode, UnityEngine::RefreshRate* perferredRefreshRate)
 	{
-		if (SetResolution_Injected_orig)
-		{
-			return reinterpret_cast<decltype(SetResolution_Injected)*>(SetResolution_Injected_orig)(width, height, fullscreenMode, perferredRefreshRate);
-		}
-		return reinterpret_cast<decltype(SetResolution_Injected)*>(SetResolution_Injected_addr)(width, height, fullscreenMode, perferredRefreshRate);
+		reinterpret_cast<decltype(SetResolution_Injected)*>(SetResolution_Injected_addr)(width, height, fullscreenMode, perferredRefreshRate);
 	}
 }

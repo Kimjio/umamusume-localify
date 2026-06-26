@@ -10,10 +10,10 @@ namespace
 {
 	Il2CppClass* CollectRaidBgCutinHelper_klass = nullptr;
 
-	void* CollectRaidBgCutinHelper_InstantiateTimeline_addr = nullptr;
+	Il2CppMethodPointer CollectRaidBgCutinHelper_InstantiateTimeline_addr = nullptr;
 	void* CollectRaidBgCutinHelper_InstantiateTimeline_orig = nullptr;
 
-	void* CollectRaidBgCutinHelper_InstantiateTimeline4_addr = nullptr;
+	Il2CppMethodPointer CollectRaidBgCutinHelper_InstantiateTimeline4_addr = nullptr;
 	void* CollectRaidBgCutinHelper_InstantiateTimeline4_orig = nullptr;
 }
 
@@ -66,7 +66,7 @@ static void InitAddress()
 
 		if (CollectRaidBgCutinHelper_InstantiateTimeline->klass == CollectRaidBgCutinHelper_klass)
 		{
-			CollectRaidBgCutinHelper_InstantiateTimeline_addr = CollectRaidBgCutinHelper_InstantiateTimeline->methodPointer;
+			CollectRaidBgCutinHelper_InstantiateTimeline_addr = il2cpp_symbols::get_method_pointer(CollectRaidBgCutinHelper_InstantiateTimeline);
 		}
 
 		CollectRaidBgCutinHelper_InstantiateTimeline4_addr = il2cpp_symbols::get_method_pointer(CollectRaidBgCutinHelper_klass, "InstantiateTimeline", 4);

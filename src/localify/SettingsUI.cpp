@@ -1,14 +1,19 @@
 #include "SettingsUI.hpp"
 
+#include <algorithm>
 #include <vector>
 #include <string>
 #include <sstream>
-#include <algorithm>
 #include <iomanip>
+
+#ifdef _MSC_VER
+#include <Shlwapi.h>
 #include <Shlobj.h>
 #include <ShObjIdl.h>
 #include <wrl.h>
 #include <wil/com.h>
+#include "notification/DesktopNotificationManagerCompat.h"
+#endif
 
 #include "UIParts.hpp"
 #include "NotificationManager.hpp"
@@ -16,8 +21,6 @@
 #include "scripts/ScriptInternal.hpp"
 #include "string_utils.hpp"
 #include "settings_text.hpp"
-
-#include "notification/DesktopNotificationManagerCompat.h"
 
 #include "scripts/UnityEngine.CoreModule/UnityEngine/Application.hpp"
 #include "scripts/UnityEngine.CoreModule/UnityEngine/Color.hpp"
@@ -29,12 +32,17 @@
 #include "scripts/umamusume/Gallop/UIManager.hpp"
 #include "scripts/umamusume/Gallop/Localize.hpp"
 
+#ifdef _MSC_VER
 #include "openxr/openxr.hpp"
+#endif
 
 #include "msgpack/msgpack_data.hpp"
 
 using namespace std;
+
+#ifdef _MSC_VER
 using namespace Microsoft::WRL;
+#endif
 
 namespace Localify
 {
@@ -151,6 +159,7 @@ namespace Localify
 		}
 	}
 
+#ifdef _MSC_VER
 	// FolderOpen helpers
 	class CDialogEventHandler : public IFileDialogEvents
 	{
@@ -236,6 +245,7 @@ namespace Localify
 		}
 		return pszFilePath;
 	}
+#endif
 
 	void SettingsUI::OpenSelectOption(const Il2CppChar* title, vector<string> options, int selectedIndex, function<void(int)> optionSelected, function<void(string, il2cppstring)> optionStyle)
 	{
@@ -254,48 +264,48 @@ namespace Localify
 
 		auto gameObject = UnityEngine::GameObject();
 		UnityEngine::RectTransform rootTransform = gameObject.AddComponent(GetRuntimeType("UnityEngine.CoreModule.dll", "UnityEngine", "RectTransform"));
-		rootTransform.sizeDelta({ 0, 0 });
-		rootTransform.anchorMax({ 1, 1 });
-		rootTransform.anchorMin({ 0, 0 });
-		rootTransform.pivot({ 0.5, 0.5 });
-		rootTransform.anchoredPosition({ 0, 0 });
+		rootTransform.sizeDelta({ .x=0, .y=0 });
+		rootTransform.anchorMax({ .x=1, .y=1 });
+		rootTransform.anchorMin({ .x=0, .y=0 });
+		rootTransform.pivot({ .x=0.5, .y=0.5 });
+		rootTransform.anchoredPosition({ .x=0, .y=0 });
 
 		UnityEngine::GameObject scrollViewBase = UnityEngine::ResourcesAPIInternal::Load(il2cpp_string_new("ui/parts/base/scrollviewbase"), GetRuntimeType("UnityEngine.CoreModule.dll", "UnityEngine", "GameObject"));
 		Il2CppObject* _mainCanvas = Gallop::UIManager::Instance()._mainCanvas();
-		auto transform = il2cpp_class_get_method_from_name_type<Il2CppObject * (*)(Il2CppObject*)>(_mainCanvas->klass, "get_transform", 0)->methodPointer(_mainCanvas);
+		auto transform = il2cpp_symbols::get_method_pointer<Il2CppObject * (*)(Il2CppObject*)>(_mainCanvas->klass, "get_transform", 0)(_mainCanvas);
 		scrollViewBase = UnityEngine::Object::Internal_CloneSingleWithParent(scrollViewBase, transform, false);
 
 		auto scrollRect = scrollViewBase.GetComponentsInChildren(GetRuntimeType("umamusume.dll", "Gallop", "ScrollRectCommon"), false)->vector[0];
 		auto m_ViewportField = il2cpp_class_get_field_from_name(scrollRect->klass, "m_Viewport");
 		Il2CppObject* m_Viewport;
 		il2cpp_field_get_value(scrollRect, m_ViewportField, &m_Viewport);
-		UnityEngine::RectTransform scrollRectTransform = il2cpp_class_get_method_from_name_type<Il2CppObject * (*)(Il2CppObject*)>(m_Viewport->klass, "get_parent", 0)->methodPointer(m_Viewport);
-		scrollRectTransform.sizeDelta({ -24, -12 });
-		scrollRectTransform.anchorMax({ 1, 1 });
-		scrollRectTransform.anchorMin({ 0, 0 });
-		scrollRectTransform.pivot({ 0.5, 0.5 });
-		scrollRectTransform.anchoredPosition({ 0, -6 });
+		UnityEngine::RectTransform scrollRectTransform = il2cpp_symbols::get_method_pointer<Il2CppObject * (*)(Il2CppObject*)>(m_Viewport->klass, "get_parent", 0)(m_Viewport);
+		scrollRectTransform.sizeDelta({ .x=-24, .y=-12 });
+		scrollRectTransform.anchorMax({ .x=1, .y=1 });
+		scrollRectTransform.anchorMin({ .x=0, .y=0 });
+		scrollRectTransform.pivot({ .x=0.5, .y=0.5 });
+		scrollRectTransform.anchoredPosition({ .x=0, .y=-6 });
 		scrollRectTransform.SetParent(rootTransform, false);
 
 		auto m_ContentField = il2cpp_class_get_field_from_name(scrollRect->klass, "m_Content");
 		Il2CppObject* m_Content;
 		il2cpp_field_get_value(scrollRect, m_ContentField, &m_Content);
-		il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, UnityEngine::Vector2)>(m_Content->klass, "set_sizeDelta", 1)->methodPointer(m_Content, UnityEngine::Vector2{ 56, 150.0f * ceilf(options.size() / 2.0f) });
-		il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, UnityEngine::Vector2)>(m_Content->klass, "set_anchorMax", 1)->methodPointer(m_Content, UnityEngine::Vector2{ 1, 1 });
-		il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, UnityEngine::Vector2)>(m_Content->klass, "set_anchorMin", 1)->methodPointer(m_Content, UnityEngine::Vector2{ 0, 1 });
-		il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, UnityEngine::Vector2)>(m_Content->klass, "set_pivot", 1)->methodPointer(m_Content, UnityEngine::Vector2{ 0.5, 1 });
-		il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, UnityEngine::Vector2)>(m_Content->klass, "set_anchoredPosition", 1)->methodPointer(m_Content, UnityEngine::Vector2{ 0, 0 });
+		il2cpp_symbols::get_method_pointer<void (*)(Il2CppObject*, UnityEngine::Vector2)>(m_Content->klass, "set_sizeDelta", 1)(m_Content, UnityEngine::Vector2{ .x=56, .y=150.0f * ceilf(options.size() / 2.0f) });
+		il2cpp_symbols::get_method_pointer<void (*)(Il2CppObject*, UnityEngine::Vector2)>(m_Content->klass, "set_anchorMax", 1)(m_Content, UnityEngine::Vector2{ .x=1, .y=1 });
+		il2cpp_symbols::get_method_pointer<void (*)(Il2CppObject*, UnityEngine::Vector2)>(m_Content->klass, "set_anchorMin", 1)(m_Content, UnityEngine::Vector2{ .x=0, .y=1 });
+		il2cpp_symbols::get_method_pointer<void (*)(Il2CppObject*, UnityEngine::Vector2)>(m_Content->klass, "set_pivot", 1)(m_Content, UnityEngine::Vector2{ .x=0.5, .y=1 });
+		il2cpp_symbols::get_method_pointer<void (*)(Il2CppObject*, UnityEngine::Vector2)>(m_Content->klass, "set_anchoredPosition", 1)(m_Content, UnityEngine::Vector2{ .x=0, .y=0 });
 
-		UnityEngine::GameObject contentGameObject = il2cpp_class_get_method_from_name_type<Il2CppObject * (*)(Il2CppObject*)>(m_Content->klass, "get_gameObject", 0)->methodPointer(m_Content);
+		UnityEngine::GameObject contentGameObject = il2cpp_symbols::get_method_pointer<Il2CppObject * (*)(Il2CppObject*)>(m_Content->klass, "get_gameObject", 0)(m_Content);
 		auto gridLayoutGroup = contentGameObject.AddComponent(GetRuntimeType("UnityEngine.UI.dll", "UnityEngine.UI", "GridLayoutGroup"));
-		il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, int)>(gridLayoutGroup->klass, "set_childAlignment", 1)->methodPointer(gridLayoutGroup, 0);
-		il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, int)>(gridLayoutGroup->klass, "set_constraintCount", 1)->methodPointer(gridLayoutGroup, 2);
-		il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, UnityEngine::Vector2)>(gridLayoutGroup->klass, "set_cellSize", 1)->methodPointer(gridLayoutGroup, UnityEngine::Vector2{ 400, 100 });
-		il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, UnityEngine::Vector2)>(gridLayoutGroup->klass, "set_spacing", 1)->methodPointer(gridLayoutGroup, UnityEngine::Vector2{ 34, 50 });
+		il2cpp_symbols::get_method_pointer<void (*)(Il2CppObject*, int)>(gridLayoutGroup->klass, "set_childAlignment", 1)(gridLayoutGroup, 0);
+		il2cpp_symbols::get_method_pointer<void (*)(Il2CppObject*, int)>(gridLayoutGroup->klass, "set_constraintCount", 1)(gridLayoutGroup, 2);
+		il2cpp_symbols::get_method_pointer<void (*)(Il2CppObject*, UnityEngine::Vector2)>(gridLayoutGroup->klass, "set_cellSize", 1)(gridLayoutGroup, UnityEngine::Vector2{ .x=400, .y=100 });
+		il2cpp_symbols::get_method_pointer<void (*)(Il2CppObject*, UnityEngine::Vector2)>(gridLayoutGroup->klass, "set_spacing", 1)(gridLayoutGroup, UnityEngine::Vector2{ .x=34, .y=50 });
 
-		auto padding = il2cpp_class_get_method_from_name_type<Il2CppObject * (*)(Il2CppObject*)>(gridLayoutGroup->klass, "get_padding", 0)->methodPointer(gridLayoutGroup);
-		il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, int)>(padding->klass, "set_top", 1)->methodPointer(padding, 26);
-		il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, int)>(padding->klass, "set_left", 1)->methodPointer(padding, 48);
+		auto padding = il2cpp_symbols::get_method_pointer<Il2CppObject * (*)(Il2CppObject*)>(gridLayoutGroup->klass, "get_padding", 0)(gridLayoutGroup);
+		il2cpp_symbols::get_method_pointer<void (*)(Il2CppObject*, int)>(padding->klass, "set_top", 1)(padding, 26);
+		il2cpp_symbols::get_method_pointer<void (*)(Il2CppObject*, int)>(padding->klass, "set_left", 1)(padding, 48);
 
 		auto toggleGroupCommon = contentGameObject.AddComponent(GetRuntimeType("umamusume.dll", "Gallop", "ToggleGroupCommon"));
 		UnityEngine::Object::Name(contentGameObject, il2cpp_string_new("option_toggle_group_content"));
@@ -316,9 +326,9 @@ namespace Localify
 			auto& option = options[i];
 			il2cpp_array_setref(toggleArray, i, UIParts::GetToggleCommon(("radio_"s + option).data()));
 		}
-		il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, Il2CppArraySize_t<Il2CppObject*>*)>(toggleGroupCommon->klass, "set_ToggleArray", 1)->methodPointer(toggleGroupCommon, toggleArray);
-		il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, int)>(toggleGroupCommon->klass, "SetToggleOnFromNumber", 1)->methodPointer(toggleGroupCommon, selectedIndex);
-		il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*)>(toggleGroupCommon->klass, "Awake", 0)->methodPointer(toggleGroupCommon);
+		il2cpp_symbols::get_method_pointer<void (*)(Il2CppObject*, Il2CppArraySize_t<Il2CppObject*>*)>(toggleGroupCommon->klass, "set_ToggleArray", 1)(toggleGroupCommon, toggleArray);
+		il2cpp_symbols::get_method_pointer<void (*)(Il2CppObject*, int)>(toggleGroupCommon->klass, "SetToggleOnFromNumber", 1)(toggleGroupCommon, selectedIndex);
+		il2cpp_symbols::get_method_pointer<void (*)(Il2CppObject*)>(toggleGroupCommon->klass, "Awake", 0)(toggleGroupCommon);
 
 		dialogData.ContentsObject(gameObject);
 		selectOptionDialog = Gallop::DialogManager::Instance().PushDialog(dialogData);
@@ -342,48 +352,48 @@ namespace Localify
 
 		auto gameObject = UnityEngine::GameObject();
 		UnityEngine::RectTransform rootTransform = gameObject.AddComponent(GetRuntimeType("UnityEngine.CoreModule.dll", "UnityEngine", "RectTransform"));
-		rootTransform.sizeDelta({ 0, 0 });
-		rootTransform.anchorMax({ 1, 1 });
-		rootTransform.anchorMin({ 0, 0 });
-		rootTransform.pivot({ 0.5, 0.5 });
-		rootTransform.anchoredPosition({ 0, 0 });
+		rootTransform.sizeDelta({ .x=0, .y=0 });
+		rootTransform.anchorMax({ .x=1, .y=1 });
+		rootTransform.anchorMin({ .x=0, .y=0 });
+		rootTransform.pivot({ .x=0.5, .y=0.5 });
+		rootTransform.anchoredPosition({ .x=0, .y=0 });
 
 		UnityEngine::GameObject scrollViewBase = UnityEngine::ResourcesAPIInternal::Load(il2cpp_string_new("ui/parts/base/scrollviewbase"), GetRuntimeType("UnityEngine.CoreModule.dll", "UnityEngine", "GameObject"));
 		Il2CppObject* _mainCanvas = Gallop::UIManager::Instance()._mainCanvas();
-		auto transform = il2cpp_class_get_method_from_name_type<Il2CppObject * (*)(Il2CppObject*)>(_mainCanvas->klass, "get_transform", 0)->methodPointer(_mainCanvas);
+		auto transform = il2cpp_symbols::get_method_pointer<Il2CppObject * (*)(Il2CppObject*)>(_mainCanvas->klass, "get_transform", 0)(_mainCanvas);
 		scrollViewBase = UnityEngine::Object::Internal_CloneSingleWithParent(scrollViewBase, transform, false);
 
 		auto scrollRect = scrollViewBase.GetComponentsInChildren(GetRuntimeType("umamusume.dll", "Gallop", "ScrollRectCommon"), false)->vector[0];
 		auto m_ViewportField = il2cpp_class_get_field_from_name(scrollRect->klass, "m_Viewport");
 		Il2CppObject* m_Viewport;
 		il2cpp_field_get_value(scrollRect, m_ViewportField, &m_Viewport);
-		UnityEngine::RectTransform scrollRectTransform = il2cpp_class_get_method_from_name_type<Il2CppObject * (*)(Il2CppObject*)>(m_Viewport->klass, "get_parent", 0)->methodPointer(m_Viewport);
-		scrollRectTransform.sizeDelta({ -24, -12 });
-		scrollRectTransform.anchorMax({ 1, 1 });
-		scrollRectTransform.anchorMin({ 0, 0 });
-		scrollRectTransform.pivot({ 0.5, 0.5 });
-		scrollRectTransform.anchoredPosition({ 0, -6 });
+		UnityEngine::RectTransform scrollRectTransform = il2cpp_symbols::get_method_pointer<Il2CppObject * (*)(Il2CppObject*)>(m_Viewport->klass, "get_parent", 0)(m_Viewport);
+		scrollRectTransform.sizeDelta({ .x=-24, .y=-12 });
+		scrollRectTransform.anchorMax({ .x=1, .y=1 });
+		scrollRectTransform.anchorMin({ .x=0, .y=0 });
+		scrollRectTransform.pivot({ .x=0.5, .y=0.5 });
+		scrollRectTransform.anchoredPosition({ .x=0, .y=-6 });
 		scrollRectTransform.SetParent(rootTransform, false);
 
 		auto m_ContentField = il2cpp_class_get_field_from_name(scrollRect->klass, "m_Content");
 		Il2CppObject* m_Content;
 		il2cpp_field_get_value(scrollRect, m_ContentField, &m_Content);
-		il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, UnityEngine::Vector2)>(m_Content->klass, "set_sizeDelta", 1)->methodPointer(m_Content, UnityEngine::Vector2{ 56, 150.0f * ceilf(options.size() / 2.0f) });
-		il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, UnityEngine::Vector2)>(m_Content->klass, "set_anchorMax", 1)->methodPointer(m_Content, UnityEngine::Vector2{ 1, 1 });
-		il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, UnityEngine::Vector2)>(m_Content->klass, "set_anchorMin", 1)->methodPointer(m_Content, UnityEngine::Vector2{ 0, 1 });
-		il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, UnityEngine::Vector2)>(m_Content->klass, "set_pivot", 1)->methodPointer(m_Content, UnityEngine::Vector2{ 0.5, 1 });
-		il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, UnityEngine::Vector2)>(m_Content->klass, "set_anchoredPosition", 1)->methodPointer(m_Content, UnityEngine::Vector2{ 0, 0 });
+		il2cpp_symbols::get_method_pointer<void (*)(Il2CppObject*, UnityEngine::Vector2)>(m_Content->klass, "set_sizeDelta", 1)(m_Content, UnityEngine::Vector2{ .x=56, .y=150.0f * ceilf(options.size() / 2.0f) });
+		il2cpp_symbols::get_method_pointer<void (*)(Il2CppObject*, UnityEngine::Vector2)>(m_Content->klass, "set_anchorMax", 1)(m_Content, UnityEngine::Vector2{ .x=1, .y=1 });
+		il2cpp_symbols::get_method_pointer<void (*)(Il2CppObject*, UnityEngine::Vector2)>(m_Content->klass, "set_anchorMin", 1)(m_Content, UnityEngine::Vector2{ .x=0, .y=1 });
+		il2cpp_symbols::get_method_pointer<void (*)(Il2CppObject*, UnityEngine::Vector2)>(m_Content->klass, "set_pivot", 1)(m_Content, UnityEngine::Vector2{ .x=0.5, .y=1 });
+		il2cpp_symbols::get_method_pointer<void (*)(Il2CppObject*, UnityEngine::Vector2)>(m_Content->klass, "set_anchoredPosition", 1)(m_Content, UnityEngine::Vector2{ .x=0, .y=0 });
 
-		UnityEngine::GameObject contentGameObject = il2cpp_class_get_method_from_name_type<Il2CppObject * (*)(Il2CppObject*)>(m_Content->klass, "get_gameObject", 0)->methodPointer(m_Content);
+		UnityEngine::GameObject contentGameObject = il2cpp_symbols::get_method_pointer<Il2CppObject * (*)(Il2CppObject*)>(m_Content->klass, "get_gameObject", 0)(m_Content);
 		auto gridLayoutGroup = contentGameObject.AddComponent(GetRuntimeType("UnityEngine.UI.dll", "UnityEngine.UI", "GridLayoutGroup"));
-		il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, int)>(gridLayoutGroup->klass, "set_childAlignment", 1)->methodPointer(gridLayoutGroup, 0);
-		il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, int)>(gridLayoutGroup->klass, "set_constraintCount", 1)->methodPointer(gridLayoutGroup, 2);
-		il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, UnityEngine::Vector2)>(gridLayoutGroup->klass, "set_cellSize", 1)->methodPointer(gridLayoutGroup, UnityEngine::Vector2{ 400, 100 });
-		il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, UnityEngine::Vector2)>(gridLayoutGroup->klass, "set_spacing", 1)->methodPointer(gridLayoutGroup, UnityEngine::Vector2{ 34, 50 });
+		il2cpp_symbols::get_method_pointer<void (*)(Il2CppObject*, int)>(gridLayoutGroup->klass, "set_childAlignment", 1)(gridLayoutGroup, 0);
+		il2cpp_symbols::get_method_pointer<void (*)(Il2CppObject*, int)>(gridLayoutGroup->klass, "set_constraintCount", 1)(gridLayoutGroup, 2);
+		il2cpp_symbols::get_method_pointer<void (*)(Il2CppObject*, UnityEngine::Vector2)>(gridLayoutGroup->klass, "set_cellSize", 1)(gridLayoutGroup, UnityEngine::Vector2{ .x=400, .y=100 });
+		il2cpp_symbols::get_method_pointer<void (*)(Il2CppObject*, UnityEngine::Vector2)>(gridLayoutGroup->klass, "set_spacing", 1)(gridLayoutGroup, UnityEngine::Vector2{ .x=34, .y=50 });
 
-		auto padding = il2cpp_class_get_method_from_name_type<Il2CppObject * (*)(Il2CppObject*)>(gridLayoutGroup->klass, "get_padding", 0)->methodPointer(gridLayoutGroup);
-		il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, int)>(padding->klass, "set_top", 1)->methodPointer(padding, 26);
-		il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, int)>(padding->klass, "set_left", 1)->methodPointer(padding, 48);
+		auto padding = il2cpp_symbols::get_method_pointer<Il2CppObject * (*)(Il2CppObject*)>(gridLayoutGroup->klass, "get_padding", 0)(gridLayoutGroup);
+		il2cpp_symbols::get_method_pointer<void (*)(Il2CppObject*, int)>(padding->klass, "set_top", 1)(padding, 26);
+		il2cpp_symbols::get_method_pointer<void (*)(Il2CppObject*, int)>(padding->klass, "set_left", 1)(padding, 48);
 
 		auto toggleGroupCommon = contentGameObject.AddComponent(GetRuntimeType("umamusume.dll", "Gallop", "ToggleGroupCommon"));
 		UnityEngine::Object::Name(contentGameObject, il2cpp_string_new("option_toggle_group_content"));
@@ -401,9 +411,9 @@ namespace Localify
 			auto& pair = options[i];
 			il2cpp_array_setref(toggleArray, i, UIParts::GetToggleCommon(("radio_"s + pair).data()));
 		}
-		il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, Il2CppArraySize_t<Il2CppObject*>*)>(toggleGroupCommon->klass, "set_ToggleArray", 1)->methodPointer(toggleGroupCommon, toggleArray);
-		il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, int)>(toggleGroupCommon->klass, "SetToggleOnFromNumber", 1)->methodPointer(toggleGroupCommon, selectedIndex);
-		il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*)>(toggleGroupCommon->klass, "Awake", 0)->methodPointer(toggleGroupCommon);
+		il2cpp_symbols::get_method_pointer<void (*)(Il2CppObject*, Il2CppArraySize_t<Il2CppObject*>*)>(toggleGroupCommon->klass, "set_ToggleArray", 1)(toggleGroupCommon, toggleArray);
+		il2cpp_symbols::get_method_pointer<void (*)(Il2CppObject*, int)>(toggleGroupCommon->klass, "SetToggleOnFromNumber", 1)(toggleGroupCommon, selectedIndex);
+		il2cpp_symbols::get_method_pointer<void (*)(Il2CppObject*)>(toggleGroupCommon->klass, "Awake", 0)(toggleGroupCommon);
 
 		dialogData.ContentsObject(gameObject);
 		selectOptionDialog = Gallop::DialogManager::Instance().PushDialog(dialogData);
@@ -473,11 +483,13 @@ namespace Localify
 
 				AddOrSet(configDocument, IL2CPP_STRING("resolution3dScale"), static_cast<int>(round(UIParts::GetOptionSliderValue("resolution_3d_scale") * 100)) / 100.0 / 10.0);
 
+#ifdef _MSC_VER
 				AddOrSet(configDocument, IL2CPP_STRING("notificationTp"), UIParts::GetOptionItemOnOffIsOn("notification_tp"));
 
 				AddOrSet(configDocument, IL2CPP_STRING("notificationRp"), UIParts::GetOptionItemOnOffIsOn("notification_rp"));
 
 				AddOrSet(configDocument, IL2CPP_STRING("notificationJobs"), UIParts::GetOptionItemOnOffIsOn("notification_jobs"));
+#endif
 
 				AddOrSet(configDocument, IL2CPP_STRING("dumpMsgPack"), UIParts::GetOptionItemOnOffIsOn("dump_msgpack"));
 
@@ -492,19 +504,22 @@ namespace Localify
 
 				AddOrSet(configDocument, IL2CPP_STRING("uiScale"), static_cast<int>(round(UIParts::GetOptionSliderValue("ui_scale") * 100)) / 100.0 / 10.0);
 
-				AddOrSet(configDocument, IL2CPP_STRING("autoFullscreen"), UIParts::GetOptionItemOnOffIsOn("auto_fullscreen"));
-
 				AddOrSet(configDocument, IL2CPP_STRING("freeFormWindow"), UIParts::GetOptionItemOnOffIsOn("freeform_window"));
 
 				AddOrSet(configDocument, IL2CPP_STRING("freeFormUiScalePortrait"), static_cast<int>(round(UIParts::GetOptionSliderValue("ui_scale_portrait") * 100)) / 100.0 / 10.0);
 
 				AddOrSet(configDocument, IL2CPP_STRING("freeFormUiScaleLandscape"), static_cast<int>(round(UIParts::GetOptionSliderValue("ui_scale_landscape") * 100)) / 100.0 / 10.0);
 
+#ifdef _MSC_VER
 				AddOrSet(configDocument, IL2CPP_STRING("taskbarShowProgressOnDownload"), UIParts::GetOptionItemOnOffIsOn("taskbar_show_progress_on_download"));
 
 				AddOrSet(configDocument, IL2CPP_STRING("taskbarShowProgressOnConnecting"), UIParts::GetOptionItemOnOffIsOn("taskbar_show_progress_on_connecting"));
+#endif
 
-				config::graphics_quality = configDocument[IL2CPP_STRING("graphicsQuality")].GetInt();
+				if (configDocument.HasMember(IL2CPP_STRING("graphicsQuality")))
+				{
+					config::graphics_quality = configDocument[IL2CPP_STRING("graphicsQuality")].GetInt();
+				}
 
 				config::anti_aliasing = configDocument[IL2CPP_STRING("antiAliasing")].GetInt();
 
@@ -518,11 +533,20 @@ namespace Localify
 
 				config::character_system_text_caption_position_y = configDocument[IL2CPP_STRING("characterSystemTextCaptionPositionY")].GetFloat();
 
-				config::character_system_text_caption_font_color = configDocument[IL2CPP_STRING("characterSystemTextCaptionFontColor")].GetString();
+				if (configDocument.HasMember(IL2CPP_STRING("characterSystemTextCaptionFontColor")))
+				{
+					config::character_system_text_caption_font_color = configDocument[IL2CPP_STRING("characterSystemTextCaptionFontColor")].GetString();
+				}
 
-				config::character_system_text_caption_outline_size = configDocument[IL2CPP_STRING("characterSystemTextCaptionOutlineSize")].GetString();
+				if (configDocument.HasMember(IL2CPP_STRING("characterSystemTextCaptionOutlineSize")))
+				{
+					config::character_system_text_caption_outline_size = configDocument[IL2CPP_STRING("characterSystemTextCaptionOutlineSize")].GetString();
+				}
 
-				config::character_system_text_caption_outline_color = configDocument[IL2CPP_STRING("characterSystemTextCaptionOutlineColor")].GetString();
+				if (configDocument.HasMember(IL2CPP_STRING("characterSystemTextCaptionOutlineColor")))
+				{
+					config::character_system_text_caption_outline_color = configDocument[IL2CPP_STRING("characterSystemTextCaptionOutlineColor")].GetString();
+				}
 
 				config::live_slider_always_show = configDocument[IL2CPP_STRING("liveSliderAlwaysShow")].GetBool();
 
@@ -530,9 +554,15 @@ namespace Localify
 
 				config::champions_live_show_text = configDocument[IL2CPP_STRING("championsLiveShowText")].GetBool();
 
-				config::champions_live_year = configDocument[IL2CPP_STRING("championsLiveYear")].GetInt();
+				if (configDocument.HasMember(IL2CPP_STRING("championsLiveYear")))
+				{
+					config::champions_live_year = configDocument[IL2CPP_STRING("championsLiveYear")].GetInt();
+				}
 
-				config::champions_live_resource_id = configDocument[IL2CPP_STRING("championsLiveResourceId")].GetInt();
+				if (configDocument.HasMember(IL2CPP_STRING("championsLiveResourceId")))
+				{
+					config::champions_live_resource_id = configDocument[IL2CPP_STRING("championsLiveResourceId")].GetInt();
+				}
 
 				config::cyspring_update_mode = configDocument[IL2CPP_STRING("cySpringUpdateMode")].GetInt();
 
@@ -570,8 +600,8 @@ namespace Localify
 				}
 
 				auto nowLoading = il2cpp_symbols::get_method_pointer<Il2CppObject * (*)()>("umamusume.dll", "Gallop", "NowLoading", "get_Instance", IgnoreNumberOfArguments)();
-				il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*)>(nowLoading->klass, "DeleteMiniCharacter", 0)->methodPointer(nowLoading);
-				il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*)>(nowLoading->klass, "CreateMiniCharacter", 0)->methodPointer(nowLoading);
+				il2cpp_symbols::get_method_pointer<void (*)(Il2CppObject*)>(nowLoading->klass, "DeleteMiniCharacter", 0)(nowLoading);
+				il2cpp_symbols::get_method_pointer<void (*)(Il2CppObject*)>(nowLoading->klass, "CreateMiniCharacter", 0)(nowLoading);
 
 				config::ui_scale = configDocument[IL2CPP_STRING("uiScale")].GetFloat();
 
@@ -579,6 +609,7 @@ namespace Localify
 
 				config::freeform_ui_scale_landscape = configDocument[IL2CPP_STRING("freeFormUiScaleLandscape")].GetFloat();
 
+#ifdef _MSC_VER
 				config::notification_tp = configDocument[IL2CPP_STRING("notificationTp")].GetBool();
 
 				if (config::notification_tp)
@@ -615,6 +646,7 @@ namespace Localify
 				config::taskbar_show_progress_on_download = configDocument[IL2CPP_STRING("taskbarShowProgressOnDownload")].GetBool();
 
 				config::taskbar_show_progress_on_connecting = configDocument[IL2CPP_STRING("taskbarShowProgressOnConnecting")].GetBool();
+#endif
 
 				config::dump_msgpack = configDocument[IL2CPP_STRING("dumpMsgPack")].GetBool();
 
@@ -652,18 +684,18 @@ namespace Localify
 		auto gameObject = UnityEngine::GameObject();
 		UnityEngine::RectTransform rootTransform = gameObject.AddComponent(GetRuntimeType("UnityEngine.CoreModule.dll", "UnityEngine", "RectTransform"));
 
-		rootTransform.sizeDelta({ 0, 0 });
-		rootTransform.anchorMax({ 1, 1 });
-		rootTransform.anchorMin({ 0, 0 });
-		rootTransform.pivot({ 0.5, 0.5 });
-		rootTransform.anchoredPosition({ 0, 0 });
+		rootTransform.sizeDelta({ .x=0, .y=0 });
+		rootTransform.anchorMax({ .x=1, .y=1 });
+		rootTransform.anchorMin({ .x=0, .y=0 });
+		rootTransform.pivot({ .x=0.5, .y=0.5 });
+		rootTransform.anchoredPosition({ .x=0, .y=0 });
 
 		UnityEngine::GameObject scrollViewBase = UnityEngine::ResourcesAPIInternal::Load(il2cpp_string_new("ui/parts/base/scrollviewbase"), GetRuntimeType("UnityEngine.CoreModule.dll", "UnityEngine", "GameObject"));
 
 		auto uiManager = Gallop::UIManager::Instance();
 		Il2CppObject* _mainCanvas = uiManager._mainCanvas();
 
-		auto transform = il2cpp_class_get_method_from_name_type<Il2CppObject * (*)(Il2CppObject*)>(_mainCanvas->klass, "get_transform", 0)->methodPointer(_mainCanvas);
+		auto transform = il2cpp_symbols::get_method_pointer<Il2CppObject * (*)(Il2CppObject*)>(_mainCanvas->klass, "get_transform", 0)(_mainCanvas);
 
 		scrollViewBase = UnityEngine::Object::Internal_CloneSingleWithParent(scrollViewBase, transform, false);
 
@@ -675,47 +707,52 @@ namespace Localify
 		Il2CppObject* m_Viewport;
 		il2cpp_field_get_value(scrollRect, m_ViewportField, &m_Viewport);
 
-		UnityEngine::RectTransform scrollRectTransform = il2cpp_class_get_method_from_name_type<Il2CppObject * (*)(Il2CppObject*)>(m_Viewport->klass, "get_parent", 0)->methodPointer(m_Viewport);
+		UnityEngine::RectTransform scrollRectTransform = il2cpp_symbols::get_method_pointer<Il2CppObject * (*)(Il2CppObject*)>(m_Viewport->klass, "get_parent", 0)(m_Viewport);
 
-		scrollRectTransform.sizeDelta({ -24, -12 });
-		scrollRectTransform.anchorMax({ 1, 1 });
-		scrollRectTransform.anchorMin({ 0, 0 });
-		scrollRectTransform.pivot({ 0.5, 0.5 });
-		scrollRectTransform.anchoredPosition({ 0, -6 });
+		scrollRectTransform.sizeDelta({ .x=-24, .y=-12 });
+		scrollRectTransform.anchorMax({ .x=1, .y=1 });
+		scrollRectTransform.anchorMin({ .x=0, .y=0 });
+		scrollRectTransform.pivot({ .x=0.5, .y=0.5 });
+		scrollRectTransform.anchoredPosition({ .x=0, .y=-6 });
 		scrollRectTransform.SetParent(rootTransform, false);
 
 		auto m_ContentField = il2cpp_class_get_field_from_name(scrollRect->klass, "m_Content");
 		Il2CppObject* m_Content;
 		il2cpp_field_get_value(scrollRect, m_ContentField, &m_Content);
 
-		il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, UnityEngine::Vector2)>(m_Content->klass, "set_sizeDelta", 1)->methodPointer(m_Content, UnityEngine::Vector2{ 56, 0 });
-		il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, UnityEngine::Vector2)>(m_Content->klass, "set_anchorMax", 1)->methodPointer(m_Content, UnityEngine::Vector2{ 1, 1 });
-		il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, UnityEngine::Vector2)>(m_Content->klass, "set_anchorMin", 1)->methodPointer(m_Content, UnityEngine::Vector2{ 0, 1 });
-		il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, UnityEngine::Vector2)>(m_Content->klass, "set_pivot", 1)->methodPointer(m_Content, UnityEngine::Vector2{ 0.5, 1 });
-		il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, UnityEngine::Vector2)>(m_Content->klass, "set_anchoredPosition", 1)->methodPointer(m_Content, UnityEngine::Vector2{ 0, 0 });
+		il2cpp_symbols::get_method_pointer<void (*)(Il2CppObject*, UnityEngine::Vector2)>(m_Content->klass, "set_sizeDelta", 1)(m_Content, UnityEngine::Vector2{ .x=56, .y=0 });
+		il2cpp_symbols::get_method_pointer<void (*)(Il2CppObject*, UnityEngine::Vector2)>(m_Content->klass, "set_anchorMax", 1)(m_Content, UnityEngine::Vector2{ .x=1, .y=1 });
+		il2cpp_symbols::get_method_pointer<void (*)(Il2CppObject*, UnityEngine::Vector2)>(m_Content->klass, "set_anchorMin", 1)(m_Content, UnityEngine::Vector2{ .x=0, .y=1 });
+		il2cpp_symbols::get_method_pointer<void (*)(Il2CppObject*, UnityEngine::Vector2)>(m_Content->klass, "set_pivot", 1)(m_Content, UnityEngine::Vector2{ .x=0.5, .y=1 });
+		il2cpp_symbols::get_method_pointer<void (*)(Il2CppObject*, UnityEngine::Vector2)>(m_Content->klass, "set_anchoredPosition", 1)(m_Content, UnityEngine::Vector2{ .x=0, .y=0 });
 
-		UnityEngine::GameObject contentGameObject = il2cpp_class_get_method_from_name_type<Il2CppObject * (*)(Il2CppObject*)>(m_Content->klass, "get_gameObject", 0)->methodPointer(m_Content);
+		UnityEngine::GameObject contentGameObject = il2cpp_symbols::get_method_pointer<Il2CppObject * (*)(Il2CppObject*)>(m_Content->klass, "get_gameObject", 0)(m_Content);
 
 		auto verticalLayoutGroup = contentGameObject.AddComponent(GetRuntimeType("UnityEngine.UI.dll", "UnityEngine.UI", "VerticalLayoutGroup"));
-		il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, int)>(verticalLayoutGroup->klass, "set_childAlignment", 1)->methodPointer(verticalLayoutGroup, 1);
-		il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, bool)>(verticalLayoutGroup->klass, "set_childForceExpandWidth", 1)->methodPointer(verticalLayoutGroup, true);
-		il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, bool)>(verticalLayoutGroup->klass, "set_childControlWidth", 1)->methodPointer(verticalLayoutGroup, true);
+		il2cpp_symbols::get_method_pointer<void (*)(Il2CppObject*, float)>(verticalLayoutGroup->klass, "set_spacing", 1)(verticalLayoutGroup, 2);
+		il2cpp_symbols::get_method_pointer<void (*)(Il2CppObject*, int)>(verticalLayoutGroup->klass, "set_childAlignment", 1)(verticalLayoutGroup, 1);
+		il2cpp_symbols::get_method_pointer<void (*)(Il2CppObject*, bool)>(verticalLayoutGroup->klass, "set_childForceExpandWidth", 1)(verticalLayoutGroup, true);
+		il2cpp_symbols::get_method_pointer<void (*)(Il2CppObject*, bool)>(verticalLayoutGroup->klass, "set_childControlWidth", 1)(verticalLayoutGroup, true);
 
-		auto padding = il2cpp_class_get_method_from_name_type<Il2CppObject * (*)(Il2CppObject*)>(verticalLayoutGroup->klass, "get_padding", 0)->methodPointer(verticalLayoutGroup);
-		il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, int)>(padding->klass, "set_top", 1)->methodPointer(padding, -20);
-		il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, int)>(padding->klass, "set_bottom", 1)->methodPointer(padding, 16);
+		auto padding = il2cpp_symbols::get_method_pointer<Il2CppObject * (*)(Il2CppObject*)>(verticalLayoutGroup->klass, "get_padding", 0)(verticalLayoutGroup);
+		il2cpp_symbols::get_method_pointer<void (*)(Il2CppObject*, int)>(padding->klass, "set_top", 1)(padding, -20);
+		il2cpp_symbols::get_method_pointer<void (*)(Il2CppObject*, int)>(padding->klass, "set_bottom", 1)(padding, 16);
 
+		int graphicsQuality = -1;
 		int antiAliasing = 0;
 		bool characterSystemTextCaption = false;
 		bool liveSliderAlwaysShow = false;
 		bool livePlaybackLoop = false;
 		bool championsLiveShowText = false;
 		int championsLiveYear = 2022;
-		int characterSystemTextCaptionLineCharCount = 0;
-		int characterSystemTextCaptionFontSize = 0;
+		int characterSystemTextCaptionLineCharCount = 26;
+		int characterSystemTextCaptionFontSize = 50;
 		float characterSystemTextCaptionPositionX = 0;
-		float characterSystemTextCaptionPositionY = 0;
+		float characterSystemTextCaptionPositionY = -3;
 		float characterSystemTextCaptionBackgroundAlpha = 0;
+		il2cppstring characterSystemTextCaptionFontColor = IL2CPP_STRING("White");
+		il2cppstring characterSystemTextCaptionOutlineSize = IL2CPP_STRING("L");
+		il2cppstring characterSystemTextCaptionOutlineColor = IL2CPP_STRING("Brown");
 		bool allowDeleteCookie = false;
 		int cySpringUpdateMode = -1;
 		bool cySpringDisableNative = false;
@@ -727,30 +764,41 @@ namespace Localify
 		float cySpringAddMoveRateScale = 1;
 		float resolution3dScale = 1;
 		float uiAnimationScale = 1;
+#ifdef _MSC_VER
 		bool notificationTp = false;
 		bool notificationRp = false;
 		bool notificationJobs = false;
+#endif
 		bool dumpMsgPack = false;
 		bool dumpMsgPackRequest = false;
 		bool useThirdPartyNews = false;
 		bool unlockLiveChara = false;
 		bool unlockSize = false;
-		float uiScale = 0;
-		bool autoFullscreen = false;
+		float uiScale = 1;
 		bool freeFormWindow = false;
-		float freeFormUiScalePortrait = 0;
-		float freeFormUiScaleLandscape = 0;
+		float freeFormUiScalePortrait = .5f;
+		float freeFormUiScaleLandscape = .5f;
+
+		string championsResourceText;
+		int championsLiveResourceIndex = -1;
+#ifdef _MSC_VER
 		bool taskbarShowProgressOnDownload = true;
 		bool taskbarShowProgressOnConnecting = true;
+#endif
 
 		if (config::read_config())
 		{
 			auto& configDocument = config::config_document;
 
+			if (configDocument.HasMember(IL2CPP_STRING("graphicsQuality")))
+			{
+				graphicsQuality = configDocument[IL2CPP_STRING("graphicsQuality")].GetInt();
+			}
+
 			if (configDocument.HasMember(IL2CPP_STRING("antiAliasing")))
 			{
 				vector<int> options = { -1, 0, 2, 4, 8 };
-				antiAliasing = find(options.begin(), options.end(), configDocument[IL2CPP_STRING("antiAliasing")].GetInt()) - options.begin();
+				antiAliasing = ranges::find(options, configDocument[IL2CPP_STRING("antiAliasing")].GetInt()) - options.begin();
 			}
 
 			if (configDocument.HasMember(IL2CPP_STRING("characterSystemTextCaption")))
@@ -801,6 +849,21 @@ namespace Localify
 			if (configDocument.HasMember(IL2CPP_STRING("characterSystemTextCaptionBackgroundAlpha")))
 			{
 				characterSystemTextCaptionBackgroundAlpha = configDocument[IL2CPP_STRING("characterSystemTextCaptionBackgroundAlpha")].GetFloat();
+			}
+
+			if (configDocument.HasMember(IL2CPP_STRING("characterSystemTextCaptionFontColor")))
+			{
+				characterSystemTextCaptionFontColor = configDocument[IL2CPP_STRING("characterSystemTextCaptionFontColor")].GetString();
+			}
+
+			if (configDocument.HasMember(IL2CPP_STRING("characterSystemTextCaptionOutlineSize")))
+			{
+				characterSystemTextCaptionOutlineSize = configDocument[IL2CPP_STRING("characterSystemTextCaptionOutlineSize")].GetString();
+			}
+
+			if (configDocument.HasMember(IL2CPP_STRING("characterSystemTextCaptionOutlineColor")))
+			{
+				characterSystemTextCaptionOutlineColor = configDocument[IL2CPP_STRING("characterSystemTextCaptionOutlineColor")].GetString();
 			}
 
 			if (configDocument.HasMember(IL2CPP_STRING("allowDeleteCookie")))
@@ -858,6 +921,7 @@ namespace Localify
 				uiAnimationScale = configDocument[IL2CPP_STRING("uiAnimationScale")].GetFloat();
 			}
 
+#ifdef _MSC_VER
 			if (configDocument.HasMember(IL2CPP_STRING("notificationTp")))
 			{
 				notificationTp = configDocument[IL2CPP_STRING("notificationTp")].GetBool();
@@ -872,6 +936,7 @@ namespace Localify
 			{
 				notificationJobs = configDocument[IL2CPP_STRING("notificationJobs")].GetBool();
 			}
+#endif
 
 			if (configDocument.HasMember(IL2CPP_STRING("dumpMsgPack")))
 			{
@@ -904,11 +969,6 @@ namespace Localify
 				uiScale = configDocument[IL2CPP_STRING("uiScale")].GetFloat();
 			}
 
-			if (configDocument.HasMember(IL2CPP_STRING("autoFullscreen")))
-			{
-				autoFullscreen = configDocument[IL2CPP_STRING("autoFullscreen")].GetBool();
-			}
-
 			if (configDocument.HasMember(IL2CPP_STRING("freeFormWindow")))
 			{
 				freeFormWindow = configDocument[IL2CPP_STRING("freeFormWindow")].GetBool();
@@ -924,6 +984,12 @@ namespace Localify
 				freeFormUiScaleLandscape = configDocument[IL2CPP_STRING("freeFormUiScaleLandscape")].GetFloat();
 			}
 
+			if (configDocument.HasMember(IL2CPP_STRING("championsLiveResourceId")))
+			{
+				championsLiveResourceIndex = configDocument[IL2CPP_STRING("championsLiveResourceId")].GetInt() - 1;
+			}
+
+#ifdef _MSC_VER
 			if (configDocument.HasMember(IL2CPP_STRING("taskbarShowProgressOnDownload")))
 			{
 				taskbarShowProgressOnDownload = configDocument[IL2CPP_STRING("taskbarShowProgressOnDownload")].GetBool();
@@ -933,32 +999,23 @@ namespace Localify
 			{
 				taskbarShowProgressOnConnecting = configDocument[IL2CPP_STRING("taskbarShowProgressOnConnecting")].GetBool();
 			}
+#endif
 		}
 
 		vector<string> graphicsQualityOptions = GetGraphicsQualityOptions();
 
-		bool isJobsExist = false;
+		bool isJobsExist = IsTextIdDefined(IL2CPP_STRING("Jobs600005"));
 
-		try
-		{
-			GetTextIdByName(IL2CPP_STRING("Jobs600005"));
-			isJobsExist = true;
-		}
-		catch (const Il2CppExceptionWrapper& ex)
-		{
-			wcout << ex.ex->message->chars << endl;
-		}
-
+#ifdef _MSC_VER
 		auto CuteCoreDevice = il2cpp_symbols::get_class("Cute.Core.Assembly.dll", "Cute.Core", "Device");
 		auto persistentDataPathField = il2cpp_class_get_field_from_name(CuteCoreDevice, "persistentDataPath");
 		Il2CppString* persistentDataPath;
 		il2cpp_field_static_get_value(persistentDataPathField, &persistentDataPath);
+#endif
 
-		string championsResourceText;
-		int championsLiveResourceIndex = config::config_document[IL2CPP_STRING("championsLiveResourceId")].GetInt() - 1;
 		auto championsResources = MasterDB::GetChampionsResources();
 
-		if (championsResources.size() <= championsLiveResourceIndex)
+		if (championsLiveResourceIndex < 0 && championsResources.size() <= championsLiveResourceIndex)
 		{
 			championsResourceText = il2cpp_u8(LocalifySettings::GetText("unknown"));
 		}
@@ -970,7 +1027,7 @@ namespace Localify
 		UIParts::AddToLayout(m_Content,
 			{
 				UIParts::GetOptionItemTitle(LocalifySettings::GetText("graphics")),
-				UIParts::GetOptionItemSimpleWithButton("graphics_quality", (LocalifySettings::GetText("graphics_quality") + il2cppstring(IL2CPP_STRING(": ")) + u8_il2cpp(graphicsQualityOptions[config::config_document[IL2CPP_STRING("graphicsQuality")].GetInt() + 1])).data(),
+				UIParts::GetOptionItemSimpleWithButton("graphics_quality", (LocalifySettings::GetText("graphics_quality") + il2cppstring(IL2CPP_STRING(": ")) + u8_il2cpp(graphicsQualityOptions[graphicsQuality + 1])).data(),
 					Gallop::Localize::Get(GetTextIdByName(IL2CPP_STRING("Circle0206")))->chars),
 				UIParts::GetOptionSlider("anti_aliasing", LocalifySettings::GetText("anti_aliasing"), antiAliasing, 0, 4, true,
 					*[](Il2CppObject* slider)
@@ -1199,14 +1256,15 @@ namespace Localify
 						NotificationManager::Show(il2cpp_string_new16(LocalifySettings::GetText("sample_caption")));
 					}
 				),
-				UIParts::GetOptionItemSimpleWithButton("character_system_text_caption_font_color", (LocalifySettings::GetText("character_system_text_caption_font_color") + il2cppstring(IL2CPP_STRING(": ")) + config::config_document[IL2CPP_STRING("characterSystemTextCaptionFontColor")].GetString()).data(),
+				UIParts::GetOptionItemSimpleWithButton("character_system_text_caption_font_color", (LocalifySettings::GetText("character_system_text_caption_font_color") + il2cppstring(IL2CPP_STRING(": ")) + characterSystemTextCaptionFontColor).data(),
 					Gallop::Localize::Get(GetTextIdByName(IL2CPP_STRING("Circle0206")))->chars),
-				UIParts::GetOptionItemSimpleWithButton("character_system_text_caption_outline_size", (LocalifySettings::GetText("character_system_text_caption_outline_size") + il2cppstring(IL2CPP_STRING(": ")) + config::config_document[IL2CPP_STRING("characterSystemTextCaptionOutlineSize")].GetString()).data(),
+				UIParts::GetOptionItemSimpleWithButton("character_system_text_caption_outline_size", (LocalifySettings::GetText("character_system_text_caption_outline_size") + il2cppstring(IL2CPP_STRING(": ")) + characterSystemTextCaptionOutlineSize).data(),
 					Gallop::Localize::Get(GetTextIdByName(IL2CPP_STRING("Circle0206")))->chars),
-					UIParts::GetOptionItemSimpleWithButton("character_system_text_caption_outline_color", (LocalifySettings::GetText("character_system_text_caption_outline_color") + il2cppstring(IL2CPP_STRING(": ")) + config::config_document[IL2CPP_STRING("characterSystemTextCaptionOutlineColor")].GetString()).data(),
+					UIParts::GetOptionItemSimpleWithButton("character_system_text_caption_outline_color", (LocalifySettings::GetText("character_system_text_caption_outline_color") + il2cppstring(IL2CPP_STRING(": ")) + characterSystemTextCaptionOutlineColor).data(),
 					Gallop::Localize::Get(GetTextIdByName(IL2CPP_STRING("Circle0206")))->chars),
 				UIParts::GetOptionItemButton("show_caption", LocalifySettings::GetText("show_caption")),
 				UIParts::GetOptionItemAttention(LocalifySettings::GetText("applied_after_restart")),
+#ifdef _MSC_VER
 				UIParts::GetOptionItemTitle(Gallop::Localize::Get(GetTextIdByName(IL2CPP_STRING("Outgame0293")))->chars),
 				UIParts::GetOptionItemOnOff("notification_tp", Gallop::Localize::Get(GetTextIdByName(IL2CPP_STRING("Outgame0294")))->chars),
 				UIParts::GetOptionItemOnOff("notification_rp", Gallop::Localize::Get(GetTextIdByName(IL2CPP_STRING("Outgame0437")))->chars),
@@ -1216,12 +1274,15 @@ namespace Localify
 				UIParts::GetOptionItemTitle(LocalifySettings::GetText("taskbar")),
 				UIParts::GetOptionItemOnOff("taskbar_show_progress_on_download", LocalifySettings::GetText("taskbar_show_progress_on_download")),
 				UIParts::GetOptionItemOnOff("taskbar_show_progress_on_connecting", LocalifySettings::GetText("taskbar_show_progress_on_connecting")),
+#endif
 				UIParts::GetOptionItemTitle(LocalifySettings::GetText("settings_title")),
+#ifdef _MSC_VER
 				UIParts::GetOptionItemSimpleWithButton("persistent_data_path", LocalifySettings::GetText("persistent_data_path"), Gallop::Localize::Get(GetTextIdByName(IL2CPP_STRING("Circle0206")))->chars),
 				UIParts::GetOptionItemInfo("persistent_data_path_detail", persistentDataPath->chars),
 				Game::CurrentGameRegion == Game::Region::JPN ?
 					UIParts::GetOptionItemButton("clear_webview_cache", LocalifySettings::GetText("clear_webview_cache")) :
 					UIParts::GetOptionItemOnOff("allow_delete_cookie", LocalifySettings::GetText("allow_delete_cookie")),
+#endif
 				UIParts::GetOptionItemOnOff("dump_msgpack", LocalifySettings::GetText("dump_msgpack")),
 				UIParts::GetOptionItemOnOff("dump_msgpack_request", LocalifySettings::GetText("dump_msgpack_request")),
 				Game::CurrentGameRegion == Game::Region::KOR ?
@@ -1233,8 +1294,10 @@ namespace Localify
 				UIParts::GetOptionItemInfo(nullptr, LocalifySettings::GetText("unlock_live_chara_info")),
 #endif
 				UIParts::GetOptionItemButton("github", IL2CPP_STRING("GitHub")),
+#ifdef _MSC_VER
 				UIParts::GetOptionItemTitle(LocalifySettings::GetText("experiments")),
 				UIParts::GetOptionItemButton("toggle_vr", IL2CPP_STRING("Toggle VR")),
+#endif
 			// GetOptionItemSimple("Simple"),
 			// GetOptionItemOnOff("on_off", "On Off"),
 			// GetOptionItem3ToggleVertical("Text"),
@@ -1269,6 +1332,7 @@ namespace Localify
 			})
 		);
 
+#ifdef _MSC_VER
 		UIParts::SetOptionItemOnOffAction("notification_tp", notificationTp, *([](Il2CppObject*, bool isOn)
 			{
 			})
@@ -1283,6 +1347,7 @@ namespace Localify
 			{
 			})
 		);
+#endif
 
 		UIParts::SetOptionItemOnOffAction("dump_msgpack", dumpMsgPack, *([](Il2CppObject*, bool isOn)
 			{
@@ -1301,49 +1366,69 @@ namespace Localify
 
 		UIParts::SetOptionItemOnOffAction("cyspring_disable_native", cySpringDisableNative, *([](Il2CppObject*, bool isOn)
 			{
-				auto cySpringMonoUncapFrameScaleToggle = UIParts::GetPartsOnOffToggleSwitch("cyspring_mono_uncap_frame_scale");
-				il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, bool)>(cySpringMonoUncapFrameScaleToggle->klass, "SetOnInteractable", 1)->methodPointer(cySpringMonoUncapFrameScaleToggle, isOn);
-				il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, Il2CppString*)>(cySpringMonoUncapFrameScaleToggle->klass, "SetNotificationMessage", 1)->methodPointer(cySpringMonoUncapFrameScaleToggle, !isOn ? il2cpp_string_new16(LocalifySettings::GetText("cyspring_mono_uncap_frame_scale_disabled")) : nullptr);
+				if (auto cySpringMonoUncapFrameScaleToggle = UIParts::GetPartsOnOffToggleSwitch("cyspring_mono_uncap_frame_scale"))
+				{
+					il2cpp_symbols::get_method_pointer<void (*)(Il2CppObject*, bool)>(cySpringMonoUncapFrameScaleToggle->klass, "SetOnInteractable", 1)(cySpringMonoUncapFrameScaleToggle, isOn);
+					il2cpp_symbols::get_method_pointer<void (*)(Il2CppObject*, Il2CppString*)>(cySpringMonoUncapFrameScaleToggle->klass, "SetNotificationMessage", 1)(cySpringMonoUncapFrameScaleToggle, !isOn ? il2cpp_string_new16(LocalifySettings::GetText("cyspring_mono_uncap_frame_scale_disabled")) : nullptr);
+				}
 
-				auto cySpringLegacyBehaviorToggle = UIParts::GetPartsOnOffToggleSwitch("cyspring_legacy_behavior");
-				il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, bool)>(cySpringLegacyBehaviorToggle->klass, "SetOnInteractable", 1)->methodPointer(cySpringLegacyBehaviorToggle, !isOn);
-				il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, Il2CppString*)>(cySpringLegacyBehaviorToggle->klass, "SetNotificationMessage", 1)->methodPointer(cySpringLegacyBehaviorToggle, isOn ? il2cpp_string_new16(LocalifySettings::GetText("cyspring_legacy_behavior_disabled")) : nullptr);
+				if (auto cySpringLegacyBehaviorToggle = UIParts::GetPartsOnOffToggleSwitch("cyspring_legacy_behavior"))
+				{
+					il2cpp_symbols::get_method_pointer<void (*)(Il2CppObject*, bool)>(cySpringLegacyBehaviorToggle->klass, "SetOnInteractable", 1)(cySpringLegacyBehaviorToggle, !isOn);
+					il2cpp_symbols::get_method_pointer<void (*)(Il2CppObject*, Il2CppString*)>(cySpringLegacyBehaviorToggle->klass, "SetNotificationMessage", 1)(cySpringLegacyBehaviorToggle, isOn ? il2cpp_string_new16(LocalifySettings::GetText("cyspring_legacy_behavior_disabled")) : nullptr);
+				}
 
-				auto cySpringDragForceRateScaleSlider = UIParts::GetOptionSlider("cyspring_drag_force_rate_scale");
-				il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, bool)>(cySpringDragForceRateScaleSlider->klass, "set_interactable", 1)->methodPointer(cySpringDragForceRateScaleSlider, !isOn);
-				
-				auto cySpringDragForceRateScaleSliderFillImageField = il2cpp_class_get_field_from_name(cySpringDragForceRateScaleSlider->klass, "m_FillImage");
-				Il2CppObject* cySpringDragForceRateScaleSliderFillImage;
-				il2cpp_field_get_value(cySpringDragForceRateScaleSlider, cySpringDragForceRateScaleSliderFillImageField, &cySpringDragForceRateScaleSliderFillImage);
+				if (auto cySpringDragForceRateScaleSlider = UIParts::GetOptionSlider("cyspring_drag_force_rate_scale"))
+				{
+					il2cpp_symbols::get_method_pointer<void (*)(Il2CppObject*, bool)>(cySpringDragForceRateScaleSlider->klass, "set_interactable", 1)(cySpringDragForceRateScaleSlider, !isOn);
 
-				il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, UnityEngine::Color)>(cySpringDragForceRateScaleSliderFillImage->klass, "set_color", 1)->methodPointer(cySpringDragForceRateScaleSliderFillImage, !isOn ? UnityEngine::Color::white() : UnityEngine::Color::gray());
+					if (auto cySpringDragForceRateScaleSliderFillImageField = il2cpp_class_get_field_from_name(cySpringDragForceRateScaleSlider->klass, "m_FillImage"))
+					{
+						Il2CppObject* cySpringDragForceRateScaleSliderFillImage;
+						il2cpp_field_get_value(cySpringDragForceRateScaleSlider, cySpringDragForceRateScaleSliderFillImageField, &cySpringDragForceRateScaleSliderFillImage);
 
-				auto cySpringStiffnessForceRateScaleSlider = UIParts::GetOptionSlider("cyspring_stiffness_force_rate_scale");
-				il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, bool)>(cySpringStiffnessForceRateScaleSlider->klass, "set_interactable", 1)->methodPointer(cySpringStiffnessForceRateScaleSlider, !isOn);
+						il2cpp_symbols::get_method_pointer<void (*)(Il2CppObject*, UnityEngine::Color)>(cySpringDragForceRateScaleSliderFillImage->klass, "set_color", 1)(cySpringDragForceRateScaleSliderFillImage, !isOn ? UnityEngine::Color::white() : UnityEngine::Color::gray());
+					}
+				}
 
-				auto cySpringStiffnessForceRateScaleSliderFillImageField = il2cpp_class_get_field_from_name(cySpringStiffnessForceRateScaleSlider->klass, "m_FillImage");
-				Il2CppObject* cySpringStiffnessForceRateScaleSliderFillImage;
-				il2cpp_field_get_value(cySpringStiffnessForceRateScaleSlider, cySpringStiffnessForceRateScaleSliderFillImageField, &cySpringStiffnessForceRateScaleSliderFillImage);
+				if (auto cySpringStiffnessForceRateScaleSlider = UIParts::GetOptionSlider("cyspring_stiffness_force_rate_scale"))
+				{
+					il2cpp_symbols::get_method_pointer<void (*)(Il2CppObject*, bool)>(cySpringStiffnessForceRateScaleSlider->klass, "set_interactable", 1)(cySpringStiffnessForceRateScaleSlider, !isOn);
 
-				il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, UnityEngine::Color)>(cySpringStiffnessForceRateScaleSliderFillImage->klass, "set_color", 1)->methodPointer(cySpringStiffnessForceRateScaleSliderFillImage, !isOn ? UnityEngine::Color::white() : UnityEngine::Color::gray());
+					if (auto cySpringStiffnessForceRateScaleSliderFillImageField = il2cpp_class_get_field_from_name(cySpringStiffnessForceRateScaleSlider->klass, "m_FillImage"))
+					{
+						Il2CppObject* cySpringStiffnessForceRateScaleSliderFillImage;
+						il2cpp_field_get_value(cySpringStiffnessForceRateScaleSlider, cySpringStiffnessForceRateScaleSliderFillImageField, &cySpringStiffnessForceRateScaleSliderFillImage);
 
-				auto cySpringMoveRateScaleSlider = UIParts::GetOptionSlider("cyspring_move_rate_scale");
-				il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, bool)>(cySpringMoveRateScaleSlider->klass, "set_interactable", 1)->methodPointer(cySpringMoveRateScaleSlider, !isOn);
+						il2cpp_symbols::get_method_pointer<void (*)(Il2CppObject*, UnityEngine::Color)>(cySpringStiffnessForceRateScaleSliderFillImage->klass, "set_color", 1)(cySpringStiffnessForceRateScaleSliderFillImage, !isOn ? UnityEngine::Color::white() : UnityEngine::Color::gray());
+					}
+				}
 
-				auto cySpringMoveRateScaleSliderFillImageField = il2cpp_class_get_field_from_name(cySpringMoveRateScaleSlider->klass, "m_FillImage");
-				Il2CppObject* cySpringMoveRateScaleSliderFillImage;
-				il2cpp_field_get_value(cySpringMoveRateScaleSlider, cySpringMoveRateScaleSliderFillImageField, &cySpringMoveRateScaleSliderFillImage);
+				if (auto cySpringMoveRateScaleSlider = UIParts::GetOptionSlider("cyspring_move_rate_scale"))
+				{
+					il2cpp_symbols::get_method_pointer<void (*)(Il2CppObject*, bool)>(cySpringMoveRateScaleSlider->klass, "set_interactable", 1)(cySpringMoveRateScaleSlider, !isOn);
 
-				il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, UnityEngine::Color)>(cySpringMoveRateScaleSliderFillImage->klass, "set_color", 1)->methodPointer(cySpringMoveRateScaleSliderFillImage, !isOn ? UnityEngine::Color::white() : UnityEngine::Color::gray());
+					if (auto cySpringMoveRateScaleSliderFillImageField = il2cpp_class_get_field_from_name(cySpringMoveRateScaleSlider->klass, "m_FillImage"))
+					{
+						Il2CppObject* cySpringMoveRateScaleSliderFillImage;
+						il2cpp_field_get_value(cySpringMoveRateScaleSlider, cySpringMoveRateScaleSliderFillImageField, &cySpringMoveRateScaleSliderFillImage);
 
-				auto cySpringAddMoveRateScaleSlider = UIParts::GetOptionSlider("cyspring_add_move_rate_scale");
-				il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, bool)>(cySpringAddMoveRateScaleSlider->klass, "set_interactable", 1)->methodPointer(cySpringAddMoveRateScaleSlider, !isOn);
+						il2cpp_symbols::get_method_pointer<void (*)(Il2CppObject*, UnityEngine::Color)>(cySpringMoveRateScaleSliderFillImage->klass, "set_color", 1)(cySpringMoveRateScaleSliderFillImage, !isOn ? UnityEngine::Color::white() : UnityEngine::Color::gray());
+					}
+				}
 
-				auto cySpringAddMoveRateScaleSliderFillImageField = il2cpp_class_get_field_from_name(cySpringAddMoveRateScaleSlider->klass, "m_FillImage");
-				Il2CppObject* cySpringAddMoveRateScaleSliderFillImage;
-				il2cpp_field_get_value(cySpringAddMoveRateScaleSlider, cySpringAddMoveRateScaleSliderFillImageField, &cySpringAddMoveRateScaleSliderFillImage);
+				if (auto cySpringAddMoveRateScaleSlider = UIParts::GetOptionSlider("cyspring_add_move_rate_scale"))
+				{
+					il2cpp_symbols::get_method_pointer<void (*)(Il2CppObject*, bool)>(cySpringAddMoveRateScaleSlider->klass, "set_interactable", 1)(cySpringAddMoveRateScaleSlider, !isOn);
 
-				il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, UnityEngine::Color)>(cySpringAddMoveRateScaleSliderFillImage->klass, "set_color", 1)->methodPointer(cySpringAddMoveRateScaleSliderFillImage, !isOn ? UnityEngine::Color::white() : UnityEngine::Color::gray());
+					if (auto cySpringAddMoveRateScaleSliderFillImageField = il2cpp_class_get_field_from_name(cySpringAddMoveRateScaleSlider->klass, "m_FillImage"))
+					{
+						Il2CppObject* cySpringAddMoveRateScaleSliderFillImage;
+						il2cpp_field_get_value(cySpringAddMoveRateScaleSlider, cySpringAddMoveRateScaleSliderFillImageField, &cySpringAddMoveRateScaleSliderFillImage);
+
+						il2cpp_symbols::get_method_pointer<void (*)(Il2CppObject*, UnityEngine::Color)>(cySpringAddMoveRateScaleSliderFillImage->klass, "set_color", 1)(cySpringAddMoveRateScaleSliderFillImage, !isOn ? UnityEngine::Color::white() : UnityEngine::Color::gray());
+					}
+				}
 			})
 		);
 
@@ -1352,54 +1437,74 @@ namespace Localify
 			})
 		);
 
-		auto cySpringMonoUncapFrameScaleToggle = UIParts::GetPartsOnOffToggleSwitch("cyspring_mono_uncap_frame_scale");
-		il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, bool)>(cySpringMonoUncapFrameScaleToggle->klass, "SetOnInteractable", 1)->methodPointer(cySpringMonoUncapFrameScaleToggle, cySpringMonoUncapFrameScale);
-		il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, Il2CppString*)>(cySpringMonoUncapFrameScaleToggle->klass, "SetNotificationMessage", 1)->methodPointer(cySpringMonoUncapFrameScaleToggle, !cySpringMonoUncapFrameScale ? il2cpp_string_new16(LocalifySettings::GetText("cyspring_mono_uncap_frame_scale_disabled")) : nullptr);
+		if (auto cySpringMonoUncapFrameScaleToggle = UIParts::GetPartsOnOffToggleSwitch("cyspring_mono_uncap_frame_scale"))
+		{
+			il2cpp_symbols::get_method_pointer<void (*)(Il2CppObject*, bool)>(cySpringMonoUncapFrameScaleToggle->klass, "SetOnInteractable", 1)(cySpringMonoUncapFrameScaleToggle, cySpringMonoUncapFrameScale);
+			il2cpp_symbols::get_method_pointer<void (*)(Il2CppObject*, Il2CppString*)>(cySpringMonoUncapFrameScaleToggle->klass, "SetNotificationMessage", 1)(cySpringMonoUncapFrameScaleToggle, !cySpringMonoUncapFrameScale ? il2cpp_string_new16(LocalifySettings::GetText("cyspring_mono_uncap_frame_scale_disabled")) : nullptr);
+		}
 
-		auto cySpringDragForceRateScaleSlider = UIParts::GetOptionSlider("cyspring_drag_force_rate_scale");
-		il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, bool)>(cySpringDragForceRateScaleSlider->klass, "set_interactable", 1)->methodPointer(cySpringDragForceRateScaleSlider, !cySpringDisableNative);
+		if (auto cySpringDragForceRateScaleSlider = UIParts::GetOptionSlider("cyspring_drag_force_rate_scale"))
+		{
+			il2cpp_symbols::get_method_pointer<void (*)(Il2CppObject*, bool)>(cySpringDragForceRateScaleSlider->klass, "set_interactable", 1)(cySpringDragForceRateScaleSlider, !cySpringDisableNative);
 
-		auto cySpringDragForceRateScaleSliderFillImageField = il2cpp_class_get_field_from_name(cySpringDragForceRateScaleSlider->klass, "m_FillImage");
-		Il2CppObject* cySpringDragForceRateScaleSliderFillImage;
-		il2cpp_field_get_value(cySpringDragForceRateScaleSlider, cySpringDragForceRateScaleSliderFillImageField, &cySpringDragForceRateScaleSliderFillImage);
+			if (auto cySpringDragForceRateScaleSliderFillImageField = il2cpp_class_get_field_from_name(cySpringDragForceRateScaleSlider->klass, "m_FillImage"))
+			{
+				Il2CppObject* cySpringDragForceRateScaleSliderFillImage;
+				il2cpp_field_get_value(cySpringDragForceRateScaleSlider, cySpringDragForceRateScaleSliderFillImageField, &cySpringDragForceRateScaleSliderFillImage);
 
-		il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, UnityEngine::Color)>(cySpringDragForceRateScaleSliderFillImage->klass, "set_color", 1)->methodPointer(cySpringDragForceRateScaleSliderFillImage, !cySpringDisableNative ? UnityEngine::Color::white() : UnityEngine::Color::gray());
+				il2cpp_symbols::get_method_pointer<void (*)(Il2CppObject*, UnityEngine::Color)>(cySpringDragForceRateScaleSliderFillImage->klass, "set_color", 1)(cySpringDragForceRateScaleSliderFillImage, !cySpringDisableNative ? UnityEngine::Color::white() : UnityEngine::Color::gray());
+			}
+		}
 
-		auto cySpringStiffnessForceRateScaleSlider = UIParts::GetOptionSlider("cyspring_stiffness_force_rate_scale");
-		il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, bool)>(cySpringStiffnessForceRateScaleSlider->klass, "set_interactable", 1)->methodPointer(cySpringStiffnessForceRateScaleSlider, !cySpringDisableNative);
+		if (auto cySpringStiffnessForceRateScaleSlider = UIParts::GetOptionSlider("cyspring_stiffness_force_rate_scale"))
+		{
+			il2cpp_symbols::get_method_pointer<void (*)(Il2CppObject*, bool)>(cySpringStiffnessForceRateScaleSlider->klass, "set_interactable", 1)(cySpringStiffnessForceRateScaleSlider, !cySpringDisableNative);
 
-		auto cySpringStiffnessForceRateScaleSliderFillImageField = il2cpp_class_get_field_from_name(cySpringStiffnessForceRateScaleSlider->klass, "m_FillImage");
-		Il2CppObject* cySpringStiffnessForceRateScaleSliderFillImage;
-		il2cpp_field_get_value(cySpringStiffnessForceRateScaleSlider, cySpringStiffnessForceRateScaleSliderFillImageField, &cySpringStiffnessForceRateScaleSliderFillImage);
+			if (auto cySpringStiffnessForceRateScaleSliderFillImageField = il2cpp_class_get_field_from_name(cySpringStiffnessForceRateScaleSlider->klass, "m_FillImage"))
+			{
+				Il2CppObject* cySpringStiffnessForceRateScaleSliderFillImage;
+				il2cpp_field_get_value(cySpringStiffnessForceRateScaleSlider, cySpringStiffnessForceRateScaleSliderFillImageField, &cySpringStiffnessForceRateScaleSliderFillImage);
 
-		il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, UnityEngine::Color)>(cySpringStiffnessForceRateScaleSliderFillImage->klass, "set_color", 1)->methodPointer(cySpringStiffnessForceRateScaleSliderFillImage, !cySpringDisableNative ? UnityEngine::Color::white() : UnityEngine::Color::gray());
+				il2cpp_symbols::get_method_pointer<void (*)(Il2CppObject*, UnityEngine::Color)>(cySpringStiffnessForceRateScaleSliderFillImage->klass, "set_color", 1)(cySpringStiffnessForceRateScaleSliderFillImage, !cySpringDisableNative ? UnityEngine::Color::white() : UnityEngine::Color::gray());
+			}
+		}
 
-		auto cySpringMoveRateScaleSlider = UIParts::GetOptionSlider("cyspring_move_rate_scale");
-		il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, bool)>(cySpringMoveRateScaleSlider->klass, "set_interactable", 1)->methodPointer(cySpringMoveRateScaleSlider, !cySpringDisableNative);
+		if (auto cySpringMoveRateScaleSlider = UIParts::GetOptionSlider("cyspring_move_rate_scale"))
+		{
+			il2cpp_symbols::get_method_pointer<void (*)(Il2CppObject*, bool)>(cySpringMoveRateScaleSlider->klass, "set_interactable", 1)(cySpringMoveRateScaleSlider, !cySpringDisableNative);
 
-		auto cySpringMoveRateScaleSliderFillImageField = il2cpp_class_get_field_from_name(cySpringMoveRateScaleSlider->klass, "m_FillImage");
-		Il2CppObject* cySpringMoveRateScaleSliderFillImage;
-		il2cpp_field_get_value(cySpringMoveRateScaleSlider, cySpringMoveRateScaleSliderFillImageField, &cySpringMoveRateScaleSliderFillImage);
+			if (auto cySpringMoveRateScaleSliderFillImageField = il2cpp_class_get_field_from_name(cySpringMoveRateScaleSlider->klass, "m_FillImage"))
+			{
+				Il2CppObject* cySpringMoveRateScaleSliderFillImage;
+				il2cpp_field_get_value(cySpringMoveRateScaleSlider, cySpringMoveRateScaleSliderFillImageField, &cySpringMoveRateScaleSliderFillImage);
 
-		il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, UnityEngine::Color)>(cySpringMoveRateScaleSliderFillImage->klass, "set_color", 1)->methodPointer(cySpringMoveRateScaleSliderFillImage, !cySpringDisableNative ? UnityEngine::Color::white() : UnityEngine::Color::gray());
+				il2cpp_symbols::get_method_pointer<void (*)(Il2CppObject*, UnityEngine::Color)>(cySpringMoveRateScaleSliderFillImage->klass, "set_color", 1)(cySpringMoveRateScaleSliderFillImage, !cySpringDisableNative ? UnityEngine::Color::white() : UnityEngine::Color::gray());
+			}
+		}
 
-		auto cySpringAddMoveRateScaleSlider = UIParts::GetOptionSlider("cyspring_add_move_rate_scale");
-		il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, bool)>(cySpringAddMoveRateScaleSlider->klass, "set_interactable", 1)->methodPointer(cySpringAddMoveRateScaleSlider, !cySpringDisableNative);
+		if (auto cySpringAddMoveRateScaleSlider = UIParts::GetOptionSlider("cyspring_add_move_rate_scale"))
+		{
+			il2cpp_symbols::get_method_pointer<void (*)(Il2CppObject*, bool)>(cySpringAddMoveRateScaleSlider->klass, "set_interactable", 1)(cySpringAddMoveRateScaleSlider, !cySpringDisableNative);
 
-		auto cySpringAddMoveRateScaleSliderFillImageField = il2cpp_class_get_field_from_name(cySpringAddMoveRateScaleSlider->klass, "m_FillImage");
-		Il2CppObject* cySpringAddMoveRateScaleSliderFillImage;
-		il2cpp_field_get_value(cySpringAddMoveRateScaleSlider, cySpringAddMoveRateScaleSliderFillImageField, &cySpringAddMoveRateScaleSliderFillImage);
+			if (auto cySpringAddMoveRateScaleSliderFillImageField = il2cpp_class_get_field_from_name(cySpringAddMoveRateScaleSlider->klass, "m_FillImage"))
+			{
+				Il2CppObject* cySpringAddMoveRateScaleSliderFillImage;
+				il2cpp_field_get_value(cySpringAddMoveRateScaleSlider, cySpringAddMoveRateScaleSliderFillImageField, &cySpringAddMoveRateScaleSliderFillImage);
 
-		il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, UnityEngine::Color)>(cySpringAddMoveRateScaleSliderFillImage->klass, "set_color", 1)->methodPointer(cySpringAddMoveRateScaleSliderFillImage, !cySpringDisableNative ? UnityEngine::Color::white() : UnityEngine::Color::gray());
+				il2cpp_symbols::get_method_pointer<void (*)(Il2CppObject*, UnityEngine::Color)>(cySpringAddMoveRateScaleSliderFillImage->klass, "set_color", 1)(cySpringAddMoveRateScaleSliderFillImage, !cySpringDisableNative ? UnityEngine::Color::white() : UnityEngine::Color::gray());
+			}
+		}
 
 		UIParts::SetOptionItemOnOffAction("cyspring_legacy_behavior", cySpringLegacyBehavior, *([](Il2CppObject*, bool isOn)
 			{
 			})
 		);
 
-		auto cySpringLegacyBehaviorToggle = UIParts::GetPartsOnOffToggleSwitch("cyspring_legacy_behavior");
-		il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, bool)>(cySpringLegacyBehaviorToggle->klass, "SetOnInteractable", 1)->methodPointer(cySpringLegacyBehaviorToggle, !cySpringDisableNative);
-		il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, Il2CppString*)>(cySpringLegacyBehaviorToggle->klass, "SetNotificationMessage", 1)->methodPointer(cySpringLegacyBehaviorToggle, cySpringDisableNative ? il2cpp_string_new16(LocalifySettings::GetText("cyspring_legacy_behavior_disabled")) : nullptr);
+		if (auto cySpringLegacyBehaviorToggle = UIParts::GetPartsOnOffToggleSwitch("cyspring_legacy_behavior"))
+		{
+			il2cpp_symbols::get_method_pointer<void (*)(Il2CppObject*, bool)>(cySpringLegacyBehaviorToggle->klass, "SetOnInteractable", 1)(cySpringLegacyBehaviorToggle, !cySpringDisableNative);
+			il2cpp_symbols::get_method_pointer<void (*)(Il2CppObject*, Il2CppString*)>(cySpringLegacyBehaviorToggle->klass, "SetNotificationMessage", 1)(cySpringLegacyBehaviorToggle, cySpringDisableNative ? il2cpp_string_new16(LocalifySettings::GetText("cyspring_legacy_behavior_disabled")) : nullptr);
+		}
 
 		UIParts::SetOptionItemOnOffAction("unlock_size", unlockSize, *([](Il2CppObject*, bool isOn)
 			{
@@ -1416,6 +1521,7 @@ namespace Localify
 			})
 		);
 
+#ifdef _MSC_VER
 		if (Game::CurrentGameRegion == Game::Region::KOR)
 		{
 			UIParts::SetOptionItemOnOffAction("allow_delete_cookie", allowDeleteCookie, *([](Il2CppObject*, bool isOn)
@@ -1423,6 +1529,7 @@ namespace Localify
 				})
 			);
 		}
+#endif
 
 		UIParts::SetOptionItemButtonAction("show_caption", *([](Il2CppObject*)
 			{
@@ -1438,6 +1545,7 @@ namespace Localify
 			})
 		);
 
+#ifdef _MSC_VER
 		UIParts::SetOptionItemButtonAction("show_notification", *([](Il2CppObject*)
 			{
 				auto leader_chara_id = MsgPackData::user_info["leader_chara_id"].int_value();
@@ -1455,10 +1563,16 @@ namespace Localify
 				DesktopNotificationManagerCompat::ShowToastNotification(title.data(), content.data(), MsgPackData::GetIconPath(Gallop::LocalPushDefine::LocalPushType::Tp)->chars);
 			})
 		);
+#endif
 
 		UIParts::SetOptionItemButtonAction("graphics_quality", *([](Il2CppObject*)
 			{
-				OpenSelectOption(LocalifySettings::GetText("graphics_quality"), GetGraphicsQualityOptions(), config::config_document[IL2CPP_STRING("graphicsQuality")].GetInt() + 1,
+				auto graphicsQuality = -1;
+				if (config::config_document.HasMember(IL2CPP_STRING("graphicsQuality")))
+				{
+					graphicsQuality = config::config_document[IL2CPP_STRING("graphicsQuality")].GetInt();
+				}
+				OpenSelectOption(LocalifySettings::GetText("graphics_quality"), GetGraphicsQualityOptions(), graphicsQuality + 1,
 					[](int value)
 					{
 						AddOrSet(config::config_document, IL2CPP_STRING("graphicsQuality"), value - 1);
@@ -1472,7 +1586,13 @@ namespace Localify
 
 		UIParts::SetOptionItemButtonAction("champions_live_resource_id", *([](Il2CppObject*)
 			{
-				OpenSelectOption(LocalifySettings::GetText("champions_live_resource_id"), MasterDB::GetChampionsResources(), config::config_document[IL2CPP_STRING("championsLiveResourceId")].GetInt() - 1,
+				auto championsLiveResourceIndex = -1;
+				if (config::config_document.HasMember(IL2CPP_STRING("championsLiveResourceId")))
+				{
+					championsLiveResourceIndex = config::config_document[IL2CPP_STRING("championsLiveResourceId")].GetInt();
+				}
+
+				OpenSelectOption(LocalifySettings::GetText("champions_live_resource_id"), MasterDB::GetChampionsResources(),  championsLiveResourceIndex - 1,
 					[](int value)
 					{
 						AddOrSet(config::config_document, IL2CPP_STRING("championsLiveResourceId"), value + 1);
@@ -1497,7 +1617,13 @@ namespace Localify
 					championsLiveYears.emplace_back(to_string(i));
 				}
 
-				OpenSelectOption(LocalifySettings::GetText("champions_live_year"), championsLiveYears, config::config_document[IL2CPP_STRING("championsLiveYear")].GetInt() - 2022,
+				auto championsLiveYear = 2022;
+				if (config::config_document.HasMember(IL2CPP_STRING("championsLiveYear")))
+				{
+					championsLiveYear = config::config_document[IL2CPP_STRING("championsLiveYear")].GetInt();
+				}
+
+				OpenSelectOption(LocalifySettings::GetText("champions_live_year"), championsLiveYears, championsLiveYear - 2022,
 					[](int value)
 					{
 						AddOrSet(config::config_document, IL2CPP_STRING("championsLiveYear"), value + 2022);
@@ -1509,21 +1635,30 @@ namespace Localify
 			})
 		);
 
-		auto fontColorTextCommon = UIParts::GetOptionItemSimpleWithButtonTextCommon("character_system_text_caption_font_color");
-		fontColorTextCommon.OutlineColor(IL2CPP_STRING("Brown"));
-		fontColorTextCommon.FontColor(config::config_document[IL2CPP_STRING("characterSystemTextCaptionFontColor")].GetString());
+		if (auto fontColorTextCommon = UIParts::GetOptionItemSimpleWithButtonTextCommon("character_system_text_caption_font_color"))
+		{
+			fontColorTextCommon.OutlineColor(IL2CPP_STRING("Brown"));
+			if (config::config_document.HasMember(IL2CPP_STRING("characterSystemTextCaptionFontColor")))
+			{
+				fontColorTextCommon.FontColor(config::config_document[IL2CPP_STRING("characterSystemTextCaptionFontColor")].GetString());
+			}
+		}
 
 		UIParts::SetOptionItemButtonAction("character_system_text_caption_font_color", *([](Il2CppObject*)
 			{
 				auto options = GetFontColorOptions();
-				auto& colorValue = config::config_document[IL2CPP_STRING("characterSystemTextCaptionFontColor")];
-				auto value = il2cpp_u8(il2cppstring(colorValue.GetString(), colorValue.GetStringLength()));
-				auto found = find(options.begin(), options.end(), value);
 				int index = 0;
 
-				if (found != options.end())
+				if (config::config_document.HasMember(IL2CPP_STRING("characterSystemTextCaptionFontColor")))
 				{
-					index = found - options.begin();
+					auto& colorValue = config::config_document[IL2CPP_STRING("characterSystemTextCaptionFontColor")];
+					auto value = il2cpp_u8(il2cppstring(colorValue.GetString(), colorValue.GetStringLength()));
+					auto found = ranges::find(options, value);
+
+					if (found != options.end())
+					{
+						index = found - options.begin();
+					}
 				}
 
 				OpenSelectOption(LocalifySettings::GetText("character_system_text_caption_font_color"), options, index,
@@ -1547,22 +1682,31 @@ namespace Localify
 			})
 		);
 
-		auto outlineSizeTextCommon = UIParts::GetOptionItemSimpleWithButtonTextCommon("character_system_text_caption_outline_size");
-		outlineSizeTextCommon.FontColor(IL2CPP_STRING("White"));
-		outlineSizeTextCommon.OutlineColor(IL2CPP_STRING("Brown"));
-		outlineSizeTextCommon.OutlineSize(config::config_document[IL2CPP_STRING("characterSystemTextCaptionOutlineSize")].GetString());
+		if (auto outlineSizeTextCommon = UIParts::GetOptionItemSimpleWithButtonTextCommon("character_system_text_caption_outline_size"))
+		{
+			outlineSizeTextCommon.FontColor(IL2CPP_STRING("White"));
+			outlineSizeTextCommon.OutlineColor(IL2CPP_STRING("Brown"));
+			if (config::config_document.HasMember(IL2CPP_STRING("characterSystemTextCaptionOutlineSize")))
+			{
+				outlineSizeTextCommon.OutlineSize(config::config_document[IL2CPP_STRING("characterSystemTextCaptionOutlineSize")].GetString());
+			}
+		}
 
 		UIParts::SetOptionItemButtonAction("character_system_text_caption_outline_size", *([](Il2CppObject*)
 			{
 				auto options = GetOutlineSizeOptions();
-				auto& sizeValue = config::config_document[IL2CPP_STRING("characterSystemTextCaptionOutlineSize")];
-				auto value = il2cpp_u8(il2cppstring(sizeValue.GetString(), sizeValue.GetStringLength()));
-				auto found = find(options.begin(), options.end(), value);
 				int index = 0;
 
-				if (found != options.end())
+				if (config::config_document.HasMember(IL2CPP_STRING("characterSystemTextCaptionOutlineSize")))
 				{
-					index = found - options.begin();
+					auto& sizeValue = config::config_document[IL2CPP_STRING("characterSystemTextCaptionOutlineSize")];
+					auto value = il2cpp_u8(il2cppstring(sizeValue.GetString(), sizeValue.GetStringLength()));
+					auto found = ranges::find(options, value);
+
+					if (found != options.end())
+					{
+						index = found - options.begin();
+					}
 				}
 
 				OpenSelectOption(LocalifySettings::GetText("character_system_text_caption_outline_size"), options, index,
@@ -1586,20 +1730,29 @@ namespace Localify
 			})
 		);
 
-		auto outlineColorTextCommon = UIParts::GetOptionItemSimpleWithButtonTextCommon("character_system_text_caption_outline_color");
-		outlineColorTextCommon.OutlineColor(config::config_document[IL2CPP_STRING("characterSystemTextCaptionOutlineColor")].GetString());
+		if (auto outlineColorTextCommon = UIParts::GetOptionItemSimpleWithButtonTextCommon("character_system_text_caption_outline_color"))
+		{
+			if (config::config_document.HasMember(IL2CPP_STRING("characterSystemTextCaptionOutlineColor")))
+			{
+				outlineColorTextCommon.OutlineColor(config::config_document[IL2CPP_STRING("characterSystemTextCaptionOutlineColor")].GetString());
+			}
+		}
 
 		UIParts::SetOptionItemButtonAction("character_system_text_caption_outline_color", *([](Il2CppObject*)
 			{
 				auto options = GetOutlineColorOptions();
-				auto& colorValue = config::config_document[IL2CPP_STRING("characterSystemTextCaptionOutlineColor")];
-				auto value = il2cpp_u8(il2cppstring(colorValue.GetString(), colorValue.GetStringLength()));
-				auto found = find(options.begin(), options.end(), value);
 				int index = 0;
 
-				if (found != options.end())
+				if (config::config_document.HasMember(IL2CPP_STRING("characterSystemTextCaptionOutlineColor")))
 				{
-					index = found - options.begin();
+					auto& colorValue = config::config_document[IL2CPP_STRING("characterSystemTextCaptionOutlineColor")];
+					auto value = il2cpp_u8(il2cppstring(colorValue.GetString(), colorValue.GetStringLength()));
+					auto found = ranges::find(options, value);
+
+					if (found != options.end())
+					{
+						index = found - options.begin();
+					}
 				}
 
 				OpenSelectOption(LocalifySettings::GetText("character_system_text_caption_outline_color"), options, index,
@@ -1623,6 +1776,7 @@ namespace Localify
 			})
 		);
 
+#ifdef _MSC_VER
 		UIParts::SetOptionItemOnOffAction("taskbar_show_progress_on_download", taskbarShowProgressOnDownload, *([](Il2CppObject*, bool isOn)
 			{
 			})
@@ -1643,11 +1797,11 @@ namespace Localify
 
 				if (Unity::OpenXR::initialized)
 				{
-					// static auto currentCamera = UnityEngine::Behaviour(il2cpp_resolve_icall_type<Il2CppObject * (*)()>("UnityEngine.Camera::get_current()")());
+					// static auto currentCamera = UnityEngine::Behaviour(il2cpp_resolve_icall_type<Il2CppObject * (*)()>("UnityEngine.Camera::get_current")());
 					//wcout << UnityEngine::Object::Name(currentCamera)->chars << endl;
-					//wcout << il2cpp_resolve_icall_type<float (*)(Il2CppObject*)>("UnityEngine.Camera::get_depth()")(currentCamera) << endl;
+					//wcout << il2cpp_resolve_icall_type<float (*)(Il2CppObject*)>("UnityEngine.Camera::get_depth")(currentCamera) << endl;
 					//Vector3 origPos{};
-					//il2cpp_resolve_icall_type<void (*)(Il2CppObject*, Vector3*)>("UnityEngine.Transform::get_position_Injected()")(currentCamera.gameObject().transform(), &origPos);
+					//il2cpp_resolve_icall_type<void (*)(Il2CppObject*, Vector3*)>("UnityEngine.Transform::get_position_Injected")(currentCamera.gameObject().transform(), &origPos);
 
 					//static auto xrRig = UnityEngine::GameObject(il2cpp_string_new("XRRig"));
 					//
@@ -1667,19 +1821,19 @@ namespace Localify
 					//cameraOffset.transform().SetParent(gameObject.transform(), false);
 					//static auto camera = UnityEngine::Behaviour(gameObject.AddComponent(GetRuntimeType("UnityEngine.CoreModule.dll", "UnityEngine", "Camera")));
 					//UnityEngine::Object::DontDestroyOnLoad(camera);
-					//// il2cpp_resolve_icall_type<Il2CppString* (*)(Il2CppObject*, int)>("UnityEngine.Camera::set_cullingMask()")(camera, 4294967295);
-					//il2cpp_resolve_icall_type<void (*)(Il2CppObject*, bool)>("UnityEngine.Camera::set_allowDynamicResolution()")(camera, true);
+					//// il2cpp_resolve_icall_type<Il2CppString* (*)(Il2CppObject*, int)>("UnityEngine.Camera::set_cullingMask")(camera, 4294967295);
+					//il2cpp_resolve_icall_type<void (*)(Il2CppObject*, bool)>("UnityEngine.Camera::set_allowDynamicResolution")(camera, true);
 
-					//il2cpp_resolve_icall_type<void (*)(Il2CppObject*, Vector3)>("UnityEngine.Transform::set_position_Injected()")(cameraOffset.transform(), origPos);
+					//il2cpp_resolve_icall_type<void (*)(Il2CppObject*, Vector3)>("UnityEngine.Transform::set_position_Injected")(cameraOffset.transform(), origPos);
 
 					auto gameObject = UnityEngine::GameObject();
 					gameObject.tag(il2cpp_string_new("MainCamera"));
 
 					gameObject.AddComponent(GetRuntimeType("UnityEngine.CoreModule.dll", "UnityEngine", "Camera"));
 
-					// il2cpp_resolve_icall_type<void (*)(Il2CppObject*, float)>("UnityEngine.Camera::set_depth()")(camera, 23);
+					// il2cpp_resolve_icall_type<void (*)(Il2CppObject*, float)>("UnityEngine.Camera::set_depth")(camera, 23);
 
-					//il2cpp_resolve_icall_type<Il2CppString* (*)(Il2CppObject*, int)>("UnityEngine.Camera::set_stereoTargetEye()")(camera, 3);
+					//il2cpp_resolve_icall_type<Il2CppString* (*)(Il2CppObject*, int)>("UnityEngine.Camera::set_stereoTargetEye")(camera, 3);
 
 					if (Unity::OpenXR::started)
 					{
@@ -1696,6 +1850,7 @@ namespace Localify
 				}
 			})
 		);
+#endif
 
 		UIParts::SetOptionItemButtonAction("github", *([](Il2CppObject*)
 			{
@@ -1716,6 +1871,7 @@ namespace Localify
 			})
 		);
 
+#ifdef _MSC_VER
 		UIParts::SetOptionItemButtonAction("persistent_data_path", *([](Il2CppObject*)
 			{
 				auto CuteCoreDevice = il2cpp_symbols::get_class("Cute.Core.Assembly.dll", "Cute.Core", "Device");
@@ -1767,13 +1923,14 @@ namespace Localify
 				})
 			);
 		}
+#endif
 
 		auto contentSizeFitter = contentGameObject.AddComponent(GetRuntimeType("umamusume.dll", "Gallop", "LayoutGroupContentSizeFitter"));
 
 		auto _layoutField = il2cpp_class_get_field_from_name(contentSizeFitter->klass, "_layout");
 		il2cpp_field_set_value(contentSizeFitter, _layoutField, verticalLayoutGroup);
 
-		il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*)>(contentSizeFitter->klass, "SetSize", 0)->methodPointer(contentSizeFitter);
+		il2cpp_symbols::get_method_pointer<void (*)(Il2CppObject*)>(contentSizeFitter->klass, "SetSize", 0)(contentSizeFitter);
 
 		dialogData.ContentsObject(gameObject);
 
@@ -1835,22 +1992,22 @@ namespace Localify
 		auto gameObject = UnityEngine::GameObject();
 		auto rootTransform = gameObject.AddComponent(GetRuntimeType("UnityEngine.CoreModule.dll", "UnityEngine", "RectTransform"));
 
-		il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, UnityEngine::Vector2)>(rootTransform->klass, "set_sizeDelta", 1)->methodPointer(rootTransform, UnityEngine::Vector2{ 0, 0 });
+		il2cpp_symbols::get_method_pointer<void (*)(Il2CppObject*, UnityEngine::Vector2)>(rootTransform->klass, "set_sizeDelta", 1)(rootTransform, UnityEngine::Vector2{ 0, 0 });
 
-		il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, UnityEngine::Vector2)>(rootTransform->klass, "set_anchorMax", 1)->methodPointer(rootTransform, UnityEngine::Vector2{ 1, 1 });
+		il2cpp_symbols::get_method_pointer<void (*)(Il2CppObject*, UnityEngine::Vector2)>(rootTransform->klass, "set_anchorMax", 1)(rootTransform, UnityEngine::Vector2{ 1, 1 });
 
-		il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, UnityEngine::Vector2)>(rootTransform->klass, "set_anchorMin", 1)->methodPointer(rootTransform, UnityEngine::Vector2{ 0, 0 });
+		il2cpp_symbols::get_method_pointer<void (*)(Il2CppObject*, UnityEngine::Vector2)>(rootTransform->klass, "set_anchorMin", 1)(rootTransform, UnityEngine::Vector2{ 0, 0 });
 
-		il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, UnityEngine::Vector2)>(rootTransform->klass, "set_pivot", 1)->methodPointer(rootTransform, UnityEngine::Vector2{ 0.5, 0.5 });
+		il2cpp_symbols::get_method_pointer<void (*)(Il2CppObject*, UnityEngine::Vector2)>(rootTransform->klass, "set_pivot", 1)(rootTransform, UnityEngine::Vector2{ 0.5, 0.5 });
 
-		il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, UnityEngine::Vector2)>(rootTransform->klass, "set_anchoredPosition", 1)->methodPointer(rootTransform, UnityEngine::Vector2{ 0, 0 });
+		il2cpp_symbols::get_method_pointer<void (*)(Il2CppObject*, UnityEngine::Vector2)>(rootTransform->klass, "set_anchoredPosition", 1)(rootTransform, UnityEngine::Vector2{ 0, 0 });
 
 		UnityEngine::GameObject scrollViewBase = UnityEngine::ResourcesAPIInternal::Load(il2cpp_string_new("ui/parts/base/scrollviewbase"), GetRuntimeType("UnityEngine.CoreModule.dll", "UnityEngine", "GameObject"));
 
 		auto uiManager = Gallop::UIManager::Instance();
 		Il2CppObject* _mainCanvas = uiManager._mainCanvas();
 
-		auto transform = il2cpp_class_get_method_from_name_type<Il2CppObject * (*)(Il2CppObject*)>(_mainCanvas->klass, "get_transform", 0)->methodPointer(_mainCanvas);
+		auto transform = il2cpp_symbols::get_method_pointer<Il2CppObject * (*)(Il2CppObject*)>(_mainCanvas->klass, "get_transform", 0)(_mainCanvas);
 
 		scrollViewBase = UnityEngine::Object::Internal_CloneSingleWithParent(scrollViewBase, transform, false);
 
@@ -1862,39 +2019,42 @@ namespace Localify
 		Il2CppObject* m_Viewport;
 		il2cpp_field_get_value(scrollRect, m_ViewportField, &m_Viewport);
 
-		UnityEngine::RectTransform scrollRectTransform = il2cpp_class_get_method_from_name_type<Il2CppObject * (*)(Il2CppObject*)>(m_Viewport->klass, "get_parent", 0)->methodPointer(m_Viewport);
-		scrollRectTransform.sizeDelta({ -24, -12 });
-		scrollRectTransform.anchorMax({ 1, 1 });
-		scrollRectTransform.anchorMin({ 0, 0 });
-		scrollRectTransform.pivot({ 0.5, 0.5 });
-		scrollRectTransform.anchoredPosition({ 0, -6 });
+		UnityEngine::RectTransform scrollRectTransform = il2cpp_symbols::get_method_pointer<Il2CppObject * (*)(Il2CppObject*)>(m_Viewport->klass, "get_parent", 0)(m_Viewport);
+		scrollRectTransform.sizeDelta({ .x=-24, .y=-12 });
+		scrollRectTransform.anchorMax({ .x=1, .y=1 });
+		scrollRectTransform.anchorMin({ .x=0, .y=0 });
+		scrollRectTransform.pivot({ .x=0.5, .y=0.5 });
+		scrollRectTransform.anchoredPosition({ .x=0, .y=-6 });
 		scrollRectTransform.SetParent(rootTransform, false);
 
 		auto m_ContentField = il2cpp_class_get_field_from_name(scrollRect->klass, "m_Content");
 		Il2CppObject* m_Content;
 		il2cpp_field_get_value(scrollRect, m_ContentField, &m_Content);
 
-		il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, UnityEngine::Vector2)>(m_Content->klass, "set_sizeDelta", 1)->methodPointer(m_Content, UnityEngine::Vector2{ 56, 0 });
-		il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, UnityEngine::Vector2)>(m_Content->klass, "set_anchorMax", 1)->methodPointer(m_Content, UnityEngine::Vector2{ 1, 1 });
-		il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, UnityEngine::Vector2)>(m_Content->klass, "set_anchorMin", 1)->methodPointer(m_Content, UnityEngine::Vector2{ 0, 1 });
-		il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, UnityEngine::Vector2)>(m_Content->klass, "set_pivot", 1)->methodPointer(m_Content, UnityEngine::Vector2{ 0.5, 1 });
-		il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, UnityEngine::Vector2)>(m_Content->klass, "set_anchoredPosition", 1)->methodPointer(m_Content, UnityEngine::Vector2{ 0, 0 });
+		il2cpp_symbols::get_method_pointer<void (*)(Il2CppObject*, UnityEngine::Vector2)>(m_Content->klass, "set_sizeDelta", 1)(m_Content, UnityEngine::Vector2{ .x=56, .y=0 });
+		il2cpp_symbols::get_method_pointer<void (*)(Il2CppObject*, UnityEngine::Vector2)>(m_Content->klass, "set_anchorMax", 1)(m_Content, UnityEngine::Vector2{ .x=1, .y=1 });
+		il2cpp_symbols::get_method_pointer<void (*)(Il2CppObject*, UnityEngine::Vector2)>(m_Content->klass, "set_anchorMin", 1)(m_Content, UnityEngine::Vector2{ .x=0, .y=1 });
+		il2cpp_symbols::get_method_pointer<void (*)(Il2CppObject*, UnityEngine::Vector2)>(m_Content->klass, "set_pivot", 1)(m_Content, UnityEngine::Vector2{ .x=0.5, .y=1 });
+		il2cpp_symbols::get_method_pointer<void (*)(Il2CppObject*, UnityEngine::Vector2)>(m_Content->klass, "set_anchoredPosition", 1)(m_Content, UnityEngine::Vector2{ .x=0, .y=0 });
 
-		UnityEngine::GameObject contentGameObject = il2cpp_class_get_method_from_name_type<Il2CppObject * (*)(Il2CppObject*)>(m_Content->klass, "get_gameObject", 0)->methodPointer(m_Content);
+		UnityEngine::GameObject contentGameObject = il2cpp_symbols::get_method_pointer<Il2CppObject * (*)(Il2CppObject*)>(m_Content->klass, "get_gameObject", 0)(m_Content);
 
 		auto verticalLayoutGroup = contentGameObject.AddComponent(GetRuntimeType("UnityEngine.UI.dll", "UnityEngine.UI", "VerticalLayoutGroup"));
-		il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, int)>(verticalLayoutGroup->klass, "set_childAlignment", 1)->methodPointer(verticalLayoutGroup, 1);
-		il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, bool)>(verticalLayoutGroup->klass, "set_childForceExpandWidth", 1)->methodPointer(verticalLayoutGroup, true);
-		il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, bool)>(verticalLayoutGroup->klass, "set_childControlWidth", 1)->methodPointer(verticalLayoutGroup, true);
+		il2cpp_symbols::get_method_pointer<void (*)(Il2CppObject*, int)>(verticalLayoutGroup->klass, "set_childAlignment", 1)(verticalLayoutGroup, 1);
+		il2cpp_symbols::get_method_pointer<void (*)(Il2CppObject*, bool)>(verticalLayoutGroup->klass, "set_childForceExpandWidth", 1)(verticalLayoutGroup, true);
+		il2cpp_symbols::get_method_pointer<void (*)(Il2CppObject*, bool)>(verticalLayoutGroup->klass, "set_childControlWidth", 1)(verticalLayoutGroup, true);
 
-		auto padding = il2cpp_class_get_method_from_name_type<Il2CppObject * (*)(Il2CppObject*)>(verticalLayoutGroup->klass, "get_padding", 0)->methodPointer(verticalLayoutGroup);
-		il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, int)>(padding->klass, "set_top", 1)->methodPointer(padding, -20);
-		il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, int)>(padding->klass, "set_bottom", 1)->methodPointer(padding, 16);
+		auto padding = il2cpp_symbols::get_method_pointer<Il2CppObject * (*)(Il2CppObject*)>(verticalLayoutGroup->klass, "get_padding", 0)(verticalLayoutGroup);
+		il2cpp_symbols::get_method_pointer<void (*)(Il2CppObject*, int)>(padding->klass, "set_top", 1)(padding, -20);
+		il2cpp_symbols::get_method_pointer<void (*)(Il2CppObject*, int)>(padding->klass, "set_bottom", 1)(padding, 16);
 
 		bool liveSliderAlwaysShow = false;
 		bool livePlaybackLoop = false;
 		bool championsLiveShowText = false;
-		int championsLiveYear = 2023;
+		int championsLiveYear = 2022;
+
+        string championsResourceText;
+        int championsLiveResourceIndex = -1;
 
 		if (config::read_config())
 		{
@@ -1919,13 +2079,16 @@ namespace Localify
 			{
 				championsLiveYear = configDocument[IL2CPP_STRING("championsLiveYear")].GetInt();
 			}
+
+            if (configDocument.HasMember(IL2CPP_STRING("championsLiveResourceId")))
+            {
+                championsLiveResourceIndex = configDocument[IL2CPP_STRING("championsLiveResourceId")].GetInt() - 1;
+            }
 		}
 
-		string championsResourceText;
-		int championsLiveResourceIndex = config::config_document[IL2CPP_STRING("championsLiveResourceId")].GetInt() - 1;
 		auto championsResources = MasterDB::GetChampionsResources();
 
-		if (championsResources.size() <= championsLiveResourceIndex)
+		if (championsLiveResourceIndex < 0 && championsResources.size() <= championsLiveResourceIndex)
 		{
 			championsResourceText = il2cpp_u8(LocalifySettings::GetText("unknown"));
 		}
@@ -1962,7 +2125,13 @@ namespace Localify
 
 		UIParts::SetOptionItemButtonAction("champions_live_resource_id", *([](Il2CppObject*)
 			{
-				OpenSelectOption(LocalifySettings::GetText("champions_live_resource_id"), MasterDB::GetChampionsResources(), config::config_document[IL2CPP_STRING("championsLiveResourceId")].GetInt() - 1, [](int value) {
+				auto championsLiveResourceIndex = -1;
+				if (config::config_document.HasMember(IL2CPP_STRING("championsLiveResourceId")))
+				{
+					championsLiveResourceIndex = config::config_document[IL2CPP_STRING("championsLiveResourceId")].GetInt() - 1;
+				}
+
+				OpenSelectOption(LocalifySettings::GetText("champions_live_resource_id"), MasterDB::GetChampionsResources(), championsLiveResourceIndex - 1, [](int value) {
 					AddOrSet(config::config_document, IL2CPP_STRING("championsLiveResourceId"), value + 1);
 
 					auto textCommon = UIParts::GetOptionItemSimpleWithButtonTextCommon("champions_live_resource_id");
@@ -1983,7 +2152,13 @@ namespace Localify
 					championsLiveYears.emplace_back(to_string(i));
 				}
 
-				OpenSelectOption(LocalifySettings::GetText("champions_live_year"), championsLiveYears, config::config_document[IL2CPP_STRING("championsLiveYear")].GetInt() - 2022, [](int value) {
+				auto championsLiveYear = 2022;
+				if (config::config_document.HasMember(IL2CPP_STRING("championsLiveYear")))
+				{
+					championsLiveYear = config::config_document[IL2CPP_STRING("championsLiveYear")].GetInt();
+				}
+
+				OpenSelectOption(LocalifySettings::GetText("champions_live_year"), championsLiveYears, championsLiveYear - 2022, [](int value) {
 					AddOrSet(config::config_document, IL2CPP_STRING("championsLiveYear"), value + 2022);
 
 					auto textCommon = UIParts::GetOptionItemSimpleWithButtonTextCommon("champions_live_year");
@@ -2000,7 +2175,7 @@ namespace Localify
 		auto _autoUpdateField = il2cpp_class_get_field_from_name(contentSizeFitter->klass, "_autoUpdate");
 		il2cpp_field_set_value(contentSizeFitter, _autoUpdateField, &_autoUpdate);
 
-		il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*)>(contentSizeFitter->klass, "SetSize", 0)->methodPointer(contentSizeFitter);
+		il2cpp_symbols::get_method_pointer<void (*)(Il2CppObject*)>(contentSizeFitter->klass, "SetSize", 0)(contentSizeFitter);
 
 		dialogData.ContentsObject(gameObject);
 

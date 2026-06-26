@@ -3,7 +3,7 @@
 
 namespace UnityEngine::UI
 {
-	class MaskableGraphic abstract : public Graphic
+	class MaskableGraphic : public Graphic
 	{
 	public:
 		using Graphic::Graphic;

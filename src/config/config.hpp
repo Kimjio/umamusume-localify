@@ -1,7 +1,5 @@
 #pragma once
 
-#include <Shlwapi.h>
-
 #include <filesystem>
 #include <fstream>
 #include <iostream>
@@ -26,8 +24,6 @@
 #include "experiments.h"
 
 using namespace std;
-
-typedef rapidjson::BasicIStreamWrapper<il2cppistream> U16IStreamWrapper;
 
 typedef rapidjson::UTF16<Il2CppChar> UTF16;
 typedef rapidjson::GenericDocument<UTF16> U16Document;
@@ -113,7 +109,9 @@ namespace config
 	extern float cyspring_move_rate_scale;
 	extern float cyspring_add_move_rate_scale;
 	extern bool hide_now_loading;
+#ifdef _MSC_VER
 	extern bool discord_rich_presence;
+#endif
 	extern bool allow_delete_cookie;
 	extern il2cppstring localify_settings_language;
 	extern bool dump_msgpack;
@@ -149,7 +147,9 @@ namespace config
 	extern bool has_json_parse_error;
 	extern il2cppstring json_parse_error_msg;
 
+#ifdef _MSC_VER
 	extern vector<il2cppstring> external_dlls_path;
+#endif
 	extern vector<il2cppstring> dicts;
 
 	extern U16Document config_document;

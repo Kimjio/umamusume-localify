@@ -1,3 +1,4 @@
+#ifdef _MSC_VER
 #include "../umamusume.hpp"
 #include "../../ScriptInternal.hpp"
 #include "WindowsGamepadControl.hpp"
@@ -12,11 +13,11 @@ namespace
 {
 	Il2CppClass* WindowsGamepadControl_klass = nullptr;
 
-	void* WindowsGamepadControl_UpdateInputControls_addr = nullptr;
+	Il2CppMethodPointer WindowsGamepadControl_UpdateInputControls_addr = nullptr;
 	
-	void* WindowsGamepadControl_ReleaseRenderTexture_addr = nullptr;
+	Il2CppMethodPointer WindowsGamepadControl_ReleaseRenderTexture_addr = nullptr;
 
-	void* WindowsGamepadControl_CreateRenderTextureFromScreen_addr = nullptr;
+	Il2CppMethodPointer WindowsGamepadControl_CreateRenderTextureFromScreen_addr = nullptr;
 	void* WindowsGamepadControl_CreateRenderTextureFromScreen_orig = nullptr;
 
 	FieldInfo* WindowsGamepadControl__softwareCursorUiTexture = nullptr;
@@ -52,7 +53,7 @@ static void WindowsGamepadControl_CreateRenderTextureFromScreen_hook(Il2CppObjec
 		return;
 	}
 
-	il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, Il2CppObject*)>(softwareCursorUiCamera->klass, "set_targetTexture", 1)->methodPointer(softwareCursorUiCamera, renderTexture);
+	il2cpp_symbols::get_method_pointer<void (*)(Il2CppObject*, Il2CppObject*)>(softwareCursorUiCamera->klass, "set_targetTexture", 1)(softwareCursorUiCamera, renderTexture);
 
 	UnityEngine::Behaviour(softwareCursorUiCamera).enabled(false);
 }
@@ -66,6 +67,12 @@ static void InitAddress()
 		WindowsGamepadControl_klass = il2cpp_symbols::get_class(ASSEMBLY_NAME, Gallop::WindowsGamepadControl::namespaze, Gallop::WindowsGamepadControl::klassNameLegacy);
 		WindowsGamepadControl_CreateRenderTextureFromScreen_addr = il2cpp_symbols::get_method_pointer(WindowsGamepadControl_klass, "CreateRenderTextureFromScreen", 0);
 	}
+
+	if (!WindowsGamepadControl_klass)
+	{
+		return;
+	}
+
 	WindowsGamepadControl__softwareCursorUiTexture = il2cpp_class_get_field_from_name(WindowsGamepadControl_klass, "_softwareCursorUiTexture");
 	WindowsGamepadControl__softwareCursorUiCamera = il2cpp_class_get_field_from_name(WindowsGamepadControl_klass, "_softwareCursorUiCamera");
 	WindowsGamepadControl_UpdateInputControls_addr = il2cpp_symbols::get_method_pointer(WindowsGamepadControl_klass, "UpdateInputControls", 0);
@@ -102,3 +109,4 @@ namespace Gallop
 		reinterpret_cast<void (*)(Il2CppObject*)>(WindowsGamepadControl_UpdateInputControls_addr)(instance);
 	}
 }
+#endif

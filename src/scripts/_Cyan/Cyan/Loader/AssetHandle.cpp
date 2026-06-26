@@ -6,7 +6,7 @@
 
 namespace
 {
-	void* AssetHandle_LoadAsset_addr = nullptr;
+	Il2CppMethodPointer AssetHandle_LoadAsset_addr = nullptr;
 	void* AssetHandle_LoadAsset_orig = nullptr;
 }
 
@@ -19,7 +19,7 @@ static void InitAddress()
 {
 	if (auto methodInfo = GetGenericMethod(il2cpp_symbols::get_method(ASSEMBLY_NAME, "Cyan.Loader", "AssetHandle", "LoadAsset", 2), GetRuntimeType("UnityEngine.TextRenderingModule.dll", "UnityEngine", "Font")))
 	{
-		AssetHandle_LoadAsset_addr = methodInfo->methodPointer;
+		AssetHandle_LoadAsset_addr = il2cpp_symbols::get_method_pointer(methodInfo);
 	}
 }
 

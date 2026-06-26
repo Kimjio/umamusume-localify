@@ -7,14 +7,14 @@
 
 namespace
 {
-	void* Localize_Get_addr = nullptr;
+	Il2CppMethodPointer Localize_Get_addr = nullptr;
 
-	void* Localize_Get1_addr = nullptr;
+	Il2CppMethodPointer Localize_Get1_addr = nullptr;
 
-	void* Localize_JP_Get_addr = nullptr;
+	Il2CppMethodPointer Localize_JP_Get_addr = nullptr;
 	void* Localize_JP_Get_orig = nullptr;
 
-	void* Localize_Set_addr = nullptr;
+	Il2CppMethodPointer Localize_Set_addr = nullptr;
 }
 
 static Il2CppString* Localize_JP_Get_hook(uint64_t id)

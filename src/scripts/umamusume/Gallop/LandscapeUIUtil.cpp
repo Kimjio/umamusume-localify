@@ -1,3 +1,4 @@
+#ifdef _MSC_VER
 #include "../umamusume.hpp"
 #include "../../ScriptInternal.hpp"
 #include "LandscapeUIUtil.hpp"
@@ -6,10 +7,10 @@
 
 namespace
 {
-	void* LandscapeUIUtil_ActivateWhiteMaskExcludeLog_addr = nullptr;
+	Il2CppMethodPointer LandscapeUIUtil_ActivateWhiteMaskExcludeLog_addr = nullptr;
 	void* LandscapeUIUtil_ActivateWhiteMaskExcludeLog_orig = nullptr;
 
-	void* LandscapeUIUtil_DeactivateWhiteMaskExcludeLog_addr = nullptr;
+	Il2CppMethodPointer LandscapeUIUtil_DeactivateWhiteMaskExcludeLog_addr = nullptr;
 	void* LandscapeUIUtil_DeactivateWhiteMaskExcludeLog_orig = nullptr;
 }
 
@@ -48,3 +49,4 @@ STATIC
 namespace Gallop
 {
 }
+#endif

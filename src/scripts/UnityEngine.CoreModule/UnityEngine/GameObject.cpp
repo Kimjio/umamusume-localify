@@ -8,36 +8,32 @@ namespace
 {
 	Il2CppClass* GameObject_klass;
 
-	void* Internal_CreateGameObject_addr = nullptr;
+	Il2CppMethodPointer Internal_CreateGameObject_addr = nullptr;
 
-	void* Internal_AddComponentWithType_addr = nullptr;
+	Il2CppMethodPointer Internal_AddComponentWithType_addr = nullptr;
 
 	void* Internal_AddComponentWithType_orig = nullptr;
 
-	void* GetComponentFastPath_addr = nullptr;
+	Il2CppMethodPointer GetComponentFastPath_addr = nullptr;
 
-	void* GetComponentFastPath_orig = nullptr;
+	Il2CppMethodPointer TryGetComponentFastPath_addr = nullptr;
 
-	void* TryGetComponentFastPath_addr = nullptr;
+	Il2CppMethodPointer GetComponent_addr = nullptr;
 
-	void* TryGetComponentFastPath_orig = nullptr;
+	Il2CppMethodPointer GetComponentInChildren_addr = nullptr;
 
-	void* GetComponent_addr = nullptr;
+	Il2CppMethodPointer GetComponentsInternal_addr = nullptr;
 
-	void* GetComponentInChildren_addr = nullptr;
+	Il2CppMethodPointer GameObject_get_transform_addr = nullptr;
 
-	void* GetComponentsInternal_addr = nullptr;
+	Il2CppMethodPointer get_tag_addr = nullptr;
 
-	void* GameObject_get_transform_addr = nullptr;
+	Il2CppMethodPointer set_tag_addr = nullptr;
 
-	void* get_tag_addr = nullptr;
-
-	void* set_tag_addr = nullptr;
-
-	void* SetActive_addr = nullptr;
+	Il2CppMethodPointer SetActive_addr = nullptr;
 	void* SetActive_orig = nullptr;
 
-	void* Find_addr = nullptr;
+	Il2CppMethodPointer Find_addr = nullptr;
 
 	Il2CppClass* FlashActionPlayerClass;
 }
@@ -50,7 +46,7 @@ struct CastHelper
 
 static void GetComponentFastPath_hook(Il2CppObject* self, Il2CppObject* runtimeType, uintptr_t oneFurtherThanResultValue)
 {
-	reinterpret_cast<decltype(GetComponentFastPath_hook)*>(GetComponentFastPath_orig)(self, runtimeType, oneFurtherThanResultValue);
+	reinterpret_cast<decltype(GetComponentFastPath_hook)*>(GetComponentFastPath_addr)(self, runtimeType, oneFurtherThanResultValue);
 
 	auto helper = reinterpret_cast<CastHelper*>(oneFurtherThanResultValue - sizeof(Il2CppObject*));
 
@@ -64,6 +60,7 @@ static void GetComponentFastPath_hook(Il2CppObject* self, Il2CppObject* runtimeT
 
 			if (_flashPrefabPath)
 			{
+#ifdef _MSC_VER
 				il2cppstringstream pathStream(_flashPrefabPath->chars);
 				il2cppstring segment;
 				vector<il2cppstring> splited;
@@ -73,6 +70,17 @@ static void GetComponentFastPath_hook(Il2CppObject* self, Il2CppObject* runtimeT
 				}
 
 				auto& fileName = splited.back();
+#else
+				stringstream pathStream(il2cpp_u8(_flashPrefabPath->chars));
+				string segment;
+				vector<string> splited;
+				while (getline(pathStream, segment, '/'))
+				{
+					splited.emplace_back(segment);
+				}
+
+				auto fileName = u8_il2cpp(splited.back());
+#endif
 				if (find_if(config::runtime::replaceAssetNames.begin(), config::runtime::replaceAssetNames.end(), [fileName](const il2cppstring& item)
 					{
 						return item.find(fileName) != wstring::npos;
@@ -93,7 +101,7 @@ static void GetComponentFastPath_hook(Il2CppObject* self, Il2CppObject* runtimeT
 
 static void TryGetComponentFastPath_hook(Il2CppObject* self, Il2CppObject* runtimeType, uintptr_t oneFurtherThanResultValue)
 {
-	reinterpret_cast<decltype(TryGetComponentFastPath_hook)*>(TryGetComponentFastPath_orig)(self, runtimeType, oneFurtherThanResultValue);
+	reinterpret_cast<decltype(TryGetComponentFastPath_hook)*>(TryGetComponentFastPath_addr)(self, runtimeType, oneFurtherThanResultValue);
 
 	auto helper = reinterpret_cast<CastHelper*>(oneFurtherThanResultValue - sizeof(Il2CppObject*));
 
@@ -102,10 +110,10 @@ static void TryGetComponentFastPath_hook(Il2CppObject* self, Il2CppObject* runti
 		if (helper->obj->klass->name == "CameraData"s)
 		{
 			auto data = helper->obj;
-			if (!il2cpp_class_get_method_from_name_type<bool (*)(Il2CppObject*)>(data->klass, "get_IsUIRendering", 0)->methodPointer(data))
+			if (!il2cpp_symbols::get_method_pointer<bool (*)(Il2CppObject*)>(data->klass, "get_IsUIRendering", 0)(data))
 			{
-				il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, int)>(data->klass, "set_RenderingAntiAliasing", 1)->methodPointer(data, config::anti_aliasing);
-				il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, bool)>(data->klass, "set_IsCreateAntialiasTexture", 1)->methodPointer(data, true);
+				il2cpp_symbols::get_method_pointer<void (*)(Il2CppObject*, int)>(data->klass, "set_RenderingAntiAliasing", 1)(data, config::anti_aliasing);
+				il2cpp_symbols::get_method_pointer<void (*)(Il2CppObject*, bool)>(data->klass, "set_IsCreateAntialiasTexture", 1)(data, true);
 			}
 		}
 	}
@@ -114,26 +122,27 @@ static void TryGetComponentFastPath_hook(Il2CppObject* self, Il2CppObject* runti
 static void InitAddress()
 {
 	GameObject_klass = il2cpp_symbols::get_class(ASSEMBLY_NAME, "UnityEngine", "GameObject");
-	Internal_CreateGameObject_addr = il2cpp_resolve_icall("UnityEngine.GameObject::Internal_CreateGameObject()");
-	Internal_AddComponentWithType_addr = il2cpp_resolve_icall("UnityEngine.GameObject::Internal_AddComponentWithType()");
-	GetComponentFastPath_addr = il2cpp_resolve_icall("UnityEngine.GameObject::GetComponentFastPath()");
-	TryGetComponentFastPath_addr = il2cpp_resolve_icall("UnityEngine.GameObject::TryGetComponentFastPath()");
-	GetComponent_addr = il2cpp_resolve_icall("UnityEngine.GameObject::GetComponent()");
-	GetComponentInChildren_addr = il2cpp_resolve_icall("UnityEngine.GameObject::GetComponentInChildren()");
-	GetComponentsInternal_addr = il2cpp_resolve_icall("UnityEngine.GameObject::GetComponentsInternal()");
-	GameObject_get_transform_addr = il2cpp_resolve_icall("UnityEngine.GameObject::get_transform()");
-	get_tag_addr = il2cpp_resolve_icall("UnityEngine.GameObject::get_tag()");
-	set_tag_addr = il2cpp_resolve_icall("UnityEngine.GameObject::set_tag()");
-	SetActive_addr = il2cpp_resolve_icall("UnityEngine.GameObject::SetActive()");
-	Find_addr = il2cpp_resolve_icall("UnityEngine.GameObject::Find()");
+	Internal_CreateGameObject_addr = il2cpp_resolve_icall("UnityEngine.GameObject::Internal_CreateGameObject");
+	Internal_AddComponentWithType_addr = il2cpp_resolve_icall("UnityEngine.GameObject::Internal_AddComponentWithType");
+	GetComponentFastPath_addr = il2cpp_resolve_icall("UnityEngine.GameObject::GetComponentFastPath");
+	TryGetComponentFastPath_addr = il2cpp_resolve_icall("UnityEngine.GameObject::TryGetComponentFastPath");
+	GetComponent_addr = il2cpp_resolve_icall("UnityEngine.GameObject::GetComponent");
+	GetComponentInChildren_addr = il2cpp_resolve_icall("UnityEngine.GameObject::GetComponentInChildren");
+	GetComponentsInternal_addr = il2cpp_resolve_icall("UnityEngine.GameObject::GetComponentsInternal");
+	GameObject_get_transform_addr = il2cpp_resolve_icall("UnityEngine.GameObject::get_transform");
+	get_tag_addr = il2cpp_resolve_icall("UnityEngine.GameObject::get_tag");
+	set_tag_addr = il2cpp_resolve_icall("UnityEngine.GameObject::set_tag");
+	SetActive_addr = il2cpp_resolve_icall("UnityEngine.GameObject::SetActive");
+	Find_addr = il2cpp_resolve_icall("UnityEngine.GameObject::Find");
 
 	FlashActionPlayerClass = il2cpp_symbols::get_class("umamusume.dll", "Gallop", "FlashActionPlayer");
 }
 
 static void HookMethods()
 {
-	ADD_HOOK(GetComponentFastPath, "UnityEngine.GameObject::GetComponentFastPath at %p\n");
-	// ADD_HOOK(TryGetComponentFastPath, "UnityEngine.GameObject::TryGetComponentFastPath at %p\n");
+	il2cpp_add_internal_call("UnityEngine.GameObject::GetComponentFastPath", reinterpret_cast<Il2CppMethodPointer>(GetComponentFastPath_hook));
+	// il2cpp_add_internal_call("UnityEngine.GameObject::TryGetComponentFastPath", reinterpret_cast<Il2CppMethodPointer>(TryGetComponentFastPath_hook));
+
 }
 
 STATIC

@@ -6,15 +6,15 @@ namespace
 {
 	Il2CppClass* Display_klass = nullptr;
 
-	void* Display_get_main_addr = nullptr;
+	Il2CppMethodPointer Display_get_main_addr = nullptr;
 
-	void* Display_get_renderingWidth_addr = nullptr;
+	Il2CppMethodPointer Display_get_renderingWidth_addr = nullptr;
 
-	void* Display_get_renderingHeight_addr = nullptr;
+	Il2CppMethodPointer Display_get_renderingHeight_addr = nullptr;
 
-	void* Display_get_systemWidth_addr = nullptr;
+	Il2CppMethodPointer Display_get_systemWidth_addr = nullptr;
 
-	void* Display_get_systemHeight_addr = nullptr;
+	Il2CppMethodPointer Display_get_systemHeight_addr = nullptr;
 }
 
 static void InitAddress()

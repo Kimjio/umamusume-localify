@@ -1,6 +1,7 @@
 #pragma once
 #include "il2cpp/il2cpp_symbols.hpp"
 
+#include "EnabledOrientation.hpp"
 #include "ScreenOrientation.hpp"
 #include "Resolution.hpp"
 #include "FullScreenMode.hpp"
@@ -23,6 +24,16 @@ namespace UnityEngine
 		static bool fullScreen();
 
 		static Resolution currentResolution();
+
+        static void autorotateToPortrait(bool value);
+
+		static void autorotateToPortraitUpsideDown(bool value);
+
+		static void autorotateToLandscapeLeft(bool value);
+
+		static void autorotateToLandscapeRight(bool value);
+
+		static void SetOrientationEnabled(EnabledOrientation orient, bool enabled);
 
 		static void RequestOrientation(ScreenOrientation orientation);
 

@@ -6,21 +6,22 @@
 
 namespace
 {
-	void* GameSystem_InitializeApplication_addr = nullptr;
+	Il2CppMethodPointer GameSystem_InitializeApplication_addr = nullptr;
 	void* GameSystem_InitializeApplication_orig = nullptr;
 
-	void* GameSystem_InitializeGame_addr = nullptr;
-	void* GameSystem_InitializeGame1_addr = nullptr;
+	Il2CppMethodPointer GameSystem_InitializeGame_addr = nullptr;
+	Il2CppMethodPointer GameSystem_InitializeGame1_addr = nullptr;
 
-	void* GameSystem_IsExecutingSoftwareReset_addr = nullptr;
+	Il2CppMethodPointer GameSystem_IsExecutingSoftwareReset_addr = nullptr;
 
-	void* GameSystem_SoftwareReset_addr = nullptr;
+	Il2CppMethodPointer GameSystem_SoftwareReset_addr = nullptr;
 
 	FieldInfo* GameSystem__systemStateField = nullptr;
 }
 
 static void GameSystem_InitializeApplication_hook()
 {
+#ifdef _MSC_VER
 	if (Game::CurrentGameRegion == Game::Region::KOR)
 	{
 		auto CuteCoreDevice = il2cpp_symbols::get_class("Cute.Core.Assembly.dll", "Cute.Core", "Device");
@@ -49,6 +50,7 @@ static void GameSystem_InitializeApplication_hook()
 			il2cpp_field_static_set_value(persistentDataPathField, il2cpp_string_new16(config::persistent_data_path.data()));
 		}
 	}
+#endif
 
 	reinterpret_cast<decltype(GameSystem_InitializeApplication_hook)*>(GameSystem_InitializeApplication_orig)();
 

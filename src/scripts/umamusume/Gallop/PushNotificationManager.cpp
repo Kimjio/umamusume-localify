@@ -11,9 +11,9 @@
 
 namespace
 {
-	void* MakeNotificationId_addr = nullptr;
-	void* createFavIconFilePath_addr = nullptr;
-	void* legacy_createFavIconFilePath_addr = nullptr;
+	Il2CppMethodPointer MakeNotificationId_addr = nullptr;
+	Il2CppMethodPointer createFavIconFilePath_addr = nullptr;
+	Il2CppMethodPointer legacy_createFavIconFilePath_addr = nullptr;
 }
 
 static void InitAddress()

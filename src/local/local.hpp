@@ -1,8 +1,8 @@
 #pragma once
 
-#include <string>
+#include <cstddef>
 #include <vector>
-#include "il2cpp/il2cpp_symbols.hpp"
+#include "il2cpp/il2cpp-api-types.h"
 
 namespace local
 {
@@ -16,4 +16,4 @@ namespace local
 	Il2CppString* get_localized_string(const il2cppstring& textIdName);
 	Il2CppString* get_localized_string(Il2CppString* str);
 	const char* get_localized_string(const char* str);
-};
+}

@@ -16,9 +16,9 @@
 
 #include "masterdb/masterdb.hpp"
 
-#include "hook.h"
-
+#ifdef _MSC_VER
 #include "notification/DesktopNotificationManagerCompat.h"
+#endif
 
 #include "msgpack_data.hpp"
 

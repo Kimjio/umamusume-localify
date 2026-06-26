@@ -1,3 +1,4 @@
+#ifdef _MSC_VER
 #include "../umamusume.hpp"
 #include "../../ScriptInternal.hpp"
 #include "Header.hpp"
@@ -10,7 +11,7 @@
 
 namespace
 {
-	void* Header_Initialize_addr = nullptr;
+	Il2CppMethodPointer Header_Initialize_addr = nullptr;
 	void* Header_Initialize_orig = nullptr;
 }
 
@@ -26,7 +27,7 @@ static void Header_Initialize_hook(Il2CppObject* self)
 
 		UnityEngine::MonoBehaviour(_menuButton).gameObject().SetActive(true);
 
-		il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, Il2CppDelegate*)>(_menuButton->klass, "SetOnClick", 1)->methodPointer(_menuButton,
+		il2cpp_symbols::get_method_pointer<void (*)(Il2CppObject*, Il2CppDelegate*)>(_menuButton->klass, "SetOnClick", 1)(_menuButton,
 			&CreateUnityAction(self, *[](Il2CppObject* self)
 				{
 					il2cpp_symbols::get_method_pointer<void (*)(Il2CppObject*, Il2CppObject*, Gallop::DialogCommon::DispStackType, Gallop::DialogCommonBase::FormType)>(ASSEMBLY_NAME, "Gallop", "DialogHomeMenuMain", "Open", 4)(nullptr, nullptr, Gallop::DialogCommon::DispStackType::DialogOnDialog, Gallop::DialogCommonBase::FormType::BIG_ONE_BUTTON);
@@ -53,3 +54,4 @@ STATIC
 	il2cpp_symbols::init_callbacks.emplace_back(InitAddress);
 	il2cpp_symbols::init_callbacks.emplace_back(HookMethods);
 }
+#endif

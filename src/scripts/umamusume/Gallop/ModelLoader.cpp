@@ -4,7 +4,7 @@
 
 namespace
 {
-	void* ModelLoader_LoadZekkenCompositeResourceInternal_addr = nullptr;
+	Il2CppMethodPointer ModelLoader_LoadZekkenCompositeResourceInternal_addr = nullptr;
 	void* ModelLoader_LoadZekkenCompositeResourceInternal_orig = nullptr;
 }
 
@@ -29,7 +29,10 @@ static void InitAddress()
 
 static void HookMethods()
 {
-	ADD_HOOK(ModelLoader_LoadZekkenCompositeResourceInternal, "Gallop.ModelLoader::LoadZekkenCompositeResourceInternal at %p\n");
+	if (config::replace_to_custom_font && config::runtime::fontAssets)
+	{
+		ADD_HOOK(ModelLoader_LoadZekkenCompositeResourceInternal, "Gallop.ModelLoader::LoadZekkenCompositeResourceInternal at %p\n");
+	}
 }
 
 STATIC

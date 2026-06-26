@@ -765,7 +765,7 @@ namespace
 			delayTweener = il2cpp_symbols::get_method_pointer<Il2CppObject * (*)(float, Il2CppDelegate*, bool)>("DOTween.dll", "DG.Tweening", "DOVirtual", "DelayedCall", 3)(0.05, &callback->delegate, true);
 		}
 
-		auto controller = GetCurrentViewController();
+		auto controller = Gallop::SceneManager::Instance().GetCurrentViewController();
 
 		if (controller)
 		{
@@ -1067,7 +1067,7 @@ namespace
 											{
 												if (array2->max_length > 0)
 												{
-													auto controller = GetCurrentViewController();
+													auto controller = Gallop::SceneManager::Instance().GetCurrentViewController();
 
 													auto _wipeControllerField = il2cpp_class_get_field_from_name(controller->klass, "_wipeController");
 													Il2CppObject* _wipeController;
@@ -1899,7 +1899,7 @@ namespace
 			{
 				bool isPauseLive = il2cpp_class_get_method_from_name_type<bool (*)()>(director->klass, "IsPauseLive", 0)->methodPointer();
 
-				auto controller = GetCurrentViewController();
+				auto controller = Gallop::SceneManager::Instance().GetCurrentViewController();
 				if (controller)
 				{
 					if (isPauseLive)
@@ -3330,7 +3330,7 @@ namespace
 
 				if (sceneName == IL2CPP_STRING("Live"))
 				{
-					auto controller = GetCurrentViewController();
+					auto controller = Gallop::SceneManager::Instance().GetCurrentViewController();
 
 					if (controller && controller->klass->name == "LiveViewController"s)
 					{
@@ -3471,7 +3471,7 @@ namespace
 
 					if (sceneName == IL2CPP_STRING("Live"))
 					{
-						auto controller = GetCurrentViewController();
+						auto controller = Gallop::SceneManager::Instance().GetCurrentViewController();
 
 						if (controller && controller->klass->name == "LiveViewController"s)
 						{
@@ -3706,7 +3706,7 @@ namespace
 						case winrt::Windows::Media::SystemMediaTransportControlsButton::Play:
 							WaitForEndOfFrame(*[]()
 								{
-									auto controller = GetCurrentViewController();
+									auto controller = Gallop::SceneManager::Instance().GetCurrentViewController();
 									auto hubViewController = GetCurrentHubViewChildController();
 
 									if (hubViewController && hubViewController->klass->name == "HomeViewController"s)
@@ -3745,7 +3745,7 @@ namespace
 						case winrt::Windows::Media::SystemMediaTransportControlsButton::Pause:
 							WaitForEndOfFrame(*[]()
 								{
-									auto controller = GetCurrentViewController();
+									auto controller = Gallop::SceneManager::Instance().GetCurrentViewController();
 									auto hubViewController = GetCurrentHubViewChildController();
 
 									if (hubViewController && hubViewController->klass->name == "HomeViewController"s)
@@ -3764,7 +3764,7 @@ namespace
 						case winrt::Windows::Media::SystemMediaTransportControlsButton::Previous:
 							WaitForEndOfFrame(*[]()
 								{
-									auto controller = GetCurrentViewController();
+									auto controller = Gallop::SceneManager::Instance().GetCurrentViewController();
 									auto hubViewController = GetCurrentHubViewChildController();
 
 									if (hubViewController && hubViewController->klass->name == "HomeViewController"s)
@@ -3778,7 +3778,7 @@ namespace
 						case winrt::Windows::Media::SystemMediaTransportControlsButton::Next:
 							WaitForEndOfFrame(*[]()
 								{
-									auto controller = GetCurrentViewController();
+									auto controller = Gallop::SceneManager::Instance().GetCurrentViewController();
 									auto hubViewController = GetCurrentHubViewChildController();
 
 									if (hubViewController && hubViewController->klass->name == "HomeViewController"s)
@@ -3831,16 +3831,14 @@ namespace
 					SetWindowLongPtrW(hWnd, GWL_STYLE, style);
 				}
 
-				auto active = il2cpp_symbols::get_method_pointer<UnityEngine::SceneManagement::Scene(*)()>("UnityEngine.CoreModule.dll", "UnityEngine.SceneManagement", "SceneManager", "GetActiveScene", IgnoreNumberOfArguments)();
+				auto sceneManager = Gallop::SceneManager::Instance();
 
-				auto handleName = il2cpp_symbols::get_method_pointer<Il2CppString * (*)(int)>("UnityEngine.CoreModule.dll", "UnityEngine.SceneManagement", "Scene", "GetNameInternal", 1)(active.handle);
-
-				if (!handleName)
-				{
+				if (!sceneManager) {
+					Gallop::StandaloneWindowResize::IsVirt(!Gallop::Screen::IsLandscapeMode());
 					return;
 				}
 
-				il2cppstring sceneName = handleName->chars;
+				il2cppstring sceneName = sceneManager.GetCurrentSceneIdName()->chars;
 
 				auto uiManager = Gallop::UIManager::Instance();
 
@@ -3874,11 +3872,6 @@ namespace
 						}
 					}
 				}*/
-
-				if (sceneName == IL2CPP_STRING("_Boot"))
-				{
-					Gallop::StandaloneWindowResize::IsVirt(!Gallop::Screen::IsLandscapeMode());
-				}
 
 				if (sceneName == IL2CPP_STRING("Title"))
 				{

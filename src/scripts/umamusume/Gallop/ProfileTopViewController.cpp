@@ -6,19 +6,20 @@
 #include "DialogManager.hpp"
 #include "TextCommon.hpp"
 #include "Localize.hpp"
+#include "SceneManager.hpp"
 
 #include "scripts/Plugins/CodeStage/AntiCheat/ObscuredTypes/ObscuredLong.hpp"
 
 namespace
 {
-	void* ProfileTopViewController_SetupUI_addr = nullptr;
+	Il2CppMethodPointer ProfileTopViewController_SetupUI_addr = nullptr;
 	void* ProfileTopViewController_SetupUI_orig = nullptr;
 }
 
 static void ProfileTopViewController_SetupUI_hook(Il2CppObject* self)
 {
 	reinterpret_cast<decltype(ProfileTopViewController_SetupUI_hook)*>(ProfileTopViewController_SetupUI_orig)(self);
-	auto view = il2cpp_class_get_method_from_name_type<Il2CppObject * (*)(Il2CppObject*)>(self->klass, "GetViewBase", 0)->methodPointer(self);
+	auto view = il2cpp_symbols::get_method_pointer<Il2CppObject * (*)(Il2CppObject*)>(self->klass, "GetViewBase", 0)(self);
 
 	auto ViewerIdTextField = il2cpp_class_get_field_from_name(view->klass, "ViewerIdText");
 	Il2CppObject* ViewerIdText;
@@ -35,10 +36,10 @@ static void ProfileTopViewController_SetupUI_hook(Il2CppObject* self)
 
 	auto workDataManager = GetSingletonInstance(il2cpp_symbols::get_class(ASSEMBLY_NAME, "Gallop", "WorkDataManager"));
 
-	auto workUserData = il2cpp_class_get_method_from_name_type<Il2CppObject * (*)(Il2CppObject*)>(workDataManager->klass, "get_UserData", 0)->methodPointer(workDataManager);
-	auto viewerIdStringObscured = il2cpp_class_get_method_from_name_type<Il2CppObject * (*)(Il2CppObject*)>(workUserData->klass, "get_ViewerIdString", 0)->methodPointer(workUserData);
+	auto workUserData = il2cpp_symbols::get_method_pointer<Il2CppObject * (*)(Il2CppObject*)>(workDataManager->klass, "get_UserData", 0)(workDataManager);
+	auto viewerIdStringObscured = il2cpp_symbols::get_method_pointer<Il2CppObject * (*)(Il2CppObject*)>(workUserData->klass, "get_ViewerIdString", 0)(workUserData);
 
-	auto viewerId = il2cpp_class_get_method_from_name_type<Il2CppString * (*)(Il2CppObject*)>(viewerIdStringObscured->klass, "InternalDecrypt", 0)->methodPointer(viewerIdStringObscured);
+	auto viewerId = il2cpp_symbols::get_method_pointer<Il2CppString * (*)(Il2CppObject*)>(viewerIdStringObscured->klass, "InternalDecrypt", 0)(viewerIdStringObscured);
 
 	if (viewerId)
 	{
@@ -53,8 +54,8 @@ static void ProfileTopViewController_SetupUI_hook(Il2CppObject* self)
 				{
 					auto workDataManager = GetSingletonInstance(il2cpp_symbols::get_class(ASSEMBLY_NAME, "Gallop", "WorkDataManager"));
 
-					auto workUserData = il2cpp_class_get_method_from_name_type<Il2CppObject * (*)(Il2CppObject*)>(workDataManager->klass, "get_UserData", 0)->methodPointer(workDataManager);
-					auto viewerIdObscured = il2cpp_class_get_method_from_name_type<CodeStage::AntiCheat::ObscuredTypes::ObscuredLong(*)(Il2CppObject*)>(workUserData->klass, "get_ViewerId", 0)->methodPointer(workUserData);
+					auto workUserData = il2cpp_symbols::get_method_pointer<Il2CppObject * (*)(Il2CppObject*)>(workDataManager->klass, "get_UserData", 0)(workDataManager);
+					auto viewerIdObscured = il2cpp_symbols::get_method_pointer<CodeStage::AntiCheat::ObscuredTypes::ObscuredLong(*)(Il2CppObject*)>(workUserData->klass, "get_ViewerId", 0)(workUserData);
 					auto viewerId = viewerIdObscured.GetDecrypted();
 
 					il2cpp_symbols::get_method_pointer<void (*)(Il2CppString*)>("UnityEngine.IMGUIModule.dll", "UnityEngine", "GUIUtility", "set_systemCopyBuffer", 1)(il2cpp_string_new(to_string(viewerId).data()));
@@ -67,8 +68,8 @@ static void ProfileTopViewController_SetupUI_hook(Il2CppObject* self)
 
 			auto playerIdCopyFn = *[](void*)
 				{
-					auto controller = GetCurrentViewController();
-					il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*)>(controller->klass, "OnClickCopyIdButton", 0)->methodPointer(controller);
+					auto controller = Gallop::SceneManager::Instance().GetCurrentViewController();
+					il2cpp_symbols::get_method_pointer<void (*)(Il2CppObject*)>(controller->klass, "OnClickCopyIdButton", 0)(controller);
 				};
 
 			auto dialogData = Gallop::DialogCommon::Data();
@@ -84,7 +85,7 @@ static void ProfileTopViewController_SetupUI_hook(Il2CppObject* self)
 			Gallop::DialogManager::PushDialog(dialogData);
 		};
 
-	il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, Il2CppDelegate*)>(CopyIdButton->klass, "SetOnClick", 1)->methodPointer(CopyIdButton, &CreateUnityActionStatic(fn)->delegate);
+	il2cpp_symbols::get_method_pointer<void (*)(Il2CppObject*, Il2CppDelegate*)>(CopyIdButton->klass, "SetOnClick", 1)(CopyIdButton, &CreateUnityActionStatic(fn)->delegate);
 }
 
 static void InitAddress()

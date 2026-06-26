@@ -5,7 +5,7 @@
 namespace Gallop
 {
 	template<class T>
-	class MonoSingleton abstract : public MonoFunctionSealedBaseForMonoSingleton
+	class MonoSingleton : public MonoFunctionSealedBaseForMonoSingleton
 	{
 	public:
 		static T Instance()

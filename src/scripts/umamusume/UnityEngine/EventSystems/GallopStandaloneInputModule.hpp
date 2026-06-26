@@ -1,3 +1,4 @@
+#ifdef _MSC_VER
 #pragma once
 #include "scripts/UnityEngine.CoreModule/UnityEngine/MonoBehaviour.hpp"
 #include "scripts/UnityEngine.CoreModule/UnityEngine/Vector2.hpp"
@@ -21,3 +22,4 @@ namespace UnityEngine::EventSystems
 		using MonoBehaviour::MonoBehaviour;
 	};
 }
+#endif

@@ -4,16 +4,16 @@
 
 namespace
 {
-	void* GetNodeStates_Internal_addr = nullptr;
-	void* GetLocalPosition_Injected_addr = nullptr;
-	void* GetLocalRotation_Injected_addr = nullptr;
+	Il2CppMethodPointer GetNodeStates_Internal_addr = nullptr;
+	Il2CppMethodPointer GetLocalPosition_Injected_addr = nullptr;
+	Il2CppMethodPointer GetLocalRotation_Injected_addr = nullptr;
 }
 
 static void InitAddress()
 {
-	GetNodeStates_Internal_addr = il2cpp_resolve_icall("UnityEngine.XR.InputTracking::GetNodeStates_Internal()");
-	GetLocalPosition_Injected_addr = il2cpp_resolve_icall("UnityEngine.XR.InputTracking::GetLocalPosition_Injected()");
-	GetLocalRotation_Injected_addr = il2cpp_resolve_icall("UnityEngine.XR.InputTracking::GetLocalRotation_Injected()");
+	GetNodeStates_Internal_addr = il2cpp_resolve_icall("UnityEngine.XR.InputTracking::GetNodeStates_Internal");
+	GetLocalPosition_Injected_addr = il2cpp_resolve_icall("UnityEngine.XR.InputTracking::GetLocalPosition_Injected");
+	GetLocalRotation_Injected_addr = il2cpp_resolve_icall("UnityEngine.XR.InputTracking::GetLocalRotation_Injected");
 }
 
 STATIC

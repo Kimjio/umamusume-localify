@@ -6,7 +6,7 @@
 
 namespace
 {
-	void* TweenManager_Update_addr = nullptr;
+	Il2CppMethodPointer TweenManager_Update_addr = nullptr;
 	void* TweenManager_Update_orig = nullptr;
 }
 

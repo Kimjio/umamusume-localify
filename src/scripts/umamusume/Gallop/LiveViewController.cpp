@@ -10,9 +10,9 @@ namespace
 {
 	Il2CppClass* LiveViewController_klass = nullptr;
 
-	void* LiveViewController_SetOrientationLandscape_addr = nullptr;
+	Il2CppMethodPointer LiveViewController_SetOrientationLandscape_addr = nullptr;
 
-	void* LiveViewController_SetOrientationPortrait_addr = nullptr;
+	Il2CppMethodPointer LiveViewController_SetOrientationPortrait_addr = nullptr;
 	void* LiveViewController_SetOrientationPortrait_orig = nullptr;
 }
 

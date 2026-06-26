@@ -6,14 +6,16 @@
 
 #include <vector>
 
+#include "game.hpp"
+
 namespace
 {
 	Il2CppClass* CySpringNative_klass = nullptr;
 
-	void* CySpringNative_cctor_addr = nullptr;
+	Il2CppMethodPointer CySpringNative_cctor_addr = nullptr;
 	void* CySpringNative_cctor_orig = nullptr;
 
-	void* CySpringNative_UpdateForce_addr = nullptr;
+	Il2CppMethodPointer CySpringNative_UpdateForce_addr = nullptr;
 	void* CySpringNative_UpdateForce_orig = nullptr;
 
 	void* CySpringNative_UpdateNativeCloth_addr = nullptr;
@@ -470,11 +472,20 @@ static void InitAddress()
 	CySpringNative_NativeClothSkirtUpdate_addr = GetProcAddress(CySpringPlugin, "NativeClothSkirtUpdate");
 	CySpringNative_NativeSkirtUpdate_addr = GetProcAddress(CySpringPlugin, "NativeSkirtUpdate");
 #else
-	auto CySpringPlugin = dlopen("libCySpringPlugin.so", RTLD_NOW);
+	if (Game::CurrentGameRegion == Game::Region::ENG)
+	{
+		CySpringNative_NativeClothUpdate_addr = il2cpp_symbols::get_method_pointer<void*>(CySpringNative_klass, "NativeClothUpdate", -1);
+		CySpringNative_NativeClothSkirtUpdate_addr = il2cpp_symbols::get_method_pointer<void*>(CySpringNative_klass, "NativeClothSkirtUpdate", -1);
+		CySpringNative_NativeSkirtUpdate_addr = il2cpp_symbols::get_method_pointer<void*>(CySpringNative_klass, "NativeSkirtUpdate", -1);
+	}
+	else
+	{
+		auto CySpringPlugin = dlopen("libcyspringandroid.so", RTLD_NOW);
 
-	CySpringNative_NativeClothUpdate_addr = dlsym(CySpringPlugin, "NativeClothUpdate");
-	CySpringNative_NativeClothSkirtUpdate_addr = dlsym(CySpringPlugin, "NativeClothSkirtUpdate");
-	CySpringNative_NativeSkirtUpdate_addr = dlsym(CySpringPlugin, "NativeSkirtUpdate");
+		CySpringNative_NativeClothUpdate_addr = dlsym(CySpringPlugin, "NativeClothUpdate");
+		CySpringNative_NativeClothSkirtUpdate_addr = dlsym(CySpringPlugin, "NativeClothSkirtUpdate");
+		CySpringNative_NativeSkirtUpdate_addr = dlsym(CySpringPlugin, "NativeSkirtUpdate");
+	}
 #endif
 }
 

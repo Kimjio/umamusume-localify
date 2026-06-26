@@ -11,31 +11,31 @@
 
 namespace
 {
-	void* StandaloneWindowResize_GetLimitSize_addr = nullptr;
+	Il2CppMethodPointer StandaloneWindowResize_GetLimitSize_addr = nullptr;
 	void* StandaloneWindowResize_GetLimitSize_orig = nullptr;
 
-	void* StandaloneWindowResize_SaveChangedWidth_addr = nullptr;
+	Il2CppMethodPointer StandaloneWindowResize_SaveChangedWidth_addr = nullptr;
 
-	void* StandaloneWindowResize_EnableWindowHitTest_addr = nullptr;
+	Il2CppMethodPointer StandaloneWindowResize_EnableWindowHitTest_addr = nullptr;
 
-	void* StandaloneWindowResize_DisableWindowHitTest_addr = nullptr;
+	Il2CppMethodPointer StandaloneWindowResize_DisableWindowHitTest_addr = nullptr;
 
-	void* StandaloneWindowResize_DisableMaximizebox_addr = nullptr;
+	Il2CppMethodPointer StandaloneWindowResize_DisableMaximizebox_addr = nullptr;
 	void* StandaloneWindowResize_DisableMaximizebox_orig = nullptr;
 
-	void* StandaloneWindowResize_ReshapeAspectRatio_addr = nullptr;
+	Il2CppMethodPointer StandaloneWindowResize_ReshapeAspectRatio_addr = nullptr;
 	void* StandaloneWindowResize_ReshapeAspectRatio_orig = nullptr;
 
-	void* StandaloneWindowResize_ReshapeAspectRatio2_addr = nullptr;
+	Il2CppMethodPointer StandaloneWindowResize_ReshapeAspectRatio2_addr = nullptr;
 	void* StandaloneWindowResize_ReshapeAspectRatio2_orig = nullptr;
 
-	void* StandaloneWindowResize_KeepAspectRatio_addr = nullptr;
+	Il2CppMethodPointer StandaloneWindowResize_KeepAspectRatio_addr = nullptr;
 	void* StandaloneWindowResize_KeepAspectRatio_orig = nullptr;
 
-	void* StandaloneWindowResize_GetChangedSize_addr = nullptr;
+	Il2CppMethodPointer StandaloneWindowResize_GetChangedSize_addr = nullptr;
 	void* StandaloneWindowResize_GetChangedSize_orig = nullptr;
 
-	void* StandaloneWindowResize_ClearStopFlagAfterWhile_addr = nullptr;
+	Il2CppMethodPointer StandaloneWindowResize_ClearStopFlagAfterWhile_addr = nullptr;
 
 	FieldInfo* StandaloneWindowResize_windowLastWidthField = nullptr;
 	FieldInfo* StandaloneWindowResize_windowLastHeightField = nullptr;

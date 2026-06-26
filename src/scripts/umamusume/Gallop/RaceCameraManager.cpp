@@ -10,9 +10,9 @@
 
 namespace
 {
-	void* SetupOrientation_addr = nullptr;
+	Il2CppMethodPointer SetupOrientation_addr = nullptr;
 
-	void* ChangeOrientationCoroutine_addr = nullptr;
+	Il2CppMethodPointer ChangeOrientationCoroutine_addr = nullptr;
 	void* ChangeOrientationCoroutine_orig = nullptr;
 }
 

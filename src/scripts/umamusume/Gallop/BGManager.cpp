@@ -8,11 +8,13 @@
 
 namespace
 {
-	void* BGManager_SetMainBgLocalPos_addr = nullptr;
+	Il2CppMethodPointer BGManager_SetMainBgLocalPos_addr = nullptr;
 	void* BGManager_SetMainBgLocalPos_orig = nullptr;
 
-	void* BGManager_SetMainBg_addr = nullptr;
+	Il2CppMethodPointer BGManager_SetMainBg_addr = nullptr;
 	void* BGManager_SetMainBg_orig = nullptr;
+
+	Il2CppMethodPointer BGManager_OnChangeResolutionByGraphicsSettings_addr = nullptr;
 }
 
 static void BGManager_SetMainBgLocalPos_hook(Il2CppObject* self, UnityEngine::Vector2 pos)
@@ -42,8 +44,10 @@ static void BGManager_SetMainBg_hook(Il2CppObject* self, Il2CppString* path, int
 
 static void InitAddress()
 {
-	BGManager_SetMainBgLocalPos_addr = il2cpp_symbols::get_method_pointer(ASSEMBLY_NAME, "Gallop", "BGManager", "SetMainBgLocalPos", 1);
-	BGManager_SetMainBg_addr = il2cpp_symbols::get_method_pointer(ASSEMBLY_NAME, "Gallop", "BGManager", "SetMainBg", 6);
+	auto BGManager_klass = il2cpp_symbols::get_class(ASSEMBLY_NAME, "Gallop", "BGManager");
+	BGManager_SetMainBgLocalPos_addr = il2cpp_symbols::get_method_pointer(BGManager_klass, "SetMainBgLocalPos", 1);
+	BGManager_SetMainBg_addr = il2cpp_symbols::get_method_pointer(BGManager_klass, "SetMainBg", 6);
+	BGManager_OnChangeResolutionByGraphicsSettings_addr = il2cpp_symbols::get_method_pointer(BGManager_klass, "OnChangeResolutionByGraphicsSettings", 0);
 }
 
 static void HookMethods()
@@ -63,4 +67,12 @@ STATIC
 {
 	il2cpp_symbols::init_callbacks.emplace_back(InitAddress);
 	il2cpp_symbols::init_callbacks.emplace_back(HookMethods);
+}
+
+namespace Gallop
+{
+	void BGManager::OnChangeResolutionByGraphicsSettings()
+	{
+		return reinterpret_cast<void (*)(Il2CppObject*)>(BGManager_OnChangeResolutionByGraphicsSettings_addr)(instance);
+	}
 }

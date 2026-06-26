@@ -4,7 +4,7 @@
 
 namespace
 {
-	void* DialogInnerBase_CreateDialogData_addr = nullptr;
+	Il2CppMethodPointer DialogInnerBase_CreateDialogData_addr = nullptr;
 }
 
 static void InitAddress()

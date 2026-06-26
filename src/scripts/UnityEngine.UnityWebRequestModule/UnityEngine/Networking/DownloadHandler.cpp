@@ -11,13 +11,12 @@
 
 namespace
 {
-	void* DownloadHandler_InternalGetByteArray_addr = nullptr;
-	void* DownloadHandler_InternalGetByteArray_orig = nullptr;
+	Il2CppMethodPointer DownloadHandler_InternalGetByteArray_addr = nullptr;
 }
 
 static const char* DownloadHandler_InternalGetByteArray_hook(Il2CppObject* self, int* length)
 {
-	auto data = reinterpret_cast<decltype(DownloadHandler_InternalGetByteArray_hook)*>(DownloadHandler_InternalGetByteArray_orig)(self, length);
+	auto data = reinterpret_cast<decltype(DownloadHandler_InternalGetByteArray_hook)*>(DownloadHandler_InternalGetByteArray_addr)(self, length);
 
 	try
 	{
@@ -58,14 +57,14 @@ static const char* DownloadHandler_InternalGetByteArray_hook(Il2CppObject* self,
 
 static void InitAddress()
 {
-	DownloadHandler_InternalGetByteArray_addr = il2cpp_resolve_icall("UnityEngine.Networking.DownloadHandler::InternalGetByteArray()");
+	DownloadHandler_InternalGetByteArray_addr = il2cpp_resolve_icall("UnityEngine.Networking.DownloadHandler::InternalGetByteArray");
 }
 
 static void HookMethods()
 {
 	if (Game::CurrentGameRegion == Game::Region::KOR)
 	{
-		ADD_HOOK(DownloadHandler_InternalGetByteArray, "UnityEngine.Networking.DownloadHandler::InternalGetByteArray at %p\n");
+		il2cpp_add_internal_call("UnityEngine.Networking.DownloadHandler::InternalGetByteArray", reinterpret_cast<Il2CppMethodPointer>(DownloadHandler_InternalGetByteArray_hook));
 	}
 }
 

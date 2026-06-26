@@ -8,13 +8,13 @@
 
 namespace
 {
-	void* DialogSingleModeTopMenu_Setup_addr = nullptr;
+	Il2CppMethodPointer DialogSingleModeTopMenu_Setup_addr = nullptr;
 	void* DialogSingleModeTopMenu_Setup_orig = nullptr;
 
-	void* DialogSingleModeTopMenu_Setup1_addr = nullptr;
+	Il2CppMethodPointer DialogSingleModeTopMenu_Setup1_addr = nullptr;
 	void* DialogSingleModeTopMenu_Setup1_orig = nullptr;
 
-	void* DialogSingleModeTopMenu_SetupButtonPositions_addr = nullptr;
+	Il2CppMethodPointer DialogSingleModeTopMenu_SetupButtonPositions_addr = nullptr;
 	void* DialogSingleModeTopMenu_SetupButtonPositions_orig = nullptr;
 }
 
@@ -30,7 +30,7 @@ static void DialogSingleModeTopMenu_Setup_hook(Il2CppObject* self)
 
 		UnityEngine::MonoBehaviour(_infoButton).gameObject().SetActive(true);
 
-		il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, Il2CppDelegate*)>(_infoButton->klass, "SetOnClick", 1)->methodPointer(_infoButton,
+		il2cpp_symbols::get_method_pointer<void (*)(Il2CppObject*, Il2CppDelegate*)>(_infoButton->klass, "SetOnClick", 1)(_infoButton,
 			&CreateUnityAction(self, *[](Il2CppObject* self)
 				{
 					il2cpp_symbols::get_method_pointer<void (*)(Gallop::DialogCommon::DispStackType, Gallop::DialogCommonBase::FormType)>(ASSEMBLY_NAME, "Gallop", "DialogSingleModeStartConfirmEntry", "OpenPlayingSingleMode", 2)(Gallop::DialogCommon::DispStackType::DialogOnDialog, Gallop::DialogCommonBase::FormType::BIG_ONE_BUTTON);
@@ -50,7 +50,7 @@ static void DialogSingleModeTopMenu_Setup1_hook(Il2CppObject* self, uint64_t dia
 
 		UnityEngine::MonoBehaviour(_infoButton).gameObject().SetActive(true);
 
-		il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, Il2CppDelegate*)>(_infoButton->klass, "SetOnClick", 1)->methodPointer(_infoButton,
+		il2cpp_symbols::get_method_pointer<void (*)(Il2CppObject*, Il2CppDelegate*)>(_infoButton->klass, "SetOnClick", 1)(_infoButton,
 			&CreateUnityAction(self, *[](Il2CppObject* self)
 				{
 					il2cpp_symbols::get_method_pointer<void (*)(Gallop::DialogCommon::DispStackType, Gallop::DialogCommonBase::FormType)>(ASSEMBLY_NAME, "Gallop", "DialogSingleModeStartConfirmEntry", "OpenPlayingSingleMode", 2)(Gallop::DialogCommon::DispStackType::DialogOnDialog, Gallop::DialogCommonBase::FormType::BIG_ONE_BUTTON);

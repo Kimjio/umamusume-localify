@@ -5,10 +5,14 @@
 #include <rapidjson/encodings.h>
 #include <rapidjson/document.h>
 
+#ifdef _MSC_VER
 #include <winver.h>
 #include <wincrypt.h>
 
 #include "Signature.h"
+#else
+#include "log.h"
+#endif
 
 #define DO_API(r, n, p) r (*n) p
 #include "il2cpp-api-functions.h"
@@ -25,8 +29,10 @@ Il2CppString* il2cpp_string_new16(const Il2CppChar* value)
 #include "string_utils.hpp"
 #include "game.hpp"
 
+#ifdef _MSC_VER
 #include "pe_lib/pe_base.h"
 #include "pe_lib/pe_properties_generic.h"
+#endif
 
 FieldInfo* il2cpp_class_get_field_from_name_wrap(Il2CppClass* klass, const char* name)
 {
@@ -138,6 +144,7 @@ namespace il2cpp_symbols
 
 	std::vector<std::function<void()>> late_init_callbacks;
 
+#ifdef _MSC_VER
 	static bool HasValidCert(filesystem::path path)
 	{
 		HCERTSTORE hStore = nullptr;
@@ -362,6 +369,7 @@ namespace il2cpp_symbols
 			cout << e.what() << endl;
 		}
 	}
+#endif
 
 	void init_functions(HMODULE game_module);
 	void init_defaults();
@@ -390,10 +398,15 @@ namespace il2cpp_symbols
 
 	void init_functions(HMODULE game_module)
 	{
+#ifdef _MSC_VER
 #define DO_API(r, n, p) n = reinterpret_cast<decltype(n)>(GetProcAddress(game_module, il2cpp_fn_name(#n).data()))
+#else
+#define DO_API(r, n, p) n = reinterpret_cast<decltype(n)>(dlsym(game_module, il2cpp_fn_name(#n).data()))
+#endif
 #include "il2cpp-api-functions.h"
 #undef DO_API
 
+#ifdef _MSC_VER
 		HMODULE hMod = nullptr;
 		if (GetModuleHandleExW(
 			GET_MODULE_HANDLE_EX_FLAG_FROM_ADDRESS | GET_MODULE_HANDLE_EX_FLAG_UNCHANGED_REFCOUNT,
@@ -401,6 +414,12 @@ namespace il2cpp_symbols
 		{
 			base = reinterpret_cast<uint64_t>(hMod);
 		}
+#else
+		Dl_info dlInfo;
+		if (dladdr(reinterpret_cast<void *>(il2cpp_domain_get_assemblies), &dlInfo)) {
+			base = reinterpret_cast<uint64_t>(dlInfo.dli_fbase);
+		}
+#endif
 	}
 
 	void init_defaults()
@@ -420,6 +439,11 @@ namespace il2cpp_symbols
 #define DEFAULTS_GEN_INIT_OPTIONAL(field, ns, n) do { il2cpp_defaults.field = il2cpp_class_from_name(il2cpp_defaults.corlib_gen, ns, n); } while (0)
 
 		il2cpp_defaults.corlib = const_cast<Il2CppImage*>(il2cpp_get_corlib());
+		if (!il2cpp_defaults.corlib)
+		{
+			return;
+		}
+
 		auto gen_assembly = il2cpp_domain_assembly_open(il2cpp_domain, "__Generated");
 		if (gen_assembly)
 		{
@@ -507,7 +531,14 @@ namespace il2cpp_symbols
 			Il2CppArgumentException);
 		DEFAULTS_INIT_TYPE(marshalbyrefobject_class, "System", "MarshalByRefObject",
 			Il2CppMarshalByRefObject);
-		DEFAULTS_GEN_INIT_TYPE(il2cpp_com_object_class, "System", "__Il2CppComObject", Il2CppComObject);
+		if (Game::CurrentUnityVersion == Game::UnityVersion::Unity20)
+		{
+			DEFAULTS_INIT_TYPE(il2cpp_com_object_class, "System", "__Il2CppComObject", Il2CppComObject);
+		}
+		else
+		{
+			DEFAULTS_GEN_INIT_TYPE(il2cpp_com_object_class, "System", "__Il2CppComObject", Il2CppComObject);
+		}
 		DEFAULTS_INIT_TYPE(safe_handle_class, "System.Runtime.InteropServices", "SafeHandle",
 			Il2CppSafeHandle);
 		DEFAULTS_INIT_TYPE(sort_key_class, "System.Globalization", "SortKey", Il2CppSortKey);
@@ -543,17 +574,18 @@ namespace il2cpp_symbols
 		DEFAULTS_INIT_OPTIONAL(uint32_shared_enum, "System", "UInt32Enum");
 		DEFAULTS_INIT_OPTIONAL(uint64_shared_enum, "System", "UInt64Enum");
 
-		DEFAULTS_GEN_INIT_OPTIONAL(il2cpp_fully_shared_type, "Unity.IL2CPP.Metadata", "__Il2CppFullySharedGenericType");
-		DEFAULTS_GEN_INIT_OPTIONAL(il2cpp_fully_shared_struct_type, "Unity.IL2CPP.Metadata", "__Il2CppFullySharedGenericStructType");
+		if (Game::CurrentUnityVersion != Game::UnityVersion::Unity20)
+		{
+			DEFAULTS_GEN_INIT_OPTIONAL(il2cpp_fully_shared_type, "Unity.IL2CPP.Metadata", "__Il2CppFullySharedGenericType");
+			DEFAULTS_GEN_INIT_OPTIONAL(il2cpp_fully_shared_struct_type, "Unity.IL2CPP.Metadata", "__Il2CppFullySharedGenericStructType");
+		}
 	}
 
 	Il2CppClass* get_class(const char* assemblyName, const char* namespaze, const char* klassName)
 	{
-		auto assembly = il2cpp_domain_assembly_open(il2cpp_domain, assemblyName);
-		if (assembly)
+		if (auto assembly = il2cpp_domain_assembly_open(il2cpp_domain, assemblyName))
 		{
-			auto image = il2cpp_assembly_get_image(assembly);
-			if (image)
+			if (auto image = il2cpp_assembly_get_image(assembly))
 			{
 				return il2cpp_class_from_name(image, namespaze, klassName);
 			}
@@ -564,17 +596,13 @@ namespace il2cpp_symbols
 	Il2CppMethodPointer get_method_pointer(const char* assemblyName, const char* namespaze,
 		const char* klassName, const char* name, int argsCount)
 	{
-		auto assembly = il2cpp_domain_assembly_open(il2cpp_domain, assemblyName);
-		if (assembly)
+		if (auto assembly = il2cpp_domain_assembly_open(il2cpp_domain, assemblyName))
 		{
-			auto image = il2cpp_assembly_get_image(assembly);
-			if (image)
+			if (auto image = il2cpp_assembly_get_image(assembly))
 			{
-				auto klass = il2cpp_class_from_name(image, namespaze, klassName);
-				if (klass)
+				if (auto klass = il2cpp_class_from_name(image, namespaze, klassName))
 				{
-					auto method = il2cpp_class_get_method_from_name(klass, name, argsCount);
-					if (method)
+					if (auto method = il2cpp_class_get_method_from_name(klass, name, argsCount))
 					{
 						return method->methodPointer;
 					}
@@ -588,8 +616,7 @@ namespace il2cpp_symbols
 	{
 		if (klass)
 		{
-			auto method = il2cpp_class_get_method_from_name(klass, name, argsCount);
-			if (method)
+			if (auto method = il2cpp_class_get_method_from_name(klass, name, argsCount))
 			{
 				return method->methodPointer;
 			}
@@ -600,14 +627,11 @@ namespace il2cpp_symbols
 	const MethodInfo* get_method(const char* assemblyName, const char* namespaze,
 		const char* klassName, const char* name, int argsCount)
 	{
-		auto assembly = il2cpp_domain_assembly_open(il2cpp_domain, assemblyName);
-		if (assembly)
+		if (auto assembly = il2cpp_domain_assembly_open(il2cpp_domain, assemblyName))
 		{
-			auto image = il2cpp_assembly_get_image(assembly);
-			if (image)
+			if (auto image = il2cpp_assembly_get_image(assembly))
 			{
-				auto klass = il2cpp_class_from_name(image, namespaze, klassName);
-				if (klass)
+				if (auto klass = il2cpp_class_from_name(image, namespaze, klassName))
 				{
 					return il2cpp_class_get_method_from_name(klass, name, argsCount);
 				}
@@ -628,11 +652,9 @@ namespace il2cpp_symbols
 	const Il2CppClass* find_class(const char* assemblyName, const char* namespaze,
 		const std::function<bool(const Il2CppClass*)>& predict)
 	{
-		auto assembly = il2cpp_domain_assembly_open(il2cpp_domain, assemblyName);
-		if (assembly)
+		if (auto assembly = il2cpp_domain_assembly_open(il2cpp_domain, assemblyName))
 		{
-			auto image = il2cpp_assembly_get_image(assembly);
-			if (image)
+			if (auto image = il2cpp_assembly_get_image(assembly))
 			{
 				auto classCount = il2cpp_image_get_class_count(image);
 				for (int i = 0; i < classCount; i++)
@@ -649,24 +671,40 @@ namespace il2cpp_symbols
 	}
 
 	Il2CppMethodPointer find_method(const char* assemblyName, const char* namespaze,
-		const char* klassName,
-		const std::function<bool(const MethodInfo*)>& predict)
+	                                const char* klassName,
+	                                const std::function<bool(const MethodInfo*)>& predict)
 	{
-		auto assembly = il2cpp_domain_assembly_open(il2cpp_domain, assemblyName);
-		if (assembly)
+		if (auto assembly = il2cpp_domain_assembly_open(il2cpp_domain, assemblyName))
 		{
-			auto image = il2cpp_assembly_get_image(assembly);
-			if (image)
+			if (auto image = il2cpp_assembly_get_image(assembly))
 			{
-				auto klass = il2cpp_class_from_name(image, namespaze, klassName);
-				if (klass)
+				if (auto klass = il2cpp_class_from_name(image, namespaze, klassName))
 				{
 					void* iter = nullptr;
 					while (const MethodInfo* method = il2cpp_class_get_methods(klass, &iter))
 					{
 						if (predict(method))
+						{
 							return method->methodPointer;
+						}
 					}
+				}
+			}
+		}
+
+		return nullptr;
+	}
+
+	Il2CppMethodPointer find_method(Il2CppClass* klass, const std::function<bool(const MethodInfo*)>& predict)
+	{
+		if (klass)
+		{
+			void* iter = nullptr;
+			while (const MethodInfo* method = il2cpp_class_get_methods(klass, &iter))
+			{
+				if (predict(method))
+				{
+					return method->methodPointer;
 				}
 			}
 		}

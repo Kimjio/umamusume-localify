@@ -1,3 +1,4 @@
+#ifdef _MSC_VER
 #pragma once
 #include "il2cpp/il2cpp_symbols.hpp"
 #include "MonoSingleton.hpp"
@@ -16,3 +17,4 @@ namespace Gallop
 		static const char* klassName;
 	};
 }
+#endif

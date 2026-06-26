@@ -4,7 +4,7 @@
 
 namespace
 {
-	void* OnClickButton_addr = nullptr;
+	Il2CppMethodPointer OnClickButton_addr = nullptr;
 	void* OnClickButton_orig = nullptr;
 
 	const MethodInfo* DialogSingleModeStoryChoiceReward_PushDialog = nullptr;
@@ -22,19 +22,19 @@ static void OnClickButton_hook(Il2CppObject* self)
 	il2cpp_field_get_value(self, _choiceParamListField, &_choiceParamList);
 
 	auto model = il2cpp_object_new(il2cpp_symbols::get_class(ASSEMBLY_NAME, "Gallop", "SingleModeStoryChoiceRewardInfoModel"));
-	il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, int, Il2CppObject*)>(model->klass, ".ctor", 2)->methodPointer(model, _eventId, _choiceParamList);
+	il2cpp_symbols::get_method_pointer<void (*)(Il2CppObject*, int, Il2CppObject*)>(model->klass, ".ctor", 2)(model, _eventId, _choiceParamList);
 
 	auto onSuccess = CreateDelegate(model, *[](Il2CppObject* model)
 		{
 			if (DialogSingleModeStoryChoiceReward_PushDialog->parameters_count < 2)
 			{
 				// legacy
-				reinterpret_cast<void (*)(Il2CppObject*)>(DialogSingleModeStoryChoiceReward_PushDialog->methodPointer)(model);
+				il2cpp_symbols::get_method_pointer<void (*)(Il2CppObject*)>(DialogSingleModeStoryChoiceReward_PushDialog)(model);
 				return;
 			}
-			reinterpret_cast<void (*)(Il2CppObject*, Il2CppDelegate*)>(DialogSingleModeStoryChoiceReward_PushDialog->methodPointer)(model, nullptr);
+			il2cpp_symbols::get_method_pointer<void (*)(Il2CppObject*, Il2CppDelegate*)>(DialogSingleModeStoryChoiceReward_PushDialog)(model, nullptr);
 		});
-	il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, Il2CppDelegate*)>(model->klass, "FetchChoiceRewardInfo", 1)->methodPointer(model, onSuccess);
+	il2cpp_symbols::get_method_pointer<void (*)(Il2CppObject*, Il2CppDelegate*)>(model->klass, "FetchChoiceRewardInfo", 1)(model, onSuccess);
 }
 
 static void InitAddress()

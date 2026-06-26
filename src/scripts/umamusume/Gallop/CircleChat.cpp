@@ -7,7 +7,7 @@
 
 namespace
 {
-	void* CircleChat_Initialize_addr = nullptr;
+	Il2CppMethodPointer CircleChat_Initialize_addr = nullptr;
 	void* CircleChat_Initialize_orig = nullptr;
 }
 
@@ -23,10 +23,10 @@ static void CircleChat_Initialize_hook(Il2CppObject* self)
 
 		UnityEngine::MonoBehaviour(_itemRequestButton).gameObject().SetActive(true);
 
-		il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, Il2CppDelegate*)>(_itemRequestButton->klass, "SetOnClick", 1)->methodPointer(_itemRequestButton,
+		il2cpp_symbols::get_method_pointer<void (*)(Il2CppObject*, Il2CppDelegate*)>(_itemRequestButton->klass, "SetOnClick", 1)(_itemRequestButton,
 			&CreateUnityAction(self, *[](Il2CppObject* self)
 				{
-					il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*)>(self->klass, "OnClickItemRequest", 0)->methodPointer(self);
+					il2cpp_symbols::get_method_pointer<void (*)(Il2CppObject*)>(self->klass, "OnClickItemRequest", 0)(self);
 				})->delegate);
 	}
 }

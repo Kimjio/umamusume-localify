@@ -1,8 +1,18 @@
 #include "config.hpp"
 
-#include "local/local.hpp"
+#include <vector>
+#include <unordered_map>
+#include <fstream>
+#include <filesystem>
+
+#include <rapidjson/document.h>
+#include <rapidjson/istreamwrapper.h>
+#include <rapidjson/error/en.h>
 
 #include "string_utils.hpp"
+#include "game.hpp"
+
+using namespace std;
 
 namespace config
 {
@@ -14,15 +24,15 @@ namespace config
 	bool enable_console = false;
 	int max_fps = -1;
 	bool unlock_size = false;
-	float ui_scale = 1.0f;
+	float ui_scale = 1.f;
 	bool freeform_window = false;
-	float freeform_ui_scale_portrait = 0.5f;
-	float freeform_ui_scale_landscape = 0.5f;
+	float freeform_ui_scale_portrait = .5f;
+	float freeform_ui_scale_landscape = .5f;
 	int initial_width = -1;
 	int initial_height = -1;
-	float ui_animation_scale = 1.0f;
+	float ui_animation_scale = 1.f;
 	float aspect_ratio = 16.f / 9.f;
-	float resolution_3d_scale = 1.0f;
+	float resolution_3d_scale = 1.f;
 	bool replace_to_builtin_font = false;
 	bool replace_to_custom_font = false;
 	il2cppstring font_assetbundle_path;
@@ -47,14 +57,14 @@ namespace config
 	int character_system_text_caption_line_char_count = 26;
 	int character_system_text_caption_font_size = 50;
 	il2cppstring character_system_text_caption_font_color = IL2CPP_STRING("White");
-	il2cppstring character_system_text_caption_outline_size = IL2CPP_STRING("u");
+	il2cppstring character_system_text_caption_outline_size = IL2CPP_STRING("L");
 	il2cppstring character_system_text_caption_outline_color = IL2CPP_STRING("Brown");
 	float character_system_text_caption_background_alpha = 0;
 	float character_system_text_caption_position_x = 0;
 	float character_system_text_caption_position_y = -3;
 	bool champions_live_show_text = false;
 	int champions_live_resource_id = 1;
-	int champions_live_year = 2023;
+	int champions_live_year = 2022;
 	bool live_slider_always_show = false;
 	bool live_playback_loop = false;
 	/*
@@ -72,7 +82,9 @@ namespace config
 	float cyspring_move_rate_scale = 1;
 	float cyspring_add_move_rate_scale = 1;
 	bool hide_now_loading = false;
+#ifdef _MSC_VER
 	bool discord_rich_presence = false;
+#endif
 	bool allow_delete_cookie = false;
 	il2cppstring localify_settings_language = IL2CPP_STRING("ja");
 	bool dump_msgpack = false;
@@ -108,7 +120,9 @@ namespace config
 	bool has_json_parse_error = false;
 	il2cppstring json_parse_error_msg;
 
+#ifdef _MSC_VER
 	vector<il2cppstring> external_dlls_path;
+#endif
 	vector<il2cppstring> dicts;
 
 	U16Document config_document;
@@ -131,17 +145,22 @@ namespace config
 
 	void read_config_init()
 	{
-		il2cppifstream config_stream{ "config.json" };
-		config_stream.imbue(locale(".UTF-8"));
+		string path;
+#ifdef _MSC_VER
+		path = "config.json";
+#else
+		path = string("/sdcard/Android/data/").append(Game::GetCurrentPackageName()).append("/config.json");
+#endif
+		ifstream config_stream{ filesystem::path(path) };
 
 		if (!config_stream.is_open())
 		{
 			return;
 		}
 
-		U16IStreamWrapper wrapper{ config_stream };
+		rapidjson::IStreamWrapper wrapper{ config_stream };
 		U16Document document;
-		document.ParseStream(wrapper);
+		document.ParseStream<rapidjson::kParseDefaultFlags, rapidjson::UTF8<>>(wrapper);
 
 		config_stream.close();
 
@@ -364,9 +383,9 @@ if (document.HasMember(IL2CPP_STRING(_name_)) && document[IL2CPP_STRING(_name_)]
 
 			GetValue("championsLiveYear", Int, champions_live_year);
 
-			if (document.HasMember(L"cySpringUpdateMode") && document[L"cySpringUpdateMode"].IsInt())
+			if (document.HasMember(IL2CPP_STRING("cySpringUpdateMode")) && document[IL2CPP_STRING("cySpringUpdateMode")].IsInt())
 			{
-				cyspring_update_mode = document[L"cySpringUpdateMode"].GetInt();
+				cyspring_update_mode = document[IL2CPP_STRING("cySpringUpdateMode")].GetInt();
 				vector<int> options = { 0, 1, 2, 3, -1 };
 				cyspring_update_mode = options[find(options.begin(), options.end(), cyspring_update_mode) - options.begin()];
 			}
@@ -398,7 +417,7 @@ if (document.HasMember(IL2CPP_STRING(_name_)) && document[IL2CPP_STRING(_name_)]
 
 			GetValue("codeMapPath", String, auto path,
 				{
-					ifstream code_map_stream{ il2cpp_u8(path) };
+					ifstream code_map_stream{ filesystem::path(path) };
 
 					if (code_map_stream.is_open())
 					{
@@ -407,10 +426,11 @@ if (document.HasMember(IL2CPP_STRING(_name_)) && document[IL2CPP_STRING(_name_)]
 
 						code_map_stream.close();
 					}
-						);
+				});
 
-					GetValue("il2cppFnMapPath", String, auto path,
-						ifstream fn_map_stream{ il2cpp_u8(path) };
+			GetValue("il2cppFnMapPath", String, auto path,
+				{
+					ifstream fn_map_stream{ filesystem::path(path) };
 
 					if (fn_map_stream.is_open())
 					{
@@ -419,10 +439,11 @@ if (document.HasMember(IL2CPP_STRING(_name_)) && document[IL2CPP_STRING(_name_)]
 
 						fn_map_stream.close();
 					}
-						);
+				});
 
-					GetValue("faqIndexPath", String, auto path,
-						ifstream faq_index_stream{ il2cpp_u8(path) };
+			GetValue("faqIndexPath", String, auto path,
+				{
+					ifstream faq_index_stream{ filesystem::path(path) };
 
 					if (faq_index_stream.is_open())
 					{
@@ -431,10 +452,11 @@ if (document.HasMember(IL2CPP_STRING(_name_)) && document[IL2CPP_STRING(_name_)]
 
 						faq_index_stream.close();
 					}
-						);
+				});
 
-					GetValue("glossaryIndexPath", String, auto path,
-						ifstream glossary_index_stream{ il2cpp_u8(path) };
+			GetValue("glossaryIndexPath", String, auto path,
+				{
+					ifstream glossary_index_stream{ filesystem::path(path) };
 
 					if (glossary_index_stream.is_open())
 					{
@@ -443,7 +465,7 @@ if (document.HasMember(IL2CPP_STRING(_name_)) && document[IL2CPP_STRING(_name_)]
 
 						glossary_index_stream.close();
 					}
-						});
+				});
 
 			GetValue("webIconSpritePath", String, web_icon_sprite_path);
 
@@ -451,7 +473,9 @@ if (document.HasMember(IL2CPP_STRING(_name_)) && document[IL2CPP_STRING(_name_)]
 
 			GetValue("webFontPath", String, web_font_path);
 
+#ifdef _MSC_VER
 			GetValue("discordRichPresence", Bool, discord_rich_presence);
+#endif
 
 			GetValue("allowDeleteCookie", Bool, allow_delete_cookie);
 
@@ -503,6 +527,7 @@ if (document.HasMember(IL2CPP_STRING(_name_)) && document[IL2CPP_STRING(_name_)]
 					}
 				});
 
+#ifdef _MSC_VER
 			GetValue("externalDlls", Array, auto array,
 				{
 					for (auto it = array.Begin(); it != array.End(); it++)
@@ -514,29 +539,35 @@ if (document.HasMember(IL2CPP_STRING(_name_)) && document[IL2CPP_STRING(_name_)]
 						}
 					}
 				});
+#endif
 		}
 		else
 		{
 			has_json_parse_error = true;
-			il2cppstringstream str_stream;
-			str_stream << "JSON parse error: " << GetParseError_En(document.GetParseError()) << " (" << to_wstring(document.GetErrorOffset()) << ")";
-			json_parse_error_msg = str_stream.str();
+			stringstream str_stream;
+			str_stream << "JSON parse error: " << GetParseError_En(document.GetParseError()) << " (" << to_string(document.GetErrorOffset()) << ")";
+			json_parse_error_msg = u8_il2cpp(str_stream.str());
 		}
 	}
 
 	bool read_config()
 	{
-		il2cppifstream config_stream{ "config.json" };
-		config_stream.imbue(locale(".UTF-8"));
+        string path;
+#ifdef _MSC_VER
+        path = "config.json";
+#else
+        path = string("/sdcard/Android/data/").append(Game::GetCurrentPackageName()).append("/config.json");
+#endif
+		ifstream config_stream{ path };
 
 		if (!config_stream.is_open())
 		{
 			return false;
 		}
 
-		U16IStreamWrapper wrapper{ config_stream };
+		rapidjson::IStreamWrapper wrapper{ config_stream };
 
-		config_document.ParseStream(wrapper);
+		config_document.ParseStream<rapidjson::kParseDefaultFlags, rapidjson::UTF8<>>(wrapper);
 		config_stream.close();
 
 		backup_document.CopyFrom(config_document, backup_document.GetAllocator(), true);
@@ -551,7 +582,14 @@ if (document.HasMember(IL2CPP_STRING(_name_)) && document[IL2CPP_STRING(_name_)]
 		rapidjson::PrettyWriter<rapidjson::StringBuffer, rapidjson::UTF16<Il2CppChar>, rapidjson::UTF8<>> writer(buffer);
 		config_document.Accept(writer);
 
-		ofstream config_stream{ "config.json" };
+		string path;
+#ifdef _MSC_VER
+		path = "config.json";
+#else
+		path = string("/sdcard/Android/data/").append(Game::GetCurrentPackageName()).append("/config.json");
+#endif
+
+		ofstream config_stream{ filesystem::path(path) };
 		config_stream << buffer.GetString() << endl;
 		config_stream.close();
 	}
@@ -560,5 +598,4 @@ if (document.HasMember(IL2CPP_STRING(_name_)) && document[IL2CPP_STRING(_name_)]
 	{
 		config_document.CopyFrom(backup_document, config_document.GetAllocator(), true);
 	}
-
 }

@@ -25,27 +25,25 @@
 
 namespace
 {
-	void* FindObjectsByType_addr = nullptr;
+	Il2CppMethodPointer FindObjectsByType_addr = nullptr;
 
-	void* FindObjectsOfType_addr = nullptr;
+	Il2CppMethodPointer FindObjectsOfType_addr = nullptr;
 
-	void* Internal_CloneSingleWithParent_addr = nullptr;
-	void* Internal_CloneSingleWithParent_orig = nullptr;
+	Il2CppMethodPointer Internal_CloneSingleWithParent_addr = nullptr;
 
-	void* Internal_CloneSingle_addr = nullptr;
-	void* Internal_CloneSingle_orig = nullptr;
+	Il2CppMethodPointer Internal_CloneSingle_addr = nullptr;
 
-	void* DontDestroyOnLoad_addr = nullptr;
+	Il2CppMethodPointer DontDestroyOnLoad_addr = nullptr;
 
-	void* GetName_addr = nullptr;
+	Il2CppMethodPointer GetName_addr = nullptr;
 
-	void* SetName_addr = nullptr;
+	Il2CppMethodPointer SetName_addr = nullptr;
 
-	void* Destroy_addr = nullptr;
+	Il2CppMethodPointer Destroy_addr = nullptr;
 
-	void* DestroyImmediate_addr = nullptr;
+	Il2CppMethodPointer DestroyImmediate_addr = nullptr;
 
-	void* IsNativeObjectAlive_addr = nullptr;
+	Il2CppMethodPointer IsNativeObjectAlive_addr = nullptr;
 
 	Il2CppClass* StoryTimelineDataClass;
 }
@@ -58,13 +56,13 @@ static bool UpdateHomeMenuMainButton()
 	}
 
 	auto dialog = GetFrontDialog();
-	auto data = il2cpp_class_get_method_from_name_type<Il2CppObject * (*)(Il2CppObject*)>(dialog->klass, "get_DialogData", 0)->methodPointer(dialog);
+	auto data = il2cpp_symbols::get_method_pointer<Il2CppObject * (*)(Il2CppObject*)>(dialog->klass, "get_DialogData", 0)(dialog);
 
 	auto ContentsObjectField = il2cpp_class_get_field_from_name(data->klass, "ContentsObject");
 	Il2CppObject* ContentsObject;
 	il2cpp_field_get_value(data, ContentsObjectField, &ContentsObject);
 
-	auto homeMenuMain = il2cpp_class_get_method_from_name_type<Il2CppObject * (*)(Il2CppObject*, Il2CppReflectionType*)>(ContentsObject->klass, "GetComponent", 1)->methodPointer(ContentsObject, GetRuntimeType("umamusume.dll", "Gallop", "DialogHomeMenuMain"));
+	auto homeMenuMain = il2cpp_symbols::get_method_pointer<Il2CppObject * (*)(Il2CppObject*, Il2CppReflectionType*)>(ContentsObject->klass, "GetComponent", 1)(ContentsObject, GetRuntimeType("umamusume.dll", "Gallop", "DialogHomeMenuMain"));
 
 	if (homeMenuMain)
 	{
@@ -92,7 +90,7 @@ static bool UpdateHomeMenuMainButton()
 						Il2CppObject* manager;
 						il2cpp_field_static_get_value(managerInstanceField, &manager);
 
-						il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, Il2CppDelegate*, Il2CppDelegate*)>(manager->klass, "OnKakaoShowCouponPopup", 2)->methodPointer(manager, nullptr, nullptr);
+						il2cpp_symbols::get_method_pointer<void (*)(Il2CppObject*, Il2CppDelegate*, Il2CppDelegate*)>(manager->klass, "OnKakaoShowCouponPopup", 2)(manager, nullptr, nullptr);
 					};
 
 				auto dialogData = Gallop::DialogCommon::Data();
@@ -107,7 +105,7 @@ static bool UpdateHomeMenuMainButton()
 				Gallop::DialogManager::PushDialog(dialogData);
 			};
 
-		il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, Il2CppDelegate*)>(_serialButton->klass, "SetOnClick", 1)->methodPointer(_serialButton, &CreateUnityActionStatic(fn)->delegate);
+		il2cpp_symbols::get_method_pointer<void (*)(Il2CppObject*, Il2CppDelegate*)>(_serialButton->klass, "SetOnClick", 1)(_serialButton, &CreateUnityActionStatic(fn)->delegate);
 
 		return true;
 	}
@@ -116,18 +114,18 @@ static bool UpdateHomeMenuMainButton()
 
 static Il2CppObject* Internal_CloneSingle_hook(Il2CppObject* original)
 {
-	auto cloned = reinterpret_cast<decltype(Internal_CloneSingle_hook)*>(Internal_CloneSingle_orig)(original);
+	auto cloned = reinterpret_cast<decltype(Internal_CloneSingle_hook)*>(Internal_CloneSingle_addr)(original);
 
 	if (Game::CurrentGameRegion == Game::Region::KOR && il2cppstring(UnityEngine::Object::Name(cloned)->chars).find(IL2CPP_STRING("DialogHomeMenuMain")) != il2cppstring::npos)
 	{
-		auto homeMenuMain = il2cpp_class_get_method_from_name_type<Il2CppObject * (*)(Il2CppObject*, Il2CppReflectionType*)>(cloned->klass, "GetComponent", 1)->methodPointer(cloned, GetRuntimeType("umamusume.dll", "Gallop", "DialogHomeMenuMain"));
+		auto homeMenuMain = il2cpp_symbols::get_method_pointer<Il2CppObject * (*)(Il2CppObject*, Il2CppReflectionType*)>(cloned->klass, "GetComponent", 1)(cloned, GetRuntimeType("umamusume.dll", "Gallop", "DialogHomeMenuMain"));
 
 		auto _dataTransButtonField = il2cpp_class_get_field_from_name(homeMenuMain->klass, "_dataTransButton");
 		Il2CppObject* _dataTransButton;
 		il2cpp_field_get_value(homeMenuMain, _dataTransButtonField, &_dataTransButton);
 
-		auto gameObject = il2cpp_class_get_method_from_name_type<Il2CppObject * (*)(Il2CppObject*)>(_dataTransButton->klass, "get_gameObject", 0)->methodPointer(_dataTransButton);
-		il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, bool)>(gameObject->klass, "SetActive", 1)->methodPointer(gameObject, true);
+		auto gameObject = il2cpp_symbols::get_method_pointer<Il2CppObject * (*)(Il2CppObject*)>(_dataTransButton->klass, "get_gameObject", 0)(_dataTransButton);
+		il2cpp_symbols::get_method_pointer<void (*)(Il2CppObject*, bool)>(gameObject->klass, "SetActive", 1)(gameObject, true);
 
 		static Il2CppDelegate* updateHomeMenuMainButton;
 		updateHomeMenuMainButton = &CreateDelegateWithClassStatic(il2cpp_symbols::get_class("DOTween.dll", "DG.Tweening", "TweenCallback"), *([](void*)
@@ -158,7 +156,7 @@ void InitOptionLayout(Il2CppObject* parentRectTransform)
 
 static Il2CppObject* Internal_CloneSingleWithParent_hook(Il2CppObject* data, Il2CppObject* parent, bool worldPositionStays)
 {
-	auto cloned = reinterpret_cast<decltype(Internal_CloneSingleWithParent_hook)*>(Internal_CloneSingleWithParent_orig)(data, parent, worldPositionStays);
+	auto cloned = reinterpret_cast<decltype(Internal_CloneSingleWithParent_hook)*>(Internal_CloneSingleWithParent_addr)(data, parent, worldPositionStays);
 
 	if (il2cppstring(UnityEngine::Object::Name(cloned)->chars).find(IL2CPP_STRING("DialogOptionHome")) != wstring::npos)
 	{
@@ -224,7 +222,7 @@ static Il2CppObject* Internal_CloneSingleWithParent_hook(Il2CppObject* data, Il2
 
 			if (_cardRootButton)
 			{
-				auto targetText = il2cpp_class_get_method_from_name_type<Il2CppObject * (*)(Il2CppObject*)>(_cardRootButton->klass, "get_TargetText", 0)->methodPointer(_cardRootButton);
+				auto targetText = il2cpp_symbols::get_method_pointer<Il2CppObject * (*)(Il2CppObject*)>(_cardRootButton->klass, "get_TargetText", 0)(_cardRootButton);
 
 				if (targetText)
 				{
@@ -262,17 +260,17 @@ static Il2CppObject* Internal_CloneSingleWithParent_hook(Il2CppObject* data, Il2
 
 		if (raceInfo)
 		{
-			auto raceType = il2cpp_class_get_method_from_name_type<int (*)(Il2CppObject*)>(raceInfo->klass, "get_RaceType", 0)->methodPointer(raceInfo);
+			auto raceType = il2cpp_symbols::get_method_pointer<int (*)(Il2CppObject*)>(raceInfo->klass, "get_RaceType", 0)(raceInfo);
 
 			if (raceType == 6 || raceType == 7)
 			{
-				auto raceInstanceId = il2cpp_class_get_method_from_name_type<int (*)(Il2CppObject*)>(raceInfo->klass, "get_RaceInstanceId", 0)->methodPointer(raceInfo);
-				auto grade = il2cpp_class_get_method_from_name_type<int (*)(Il2CppObject*)>(raceInfo->klass, "get_Grade", 0)->methodPointer(raceInfo);
+				auto raceInstanceId = il2cpp_symbols::get_method_pointer<int (*)(Il2CppObject*)>(raceInfo->klass, "get_RaceInstanceId", 0)(raceInfo);
+				auto grade = il2cpp_symbols::get_method_pointer<int (*)(Il2CppObject*)>(raceInfo->klass, "get_Grade", 0)(raceInfo);
 
 				auto musicId = MasterDB::GetSingleModeRaceLiveMusicId(raceInstanceId, grade);
 
-				auto playerHorseIndex = il2cpp_class_get_method_from_name_type<int (*)(Il2CppObject*)>(raceInfo->klass, "get_PlayerHorseIndex", 0)->methodPointer(raceInfo);
-				auto raceHorse = il2cpp_class_get_method_from_name_type<Il2CppArraySize_t<Il2CppObject*>*(*)(Il2CppObject*)>(raceInfo->klass, "get_RaceHorse", 0)->methodPointer(raceInfo);
+				auto playerHorseIndex = il2cpp_symbols::get_method_pointer<int (*)(Il2CppObject*)>(raceInfo->klass, "get_PlayerHorseIndex", 0)(raceInfo);
+				auto raceHorse = il2cpp_symbols::get_method_pointer<Il2CppArraySize_t<Il2CppObject*>*(*)(Il2CppObject*)>(raceInfo->klass, "get_RaceHorse", 0)(raceInfo);
 				auto horseData = raceHorse->vector[playerHorseIndex];
 
 				auto charaIdField = il2cpp_class_get_field_from_name(horseData->klass, "charaId");
@@ -311,7 +309,7 @@ static Il2CppObject* Internal_CloneSingleWithParent_hook(Il2CppObject* data, Il2
 						Il2CppObject* _flashPlayer;
 						il2cpp_field_get_value(ChampionsTextController, _flashPlayerField, &_flashPlayer);
 
-						auto root = il2cpp_class_get_method_from_name_type<Il2CppObject * (*)(Il2CppObject*)>(_flashPlayer->klass, "get_Root", 0)->methodPointer(_flashPlayer);
+						auto root = il2cpp_symbols::get_method_pointer<Il2CppObject * (*)(Il2CppObject*)>(_flashPlayer->klass, "get_Root", 0)(_flashPlayer);
 
 						int unityWidth = UnityEngine::Screen::width();
 
@@ -335,20 +333,26 @@ static Il2CppObject* Internal_CloneSingleWithParent_hook(Il2CppObject* data, Il2
 						float availableWidth = static_cast<float>(unityWidth) / scale;
 						float availableHeight = static_cast<float>(unityHeight) / scale;
 
+#ifdef _MSC_VER
 						float width = ratio_16_9 * availableHeight;
+#else
+						float width = availableWidth;
+#endif
 						float height = availableHeight;
 
+#ifdef _MSC_VER
 						if (width > availableWidth)
 						{
 							width = availableWidth;
 							height = width / ratio_16_9;
 						}
+#endif
 
-						il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, UnityEngine::Vector2)>(_flashCanvasScaler->klass, "set_referenceResolution", 1)->methodPointer(_flashCanvasScaler, UnityEngine::Vector2{ width, height });
-						il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, UnityEngine::Vector2)>(root->klass, "SetScreenReferenceSize", 1)->methodPointer(root, UnityEngine::Vector2{ width, height });
+						il2cpp_symbols::get_method_pointer<void (*)(Il2CppObject*, UnityEngine::Vector2)>(_flashCanvasScaler->klass, "set_referenceResolution", 1)(_flashCanvasScaler, UnityEngine::Vector2{ width, height });
+						il2cpp_symbols::get_method_pointer<void (*)(Il2CppObject*, UnityEngine::Vector2)>(root->klass, "SetScreenReferenceSize", 1)(root, UnityEngine::Vector2{ width, height });
 					}
 
-					auto liveFlashController = il2cpp_class_get_method_from_name_type<Il2CppObject * (*)(Il2CppObject*)>(director->klass, "get_LiveFlashController", 0)->methodPointer(director);
+					auto liveFlashController = il2cpp_symbols::get_method_pointer<Il2CppObject * (*)(Il2CppObject*)>(director->klass, "get_LiveFlashController", 0)(director);
 
 					if (liveFlashController)
 					{
@@ -359,7 +363,7 @@ static Il2CppObject* Internal_CloneSingleWithParent_hook(Il2CppObject* data, Il2
 							Il2CppObject* _flashPlayer;
 							il2cpp_field_get_value(liveFlashController, _flashPlayerField, &_flashPlayer);
 
-							auto root = il2cpp_class_get_method_from_name_type<Il2CppObject * (*)(Il2CppObject*)>(_flashPlayer->klass, "get_Root", 0)->methodPointer(_flashPlayer);
+							auto root = il2cpp_symbols::get_method_pointer<Il2CppObject * (*)(Il2CppObject*)>(_flashPlayer->klass, "get_Root", 0)(_flashPlayer);
 
 							int unityWidth = UnityEngine::Screen::width();
 
@@ -379,16 +383,22 @@ static Il2CppObject* Internal_CloneSingleWithParent_hook(Il2CppObject* data, Il2
 							float availableWidth = static_cast<float>(unityWidth) / scale;
 							float availableHeight = static_cast<float>(unityHeight) / scale;
 
+#ifdef _MSC_VER
 							float width = ratio_16_9 * availableHeight;
+#else
+							float width = availableWidth;
+#endif
 							float height = availableHeight;
 
+#ifdef _MSC_VER
 							if (width > availableWidth)
 							{
 								width = availableWidth;
 								height = width / ratio_16_9;
 							}
+#endif
 
-							il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, UnityEngine::Vector2)>(root->klass, "SetScreenReferenceSize", 1)->methodPointer(root, UnityEngine::Vector2{ width, height });
+							il2cpp_symbols::get_method_pointer<void (*)(Il2CppObject*, UnityEngine::Vector2)>(root->klass, "SetScreenReferenceSize", 1)(root, UnityEngine::Vector2{ width, height });
 						}
 					}
 				}
@@ -403,23 +413,23 @@ static Il2CppObject* Internal_CloneSingleWithParent_hook(Il2CppObject* data, Il2
 
 static void InitAddress()
 {
-	FindObjectsByType_addr = il2cpp_resolve_icall("UnityEngine.Object::FindObjectsByType()");
-	FindObjectsOfType_addr = il2cpp_resolve_icall("UnityEngine.Object::FindObjectsOfType()");
-	Internal_CloneSingleWithParent_addr = il2cpp_resolve_icall("UnityEngine.Object::Internal_CloneSingleWithParent()");
-	Internal_CloneSingle_addr = il2cpp_resolve_icall("UnityEngine.Object::Internal_CloneSingle()");
-	DontDestroyOnLoad_addr = il2cpp_resolve_icall("UnityEngine.Object::DontDestroyOnLoad()");
-	GetName_addr = il2cpp_resolve_icall("UnityEngine.Object::GetName()");
-	SetName_addr = il2cpp_resolve_icall("UnityEngine.Object::SetName()");
-	Destroy_addr = il2cpp_resolve_icall("UnityEngine.Object::Destroy()");
-	DestroyImmediate_addr = il2cpp_resolve_icall("UnityEngine.Object::DestroyImmediate()");
+	FindObjectsByType_addr = il2cpp_resolve_icall("UnityEngine.Object::FindObjectsByType");
+	FindObjectsOfType_addr = il2cpp_resolve_icall("UnityEngine.Object::FindObjectsOfType");
+	Internal_CloneSingleWithParent_addr = il2cpp_resolve_icall("UnityEngine.Object::Internal_CloneSingleWithParent");
+	Internal_CloneSingle_addr = il2cpp_resolve_icall("UnityEngine.Object::Internal_CloneSingle");
+	DontDestroyOnLoad_addr = il2cpp_resolve_icall("UnityEngine.Object::DontDestroyOnLoad");
+	GetName_addr = il2cpp_resolve_icall("UnityEngine.Object::GetName");
+	SetName_addr = il2cpp_resolve_icall("UnityEngine.Object::SetName");
+	Destroy_addr = il2cpp_resolve_icall("UnityEngine.Object::Destroy");
+	DestroyImmediate_addr = il2cpp_resolve_icall("UnityEngine.Object::DestroyImmediate");
 	IsNativeObjectAlive_addr = il2cpp_symbols::get_method_pointer(ASSEMBLY_NAME, "UnityEngine", "Object", "IsNativeObjectAlive", 1);
 	StoryTimelineDataClass = il2cpp_symbols::get_class("umamusume.dll", "Gallop", "StoryTimelineData");
 }
 
 static void HookMethods()
 {
-	ADD_HOOK(Internal_CloneSingle, "UnityEngine.Object::Internal_CloneSingle at %p\n");
-	ADD_HOOK(Internal_CloneSingleWithParent, "UnityEngine.Object::Internal_CloneSingleWithParent at %p\n");
+	il2cpp_add_internal_call("UnityEngine.Object::Internal_CloneSingle", reinterpret_cast<Il2CppMethodPointer>(Internal_CloneSingle_hook));
+	il2cpp_add_internal_call("UnityEngine.Object::Internal_CloneSingleWithParent", reinterpret_cast<Il2CppMethodPointer>(Internal_CloneSingleWithParent_hook));
 }
 
 STATIC

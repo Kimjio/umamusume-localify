@@ -1,7 +1,10 @@
 #pragma once
-#include <stdinclude.hpp>
 
 #include <set>
+
+#include "il2cpp/il2cpp_symbols.hpp"
+
+using namespace std;
 
 namespace Localify
 {

@@ -8,10 +8,10 @@ namespace
 {
 	Il2CppClass* CountupModifier_klass = nullptr;
 
-	void* CountupModifier_SetValue_addr = nullptr;
+	Il2CppMethodPointer CountupModifier_SetValue_addr = nullptr;
 	void* CountupModifier_SetValue_orig = nullptr;
 
-	void* CountupModifier_SetUlongValue_addr = nullptr;
+	Il2CppMethodPointer CountupModifier_SetUlongValue_addr = nullptr;
 	void* CountupModifier_SetUlongValue_orig = nullptr;
 
 	FieldInfo* CountupModifier__prefix = nullptr;

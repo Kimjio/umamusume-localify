@@ -1,3 +1,4 @@
+#ifdef _MSC_VER
 #pragma once
 #include "scripts/UnityEngine.CoreModule/UnityEngine/Object.hpp"
 #include "scripts/UnityEngine.CoreModule/UnityEngine/Vector3.hpp"
@@ -12,3 +13,4 @@ namespace Gallop
 		using Object::Object;
 	};
 }
+#endif

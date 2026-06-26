@@ -92,7 +92,7 @@ static void ShowCaptionByNotification(Il2CppObject* audioManager, Il2CppObject* 
 
 					if (sceneManager)
 					{
-						auto viewId = il2cpp_class_get_method_from_name_type<int (*)(Il2CppObject*)>(sceneManager->klass, "GetCurrentViewId", 0)->methodPointer(sceneManager);
+						auto viewId = il2cpp_symbols::get_method_pointer<int (*)(Il2CppObject*)>(sceneManager->klass, "GetCurrentViewId", 0)(sceneManager);
 
 						if (viewId != 5901)
 						{
@@ -112,7 +112,7 @@ static void ShowCaptionByNotification(Il2CppObject* audioManager, Il2CppObject* 
 		}
 
 		float length =
-			il2cpp_class_get_method_from_name_type<float (*)(Il2CppObject*, Il2CppString*, int)>(audioManager->klass, "GetCueLength", 2)->methodPointer(audioManager, cueSheet, cueId);
+			il2cpp_symbols::get_method_pointer<float (*)(Il2CppObject*, Il2CppString*, int)>(audioManager->klass, "GetCueLength", 2)(audioManager, cueSheet, cueId);
 
 		Localify::NotificationManager::SetDisplayTime(length);
 
@@ -209,11 +209,11 @@ static void HookMethods()
 {
 	if (config::character_system_text_caption)
 	{
-		ADD_HOOK(criAtomExPlayer_SetCueId, "CriWare.CriAtomExPlayer::criAtomExPlayer_SetCueId");
-		ADD_HOOK(criAtomExPlayer_Start, "CriWare.CriAtomExPlayer::criAtomExPlayer_Start");
-		ADD_HOOK(criAtomExPlayer_Stop, "CriWare.CriAtomExPlayer::criAtomExPlayer_Stop");
-		ADD_HOOK(criAtomExPlayer_StopWithoutReleaseTime, "CriWare.CriAtomExPlayer::criAtomExPlayer_StopWithoutReleaseTime");
-		ADD_HOOK(criAtomExPlayer_Pause, "CriWare.CriAtomExPlayer::criAtomExPlayer_Pause");
+		ADD_HOOK(criAtomExPlayer_SetCueId, "CriWare.CriAtomExPlayer::criAtomExPlayer_SetCueId at %p\n");
+		ADD_HOOK(criAtomExPlayer_Start, "CriWare.CriAtomExPlayer::criAtomExPlayer_Start at %p\n");
+		ADD_HOOK(criAtomExPlayer_Stop, "CriWare.CriAtomExPlayer::criAtomExPlayer_Stop at %p\n");
+		ADD_HOOK(criAtomExPlayer_StopWithoutReleaseTime, "CriWare.CriAtomExPlayer::criAtomExPlayer_StopWithoutReleaseTime at %p\n");
+		ADD_HOOK(criAtomExPlayer_Pause, "CriWare.CriAtomExPlayer::criAtomExPlayer_Pause at %p\n");
 	}
 }
 

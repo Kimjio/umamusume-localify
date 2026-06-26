@@ -6,7 +6,7 @@ using namespace UnityEngine;
 
 namespace Gallop
 {
-	class MonoFunctionSealedBaseForMonoSingleton abstract : public MonoBehaviour
+	class MonoFunctionSealedBaseForMonoSingleton : public MonoBehaviour
 	{
 		using MonoBehaviour::MonoBehaviour;
 	};

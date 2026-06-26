@@ -14,7 +14,7 @@
 
 namespace
 {
-	void* TextMeshProUguiCommon_Awake_addr = nullptr;
+	Il2CppMethodPointer TextMeshProUguiCommon_Awake_addr = nullptr;
 	void* TextMeshProUguiCommon_Awake_orig = nullptr;
 }
 
@@ -28,20 +28,20 @@ static void TextMeshProUguiCommon_Awake_hook(Il2CppObject* self)
 		return;
 	}
 
-	il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, Il2CppObject*)>(self->klass, "set_font", 1)->methodPointer(self, customFont);
-	il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, bool)>(self->klass, "set_enableWordWrapping", 1)->methodPointer(self, false);
+	il2cpp_symbols::get_method_pointer<void (*)(Il2CppObject*, Il2CppObject*)>(self->klass, "set_font", 1)(self, customFont);
+	il2cpp_symbols::get_method_pointer<void (*)(Il2CppObject*, bool)>(self->klass, "set_enableWordWrapping", 1)(self, false);
 
 	auto customFontMaterialField = il2cpp_class_get_field_from_name(customFont->klass, "material");
 	Il2CppObject* customFontMaterial;
 	il2cpp_field_get_value(customFont, customFontMaterialField, &customFontMaterial);
-	il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, Il2CppObject*)>(self->klass, "set_fontSharedMaterial", 1)->methodPointer(self, customFontMaterial);
+	il2cpp_symbols::get_method_pointer<void (*)(Il2CppObject*, Il2CppObject*)>(self->klass, "set_fontSharedMaterial", 1)(self, customFontMaterial);
 
-	auto origOutlineWidth = il2cpp_class_get_method_from_name_type<float (*)(Il2CppObject*)>(self->klass, "get_outlineWidth", 0)->methodPointer(self);
+	auto origOutlineWidth = il2cpp_symbols::get_method_pointer<float (*)(Il2CppObject*)>(self->klass, "get_outlineWidth", 0)(self);
 
 	auto outlineColorDictField = il2cpp_class_get_field_from_name(il2cpp_symbols::get_class(ASSEMBLY_NAME, "Gallop", "ColorPreset"), "OutlineColorDictionary");
 	Il2CppObject* outlineColorDict;
 	il2cpp_field_static_get_value(outlineColorDictField, &outlineColorDict);
-	auto colorEnum = il2cpp_class_get_method_from_name_type<uint32_t(*)(Il2CppObject*)>(self->klass, "get_OutlineColor", 0)->methodPointer(self);
+	auto colorEnum = il2cpp_symbols::get_method_pointer<uint32_t(*)(Il2CppObject*)>(self->klass, "get_OutlineColor", 0)(self);
 
 	auto entriesField = il2cpp_class_get_field_from_name(outlineColorDict->klass, "_entries");
 	if (!entriesField)
@@ -69,8 +69,8 @@ static void TextMeshProUguiCommon_Awake_hook(Il2CppObject* self)
 
 	auto origOutlineColor = UnityEngine::Color{ r, g, b, a };
 
-	il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, Il2CppString*, float)>(customFontMaterial->klass, "SetFloat", 2)->methodPointer(customFontMaterial, il2cpp_string_new("_OutlineWidth"), origOutlineWidth);
-	il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, Il2CppString*, UnityEngine::Color)>(customFontMaterial->klass, "SetColor", 2)->methodPointer(customFontMaterial, il2cpp_string_new("_OutlineColor"), origOutlineColor);
+	il2cpp_symbols::get_method_pointer<void (*)(Il2CppObject*, Il2CppString*, float)>(customFontMaterial->klass, "SetFloat", 2)(customFontMaterial, il2cpp_string_new("_OutlineWidth"), origOutlineWidth);
+	il2cpp_symbols::get_method_pointer<void (*)(Il2CppObject*, Il2CppString*, UnityEngine::Color)>(customFontMaterial->klass, "SetColor", 2)(customFontMaterial, il2cpp_string_new("_OutlineColor"), origOutlineColor);
 }
 
 static void InitAddress()

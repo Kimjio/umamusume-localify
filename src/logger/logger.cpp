@@ -1,7 +1,12 @@
-#include <stdinclude.hpp>
+#include <iostream>
+#include <fstream>
+#include <thread>
+#include <utility>
 
 #include "config/config.hpp"
 #include "string_utils.hpp"
+
+#include "game.hpp"
 
 using namespace std;
 
@@ -25,7 +30,14 @@ namespace logger
 		if (config::enable_logger)
 		{
 			enabled = true;
-			log_file.open("dump.txt", ios::app | ios::out);
+			string path;
+
+#ifdef _MSC_VER
+			path = "dump.txt";
+#else
+			path = string("/sdcard/Android/data/").append(Game::GetCurrentPackageName()).append("/dump.txt");
+#endif
+			log_file.open(path, ios::app | ios::out);
 
 			thread t([]() {
 				while (!request_exit)
@@ -69,7 +81,13 @@ namespace logger
 	{
 		if (config::enable_logger)
 		{
-			static_json.open("static.json", ios::out);
+			string path;
+#ifdef _MSC_VER
+			path = "static.json";
+#else
+			path = string("/sdcard/Android/data/").append(Game::GetCurrentPackageName()).append("/static.json");
+#endif
+			static_json.open(path, ios::out);
 			static_json << "{\n";
 			thread t([dict]() {
 				for (int i = 0; i < dict.size(); i++)
@@ -101,7 +119,13 @@ namespace logger
 	{
 		if (config::enable_logger)
 		{
-			static_json.open("text_id_static.json", ios::out);
+			string path;
+#ifdef _MSC_VER
+			path = "text_id_static.json";
+#else
+			path = string("/sdcard/Android/data/").append(Game::GetCurrentPackageName()).append("/text_id_static.json");
+#endif
+			static_json.open(path, ios::out);
 			static_json << "{\n";
 			thread t([dict]() {
 				for (auto pair = dict.begin(); pair != dict.end(); pair++)
@@ -126,7 +150,13 @@ namespace logger
 			t.detach();
 			if (!not_matched.empty())
 			{
-				not_matched_json.open("text_id_not_matched.json", ios::out);
+				string path;
+#ifdef _MSC_VER
+				path = "text_id_not_matched.json";
+#else
+				path = string("/sdcard/Android/data/").append(Game::GetCurrentPackageName()).append("/text_id_not_matched.json");
+#endif
+				not_matched_json.open(path, ios::out);
 				not_matched_json << "{\n";
 				thread t1([not_matched]() {
 					for (auto pair = not_matched.begin(); pair != not_matched.end(); pair++)

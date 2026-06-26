@@ -4,38 +4,38 @@
 
 namespace
 {
-	void* DialogCommon_Close_addr = nullptr;
+	Il2CppMethodPointer DialogCommon_Close_addr = nullptr;
 
-	void* DialogCommon_SetContentsRootLocalScale_addr = nullptr;
+	Il2CppMethodPointer DialogCommon_SetContentsRootLocalScale_addr = nullptr;
 	void* DialogCommon_SetContentsRootLocalScale_orig = nullptr;
 
-	void* DialogCommon_Data_get_DialogHash_addr = nullptr;
+	Il2CppMethodPointer DialogCommon_Data_get_DialogHash_addr = nullptr;
 
-	void* DialogCommon_Data_set_DialogHash_addr = nullptr;
+	Il2CppMethodPointer DialogCommon_Data_set_DialogHash_addr = nullptr;
 
-	void* DialogCommon_Data_SetSimpleNoButtonMessage_addr = nullptr;
+	Il2CppMethodPointer DialogCommon_Data_SetSimpleNoButtonMessage_addr = nullptr;
 
-	void* DialogCommon_Data_SetSimpleOneButtonMessage_addr = nullptr;
+	Il2CppMethodPointer DialogCommon_Data_SetSimpleOneButtonMessage_addr = nullptr;
 
-	void* DialogCommon_Data_SetSimpleOneButtonMessage2_addr = nullptr;
+	Il2CppMethodPointer DialogCommon_Data_SetSimpleOneButtonMessage2_addr = nullptr;
 
-	void* DialogCommon_Data_SetSimpleTwoButtonMessage_addr = nullptr;
+	Il2CppMethodPointer DialogCommon_Data_SetSimpleTwoButtonMessage_addr = nullptr;
 
-	void* DialogCommon_Data_SetSimpleThreeButtonMessage_addr = nullptr;
+	Il2CppMethodPointer DialogCommon_Data_SetSimpleThreeButtonMessage_addr = nullptr;
 
-	void* DialogCommon_Data_AddOpenCallback_addr = nullptr;
+	Il2CppMethodPointer DialogCommon_Data_AddOpenCallback_addr = nullptr;
 
-	void* DialogCommon_Data_AddCenterButtonCallback_addr = nullptr;
+	Il2CppMethodPointer DialogCommon_Data_AddCenterButtonCallback_addr = nullptr;
 
-	void* DialogCommon_Data_AddLeftButtonCallback_addr = nullptr;
+	Il2CppMethodPointer DialogCommon_Data_AddLeftButtonCallback_addr = nullptr;
 
-	void* DialogCommon_Data_AddRightButtonCallback_addr = nullptr;
+	Il2CppMethodPointer DialogCommon_Data_AddRightButtonCallback_addr = nullptr;
 
-	void* DialogCommon_Data_AddBeginCloseCallback_addr = nullptr;
+	Il2CppMethodPointer DialogCommon_Data_AddBeginCloseCallback_addr = nullptr;
 
-	void* DialogCommon_Data_AddDestroyCallback_addr = nullptr;
+	Il2CppMethodPointer DialogCommon_Data_AddDestroyCallback_addr = nullptr;
 
-	void* DialogCommon_Data_ReleaseDialogResourceAndHash_addr = nullptr;
+	Il2CppMethodPointer DialogCommon_Data_ReleaseDialogResourceAndHash_addr = nullptr;
 
 	FieldInfo* DialogCommon_Data_HeaderSortOrderOffsetField = nullptr;
 

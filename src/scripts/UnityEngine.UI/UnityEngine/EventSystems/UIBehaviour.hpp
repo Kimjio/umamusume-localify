@@ -3,7 +3,7 @@
 
 namespace UnityEngine::EventSystems
 {
-	class UIBehaviour abstract : public MonoBehaviour
+	class UIBehaviour : public MonoBehaviour
 	{
 	public:
 		virtual bool IsActive()

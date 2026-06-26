@@ -5,7 +5,7 @@
 namespace AnimateToUnity
 {
 	template<class T>
-	class AnMonoSingleton abstract : public UnityEngine::MonoBehaviour
+	class AnMonoSingleton : public UnityEngine::MonoBehaviour
 	{
 	public:
 		static T Instance()

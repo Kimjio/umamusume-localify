@@ -7,13 +7,13 @@ namespace
 	Il2CppClass* Master3dLive_klass = nullptr;
 	Il2CppClass* Master3dLive_Live3dData_klass = nullptr;
 
-	void* Master3dLive_ctor_addr = nullptr;
+	Il2CppMethodPointer Master3dLive_ctor_addr = nullptr;
 
-	void* Master3dLive_Live3dData_get_ScreenMode_addr = nullptr;
+	Il2CppMethodPointer Master3dLive_Live3dData_get_ScreenMode_addr = nullptr;
 
-	void* Master3dLive_Live3dData_set_ScreenMode_addr = nullptr;
+	Il2CppMethodPointer Master3dLive_Live3dData_set_ScreenMode_addr = nullptr;
 
-	void* Master3dLive_Live3dData_ctor_addr = nullptr;
+	Il2CppMethodPointer Master3dLive_Live3dData_ctor_addr = nullptr;
 
 	FieldInfo* Master3dLive_LiveData = nullptr;
 }

@@ -8,14 +8,14 @@
 
 namespace
 {
-	void* StoryViewController_ApplyBackgroundOffset_addr = nullptr;
+	Il2CppMethodPointer StoryViewController_ApplyBackgroundOffset_addr = nullptr;
 	void* StoryViewController_ApplyBackgroundOffset_orig = nullptr;
 
-	void* StoryViewController_get_IsSingleModeOrGallery_addr = nullptr;
+	Il2CppMethodPointer StoryViewController_get_IsSingleModeOrGallery_addr = nullptr;
 
-	void* StoryViewController_SetDisplayMode_addr = nullptr;
+	Il2CppMethodPointer StoryViewController_SetDisplayMode_addr = nullptr;
 
-	void* StoryViewController_SetupUIOnChangeOrientation_addr = nullptr;
+	Il2CppMethodPointer StoryViewController_SetupUIOnChangeOrientation_addr = nullptr;
 
 	FieldInfo* StoryViewController__use3DBgField = nullptr;
 	FieldInfo* StoryViewController__controllerField = nullptr;
@@ -38,8 +38,8 @@ static void StoryViewController_ApplyBackgroundOffset_hook(Il2CppObject* self, U
 	Il2CppObject* _controller;
 	il2cpp_field_get_value(self, StoryViewController__controllerField, &_controller);
 
-	auto CameraController = il2cpp_class_get_method_from_name_type<Il2CppObject * (*)(Il2CppObject*)>(_controller->klass, "get_CameraController", 0)->methodPointer(_controller);
-	UnityEngine::Transform bgOffset = il2cpp_class_get_method_from_name_type<Il2CppObject * (*)(Il2CppObject*)>(CameraController->klass, "get_BgOffset", 0)->methodPointer(CameraController);
+	auto CameraController = il2cpp_symbols::get_method_pointer<Il2CppObject * (*)(Il2CppObject*)>(_controller->klass, "get_CameraController", 0)(_controller);
+	UnityEngine::Transform bgOffset = il2cpp_symbols::get_method_pointer<Il2CppObject * (*)(Il2CppObject*)>(CameraController->klass, "get_BgOffset", 0)(CameraController);
 
 	UnityEngine::Vector3 _eyeLevelOffset;
 	il2cpp_field_get_value(self, StoryViewController__eyeLevelOffsetField, &_eyeLevelOffset);

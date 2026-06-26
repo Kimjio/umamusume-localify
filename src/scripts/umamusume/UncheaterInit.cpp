@@ -3,16 +3,16 @@
 
 namespace
 {
-	void* UncheaterInit_Init_addr = nullptr;
+	Il2CppMethodPointer UncheaterInit_Init_addr = nullptr;
 	void* UncheaterInit_Init_orig = nullptr;
 
-	void* UncheaterInit_InitializeUncheaterSDK_addr = nullptr;
+	Il2CppMethodPointer UncheaterInit_InitializeUncheaterSDK_addr = nullptr;
 	void* UncheaterInit_InitializeUncheaterSDK_orig = nullptr;
 
-	void* UncheaterInit_CheckUncheaterSystem_addr = nullptr;
+	Il2CppMethodPointer UncheaterInit_CheckUncheaterSystem_addr = nullptr;
 	void* UncheaterInit_CheckUncheaterSystem_orig = nullptr;
 
-	void* UncheaterInit_setUserName_addr = nullptr;
+	Il2CppMethodPointer UncheaterInit_setUserName_addr = nullptr;
 	void* UncheaterInit_setUserName_orig = nullptr;
 }
 
@@ -49,6 +49,7 @@ static void InitAddress()
 
 static void HookMethods()
 {
+#ifdef _MSC_VER
 	if (Game::CurrentGameRegion == Game::Region::KOR)
 	{
 		ADD_HOOK(UncheaterInit_Init, "UncheaterInit::Init at %p\n");
@@ -56,6 +57,7 @@ static void HookMethods()
 		ADD_HOOK(UncheaterInit_CheckUncheaterSystem, "UncheaterInit::CheckUncheaterSystem at %p\n");
 		ADD_HOOK(UncheaterInit_setUserName, "UncheaterInit::setUserName at %p\n");
 	}
+#endif
 }
 
 STATIC

@@ -8,7 +8,7 @@
 
 namespace
 {
-	void* ResourceManager_Load_addr = nullptr;
+	Il2CppMethodPointer ResourceManager_Load_addr = nullptr;
 	void* ResourceManager_Load_orig = nullptr;
 
 	Il2CppClass* FontClass;
@@ -35,7 +35,7 @@ static void InitAddress()
 {
 	if (auto methodInfo = GetGenericMethod(il2cpp_symbols::get_method(ASSEMBLY_NAME, "Gallop", "ResourceManager", "Load", 3), GetRuntimeType("UnityEngine.TextRenderingModule.dll", "UnityEngine", "Font")))
 	{
-		ResourceManager_Load_addr = methodInfo->methodPointer;
+		ResourceManager_Load_addr = il2cpp_symbols::get_method_pointer(methodInfo);
 	}
 
 	FontClass = il2cpp_symbols::get_class("UnityEngine.TextRenderingModule.dll", "UnityEngine", "Font");

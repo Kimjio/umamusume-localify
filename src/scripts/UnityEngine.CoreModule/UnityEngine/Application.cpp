@@ -9,29 +9,27 @@
 
 namespace
 {
-	void* Quit_addr = nullptr;
-	void* Quit_orig = nullptr;
+	Il2CppMethodPointer Quit_addr = nullptr;
 
-	void* OpenURL_addr = nullptr;
+	Il2CppMethodPointer OpenURL_addr = nullptr;
 
-	void* get_unityVersion_addr = nullptr;
+	Il2CppMethodPointer get_unityVersion_addr = nullptr;
 
-	void* get_companyName_addr = nullptr;
+	Il2CppMethodPointer get_companyName_addr = nullptr;
 
-	void* get_productName_addr = nullptr;
+	Il2CppMethodPointer get_productName_addr = nullptr;
 
-	void* get_streamingAssetsPath_addr = nullptr;
+	Il2CppMethodPointer get_streamingAssetsPath_addr = nullptr;
 
-	void* get_persistentDataPath_addr = nullptr;
+	Il2CppMethodPointer get_persistentDataPath_addr = nullptr;
 
-	void* set_targetFrameRate_addr = nullptr;
-	void* set_targetFrameRate_orig = nullptr;
+	Il2CppMethodPointer set_targetFrameRate_addr = nullptr;
 
-	void* get_targetFrameRate_addr = nullptr;
+	Il2CppMethodPointer get_targetFrameRate_addr = nullptr;
 
-	void* get_systemLanguage_addr = nullptr;
+	Il2CppMethodPointer get_systemLanguage_addr = nullptr;
 
-	void* get_internetReachability_addr = nullptr;
+	Il2CppMethodPointer get_internetReachability_addr = nullptr;
 }
 
 static void Quit_hook(int exitCode)
@@ -41,31 +39,33 @@ static void Quit_hook(int exitCode)
 
 static void set_targetFrameRate_hook(int value)
 {
-	reinterpret_cast<decltype(set_targetFrameRate_hook)*>(set_targetFrameRate_orig)(config::runtime::useDefaultFPS ? value : config::max_fps);
+	 reinterpret_cast<decltype(set_targetFrameRate_hook)*>(set_targetFrameRate_addr)(config::runtime::useDefaultFPS ? value : config::max_fps);
 }
 
 static void InitAddress()
 {
 	Quit_addr = il2cpp_resolve_icall("UnityEngine.Application::Quit(System.Int32)");
 	OpenURL_addr = il2cpp_symbols::get_method_pointer(ASSEMBLY_NAME, "UnityEngine", "Application", "OpenURL", 1);
-	get_unityVersion_addr = il2cpp_resolve_icall("UnityEngine.Application::get_unityVersion()");
-	get_companyName_addr = il2cpp_resolve_icall("UnityEngine.Application::get_companyName()");
-	get_productName_addr = il2cpp_resolve_icall("UnityEngine.Application::get_productName()");
-	get_streamingAssetsPath_addr = il2cpp_resolve_icall("UnityEngine.Application::get_streamingAssetsPath()");
-	get_persistentDataPath_addr = il2cpp_resolve_icall("UnityEngine.Application::get_persistentDataPath()");
-	set_targetFrameRate_addr = il2cpp_resolve_icall("UnityEngine.Application::set_targetFrameRate(System.Int32)");
-	get_targetFrameRate_addr = il2cpp_resolve_icall("UnityEngine.Application::get_targetFrameRate()");
-	get_systemLanguage_addr = il2cpp_resolve_icall("UnityEngine.Application::get_systemLanguage()");
-	get_internetReachability_addr = il2cpp_resolve_icall("UnityEngine.Application::get_internetReachability()");
+	get_unityVersion_addr = il2cpp_resolve_icall("UnityEngine.Application::get_unityVersion");
+	get_companyName_addr = il2cpp_resolve_icall("UnityEngine.Application::get_companyName");
+	get_productName_addr = il2cpp_resolve_icall("UnityEngine.Application::get_productName");
+	get_streamingAssetsPath_addr = il2cpp_resolve_icall("UnityEngine.Application::get_streamingAssetsPath");
+	get_persistentDataPath_addr = il2cpp_resolve_icall("UnityEngine.Application::get_persistentDataPath");
+	set_targetFrameRate_addr = il2cpp_resolve_icall("UnityEngine.Application::set_targetFrameRate");
+	get_targetFrameRate_addr = il2cpp_resolve_icall("UnityEngine.Application::get_targetFrameRate");
+	get_systemLanguage_addr = il2cpp_resolve_icall("UnityEngine.Application::get_systemLanguage");
+	get_internetReachability_addr = il2cpp_resolve_icall("UnityEngine.Application::get_internetReachability");
 }
 
 static void HookMethods()
 {
-	ADD_HOOK(Quit, "UnityEngine.Application::Quit at %p\n");
+#ifdef _MSC_VER
+#endif
+    il2cpp_add_internal_call("UnityEngine.Application::Quit", reinterpret_cast<Il2CppMethodPointer>(Quit_hook));
 
 	if (config::max_fps > -1)
 	{
-		ADD_HOOK(set_targetFrameRate, "UnityEngine.Application.set_targetFrameRate at %p\n");
+        il2cpp_add_internal_call("UnityEngine.Application::set_targetFrameRate", reinterpret_cast<Il2CppMethodPointer>(set_targetFrameRate_hook));
 	}
 }
 
@@ -155,7 +155,7 @@ namespace UnityEngine
 
 		TerminateProcess(GetCurrentProcess(), exitCode);
 #else
-		reinterpret_cast<decltype(Quit)*>(Quit_orig)(exitCode);
+		reinterpret_cast<decltype(Quit)*>(Quit_addr)(exitCode);
 #endif
 	}
 }

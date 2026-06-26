@@ -26,6 +26,8 @@ namespace Gallop
 
 		static bool IsVertical();
 
+		static void UpdateOriginalScreenSize();
+
 		static Il2CppObject* ChangeScreenOrientation(UnityEngine::ScreenOrientation targetOrientation, bool isForce);
 
 		static Il2CppObject* ChangeScreenOrientationLandscapeAsync();

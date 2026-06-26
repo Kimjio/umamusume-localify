@@ -1,3 +1,4 @@
+#ifdef _MSC_VER
 #include "../umamusume.hpp"
 #include "../../ScriptInternal.hpp"
 #include "GallopInput.hpp"
@@ -11,7 +12,7 @@
 
 namespace
 {
-	void* GallopInput_mousePosition_addr = nullptr;
+	Il2CppMethodPointer GallopInput_mousePosition_addr = nullptr;
 	void* GallopInput_mousePosition_orig = nullptr;
 }
 
@@ -62,3 +63,4 @@ namespace Gallop
 		return reinterpret_cast<UnityEngine::Vector3(*)()>(GallopInput_mousePosition_addr)();
 	}
 }
+#endif

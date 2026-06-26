@@ -6,59 +6,56 @@
 
 namespace
 {
-	void* set_anisotropicFiltering_addr = nullptr;
-	void* set_anisotropicFiltering_orig = nullptr;
+	Il2CppMethodPointer set_anisotropicFiltering_addr = nullptr;
 
-	void* set_vSyncCount_addr = nullptr;
-	void* set_vSyncCount_orig = nullptr;
+	Il2CppMethodPointer set_vSyncCount_addr = nullptr;
 
-	void* set_antiAliasing_addr = nullptr;
-	void* set_antiAliasing_orig = nullptr;
+	Il2CppMethodPointer set_antiAliasing_addr = nullptr;
 }
 
 static void set_anisotropicFiltering_hook(int mode)
 {
-	reinterpret_cast<decltype(set_anisotropicFiltering_hook)*>(set_anisotropicFiltering_orig)(config::anisotropic_filtering);
+	reinterpret_cast<decltype(set_anisotropicFiltering_hook)*>(set_anisotropicFiltering_addr)(config::anisotropic_filtering);
 }
 
 static void set_vSyncCount_hook(int level)
 {
-	reinterpret_cast<decltype(set_vSyncCount_hook)*>(set_vSyncCount_orig)(config::vsync_count);
+	reinterpret_cast<decltype(set_vSyncCount_hook)*>(set_vSyncCount_addr)(config::vsync_count);
 }
 
 static void set_antiAliasing_hook(int level)
 {
 	if (config::anti_aliasing < 0)
 	{
-		reinterpret_cast<decltype(set_antiAliasing_hook)*>(set_antiAliasing_orig)(level);
+		reinterpret_cast<decltype(set_antiAliasing_hook)*>(set_antiAliasing_addr)(level);
 		return;
 	}
 
-	reinterpret_cast<decltype(set_antiAliasing_hook)*>(set_antiAliasing_orig)(config::anti_aliasing);
+	reinterpret_cast<decltype(set_antiAliasing_hook)*>(set_antiAliasing_addr)(config::anti_aliasing);
 }
 
 static void InitAddress()
 {
-	set_anisotropicFiltering_addr = il2cpp_resolve_icall("UnityEngine.QualitySettings::set_anisotropicFiltering(UnityEngine.AnisotropicFiltering)");
-	set_vSyncCount_addr = il2cpp_resolve_icall("UnityEngine.QualitySettings::set_vSyncCount()");
-	set_antiAliasing_addr = il2cpp_resolve_icall("UnityEngine.QualitySettings::set_antiAliasing(System.Int32)");
+	set_anisotropicFiltering_addr = il2cpp_resolve_icall("UnityEngine.QualitySettings::set_anisotropicFiltering");
+	set_vSyncCount_addr = il2cpp_resolve_icall("UnityEngine.QualitySettings::set_vSyncCount");
+	set_antiAliasing_addr = il2cpp_resolve_icall("UnityEngine.QualitySettings::set_antiAliasing");
 }
 
 static void HookMethods()
 {
 	if (config::anisotropic_filtering != -1)
 	{
-		ADD_HOOK(set_anisotropicFiltering, "UnityEngine.QualitySettings.set_anisotropicFiltering(UnityEngine.AnisotropicFiltering) at %p\n");
+		il2cpp_add_internal_call("UnityEngine.QualitySettings.set_anisotropicFiltering", reinterpret_cast<Il2CppMethodPointer>(set_anisotropicFiltering_hook));
 	}
 
 	if (config::vsync_count != -1)
 	{
-		ADD_HOOK(set_vSyncCount, "UnityEngine.QualitySettings.set_vSyncCount() at %p\n");
+		il2cpp_add_internal_call("UnityEngine.QualitySettings.set_vSyncCount", reinterpret_cast<Il2CppMethodPointer>(set_vSyncCount_hook));
 	}
 
 	if (config::anti_aliasing != -1)
 	{
-		ADD_HOOK(set_antiAliasing, "UnityEngine.QualitySettings::set_antiAliasing at %p\n");
+		il2cpp_add_internal_call("UnityEngine.QualitySettings::set_antiAliasing", reinterpret_cast<Il2CppMethodPointer>(set_antiAliasing_hook));
 	}
 }
 

@@ -2,20 +2,8 @@
 #include "../../ScriptInternal.hpp"
 #include "Matrix4x4.hpp"
 
-// void* GetNodeStates_Internal_addr = nullptr;
-
-static void InitAddress()
-{
-	// GetNodeStates_Internal_addr = il2cpp_resolve_icall("UnityEngine.XR.InputTracking::GetNodeStates_Internal()");
-}
-
-STATIC
-{
-	il2cpp_symbols::init_callbacks.emplace_back(InitAddress);
-}
-
 namespace UnityEngine
 {
-	Matrix4x4 Matrix4x4::zeroMatrix = Matrix4x4{ {0,0,0,0}, {0,0,0,0}, {0,0,0,0}, {0,0,0,0} };
-	Matrix4x4 Matrix4x4::identityMatrix = Matrix4x4{ {1,0,0,0}, {0,1,0,0}, {0,0,1,0}, {0,0,0,1} };
+	[[maybe_unused]] Matrix4x4 Matrix4x4::zeroMatrix = Matrix4x4{ {.x=0,.y=0,.z=0,.w=0}, {.x=0,.y=0,.z=0,.w=0}, {.x=0,.y=0,.z=0,.w=0}, {.x=0,.y=0,.z=0,.w=0} };
+	[[maybe_unused]] Matrix4x4 Matrix4x4::identityMatrix = Matrix4x4{ {.x=1,.y=0,.z=0,.w=0}, {.x=0,.y=1,.z=0,.w=0}, {.x=0,.y=0,.z=1,.w=0}, {.x=0,.y=0,.z=0,.w=1} };
 }

@@ -4,32 +4,32 @@
 
 namespace
 {
-	void* Quaternion_AngleAxis_Injected_addr = nullptr;
+	Il2CppMethodPointer Quaternion_AngleAxis_Injected_addr = nullptr;
 
-	void* Quaternion_FromToRotation_Injected_addr = nullptr;
+	Il2CppMethodPointer Quaternion_FromToRotation_Injected_addr = nullptr;
 
-	void* Quaternion_Inverse_Injected_addr = nullptr;
+	Il2CppMethodPointer Quaternion_Inverse_Injected_addr = nullptr;
 
-	void* Quaternion_Slerp_Injected_addr = nullptr;
+	Il2CppMethodPointer Quaternion_Slerp_Injected_addr = nullptr;
 
-	void* Quaternion_Lerp_Injected_addr = nullptr;
+	Il2CppMethodPointer Quaternion_Lerp_Injected_addr = nullptr;
 
-	void* Quaternion_Internal_FromEulerRad_Injected_addr = nullptr;
+	Il2CppMethodPointer Quaternion_Internal_FromEulerRad_Injected_addr = nullptr;
 
-	void* Quaternion_Internal_ToEulerRad_Injected_addr = nullptr;
+	Il2CppMethodPointer Quaternion_Internal_ToEulerRad_Injected_addr = nullptr;
 
 	constexpr float DEG_2_RAD = 3.1415926535f / 180.0f;
 }
 
 static void InitAddress()
 {
-	Quaternion_AngleAxis_Injected_addr = il2cpp_resolve_icall("UnityEngine.Quaternion::AngleAxis_Injected()");
-	Quaternion_FromToRotation_Injected_addr = il2cpp_resolve_icall("UnityEngine.Quaternion::FromToRotation_Injected()");
-	Quaternion_Inverse_Injected_addr = il2cpp_resolve_icall("UnityEngine.Quaternion::Inverse_Injected()");
-	Quaternion_Slerp_Injected_addr = il2cpp_resolve_icall("UnityEngine.Quaternion::Slerp_Injected()");
-	Quaternion_Lerp_Injected_addr = il2cpp_resolve_icall("UnityEngine.Quaternion::Lerp_Injected()");
-	Quaternion_Internal_FromEulerRad_Injected_addr = il2cpp_resolve_icall("UnityEngine.Quaternion::Internal_FromEulerRad_Injected()");
-	Quaternion_Internal_ToEulerRad_Injected_addr = il2cpp_resolve_icall("UnityEngine.Quaternion::Internal_ToEulerRad_Injected()");
+	Quaternion_AngleAxis_Injected_addr = il2cpp_resolve_icall("UnityEngine.Quaternion::AngleAxis_Injected");
+	Quaternion_FromToRotation_Injected_addr = il2cpp_resolve_icall("UnityEngine.Quaternion::FromToRotation_Injected");
+	Quaternion_Inverse_Injected_addr = il2cpp_resolve_icall("UnityEngine.Quaternion::Inverse_Injected");
+	Quaternion_Slerp_Injected_addr = il2cpp_resolve_icall("UnityEngine.Quaternion::Slerp_Injected");
+	Quaternion_Lerp_Injected_addr = il2cpp_resolve_icall("UnityEngine.Quaternion::Lerp_Injected");
+	Quaternion_Internal_FromEulerRad_Injected_addr = il2cpp_resolve_icall("UnityEngine.Quaternion::Internal_FromEulerRad_Injected");
+	Quaternion_Internal_ToEulerRad_Injected_addr = il2cpp_resolve_icall("UnityEngine.Quaternion::Internal_ToEulerRad_Injected");
 }
 
 STATIC

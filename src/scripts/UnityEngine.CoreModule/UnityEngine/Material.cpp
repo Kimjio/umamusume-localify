@@ -6,18 +6,16 @@ namespace
 {
 	Il2CppReflectionType* Texture2DClass = nullptr;
 
-	void* Material_HasProperty_addr = nullptr;
+	Il2CppMethodPointer Material_HasProperty_addr = nullptr;
 
-	void* Material_GetTextureImpl_addr = nullptr;
-	void* Material_GetTextureImpl_orig = nullptr;
+	Il2CppMethodPointer Material_GetTextureImpl_addr = nullptr;
 
-	void* Material_SetTextureImpl_addr = nullptr;
-	void* Material_SetTextureImpl_orig = nullptr;
+	Il2CppMethodPointer Material_SetTextureImpl_addr = nullptr;
 }
 
 static Il2CppObject* Material_GetTextureImpl_hook(Il2CppObject* self, int nameID)
 {
-	auto texture = reinterpret_cast<decltype(Material_GetTextureImpl_hook)*>(Material_GetTextureImpl_orig)(self, nameID);
+	auto texture = reinterpret_cast<decltype(Material_GetTextureImpl_hook)*>(Material_GetTextureImpl_addr)(self, nameID);
 	if (texture && !il2cppstring(UnityEngine::Object::Name(texture)->chars).empty())
 	{
 		auto newTexture = GetReplacementAssets(UnityEngine::Object::Name(texture), Texture2DClass);
@@ -36,27 +34,27 @@ static void Material_SetTextureImpl_hook(Il2CppObject* self, int nameID, Il2CppO
 		auto newTexture = GetReplacementAssets(UnityEngine::Object::Name(texture), Texture2DClass);
 		if (newTexture)
 		{
-			reinterpret_cast<decltype(Material_SetTextureImpl_hook)*>(Material_SetTextureImpl_orig)(self, nameID, newTexture);
+			reinterpret_cast<decltype(Material_SetTextureImpl_hook)*>(Material_SetTextureImpl_addr)(self, nameID, newTexture);
 			return;
 		}
 	}
-	reinterpret_cast<decltype(Material_SetTextureImpl_hook)*>(Material_SetTextureImpl_orig)(self, nameID, texture);
+	reinterpret_cast<decltype(Material_SetTextureImpl_hook)*>(Material_SetTextureImpl_addr)(self, nameID, texture);
 }
 
 static void InitAddress()
 {
 	Texture2DClass = GetRuntimeType("UnityEngine.CoreModule.dll", "UnityEngine", "Texture2D");
-	Material_HasProperty_addr = il2cpp_resolve_icall("UnityEngine.Material::HasProperty()");
-	Material_GetTextureImpl_addr = il2cpp_resolve_icall("UnityEngine.Material::GetTextureImpl()");
-	Material_SetTextureImpl_addr = il2cpp_resolve_icall("UnityEngine.Material::SetTextureImpl()");
+	Material_HasProperty_addr = il2cpp_resolve_icall("UnityEngine.Material::HasProperty");
+	Material_GetTextureImpl_addr = il2cpp_resolve_icall("UnityEngine.Material::GetTextureImpl");
+	Material_SetTextureImpl_addr = il2cpp_resolve_icall("UnityEngine.Material::SetTextureImpl");
 }
 
 static void HookMethods()
 {
 	if (!config::replace_assetbundle_file_paths.empty())
 	{
-		ADD_HOOK(Material_GetTextureImpl, "UnityEngine.Material::GetTextureImpl at %p\n");
-		ADD_HOOK(Material_SetTextureImpl, "UnityEngine.Material::SetTextureImpl at %p\n");
+		il2cpp_add_internal_call("UnityEngine.Material::GetTextureImpl", reinterpret_cast<Il2CppMethodPointer>(Material_GetTextureImpl_hook));
+		il2cpp_add_internal_call("UnityEngine.Material::SetTextureImpl", reinterpret_cast<Il2CppMethodPointer>(Material_SetTextureImpl_hook));
 	}
 }
 

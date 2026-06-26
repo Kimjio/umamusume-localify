@@ -5,10 +5,10 @@
 
 namespace
 {
-	void* PushDialog_addr = nullptr;
+	Il2CppMethodPointer PushDialog_addr = nullptr;
 	void* PushDialog_orig = nullptr;
 
-	void* PushSystemDialog_addr = nullptr;
+	Il2CppMethodPointer PushSystemDialog_addr = nullptr;
 }
 
 static Il2CppObject* PushDialog_hook(Il2CppObject* data)

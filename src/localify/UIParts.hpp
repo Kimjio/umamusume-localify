@@ -1,5 +1,4 @@
 #pragma once
-#include <stdinclude.hpp>
 #include "il2cpp/il2cpp_symbols.hpp"
 
 #include "scripts/UnityEngine.CoreModule/UnityEngine/GameObject.hpp"

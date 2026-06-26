@@ -4,54 +4,54 @@
 
 namespace
 {
-	void* Transform_SetParent_addr = nullptr;
+	Il2CppMethodPointer Transform_SetParent_addr = nullptr;
 
-	void* Transform_GetParent_addr = nullptr;
+	Il2CppMethodPointer Transform_GetParent_addr = nullptr;
 
-	void* Transform_FindRelativeTransformWithPath_addr = nullptr;
+	Il2CppMethodPointer Transform_FindRelativeTransformWithPath_addr = nullptr;
 
-	void* Transform_InverseTransformPoint_Injected_addr = nullptr;
+	Il2CppMethodPointer Transform_InverseTransformPoint_Injected_addr = nullptr;
 
-	void* Transform_get_position_Injected_addr = nullptr;
+	Il2CppMethodPointer Transform_get_position_Injected_addr = nullptr;
 
-	void* Transform_set_position_Injected_addr = nullptr;
+	Il2CppMethodPointer Transform_set_position_Injected_addr = nullptr;
 
-	void* Transform_get_localPosition_Injected_addr = nullptr;
+	Il2CppMethodPointer Transform_get_localPosition_Injected_addr = nullptr;
 
-	void* Transform_set_localPosition_Injected_addr = nullptr;
+	Il2CppMethodPointer Transform_set_localPosition_Injected_addr = nullptr;
 
-	void* Transform_get_rotation_Injected_addr = nullptr;
+	Il2CppMethodPointer Transform_get_rotation_Injected_addr = nullptr;
 
-	void* Transform_set_rotation_Injected_addr = nullptr;
+	Il2CppMethodPointer Transform_set_rotation_Injected_addr = nullptr;
 
-	void* Transform_get_localScale_Injected_addr = nullptr;
+	Il2CppMethodPointer Transform_get_localScale_Injected_addr = nullptr;
 
-	void* Transform_set_localScale_Injected_addr = nullptr;
+	Il2CppMethodPointer Transform_set_localScale_Injected_addr = nullptr;
 
-	void* Transform_get_childCount_addr = nullptr;
+	Il2CppMethodPointer Transform_get_childCount_addr = nullptr;
 
-	void* Transform_GetChild_addr = nullptr;
+	Il2CppMethodPointer Transform_GetChild_addr = nullptr;
 
-	void* Transform_SetAsFirstSibling_addr = nullptr;
+	Il2CppMethodPointer Transform_SetAsFirstSibling_addr = nullptr;
 }
 
 static void InitAddress()
 {
-	Transform_SetParent_addr = il2cpp_resolve_icall("UnityEngine.Transform::SetParent()");
-	Transform_GetParent_addr = il2cpp_resolve_icall("UnityEngine.Transform::GetParent()");
-	Transform_FindRelativeTransformWithPath_addr = il2cpp_resolve_icall("UnityEngine.Transform::FindRelativeTransformWithPath()");
-	Transform_InverseTransformPoint_Injected_addr = il2cpp_resolve_icall("UnityEngine.Transform::InverseTransformPoint_Injected()");
-	Transform_get_position_Injected_addr = il2cpp_resolve_icall("UnityEngine.Transform::get_position_Injected()");
-	Transform_set_position_Injected_addr = il2cpp_resolve_icall("UnityEngine.Transform::set_position_Injected()");
-	Transform_get_localPosition_Injected_addr = il2cpp_resolve_icall("UnityEngine.Transform::get_localPosition_Injected()");
-	Transform_set_localPosition_Injected_addr = il2cpp_resolve_icall("UnityEngine.Transform::set_localPosition_Injected()");
-	Transform_get_rotation_Injected_addr = il2cpp_resolve_icall("UnityEngine.Transform::get_rotation_Injected()");
-	Transform_set_rotation_Injected_addr = il2cpp_resolve_icall("UnityEngine.Transform::set_rotation_Injected()");
-	Transform_get_localScale_Injected_addr = il2cpp_resolve_icall("UnityEngine.Transform::get_localScale_Injected()");
-	Transform_set_localScale_Injected_addr = il2cpp_resolve_icall("UnityEngine.Transform::set_localScale_Injected()");
-	Transform_get_childCount_addr = il2cpp_resolve_icall("UnityEngine.Transform::get_childCount()");
-	Transform_GetChild_addr = il2cpp_resolve_icall("UnityEngine.Transform::GetChild()");
-	Transform_SetAsFirstSibling_addr = il2cpp_resolve_icall("UnityEngine.Transform::SetAsFirstSibling()");
+	Transform_SetParent_addr = il2cpp_resolve_icall("UnityEngine.Transform::SetParent");
+	Transform_GetParent_addr = il2cpp_resolve_icall("UnityEngine.Transform::GetParent");
+	Transform_FindRelativeTransformWithPath_addr = il2cpp_resolve_icall("UnityEngine.Transform::FindRelativeTransformWithPath");
+	Transform_InverseTransformPoint_Injected_addr = il2cpp_resolve_icall("UnityEngine.Transform::InverseTransformPoint_Injected");
+	Transform_get_position_Injected_addr = il2cpp_resolve_icall("UnityEngine.Transform::get_position_Injected");
+	Transform_set_position_Injected_addr = il2cpp_resolve_icall("UnityEngine.Transform::set_position_Injected");
+	Transform_get_localPosition_Injected_addr = il2cpp_resolve_icall("UnityEngine.Transform::get_localPosition_Injected");
+	Transform_set_localPosition_Injected_addr = il2cpp_resolve_icall("UnityEngine.Transform::set_localPosition_Injected");
+	Transform_get_rotation_Injected_addr = il2cpp_resolve_icall("UnityEngine.Transform::get_rotation_Injected");
+	Transform_set_rotation_Injected_addr = il2cpp_resolve_icall("UnityEngine.Transform::set_rotation_Injected");
+	Transform_get_localScale_Injected_addr = il2cpp_resolve_icall("UnityEngine.Transform::get_localScale_Injected");
+	Transform_set_localScale_Injected_addr = il2cpp_resolve_icall("UnityEngine.Transform::set_localScale_Injected");
+	Transform_get_childCount_addr = il2cpp_resolve_icall("UnityEngine.Transform::get_childCount");
+	Transform_GetChild_addr = il2cpp_resolve_icall("UnityEngine.Transform::GetChild");
+	Transform_SetAsFirstSibling_addr = il2cpp_resolve_icall("UnityEngine.Transform::SetAsFirstSibling");
 }
 
 STATIC

@@ -6,7 +6,7 @@
 
 namespace
 {
-	void* AnText__FixData_addr = nullptr;
+	Il2CppMethodPointer AnText__FixData_addr = nullptr;
 	void* AnText__FixData_orig = nullptr;
 
 	FieldInfo* AnText__text = nullptr;

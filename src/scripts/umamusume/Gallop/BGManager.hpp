@@ -6,6 +6,8 @@ namespace Gallop
 	class BGManager : public UnityEngine::MonoBehaviour
 	{
 	public:
+		void OnChangeResolutionByGraphicsSettings();
+
 		using MonoBehaviour::MonoBehaviour;
 	};
 }

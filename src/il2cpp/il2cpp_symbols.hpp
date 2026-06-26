@@ -1,8 +1,13 @@
 #pragma once
 
+#ifdef _MSC_VER
 #define NOMINMAX
 
 #include <Windows.h>
+#else
+#include <dlfcn.h>
+#define HMODULE void*
+#endif
 
 #include <functional>
 #include <vector>
@@ -12,10 +17,13 @@
 #include "il2cpp-object-internals.h"
 #include "codegen/il2cpp-codegen-metadata.h"
 
+#include "game.hpp"
+
 template<typename T>
 struct MethodInfo_t
 {
 	T methodPointer;
+	Il2CppMethodPointer virtualMethodPointer;
 	void* (*invoker_method)(T, const MethodInfo_t<T>*, void*, void**);
 	const char* name;
 	Il2CppClass* klass;
@@ -150,25 +158,49 @@ namespace il2cpp_symbols
 	Il2CppMethodPointer get_method_pointer(const char* assemblyName, const char* namespaze,
 		const char* klassName, const char* name, int argsCount);
 
-	template<typename T>
+	template<typename T = Il2CppMethodPointer>
 	T get_method_pointer(const char* assemblyName, const char* namespaze,
-		const char* klassName, const char* name, int argsCount) {
+		const char* klassName, const char* name, int argsCount)
+	{
 		return reinterpret_cast<T>(get_method_pointer(assemblyName, namespaze, klassName, name,
 			argsCount));
 	}
 
 	Il2CppMethodPointer get_method_pointer(Il2CppClass* klass, const char* name, int argsCount);
 
-	template<typename T>
-	T get_method_pointer(Il2CppClass* klass, const char* name, int argsCount) {
+	template<typename T = Il2CppMethodPointer>
+	T get_method_pointer(Il2CppClass* klass, const char* name, int argsCount)
+	{
 		return reinterpret_cast<T>(get_method_pointer(klass, name, argsCount));
+	}
+
+	template<typename T = Il2CppMethodPointer>
+	T get_method_pointer(const MethodInfo* method)
+	{
+		if (method)
+		{
+		    return reinterpret_cast<T>(method->methodPointer);
+		}
+
+        return nullptr;
+	}
+
+	template<typename T = Il2CppMethodPointer>
+	T get_method_pointer(const MethodInfo_t<T>* method)
+	{
+		if (method)
+		{
+		    return method->methodPointer;
+		}
+
+        return nullptr;
 	}
 
 	const MethodInfo* get_method(const char* assemblyName, const char* namespaze,
 		const char* klassName, const char* name, int argsCount);
 
-	template<typename T>
-	const MethodInfo_t<T>* get_method(const char* assemblyName, const char* namespaze,
+	template<typename T = Il2CppMethodPointer>
+	const MethodInfo_t<T>* get_method_type(const char* assemblyName, const char* namespaze,
 		const char* klassName, const char* name, int argsCount)
 	{
 		return reinterpret_cast<const MethodInfo_t<T>*>(get_method(assemblyName, namespaze, klassName, name, argsCount));
@@ -176,9 +208,10 @@ namespace il2cpp_symbols
 
 	const MethodInfo* get_method(Il2CppClass* klass, const char* name, int argsCount);
 
-	template<typename T>
-	MethodInfo_t<T>* get_method(Il2CppClass* klass, const char* name, int argsCount) {
-		return reinterpret_cast<MethodInfo_t<T>*>(get_method(klass, name, argsCount));
+	template<typename T = Il2CppMethodPointer>
+	const MethodInfo_t<T>* get_method_type(Il2CppClass* klass, const char* name, int argsCount)
+	{
+		return reinterpret_cast<const MethodInfo_t<T>*>(get_method(klass, name, argsCount));
 	}
 
 	const Il2CppClass* find_class(const char* assemblyName, const char* namespaze,
@@ -195,6 +228,15 @@ namespace il2cpp_symbols
 	{
 		return reinterpret_cast<T>(find_method(assemblyName, namespaze, klassName, predict));
 	}
+
+    Il2CppMethodPointer find_method(Il2CppClass* klass, const std::function<bool(const MethodInfo*)>& predict);
+
+    template<typename T>
+    T find_method(Il2CppClass* klass,
+                  const std::function<bool(const MethodInfo*)>& predict)
+    {
+        return reinterpret_cast<T>(find_method(klass, predict));
+    }
 }
 
 #include "il2cpp-api-functions.hpp"

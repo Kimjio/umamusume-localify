@@ -4,7 +4,7 @@
 
 namespace
 {
-	void* MoviePlayerBase_get_MovieInfo_addr = nullptr;
+	Il2CppMethodPointer MoviePlayerBase_get_MovieInfo_addr = nullptr;
 }
 
 static void InitAddress()

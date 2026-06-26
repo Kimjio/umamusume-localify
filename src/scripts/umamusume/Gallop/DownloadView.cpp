@@ -1,3 +1,4 @@
+#ifdef _MSC_VER
 #include "../umamusume.hpp"
 #include "../../ScriptInternal.hpp"
 #include "DownloadView.hpp"
@@ -6,7 +7,7 @@
 
 namespace
 {
-	void* DownloadView_UpdateView_addr = nullptr;
+	Il2CppMethodPointer DownloadView_UpdateView_addr = nullptr;
 	void* DownloadView_UpdateView_orig = nullptr;
 }
 
@@ -50,3 +51,4 @@ namespace Gallop
 		reinterpret_cast<void (*)(Il2CppObject*, float, float)>(DownloadView_UpdateView_addr)(instance, downloadSize, allDownloadSize);
 	}
 }
+#endif

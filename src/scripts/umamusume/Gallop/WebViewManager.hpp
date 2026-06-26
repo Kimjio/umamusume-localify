@@ -37,7 +37,7 @@ namespace Gallop
 		static void SettingUIEffectOnOpen();
 		static void SettingUIEffectOnClose();
 
-		static Il2CppString* GetGachaUrl(int gachaId);
+		static Il2CppString* GetGachaUrl(int gachaId, int stepupId);
 
 		static Il2CppString* GetGachaURLProperty(int gachaId);
 

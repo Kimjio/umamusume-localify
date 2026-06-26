@@ -194,9 +194,9 @@ static void HookMethods()
 {
 	if (config::character_system_text_caption)
 	{
-		ADD_HOOK(criAtomExAcb_GetCueInfoById, "CriWare.CriAtomExAcb::criAtomExAcb_GetCueInfoById");
-		ADD_HOOK(criAtomExAcb_GetCueInfoByName, "CriWare.CriAtomExAcb::criAtomExAcb_GetCueInfoByName");
-		ADD_HOOK(criAtomExAcb_Release, "CriWare.CriAtomExAcb::criAtomExAcb_Release");
+		ADD_HOOK(criAtomExAcb_GetCueInfoById, "CriWare.CriAtomExAcb::criAtomExAcb_GetCueInfoById at %p\n");
+		ADD_HOOK(criAtomExAcb_GetCueInfoByName, "CriWare.CriAtomExAcb::criAtomExAcb_GetCueInfoByName at %p\n");
+		ADD_HOOK(criAtomExAcb_Release, "CriWare.CriAtomExAcb::criAtomExAcb_Release at %p\n");
 	}
 }
 

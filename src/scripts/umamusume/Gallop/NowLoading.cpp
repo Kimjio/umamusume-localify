@@ -6,16 +6,16 @@
 
 namespace
 {
-	void* NowLoading_Show_addr = nullptr;
+	Il2CppMethodPointer NowLoading_Show_addr = nullptr;
 	void* NowLoading_Show_orig = nullptr;
 
-	void* NowLoading_Show3_addr = nullptr;
+	Il2CppMethodPointer NowLoading_Show3_addr = nullptr;
 	void* NowLoading_Show3_orig = nullptr;
 
-	void* NowLoading_Hide_addr = nullptr;
+	Il2CppMethodPointer NowLoading_Hide_addr = nullptr;
 	void* NowLoading_Hide_orig = nullptr;
 
-	void* NowLoading_Hide1_addr = nullptr;
+	Il2CppMethodPointer NowLoading_Hide1_addr = nullptr;
 	void* NowLoading_Hide1_orig = nullptr;
 }
 

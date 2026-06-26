@@ -12,11 +12,13 @@
 #include "../../UnityEngine.CoreModule/UnityEngine/Screen.hpp"
 #include "../../Cute.Core.Assembly/Cute/Core/WebViewManager.hpp"
 
+#ifdef _MSC_VER
 #include <WebView2.h>
 #include <wrl.h>
 #include <wil/com.h>
 #include <ShlObj.h>
 #include <WebView2EnvironmentOptions.h>
+#endif
 
 #include "config/config.hpp"
 
@@ -24,55 +26,57 @@
 
 #include "jwt/jwt.hpp"
 
+#ifdef _MSC_VER
 using namespace Microsoft::WRL;
 using namespace Microsoft::WRL::Wrappers;
 using namespace Windows::Foundation;
+#endif
 
 namespace
 {
-	void* Gallop_WebViewManager_cctor_addr = nullptr;
+	Il2CppMethodPointer Gallop_WebViewManager_cctor_addr = nullptr;
 	void* Gallop_WebViewManager_cctor_orig = nullptr;
 
-	void* Gallop_WebViewManager_GetUrl_addr = nullptr;
+	Il2CppMethodPointer Gallop_WebViewManager_GetUrl_addr = nullptr;
 	void* Gallop_WebViewManager_GetUrl_orig = nullptr;
 
-	void* Gallop_WebViewManager_Open_addr = nullptr;
+	Il2CppMethodPointer Gallop_WebViewManager_Open_addr = nullptr;
 	void* Gallop_WebViewManager_Open_orig = nullptr;
 
-	void* Gallop_WebViewManager_SetCustomFont_addr = nullptr;
+	Il2CppMethodPointer Gallop_WebViewManager_SetCustomFont_addr = nullptr;
 	void* Gallop_WebViewManager_SetCustomFont_orig = nullptr;
 
-	void* Gallop_WebViewManager_OpenWebView_addr = nullptr;
+	Il2CppMethodPointer Gallop_WebViewManager_OpenWebView_addr = nullptr;
 
-	void* Gallop_WebViewManager_SetMargin_addr = nullptr;
+	Il2CppMethodPointer Gallop_WebViewManager_SetMargin_addr = nullptr;
 	void* Gallop_WebViewManager_SetMargin_orig = nullptr;
 
-	void* Gallop_WebViewManager_get_CuteWebView_addr = nullptr;
+	Il2CppMethodPointer Gallop_WebViewManager_get_CuteWebView_addr = nullptr;
 
-	void* Gallop_WebViewManager_SetErrorCallback_addr = nullptr;
+	Il2CppMethodPointer Gallop_WebViewManager_SetErrorCallback_addr = nullptr;
 
-	void* Gallop_WebViewManager_OpenErrorDialog_addr = nullptr;
+	Il2CppMethodPointer Gallop_WebViewManager_OpenErrorDialog_addr = nullptr;
 
-	void* Gallop_WebViewManager_GetGachaUrl_addr = nullptr;
+	Il2CppMethodPointer Gallop_WebViewManager_GetGachaUrl_addr = nullptr;
 	void* Gallop_WebViewManager_GetGachaUrl_orig = nullptr;
 
-	void* Gallop_WebViewManager_GetGachaUrl1_addr = nullptr;
+	Il2CppMethodPointer Gallop_WebViewManager_GetGachaUrl1_addr = nullptr;
 	void* Gallop_WebViewManager_GetGachaUrl1_orig = nullptr;
 
-	void* Gallop_WebViewManager_GetProductUrl_addr = nullptr;
+	Il2CppMethodPointer Gallop_WebViewManager_GetProductUrl_addr = nullptr;
 	void* Gallop_WebViewManager_GetProductUrl_orig = nullptr;
 
-	void* Gallop_WebViewManager_SettingUIEffectOnOpen_addr = nullptr;
+	Il2CppMethodPointer Gallop_WebViewManager_SettingUIEffectOnOpen_addr = nullptr;
 
-	void* Gallop_WebViewManager_SettingUIEffectOnClose_addr = nullptr;
+	Il2CppMethodPointer Gallop_WebViewManager_SettingUIEffectOnClose_addr = nullptr;
 
-	void* Gallop_WebViewManager_GetGachaURLProperty_addr = nullptr;
+	Il2CppMethodPointer Gallop_WebViewManager_GetGachaURLProperty_addr = nullptr;
 	void* Gallop_WebViewManager_GetGachaURLProperty_orig = nullptr;
 
-	void* Gallop_WebViewManager_GetProductURLProperty_addr = nullptr;
+	Il2CppMethodPointer Gallop_WebViewManager_GetProductURLProperty_addr = nullptr;
 
 	const MethodInfo* Gallop_WebViewManager_TryGetWebViewInfo = nullptr;
-	void* Gallop_WebViewManager_TryGetWebViewInfo_addr = nullptr;
+	Il2CppMethodPointer Gallop_WebViewManager_TryGetWebViewInfo_addr = nullptr;
 
 	Il2CppClass* Gallop_WebViewManager_WebViewInfo = nullptr;
 
@@ -82,69 +86,71 @@ namespace
 
 	FieldInfo* Gallop_WebViewManager__fontFilePaths = nullptr;
 
-	void* Gallop_WebViewManager_WebViewInfo_ctor_addr = nullptr;
+	Il2CppMethodPointer Gallop_WebViewManager_WebViewInfo_ctor_addr = nullptr;
 
 	FieldInfo* Gallop_WebViewManager_WebViewInfo__url = nullptr;
 
 	FieldInfo* Gallop_WebViewManager_WebViewInfo__isVueJs = nullptr;
 
-	void* Gallop_WebViewManager_OpenGachaDetail_addr = nullptr;
+	Il2CppMethodPointer Gallop_WebViewManager_OpenGachaDetail_addr = nullptr;
 	void* Gallop_WebViewManager_OpenGachaDetail_orig = nullptr;
 
-	void* Gallop_WebViewManager_OpenPurchaseItemDetail_addr = nullptr;
+	Il2CppMethodPointer Gallop_WebViewManager_OpenPurchaseItemDetail_addr = nullptr;
 	void* Gallop_WebViewManager_OpenPurchaseItemDetail_orig = nullptr;
 
 	void* DialogHomeMenuMain_SetupTrainer_callback = nullptr;
 
-	void* DialogHomeMenuMain_SetupTrainer_addr = nullptr;
+	Il2CppMethodPointer DialogHomeMenuMain_SetupTrainer_addr = nullptr;
 	void* DialogHomeMenuMain_SetupTrainer_orig = nullptr;
 
 	void* DialogHomeMenuMain_SetupOther_callback = nullptr;
 
-	void* DialogHomeMenuMain_SetupOther_addr = nullptr;
+	Il2CppMethodPointer DialogHomeMenuMain_SetupOther_addr = nullptr;
 	void* DialogHomeMenuMain_SetupOther_orig = nullptr;
 
-	void* DialogHomeMenuSupport_OnSelectMenu_addr = nullptr;
+	Il2CppMethodPointer DialogHomeMenuSupport_OnSelectMenu_addr = nullptr;
 	void* DialogHomeMenuSupport_OnSelectMenu_orig = nullptr;
 
-	void* DialogTitleMenu_OnSelectMenu_addr = nullptr;
+	Il2CppMethodPointer DialogTitleMenu_OnSelectMenu_addr = nullptr;
 	void* DialogTitleMenu_OnSelectMenu_orig = nullptr;
 
-	void* DialogTitleMenu_OnSelectMenu_KaKaoNotLogin_addr = nullptr;
+	Il2CppMethodPointer DialogTitleMenu_OnSelectMenu_KaKaoNotLogin_addr = nullptr;
 	void* DialogTitleMenu_OnSelectMenu_KaKaoNotLogin_orig = nullptr;
 
-	void* DialogTutorialGuide_OnPushHelpButton_addr = nullptr;
+	Il2CppMethodPointer DialogTutorialGuide_OnPushHelpButton_addr = nullptr;
 	void* DialogTutorialGuide_OnPushHelpButton_orig = nullptr;
 
 	void* DialogSingleModeTopMenu_Setup_help_callback = nullptr;
 
 	void* DialogSingleModeTopMenu_Setup_guide_callback = nullptr;
 
-	void* DialogSingleModeTopMenu_Setup_addr = nullptr;
+	Il2CppMethodPointer DialogSingleModeTopMenu_Setup_addr = nullptr;
 	void* DialogSingleModeTopMenu_Setup_orig = nullptr;
 
-	void* ChampionsInfoWebViewButton_OnClick_addr = nullptr;
+	Il2CppMethodPointer ChampionsInfoWebViewButton_OnClick_addr = nullptr;
 	void* ChampionsInfoWebViewButton_OnClick_orig = nullptr;
 
-	void* StoryEventTopViewController_OnClickHelpButton_addr = nullptr;
+	Il2CppMethodPointer StoryEventTopViewController_OnClickHelpButton_addr = nullptr;
 	void* StoryEventTopViewController_OnClickHelpButton_orig = nullptr;
 
 	void* PartsNewsButton_Setup_callback = nullptr;
 
-	void* PartsNewsButton_Setup_addr = nullptr;
+	Il2CppMethodPointer PartsNewsButton_Setup_addr = nullptr;
 	void* PartsNewsButton_Setup_orig = nullptr;
 
-	void* BannerUI_OnClickBannerItem_addr = nullptr;
+	Il2CppMethodPointer BannerUI_OnClickBannerItem_addr = nullptr;
 	void* BannerUI_OnClickBannerItem_orig = nullptr;
 
-	void* KakaoManager_OnKakaoShowInAppWebView_addr = nullptr;
+	Il2CppMethodPointer KakaoManager_OnKakaoShowInAppWebView_addr = nullptr;
 	void* KakaoManager_OnKakaoShowInAppWebView_orig = nullptr;
 
 	bool _isShowWebView = false;
 }
 
+#ifdef _MSC_VER
 extern wil::com_ptr<ICoreWebView2Controller> webviewController;
 extern wil::com_ptr<ICoreWebView2> webview;
+#endif
 
 static void OpenWebViewDialog(Il2CppString* url, Il2CppString* headerTextArg, uint64_t closeTextId,
 	Il2CppDelegate* onClose = nullptr) {
@@ -152,8 +158,7 @@ static void OpenWebViewDialog(Il2CppString* url, Il2CppString* headerTextArg, ui
 	data.SetSimpleOneButtonMessage(headerTextArg, nullptr, onClose, closeTextId, Gallop::DialogCommonBase::FormType::BIG_ONE_BUTTON);
 
 	auto webViewManager = GetSingletonInstance(il2cpp_symbols::get_class(ASSEMBLY_NAME, "Gallop", "WebViewManager"));
-	il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, Il2CppString*, Il2CppObject*, Il2CppDelegate*, Il2CppDelegate*, bool)>
-		(webViewManager->klass, "Open", 5)->methodPointer(webViewManager, url, data, nullptr, nullptr, false);
+	il2cpp_symbols::get_method_pointer<void (*)(Il2CppObject*, Il2CppString*, Il2CppObject*, Il2CppDelegate*, Il2CppDelegate*, bool)>(webViewManager->klass, "Open", 5)(webViewManager, url, data, nullptr, nullptr, false);
 }
 
 static void OpenNewsDialog()
@@ -167,20 +172,20 @@ static void OpenNewsDialog()
 	else
 	{
 		auto webViewManager = GetSingletonInstance(il2cpp_symbols::get_class(ASSEMBLY_NAME, "Gallop", "WebViewManager"));
-		reinterpret_cast<void (*)(Il2CppObject*, Il2CppDelegate*)>(il2cpp_class_get_method_from_name(webViewManager->klass, "OpenNews", 1)->methodPointer)(webViewManager, nullptr);
+		il2cpp_symbols::get_method_pointer<void (*)(Il2CppObject*, Il2CppDelegate*)>(webViewManager->klass, "OpenNews", 1)(webViewManager, nullptr);
 	}
 }
 
 static void OpenHelpDialog()
 {
 	auto webViewManager = GetSingletonInstance(il2cpp_symbols::get_class(ASSEMBLY_NAME, "Gallop", "WebViewManager"));
-	reinterpret_cast<void (*)(Il2CppObject*)>(il2cpp_class_get_method_from_name(webViewManager->klass, "OpenHelp", 0)->methodPointer)(webViewManager);
+	il2cpp_symbols::get_method_pointer<void (*)(Il2CppObject*)>(webViewManager->klass, "OpenHelp", 0)(webViewManager);
 }
 
 static void OpenStoryEventHelpDialog()
 {
 	auto webViewManager = GetSingletonInstance(il2cpp_symbols::get_class(ASSEMBLY_NAME, "Gallop", "WebViewManager"));
-	reinterpret_cast<void (*)(Il2CppObject*)>(il2cpp_class_get_method_from_name(webViewManager->klass, "OpenStoryEventHelp", 0)->methodPointer)(webViewManager);
+	il2cpp_symbols::get_method_pointer<void (*)(Il2CppObject*)>(webViewManager->klass, "OpenStoryEventHelp", 0)(webViewManager);
 }
 
 static string GetOqupieToken()
@@ -199,25 +204,20 @@ static string GetOqupieToken()
 	auto SystemInfo = il2cpp_symbols::get_class("UnityEngine.CoreModule.dll", "UnityEngine",
 		"SystemInfo");
 
-	auto deviceId = reinterpret_cast<Il2CppString * (*)()>(il2cpp_class_get_method_from_name(
-		SystemInfo, "get_deviceUniqueIdentifier", 0)->methodPointer)();
+	auto deviceId = il2cpp_symbols::get_method_pointer<Il2CppString * (*)()>(SystemInfo, "get_deviceUniqueIdentifier", 0)();
 	auto deviceIdU8 = il2cpp_u8(deviceId->chars);
 
-	auto deviceModel = reinterpret_cast<Il2CppString * (*)()>(il2cpp_class_get_method_from_name(
-		SystemInfo, "get_deviceModel", 0)->methodPointer)();
+	auto deviceModel = il2cpp_symbols::get_method_pointer<Il2CppString * (*)()>(SystemInfo, "get_deviceModel", 0)();
 	auto deviceModelU8 = il2cpp_u8(deviceModel->chars);
 
-	auto systemMemorySize = reinterpret_cast<int (*)()>(il2cpp_class_get_method_from_name(
-		SystemInfo, "get_systemMemorySize", 0)->methodPointer)();
+	auto systemMemorySize = il2cpp_symbols::get_method_pointer<int (*)()>(SystemInfo, "get_systemMemorySize", 0)();
 
-	auto operatingSystem = reinterpret_cast<Il2CppString * (*)()>(il2cpp_class_get_method_from_name(
-		SystemInfo, "get_operatingSystem", 0)->methodPointer)();
+	auto operatingSystem = il2cpp_symbols::get_method_pointer<Il2CppString * (*)()>(SystemInfo, "get_operatingSystem", 0)();
 	auto operatingSystemU8 = il2cpp_u8(operatingSystem->chars);
 
 	auto manager = GetSingletonInstanceByMethod(il2cpp_symbols::get_class(ASSEMBLY_NAME, "", "KakaoManager"));
-	Il2CppString* playerId = reinterpret_cast<Il2CppString * (*)(
-		Il2CppObject*)>(il2cpp_class_get_method_from_name(manager->klass, "get_PlayerID",
-			0)->methodPointer)(manager);
+	Il2CppString* playerId = il2cpp_symbols::get_method_pointer<Il2CppString * (*)(
+		Il2CppObject*)>(manager->klass, "get_PlayerID", 0)(manager);
 	auto playerIdU8 = il2cpp_u8(playerId->chars);
 
 	auto AppVersionName = il2cpp_symbols::get_method_pointer<Il2CppString * (*)()>(ASSEMBLY_NAME, "Gallop", "DeviceHelper", "GetAppVersionName", 0)();
@@ -265,6 +265,7 @@ static string GetOqupieToken()
 	return token.encodeJWT(payload);
 }
 
+#ifdef _MSC_VER
 static void Gallop_WebViewManager_cctor_hook()
 {
 	reinterpret_cast<decltype(Gallop_WebViewManager_cctor_hook)*>(Gallop_WebViewManager_cctor_orig)();
@@ -273,12 +274,12 @@ static void Gallop_WebViewManager_cctor_hook()
 	Il2CppObject* WebViewUrlDict;
 	il2cpp_field_static_get_value(WebViewUrlDictField, &WebViewUrlDict);
 
-	auto WebViewUrlDict_Add = il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, Gallop::WebViewDefine::Url, Il2CppObject*, const MethodInfo*)>(WebViewUrlDict->klass, "Add", 2);
-	auto WebViewUrlDict_Add_methodPointer = WebViewUrlDict_Add->methodPointer;
+	auto WebViewUrlDict_Add = il2cpp_symbols::get_method_type<void (*)(Il2CppObject*, Gallop::WebViewDefine::Url, Il2CppObject*, const MethodInfo*)>(WebViewUrlDict->klass, "Add", 2);
+	auto WebViewUrlDict_Add_methodPointer = il2cpp_symbols::get_method_pointer(WebViewUrlDict_Add);
 
 	auto methodInfo = reinterpret_cast<const MethodInfo*>(WebViewUrlDict_Add);
 
-	il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*)>(WebViewUrlDict->klass, "Clear", 0)->methodPointer(WebViewUrlDict);
+	il2cpp_symbols::get_method_pointer<void (*)(Il2CppObject*)>(WebViewUrlDict->klass, "Clear", 0)(WebViewUrlDict);
 	WebViewUrlDict_Add_methodPointer(WebViewUrlDict, Gallop::WebViewDefine::Url::Update,
 		Gallop::WebViewManager::WebViewInfo(il2cpp_string_new("info?p=2&c=0")), methodInfo);
 	WebViewUrlDict_Add_methodPointer(WebViewUrlDict, Gallop::WebViewDefine::Url::Event,
@@ -366,8 +367,7 @@ static Il2CppString* Gallop_WebViewManager_GetUrl_hook(Il2CppObject* self, Gallo
 
 	auto serverUrl = il2cpp_symbols::get_method_pointer<Il2CppString * (*)()>(ASSEMBLY_NAME, "Gallop", "GameDefine", "get_ApplicationServerUrl", 0)();
 
-	if (Game::CurrentGameRegion == Game::Region::ENG &&
-		Game::CurrentGameStore == Game::Store::Steam)
+	if (Game::CurrentGameRegion == Game::Region::ENG)
 	{
 		auto newUrl = il2cppstring(serverUrl->chars);
 		replaceAll(newUrl, IL2CPP_STRING("api"), IL2CPP_STRING("webview"));
@@ -413,7 +413,7 @@ static void Gallop_WebViewManager_Open_hook(Il2CppObject* self, Il2CppString* ur
 				Gallop::WebViewManager::SettingUIEffectOnOpen();
 			}
 		);
-		il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, Il2CppDelegate*)>(dialogData->klass, "AddOpenCallback", 1)->methodPointer(dialogData, &openCallback->delegate);
+		il2cpp_symbols::get_method_pointer<void (*)(Il2CppObject*, Il2CppDelegate*)>(dialogData->klass, "AddOpenCallback", 1)(dialogData, &openCallback->delegate);
 
 		//AddDestroyCallback
 		auto destroyCallback = CreateDelegateWithClassStatic(il2cpp_symbols::get_class("mscorlib.dll", "System", "Action"), *[](void*)
@@ -427,7 +427,7 @@ static void Gallop_WebViewManager_Open_hook(Il2CppObject* self, Il2CppString* ur
 				}
 			}
 		);
-		il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, Il2CppDelegate*)>(dialogData->klass, "AddDestroyCallback", 1)->methodPointer(dialogData, &destroyCallback->delegate);
+		il2cpp_symbols::get_method_pointer<void (*)(Il2CppObject*, Il2CppDelegate*)>(dialogData->klass, "AddDestroyCallback", 1)(dialogData, &destroyCallback->delegate);
 
 
 		//AddBeginCloseCallback
@@ -441,7 +441,7 @@ static void Gallop_WebViewManager_Open_hook(Il2CppObject* self, Il2CppString* ur
 				Gallop::WebViewManager::SettingUIEffectOnClose();
 			}
 		);
-		il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, Il2CppDelegate*)>(dialogData->klass, "AddBeginCloseCallback", 1)->methodPointer(dialogData, &beginCloseCallback->delegate);
+		il2cpp_symbols::get_method_pointer<void (*)(Il2CppObject*, Il2CppDelegate*)>(dialogData->klass, "AddBeginCloseCallback", 1)(dialogData, &beginCloseCallback->delegate);
 
 		auto dialogCommon = il2cpp_symbols::get_method_pointer<Il2CppObject * (*)(Il2CppObject*, bool)>(
 			ASSEMBLY_NAME, "Gallop", "DialogManager", "PushSystemDialog", 2)(dialogData, true);
@@ -475,7 +475,7 @@ static void Gallop_WebViewManager_SetCustomFont_hook(Il2CppObject* self, Gallop:
 		if (!Cute::Core::WebViewManager::customFontMap.contains(splited.back()))
 		{
 			auto LocalFile = il2cpp_symbols::get_method_pointer<Il2CppObject * (*)()>(ASSEMBLY_NAME, "Gallop", "AssetManager", "get_LocalFile", 0)();
-			auto pathAllowUnknown = il2cpp_class_get_method_from_name_type<Il2CppString * (*)(Il2CppObject*, Il2CppString*)>(LocalFile->klass, "GetPathAllowUnknown", 1)->methodPointer(LocalFile, filePath);
+			auto pathAllowUnknown = il2cpp_symbols::get_method_pointer<Il2CppString * (*)(Il2CppObject*, Il2CppString*)>(LocalFile->klass, "GetPathAllowUnknown", 1)(LocalFile, filePath);
 
 			if (filesystem::exists(il2cppstring(pathAllowUnknown->chars)))
 			{
@@ -531,6 +531,7 @@ static Il2CppString* Gallop_WebViewManager_GetProductUrl_hook(int productMasterI
 		Gallop::WebViewManager::GetProductURLProperty(productMasterId));
 	return res;
 }
+#endif
 
 static void DialogHomeMenuMain_SetupTrainer_hook(Il2CppObject* self, Il2CppObject* dialog) {
 	reinterpret_cast<decltype(DialogHomeMenuMain_SetupTrainer_hook)*>(DialogHomeMenuMain_SetupTrainer_orig)(self, dialog);
@@ -549,9 +550,14 @@ static void DialogHomeMenuMain_SetupTrainer_hook(Il2CppObject* self, Il2CppObjec
 						Gallop::Localize::Get(GetTextIdByName(IL2CPP_STRING("Menu900001"))),
 						GetTextIdByName(IL2CPP_STRING("Common0007")));
 				});
+#ifdef _MSC_VER
 			MH_CreateHook(reinterpret_cast<void*>(guideCallback->method_ptr),
 				reinterpret_cast<void*>(newFn), &DialogHomeMenuMain_SetupTrainer_callback);
 			MH_EnableHook(reinterpret_cast<void*>(guideCallback->method_ptr));
+#else
+			DobbyHook(reinterpret_cast<void*>(guideCallback->method_ptr),
+									  reinterpret_cast<void*>(newFn), &DialogHomeMenuMain_SetupTrainer_callback);
+#endif
 		}
 	}
 }
@@ -571,9 +577,14 @@ static void DialogHomeMenuMain_SetupOther_hook(Il2CppObject* self) {
 				{
 					OpenHelpDialog();
 				});
+#ifdef _MSC_VER
 			MH_CreateHook(reinterpret_cast<void*>(helpCallback->method_ptr),
 				reinterpret_cast<void*>(newFn), &DialogHomeMenuMain_SetupOther_callback);
 			MH_EnableHook(reinterpret_cast<void*>(helpCallback->method_ptr));
+#else
+			DobbyHook(reinterpret_cast<void*>(helpCallback->method_ptr),
+						  reinterpret_cast<void*>(newFn), &DialogHomeMenuMain_SetupOther_callback);
+#endif
 		}
 	}
 }
@@ -676,10 +687,16 @@ static void DialogSingleModeTopMenu_Setup_hook(Il2CppObject* self)
 				{
 					OpenHelpDialog();
 				});
+#ifdef _MSC_VER
 			MH_CreateHook(reinterpret_cast<void*>(helpCallback->method_ptr),
 				reinterpret_cast<void*>(newFn),
 				&DialogSingleModeTopMenu_Setup_help_callback);
 			MH_EnableHook(reinterpret_cast<void*>(helpCallback->method_ptr));
+#else
+			DobbyHook(reinterpret_cast<void*>(helpCallback->method_ptr),
+									  reinterpret_cast<void*>(newFn),
+									  &DialogSingleModeTopMenu_Setup_help_callback);
+#endif
 		}
 	}
 
@@ -697,10 +714,16 @@ static void DialogSingleModeTopMenu_Setup_hook(Il2CppObject* self)
 			});
 		if (!DialogSingleModeTopMenu_Setup_guide_callback)
 		{
+#ifdef _MSC_VER
 			MH_CreateHook(reinterpret_cast<void*>(guideCallback->method_ptr),
 				reinterpret_cast<void*>(newFn),
 				&DialogSingleModeTopMenu_Setup_guide_callback);
 			MH_EnableHook(reinterpret_cast<void*>(guideCallback->method_ptr));
+#else
+			DobbyHook(reinterpret_cast<void*>(guideCallback->method_ptr),
+									  reinterpret_cast<void*>(newFn),
+									  &DialogSingleModeTopMenu_Setup_guide_callback);
+#endif
 		}
 	}
 }
@@ -712,10 +735,7 @@ static void ChampionsInfoWebViewButton_OnClick_hook(Il2CppObject*)
 	Il2CppObject* manager;
 	il2cpp_field_static_get_value(managerInstanceField, &manager);
 
-	auto url = reinterpret_cast<Il2CppString * (*)(Il2CppObject*, Il2CppString*)>(
-		il2cpp_class_get_method_from_name(manager->klass, "GetKakaoOptionValue",
-			1)->methodPointer
-		)(manager, il2cpp_string_new("kakaoUmaChampion"));
+	auto url = il2cpp_symbols::get_method_pointer<Il2CppString * (*)(Il2CppObject*, Il2CppString*)>(manager->klass, "GetKakaoOptionValue",1)(manager, il2cpp_string_new("kakaoUmaChampion"));
 
 	OpenWebViewDialog(url, Gallop::Localize::Get(GetTextIdByName(IL2CPP_STRING("Common0161"))),
 		GetTextIdByName(IL2CPP_STRING("Common0007")));
@@ -746,9 +766,14 @@ static void PartsNewsButton_Setup_hook(Il2CppObject* self, Il2CppDelegate* onUpd
 					{
 						OpenNewsDialog();
 					});
+#ifdef _MSC_VER
 				MH_CreateHook(reinterpret_cast<void*>(callback->method_ptr),
 					reinterpret_cast<void*>(newFn), &PartsNewsButton_Setup_callback);
 				MH_EnableHook(reinterpret_cast<void*>(callback->method_ptr));
+#else
+				DobbyHook(reinterpret_cast<void*>(callback->method_ptr),
+							  reinterpret_cast<void*>(newFn), &PartsNewsButton_Setup_callback);
+#endif
 			}
 		}
 	}
@@ -756,9 +781,7 @@ static void PartsNewsButton_Setup_hook(Il2CppObject* self, Il2CppDelegate* onUpd
 
 static void BannerUI_OnClickBannerItem_hook(Il2CppObject* self, Il2CppObject* buttonInfo)
 {
-	auto master = reinterpret_cast<Il2CppObject * (*)(
-		Il2CppObject*)>(il2cpp_class_get_method_from_name(buttonInfo->klass, "get_Master",
-			0)->methodPointer)(buttonInfo);
+	auto master = il2cpp_symbols::get_method_pointer<Il2CppObject * (*)(Il2CppObject*)>(buttonInfo->klass, "get_Master", 0)(buttonInfo);
 	auto masterTypeField = il2cpp_class_get_field_from_name(master->klass, "Type");
 	int masterType;
 	il2cpp_field_get_value(master, masterTypeField, &masterType);
@@ -784,7 +807,7 @@ static void KakaoManager_OnKakaoShowInAppWebView_hook(Il2CppObject* self, Il2Cpp
 		auto NewsDialogInfo = il2cpp_symbols::get_class(ASSEMBLY_NAME, "Gallop", "HomeStartCheckSequence/NewsDialogInfo");
 		auto instance = il2cpp_object_new(NewsDialogInfo);
 		il2cpp_runtime_object_init(instance);
-		auto newsOpened = reinterpret_cast<bool (*)(Il2CppObject*)>(il2cpp_class_get_method_from_name(instance->klass, "Check", 0)->methodPointer)(instance);
+		auto newsOpened = il2cpp_symbols::get_method_pointer<bool (*)(Il2CppObject*)>(instance->klass, "Check", 0)(instance);
 		if (!newsOpened)
 		{
 			OpenNewsDialog();
@@ -804,7 +827,7 @@ static void Gallop_WebViewManager_OpenGachaDetail_hook(Il2CppObject* self, int g
 	auto data = Gallop::DialogCommon::Data();
 	data.SetSimpleOneButtonMessage(Gallop::Localize::Get(GetTextIdByName(IL2CPP_STRING("Gacha0010"))), nullptr, onClose, GetTextIdByName(IL2CPP_STRING("Common0007")), Gallop::DialogCommonBase::FormType::BIG_ONE_BUTTON);
 
-	auto gachaUrl = Gallop::WebViewManager::GetGachaUrl(gachaId);
+	auto gachaUrl = Gallop::WebViewManager::GetGachaUrl(gachaId, stepupId);
 
 	webViewManager.Open(gachaUrl, data);
 }
@@ -813,13 +836,14 @@ static void Gallop_WebViewManager_OpenPurchaseItemDetail_hook(Il2CppObject* self
 {
 	auto webViewManager = Gallop::WebViewManager(self);
 
-	auto data = il2cpp_class_get_method_from_name_type<Il2CppObject * (*)(Il2CppObject*, Il2CppDelegate*)>(self->klass, "CreatePurchaseItemDetailDialogData", 1)->methodPointer(self, onClose);
-	auto productMasterId = il2cpp_class_get_method_from_name_type<int (*)(Il2CppObject*)>(purchaseItem->klass, "get_Id", 0)->methodPointer(purchaseItem);
+	auto data = il2cpp_symbols::get_method_pointer<Il2CppObject * (*)(Il2CppObject*, Il2CppDelegate*)>(self->klass, "CreatePurchaseItemDetailDialogData", 1)(self, onClose);
+	auto productMasterId = il2cpp_symbols::get_method_pointer<int (*)(Il2CppObject*)>(purchaseItem->klass, "get_Id", 0)(purchaseItem);
 	auto productUrl = Gallop::WebViewManager::GetProductUrl(productMasterId);
 
 	webViewManager.Open(productUrl, data);
 }
 
+#ifdef _MSC_VER
 static void Gallop_WebViewManager_SetMargin_hook(Il2CppObject* self, UnityEngine::Rect offsetRect)
 {
 	auto instance = Gallop::WebViewManager(self);
@@ -828,7 +852,7 @@ static void Gallop_WebViewManager_SetMargin_hook(Il2CppObject* self, UnityEngine
 	{
 		return;
 	}
-	auto webViewRect = UnityEngine::RectTransform(il2cpp_class_get_method_from_name_type<Il2CppObject * (*)(Il2CppObject*)>(_currentWebViewDialog->klass, "GetWebViewRect", 0)->methodPointer(_currentWebViewDialog));
+	auto webViewRect = UnityEngine::RectTransform(il2cpp_symbols::get_method_pointer<Il2CppObject * (*)(Il2CppObject*)>(_currentWebViewDialog->klass, "GetWebViewRect", 0)(_currentWebViewDialog));
 	if (!webViewRect)
 	{
 		return;
@@ -840,7 +864,7 @@ static void Gallop_WebViewManager_SetMargin_hook(Il2CppObject* self, UnityEngine
 	auto _systemCanvas = Gallop::UIManager::Instance()._systemCanvas();
 	float scaleFactor = 1.0f;
 
-	scaleFactor = il2cpp_class_get_method_from_name_type<float (*)(Il2CppObject*)>(_systemCanvas->klass, "get_scaleFactor", 0)->methodPointer(_systemCanvas);
+	scaleFactor = il2cpp_symbols::get_method_pointer<float (*)(Il2CppObject*)>(_systemCanvas->klass, "get_scaleFactor", 0)(_systemCanvas);
 
 	Il2CppObject* gameCanvas;
 	UnityEngine::Rect leftRect;
@@ -857,9 +881,9 @@ static void Gallop_WebViewManager_SetMargin_hook(Il2CppObject* self, UnityEngine
 		{
 			auto LandscapeUIManager = Gallop::UIManager::Instance().LandscapeUIManager();
 
-			gameCanvas = il2cpp_class_get_method_from_name_type<Il2CppObject * (*)(Il2CppObject*)>(LandscapeUIManager->klass, "get_GameCanvas", 0)->methodPointer(LandscapeUIManager);
-			auto leftCanvas = il2cpp_class_get_method_from_name_type<Il2CppObject * (*)(Il2CppObject*)>(LandscapeUIManager->klass, "get_LeftCanvas", 0)->methodPointer(LandscapeUIManager);
-			auto evacuationCanvas = il2cpp_class_get_method_from_name_type<Il2CppObject * (*)(Il2CppObject*)>(LandscapeUIManager->klass, "get_EvacuationCanvas", 0)->methodPointer(LandscapeUIManager);
+			gameCanvas = il2cpp_symbols::get_method_pointer<Il2CppObject * (*)(Il2CppObject*)>(LandscapeUIManager->klass, "get_GameCanvas", 0)(LandscapeUIManager);
+			auto leftCanvas = il2cpp_symbols::get_method_pointer<Il2CppObject * (*)(Il2CppObject*)>(LandscapeUIManager->klass, "get_LeftCanvas", 0)(LandscapeUIManager);
+			auto evacuationCanvas = il2cpp_symbols::get_method_pointer<Il2CppObject * (*)(Il2CppObject*)>(LandscapeUIManager->klass, "get_EvacuationCanvas", 0)(LandscapeUIManager);
 
 			auto _bandMenuField = il2cpp_class_get_field_from_name(LandscapeUIManager->klass, "_bandMenu");
 			Il2CppObject* _bandMenu;
@@ -950,6 +974,7 @@ static void Gallop_WebViewManager_SetMargin_hook(Il2CppObject* self, UnityEngine
 		);
 	}
 }
+#endif
 
 static void InitAddress()
 {
@@ -974,14 +999,14 @@ static void InitAddress()
 	}
 	Gallop_WebViewManager_GetProductURLProperty_addr = il2cpp_symbols::get_method_pointer(ASSEMBLY_NAME, "Gallop", "WebViewManager", "GetProductURLProperty", 1);
 	Gallop_WebViewManager_TryGetWebViewInfo = il2cpp_symbols::get_method(ASSEMBLY_NAME, "Gallop", "WebViewManager", "TryGetWebViewInfo", 2);
-	Gallop_WebViewManager_TryGetWebViewInfo_addr = Gallop_WebViewManager_TryGetWebViewInfo->methodPointer;
+	Gallop_WebViewManager_TryGetWebViewInfo_addr = il2cpp_symbols::get_method_pointer(Gallop_WebViewManager_TryGetWebViewInfo);
 	Gallop_WebViewManager__currentWebViewDialog = il2cpp_class_get_field_from_name(il2cpp_symbols::get_class(ASSEMBLY_NAME, "Gallop", "WebViewManager"), "_currentWebViewDialog");
 	Gallop_WebViewManager__errorCallback = il2cpp_class_get_field_from_name(il2cpp_symbols::get_class(ASSEMBLY_NAME, "Gallop", "WebViewManager"), "_errorCallback");
 	Gallop_WebViewManager__fontFilePaths = il2cpp_class_get_field_from_name(il2cpp_symbols::get_class(ASSEMBLY_NAME, "Gallop", "WebViewManager"), "_fontFilePaths");
 
 	Gallop_WebViewManager_WebViewInfo = il2cpp_class_from_type(Gallop_WebViewManager_TryGetWebViewInfo->parameters[1]);
 
-	Gallop_WebViewManager_WebViewInfo_ctor_addr = il2cpp_class_get_method_from_name(Gallop_WebViewManager_WebViewInfo, ".ctor", 4)->methodPointer;
+	Gallop_WebViewManager_WebViewInfo_ctor_addr = il2cpp_symbols::get_method_pointer(Gallop_WebViewManager_WebViewInfo, ".ctor", 4);
 	Gallop_WebViewManager_WebViewInfo__url = il2cpp_class_get_field_from_name(Gallop_WebViewManager_WebViewInfo, "_url");
 	Gallop_WebViewManager_WebViewInfo__isVueJs = il2cpp_class_get_field_from_name(Gallop_WebViewManager_WebViewInfo, "_isVueJs");
 
@@ -1014,6 +1039,7 @@ static void InitAddress()
 
 static void HookMethods()
 {
+#ifdef _MSC_VER
 	ADD_HOOK(Gallop_WebViewManager_cctor, "Gallop.WebViewManager::.cctor at %p\n");
 	ADD_HOOK(Gallop_WebViewManager_GetUrl, "Gallop.WebViewManager::GetUrl at %p\n");
 	ADD_HOOK(Gallop_WebViewManager_Open, "Gallop.WebViewManager::Open at %p\n");
@@ -1023,6 +1049,7 @@ static void HookMethods()
 	ADD_HOOK(Gallop_WebViewManager_GetGachaUrl1, "Gallop.WebViewManager::GetGachaUrl1 at %p\n");
 	ADD_HOOK(Gallop_WebViewManager_GetProductUrl, "Gallop.WebViewManager::GetProductUrl at %p\n");
 	ADD_HOOK(Gallop_WebViewManager_SetMargin, "Gallop.WebViewManager::SetMargin at %p\n");
+#endif
 
 	if (Game::CurrentGameRegion == Game::Region::KOR)
 	{
@@ -1119,9 +1146,13 @@ namespace Gallop
 		reinterpret_cast<decltype(SettingUIEffectOnOpen)*>(Gallop_WebViewManager_SettingUIEffectOnClose_addr)();
 	}
 
-	Il2CppString* WebViewManager::GetGachaUrl(int gachaId)
+	Il2CppString* WebViewManager::GetGachaUrl(int gachaId, int stepupId)
 	{
-		return reinterpret_cast<decltype(GetGachaUrl)*>(Gallop_WebViewManager_GetGachaUrl_addr)(gachaId);
+		if (Gallop_WebViewManager_GetGachaUrl1_addr) {
+			return reinterpret_cast<Il2CppString*(*)(int)>(Gallop_WebViewManager_GetGachaUrl1_addr)(gachaId);
+		}
+
+		return reinterpret_cast<decltype(GetGachaUrl)*>(Gallop_WebViewManager_GetGachaUrl_addr)(gachaId, stepupId);
 	}
 
 	Il2CppString* WebViewManager::GetGachaURLProperty(int gachaId)
@@ -1148,7 +1179,7 @@ namespace Gallop
 		return result;
 	}
 
-	WebViewManager::WebViewInfo::WebViewInfo(Il2CppString* url, Il2CppString* partsPath, bool isVueJs, WebViewDefine::DmmUrlType urlType) : Object::Object(instance)
+	WebViewManager::WebViewInfo::WebViewInfo(Il2CppString* url, Il2CppString* partsPath, bool isVueJs, WebViewDefine::DmmUrlType urlType) : Object::Object(nullptr)
 	{
 		instance = il2cpp_object_new(Gallop_WebViewManager_WebViewInfo);
 		reinterpret_cast<void (*)(Il2CppObject*, Il2CppString*, Il2CppString*, bool, WebViewDefine::DmmUrlType)>(Gallop_WebViewManager_WebViewInfo_ctor_addr)

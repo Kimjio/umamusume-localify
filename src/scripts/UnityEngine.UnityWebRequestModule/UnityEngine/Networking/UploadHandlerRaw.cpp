@@ -11,8 +11,7 @@
 
 namespace
 {
-	void* UploadHandlerRaw_Create_addr = nullptr;
-	void* UploadHandlerRaw_Create_orig = nullptr;
+	Il2CppMethodPointer UploadHandlerRaw_Create_addr = nullptr;
 }
 
 static void* UploadHandlerRaw_Create_hook(Il2CppObject* self, const char* data, int dataLength)
@@ -50,19 +49,19 @@ static void* UploadHandlerRaw_Create_hook(Il2CppObject* self, const char* data, 
 	{
 	}
 
-	return reinterpret_cast<decltype(UploadHandlerRaw_Create_hook)*>(UploadHandlerRaw_Create_orig)(self, data, dataLength);
+	return reinterpret_cast<decltype(UploadHandlerRaw_Create_hook)*>(UploadHandlerRaw_Create_addr)(self, data, dataLength);
 }
 
 static void InitAddress()
 {
-	UploadHandlerRaw_Create_addr = il2cpp_resolve_icall("UnityEngine.Networking.UploadHandlerRaw::Create()");
+	UploadHandlerRaw_Create_addr = il2cpp_resolve_icall("UnityEngine.Networking.UploadHandlerRaw::Create");
 }
 
 static void HookMethods()
 {
 	if (Game::CurrentGameRegion == Game::Region::KOR)
 	{
-		ADD_HOOK(UploadHandlerRaw_Create, "UnityEngine.Networking.UploadHandlerRaw::Create at %p\n");
+		il2cpp_add_internal_call("UnityEngine.Networking.UploadHandlerRaw::Create", reinterpret_cast<Il2CppMethodPointer>(UploadHandlerRaw_Create_hook));
 	}
 }
 

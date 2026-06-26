@@ -1,3 +1,4 @@
+#ifdef _MSC_VER
 #include "../../Cute.Http.Assembly.hpp"
 #include "../../../ScriptInternal.hpp"
 #include "HttpManager.hpp"
@@ -7,7 +8,7 @@
 namespace
 {
 	void* HttpManager_Cute_Core_IUpdatable_FastUpdate_orig = nullptr;
-	void* HttpManager_Cute_Core_IUpdatable_FastUpdate_addr = nullptr;
+	Il2CppMethodPointer HttpManager_Cute_Core_IUpdatable_FastUpdate_addr = nullptr;
 }
 
 static void HttpManager_Cute_Core_IUpdatable_FastUpdate_hook(Il2CppObject* self)
@@ -22,8 +23,8 @@ static void HttpManager_Cute_Core_IUpdatable_FastUpdate_hook(Il2CppObject* self)
 		float timeOutTime;
 		il2cpp_field_get_value(self, timeOutTimeField, &timeOutTime);
 
-		auto isDone = il2cpp_class_get_method_from_name_type<bool (*)(Il2CppObject*)>(currentOperation->klass, "isDone", 0);
-		auto realtimeSinceStartup = il2cpp_resolve_icall_type<float (*)()>("UnityEngine.Time::get_realtimeSinceStartup()")();
+		auto isDone = il2cpp_symbols::get_method_pointer<bool (*)(Il2CppObject*)>(currentOperation->klass, "isDone", 0)(currentOperation);
+		auto realtimeSinceStartup = il2cpp_resolve_icall_type<float (*)()>("UnityEngine.Time::get_realtimeSinceStartup")();
 
 		if (!isDone && timeOutTime <= realtimeSinceStartup)
 		{
@@ -54,3 +55,4 @@ STATIC
 	il2cpp_symbols::init_callbacks.emplace_back(InitAddress);
 	il2cpp_symbols::init_callbacks.emplace_back(HookMethods);
 }
+#endif

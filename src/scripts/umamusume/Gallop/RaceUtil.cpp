@@ -4,10 +4,10 @@
 
 namespace
 {
-	void* GetRaceDynamicCameraSettingData_addr = nullptr;
+	Il2CppMethodPointer GetRaceDynamicCameraSettingData_addr = nullptr;
 	void* GetRaceDynamicCameraSettingData_orig = nullptr;
 
-	void* IsEnableDynamicRaceType_addr = nullptr;
+	Il2CppMethodPointer IsEnableDynamicRaceType_addr = nullptr;
 	void* IsEnableDynamicRaceType_orig = nullptr;
 }
 
@@ -40,7 +40,7 @@ namespace Gallop
 
 		if (RaceInfo)
 		{
-			auto RaceType = il2cpp_class_get_method_from_name_type<uint64_t(*)(Il2CppObject*)>(RaceInfo->klass, "get_RaceType", 0)->methodPointer(RaceInfo);
+			auto RaceType = il2cpp_symbols::get_method_pointer<uint64_t(*)(Il2CppObject*)>(RaceInfo->klass, "get_RaceType", 0)(RaceInfo);
 
 			if (RaceType == 3)
 			{
@@ -49,8 +49,8 @@ namespace Gallop
 		}
 
 		auto SaveDataManager = GetSingletonInstance(il2cpp_symbols::get_class(ASSEMBLY_NAME, "Gallop", "SaveDataManager"));
-		auto SaveLoader = il2cpp_class_get_method_from_name_type<Il2CppObject * (*)(Il2CppObject*)>(SaveDataManager->klass, "get_SaveLoader", 0)->methodPointer(SaveDataManager);
-		bool IsTryRaceDynamicCamera = il2cpp_class_get_method_from_name_type<bool (*)(Il2CppObject*)>(SaveLoader->klass, "get_IsTryRaceDynamicCamera", 0)->methodPointer(SaveLoader);
+		auto SaveLoader = il2cpp_symbols::get_method_pointer<Il2CppObject * (*)(Il2CppObject*)>(SaveDataManager->klass, "get_SaveLoader", 0)(SaveDataManager);
+		bool IsTryRaceDynamicCamera = il2cpp_symbols::get_method_pointer<bool (*)(Il2CppObject*)>(SaveLoader->klass, "get_IsTryRaceDynamicCamera", 0)(SaveLoader);
 		return IsTryRaceDynamicCamera;
 	}
 

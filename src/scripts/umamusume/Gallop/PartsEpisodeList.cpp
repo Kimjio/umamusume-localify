@@ -13,14 +13,13 @@ namespace
 {
 	Il2CppClass* PartsEpisodeList_klass = nullptr;
 
-	void* PartsEpisodeList_SetupStoryExtraEpisodeList_4_addr = nullptr;
+	Il2CppMethodPointer PartsEpisodeList_SetupStoryExtraEpisodeList_4_addr = nullptr;
 	void* PartsEpisodeList_SetupStoryExtraEpisodeList_4_orig = nullptr;
 
-	void* PartsEpisodeList_SetupStoryExtraEpisodeList_addr = nullptr;
+	Il2CppMethodPointer PartsEpisodeList_SetupStoryExtraEpisodeList_addr = nullptr;
 	void* PartsEpisodeList_SetupStoryExtraEpisodeList_orig = nullptr;
 
 	FieldInfo* PartsEpisodeList__voiceButton = nullptr;
-	FieldInfo* PartsEpisodeList__playVoiceButton = nullptr;
 }
 
 static void UpdateVoiceButtonKakao(Il2CppObject* partData, Il2CppObject* voiceButton, Il2CppObject* button, int storyId)
@@ -37,7 +36,7 @@ static void UpdateVoiceButtonKakao(Il2CppObject* partData, Il2CppObject* voiceBu
 					auto voiceButton = tuple.Item2;
 					auto storyId = tuple.Item3;
 
-					reinterpret_cast<void (*)(Il2CppObject*)>(il2cpp_class_get_method_from_name(voiceButton->klass, "StopVoiceIfNeed", 0)->methodPointer)(voiceButton);
+					il2cpp_symbols::get_method_pointer<void (*)(Il2CppObject*)>(voiceButton->klass, "StopVoiceIfNeed", 0)(voiceButton);
 
 					auto onLeft = CreateDelegate(self, *[](Il2CppObject* self)
 						{
@@ -46,10 +45,10 @@ static void UpdateVoiceButtonKakao(Il2CppObject* partData, Il2CppObject* voiceBu
 							auto storyId = tuple.Item3;
 
 							auto masterDataManager = GetSingletonInstance(il2cpp_symbols::get_class(ASSEMBLY_NAME, "Gallop", "MasterDataManager"));
-							auto masterBannerData = il2cpp_class_get_method_from_name_type<Il2CppObject * (*)(Il2CppObject*)>(masterDataManager->klass, "get_masterBannerData", 0)->methodPointer(masterDataManager);
+							auto masterBannerData = il2cpp_symbols::get_method_pointer<Il2CppObject * (*)(Il2CppObject*)>(masterDataManager->klass, "get_masterBannerData", 0)(masterDataManager);
 
-							auto bannerList = il2cpp_class_get_method_from_name_type<Il2CppObject * (*)(Il2CppObject*, int)>
-								(masterBannerData->klass, "GetListWithGroupId", 1)->methodPointer(masterBannerData, 7);
+							auto bannerList = il2cpp_symbols::get_method_pointer<Il2CppObject * (*)(Il2CppObject*, int)>
+								(masterBannerData->klass, "GetListWithGroupId", 1)(masterBannerData, 7);
 
 							FieldInfo* itemsField = il2cpp_class_get_field_from_name(bannerList->klass, "_items");
 							Il2CppArraySize_t<Il2CppObject*>* arr;
@@ -120,10 +119,10 @@ static void UpdateVoiceButtonKakao(Il2CppObject* partData, Il2CppObject* voiceBu
 								Il2CppObject* manager;
 								il2cpp_field_static_get_value(managerInstanceField, &manager);
 
-								auto url = il2cpp_class_get_method_from_name_type<Il2CppString * (*)(Il2CppObject*, Il2CppString*)>(
-									manager->klass, "GetKakaoOptionValue", 1)->methodPointer(manager, il2cpp_string_new(optionKey.data()));
+								auto url = il2cpp_symbols::get_method_pointer<Il2CppString * (*)(Il2CppObject*, Il2CppString*)>(
+									manager->klass, "GetKakaoOptionValue", 1)(manager, il2cpp_string_new(optionKey.data()));
 
-								auto title = il2cpp_class_get_method_from_name_type<Il2CppString * (*)(Il2CppObject*)>(partData->klass, "get_Title", 0)->methodPointer(partData);
+								auto title = il2cpp_symbols::get_method_pointer<Il2CppString * (*)(Il2CppObject*)>(partData->klass, "get_Title", 0)(partData);
 								auto data = Gallop::DialogCommon::Data();
 								data.SetSimpleOneButtonMessage(title, nullptr,
 									CreateDelegate(self, *[](Il2CppObject* self)
@@ -132,13 +131,13 @@ static void UpdateVoiceButtonKakao(Il2CppObject* partData, Il2CppObject* voiceBu
 
 											auto voiceButton = tuple.Item2;
 
-											reinterpret_cast<void (*)(Il2CppObject*)>(il2cpp_class_get_method_from_name(voiceButton->klass, "StopVoiceIfNeed", 0)->methodPointer)(voiceButton);
+											il2cpp_symbols::get_method_pointer<void (*)(Il2CppObject*)>(voiceButton->klass, "StopVoiceIfNeed", 0)(voiceButton);
 										}),
 									GetTextIdByName(IL2CPP_STRING("Common0007")), Gallop::DialogCommonBase::FormType::BIG_ONE_BUTTON);
 
 								Gallop::WebViewManager::Instance().Open(url, data, nullptr, nullptr, false);
 
-								il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, Il2CppString*, Il2CppString*)>(voiceButton->klass, "PlayAnnounceVoice", 2)->methodPointer(voiceButton, cueSheetName, cueName);
+								il2cpp_symbols::get_method_pointer<void (*)(Il2CppObject*, Il2CppString*, Il2CppString*)>(voiceButton->klass, "PlayAnnounceVoice", 2)(voiceButton, cueSheetName, cueName);
 							});
 
 						auto dialogData = Gallop::DialogCommon::Data();
@@ -163,7 +162,7 @@ static void UpdateVoiceButtonKakao(Il2CppObject* partData, Il2CppObject* voiceBu
 			System::ValueTuple3<Il2CppObject*, Il2CppObject*, int> tuple = { partData, voiceButton, storyId };
 			auto boxed = il2cpp_value_box(ValueTuple3Class, &tuple);
 
-			il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, Il2CppDelegate*)>(button->klass, "SetOnClick", 1)->methodPointer(button, &CreateUnityAction(boxed, newFn)->delegate);
+			il2cpp_symbols::get_method_pointer<void (*)(Il2CppObject*, Il2CppDelegate*)>(button->klass, "SetOnClick", 1)(button, &CreateUnityAction(boxed, newFn)->delegate);
 		}
 	}
 }
@@ -199,9 +198,9 @@ static void UpdateVoiceButton(Il2CppObject* partsEpisodeList, Il2CppObject* part
 					{
 						int currentStoryId = *il2cpp_object_unbox_type<int*>(storyIdBox);
 						auto masterDataManager = GetSingletonInstance(il2cpp_symbols::get_class(ASSEMBLY_NAME, "Gallop", "MasterDataManager"));
-						auto masterBannerData = il2cpp_class_get_method_from_name_type<Il2CppObject * (*)(Il2CppObject*)>(masterDataManager->klass, "get_masterBannerData", 0)->methodPointer(masterDataManager);
+						auto masterBannerData = il2cpp_symbols::get_method_pointer<Il2CppObject * (*)(Il2CppObject*)>(masterDataManager->klass, "get_masterBannerData", 0)(masterDataManager);
 
-						auto bannerList = il2cpp_class_get_method_from_name_type<Il2CppObject * (*)(Il2CppObject*, int)>(masterBannerData->klass, "GetListWithGroupId", 1)->methodPointer(masterBannerData, 7);
+						auto bannerList = il2cpp_symbols::get_method_pointer<Il2CppObject * (*)(Il2CppObject*, int)>(masterBannerData->klass, "GetListWithGroupId", 1)(masterBannerData, 7);
 
 						FieldInfo* itemsField = il2cpp_class_get_field_from_name(bannerList->klass, "_items");
 						Il2CppArraySize_t<Il2CppObject*>* arr;
@@ -238,7 +237,7 @@ static void UpdateVoiceButton(Il2CppObject* partsEpisodeList, Il2CppObject* part
 
 						il2cpp_symbols::get_method_pointer<void (*)(int, Il2CppDelegate*, Il2CppDelegate*)>(ASSEMBLY_NAME, "Gallop", "DialogAnnounceEvent", "Open", 3)(announceId, action, action);
 					});
-				il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, Il2CppDelegate*)>(button->klass, "SetOnClick", 1)->methodPointer(button,
+				il2cpp_symbols::get_method_pointer<void (*)(Il2CppObject*, Il2CppDelegate*)>(button->klass, "SetOnClick", 1)(button,
 					&CreateUnityAction(il2cpp_value_box(il2cpp_defaults.int32_class, &currentStoryId), newFn)->delegate);
 			}
 		}
@@ -261,7 +260,6 @@ static void InitAddress()
 {
 	PartsEpisodeList_klass = il2cpp_symbols::get_class(ASSEMBLY_NAME, "Gallop", "PartsEpisodeList");
 	PartsEpisodeList__voiceButton = il2cpp_class_get_field_from_name(PartsEpisodeList_klass, "_voiceButton");
-	PartsEpisodeList__playVoiceButton = il2cpp_class_get_field_from_name(PartsEpisodeList_klass, "_playVoiceButton");
 	PartsEpisodeList_SetupStoryExtraEpisodeList_4_addr = il2cpp_symbols::get_method_pointer(PartsEpisodeList_klass, "SetupStoryExtraEpisodeList", 4);
 	PartsEpisodeList_SetupStoryExtraEpisodeList_addr = il2cpp_symbols::get_method_pointer(PartsEpisodeList_klass, "SetupStoryExtraEpisodeList", 5);
 }

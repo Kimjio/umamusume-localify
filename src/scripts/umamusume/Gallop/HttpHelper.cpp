@@ -11,10 +11,10 @@
 
 namespace
 {
-	void* HttpHelper_DecompressResponse_addr = nullptr;
+	Il2CppMethodPointer HttpHelper_DecompressResponse_addr = nullptr;
 	void* HttpHelper_DecompressResponse_orig = nullptr;
 
-	void* HttpHelper_CompressRequest_addr = nullptr;
+	Il2CppMethodPointer HttpHelper_CompressRequest_addr = nullptr;
 	void* HttpHelper_CompressRequest_orig = nullptr;
 }
 
@@ -106,8 +106,18 @@ static Il2CppArraySize_t<int8_t>* HttpHelper_DecompressResponse_hook(Il2CppArray
 
 static void InitAddress()
 {
-	HttpHelper_DecompressResponse_addr = il2cpp_symbols::get_method_pointer(ASSEMBLY_NAME, "Gallop", "HttpHelper", "DecompressResponse", 1);
-	HttpHelper_CompressRequest_addr = il2cpp_symbols::get_method_pointer(ASSEMBLY_NAME, "Gallop", "HttpHelper", "CompressRequest", 1);
+	auto HttpHelper_klass = il2cpp_symbols::get_class(ASSEMBLY_NAME, "Gallop", "HttpHelper");
+	HttpHelper_DecompressResponse_addr = il2cpp_symbols::get_method_pointer(HttpHelper_klass, "DecompressResponse", 1);
+	if (!HttpHelper_DecompressResponse_addr)
+	{
+		HttpHelper_DecompressResponse_addr = il2cpp_symbols::get_method_pointer(HttpHelper_klass, "DecompressResponse_BUMA", 1);
+	}
+
+	HttpHelper_CompressRequest_addr = il2cpp_symbols::get_method_pointer(HttpHelper_klass, "CompressRequest", 1);
+	if (!HttpHelper_CompressRequest_addr)
+	{
+		HttpHelper_CompressRequest_addr = il2cpp_symbols::get_method_pointer(HttpHelper_klass, "CompressRequest_BUMA", 1);
+	}
 }
 
 static void HookMethods()

@@ -4,7 +4,7 @@
 
 namespace
 {
-	void* Mathf_Approximately_addr = nullptr;
+	Il2CppMethodPointer Mathf_Approximately_addr = nullptr;
 }
 
 static void InitAddress()

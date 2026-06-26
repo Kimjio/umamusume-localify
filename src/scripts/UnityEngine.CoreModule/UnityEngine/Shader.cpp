@@ -4,18 +4,18 @@
 
 namespace
 {
-	void* PropertyToID_addr = nullptr;
+	Il2CppMethodPointer PropertyToID_addr = nullptr;
 
-	void* GetGlobalTextureImpl_addr = nullptr;
+	Il2CppMethodPointer GetGlobalTextureImpl_addr = nullptr;
 
-	void* SetGlobalTextureImpl_addr = nullptr;
+	Il2CppMethodPointer SetGlobalTextureImpl_addr = nullptr;
 }
 
 static void InitAddress()
 {
-	PropertyToID_addr = il2cpp_resolve_icall("UnityEngine.Shader::PropertyToID()");
-	GetGlobalTextureImpl_addr = il2cpp_resolve_icall("UnityEngine.Shader::GetGlobalTextureImpl()");
-	SetGlobalTextureImpl_addr = il2cpp_resolve_icall("UnityEngine.Shader::SetGlobalTextureImpl()");
+	PropertyToID_addr = il2cpp_resolve_icall("UnityEngine.Shader::PropertyToID");
+	GetGlobalTextureImpl_addr = il2cpp_resolve_icall("UnityEngine.Shader::GetGlobalTextureImpl");
+	SetGlobalTextureImpl_addr = il2cpp_resolve_icall("UnityEngine.Shader::SetGlobalTextureImpl");
 }
 
 STATIC

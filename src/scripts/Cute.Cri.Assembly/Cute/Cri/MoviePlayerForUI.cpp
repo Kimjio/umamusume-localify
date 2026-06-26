@@ -2,13 +2,14 @@
 #include "../../../ScriptInternal.hpp"
 #include "MoviePlayerForUI.hpp"
 
+#include "scripts/umamusume/Gallop/Screen.hpp"
 #include "scripts/umamusume/Gallop/StandaloneWindowResize.hpp"
 
 #include "config/config.hpp"
 
 namespace
 {
-	void* MoviePlayerForUI_AdjustScreenSize_addr = nullptr;
+	Il2CppMethodPointer MoviePlayerForUI_AdjustScreenSize_addr = nullptr;
 	void* MoviePlayerForUI_AdjustScreenSize_orig = nullptr;
 }
 
@@ -20,7 +21,11 @@ static void MoviePlayerForUI_AdjustScreenSize_hook(Il2CppObject* self, UnityEngi
 		return;
 	}
 
+#ifdef _MSC_VER
 	if (movieInfo->width < movieInfo->height && !Gallop::StandaloneWindowResize::IsVirt())
+#else
+	if (movieInfo->width < movieInfo->height && !Gallop::Screen::IsVertical())
+#endif
 	{
 		auto ratio1 = static_cast<float>(movieInfo->width) / static_cast<float>(movieInfo->height);
 		dispRectWH.x = dispRectWH.y * ratio1;

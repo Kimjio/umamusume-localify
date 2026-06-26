@@ -4,8 +4,8 @@
 
 namespace
 {
-	void* get_transform_addr = nullptr;
-	void* get_gameObject_addr = nullptr;
+	Il2CppMethodPointer get_transform_addr = nullptr;
+	Il2CppMethodPointer get_gameObject_addr = nullptr;
 }
 
 static void InitAddress()

@@ -1,31 +1,42 @@
 #pragma once
 
+#ifdef _MSC_VER
 #define NOMINMAX
+#include <Windows.Foundation.Numerics.h>
+
+#include <MinHook.h>
+
+inline static HWND currentHWnd = nullptr;
+#else
+#include <dobby.h>
+#include "log.h"
+#endif
 
 #include <iostream>
 #include <string>
 #include <cstdio>
 #include <chrono>
-#include <MinHook.h>
 
 #include "il2cpp/il2cpp_symbols.hpp"
 #include "il2cpp/il2cpp-tabledefs.h"
 
 #include "scripts/UnityEngine.AssetBundleModule/UnityEngine/AssetBundle.hpp"
 
+#include "scripts/umamusume/Gallop/SceneManager.hpp"
+
 #include "config/config.hpp"
 
 #include "game.hpp"
+
+#include "string_utils.hpp"
 
 constexpr float ratio_16_9 = 1.7777f;
 constexpr float ratio_9_16 = 0.5625f;
 constexpr float ratio_4_3 = 1.3333f;
 constexpr float ratio_3_4 = 0.75f;
 
-inline static HWND currentHWnd = nullptr;
-
 #define STATIC \
-static void __static__();\
+static void __static__(); \
 [[maybe_unused]] static const char __static_value__ = (__static__(), 0);\
 static void __static__()
 
@@ -36,7 +47,7 @@ inline void PrintStackTrace()
 #ifdef _MSC_VER
 	wcout << reinterpret_cast<wchar_t*>(trace()->chars) << endl;
 #else
-	printf("%ls\n", trace()->chars);
+	LOGD("%s", il2cpp_u8(trace()->chars).data());
 #endif
 }
 
@@ -52,7 +63,7 @@ inline Il2CppClass* GetGenericClass(Il2CppReflectionType* baseRuntimeType, Ts...
 		i++;
 	}
 
-	auto runtimeType = il2cpp_class_get_method_from_name_type<Il2CppReflectionRuntimeType * (*)(Il2CppReflectionType*, Il2CppArraySize*)>(baseRuntimeType->object.klass, "MakeGenericType", 1)->methodPointer(baseRuntimeType, typeArray);
+	auto runtimeType = il2cpp_symbols::get_method_pointer<Il2CppReflectionRuntimeType * (*)(Il2CppReflectionType*, Il2CppArraySize*)>(baseRuntimeType->object.klass, "MakeGenericType", 1)(baseRuntimeType, typeArray);
 	auto newType = runtimeType->type.type;
 
 	return il2cpp_class_from_type(newType);
@@ -61,7 +72,7 @@ inline Il2CppClass* GetGenericClass(Il2CppReflectionType* baseRuntimeType, Ts...
 template<typename... Ts, typename = Il2CppReflectionType*>
 inline Il2CppClass* GetArrayClass(Il2CppReflectionType* runtimeType)
 {
-	auto arrayRuntimeType = il2cpp_class_get_method_from_name_type<Il2CppReflectionRuntimeType * (*)(Il2CppReflectionType*)>(runtimeType->object.klass, "MakeArrayType", 0)->methodPointer(runtimeType);
+	auto arrayRuntimeType = il2cpp_symbols::get_method_pointer<Il2CppReflectionRuntimeType * (*)(Il2CppReflectionType*)>(runtimeType->object.klass, "MakeArrayType", 0)(runtimeType);
 	auto newType = arrayRuntimeType->type.type;
 
 	return il2cpp_class_from_type(newType);
@@ -80,7 +91,7 @@ inline const MethodInfo* GetGenericMethod(const MethodInfo* baseMethodInfo, Ts..
 		i++;
 	}
 
-	auto runtimeType = il2cpp_class_get_method_from_name_type<Il2CppReflectionMethod * (*)(Il2CppObject*, Il2CppArraySize*)>(runtimeMethodInfo->object.klass, "MakeGenericMethod", 1)->methodPointer(&runtimeMethodInfo->object, typeArray);
+	auto runtimeType = il2cpp_symbols::get_method_pointer<Il2CppReflectionMethod * (*)(Il2CppObject*, Il2CppArraySize*)>(runtimeMethodInfo->object.klass, "MakeGenericMethod", 1)(&runtimeMethodInfo->object, typeArray);
 	return il2cpp_method_get_from_reflection(runtimeType);
 }
 
@@ -111,7 +122,58 @@ static void InvokeDelegateConstructor(Il2CppDelegate* delegate, Il2CppObject* ta
 	}
 
 	void* ctorArgs[2] = { target, reinterpret_cast<void*>(&method) };
-	ctor->invoker_method(ctor->methodPointer, ctor, delegate, ctorArgs, nullptr);
+	ctor->invoker_method(il2cpp_symbols::get_method_pointer(ctor), ctor, delegate, ctorArgs, nullptr);
+}
+
+static void InvokeDelegateConstructor2020(Il2CppDelegate* delegate, Il2CppObject* target, const MethodInfo* method)
+{
+	const MethodInfo2020* ctor = reinterpret_cast<const MethodInfo2020*>(il2cpp_class_get_method_from_name(delegate->object.klass, ".ctor", 2));
+
+	if (!ctor) {
+		return;
+	}
+
+	void* ctorArgs[2] = { target, reinterpret_cast<void*>(&method) };
+	ctor->invoker_method(ctor->methodPointer, reinterpret_cast<const MethodInfo*>(ctor), delegate, ctorArgs);
+}
+
+template<typename... T, typename R>
+inline Il2CppReflectionMethod* GetRuntimeMethodInfo(R(*fn)(T...), bool isStatic = false)
+{
+	if (Game::CurrentUnityVersion == Game::UnityVersion::Unity20)
+	{
+		MethodInfo2020* methodInfo = new MethodInfo2020{};
+		methodInfo->name = "AnonymousMethod";
+		methodInfo->methodPointer = reinterpret_cast<Il2CppMethodPointer>(fn);
+		methodInfo->klass = il2cpp_defaults.method_info_class;
+		methodInfo->slot = kInvalidIl2CppMethodSlot;
+		if (isStatic)
+		{
+			methodInfo->flags = METHOD_ATTRIBUTE_STATIC;
+		}
+		methodInfo->parameters_count = max(static_cast<size_t>(sizeof...(T) - 1), static_cast<size_t>(0));
+
+		return il2cpp_method_get_object(reinterpret_cast<MethodInfo*>(methodInfo), methodInfo->klass);
+	}
+
+	MethodInfo* methodInfo = new MethodInfo{};
+	methodInfo->name = "AnonymousMethod";
+	methodInfo->methodPointer = reinterpret_cast<Il2CppMethodPointer>(fn);
+	methodInfo->virtualMethodPointer = reinterpret_cast<Il2CppMethodPointer>(fn);
+	methodInfo->klass = il2cpp_defaults.method_info_class;
+	// methodInfo->invoker_method = GetInvokerMethod(fn, index_sequence_for<T...>{});
+	methodInfo->slot = kInvalidIl2CppMethodSlot;
+	if (isStatic)
+	{
+		methodInfo->flags = METHOD_ATTRIBUTE_STATIC;
+	}
+	methodInfo->parameters_count = max(static_cast<size_t>(sizeof...(T) - 1), static_cast<size_t>(0));
+//	methodInfo->return_type = il2cpp_class_get_type(il2cpp_defaults.object_class);
+
+	// methodInfo->nativeFunction = reinterpret_cast<Il2CppMethodPointer>(fn);
+	// methodInfo->is_marshaled_from_native = true;
+
+	return il2cpp_method_get_object(methodInfo, methodInfo->klass);
 }
 
 template<typename... T, typename R>
@@ -121,21 +183,20 @@ inline Il2CppMulticastDelegate* CreateDelegateWithClass(Il2CppClass* klass, Il2C
 	delegate->delegate.method_ptr = reinterpret_cast<Il2CppMethodPointer>(fn);
 	delegate->delegate.invoke_impl = reinterpret_cast<Il2CppMethodPointer>(fn);
 
-	MethodInfo* methodInfo = new MethodInfo{};
-	methodInfo->name = "AnonymousMethod";
-	methodInfo->methodPointer = delegate->delegate.method_ptr;
-	methodInfo->virtualMethodPointer = delegate->delegate.method_ptr;
-	methodInfo->klass = il2cpp_defaults.method_info_class;
-	// methodInfo->invoker_method = GetInvokerMethod(fn, index_sequence_for<T...>{});
-	methodInfo->slot = kInvalidIl2CppMethodSlot;
-	// methodInfo->flags = METHOD_ATTRIBUTE_PINVOKE_IMPL;
-	methodInfo->parameters_count = sizeof...(T);
+	auto runtimeMethodInfo = GetRuntimeMethodInfo(fn);
+	auto methodInfo = runtimeMethodInfo->method;
 
-	// methodInfo->nativeFunction = reinterpret_cast<Il2CppMethodPointer>(fn);
-	// methodInfo->is_marshaled_from_native = true;
-	delegate->delegate.method = reinterpret_cast<const MethodInfo*>(il2cpp_method_get_object(methodInfo, methodInfo->klass));
+	delegate->delegate.method = reinterpret_cast<const MethodInfo*>(runtimeMethodInfo);
+	// reinterpret_cast<const MethodInfo*>(il2cpp_method_get_object(methodInfo, methodInfo->klass));
 
-	InvokeDelegateConstructor(&delegate->delegate, target, methodInfo);
+	if (Game::CurrentUnityVersion == Game::UnityVersion::Unity20)
+	{
+		InvokeDelegateConstructor2020(&delegate->delegate, target, methodInfo);
+	}
+	else
+	{
+		InvokeDelegateConstructor(&delegate->delegate, target, methodInfo);
+	}
 
 	delegate->delegates = il2cpp_array_new(klass, 1);
 	il2cpp_array_setref(delegate->delegates, 0, &delegate->delegate);
@@ -156,23 +217,19 @@ inline Il2CppDelegate* CreateDelegate(Il2CppObject* target, R(*fn)(Il2CppObject*
 	delegate->method_ptr = reinterpret_cast<Il2CppMethodPointer>(fn);
 	delegate->invoke_impl = reinterpret_cast<Il2CppMethodPointer>(fn);
 
-	MethodInfo* methodInfo = new MethodInfo{};
-	methodInfo->name = "AnonymousMethod";
-	methodInfo->methodPointer = delegate->method_ptr;
-	methodInfo->virtualMethodPointer = delegate->method_ptr;
-	methodInfo->klass = il2cpp_defaults.method_info_class;
-	// methodInfo->invoker_method = GetInvokerMethod(fn, index_sequence_for<T...>{});
-	methodInfo->slot = kInvalidIl2CppMethodSlot;
-	// methodInfo->flags = METHOD_ATTRIBUTE_PINVOKE_IMPL;
-	methodInfo->parameters_count = sizeof...(T);
-	methodInfo->return_type = il2cpp_class_get_type(il2cpp_defaults.void_class);
+	auto runtimeMethodInfo = GetRuntimeMethodInfo(fn);
+	auto methodInfo = runtimeMethodInfo->method;
 
-	// methodInfo->nativeFunction = reinterpret_cast<Il2CppMethodPointer>(fn);
-	// methodInfo->is_marshaled_from_native = true;
+	delegate->method = reinterpret_cast<const MethodInfo*>(runtimeMethodInfo);
 
-	delegate->method = reinterpret_cast<const MethodInfo*>(il2cpp_method_get_object(methodInfo, methodInfo->klass));
-
-	InvokeDelegateConstructor(delegate, target, methodInfo);
+	if (Game::CurrentUnityVersion == Game::UnityVersion::Unity20)
+	{
+		InvokeDelegateConstructor2020(delegate, target, methodInfo);
+	}
+	else
+	{
+		InvokeDelegateConstructor(delegate, target, methodInfo);
+	}
 
 	auto object = reinterpret_cast<Il2CppObject*>(delegate);
 
@@ -190,23 +247,19 @@ inline Il2CppMulticastDelegate* CreateUnityAction(Il2CppObject* target, R(*fn)(I
 	delegate->delegate.method_ptr = reinterpret_cast<Il2CppMethodPointer>(fn);
 	delegate->delegate.invoke_impl = reinterpret_cast<Il2CppMethodPointer>(fn);
 
-	MethodInfo* methodInfo = new MethodInfo{};
-	methodInfo->name = "AnonymousMethod";
-	methodInfo->methodPointer = delegate->delegate.method_ptr;
-	methodInfo->virtualMethodPointer = delegate->delegate.method_ptr;
-	methodInfo->klass = il2cpp_defaults.method_info_class;
-	// methodInfo->invoker_method = GetInvokerMethod(fn, index_sequence_for<T...>{});
-	methodInfo->slot = kInvalidIl2CppMethodSlot;
-	// methodInfo->flags = METHOD_ATTRIBUTE_PINVOKE_IMPL;
-	methodInfo->parameters_count = sizeof...(T);
-	methodInfo->return_type = il2cpp_class_get_type(il2cpp_defaults.void_class);
+	auto runtimeMethodInfo = GetRuntimeMethodInfo(fn);
+	auto methodInfo = runtimeMethodInfo->method;
 
-	// methodInfo->nativeFunction = reinterpret_cast<Il2CppMethodPointer>(fn);
-	// methodInfo->is_marshaled_from_native = true;
+	delegate->delegate.method = reinterpret_cast<const MethodInfo*>(runtimeMethodInfo);
 
-	delegate->delegate.method = reinterpret_cast<const MethodInfo*>(il2cpp_method_get_object(methodInfo, methodInfo->klass));
-
-	InvokeDelegateConstructor(&delegate->delegate, target, methodInfo);
+	if (Game::CurrentUnityVersion == Game::UnityVersion::Unity20)
+	{
+		InvokeDelegateConstructor2020(&delegate->delegate, target, methodInfo);
+	}
+	else
+	{
+		InvokeDelegateConstructor(&delegate->delegate, target, methodInfo);
+	}
 
 	delegate->delegates = il2cpp_array_new(delegateClass, 1);
 	il2cpp_array_setref(delegate->delegates, 0, &delegate->delegate);
@@ -219,49 +272,25 @@ inline Il2CppMulticastDelegate* CreateUnityAction(Il2CppObject* target, R(*fn)(I
 }
 
 template<typename... T, typename R>
-inline Il2CppReflectionMethod* GetRuntimeMethodInfo(R(*fn)(void*, T...))
-{
-	MethodInfo* methodInfo = new MethodInfo{};
-	methodInfo->name = "AnonymousMethod";
-	methodInfo->methodPointer = reinterpret_cast<Il2CppMethodPointer>(fn);
-	methodInfo->virtualMethodPointer = reinterpret_cast<Il2CppMethodPointer>(fn);
-	methodInfo->klass = il2cpp_defaults.method_info_class;
-	// methodInfo->invoker_method = GetInvokerMethod(fn, index_sequence_for<T...>{});
-	methodInfo->slot = kInvalidIl2CppMethodSlot;
-	// methodInfo->flags = METHOD_ATTRIBUTE_PINVOKE_IMPL;
-	methodInfo->parameters_count = sizeof...(T);
-	methodInfo->return_type = il2cpp_class_get_type(il2cpp_defaults.void_class);
-
-	// methodInfo->nativeFunction = reinterpret_cast<Il2CppMethodPointer>(fn);
-	// methodInfo->is_marshaled_from_native = true;
-
-	return il2cpp_method_get_object(methodInfo, methodInfo->klass);
-}
-
-template<typename... T, typename R>
 inline Il2CppMulticastDelegate* CreateDelegateWithClassStatic(Il2CppClass* klass, R(*fn)(T...))
 {
 	auto delegate = reinterpret_cast<Il2CppMulticastDelegate*>(il2cpp_object_new(klass));
 	delegate->delegate.method_ptr = reinterpret_cast<Il2CppMethodPointer>(fn);
 	delegate->delegate.invoke_impl = reinterpret_cast<Il2CppMethodPointer>(fn);
 
-	MethodInfo* methodInfo = new MethodInfo{};
-	methodInfo->name = "AnonymousStaticMethod";
-	methodInfo->methodPointer = delegate->delegate.method_ptr;
-	methodInfo->virtualMethodPointer = delegate->delegate.method_ptr;
-	methodInfo->klass = il2cpp_defaults.method_info_class;
-	// methodInfo->invoker_method = GetInvokerMethod(fn, index_sequence_for<T...>{});
-	methodInfo->slot = kInvalidIl2CppMethodSlot;
-	methodInfo->flags = METHOD_ATTRIBUTE_STATIC;
-	methodInfo->parameters_count = sizeof...(T);
-	methodInfo->return_type = il2cpp_class_get_type(il2cpp_defaults.void_class);
+	auto runtimeMethodInfo = GetRuntimeMethodInfo(fn, true);
+	auto methodInfo = runtimeMethodInfo->method;
 
-	// methodInfo->nativeFunction = reinterpret_cast<Il2CppMethodPointer>(fn);
-	// methodInfo->is_marshaled_from_native = true;
+	delegate->delegate.method = reinterpret_cast<const MethodInfo*>(runtimeMethodInfo);
 
-	delegate->delegate.method = reinterpret_cast<const MethodInfo*>(il2cpp_method_get_object(methodInfo, methodInfo->klass));
-
-	InvokeDelegateConstructor(&delegate->delegate, nullptr, methodInfo);
+	if (Game::CurrentUnityVersion == Game::UnityVersion::Unity20)
+	{
+		InvokeDelegateConstructor2020(&delegate->delegate, nullptr, methodInfo);
+	}
+	else
+	{
+		InvokeDelegateConstructor(&delegate->delegate, nullptr, methodInfo);
+	}
 
 	delegate->delegates = il2cpp_array_new(klass, 1);
 	il2cpp_array_setref(delegate->delegates, 0, &delegate->delegate);
@@ -284,23 +313,19 @@ inline Il2CppDelegate* CreateDelegateStatic(R(*fn)(void*, T...))
 	delegate->method_ptr = reinterpret_cast<Il2CppMethodPointer>(fn);
 	delegate->invoke_impl = reinterpret_cast<Il2CppMethodPointer>(fn);
 
-	MethodInfo* methodInfo = new MethodInfo{};
-	methodInfo->name = "AnonymousStaticMethod";
-	methodInfo->methodPointer = delegate->method_ptr;
-	methodInfo->virtualMethodPointer = delegate->method_ptr;
-	methodInfo->klass = il2cpp_defaults.method_info_class;
-	// methodInfo->invoker_method = GetInvokerMethod(fn, index_sequence_for<T...>{});
-	methodInfo->slot = kInvalidIl2CppMethodSlot;
-	methodInfo->flags = METHOD_ATTRIBUTE_STATIC;
-	methodInfo->parameters_count = sizeof...(T);
-	methodInfo->return_type = il2cpp_class_get_type(il2cpp_defaults.void_class);
+	auto runtimeMethodInfo = GetRuntimeMethodInfo(fn, true);
+	auto methodInfo = runtimeMethodInfo->method;
 
-	// methodInfo->nativeFunction = reinterpret_cast<Il2CppMethodPointer>(fn);
-	// methodInfo->is_marshaled_from_native = true;
+	delegate->method = reinterpret_cast<const MethodInfo*>(runtimeMethodInfo);
 
-	delegate->method = reinterpret_cast<const MethodInfo*>(il2cpp_method_get_object(methodInfo, methodInfo->klass));
-
-	InvokeDelegateConstructor(delegate, nullptr, methodInfo);
+	if (Game::CurrentUnityVersion == Game::UnityVersion::Unity20)
+	{
+		InvokeDelegateConstructor2020(delegate, nullptr, methodInfo);
+	}
+	else
+	{
+		InvokeDelegateConstructor(delegate, nullptr, methodInfo);
+	}
 
 	return delegate;
 }
@@ -320,23 +345,19 @@ inline Il2CppMulticastDelegate* CreateUnityActionStatic(R(*fn)(void*, T...))
 	delegate->delegate.method_ptr = reinterpret_cast<Il2CppMethodPointer>(fn);
 	delegate->delegate.invoke_impl = reinterpret_cast<Il2CppMethodPointer>(fn);
 
-	MethodInfo* methodInfo = new MethodInfo{};
-	methodInfo->name = "AnonymousStaticMethod";
-	methodInfo->methodPointer = delegate->delegate.method_ptr;
-	methodInfo->virtualMethodPointer = delegate->delegate.method_ptr;
-	methodInfo->klass = il2cpp_defaults.method_info_class;
-	// methodInfo->invoker_method = GetInvokerMethod(fn, index_sequence_for<T...>{});
-	methodInfo->slot = kInvalidIl2CppMethodSlot;
-	methodInfo->flags = METHOD_ATTRIBUTE_STATIC;
-	methodInfo->parameters_count = sizeof...(T);
-	methodInfo->return_type = il2cpp_class_get_type(il2cpp_defaults.void_class);
+	auto runtimeMethodInfo = GetRuntimeMethodInfo(fn, true);
+	auto methodInfo = runtimeMethodInfo->method;
 
-	// methodInfo->nativeFunction = reinterpret_cast<Il2CppMethodPointer>(fn);
-	// methodInfo->is_marshaled_from_native = true;
+	delegate->delegate.method = reinterpret_cast<const MethodInfo*>(runtimeMethodInfo);
 
-	delegate->delegate.method = reinterpret_cast<const MethodInfo*>(il2cpp_method_get_object(methodInfo, methodInfo->klass));
-
-	InvokeDelegateConstructor(&delegate->delegate, nullptr, methodInfo);
+	if (Game::CurrentUnityVersion == Game::UnityVersion::Unity20)
+	{
+		InvokeDelegateConstructor2020(&delegate->delegate, nullptr, methodInfo);
+	}
+	else
+	{
+		InvokeDelegateConstructor(&delegate->delegate, nullptr, methodInfo);
+	}
 
 	delegate->delegates = il2cpp_array_new(delegateClass, 1);
 	il2cpp_array_setref(delegate->delegates, 0, &delegate->delegate);
@@ -376,10 +397,10 @@ inline Il2CppObject* GetSingletonInstanceByMethod(Il2CppClass* klass)
 	{
 		return nullptr;
 	}
-	auto get_Instance = il2cpp_class_get_method_from_name_type<Il2CppObject * (*)()>(klass, "get_Instance", 0);
+	auto get_Instance = il2cpp_symbols::get_method_pointer<Il2CppObject * (*)()>(klass, "get_Instance", 0);
 	if (get_Instance)
 	{
-		return get_Instance->methodPointer();
+		return get_Instance();
 	}
 	return nullptr;
 }
@@ -394,8 +415,18 @@ inline Il2CppReflectionType* GetRuntimeType(Il2CppClass* klass)
 	return reinterpret_cast<Il2CppReflectionType*>(il2cpp_type_get_object(il2cpp_class_get_type(klass)));
 }
 
+inline bool IsEnumDefined(Il2CppReflectionType* runtimeType, const IL2CPP_BASIC_STRING& name)
+{
+	return il2cpp_symbols::get_method_pointer<bool (*)(Il2CppReflectionType*, Il2CppString*)>("mscorlib.dll", "System", "Enum", "IsDefined", 2)(runtimeType, il2cpp_string_new16(name.data()));
+}
+
 inline Il2CppObject* ParseEnum(Il2CppReflectionType* runtimeType, const IL2CPP_BASIC_STRING& name)
 {
+	if (!IsEnumDefined(runtimeType, name))
+	{
+		return nullptr;
+	}
+
 	return il2cpp_symbols::get_method_pointer<Il2CppObject * (*)(Il2CppReflectionType*, Il2CppString*)>("mscorlib.dll", "System", "Enum", "Parse", 2)(runtimeType, il2cpp_string_new16(name.data()));
 }
 
@@ -470,6 +501,16 @@ inline Il2CppDelegate* GetButtonCommonOnClickDelegate(Il2CppObject* object)
 	return nullptr;
 }
 
+inline Il2CppString *GetApplicationServerUrl() {
+    auto GameDefine = il2cpp_symbols::get_class("umamusume.dll", "Gallop", "GameDefine");
+    return il2cpp_symbols::get_method_pointer<Il2CppString *(*)()>(GameDefine, "get_ApplicationServerUrl", 0)();
+}
+
+inline bool IsTextIdDefined(const il2cppstring& name)
+{
+	return IsEnumDefined(GetRuntimeType("umamusume.dll", "Gallop", "TextId"), name);
+}
+
 inline uint64_t GetTextIdByName(const il2cppstring& name)
 {
 	return GetEnumValue(ParseEnum(GetRuntimeType("umamusume.dll", "Gallop", "TextId"), name));
@@ -482,43 +523,9 @@ inline il2cppstring GetTextIdNameById(uint64_t id)
 	return name ? name->chars : IL2CPP_STRING("");
 }
 
-inline Il2CppObject* GetCurrentViewController()
-{
-	auto sceneManager = GetSingletonInstance(il2cpp_symbols::get_class("umamusume.dll", "Gallop", "SceneManager"));
-
-	if (!sceneManager)
-	{
-		return nullptr;
-	}
-
-	auto GetCurrentViewController = il2cpp_symbols::find_method<Il2CppObject * (*)(Il2CppObject*)>("umamusume.dll", "Gallop", "SceneManager", [](const MethodInfo* info)
-		{
-			return info->name == "GetCurrentViewController"s && !info->is_generic;
-		});
-
-	return GetCurrentViewController(sceneManager);
-}
-
-inline Il2CppObject* GetCurrentSceneController()
-{
-	auto sceneManager = GetSingletonInstance(il2cpp_symbols::get_class("umamusume.dll", "Gallop", "SceneManager"));
-
-	if (!sceneManager)
-	{
-		return nullptr;
-	}
-
-	auto GetCurrentSceneController = il2cpp_symbols::find_method<Il2CppObject * (*)(Il2CppObject*)>("umamusume.dll", "Gallop", "SceneManager", [](const MethodInfo* info)
-		{
-			return info->name == "GetCurrentSceneController"s && !info->is_generic;
-		});
-
-	return GetCurrentSceneController(sceneManager);
-}
-
 inline Il2CppObject* GetCurrentHubViewChildController()
 {
-	auto viewController = GetCurrentViewController();
+	auto viewController = Gallop::SceneManager::Instance().GetCurrentViewController();
 
 	if (!viewController)
 	{
@@ -527,7 +534,7 @@ inline Il2CppObject* GetCurrentHubViewChildController()
 
 	if (viewController->klass->parent->klass->name == "HubViewControllerBase"s)
 	{
-		return il2cpp_class_get_method_from_name_type<Il2CppObject * (*)(Il2CppObject*)>(viewController->klass, "get_ChildCurrentController", 0)->methodPointer(viewController);
+		return il2cpp_symbols::get_method_pointer<Il2CppObject * (*)(Il2CppObject*)>(viewController->klass, "get_ChildCurrentController", 0)(viewController);
 	}
 
 	return nullptr;
@@ -623,6 +630,7 @@ inline HWND GetHWND()
 
 inline void dump_bytes(void* pos)
 {
+#ifdef _MSC_VER
 	if (pos)
 	{
 		printf("Hex dump of %p\n", pos);
@@ -641,9 +649,31 @@ inline void dump_bytes(void* pos)
 
 	}
 	printf("\n\n");
+#else
+	if (pos)
+	{
+		LOGI("Hex dump of %p", pos);
+
+		unsigned char* memory = reinterpret_cast<unsigned char*>(pos);
+
+		for (int i = 0; i < 2; i++)
+		{
+			char buffer[64];
+			int offset = 0;
+
+			for (int j = 0; j < 16; j++)
+			{
+				offset += sprintf(buffer + offset, "%02X ", memory[i * 16 + j]);
+			}
+
+			LOGI("%s", buffer);
+		}
+	}
+#endif
 }
 
 #pragma region HOOK_MACRO
+#ifdef _MSC_VER
 #define ADD_HOOK(_name_, _fmt_) \
 	auto _name_##_offset = reinterpret_cast<void*>(_name_##_addr); \
 	\
@@ -661,4 +691,17 @@ inline void dump_bytes(void* pos)
 		cout << "WARN: " << #_name_ << " Failed: " << MH_StatusToString(_name_##_result) << " LastError: " << GetLastError() << endl << endl; \
 		_name_##_orig = _name_##_addr; \
 	}
+#else
+#define ADD_HOOK(_name_, _fmt_) \
+	auto _name_##_offset = reinterpret_cast<void*>(_name_##_addr); \
+	\
+	LOGI(_fmt_, _name_##_offset); \
+	dump_bytes(_name_##_offset); \
+	\
+	auto _name_##_create_result = DobbyHook(_name_##_offset, reinterpret_cast<void*>(_name_##_hook), reinterpret_cast<void**>(&_name_##_orig)); \
+	if (_name_##_create_result != 0) \
+	{\
+		LOGW("WARN: %s Create Failed", #_name_); \
+	}
+#endif
 #pragma endregion

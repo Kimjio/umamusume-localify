@@ -7,21 +7,21 @@
 
 namespace
 {
-	void* GallopFrameBuffer_Initialize_addr = nullptr;
+	Il2CppMethodPointer GallopFrameBuffer_Initialize_addr = nullptr;
 	void* GallopFrameBuffer_Initialize_orig = nullptr;
 
-	void* GallopFrameBuffer_Initialize2_addr = nullptr;
+	Il2CppMethodPointer GallopFrameBuffer_Initialize2_addr = nullptr;
 	void* GallopFrameBuffer_Initialize2_orig = nullptr;
 
-	void* GallopFrameBuffer_Release_addr = nullptr;
+	Il2CppMethodPointer GallopFrameBuffer_Release_addr = nullptr;
 	void* GallopFrameBuffer_Release_orig = nullptr;
 
-	void* GallopFrameBuffer_ResizeRenderTexture_addr = nullptr;
+	Il2CppMethodPointer GallopFrameBuffer_ResizeRenderTexture_addr = nullptr;
 	void* GallopFrameBuffer_ResizeRenderTexture_orig = nullptr;
 
-	void* GallopFrameBuffer_get_ColorBuffer_addr = nullptr;
+	Il2CppMethodPointer GallopFrameBuffer_get_ColorBuffer_addr = nullptr;
 
-	void* GallopFrameBuffer_RemakeRenderTexture_addr = nullptr;
+	Il2CppMethodPointer GallopFrameBuffer_RemakeRenderTexture_addr = nullptr;
 
 	FieldInfo* GallopFrameBuffer__drawPassField = nullptr;
 

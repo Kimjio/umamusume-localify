@@ -1,3 +1,4 @@
+#ifdef _MSC_VER
 #include "../umamusume.hpp"
 #include "../../ScriptInternal.hpp"
 #include "DownloadManager.hpp"
@@ -6,22 +7,22 @@
 
 namespace
 {
-	void* DownloadProgressUIGame_Show_addr = nullptr;
+	Il2CppMethodPointer DownloadProgressUIGame_Show_addr = nullptr;
 	void* DownloadProgressUIGame_Show_orig = nullptr;
 
-	void* DownloadProgressUIGame_Hide_addr = nullptr;
+	Il2CppMethodPointer DownloadProgressUIGame_Hide_addr = nullptr;
 	void* DownloadProgressUIGame_Hide_orig = nullptr;
 
-	void* DownloadProgressUIGame_SetProgress_addr = nullptr;
+	Il2CppMethodPointer DownloadProgressUIGame_SetProgress_addr = nullptr;
 	void* DownloadProgressUIGame_SetProgress_orig = nullptr;
 
-	void* BackgroundDownloadProgressUI_Show_addr = nullptr;
+	Il2CppMethodPointer BackgroundDownloadProgressUI_Show_addr = nullptr;
 	void* BackgroundDownloadProgressUI_Show_orig = nullptr;
 
-	void* BackgroundDownloadProgressUI_Hide_addr = nullptr;
+	Il2CppMethodPointer BackgroundDownloadProgressUI_Hide_addr = nullptr;
 	void* BackgroundDownloadProgressUI_Hide_orig = nullptr;
 
-	void* BackgroundDownloadProgressUI_SetProgress_addr = nullptr;
+	Il2CppMethodPointer BackgroundDownloadProgressUI_SetProgress_addr = nullptr;
 	void* BackgroundDownloadProgressUI_SetProgress_orig = nullptr;
 }
 
@@ -114,3 +115,4 @@ namespace Gallop
 	const char* DownloadManager::namespaze = "Gallop";
 	const char* DownloadManager::klassName = "DownloadManager";
 }
+#endif

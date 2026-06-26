@@ -11,7 +11,7 @@
 
 namespace
 {
-	void* TextFontManager_get_DefaultFont_addr = nullptr;
+	Il2CppMethodPointer TextFontManager_get_DefaultFont_addr = nullptr;
 
 	Il2CppReflectionType* FontReflectionType = nullptr;
 
@@ -36,6 +36,7 @@ namespace Gallop
 	{
 		if (!loadedFontAssets.contains(path))
 		{
+
 			loadedFontAssets.emplace(path, UnityEngine::AssetBundle::LoadFromFile(il2cpp_string_new16(path.data())));
 		}
 

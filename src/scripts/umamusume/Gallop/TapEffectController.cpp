@@ -7,7 +7,7 @@
 
 namespace
 {
-	void* TapEffectController_Update_addr = nullptr;
+	Il2CppMethodPointer TapEffectController_Update_addr = nullptr;
 }
 
 static void InitAddress()

@@ -9,14 +9,14 @@
 
 namespace
 {
-	void* Director_SetupOrientation_addr = nullptr;
+	Il2CppMethodPointer Director_SetupOrientation_addr = nullptr;
 	void* Director_SetupOrientation_orig = nullptr;
 
-	void* Director_Live3DSettings_get_ScreenMode_addr = nullptr;
+	Il2CppMethodPointer Director_Live3DSettings_get_ScreenMode_addr = nullptr;
 
-	void* Director_Live3DSettings_set_ScreenMode_addr = nullptr;
+	Il2CppMethodPointer Director_Live3DSettings_set_ScreenMode_addr = nullptr;
 
-	void* Director_Live3DSettings_SetData_addr = nullptr;
+	Il2CppMethodPointer Director_Live3DSettings_SetData_addr = nullptr;
 	void* Director_Live3DSettings_SetData_orig = nullptr;
 }
 

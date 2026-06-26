@@ -1,3 +1,4 @@
+#ifdef _MSC_VER
 #include "../umamusume.hpp"
 #include "../../ScriptInternal.hpp"
 #include "PartsSingleModeCommonFooter.hpp"
@@ -10,7 +11,7 @@
 
 namespace
 {
-	void* PartsSingleModeCommonFooter_Setup_addr = nullptr;
+	Il2CppMethodPointer PartsSingleModeCommonFooter_Setup_addr = nullptr;
 	void* PartsSingleModeCommonFooter_Setup_orig = nullptr;
 }
 
@@ -26,10 +27,10 @@ static void PartsSingleModeCommonFooter_Setup_hook(Il2CppObject* self)
 
 		UnityEngine::MonoBehaviour(_logButton).gameObject().SetActive(true);
 
-		il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, Il2CppDelegate*)>(_logButton->klass, "SetOnClick", 1)->methodPointer(_logButton,
+		il2cpp_symbols::get_method_pointer<void (*)(Il2CppObject*, Il2CppDelegate*)>(_logButton->klass, "SetOnClick", 1)(_logButton,
 			&CreateUnityAction(self, *[](Il2CppObject* self)
 				{
-					il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*)>(self->klass, "OnClickLog", 0)->methodPointer(self);
+					il2cpp_symbols::get_method_pointer<void (*)(Il2CppObject*)>(self->klass, "OnClickLog", 0)(self);
 				})->delegate);
 	}
 }
@@ -52,3 +53,4 @@ STATIC
 	il2cpp_symbols::init_callbacks.emplace_back(InitAddress);
 	il2cpp_symbols::init_callbacks.emplace_back(HookMethods);
 }
+#endif

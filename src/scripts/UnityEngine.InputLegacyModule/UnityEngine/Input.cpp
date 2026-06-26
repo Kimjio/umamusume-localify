@@ -6,18 +6,18 @@
 
 namespace
 {
-	void* Input_get_mousePosition_Injected_addr = nullptr;
-	void* Input_GetMouseButtonDown_addr = nullptr;
-	void* Input_GetMouseButton_addr = nullptr;
-	void* Input_GetMouseButtonUp_addr = nullptr;
+	Il2CppMethodPointer Input_get_mousePosition_Injected_addr = nullptr;
+	Il2CppMethodPointer Input_GetMouseButtonDown_addr = nullptr;
+	Il2CppMethodPointer Input_GetMouseButton_addr = nullptr;
+	Il2CppMethodPointer Input_GetMouseButtonUp_addr = nullptr;
 }
 
 static void InitAddress()
 {
-	Input_get_mousePosition_Injected_addr = il2cpp_resolve_icall("UnityEngine.Input::get_mousePosition_Injected()");
-	Input_GetMouseButtonDown_addr = il2cpp_resolve_icall("UnityEngine.Input::GetMouseButtonDown()");
-	Input_GetMouseButton_addr = il2cpp_resolve_icall("UnityEngine.Input::GetMouseButton()");
-	Input_GetMouseButtonUp_addr = il2cpp_resolve_icall("UnityEngine.Input::GetMouseButtonUp()");
+	Input_get_mousePosition_Injected_addr = il2cpp_resolve_icall("UnityEngine.Input::get_mousePosition_Injected");
+	Input_GetMouseButtonDown_addr = il2cpp_resolve_icall("UnityEngine.Input::GetMouseButtonDown");
+	Input_GetMouseButton_addr = il2cpp_resolve_icall("UnityEngine.Input::GetMouseButton");
+	Input_GetMouseButtonUp_addr = il2cpp_resolve_icall("UnityEngine.Input::GetMouseButtonUp");
 }
 
 STATIC

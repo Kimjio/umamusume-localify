@@ -6,10 +6,10 @@
 
 namespace
 {
-	void* CySpringUpdater_set_SpringUpdateMode_addr = nullptr;
+	Il2CppMethodPointer CySpringUpdater_set_SpringUpdateMode_addr = nullptr;
 	void* CySpringUpdater_set_SpringUpdateMode_orig = nullptr;
 
-	void* CySpringUpdater_get_SpringUpdateMode_addr = nullptr;
+	Il2CppMethodPointer CySpringUpdater_get_SpringUpdateMode_addr = nullptr;
 	void* CySpringUpdater_get_SpringUpdateMode_orig = nullptr;
 }
 

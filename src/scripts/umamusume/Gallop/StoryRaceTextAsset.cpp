@@ -8,7 +8,7 @@
 
 namespace
 {
-	void* StoryRaceTextAsset_Load_addr = nullptr;
+	Il2CppMethodPointer StoryRaceTextAsset_Load_addr = nullptr;
 	void* StoryRaceTextAsset_Load_orig = nullptr;
 	
 	FieldInfo* StoryRaceTextAsset_textDataField = nullptr;
@@ -19,9 +19,9 @@ static void StoryRaceTextAsset_Load_hook(Il2CppObject* self)
 	Il2CppObject* textData;
 	il2cpp_field_get_value(self, StoryRaceTextAsset_textDataField, &textData);
 
-	auto enumerator = il2cpp_class_get_method_from_name_type<Il2CppObject * (*)(Il2CppObject*)>(textData->klass, "GetEnumerator", 0)->methodPointer(textData);
-	auto get_current = il2cpp_class_get_method_from_name_type<Il2CppObject * (*)(Il2CppObject*)>(enumerator->klass, "get_Current", 0)->methodPointer;
-	auto move_next = il2cpp_class_get_method_from_name_type<bool (*)(Il2CppObject*)>(enumerator->klass, "MoveNext", 0)->methodPointer;
+	auto enumerator = il2cpp_symbols::get_method_pointer<Il2CppObject * (*)(Il2CppObject*)>(textData->klass, "GetEnumerator", 0)(textData);
+	auto get_current = il2cpp_symbols::get_method_pointer<Il2CppObject * (*)(Il2CppObject*)>(enumerator->klass, "get_Current", 0);
+	auto move_next = il2cpp_symbols::get_method_pointer<bool (*)(Il2CppObject*)>(enumerator->klass, "MoveNext", 0);
 
 	while (move_next(enumerator))
 	{

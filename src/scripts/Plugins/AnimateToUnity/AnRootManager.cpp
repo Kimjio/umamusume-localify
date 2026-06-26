@@ -4,7 +4,7 @@
 
 namespace
 {
-	void* AnRootManager_set_ScreenRate_addr = nullptr;
+	Il2CppMethodPointer AnRootManager_set_ScreenRate_addr = nullptr;
 }
 
 static void InitAddress()

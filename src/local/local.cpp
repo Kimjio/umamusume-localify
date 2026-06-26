@@ -1,6 +1,9 @@
-#include <stdinclude.hpp>
+#include "local.hpp"
+
+#include <algorithm>
 
 #include "config/config.hpp"
+#include "logger/logger.hpp"
 
 #include "string_utils.hpp"
 
@@ -15,19 +18,19 @@ namespace local
 		vector<size_t> str_list;
 	}
 
-	static void reload_textdb(const vector<il2cppstring>* dicts)
+	void reload_textdb(const vector<il2cppstring>* dicts)
 	{
 		text_db.clear();
 		load_textdb(dicts);
 	}
 
-	static void reload_textId_textdb(const il2cppstring& dict)
+	void reload_textId_textdb(const il2cppstring& dict)
 	{
 		textId_text_db.clear();
 		load_textId_textdb(dict);
 	}
 
-	static void load_textdb(const vector<il2cppstring>* dicts)
+	void load_textdb(const vector<il2cppstring>* dicts)
 	{
 		for (il2cppstring dict : *dicts)
 		{
@@ -35,32 +38,32 @@ namespace local
 			{
 				if (filesystem::is_directory(dict))
 				{
-					wcout << L"Dict directory: " << dict << endl;
 					for (auto& file : filesystem::directory_iterator(dict))
 					{
 						const auto filePath = file.path().IL2CPP_BASIC_STRING();
-						const auto fileName = file.path().filename().IL2CPP_BASIC_STRING();
 						if (file.is_regular_file())
 						{
-							il2cppifstream dict_stream{ filePath };
-							dict_stream.imbue(locale(".UTF-8"));
+							ifstream dict_stream{ filesystem::path(filePath) };
 
 							if (!dict_stream.is_open())
 							{
 								continue;
 							}
 
-							wcout << L"Reading " << fileName << L"..." << endl;
-
-							U16IStreamWrapper wrapper{ dict_stream };
+							rapidjson::IStreamWrapper wrapper{ dict_stream };
 							U16Document document;
 
-							document.ParseStream(wrapper);
+							document.ParseStream<rapidjson::kParseDefaultFlags, rapidjson::UTF8<>>(wrapper);
+
+							if (document.HasParseError())
+							{
+								continue;
+							}
 
 							for (auto iter = document.MemberBegin();
 								iter != document.MemberEnd(); ++iter)
 							{
-								auto key = stoull(iter->name.GetString());
+								auto key = stoull(il2cpp_u8(iter->name.GetString()));
 								auto value = iter->value.GetString();
 
 								text_db.emplace(key, value);
@@ -72,71 +75,67 @@ namespace local
 				}
 				else
 				{
-					il2cppifstream dict_stream{ dict };
-					dict_stream.imbue(locale(".UTF-8"));
+					ifstream dict_stream{ filesystem::path(dict) };
 
 					if (!dict_stream.is_open())
 					{
 						continue;
 					}
 
-					wcout << L"Reading " << dict << L"..." << endl;
-
-					U16IStreamWrapper wrapper{ dict_stream };
+					rapidjson::IStreamWrapper wrapper{ dict_stream };
 					U16Document document;
 
-					document.ParseStream(wrapper);
+					document.ParseStream<rapidjson::kParseDefaultFlags, rapidjson::UTF8<>>(wrapper);
 
-					for (auto iter = document.MemberBegin();
-						iter != document.MemberEnd(); ++iter)
+					if (!document.HasParseError())
 					{
-						auto key = stoull(iter->name.GetString());
-						auto value = iter->value.GetString();
+						for (auto iter = document.MemberBegin();
+							iter != document.MemberEnd(); ++iter)
+						{
+							auto key = stoull(il2cpp_u8(iter->name.GetString()));
+							auto value = iter->value.GetString();
 
-						text_db.emplace(key, value);
+							text_db.emplace(key, value);
+						}
 					}
 
 					dict_stream.close();
 				}
 			}
 		}
-
-		cout << "loaded " << text_db.size() << " localized entries." << endl;
 	}
 
-	static void load_textId_textdb(const il2cppstring& dict)
+	void load_textId_textdb(const il2cppstring& dict)
 	{
-		if (filesystem::exists(dict.data()))
+		if (filesystem::exists(dict))
 		{
-			il2cppifstream dict_stream{ dict };
-			dict_stream.imbue(locale(".UTF-8"));
+			ifstream dict_stream{ filesystem::path(dict) };
 
 			if (!dict_stream.is_open())
 				return;
 
-			wcout << L"Reading " << dict << L"..." << endl;
-
-			U16IStreamWrapper wrapper{ dict_stream };
+			rapidjson::IStreamWrapper wrapper{ dict_stream };
 			U16Document document;
 
-			document.ParseStream(wrapper);
+			document.ParseStream<rapidjson::kParseDefaultFlags, rapidjson::UTF8<>>(wrapper);
 
-			for (auto iter = document.MemberBegin();
-				iter != document.MemberEnd(); ++iter)
+			if (!document.HasParseError())
 			{
-				auto key = iter->name.GetString();
-				auto value = iter->value.GetString();
+				for (auto iter = document.MemberBegin();
+					iter != document.MemberEnd(); ++iter)
+				{
+					auto key = iter->name.GetString();
+					auto value = iter->value.GetString();
 
-				textId_text_db.emplace(key, value);
+					textId_text_db.emplace(key, value);
+				}
 			}
 
 			dict_stream.close();
 		}
+	}
 
-		cout << "loaded " << textId_text_db.size() << " TextId localized entries." << endl;
-	} 
-
-	static bool localify_text(size_t hash, il2cppstring** result)
+	bool localify_text(size_t hash, const il2cppstring** result)
 	{
 		if (text_db.contains(hash))
 		{
@@ -147,7 +146,7 @@ namespace local
 		return false;
 	}
 
-	static bool localify_text_by_textId_name(const il2cppstring& textIdName, il2cppstring** result)
+	bool localify_text_by_textId_name(const il2cppstring& textIdName, il2cppstring** result)
 	{
 		if (textId_text_db.contains(textIdName))
 		{
@@ -157,39 +156,39 @@ namespace local
 		return false;
 	}
 
-	static Il2CppString* get_localized_string(size_t hash_or_id)
+	Il2CppString* get_localized_string(size_t hash_or_id)
 	{
-		il2cppstring* result;
+		const il2cppstring* result;
 
 		if (local::localify_text(hash_or_id, &result))
 		{
-			return il2cpp_string_new_utf16(result->data(), result->size());
+			return il2cpp_string_new16(result->data());
 		}
 
 		return nullptr;
 	}
 
-	static Il2CppString* get_localized_string(const il2cppstring& textIdName)
+	Il2CppString* get_localized_string(const il2cppstring& textIdName)
 	{
 		il2cppstring* result;
 
 		if (local::localify_text_by_textId_name(textIdName, &result))
 		{
-			return il2cpp_string_new_utf16(result->data(), result->size());
+			return il2cpp_string_new16(result->data());
 		}
 
 		return nullptr;
 	}
 
-	static Il2CppString* get_localized_string(Il2CppString* str)
+	Il2CppString* get_localized_string(Il2CppString* str)
 	{
-		il2cppstring* result;
+		const il2cppstring* result;
 
 		auto hash = std::hash<il2cppstring>{}(str->chars);
 
 		if (local::localify_text(hash, &result))
 		{
-			return il2cpp_string_new_utf16(result->data(), result->size());
+			return il2cpp_string_new16(result->data());
 		}
 
 		if (config::enable_logger && !any_of(str_list.begin(), str_list.end(), [hash](size_t hash1) { return hash1 == hash; }))
@@ -202,7 +201,7 @@ namespace local
 		return str;
 	}
 
-	static const char* get_localized_string(const char* str)
+	const char* get_localized_string(const char* str)
 	{
 		if (!str)
 		{
@@ -211,7 +210,7 @@ namespace local
 
 		il2cppstring u16str = u8_il2cpp(str);
 
-		il2cppstring* result;
+		const il2cppstring* result;
 
 		auto hash = std::hash<il2cppstring>{}(u16str);
 

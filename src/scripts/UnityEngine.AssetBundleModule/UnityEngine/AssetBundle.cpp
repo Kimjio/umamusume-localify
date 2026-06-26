@@ -20,25 +20,17 @@ using namespace msgpack11;
 
 namespace
 {
-	void* LoadFromFile_Internal_addr = nullptr;
-	void* LoadFromFile_Internal_orig = nullptr;
+	Il2CppMethodPointer LoadFromFile_Internal_addr = nullptr;
 
-	void* LoadFromStreamInternal_addr = nullptr;
-	void* LoadFromStreamInternal_orig = nullptr;
+	Il2CppMethodPointer LoadAsset_Internal_addr = nullptr;
 
-	void* LoadAsset_Internal_addr = nullptr;
-	void* LoadAsset_Internal_orig = nullptr;
+	Il2CppMethodPointer LoadAssetAsync_Internal_addr = nullptr;
 
-	void* LoadAssetAsync_Internal_addr = nullptr;
-	void* LoadAssetAsync_Internal_orig = nullptr;
+	Il2CppMethodPointer AssetBundleRequest_GetResult_addr = nullptr;
 
-	void* AssetBundleRequest_GetResult_addr = nullptr;
-	void* AssetBundleRequest_GetResult_orig = nullptr;
+	Il2CppMethodPointer GetAllAssetNames_addr = nullptr;
 
-	void* GetAllAssetNames_addr = nullptr;
-
-	void* Unload_addr = nullptr;
-	void* Unload_orig = nullptr;
+	Il2CppMethodPointer Unload_addr = nullptr;
 
 	Il2CppClass* AtlasReferenceClass;
 	Il2CppClass* GameObjectClass;
@@ -50,7 +42,7 @@ namespace
 	Il2CppClass* StoryRaceTextAssetClass;
 }
 
-static void ReplaceMaterialTextureProperty(Il2CppObject* material, Il2CppString* property)
+void ReplaceMaterialTextureProperty(Il2CppObject* material, Il2CppString* property)
 {
 	if (UnityEngine::Material{ material }.HasProperty(UnityEngine::Shader::PropertyToID(property)))
 	{
@@ -72,7 +64,7 @@ static void ReplaceMaterialTextureProperty(Il2CppObject* material, Il2CppString*
 	}
 }
 
-static void ReplaceMaterialTexture(Il2CppObject* material)
+void ReplaceMaterialTexture(Il2CppObject* material)
 {
 	if (!UnityEngine::Object::IsNativeObjectAlive(material))
 	{
@@ -96,7 +88,7 @@ static void ReplaceAssetHolderTextures(Il2CppObject* holder)
 		return;
 	}
 
-	auto objectList = il2cpp_class_get_method_from_name_type<Il2CppObject * (*)(Il2CppObject*)>(holder->klass, "get_ObjectList", 0)->methodPointer(holder);
+	auto objectList = il2cpp_symbols::get_method_pointer<Il2CppObject * (*)(Il2CppObject*)>(holder->klass, "get_ObjectList", 0)(holder);
 
 	FieldInfo* itemsField = il2cpp_class_get_field_from_name(objectList->klass, "_items");
 	Il2CppArraySize_t<Il2CppObject*>* arr;
@@ -148,11 +140,11 @@ static void ReplaceAnimateToUnityTextures(Il2CppObject* anRoot)
 		return;
 	}
 
-	auto meshParameterGroup = il2cpp_class_get_method_from_name_type<Il2CppObject * (*)(Il2CppObject*)>(anRoot->klass, "get_MeshParameterGroup", 0)->methodPointer(anRoot);
+	auto meshParameterGroup = il2cpp_symbols::get_method_pointer<Il2CppObject * (*)(Il2CppObject*)>(anRoot->klass, "get_MeshParameterGroup", 0)(anRoot);
 
 	if (meshParameterGroup)
 	{
-		auto meshParameterList = il2cpp_class_get_method_from_name_type<Il2CppObject * (*)(Il2CppObject*)>(meshParameterGroup->klass, "get_MeshParameterList", 0)->methodPointer(meshParameterGroup);
+		auto meshParameterList = il2cpp_symbols::get_method_pointer<Il2CppObject * (*)(Il2CppObject*)>(meshParameterGroup->klass, "get_MeshParameterList", 0)(meshParameterGroup);
 
 		if (meshParameterList)
 		{
@@ -168,7 +160,7 @@ static void ReplaceAnimateToUnityTextures(Il2CppObject* anRoot)
 
 					if (parameter)
 					{
-						auto meshParameterGroupList = il2cpp_class_get_method_from_name_type<Il2CppObject * (*)(Il2CppObject*)>(parameter->klass, "get_MeshParameterGroupList", 0)->methodPointer(parameter);
+						auto meshParameterGroupList = il2cpp_symbols::get_method_pointer<Il2CppObject * (*)(Il2CppObject*)>(parameter->klass, "get_MeshParameterGroupList", 0)(parameter);
 
 						if (meshParameterGroupList)
 						{
@@ -184,7 +176,7 @@ static void ReplaceAnimateToUnityTextures(Il2CppObject* anRoot)
 
 									if (group)
 									{
-										auto textureSetColor = il2cpp_class_get_method_from_name_type<Il2CppObject * (*)(Il2CppObject*)>(group->klass, "get_TextureSetColor", 0)->methodPointer(group);
+										auto textureSetColor = il2cpp_symbols::get_method_pointer<Il2CppObject * (*)(Il2CppObject*)>(group->klass, "get_TextureSetColor", 0)(group);
 
 										if (textureSetColor)
 										{
@@ -196,12 +188,12 @@ static void ReplaceAnimateToUnityTextures(Il2CppObject* anRoot)
 													GetRuntimeType("UnityEngine.CoreModule.dll", "UnityEngine", "Texture2D"));
 												if (newTexture)
 												{
-													il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, Il2CppObject*)>(group->klass, "set_TextureSetColor", 1)->methodPointer(group, newTexture);
+													il2cpp_symbols::get_method_pointer<void (*)(Il2CppObject*, Il2CppObject*)>(group->klass, "set_TextureSetColor", 1)(group, newTexture);
 												}
 											}
 										}
 
-										auto textureSetAlpha = il2cpp_class_get_method_from_name_type<Il2CppObject * (*)(Il2CppObject*)>(group->klass, "get_TextureSetAlpha", 0)->methodPointer(group);
+										auto textureSetAlpha = il2cpp_symbols::get_method_pointer<Il2CppObject * (*)(Il2CppObject*)>(group->klass, "get_TextureSetAlpha", 0)(group);
 
 										if (textureSetAlpha)
 										{
@@ -213,7 +205,7 @@ static void ReplaceAnimateToUnityTextures(Il2CppObject* anRoot)
 													GetRuntimeType("UnityEngine.CoreModule.dll", "UnityEngine", "Texture2D"));
 												if (newTexture)
 												{
-													il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, Il2CppObject*)>(group->klass, "set_TextureSetAlpha", 1)->methodPointer(group, newTexture);
+													il2cpp_symbols::get_method_pointer<void (*)(Il2CppObject*, Il2CppObject*)>(group->klass, "set_TextureSetAlpha", 1)(group, newTexture);
 												}
 											}
 										}
@@ -222,7 +214,7 @@ static void ReplaceAnimateToUnityTextures(Il2CppObject* anRoot)
 							}
 						}
 
-						auto customMeshInfoParameterList = il2cpp_class_get_method_from_name_type<Il2CppObject * (*)(Il2CppObject*)>(parameter->klass, "get_CustomMeshInfoParameterList", 0)->methodPointer(parameter);
+						auto customMeshInfoParameterList = il2cpp_symbols::get_method_pointer<Il2CppObject * (*)(Il2CppObject*)>(parameter->klass, "get_CustomMeshInfoParameterList", 0)(parameter);
 
 						if (customMeshInfoParameterList)
 						{
@@ -238,7 +230,7 @@ static void ReplaceAnimateToUnityTextures(Il2CppObject* anRoot)
 
 									if (customParameter)
 									{
-										auto textureColor = il2cpp_class_get_method_from_name_type<Il2CppObject * (*)(Il2CppObject*)>(customParameter->klass, "get_TextureColor", 0)->methodPointer(customParameter);
+										auto textureColor = il2cpp_symbols::get_method_pointer<Il2CppObject * (*)(Il2CppObject*)>(customParameter->klass, "get_TextureColor", 0)(customParameter);
 
 										if (textureColor)
 										{
@@ -250,12 +242,12 @@ static void ReplaceAnimateToUnityTextures(Il2CppObject* anRoot)
 													GetRuntimeType("UnityEngine.CoreModule.dll", "UnityEngine", "Texture2D"));
 												if (newTexture)
 												{
-													il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, Il2CppObject*)>(customParameter->klass, "set_TextureColor", 1)->methodPointer(customParameter, newTexture);
+													il2cpp_symbols::get_method_pointer<void (*)(Il2CppObject*, Il2CppObject*)>(customParameter->klass, "set_TextureColor", 1)(customParameter, newTexture);
 												}
 											}
 										}
 
-										auto textureAlpha = il2cpp_class_get_method_from_name_type<Il2CppObject * (*)(Il2CppObject*)>(customParameter->klass, "get_TextureAlpha", 0)->methodPointer(customParameter);
+										auto textureAlpha = il2cpp_symbols::get_method_pointer<Il2CppObject * (*)(Il2CppObject*)>(customParameter->klass, "get_TextureAlpha", 0)(customParameter);
 
 										if (textureAlpha)
 										{
@@ -267,7 +259,7 @@ static void ReplaceAnimateToUnityTextures(Il2CppObject* anRoot)
 													GetRuntimeType("UnityEngine.CoreModule.dll", "UnityEngine", "Texture2D"));
 												if (newTexture)
 												{
-													il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, Il2CppObject*)>(customParameter->klass, "set_TextureAlpha", 1)->methodPointer(customParameter, newTexture);
+													il2cpp_symbols::get_method_pointer<void (*)(Il2CppObject*, Il2CppObject*)>(customParameter->klass, "set_TextureAlpha", 1)(customParameter, newTexture);
 												}
 											}
 										}
@@ -289,12 +281,12 @@ static void ReplaceRendererTexture(Il2CppObject* renderer)
 		return;
 	}
 
-	auto count = il2cpp_resolve_icall_type<int (*)(Il2CppObject*)>("UnityEngine.Renderer::GetMaterialCount()")(renderer);
+	auto count = il2cpp_resolve_icall_type<int (*)(Il2CppObject*)>("UnityEngine.Renderer::GetMaterialCount")(renderer);
 
 	if (count > 0)
 	{
 		Il2CppArraySize_t<Il2CppObject*>* materials = il2cpp_array_new_type<Il2CppObject*>(il2cpp_symbols::get_class("UnityEngine.CoreModule.dll", "UnityEngine", "Material"), count);
-		il2cpp_resolve_icall_type<void (*)(Il2CppObject*, Il2CppArraySize_t<Il2CppObject*>*)>("UnityEngine.Renderer::CopySharedMaterialArray()")(renderer, materials);
+		il2cpp_resolve_icall_type<void (*)(Il2CppObject*, Il2CppArraySize_t<Il2CppObject*>*)>("UnityEngine.Renderer::CopySharedMaterialArray")(renderer, materials);
 
 		for (int i = 0; i < materials->max_length; i++)
 		{
@@ -316,11 +308,11 @@ static void ReplaceCutInTimelineControllerTextures(Il2CppObject* controller)
 		return;
 	}
 
-	auto data = il2cpp_class_get_method_from_name_type<Il2CppObject * (*)(Il2CppObject*)>(controller->klass, "get_Data", 0)->methodPointer(controller);
+	auto data = il2cpp_symbols::get_method_pointer<Il2CppObject * (*)(Il2CppObject*)>(controller->klass, "get_Data", 0)(controller);
 
 	if (data)
 	{
-		auto worksheetList = il2cpp_class_get_method_from_name_type<Il2CppObject * (*)(Il2CppObject*)>(data->klass, "GetWorkSheetList", 0)->methodPointer(data);
+		auto worksheetList = il2cpp_symbols::get_method_pointer<Il2CppObject * (*)(Il2CppObject*)>(data->klass, "GetWorkSheetList", 0)(data);
 
 		if (worksheetList)
 		{
@@ -361,7 +353,7 @@ static void ReplaceCutInTimelineControllerTextures(Il2CppObject* controller)
 
 										if (keys)
 										{
-											auto gameObject = il2cpp_class_get_method_from_name_type<Il2CppObject * (*)(Il2CppObject*)>(keys->klass, "get_Prefab", 0)->methodPointer(keys);
+											auto gameObject = il2cpp_symbols::get_method_pointer<Il2CppObject * (*)(Il2CppObject*)>(keys->klass, "get_Prefab", 0)(keys);
 
 											if (gameObject)
 											{
@@ -398,7 +390,7 @@ static void ReplaceCutInTimelineControllerTextures(Il2CppObject* controller)
 
 										if (keys)
 										{
-											auto gameObject = il2cpp_class_get_method_from_name_type<Il2CppObject * (*)(Il2CppObject*)>(keys->klass, "get_Prefab", 0)->methodPointer(keys);
+											auto gameObject = il2cpp_symbols::get_method_pointer<Il2CppObject * (*)(Il2CppObject*)>(keys->klass, "get_Prefab", 0)(keys);
 
 											if (gameObject)
 											{
@@ -423,17 +415,17 @@ static void ReplaceTransformTextures(Il2CppObject* transform)
 		return;
 	}
 
-	auto childCount = il2cpp_class_get_method_from_name_type<int(*)(Il2CppObject*)>(transform->klass, "get_childCount", 0)->methodPointer(transform);
+	auto childCount = il2cpp_symbols::get_method_pointer<int(*)(Il2CppObject*)>(transform->klass, "get_childCount", 0)(transform);
 
 	if (!childCount)
 	{
-		auto gameObject = il2cpp_class_get_method_from_name_type<Il2CppObject * (*)(Il2CppObject*)>(transform->klass, "get_gameObject", 0)->methodPointer(transform);
+		auto gameObject = il2cpp_symbols::get_method_pointer<Il2CppObject * (*)(Il2CppObject*)>(transform->klass, "get_gameObject", 0)(transform);
 		ReplaceGameObjectTextures(gameObject, true);
 	}
 
 	for (int i = 0; i < childCount; i++)
 	{
-		auto child = il2cpp_class_get_method_from_name_type<Il2CppObject * (*)(Il2CppObject*, int)>(transform->klass, "GetChild", 1)->methodPointer(transform, i);
+		auto child = il2cpp_symbols::get_method_pointer<Il2CppObject * (*)(Il2CppObject*, int)>(transform->klass, "GetChild", 1)(transform, i);
 
 		ReplaceTransformTextures(child);
 	}
@@ -518,7 +510,7 @@ static void ReplaceImageTexture(Il2CppObject* image)
 							GetRuntimeType("UnityEngine.CoreModule.dll", "UnityEngine", "Sprite"));
 						if (spriteNew)
 						{
-							il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, Il2CppObject*)>(image->klass, "set_sprite", 1)->methodPointer(image, spriteNew);
+							il2cpp_symbols::get_method_pointer<void (*)(Il2CppObject*, Il2CppObject*)>(image->klass, "set_sprite", 1)(image, spriteNew);
 						}
 					}
 				} while (false);
@@ -529,9 +521,9 @@ static void ReplaceImageTexture(Il2CppObject* image)
 
 static void ReplaceGameObjectTextures(Il2CppObject* gameObject, bool isChild)
 {
-	auto getComponent = il2cpp_class_get_method_from_name_type<Il2CppObject * (*)(Il2CppObject*, Il2CppType*)>(gameObject->klass, "GetComponent", 1)->methodPointer;
+	auto getComponent = il2cpp_symbols::get_method_pointer<Il2CppObject * (*)(Il2CppObject*, Il2CppType*)>(gameObject->klass, "GetComponent", 1);
 	auto getComponents =
-		il2cpp_class_get_method_from_name_type<Il2CppArraySize_t<Il2CppObject*> *(*)(Il2CppObject*, Il2CppType*, bool, bool, bool, bool, Il2CppObject*)>(gameObject->klass, "GetComponentsInternal", 6)->methodPointer;
+			il2cpp_symbols::get_method_pointer<Il2CppArraySize_t<Il2CppObject*> *(*)(Il2CppObject*, Il2CppType*, bool, bool, bool, bool, Il2CppObject*)>(gameObject->klass, "GetComponentsInternal", 6);
 
 	auto array = getComponents(gameObject, reinterpret_cast<Il2CppType*>(GetRuntimeType(
 		"UnityEngine.CoreModule.dll", "UnityEngine", "Object")), true, true, true, false, nullptr);
@@ -646,6 +638,7 @@ static void ReplaceAtlasReferenceSprites(Il2CppObject* atlasReference)
 
 	if (sprites)
 	{
+#ifdef _MSC_VER
 		il2cppstringstream pathStream(UnityEngine::Object::Name(atlasReference)->chars);
 		il2cppstring segment;
 		vector<il2cppstring> splited;
@@ -655,6 +648,17 @@ static void ReplaceAtlasReferenceSprites(Il2CppObject* atlasReference)
 		}
 
 		auto& atlasName = splited.front();
+#else
+		stringstream pathStream(il2cpp_u8(UnityEngine::Object::Name(atlasReference)->chars));
+		string segment;
+		vector<string> splited;
+		while (getline(pathStream, segment, '.'))
+		{
+			splited.emplace_back(segment);
+		}
+
+		auto atlasName = u8_il2cpp(splited.front());
+#endif
 
 		auto atlas = GetReplacementAtlasAssets(
 			il2cpp_string_new16((IL2CPP_STRING("_") + atlasName).data()),
@@ -665,7 +669,7 @@ static void ReplaceAtlasReferenceSprites(Il2CppObject* atlasReference)
 			return;
 		}
 
-		il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*)>(atlas->klass, "OnEnable", 0)->methodPointer(atlas);
+		il2cpp_symbols::get_method_pointer<void (*)(Il2CppObject*)>(atlas->klass, "OnEnable", 0)(atlas);
 
 		auto newSprites = il2cpp_array_new(il2cpp_symbols::get_class("UnityEngine.CoreModule.dll", "UnityEngine", "Sprite"), sprites->max_length);
 
@@ -677,7 +681,7 @@ static void ReplaceAtlasReferenceSprites(Il2CppObject* atlasReference)
 				auto uobject_name = UnityEngine::Object::Name(sprite);
 				if (!il2cppstring(uobject_name->chars).empty())
 				{
-					auto newSprite = il2cpp_class_get_method_from_name_type<Il2CppObject * (*)(Il2CppObject*, Il2CppString*)>(atlas->klass, "GetSprite", 1)->methodPointer(atlas, uobject_name);
+					auto newSprite = il2cpp_symbols::get_method_pointer<Il2CppObject * (*)(Il2CppObject*, Il2CppString*)>(atlas->klass, "GetSprite", 1)(atlas, uobject_name);
 
 					if (newSprite)
 					{
@@ -692,7 +696,7 @@ static void ReplaceAtlasReferenceSprites(Il2CppObject* atlasReference)
 		}
 
 		il2cpp_field_set_value(atlasReference, spritesField, newSprites);
-		il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*)>(atlasReference->klass, "OnEnable", 0)->methodPointer(atlasReference);
+		il2cpp_symbols::get_method_pointer<void (*)(Il2CppObject*)>(atlasReference->klass, "OnEnable", 0)(atlasReference);
 	}
 }
 
@@ -703,7 +707,7 @@ static void ReplaceFontTexture(Il2CppObject* font)
 		return;
 	}
 
-	auto material = il2cpp_class_get_method_from_name_type<Il2CppObject * (*)(Il2CppObject*)>(font->klass, "get_material", 0)->methodPointer(font);
+	auto material = il2cpp_symbols::get_method_pointer<Il2CppObject * (*)(Il2CppObject*)>(font->klass, "get_material", 0)(font);
 
 	if (material)
 	{
@@ -1015,11 +1019,11 @@ static void ReplaceRaceTextAssetData(Il2CppObject* raceTextAssetData)
 
 static Il2CppObject* LoadAsset_Internal_hook(Il2CppObject* self, Il2CppString* name, Il2CppReflectionType* type);
 
-static Il2CppObject* GetReplacementAssets(Il2CppString* name, Il2CppReflectionType* type)
+Il2CppObject* GetReplacementAssets(Il2CppString* name, Il2CppReflectionType* type)
 {
 	for (auto it = config::runtime::replaceAssets.begin(); it != config::runtime::replaceAssets.end(); it++)
 	{
-		auto assets = reinterpret_cast<decltype(LoadAsset_Internal_hook)*>(LoadAsset_Internal_orig)(*it, name, type);
+		auto assets = reinterpret_cast<decltype(LoadAsset_Internal_hook)*>(LoadAsset_Internal_addr)(*it, name, type);
 		if (assets)
 		{
 			return assets;
@@ -1029,11 +1033,11 @@ static Il2CppObject* GetReplacementAssets(Il2CppString* name, Il2CppReflectionTy
 	return nullptr;
 }
 
-static Il2CppObject* GetReplacementAtlasAssets(Il2CppString* name, Il2CppReflectionType* type)
+Il2CppObject* GetReplacementAtlasAssets(Il2CppString* name, Il2CppReflectionType* type)
 {
 	if (config::runtime::replaceAtlas)
 	{
-		auto assets = reinterpret_cast<decltype(LoadAsset_Internal_hook)*>(LoadAsset_Internal_orig)(config::runtime::replaceAtlas, name, type);
+		auto assets = reinterpret_cast<decltype(LoadAsset_Internal_hook)*>(LoadAsset_Internal_addr)(config::runtime::replaceAtlas, name, type);
 		if (assets)
 		{
 			return assets;
@@ -1049,7 +1053,7 @@ static Il2CppObject* GetReplacementAssetsAsync(Il2CppString* name, Il2CppReflect
 {
 	for (auto it = config::runtime::replaceAssets.begin(); it != config::runtime::replaceAssets.end(); it++)
 	{
-		auto assets = reinterpret_cast<decltype(LoadAssetAsync_Internal_hook)*>(LoadAssetAsync_Internal_orig)(*it, name, type);
+		auto assets = reinterpret_cast<decltype(LoadAssetAsync_Internal_hook)*>(LoadAssetAsync_Internal_addr)(*it, name, type);
 		if (assets)
 		{
 			return assets;
@@ -1061,6 +1065,7 @@ static Il2CppObject* GetReplacementAssetsAsync(Il2CppString* name, Il2CppReflect
 
 static Il2CppObject* LoadFromFile_Internal_hook(Il2CppString* path, uint32_t crc, uint64_t offset)
 {
+#ifdef _MSC_VER
 	il2cppstringstream pathStream(path->chars);
 	il2cppstring segment;
 	vector<il2cppstring> splited;
@@ -1070,25 +1075,32 @@ static Il2CppObject* LoadFromFile_Internal_hook(Il2CppString* path, uint32_t crc
 	}
 
 	auto& name = splited.back();
+#else
+	stringstream pathStream(il2cpp_u8(path->chars));
+	string segment;
+	vector<string> splited;
+	while (getline(pathStream, segment, '\\'))
+	{
+		splited.emplace_back(segment);
+	}
+
+	auto name = u8_il2cpp(splited.back());
+#endif
 	if (config::replace_assets.find(name) != config::replace_assets.end())
 	{
 		auto& replaceAsset = config::replace_assets.at(name);
-		auto assets = reinterpret_cast<decltype(LoadFromFile_Internal_hook)*>(LoadFromFile_Internal_orig)(il2cpp_string_new16(replaceAsset.path.data()), crc, offset);
+		auto assets = reinterpret_cast<decltype(LoadFromFile_Internal_hook)*>(LoadFromFile_Internal_addr)(il2cpp_string_new16(replaceAsset.path.data()), crc, offset);
 		replaceAsset.asset = assets;
 		return assets;
 	}
 
-	auto assetBundle = reinterpret_cast<decltype(LoadFromFile_Internal_hook)*>(LoadFromFile_Internal_orig)(path, crc, offset);
+	auto assetBundle = reinterpret_cast<decltype(LoadFromFile_Internal_hook)*>(LoadFromFile_Internal_addr)(path, crc, offset);
 	return assetBundle;
-}
-
-static Il2CppObject* LoadFromStreamInternal_hook(Il2CppObject* stream, uint32_t crc, uint32_t managedReadBufferSize)
-{
-	return reinterpret_cast<decltype(LoadFromStreamInternal_hook)*>(LoadFromStreamInternal_orig)(stream, crc, managedReadBufferSize);
 }
 
 static Il2CppObject* LoadAsset_Internal_hook(Il2CppObject* self, Il2CppString* name, Il2CppReflectionType* type)
 {
+#ifdef _MSC_VER
 	il2cppstringstream pathStream(name->chars);
 	il2cppstring segment;
 	vector<il2cppstring> splited;
@@ -1098,6 +1110,17 @@ static Il2CppObject* LoadAsset_Internal_hook(Il2CppObject* self, Il2CppString* n
 	}
 
 	auto& fileName = splited.back();
+#else
+	stringstream pathStream(il2cpp_u8(name->chars));
+	string segment;
+	vector<string> splited;
+	while (getline(pathStream, segment, '/'))
+	{
+		splited.emplace_back(segment);
+	}
+
+	auto fileName = u8_il2cpp(splited.back());
+#endif
 	if (find_if(config::runtime::replaceAssetNames.begin(), config::runtime::replaceAssetNames.end(), [fileName](const il2cppstring& item)
 		{
 			return item.find(fileName) != il2cppstring::npos;
@@ -1111,7 +1134,7 @@ static Il2CppObject* LoadAsset_Internal_hook(Il2CppObject* self, Il2CppString* n
 		}
 	}
 
-	auto obj = reinterpret_cast<decltype(LoadAsset_Internal_hook)*>(LoadAsset_Internal_orig)(self, name, type);
+	auto obj = reinterpret_cast<decltype(LoadAsset_Internal_hook)*>(LoadAsset_Internal_addr)(self, name, type);
 
 	if (!obj)
 	{
@@ -1158,6 +1181,7 @@ static Il2CppObject* LoadAsset_Internal_hook(Il2CppObject* self, Il2CppString* n
 
 static Il2CppObject* LoadAssetAsync_Internal_hook(Il2CppObject* self, Il2CppString* name, Il2CppReflectionType* type)
 {
+#ifdef _MSC_VER
 	il2cppstringstream pathStream(name->chars);
 	il2cppstring segment;
 	vector<il2cppstring> splited;
@@ -1166,6 +1190,16 @@ static Il2CppObject* LoadAssetAsync_Internal_hook(Il2CppObject* self, Il2CppStri
 		splited.emplace_back(segment);
 	}
 	auto& fileName = splited.back();
+#else
+	stringstream pathStream(il2cpp_u8(name->chars));
+	string segment;
+	vector<string> splited;
+	while (getline(pathStream, segment, '/'))
+	{
+		splited.emplace_back(segment);
+	}
+	auto fileName = u8_il2cpp(splited.back());
+#endif
 	if (find_if(config::runtime::replaceAssetNames.begin(), config::runtime::replaceAssetNames.end(), [fileName](const il2cppstring& item)
 		{
 			return item.find(fileName) != il2cppstring::npos;
@@ -1173,12 +1207,12 @@ static Il2CppObject* LoadAssetAsync_Internal_hook(Il2CppObject* self, Il2CppStri
 	{
 		return GetReplacementAssetsAsync(il2cpp_string_new16(fileName.data()), type);
 	}
-	return reinterpret_cast<decltype(LoadAssetAsync_Internal_hook)*>(LoadAssetAsync_Internal_orig)(self, name, type);
+	return reinterpret_cast<decltype(LoadAssetAsync_Internal_hook)*>(LoadAssetAsync_Internal_addr)(self, name, type);
 }
 
 static Il2CppObject* AssetBundleRequest_GetResult_hook(Il2CppObject* self)
 {
-	auto obj = reinterpret_cast<decltype(AssetBundleRequest_GetResult_hook)*>(AssetBundleRequest_GetResult_orig)(self);
+	auto obj = reinterpret_cast<decltype(AssetBundleRequest_GetResult_hook)*>(AssetBundleRequest_GetResult_addr)(self);
 
 	if (obj->klass == StoryTimelineDataClass)
 	{
@@ -1208,24 +1242,23 @@ static void Unload_hook(Il2CppObject* self, bool unloadAllLoadedObjects)
 	{
 		if (pair.second.asset == self)
 		{
-			reinterpret_cast<decltype(Unload_hook)*>(Unload_orig)(self, unloadAllLoadedObjects);
+			reinterpret_cast<decltype(Unload_hook)*>(Unload_addr)(self, unloadAllLoadedObjects);
 			pair.second.asset = nullptr;
 			return;
 		}
 	}
 
-	reinterpret_cast<decltype(Unload_hook)*>(Unload_orig)(self, unloadAllLoadedObjects);
+	reinterpret_cast<decltype(Unload_hook)*>(Unload_addr)(self, unloadAllLoadedObjects);
 }
 
 static void InitAddress()
 {
-	LoadFromFile_Internal_addr = il2cpp_resolve_icall("UnityEngine.AssetBundle::LoadFromFile_Internal(System.String,System.UInt32,System.UInt64)");
-	LoadFromStreamInternal_addr = il2cpp_resolve_icall("UnityEngine.AssetBundle::LoadFromStreamInternal()");
-	LoadAsset_Internal_addr = il2cpp_resolve_icall("UnityEngine.AssetBundle::LoadAsset_Internal(System.String,System.Type)");
-	LoadAssetAsync_Internal_addr = il2cpp_resolve_icall("UnityEngine.AssetBundle::LoadAssetAsync_Internal(System.String,System.Type)");
-	AssetBundleRequest_GetResult_addr = il2cpp_resolve_icall("UnityEngine.AssetBundleRequest::GetResult()");
-	GetAllAssetNames_addr = il2cpp_resolve_icall("UnityEngine.AssetBundle::GetAllAssetNames()");
-	Unload_addr = il2cpp_resolve_icall("UnityEngine.AssetBundle::Unload()");
+	LoadFromFile_Internal_addr = il2cpp_resolve_icall("UnityEngine.AssetBundle::LoadFromFile_Internal");
+	LoadAsset_Internal_addr = il2cpp_resolve_icall("UnityEngine.AssetBundle::LoadAsset_Internal");
+	LoadAssetAsync_Internal_addr = il2cpp_resolve_icall("UnityEngine.AssetBundle::LoadAssetAsync_Internal");
+	AssetBundleRequest_GetResult_addr = il2cpp_resolve_icall("UnityEngine.AssetBundleRequest::GetResult");
+	GetAllAssetNames_addr = il2cpp_resolve_icall("UnityEngine.AssetBundle::GetAllAssetNames");
+	Unload_addr = il2cpp_resolve_icall("UnityEngine.AssetBundle::Unload");
 
 	AtlasReferenceClass = il2cpp_symbols::get_class("Cute.UI.Assembly.dll", "Cute.UI", "AtlasReference");
 	GameObjectClass = il2cpp_symbols::get_class("UnityEngine.CoreModule.dll", "UnityEngine", "GameObject");
@@ -1238,12 +1271,11 @@ static void InitAddress()
 
 static void HookMethods()
 {
-	ADD_HOOK(LoadFromFile_Internal, "UnityEngine.AssetBundle::LoadFromFile_Internal at %p\n");
-	// ADD_HOOK(LoadFromStreamInternal, "UnityEngine.AssetBundle::LoadFromStreamInternal at %p\n");
-	ADD_HOOK(LoadAsset_Internal, "UnityEngine.AssetBundle::LoadAsset_Internal at %p\n");
-	ADD_HOOK(LoadAssetAsync_Internal, "UnityEngine.AssetBundle::LoadAssetAsync_Internal at %p\n");
-	ADD_HOOK(AssetBundleRequest_GetResult, "UnityEngine.AssetBundleRequest::GetResult at %p\n");
-	ADD_HOOK(Unload, "UnityEngine.AssetBundle::Unload at %p\n");
+	il2cpp_add_internal_call("UnityEngine.AssetBundle::LoadFromFile_Internal", reinterpret_cast<Il2CppMethodPointer>(LoadFromFile_Internal_hook));
+	il2cpp_add_internal_call("UnityEngine.AssetBundle::LoadAsset_Internal", reinterpret_cast<Il2CppMethodPointer>(LoadAsset_Internal_hook));
+	il2cpp_add_internal_call("UnityEngine.AssetBundle::LoadAssetAsync_Internal", reinterpret_cast<Il2CppMethodPointer>(LoadAssetAsync_Internal_hook));
+	il2cpp_add_internal_call("UnityEngine.AssetBundleRequest::GetResult", reinterpret_cast<Il2CppMethodPointer>(AssetBundleRequest_GetResult_hook));
+	il2cpp_add_internal_call("UnityEngine.AssetBundle::Unload", reinterpret_cast<Il2CppMethodPointer>(Unload_hook));
 }
 
 STATIC
@@ -1256,18 +1288,18 @@ namespace UnityEngine
 {
 	AssetBundle AssetBundle::LoadFromFile(Il2CppString* path)
 	{
-		auto obj = reinterpret_cast<decltype(LoadFromFile_Internal_hook)*>(LoadFromFile_Internal_orig)(path, 0, 0);
+		auto obj = reinterpret_cast<decltype(LoadFromFile_Internal_hook)*>(LoadFromFile_Internal_addr)(path, 0, 0);
 		return AssetBundle{ obj };
 	}
 
 	Il2CppObject* AssetBundle::LoadAsset(Il2CppString* name, Il2CppReflectionType* runtimeType)
 	{
-		return reinterpret_cast<decltype(LoadAsset_Internal_hook)*>(LoadAsset_Internal_orig)(instance, name, runtimeType);
+		return reinterpret_cast<decltype(LoadAsset_Internal_hook)*>(LoadAsset_Internal_addr)(instance, name, runtimeType);
 	}
 
 	Il2CppObject* AssetBundle::LoadAssetAsync(Il2CppString* name, Il2CppReflectionType* runtimeType)
 	{
-		return reinterpret_cast<decltype(LoadAssetAsync_Internal_hook)*>(LoadAssetAsync_Internal_orig)(instance, name, runtimeType);
+		return reinterpret_cast<decltype(LoadAssetAsync_Internal_hook)*>(LoadAssetAsync_Internal_addr)(instance, name, runtimeType);
 	}
 
 	Il2CppArraySize_t<Il2CppString*>* AssetBundle::GetAllAssetNames()
@@ -1277,6 +1309,6 @@ namespace UnityEngine
 
 	void AssetBundle::Unload(bool unloadAllLoadedObjects)
 	{
-		reinterpret_cast<decltype(Unload_hook)*>(Unload_orig)(instance, unloadAllLoadedObjects);
+		reinterpret_cast<decltype(Unload_hook)*>(Unload_addr)(instance, unloadAllLoadedObjects);
 	}
 }

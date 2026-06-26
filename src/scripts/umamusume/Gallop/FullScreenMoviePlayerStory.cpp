@@ -6,7 +6,7 @@
 
 namespace
 {
-	void* FullScreenMoviePlayerStory_AdjustScreenSize_SingleMode_addr = nullptr;
+	Il2CppMethodPointer FullScreenMoviePlayerStory_AdjustScreenSize_SingleMode_addr = nullptr;
 	void* FullScreenMoviePlayerStory_AdjustScreenSize_SingleMode_orig = nullptr;
 }
 

@@ -6,7 +6,7 @@
 
 namespace
 {
-	void* LowResolutionCameraFrameBuffer_Initialize_addr = nullptr;
+	Il2CppMethodPointer LowResolutionCameraFrameBuffer_Initialize_addr = nullptr;
 	void* LowResolutionCameraFrameBuffer_Initialize_orig = nullptr;
 }
 

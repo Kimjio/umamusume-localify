@@ -14,7 +14,7 @@
 
 namespace
 {
-	void* DeviceOrientationGuide_Show_addr = nullptr;
+	Il2CppMethodPointer DeviceOrientationGuide_Show_addr = nullptr;
 	void* DeviceOrientationGuide_Show_orig = nullptr;
 }
 

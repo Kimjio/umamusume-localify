@@ -4,19 +4,19 @@
 
 namespace
 {
-	void* GallopUtil_LineHeadWrap_addr = nullptr;
+	Il2CppMethodPointer GallopUtil_LineHeadWrap_addr = nullptr;
 	void* GallopUtil_LineHeadWrap_orig = nullptr;
 
-	void* GallopUtil_StripColorTag_addr = nullptr;
+	Il2CppMethodPointer GallopUtil_StripColorTag_addr = nullptr;
 
-	void* GallopUtil_ConvertSymbolCode_addr = nullptr;
+	Il2CppMethodPointer GallopUtil_ConvertSymbolCode_addr = nullptr;
 
-	void* GallopUtil_IsWaveDash_addr = nullptr;
+	Il2CppMethodPointer GallopUtil_IsWaveDash_addr = nullptr;
 
-	void* GallopUtil_ConvertInputText_addr = nullptr;
+	Il2CppMethodPointer GallopUtil_ConvertInputText_addr = nullptr;
 	void* GallopUtil_ConvertInputText_orig = nullptr;
 
-	void* GallopUtil_ConvertInputText2_addr = nullptr;
+	Il2CppMethodPointer GallopUtil_ConvertInputText2_addr = nullptr;
 	void* GallopUtil_ConvertInputText2_orig = nullptr;
 }
 
@@ -86,14 +86,14 @@ namespace Gallop
 	{
 		srcText = Gallop::GallopUtil::StripColorTag(srcText);
 		auto stringInfo = il2cpp_object_new(il2cpp_symbols::get_class("mscorlib.dll", "System.Globalization", "StringInfo"));
-		il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, Il2CppString*)>(stringInfo->klass, ".ctor", 1)->methodPointer(stringInfo, srcText);
+		il2cpp_symbols::get_method_pointer<void (*)(Il2CppObject*, Il2CppString*)>(stringInfo->klass, ".ctor", 1)(stringInfo, srcText);
 
 		il2cppstring text = IL2CPP_STRING("");
 
-		int lengthInTextElements = il2cpp_class_get_method_from_name_type<int (*)(Il2CppObject*)>(stringInfo->klass, "get_LengthInTextElements", 0)->methodPointer(stringInfo);
+		int lengthInTextElements = il2cpp_symbols::get_method_pointer<int (*)(Il2CppObject*)>(stringInfo->klass, "get_LengthInTextElements", 0)(stringInfo);
 		for (int i = 0; i < lengthInTextElements; i++)
 		{
-			auto text2 = il2cpp_class_get_method_from_name_type<Il2CppString * (*)(Il2CppObject*, int, int)>(stringInfo->klass, "SubstringByTextElements", 2)->methodPointer(stringInfo, i, 1);
+			auto text2 = il2cpp_symbols::get_method_pointer<Il2CppString * (*)(Il2CppObject*, int, int)>(stringInfo->klass, "SubstringByTextElements", 2)(stringInfo, i, 1);
 			if (allowNewLine && (text2->chars == IL2CPP_STRING("\r"s)) || text2->chars == IL2CPP_STRING("\n"s))
 			{
 				text += text2->chars;

@@ -4,7 +4,7 @@
 
 namespace
 {
-	void* PartsCharaMessageBase_Awake_addr = nullptr;
+	Il2CppMethodPointer PartsCharaMessageBase_Awake_addr = nullptr;
 	void* PartsCharaMessageBase_Awake_orig = nullptr;
 }
 
@@ -24,7 +24,9 @@ static void InitAddress()
 
 static void HookMethods()
 {
+#ifdef _MSC_VER
 	ADD_HOOK(PartsCharaMessageBase_Awake, "Gallop.PartsCharaMessageBase::Awake at %p\n");
+#endif
 }
 
 STATIC

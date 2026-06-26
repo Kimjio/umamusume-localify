@@ -8,6 +8,8 @@ namespace Gallop
 	public:
 		int TextId();
 
+		void TextId(int value);
+
 		void FontColor(int value);
 
 		void FontColor(const Il2CppChar* value);

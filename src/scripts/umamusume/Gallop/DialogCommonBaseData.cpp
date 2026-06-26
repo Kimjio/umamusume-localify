@@ -19,7 +19,6 @@ static void InitAddress()
 	DialogCommonBaseData_ContentsObjectField = il2cpp_class_get_field_from_name(DialogCommonBaseData, "ContentsObject");
 }
 
-
 STATIC
 {
 	il2cpp_symbols::init_callbacks.emplace_back(InitAddress);

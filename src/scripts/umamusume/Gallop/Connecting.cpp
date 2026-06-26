@@ -1,3 +1,4 @@
+#ifdef _MSC_VER
 #include "../umamusume.hpp"
 #include "../../ScriptInternal.hpp"
 #include "Connecting.hpp"
@@ -6,10 +7,10 @@
 
 namespace
 {
-	void* Connecting_Show_addr = nullptr;
+	Il2CppMethodPointer Connecting_Show_addr = nullptr;
 	void* Connecting_Show_orig = nullptr;
 
-	void* Connecting_Hide_addr = nullptr;
+	Il2CppMethodPointer Connecting_Hide_addr = nullptr;
 	void* Connecting_Hide_orig = nullptr;
 }
 
@@ -55,3 +56,4 @@ namespace Gallop
 {
 
 }
+#endif

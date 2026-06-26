@@ -4,13 +4,13 @@
 
 namespace
 {
-	void* get_unityLogger = nullptr;
+	Il2CppMethodPointer get_unityLogger = nullptr;
 
-	void* Log_addr = nullptr;
+	Il2CppMethodPointer Log_addr = nullptr;
 
-	void* LogError_addr = nullptr;
+	Il2CppMethodPointer LogError_addr = nullptr;
 
-	void* LogWarning_addr = nullptr;
+	Il2CppMethodPointer LogWarning_addr = nullptr;
 }
 
 static void InitAddress()

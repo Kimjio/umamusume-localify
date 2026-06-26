@@ -1,3 +1,4 @@
+#ifdef _MSC_VER
 #include "../../umamusume.hpp"
 #include "scripts/ScriptInternal.hpp"
 #include "GallopStandaloneInputModule.hpp"
@@ -20,47 +21,47 @@ namespace
 
 	const MethodInfo* ExecuteEvents_ExecuteHierarchy = nullptr;
 
-	void* ExecuteEvents_get_scrollHandler_addr = nullptr;
+	Il2CppMethodPointer ExecuteEvents_get_scrollHandler_addr = nullptr;
 
-	void* PointerEventData_get_dragging_addr = nullptr;
+	Il2CppMethodPointer PointerEventData_get_dragging_addr = nullptr;
 
-	void* PointerEventData_set_position_addr = nullptr;
+	Il2CppMethodPointer PointerEventData_set_position_addr = nullptr;
 
-	void* PointerEventData_get_position_addr = nullptr;
+	Il2CppMethodPointer PointerEventData_get_position_addr = nullptr;
 
-	void* PointerEventData_get_pointerPressRaycast_addr = nullptr;
+	Il2CppMethodPointer PointerEventData_get_pointerPressRaycast_addr = nullptr;
 
-	void* PointerEventData_get_pressPosition_addr = nullptr;
+	Il2CppMethodPointer PointerEventData_get_pressPosition_addr = nullptr;
 
-	void* PointerEventData_set_pressPosition_addr = nullptr;
+	Il2CppMethodPointer PointerEventData_set_pressPosition_addr = nullptr;
 
-	void* PointerEventData_set_delta_addr = nullptr;
+	Il2CppMethodPointer PointerEventData_set_delta_addr = nullptr;
 
-	void* PointerEventData_set_pointerCurrentRaycast_addr = nullptr;
+	Il2CppMethodPointer PointerEventData_set_pointerCurrentRaycast_addr = nullptr;
 
-	void* PointerEventData_get_scrollDelta_addr = nullptr;
+	Il2CppMethodPointer PointerEventData_get_scrollDelta_addr = nullptr;
 
-	void* PointerEventData_set_scrollDelta_addr = nullptr;
+	Il2CppMethodPointer PointerEventData_set_scrollDelta_addr = nullptr;
 
-	void* GallopPointerInputModule_MouseState_GetButtonState_addr = nullptr;
+	Il2CppMethodPointer GallopPointerInputModule_MouseState_GetButtonState_addr = nullptr;
 
-	void* GallopPointerInputModule_ButtonState_get_eventData_addr = nullptr;
+	Il2CppMethodPointer GallopPointerInputModule_ButtonState_get_eventData_addr = nullptr;
 
-	void* LandscapeUIGraphicRaycaster_get_CameraType_addr = nullptr;
+	Il2CppMethodPointer LandscapeUIGraphicRaycaster_get_CameraType_addr = nullptr;
 
-	void* GallopStandaloneInputModule_AdjustSplitWindowTouchPos_addr = nullptr;
+	Il2CppMethodPointer GallopStandaloneInputModule_AdjustSplitWindowTouchPos_addr = nullptr;
 	void* GallopStandaloneInputModule_AdjustSplitWindowTouchPos_orig = nullptr;
 
-	void* GallopStandaloneInputModule_GetMousePointerEventData_addr = nullptr;
+	Il2CppMethodPointer GallopStandaloneInputModule_GetMousePointerEventData_addr = nullptr;
 
-	void* GallopStandaloneInputModule_ProcessMouseEvent_addr = nullptr;
+	Il2CppMethodPointer GallopStandaloneInputModule_ProcessMouseEvent_addr = nullptr;
 	void* GallopStandaloneInputModule_ProcessMouseEvent_orig = nullptr;
 
-	void* GallopStandaloneInputModule_ProcessMousePress_addr = nullptr;
+	Il2CppMethodPointer GallopStandaloneInputModule_ProcessMousePress_addr = nullptr;
 
-	void* GallopStandaloneInputModule_ProcessMove_addr = nullptr;
+	Il2CppMethodPointer GallopStandaloneInputModule_ProcessMove_addr = nullptr;
 
-	void* GallopStandaloneInputModule_ProcessDrag_addr = nullptr;
+	Il2CppMethodPointer GallopStandaloneInputModule_ProcessDrag_addr = nullptr;
 
 	FieldInfo* GallopStandaloneInputModule_pointerEventData = nullptr;
 	FieldInfo* GallopStandaloneInputModule_m_MousePosition = nullptr;
@@ -113,7 +114,7 @@ static void GallopStandaloneInputModule_ProcessMouseEvent_hook(Il2CppObject* sel
 	{
 		if (!Gallop::UIManager::IsLandscapeMode() || !Gallop::Screen::IsVertical())
 		{
-			UnityEngine::Vector2 pointerEventDataPosition = il2cpp_class_get_method_from_name_type<UnityEngine::Vector2(*)(Il2CppObject*)>(pointerEventData->klass, "get_position", 0)->methodPointer(pointerEventData);
+			UnityEngine::Vector2 pointerEventDataPosition = il2cpp_symbols::get_method_pointer<UnityEngine::Vector2(*)(Il2CppObject*)>(pointerEventData->klass, "get_position", 0)(pointerEventData);
 
 			reinterpret_cast<void (*)(Il2CppObject*, UnityEngine::Vector2)>(PointerEventData_set_position_addr)(buttonData, pointerEventDataPosition);
 		}
@@ -193,11 +194,11 @@ static void GallopStandaloneInputModule_ProcessMouseEvent_hook(Il2CppObject* sel
 
 	if (!UnityEngine::Mathf::Approximately(scrollDelta.sqrMagnitude(), 0.0f))
 	{
-		auto eventHandler = reinterpret_cast<Il2CppObject * (*)(Il2CppObject*, const MethodInfo*)>(ExecuteEvents_GetEventHandler->methodPointer)(CurrentRaycast.m_GameObject, ExecuteEvents_GetEventHandler);
+		auto eventHandler = reinterpret_cast<Il2CppObject * (*)(Il2CppObject*, const MethodInfo*)>(il2cpp_symbols::get_method_pointer(ExecuteEvents_GetEventHandler))(CurrentRaycast.m_GameObject, ExecuteEvents_GetEventHandler);
 
 		auto scrollHandler = reinterpret_cast<Il2CppObject * (*)()>(ExecuteEvents_get_scrollHandler_addr)();
 
-		reinterpret_cast<void (*)(Il2CppObject*, Il2CppObject*, Il2CppObject*, const MethodInfo*)>(ExecuteEvents_ExecuteHierarchy->methodPointer)(eventHandler, buttonData, scrollHandler, ExecuteEvents_ExecuteHierarchy);
+		reinterpret_cast<void (*)(Il2CppObject*, Il2CppObject*, Il2CppObject*, const MethodInfo*)>(il2cpp_symbols::get_method_pointer(ExecuteEvents_ExecuteHierarchy))(eventHandler, buttonData, scrollHandler, ExecuteEvents_ExecuteHierarchy);
 	}
 }
 
@@ -309,3 +310,4 @@ namespace UnityEngine::EventSystems
 		return value;
 	}
 }
+#endif

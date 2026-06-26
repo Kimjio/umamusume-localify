@@ -5,7 +5,7 @@
 
 namespace Gallop
 {
-	class DialogInnerBase abstract : public UnityEngine::MonoBehaviour
+	class DialogInnerBase : public UnityEngine::MonoBehaviour
 	{
 	public:
 		using MonoBehaviour::MonoBehaviour;

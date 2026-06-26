@@ -6,7 +6,7 @@
 
 namespace
 {
-	void* StorySceneController_UpdateFovFactor_addr = nullptr;
+	Il2CppMethodPointer StorySceneController_UpdateFovFactor_addr = nullptr;
 	void* StorySceneController_UpdateFovFactor_orig = nullptr;
 }
 

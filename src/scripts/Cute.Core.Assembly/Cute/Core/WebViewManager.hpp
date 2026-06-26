@@ -5,8 +5,10 @@
 
 #include <unordered_map>
 
+#ifdef _MSC_VER
 #include <WebView2.h>
 #include <wil/com.h>
+#endif
 
 namespace Cute::Core
 {
@@ -14,8 +16,9 @@ namespace Cute::Core
 	{
 	public:
 		static WebViewManager Instance();
-
+#ifdef _MSC_VER
 		static wil::com_ptr<ICoreWebView2Controller> webviewController;
+#endif
 
 		static unordered_map<il2cppstring, il2cppstring> customFontMap;
 

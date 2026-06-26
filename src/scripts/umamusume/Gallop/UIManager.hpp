@@ -1,6 +1,7 @@
 #pragma once
 #include "il2cpp/il2cpp_symbols.hpp"
 #include "MonoSingleton.hpp"
+#include "BGManager.hpp"
 #include "scripts/UnityEngine.CoreModule/UnityEngine/ScreenOrientation.hpp"
 #include "scripts/UnityEngine.CoreModule/UnityEngine/Vector2.hpp"
 
@@ -17,7 +18,7 @@ namespace Gallop
 
 		Il2CppObject* _uiCamera();
 
-		Il2CppObject* _bgManager();
+		BGManager _bgManager();
 
 		Il2CppObject* _uiToFrameBufferRenderCameraData();
 
@@ -41,17 +42,23 @@ namespace Gallop
 
 		Il2CppObject* CommonHeaderTitle();
 
+#ifdef _MSC_VER
 		Il2CppObject* LandscapeUIManager();
+#endif
 
 		void UITexture(Il2CppObject* value);
 
-		void ShowNotification(Il2CppString*);
+		void ShowNotification(Il2CppString* text);
 
 		void SetCameraSizeByOrientation(ScreenOrientation orientation);
 
 		void CheckUIToFrameBufferBlitInstance();
 
+		void SetupSafeArea();
+
 		void AdjustSafeArea();
+
+        static void UpdateCanvasScaler(Il2CppObject* canvasScaler);
 
 		void AdjustMissionClearContentsRootRect();
 

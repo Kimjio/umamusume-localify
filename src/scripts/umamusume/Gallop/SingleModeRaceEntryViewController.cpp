@@ -9,7 +9,7 @@
 
 namespace
 {
-	void* SingleModeRaceEntryViewController_SetupBottomButtons_addr = nullptr;
+	Il2CppMethodPointer SingleModeRaceEntryViewController_SetupBottomButtons_addr = nullptr;
 	void* SingleModeRaceEntryViewController_SetupBottomButtons_orig = nullptr;
 }
 
@@ -23,14 +23,14 @@ static void SingleModeRaceEntryViewController_SetupBottomButtons_hook(Il2CppObje
 		Il2CppObject* _view;
 		il2cpp_field_get_value(self, _viewField, &_view);
 
-		auto ReserveListButton = il2cpp_class_get_method_from_name_type<Il2CppObject * (*)(Il2CppObject*)>(_view->klass, "get_ReserveListButton", 0)->methodPointer(_view);
+		auto ReserveListButton = il2cpp_symbols::get_method_pointer<Il2CppObject * (*)(Il2CppObject*)>(_view->klass, "get_ReserveListButton", 0)(_view);
 
 		UnityEngine::MonoBehaviour(ReserveListButton).gameObject().SetActive(true);
 
-		il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, Il2CppDelegate*)>(ReserveListButton->klass, "SetOnClick", 1)->methodPointer(ReserveListButton,
+		il2cpp_symbols::get_method_pointer<void (*)(Il2CppObject*, Il2CppDelegate*)>(ReserveListButton->klass, "SetOnClick", 1)(ReserveListButton,
 			&CreateUnityAction(self, *[](Il2CppObject* self)
 				{
-					il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*)>(self->klass, "OnClickReserveListButton", 0)->methodPointer(self);
+					il2cpp_symbols::get_method_pointer<void (*)(Il2CppObject*)>(self->klass, "OnClickReserveListButton", 0)(self);
 				})->delegate);
 	}
 }
