@@ -487,10 +487,6 @@ if (document.HasMember(IL2CPP_STRING(_name_)) && document[IL2CPP_STRING(_name_)]
 
 			GetValue("useThirdPartyNews", Bool, use_third_party_news);
 
-#ifdef EXPERIMENTS
-			GetValue("unlockLiveChara", Bool, unlock_live_chara);
-#endif
-
 			GetValue("notificationTp", Bool, notification_tp);
 
 			GetValue("notificationRp", Bool, notification_rp);
@@ -502,6 +498,15 @@ if (document.HasMember(IL2CPP_STRING(_name_)) && document[IL2CPP_STRING(_name_)]
 			GetValue("taskbarShowProgressOnConnecting", Bool, taskbar_show_progress_on_connecting);
 
 			GetValue("decryptManifestDB", Bool, decrypt_manifest_db);
+
+#ifdef EXPERIMENTS
+			GetValue("unlockLiveChara", Bool, unlock_live_chara);
+
+			if (unlock_live_chara)
+			{
+				decrypt_manifest_db = true;
+			}
+#endif
 
 			GetValue("msgpackNotifier", Bool, msgpack_notifier);
 

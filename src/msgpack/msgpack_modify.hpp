@@ -222,7 +222,7 @@ namespace MsgPackModify
 				{
 					MsgPack::object object = parsed.object_items();
 
-					if (object["live_theater_save_info"].is_object())
+					if (object.contains("live_theater_save_info") && object["live_theater_save_info"].is_object())
 					{
 						MsgPack::object info = object["live_theater_save_info"].object_items();
 						auto music_id = info["music_id"].int32_value();
@@ -481,11 +481,11 @@ namespace MsgPackModify
 						object["data_headers"] = header;
 					}*/
 
-					if (object["data"].is_object())
+					if (object.contains("data") && object["data"].is_object())
 					{
 						MsgPack::object data = object["data"].object_items();
 
-						if (data["common_define"].is_object())
+						if (data.contains("common_define") && data["common_define"].is_object())
 						{
 							if (!MsgPackModify::masterDB)
 							{
@@ -542,7 +542,7 @@ namespace MsgPackModify
 							data["login_bonus_list"] = login_bonus_list;
 						}*/
 
-						if (data["chara_list"].is_array())
+						if (data.contains("chara_list") && data["chara_list"].is_array())
 						{
 							MsgPack::array chara_list = data["chara_list"].array_items();
 
@@ -595,7 +595,7 @@ namespace MsgPackModify
 							charaList = charas;
 						}
 
-						if (data["chara_profile_array"].is_array())
+						if (data.contains("chara_profile_array") && data["chara_profile_array"].is_array())
 						{
 							MsgPack::array chara_profile_array = data["chara_profile_array"].array_items();
 
@@ -642,7 +642,7 @@ namespace MsgPackModify
 							data["chara_profile_array"] = chara_profiles;
 						}
 
-						if (data["release_card_array"].is_array())
+						if (data.contains("release_card_array") && data["release_card_array"].is_array())
 						{
 							MsgPack::array release_card_array = data["release_card_array"].array_items();
 
@@ -672,7 +672,7 @@ namespace MsgPackModify
 							data["release_card_array"] = release_cards;
 						}
 
-						if (data["card_list"].is_array())
+						if (data.contains("card_list") && data["card_list"].is_array())
 						{
 							MsgPack::array card_list = data["card_list"].array_items();
 
@@ -727,7 +727,7 @@ namespace MsgPackModify
 							data["card_list"] = cards;
 						}
 
-						if (data["cloth_list"].is_array())
+						if (data.contains("cloth_list") && data["cloth_list"].is_array())
 						{
 							MsgPack::array cloth_list = data["cloth_list"].array_items();
 
@@ -753,7 +753,7 @@ namespace MsgPackModify
 							data["cloth_list"] = dresses;
 						}
 
-						if (data["music_list"].is_array())
+						if (data.contains("music_list") && data["music_list"].is_array())
 						{
 							MsgPack::array music_list = data["music_list"].array_items();
 
@@ -785,7 +785,7 @@ namespace MsgPackModify
 							data["music_list"] = musicIds;
 						}
 
-						if (data["live_theater_save_info_array"].is_array())
+						if (data.contains("live_theater_save_info_array") && data["live_theater_save_info_array"].is_array())
 						{
 							MsgPack::array live_theater_save_info_array = data["live_theater_save_info_array"].array_items();
 
@@ -828,7 +828,7 @@ namespace MsgPackModify
 							data["circle_item_request_array"] = MsgPack::array{};
 						}*/
 
-						object["data"] = data;
+						// object["data"] = data;
 					}
 
 					MsgPack{ object }.dump(dump);
