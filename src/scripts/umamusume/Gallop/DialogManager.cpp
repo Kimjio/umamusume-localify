@@ -41,7 +41,15 @@ static Il2CppObject* PushDialog_hook(Il2CppObject* data)
 			}
 		}
 	}
-	return reinterpret_cast<decltype(PushDialog_hook)*>(PushDialog_orig)(data);
+	
+	auto dialog = reinterpret_cast<decltype(PushDialog_hook)*>(PushDialog_orig)(data);
+
+	if (config::freeform_window && Gallop::Screen::IsLandscapeMode())
+	{
+		il2cpp_symbols::get_method_pointer<void (*)(Il2CppObject*, float)>(dialog->klass, "SetContentsRootLocalScale", 1)(dialog, 1.f);
+	}
+
+	return dialog;
 }
 
 static void InitAddress()

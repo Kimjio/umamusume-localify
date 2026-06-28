@@ -194,8 +194,9 @@ BOOL WINAPI DllMain(HINSTANCE, DWORD reason, LPVOID)
 
 		// check name
 		if (module_path.filename() != "umamusume.exe" && 
-			module_path.filename() != "UmamusumePrettyDerby_Jpn.exe" && 
-			module_path.filename() != "UmamusumePrettyDerby.exe")
+			module_path.filename() != "UmamusumePrettyDerby_Jpn.exe" &&
+			module_path.filename() != "UmamusumePrettyDerby.exe" &&
+			module_path.filename() != "komoeumamusume.exe")
 		{
 			return TRUE;
 		}
@@ -270,6 +271,10 @@ BOOL WINAPI DllMain(HINSTANCE, DWORD reason, LPVOID)
 			}
 
 		}
+		else if (company == L"KomoeGame")
+		{
+			Game::CurrentGameRegion = Game::Region::TWN;
+		}
 		else
 		{
 			if (product == L"UmamusumePrettyDerby_Jpn")
@@ -289,7 +294,8 @@ BOOL WINAPI DllMain(HINSTANCE, DWORD reason, LPVOID)
 		}
 
 		if (Game::CurrentGameRegion != Game::Region::JPN &&
-			Game::CurrentGameRegion != Game::Region::ENG)
+			Game::CurrentGameRegion != Game::Region::ENG &&
+			Game::CurrentGameRegion != Game::Region::TWN)
 		{
 			wstringstream subKeyStream;
 

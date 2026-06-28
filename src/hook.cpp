@@ -3600,6 +3600,10 @@ namespace
 		{
 			title = IL2CPP_STRING("Umamusume");
 		}
+		else if (Game::CurrentGameRegion == Game::Region::TWN)
+		{
+			title = IL2CPP_STRING("賽馬娘Pretty Derby");
+		}
 		else
 		{
 			title = IL2CPP_STRING("ウマ娘");
