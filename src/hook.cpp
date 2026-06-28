@@ -4103,7 +4103,6 @@ static LONG_PTR WINAPI SetWindowLongPtrW_hook(
 			bool isVirt = width < height;
 			Gallop::StandaloneWindowResize::IsVirt(isVirt);
 		}
-
 		return reinterpret_cast<LONG_PTR>(oldWndProcPtr);
 	}
 
@@ -4137,38 +4136,100 @@ static LONG_PTR WINAPI SetWindowLongPtrA_hook(
 			bool isVirt = width < height;
 			Gallop::StandaloneWindowResize::IsVirt(isVirt);
 		}
-
 		return reinterpret_cast<LONG_PTR>(oldWndProcPtr);
 	}
 
 	return reinterpret_cast<decltype(SetWindowLongPtrA)*>(SetWindowLongPtrA_orig)(hWnd, nIndex, dwNewLong);
 }
 
-void* ShowWindow_orig = nullptr;
-static BOOL WINAPI ShowWindow_hook(
-	_In_ HWND hWnd,
-	_In_ int nCmdShow)
+void* RegisterClassExW_orig = nullptr;
+static ATOM
+WINAPI
+RegisterClassExW_hook(
+	_In_ CONST WNDCLASSEXW* lpwcx)
 {
-	if (!currentHWnd)
+	if (lpwcx && wcsstr(lpwcx->lpszClassName, L"UnityWndClass"))
+	{
+		oldWndProcPtr = lpwcx->lpfnWndProc;
+		const_cast<WNDCLASSEXW*>(lpwcx)->lpfnWndProc = WndProc;
+
+		MH_DisableHook(RegisterClassExW);
+		MH_RemoveHook(RegisterClassExW);
+
+		return RegisterClassExW(lpwcx);
+	}
+
+	return reinterpret_cast<decltype(RegisterClassExW)*>(RegisterClassExW_orig)(lpwcx);
+}
+
+constexpr uint16_t UNITY_BATCH_CLASS_ID = 0xC03e;
+
+void* CreateWindowExW_orig = nullptr;
+static
+HWND
+WINAPI
+CreateWindowExW_hook(
+	_In_ DWORD dwExStyle,
+	_In_opt_ LPCWSTR lpClassName,
+	_In_opt_ LPCWSTR lpWindowName,
+	_In_ DWORD dwStyle,
+	_In_ int X,
+	_In_ int Y,
+	_In_ int nWidth,
+	_In_ int nHeight,
+	_In_opt_ HWND hWndParent,
+	_In_opt_ HMENU hMenu,
+	_In_opt_ HINSTANCE hInstance,
+	_In_opt_ LPVOID lpParam)
+{
+	bool isUnity = false;
+	
+	if (reinterpret_cast<uint16_t>(lpClassName) != UNITY_BATCH_CLASS_ID)
+	{
+		isUnity = wcscmp(lpClassName, L"UnityWndClass") == 0;
+	}
+
+	if (isUnity)
 	{
 		if (!config::custom_title_name.empty())
 		{
-			SetWindowTextW(hWnd, config::custom_title_name.data());
+			lpWindowName = config::custom_title_name.data();
 		}
+	}
+
+	auto hWnd = reinterpret_cast<decltype(CreateWindowExW)*>(CreateWindowExW_orig)(dwExStyle, lpClassName, lpWindowName, dwStyle, X, Y, nWidth, nHeight, hWndParent, hMenu, hInstance, lpParam);
+
+	if (isUnity)
+	{
+		currentHWnd = hWnd;
 
 		if (config::has_json_parse_error)
 		{
 			MessageBoxW(hWnd, config::json_parse_error_msg.data(), L"Umamusume Localify", MB_OK | MB_ICONWARNING);
 		}
 
-		oldWndProcPtr = reinterpret_cast<WNDPROC>(SetWindowLongPtrW(hWnd, GWLP_WNDPROC, reinterpret_cast<LONG_PTR>(WndProc)));
-
-		currentHWnd = hWnd;
+		MH_DisableHook(CreateWindowExW);
+		MH_RemoveHook(CreateWindowExW);
 	}
 
-	MH_DisableHook(ShowWindow);
-	MH_RemoveHook(ShowWindow);
-	return ShowWindow(hWnd, nCmdShow);
+	return hWnd;
+}
+
+void* SetWindowTextW_orig = nullptr;
+static BOOL
+WINAPI
+SetWindowTextW_hook(
+	_In_ HWND hWnd,
+	_In_opt_ LPCWSTR lpString)
+{
+	if (hWnd == currentHWnd)
+	{
+		MH_DisableHook(SetWindowTextW);
+		MH_RemoveHook(SetWindowTextW);
+		return TRUE;
+	}
+
+	return reinterpret_cast<decltype(SetWindowTextW)*>(SetWindowTextW_orig)(hWnd, lpString);
 }
 
 void* HttpSendRequestW_orig = nullptr;
@@ -4231,7 +4292,7 @@ static BOOL InternetCrackUrlW_hook(
 	return reinterpret_cast<decltype(InternetCrackUrlW_hook)*>(InternetCrackUrlW_orig)(lpszUrl, dwUrlLength, dwFlags, lpUrlComponents);
 }
 
-constexpr int MAX_DLL_COUNT = 21;
+constexpr int MAX_DLL_COUNT = 22;
 constexpr int MAX_ROOT_FILE_COUNT = 9 + /* self (.) */1 + /* parent (..) */1;
 
 HANDLE currentFindHandle;
@@ -4595,8 +4656,14 @@ void init_hook(filesystem::path module_path)
 	MH_CreateHook(SetWindowLongPtrA, SetWindowLongPtrA_hook, &SetWindowLongPtrA_orig);
 	MH_EnableHook(SetWindowLongPtrA);
 
-	MH_CreateHook(ShowWindow, ShowWindow_hook, &ShowWindow_orig);
-	MH_EnableHook(ShowWindow);
+	MH_CreateHook(RegisterClassExW, RegisterClassExW_hook, &RegisterClassExW_orig);
+	MH_EnableHook(RegisterClassExW);
+
+	MH_CreateHook(CreateWindowExW, CreateWindowExW_hook, &CreateWindowExW_orig);
+	MH_EnableHook(CreateWindowExW);
+
+	MH_CreateHook(SetWindowTextW, SetWindowTextW_hook, &SetWindowTextW_orig);
+	MH_EnableHook(SetWindowTextW);
 }
 
 void uninit_hook()

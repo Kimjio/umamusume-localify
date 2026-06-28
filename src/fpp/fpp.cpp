@@ -179,7 +179,7 @@ void fpp::ChangeGameAssemblyProtection(HMODULE module)
 
 			range.emplace_back(make_pair(start + section.SizeOfRawData, reinterpret_cast<const char*>(section.Name)));
 
-			if (range.back().second == "il2cpp"s)
+			if (range.back().second == ".rdata"s)
 			{
 				break;
 			}
