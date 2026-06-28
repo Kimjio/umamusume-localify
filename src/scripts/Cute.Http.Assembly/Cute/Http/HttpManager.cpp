@@ -23,7 +23,7 @@ static void HttpManager_Cute_Core_IUpdatable_FastUpdate_hook(Il2CppObject* self)
 		float timeOutTime;
 		il2cpp_field_get_value(self, timeOutTimeField, &timeOutTime);
 
-		auto isDone = il2cpp_symbols::get_method_pointer<bool (*)(Il2CppObject*)>(currentOperation->klass, "isDone", 0)(currentOperation);
+		auto isDone = il2cpp_symbols::get_method_pointer<bool (*)(Il2CppObject*)>(currentOperation->klass, "get_isDone", 0)(currentOperation);
 		auto realtimeSinceStartup = il2cpp_resolve_icall_type<float (*)()>("UnityEngine.Time::get_realtimeSinceStartup")();
 
 		if (!isDone && timeOutTime <= realtimeSinceStartup)

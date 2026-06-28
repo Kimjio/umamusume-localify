@@ -3875,6 +3875,9 @@ namespace
 
 				if (sceneName == IL2CPP_STRING("Title"))
 				{
+					il2cpp_symbols::get_method_pointer<void (*)(int)>("umamusume.dll", "Gallop", "MainGameInitializer", "SetBootProgress", 1)(0);
+					il2cpp_symbols::get_method_pointer<void (*)(float, int)>("umamusume.dll", "Gallop", "MainGameInitializer", "SetBootSubProgress", 2)(0, 0);
+
 					TaskbarManager::SetProgressValue(0, 0);
 					TaskbarManager::SetProgressState(TBPF_NOPROGRESS);
 				}
