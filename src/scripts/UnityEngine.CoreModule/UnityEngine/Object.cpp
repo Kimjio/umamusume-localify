@@ -12,6 +12,7 @@
 #include "scripts/umamusume/Gallop/DialogManager.hpp"
 #include "scripts/umamusume/Gallop/TextCommon.hpp"
 #include "scripts/umamusume/Gallop/Localize.hpp"
+#include "scripts/umamusume/Gallop/Live/Director.hpp"
 
 #include "masterdb/masterdb.hpp"
 
@@ -296,10 +297,10 @@ static Il2CppObject* Internal_CloneSingleWithParent_hook(Il2CppObject* data, Il2
 	{
 		auto updateScreenReferenceSize = CreateDelegateWithClass(il2cpp_symbols::get_class("DOTween.dll", "DG.Tweening", "TweenCallback"), cloned, *([](Il2CppObject* self)
 			{
-				auto director = GetSingletonInstance(il2cpp_symbols::get_class("umamusume.dll", "Gallop.Live", "Director"));
+				auto director = Gallop::Live::Director::Instance();
 				if (director)
 				{
-					auto ChampionsTextControllerField = il2cpp_class_get_field_from_name(director->klass, "ChampionsTextController");
+					auto ChampionsTextControllerField = il2cpp_class_get_field_from_name(director, "ChampionsTextController");
 					Il2CppObject* ChampionsTextController;
 					il2cpp_field_get_value(director, ChampionsTextControllerField, &ChampionsTextController);
 
@@ -352,7 +353,7 @@ static Il2CppObject* Internal_CloneSingleWithParent_hook(Il2CppObject* data, Il2
 						il2cpp_symbols::get_method_pointer<void (*)(Il2CppObject*, UnityEngine::Vector2)>(root->klass, "SetScreenReferenceSize", 1)(root, UnityEngine::Vector2{ width, height });
 					}
 
-					auto liveFlashController = il2cpp_symbols::get_method_pointer<Il2CppObject * (*)(Il2CppObject*)>(director->klass, "get_LiveFlashController", 0)(director);
+					auto liveFlashController = il2cpp_symbols::get_method_pointer<Il2CppObject * (*)(Il2CppObject*)>(director, "get_LiveFlashController", 0)(director);
 
 					if (liveFlashController)
 					{

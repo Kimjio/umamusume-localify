@@ -77,6 +77,7 @@
 #include "scripts/umamusume/Gallop/FrameRateController.hpp"
 #include "scripts/umamusume/Gallop/GameSystem.hpp"
 #include "scripts/umamusume/Gallop/GraphicSettings.hpp"
+#include "scripts/umamusume/Gallop/Live/Director.hpp"
 #ifdef _MSC_VER
 #include "scripts/umamusume/Gallop/StandaloneWindowResize.hpp"
 #endif
@@ -1158,8 +1159,10 @@ namespace
 	{
 		try
 		{
-			auto gameSystem = Gallop::GameSystem::Instance();
-			il2cpp_symbols::get_method_pointer<void (*)(Il2CppObject*, Il2CppDelegate*)>("umamusume.dll", "Gallop", "MonoBehaviourExtension", "WaitForEndFrame", 2)(gameSystem, CreateDelegateStatic(fn));
+			if (auto gameSystem = Gallop::GameSystem::Instance())
+			{
+				il2cpp_symbols::get_method_pointer<void (*)(Il2CppObject*, Il2CppDelegate*)>("umamusume.dll", "Gallop", "MonoBehaviourExtension", "WaitForEndFrame", 2)(gameSystem, CreateDelegateStatic(fn));
+			}
 		}
 		catch (const Il2CppExceptionWrapper& e)
 		{
@@ -1173,8 +1176,10 @@ namespace
 		try
 		{
 			auto delegate = &CreateUnityAction(target, fn)->delegate;
-			auto gameSystem = Gallop::GameSystem::Instance();
-			il2cpp_symbols::get_method_pointer<void (*)(Il2CppObject*, Il2CppDelegate*)>("umamusume.dll", "Gallop", "MonoBehaviourExtension", "WaitForEndFrame", 2)(gameSystem, delegate);
+			if (auto gameSystem = Gallop::GameSystem::Instance())
+			{
+				il2cpp_symbols::get_method_pointer<void (*)(Il2CppObject*, Il2CppDelegate*)>("umamusume.dll", "Gallop", "MonoBehaviourExtension", "WaitForEndFrame", 2)(gameSystem, delegate);
+			}
 		}
 		catch (const Il2CppExceptionWrapper& e)
 		{
@@ -1385,12 +1390,12 @@ namespace
 									raceCameraManager.SetupOrientation(isPortrait ? Gallop::LowResolutionCameraUtil::DrawDirection::Portrait : Gallop::LowResolutionCameraUtil::DrawDirection::Landscape);
 								}
 
-								auto director = GetSingletonInstance(il2cpp_symbols::get_class("umamusume.dll", "Gallop.Live", "Director"));
+								auto director = Gallop::Live::Director::Instance();
 								if (director)
 								{
-									il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, int)>(director->klass, "SetupOrientation", 1)->methodPointer(director, isPortrait ? 2 : 1);
+									il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, int)>(director, "SetupOrientation", 1)->methodPointer(director, isPortrait ? 2 : 1);
 
-									auto ChampionsTextControllerField = il2cpp_class_get_field_from_name(director->klass, "ChampionsTextController");
+									auto ChampionsTextControllerField = il2cpp_class_get_field_from_name(director, "ChampionsTextController");
 									Il2CppObject* ChampionsTextController;
 									il2cpp_field_get_value(director, ChampionsTextControllerField, &ChampionsTextController);
 
@@ -1429,7 +1434,7 @@ namespace
 									}
 
 
-									auto liveFlashController = il2cpp_class_get_method_from_name_type<Il2CppObject * (*)(Il2CppObject*)>(director->klass, "get_LiveFlashController", 0)->methodPointer(director);
+									auto liveFlashController = il2cpp_class_get_method_from_name_type<Il2CppObject * (*)(Il2CppObject*)>(director, "get_LiveFlashController", 0)->methodPointer(director);
 
 									if (liveFlashController)
 									{
@@ -1854,10 +1859,10 @@ namespace
 
 		if (wParam == VK_LEFT || wParam == VK_RIGHT)
 		{
-			auto director = GetSingletonInstance(il2cpp_symbols::get_class("umamusume.dll", "Gallop.Live", "Director"));
+			auto director = Gallop::Live::Director::Instance();
 			if (director)
 			{
-				auto LiveCurrentTime = il2cpp_class_get_method_from_name_type<float (*)(Il2CppObject*)>(director->klass, "get_LiveCurrentTime", 0)->methodPointer(director);
+				auto LiveCurrentTime = il2cpp_class_get_method_from_name_type<float (*)(Il2CppObject*)>(director, "get_LiveCurrentTime", 0)->methodPointer(director);
 
 				bool shiftKeyDown = GetKeyState(VK_SHIFT) < 0;
 				bool controlKeyDown = GetKeyState(VK_CONTROL) < 0;
@@ -1894,10 +1899,10 @@ namespace
 
 		if (wParam == VK_SPACE)
 		{
-			auto director = GetSingletonInstance(il2cpp_symbols::get_class("umamusume.dll", "Gallop.Live", "Director"));
+			auto director = Gallop::Live::Director::Instance();
 			if (director)
 			{
-				bool isPauseLive = il2cpp_class_get_method_from_name_type<bool (*)()>(director->klass, "IsPauseLive", 0)->methodPointer();
+				bool isPauseLive = il2cpp_class_get_method_from_name_type<bool (*)()>(director, "IsPauseLive", 0)->methodPointer();
 
 				auto controller = Gallop::SceneManager::Instance().GetCurrentViewController();
 				if (controller)
@@ -2919,23 +2924,24 @@ namespace
 
 		if ((uMsg == WM_EXITSIZEMOVE || uMsg == WM_SIZE) && config::character_system_text_caption)
 		{
-			WaitForEndOfFrame(*[]() {
-				auto callback = &CreateDelegateWithClassStatic(il2cpp_symbols::get_class("DOTween.dll", "DG.Tweening", "TweenCallback"), *([](void*)
-					{
-						auto sliderX = Localify::UIParts::GetOptionSlider("character_system_text_caption_position_x");
-						auto sliderY = Localify::UIParts::GetOptionSlider("character_system_text_caption_position_y");
-
-						if (sliderX && sliderY)
+			WaitForEndOfFrame(*[]()
+				{
+					auto callback = &CreateDelegateWithClassStatic(il2cpp_symbols::get_class("DOTween.dll", "DG.Tweening", "TweenCallback"), *([](void*)
 						{
-							Localify::NotificationManager::SetPosition(Localify::UIParts::GetOptionSliderValue(sliderX) / 10, Localify::UIParts::GetOptionSliderValue(sliderY) / 10);
-						}
-						else
-						{
-							Localify::NotificationManager::SetPosition(config::character_system_text_caption_position_x, config::character_system_text_caption_position_y);
-						}
-					}))->delegate;
+							auto sliderX = Localify::UIParts::GetOptionSlider("character_system_text_caption_position_x");
+							auto sliderY = Localify::UIParts::GetOptionSlider("character_system_text_caption_position_y");
 
-				il2cpp_symbols::get_method_pointer<Il2CppObject* (*)(float, Il2CppDelegate*, bool)>("DOTween.dll", "DG.Tweening", "DOVirtual", "DelayedCall", 3)(0.01, callback, true);
+							if (sliderX && sliderY)
+							{
+								Localify::NotificationManager::SetPosition(Localify::UIParts::GetOptionSliderValue(sliderX) / 10, Localify::UIParts::GetOptionSliderValue(sliderY) / 10);
+							}
+							else
+							{
+								Localify::NotificationManager::SetPosition(config::character_system_text_caption_position_x, config::character_system_text_caption_position_y);
+							}
+						}))->delegate;
+
+					il2cpp_symbols::get_method_pointer<Il2CppObject* (*)(float, Il2CppDelegate*, bool)>("DOTween.dll", "DG.Tweening", "DOVirtual", "DelayedCall", 3)(0.01, callback, true);
 				}
 			);
 		}
@@ -3205,14 +3211,14 @@ namespace
 	{
 		if (discord)
 		{
-			auto director = GetSingletonInstance(il2cpp_symbols::get_class("umamusume.dll", "Gallop.Live", "Director"));
+			auto director = Gallop::Live::Director::Instance();
 			if (director)
 			{
-				float currentTime = il2cpp_class_get_method_from_name_type<float (*)(Il2CppObject*)>(director->klass, "get_LiveCurrentTime", 0)->methodPointer(director);
-				float totalTime = il2cpp_class_get_method_from_name_type<float (*)(Il2CppObject*)>(director->klass, "get_LiveTotalTime", 0)->methodPointer(director);
+				float currentTime = il2cpp_class_get_method_from_name_type<float (*)(Il2CppObject*)>(director, "get_LiveCurrentTime", 0)->methodPointer(director);
+				float totalTime = il2cpp_class_get_method_from_name_type<float (*)(Il2CppObject*)>(director, "get_LiveTotalTime", 0)->methodPointer(director);
 				string name;
 
-				auto titleField = il2cpp_class_get_field_from_name(director->klass, "TitleController");
+				auto titleField = il2cpp_class_get_field_from_name(director, "TitleController");
 				Il2CppObject* title;
 				il2cpp_field_get_value(director, titleField, &title);
 				if (title)
@@ -3230,7 +3236,7 @@ namespace
 					}
 				}
 
-				auto songId = il2cpp_class_get_method_from_name_type<int (*)(Il2CppObject*)>(director->klass, "GetPlaySongId", 0)->methodPointer(director);
+				auto songId = il2cpp_class_get_method_from_name_type<int (*)(Il2CppObject*)>(director, "GetPlaySongId", 0)->methodPointer(director);
 
 				if (discord)
 				{
@@ -3250,7 +3256,7 @@ namespace
 			else
 			{
 				auto uiManager = Gallop::UIManager::Instance();
-				auto sceneManager = GetSingletonInstance(il2cpp_symbols::get_class("umamusume.dll", "Gallop", "SceneManager"));
+				auto sceneManager = Gallop::SceneManager::Instance();
 				if (uiManager && sceneManager)
 				{
 					string detail;
@@ -3271,14 +3277,9 @@ namespace
 
 					if (detail.empty())
 					{
-						auto viewId = il2cpp_class_get_method_from_name_type<int (*)(Il2CppObject*)>(sceneManager->klass, "GetCurrentViewId", 0)->methodPointer(sceneManager);
+						auto viewId = il2cpp_class_get_method_from_name_type<int (*)(Il2CppObject*)>(sceneManager, "GetCurrentViewId", 0)->methodPointer(sceneManager);
 						auto viewName = il2cpp_u8(GetEnumName(GetRuntimeType("umamusume.dll", "Gallop", "SceneDefine/ViewId"), viewId)->chars);
 						detail = GetViewName(viewName);
-
-						if (detail.empty())
-						{
-							// detail = GetSceneName()
-						}
 					}
 
 					if (discord && !detail.empty())
@@ -3320,9 +3321,16 @@ namespace
 				TickDiscord();
 			}
 
-			auto active = il2cpp_symbols::get_method_pointer<UnityEngine::SceneManagement::Scene(*)()>("UnityEngine.CoreModule.dll", "UnityEngine.SceneManagement", "SceneManager", "GetActiveScene", IgnoreNumberOfArguments)();
+			auto sceneManager = Gallop::SceneManager::Instance();
+			
+			if (!sceneManager)
+			{
+				StartTickFrame();
+				return;
+			}
 
-			auto handleName = il2cpp_symbols::get_method_pointer<Il2CppString * (*)(int)>("UnityEngine.CoreModule.dll", "UnityEngine.SceneManagement", "Scene", "GetNameInternal", 1)(active.handle);
+
+			auto handleName = sceneManager.GetCurrentSceneIdName();
 
 			if (handleName)
 			{
@@ -3334,11 +3342,11 @@ namespace
 
 					if (controller && controller->klass->name == "LiveViewController"s)
 					{
-						auto director = GetSingletonInstance(il2cpp_symbols::get_class("umamusume.dll", "Gallop.Live", "Director"));
+						auto director = Gallop::Live::Director::Instance();
 						if (director)
 						{
-							auto LiveCurrentTime = il2cpp_class_get_method_from_name_type<float (*)(Il2CppObject*)>(director->klass, "get_LiveCurrentTime", 0)->methodPointer(director);
-							auto LiveTotalTime = il2cpp_class_get_method_from_name_type<float (*)(Il2CppObject*)>(director->klass, "get_LiveTotalTime", 0)->methodPointer(director);
+							auto LiveCurrentTime = il2cpp_class_get_method_from_name_type<float (*)(Il2CppObject*)>(director, "get_LiveCurrentTime", 0)->methodPointer(director);
+							auto LiveTotalTime = il2cpp_class_get_method_from_name_type<float (*)(Il2CppObject*)>(director, "get_LiveTotalTime", 0)->methodPointer(director);
 
 							auto sliderCommon = Localify::UIParts::GetOptionSlider("live_slider");
 

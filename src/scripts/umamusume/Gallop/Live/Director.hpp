@@ -22,6 +22,8 @@ namespace Gallop::Live
 			using Object::Object;
 		};
 
+		static Director Instance();
+
 		using MonoBehaviour::MonoBehaviour;
 	};
 }

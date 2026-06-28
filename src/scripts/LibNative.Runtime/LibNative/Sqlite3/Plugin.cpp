@@ -330,5 +330,5 @@ static void HookMethods()
 STATIC
 {
 	il2cpp_symbols::init_callbacks.emplace_back(InitAddress);
-//	il2cpp_symbols::late_init_callbacks.emplace_back(HookMethods);
+    il2cpp_symbols::init_callbacks.emplace_back(HookMethods);
 }
