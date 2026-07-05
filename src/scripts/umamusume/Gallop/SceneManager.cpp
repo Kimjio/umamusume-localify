@@ -11,6 +11,8 @@ namespace
     Il2CppMethodPointer SceneManager_GetCurrentViewController_addr = nullptr;
 
     Il2CppMethodPointer SceneManager_GetCurrentSceneController_addr = nullptr;
+
+    Il2CppMethodPointer SceneManager_BootView_addr = nullptr;
 }
 
 static void InitAddress()
@@ -29,6 +31,7 @@ static void InitAddress()
             return info->name == "GetCurrentSceneController"s && !info->is_generic;
         }
     );
+	SceneManager_BootView_addr = il2cpp_symbols::get_method_pointer(SceneManager_klass, "BootView", 0);
     SceneDefine_SceneId_klass = il2cpp_symbols::get_class(ASSEMBLY_NAME, "Gallop", "SceneDefine/SceneId");
 }
 
@@ -61,4 +64,9 @@ namespace Gallop
     {
         return reinterpret_cast<Il2CppObject* (*)(Il2CppObject*)>(SceneManager_GetCurrentSceneController_addr)(instance);
     }
+
+	void SceneManager::BootView()
+	{
+		reinterpret_cast<void (*)(Il2CppObject*)>(SceneManager_BootView_addr)(instance);
+	}
 }

@@ -8,9 +8,9 @@ namespace
 	void* PartsBuyJewelListItem_Setup_orig = nullptr;
 }
 
-static void PartsBuyJewelListItem_Setup_hook(Il2CppObject* self, Il2CppObject* purchaseItem, Il2CppDelegate* onComplete, Il2CppObject* evacuationCanvas)
+static void PartsBuyJewelListItem_Setup_hook(Il2CppObject* self, Il2CppObject* purchaseItem, Il2CppDelegate* onComplete, Il2CppObject* evacuationCanvas, int resourceHash)
 {
-	reinterpret_cast<decltype(PartsBuyJewelListItem_Setup_hook)*>(PartsBuyJewelListItem_Setup_orig)(self, purchaseItem, onComplete, evacuationCanvas);
+	reinterpret_cast<decltype(PartsBuyJewelListItem_Setup_hook)*>(PartsBuyJewelListItem_Setup_orig)(self, purchaseItem, onComplete, evacuationCanvas, resourceHash);
 
 	auto _purchaseButtonField = il2cpp_class_get_field_from_name(self->klass, "_purchaseButton");
 	Il2CppObject* _purchaseButton;
@@ -22,7 +22,7 @@ static void PartsBuyJewelListItem_Setup_hook(Il2CppObject* self, Il2CppObject* p
 
 static void InitAddress()
 {
-	PartsBuyJewelListItem_Setup_addr = il2cpp_symbols::get_method_pointer(ASSEMBLY_NAME, "Gallop", "PartsBuyJewelListItem", "Setup", 3);
+	PartsBuyJewelListItem_Setup_addr = il2cpp_symbols::get_method_pointer(ASSEMBLY_NAME, "Gallop", "PartsBuyJewelListItem", "Setup", 4);
 }
 
 static void HookMethods()

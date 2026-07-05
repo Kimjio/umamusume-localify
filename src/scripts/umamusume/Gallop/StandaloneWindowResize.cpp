@@ -37,6 +37,9 @@ namespace
 
 	Il2CppMethodPointer StandaloneWindowResize_ClearStopFlagAfterWhile_addr = nullptr;
 
+	Il2CppMethodPointer StandaloneWindowResize_CheckAspectRatio_addr = nullptr;
+	void* StandaloneWindowResize_CheckAspectRatio_orig = nullptr;
+
 	FieldInfo* StandaloneWindowResize_windowLastWidthField = nullptr;
 	FieldInfo* StandaloneWindowResize_windowLastHeightField = nullptr;
 	FieldInfo* StandaloneWindowResize__aspectRatioField = nullptr;
@@ -87,6 +90,16 @@ static void StandaloneWindowResize_KeepAspectRatio_hook(float currentWidth, floa
 	SetWindowLongPtrW(hWnd, GWL_STYLE, style);
 }
 
+static Vector2 StandaloneWindowResize_GetChangedSize_hook(float width, float height, bool forceVirt = false)
+{
+	return { width, height };
+}
+
+static void StandaloneWindowResize_CheckAspectRatio_hook()
+{
+
+}
+
 static void InitAddress()
 {
 	auto StandaloneWindowResize_klass = il2cpp_symbols::get_class(ASSEMBLY_NAME, "Gallop", "StandaloneWindowResize");
@@ -98,7 +111,9 @@ static void InitAddress()
 	StandaloneWindowResize_ReshapeAspectRatio_addr = il2cpp_symbols::get_method_pointer(StandaloneWindowResize_klass, "ReshapeAspectRatio", 0);
 	StandaloneWindowResize_ReshapeAspectRatio2_addr = il2cpp_symbols::get_method_pointer(StandaloneWindowResize_klass, "ReshapeAspectRatio", 2);
 	StandaloneWindowResize_KeepAspectRatio_addr = il2cpp_symbols::get_method_pointer(StandaloneWindowResize_klass, "KeepAspectRatio", 2);
+	StandaloneWindowResize_GetChangedSize_addr = il2cpp_symbols::get_method_pointer(StandaloneWindowResize_klass, "GetChangedSize", 3);
 	StandaloneWindowResize_ClearStopFlagAfterWhile_addr = il2cpp_symbols::get_method_pointer(StandaloneWindowResize_klass, "ClearStopFlagAfterWhile", 0);
+	StandaloneWindowResize_CheckAspectRatio_addr = il2cpp_symbols::get_method_pointer(StandaloneWindowResize_klass, "CheckAspectRatio", 0);
 	StandaloneWindowResize_windowLastWidthField = il2cpp_class_get_field_from_name(StandaloneWindowResize_klass, "windowLastWidth");
 	StandaloneWindowResize_windowLastHeightField = il2cpp_class_get_field_from_name(StandaloneWindowResize_klass, "windowLastHeight");
 	StandaloneWindowResize__aspectRatioField = il2cpp_class_get_field_from_name(StandaloneWindowResize_klass, "_aspectRatio");
@@ -121,7 +136,9 @@ static void HookMethods()
 		ADD_HOOK(StandaloneWindowResize_ReshapeAspectRatio, "Gallop.StandaloneWindowResize::ReshapeAspectRatio at %p\n");
 		ADD_HOOK(StandaloneWindowResize_ReshapeAspectRatio2, "Gallop.StandaloneWindowResize::ReshapeAspectRatio2 at %p\n");
 		ADD_HOOK(StandaloneWindowResize_KeepAspectRatio, "Gallop.StandaloneWindowResize::KeepAspectRatio at %p\n");
+		ADD_HOOK(StandaloneWindowResize_GetChangedSize, "Gallop.StandaloneWindowResize::GetChangedSize at %p\n");
 		ADD_HOOK(StandaloneWindowResize_GetLimitSize, "Gallop.StandaloneWindowResize::GetLimitSize at %p\n");
+		ADD_HOOK(StandaloneWindowResize_CheckAspectRatio, "Gallop.StandaloneWindowResize::CheckAspectRatio at %p\n");
 	}
 }
 

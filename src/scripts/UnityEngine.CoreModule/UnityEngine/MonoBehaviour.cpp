@@ -22,6 +22,8 @@
 
 #include "string_utils.hpp"
 
+#include "game.hpp"
+
 namespace
 {
 	Il2CppMethodPointer StartCoroutineManaged2_addr = nullptr;
@@ -392,6 +394,15 @@ static Il2CppObject* StartCoroutineManaged2_hook(Il2CppObject* self, Il2CppObjec
 
 		auto onComplete = *[]()
 			{
+				if (Game::CurrentGameRegion == Game::Region::KOR)
+				{
+					il2cpp_symbols::get_method_pointer<void (*)()>("KakaoGame.API.dll", "KakaoGame.API", "KGTApplication", "InitSDK", 0)();
+				}
+
+#ifdef __ANDROID__
+				il2cpp_symbols::get_method_pointer("Unity.Notifications.Android.dll", "Unity.Notifications.Android", "AndroidNotificationCenter", "CancelAllDisplayedNotifications", 0)();
+#endif
+
 				auto GameSystem = Gallop::GameSystem::Instance();
 				reinterpret_cast<decltype(StartCoroutineManaged2_hook)*>(StartCoroutineManaged2_addr)(GameSystem, GameSystem.InitializeGame(nullptr));
 
@@ -399,7 +410,7 @@ static Il2CppObject* StartCoroutineManaged2_hook(Il2CppObject* self, Il2CppObjec
 					GetRuntimeType("mscorlib.dll", "System", "Boolean"));
 				auto predicate = CreateDelegateWithClass(Func, GameSystem, *[](Il2CppObject* gameSystem)
 					{
-                    if (Gallop::GameSystem(gameSystem)._systemState() == Gallop::GameSystem::SystemState::Active)
+						if (Gallop::GameSystem(gameSystem)._systemState() == Gallop::GameSystem::SystemState::Active)
 						{
 							auto uiManager = Gallop::UIManager::Instance();
 #ifdef _MSC_VER

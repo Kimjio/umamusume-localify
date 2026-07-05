@@ -44,6 +44,7 @@ static const char* DownloadHandler_InternalGetByteArray_hook(Il2CppObject* self,
 			{
 				data = new char[modified.size()];
 				memcpy(const_cast<char*>(data), modified.data(), modified.size());
+				*length = modified.size();
 			}
 		}
 #endif

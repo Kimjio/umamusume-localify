@@ -31,7 +31,8 @@ namespace
 	Il2CppMethodPointer set_tag_addr = nullptr;
 
 	Il2CppMethodPointer SetActive_addr = nullptr;
-	void* SetActive_orig = nullptr;
+
+	Il2CppMethodPointer get_activeSelf_addr = nullptr;
 
 	Il2CppMethodPointer Find_addr = nullptr;
 
@@ -133,6 +134,7 @@ static void InitAddress()
 	get_tag_addr = il2cpp_resolve_icall("UnityEngine.GameObject::get_tag");
 	set_tag_addr = il2cpp_resolve_icall("UnityEngine.GameObject::set_tag");
 	SetActive_addr = il2cpp_resolve_icall("UnityEngine.GameObject::SetActive");
+	get_activeSelf_addr = il2cpp_resolve_icall("UnityEngine.GameObject::get_activeSelf");
 	Find_addr = il2cpp_resolve_icall("UnityEngine.GameObject::Find");
 
 	FlashActionPlayerClass = il2cpp_symbols::get_class("umamusume.dll", "Gallop", "FlashActionPlayer");
@@ -142,7 +144,6 @@ static void HookMethods()
 {
 	il2cpp_add_internal_call("UnityEngine.GameObject::GetComponentFastPath", reinterpret_cast<Il2CppMethodPointer>(GetComponentFastPath_hook));
 	// il2cpp_add_internal_call("UnityEngine.GameObject::TryGetComponentFastPath", reinterpret_cast<Il2CppMethodPointer>(TryGetComponentFastPath_hook));
-
 }
 
 STATIC
@@ -209,5 +210,10 @@ namespace UnityEngine
 	void GameObject::SetActive(bool value)
 	{
 		reinterpret_cast<void (*)(Il2CppObject*, bool)>(SetActive_addr)(instance, value);
+	}
+
+	bool GameObject::activeSelf()
+	{
+		return reinterpret_cast<bool (*)(Il2CppObject*)>(get_activeSelf_addr)(instance);
 	}
 }

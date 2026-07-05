@@ -17,9 +17,11 @@ namespace Gallop
 				return nullptr;
 			}
 
-			auto instanceField = il2cpp_class_get_field_from_name(klass, "_instance");
-			Il2CppObject* instance;
-			il2cpp_field_static_get_value(instanceField, &instance);
+			// auto instanceField = il2cpp_class_get_field_from_name(klass, "_instance");
+			// Il2CppObject* instance;
+			// il2cpp_field_static_get_value(instanceField, &instance);
+			auto get_Instance = il2cpp_symbols::get_method(klass, "get_Instance", 0);
+			auto instance = reinterpret_cast<Il2CppObject * (*)(const MethodInfo*)>(get_Instance->methodPointer)(get_Instance);
 			return T(instance);
 		}
 

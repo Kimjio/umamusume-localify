@@ -17,6 +17,8 @@ namespace Gallop
 
         Il2CppObject* GetCurrentSceneController();
 
+        void BootView();
+
         using MonoSingleton::MonoSingleton;
 
         static const char* namespaze;

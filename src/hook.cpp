@@ -175,14 +175,14 @@ namespace
 		il2cpp_runtime_class_init(il2cpp_symbols::get_class("UnityEngine.SubsystemsModule.dll", "UnityEngine.SubsystemsImplementation", "SubsystemDescriptorStore"));
 		//il2cpp_runtime_class_init(il2cpp_symbols::get_class("UnityEngine.CoreModule.dll", "UnityEngine", "BeforeRenderHelper"));
 
-		auto NtCreateFile_addr = NtCreateFile;
-		ADD_HOOK(NtCreateFile, "NtCreateFile at %p\n");
-
-		auto NtQueryDirectoryFile_addr = NtQueryDirectoryFile;
-		ADD_HOOK(NtQueryDirectoryFile, "NtQueryDirectoryFile at %p\n");
-
 		if (Game::CurrentGameRegion == Game::Region::KOR)
 		{
+			auto NtCreateFile_addr = NtCreateFile;
+			ADD_HOOK(NtCreateFile, "NtCreateFile at %p\n");
+
+			auto NtQueryDirectoryFile_addr = NtQueryDirectoryFile;
+			ADD_HOOK(NtQueryDirectoryFile, "NtQueryDirectoryFile at %p\n");
+
 			KillProcessByName(L"ucldr_Umamusume_KR_loader_x64.exe");
 		}
 	}
@@ -4307,7 +4307,7 @@ static BOOL InternetCrackUrlW_hook(
 	return reinterpret_cast<decltype(InternetCrackUrlW_hook)*>(InternetCrackUrlW_orig)(lpszUrl, dwUrlLength, dwFlags, lpUrlComponents);
 }
 
-constexpr int MAX_DLL_COUNT = 22;
+constexpr int MAX_DLL_COUNT = 25;
 constexpr int MAX_ROOT_FILE_COUNT = 9 + /* self (.) */1 + /* parent (..) */1;
 
 HANDLE currentFindHandle;
@@ -4370,10 +4370,8 @@ static NTSTATUS NTAPI NtCreateFile_hook(
 		}
 	}
 
-	auto status = reinterpret_cast<decltype(NtCreateFile)*>(NtCreateFile_orig)(FileHandle, DesiredAccess, ObjectAttributes, IoStatusBlock,
+	return reinterpret_cast<decltype(NtCreateFile)*>(NtCreateFile_orig)(FileHandle, DesiredAccess, ObjectAttributes, IoStatusBlock,
 		AllocationSize, FileAttributes, ShareAccess, CreateDisposition, CreateOptions, EaBuffer, EaLength);
-
-	return status;
 }
 
 static NTSTATUS NTAPI NtQueryDirectoryFile_hook(

@@ -46,13 +46,15 @@ namespace UnityEngine
 
 		void SetActive(bool value);
 
+		bool activeSelf();
+
 		using Object::Object;
 
 	private:
 		static void Internal_CreateGameObject(Il2CppObject* self, Il2CppString* name);
 
 		Il2CppArraySize_t<Il2CppObject*>* GetComponentsInternal(Il2CppReflectionType* runtimeType, bool useSearchTypeAsArrayReturnType, bool recursive, bool includeInactive, bool reverse, Il2CppObject** resultList);
-		
+
 		Il2CppObject* Internal_AddComponentWithType(Il2CppReflectionType* runtimeType);
 	};
 }

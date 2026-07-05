@@ -41,6 +41,7 @@ static void* UploadHandlerRaw_Create_hook(Il2CppObject* self, const char* data, 
 			{
 				data = new char[modified.size()];
 				memcpy(const_cast<char*>(data), modified.data(), modified.size());
+				dataLength = modified.size();
 			}
 		}
 #endif
