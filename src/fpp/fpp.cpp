@@ -8,6 +8,52 @@
 
 using namespace std;
 
+struct DiskSectionInfo
+{
+	string name;
+	ULONG_PTR rvaStart;
+	ULONG_PTR rvaEnd;
+};
+
+static vector<DiskSectionInfo> GetSectionRangesFromDiskPath(const wstring& filePath)
+{
+	vector<DiskSectionInfo> result;
+	HANDLE hFile = CreateFileW(filePath.data(), GENERIC_READ, FILE_SHARE_READ, NULL, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
+	if (hFile == INVALID_HANDLE_VALUE)
+	{
+		return result;
+	}
+
+	HANDLE hMapping = CreateFileMappingW(hFile, NULL, PAGE_READONLY, 0, 0, NULL);
+	if (hMapping)
+	{
+		LPVOID fileBase = MapViewOfFile(hMapping, FILE_MAP_READ, 0, 0, 0);
+		if (fileBase)
+		{
+			const auto dosHeader = static_cast<const IMAGE_DOS_HEADER*>(fileBase);
+			const auto ntHeader = reinterpret_cast<const IMAGE_NT_HEADERS*>(static_cast<const std::byte*>(fileBase) + dosHeader->e_lfanew);
+			const auto sections = IMAGE_FIRST_SECTION(ntHeader);
+
+			for (WORD i = 0; i < ntHeader->FileHeader.NumberOfSections; ++i)
+			{
+				const auto& section = sections[i];
+				char nameBuf[9] = { 0 };
+				memcpy(nameBuf, section.Name, 8);
+
+				DiskSectionInfo info;
+				info.name = nameBuf;
+				info.rvaStart = section.VirtualAddress;
+				info.rvaEnd = section.VirtualAddress + section.Misc.VirtualSize;
+				result.push_back(info);
+			}
+			UnmapViewOfFile(fileBase);
+		}
+		CloseHandle(hMapping);
+	}
+	CloseHandle(hFile);
+	return result;
+}
+
 static bool RegionIsMappedView(HANDLE ProcessHandle, PVOID BaseAddress, SIZE_T RegionSize)
 {
 	MEMORY_BASIC_INFORMATION mbi{};
@@ -109,8 +155,6 @@ static bool RemapViewOfSection(HANDLE ProcessHandle,
 		LARGE_INTEGER sectionMaxSize{};
 		sectionMaxSize.QuadPart = RegionSize;
 
-		UnhookNtdll();
-
 		if (NT_SUCCESS(NtCreateSection(&hSection, SECTION_ALL_ACCESS, nullptr, &sectionMaxSize, PAGE_EXECUTE_READWRITE, SEC_COMMIT, nullptr)))
 		{
 			NTSTATUS status = NtUnmapViewOfSection(ProcessHandle, BaseAddress);
@@ -128,21 +172,6 @@ static bool RemapViewOfSection(HANDLE ProcessHandle,
 						result = true;
 					}
 				}
-				else
-				{
-					status = NtUnmapViewOfSectionEx(ProcessHandle, BaseAddress, 0);
-					if (NT_SUCCESS(status))
-					{
-						if (NT_SUCCESS(NtMapViewOfSection(hSection, ProcessHandle, &viewBase, 0, RegionSize, &sectionOffset, &viewSize, ViewUnmap, 0, NewProtection)))
-						{
-							SIZE_T numberOfBytesWritten = 0;
-							if (WriteProcessMemory(ProcessHandle, viewBase, CopyBuffer, viewSize, &numberOfBytesWritten))
-							{
-								result = true;
-							}
-						}
-					}
-				}
 			}
 		}
 	}
@@ -153,81 +182,66 @@ static bool RemapViewOfSection(HANDLE ProcessHandle,
 
 void fpp::ChangeGameAssemblyProtection(HMODULE module)
 {
+	UnhookNtdll();
+
 	MODULEINFO info;
 	DWORD oldProtection = 0;
 	HANDLE hProcess = GetCurrentProcess();
 	GetModuleInformation(hProcess, module, &info, sizeof(info));
-	if (!VirtualProtectEx(hProcess, PVOID(module), info.SizeOfImage, PAGE_EXECUTE_READWRITE, &oldProtection))
+
+	wchar_t pathBuffer[MAX_PATH] = { 0 };
+	if (GetModuleFileNameExW(hProcess, module, pathBuffer, MAX_PATH) == 0)
 	{
-		const auto header = static_cast<const IMAGE_DOS_HEADER*>(info.lpBaseOfDll);
-		const auto ntHeader = reinterpret_cast<const IMAGE_NT_HEADERS*>(
-			static_cast<const std::byte*>(info.lpBaseOfDll) + header->e_lfanew);
-		const auto sections = IMAGE_FIRST_SECTION(ntHeader);
+		GetMappedFileNameW(hProcess, module, pathBuffer, MAX_PATH);
+	}
 
-		vector<pair<SIZE_T, const char*>> range;
+	wstring dllDiskPath(pathBuffer);
+	vector<DiskSectionInfo> diskSections = GetSectionRangesFromDiskPath(dllDiskPath);
+	if (diskSections.empty())
+	{
+		return;
+	}
 
-		for (std::size_t i = 0; i < ntHeader->FileHeader.NumberOfSections; ++i)
+	ULONG_PTR modBase = reinterpret_cast<ULONG_PTR>(module);
+	ULONG_PTR modEnd = modBase + info.SizeOfImage;
+	LPVOID pageStart = module;
+
+	while (reinterpret_cast<ULONG_PTR>(pageStart) < modEnd)
+	{
+		MEMORY_BASIC_INFORMATION mbi{};
+		if (!VirtualQueryEx(hProcess, pageStart, &mbi, sizeof(mbi)))
 		{
-			const auto& section = sections[i];
-
-			SIZE_T start = 0;
-
-			if (!range.empty())
-			{
-				start = range.back().first;
-			}
-
-			range.emplace_back(make_pair(start + section.SizeOfRawData, reinterpret_cast<const char*>(section.Name)));
-
-			if (range.back().second == ".rdata"s)
-			{
-				break;
-			}
+			break;
 		}
 
-		LPVOID pageStart = module;
-		SIZE_T numBytes = 0;
-		SIZE_T totalRegionSize = 0;
-		do
+		if (reinterpret_cast<ULONG_PTR>(mbi.BaseAddress) >= modEnd)
 		{
-			MEMORY_BASIC_INFORMATION mbi{};
-			numBytes = VirtualQueryEx(hProcess, reinterpret_cast<LPVOID>(pageStart), &mbi, sizeof(mbi));
+			break;
+		}
 
-			totalRegionSize += mbi.RegionSize;
+		SIZE_T RegionSize = mbi.RegionSize;
 
-			const char* name = nullptr;
+		if (mbi.State == MEM_COMMIT)
+		{
+			PVOID currentAllocBase = mbi.AllocationBase;
 
-			for (auto& pair : range)
+			while (true)
 			{
-				auto size = totalRegionSize;
-
-				if (size <= pair.first)
+				PVOID nextAddress = reinterpret_cast<PVOID>(reinterpret_cast<ULONG_PTR>(mbi.BaseAddress) + RegionSize);
+				if (reinterpret_cast<ULONG_PTR>(nextAddress) >= modEnd)
 				{
-					name = pair.second;
 					break;
 				}
-			}
 
-			if (!name)
-			{
-				break;
-			}
-
-			if (mbi.State != MEM_FREE)
-			{
-				if (RegionIsMappedView(hProcess, reinterpret_cast<PVOID>(pageStart), mbi.RegionSize))
+				MEMORY_BASIC_INFORMATION nextMbi{};
+				if (!VirtualQueryEx(hProcess, nextAddress, &nextMbi, sizeof(nextMbi)))
 				{
-					if (ViewHasProtectedProtection(hProcess, reinterpret_cast<PVOID>(pageStart), mbi.RegionSize, PAGE_EXECUTE_READWRITE))
-					{
-						if (!RemapViewOfSection(hProcess, reinterpret_cast<PVOID>(pageStart), mbi.RegionSize, PAGE_EXECUTE_READWRITE))
-						{
-							break;
-						}
-					}
-					else
-					{
-						break;
-					}
+					break;
+				}
+
+				if (nextMbi.State == MEM_COMMIT && nextMbi.AllocationBase == currentAllocBase)
+				{
+					RegionSize += nextMbi.RegionSize;
 				}
 				else
 				{
@@ -235,14 +249,39 @@ void fpp::ChangeGameAssemblyProtection(HMODULE module)
 				}
 			}
 
-			LPVOID newAddress = reinterpret_cast<LPCH>(mbi.BaseAddress) + mbi.RegionSize;
+			ULONG_PTR pageStartRVA = reinterpret_cast<ULONG_PTR>(mbi.BaseAddress) - modBase;
+			ULONG_PTR pageEndRVA = pageStartRVA + RegionSize;
 
-			if (newAddress <= pageStart)
+			const char* sectionName = nullptr;
+			for (const auto& sec : diskSections)
 			{
-				break;
+				ULONG_PTR overlapStart = max(pageStartRVA, sec.rvaStart);
+				ULONG_PTR overlapEnd = min(pageEndRVA, sec.rvaEnd);
+
+				if (overlapStart < overlapEnd)
+				{
+					sectionName = sec.name.data();
+					break;
+				}
 			}
 
-			pageStart = newAddress;
-		} while (numBytes);
+			if (sectionName)
+			{
+				if (RegionIsMappedView(hProcess, mbi.BaseAddress, RegionSize))
+				{
+					if (!RemapViewOfSection(hProcess, mbi.BaseAddress, RegionSize, PAGE_EXECUTE_READWRITE))
+					{
+						break;
+					}
+				}
+			}
+		}
+
+		LPVOID newAddress = reinterpret_cast<LPVOID>(reinterpret_cast<ULONG_PTR>(mbi.BaseAddress) + RegionSize);
+		if (newAddress <= pageStart)
+		{
+			break;
+		}
+		pageStart = newAddress;
 	}
 }
