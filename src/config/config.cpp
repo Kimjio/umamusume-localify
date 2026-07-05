@@ -501,11 +501,6 @@ if (document.HasMember(IL2CPP_STRING(_name_)) && document[IL2CPP_STRING(_name_)]
 
 #ifdef EXPERIMENTS
 			GetValue("unlockLiveChara", Bool, unlock_live_chara);
-
-			if (unlock_live_chara)
-			{
-				decrypt_manifest_db = true;
-			}
 #endif
 
 			GetValue("msgpackNotifier", Bool, msgpack_notifier);

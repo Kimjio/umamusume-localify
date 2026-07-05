@@ -16,7 +16,6 @@ namespace MasterDB
 {
 	inline sqlite3* replacementMasterDB;
 	inline sqlite3* masterDB;
-	inline sqlite3* metaDB;
 
 	inline string masterDBPath;
 
@@ -24,21 +23,12 @@ namespace MasterDB
 	{
 		auto path = il2cpp_u8(il2cpp_symbols::get_method_pointer<Il2CppString * (*)()>("Cute.Core.Assembly.dll", "Cute.Core", "Device", "GetPersistentDataPath", IgnoreNumberOfArguments)()->chars);
 #ifdef _MSC_VER
-		auto metaDBPath = path + "\\" + "meta";
 		masterDBPath = path + "\\" + "master" + "\\" + "master.mdb";
 #else
-		auto metaDBPath = path +
-			filesystem::path::preferred_separator + "meta";
 		masterDBPath = path +
 			filesystem::path::preferred_separator + "master" +
 			filesystem::path::preferred_separator + "master.mdb";
 #endif
-
-		auto res = sqlite3_open_v2(metaDBPath.data(), &metaDB, SQLITE_OPEN_READONLY, nullptr);
-		if (res != SQLITE_OK)
-		{
-			metaDB = nullptr;
-		}
 
 		if (config::unlock_live_chara)
 		{
@@ -52,7 +42,7 @@ namespace MasterDB
 
 			filesystem::copy(masterDBPath, masterDBOrigPath, filesystem::copy_options::skip_existing);
 
-			res = sqlite3_open_v2(masterDBOrigPath.data(), &masterDB, SQLITE_OPEN_READONLY, nullptr);
+			auto res = sqlite3_open_v2(masterDBOrigPath.data(), &masterDB, SQLITE_OPEN_READONLY, nullptr);
 			if (res != SQLITE_OK)
 			{
 				masterDB = nullptr;
@@ -60,7 +50,7 @@ namespace MasterDB
 		}
 		else
 		{
-			res = sqlite3_open_v2(masterDBPath.data(), &masterDB, SQLITE_OPEN_READONLY, nullptr);
+			auto res = sqlite3_open_v2(masterDBPath.data(), &masterDB, SQLITE_OPEN_READONLY, nullptr);
 			if (res != SQLITE_OK)
 			{
 				masterDB = nullptr;
@@ -72,7 +62,7 @@ namespace MasterDB
 	{
 		auto res = sqlite3_open_v2(path.data(), &replacementMasterDB, SQLITE_OPEN_READONLY, nullptr);
 
-		bool isOk = res == SQLITE_OK;
+		const bool isOk = res == SQLITE_OK;
 		if (!isOk)
 		{
 			replacementMasterDB = nullptr;
@@ -104,7 +94,7 @@ namespace MasterDB
 		{
 			sqlite3_prepare_v2(replacementMasterDB, query.data(), query.size(), &replacementStmt, nullptr);
 		}
-		
+
 		sqlite3_prepare_v2(masterDB, query.data(), query.size(), &stmt, nullptr);
 
 		while (sqlite3_step(stmt) == SQLITE_ROW)

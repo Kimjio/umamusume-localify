@@ -104,6 +104,8 @@ namespace MsgPackModify
 
 		sqlite3_exec(db, "UPDATE chara_data SET shape = 1 WHERE id = 9001", nullptr, nullptr, nullptr);
 
+		sqlite3_exec(db, "UPDATE omakase_scenario SET start_date = '2025/06/29 12:00:00'", nullptr, nullptr, nullptr);
+
 		unordered_map<int, bool> masterCardIds;
 
 		auto query = "SELECT id FROM card_data"s;
@@ -136,39 +138,64 @@ namespace MsgPackModify
 
 		sqlite3_finalize(stmt2);
 
-		vector<int> metaDressIds;
+		sqlite3* metaDB = nullptr;
+		auto DB = il2cpp_symbols::get_method_pointer<Il2CppObject * (*)()>("umamusume.dll", "Gallop", "AssetManager", "get_DB", 0)();
 
-		auto mquery = "SELECT n FROM a WHERE n LIKE '%pfb_bdy1____0_'"s;
-		sqlite3_stmt* mstmt;
-		sqlite3_prepare_v2(MasterDB::metaDB, mquery.data(), mquery.size(), &mstmt, nullptr);
-		while (sqlite3_step(mstmt) == SQLITE_ROW)
+		if (DB)
 		{
-			string name = reinterpret_cast<const char*>(sqlite3_column_text(mstmt, 0));
-			auto chara_id = name.substr(32, 4);
-			auto body_type = name.substr(37, 2);
+			Il2CppObject* manifestDB;
+			auto manifestDBField = il2cpp_class_get_field_from_name(DB->klass, "manifestDB");
+			il2cpp_field_get_value(DB, manifestDBField, &manifestDB);
 
-			if (stoi(body_type) <= 1)
+			if (manifestDB)
 			{
-				body_type = "01";
-				metaDressIds.emplace_back(stoi(chara_id + body_type));
+				Il2CppObject* connection;
+				auto connectionField = il2cpp_class_get_field_from_name(manifestDB->klass, "connection");
+				il2cpp_field_get_value(manifestDB, connectionField, &connection);
+
+				if (connection)
+				{
+					metaDB = il2cpp_symbols::get_method_pointer<sqlite3* (*)(Il2CppObject*)>(connection->klass, "get_DBHandle", 0)(connection);
+				}
 			}
 		}
 
-		sqlite3_finalize(mstmt);
+		vector<int> metaDressIds;
 
-		auto mquery1 = "SELECT n FROM a WHERE n LIKE '%pfb_bdy2____0_'"s;
-		sqlite3_stmt* mstmt1;
-		sqlite3_prepare_v2(MasterDB::metaDB, mquery1.data(), mquery1.size(), &mstmt1, nullptr);
-		while (sqlite3_step(mstmt1) == SQLITE_ROW)
+		if (metaDB)
 		{
-			string name = reinterpret_cast<const char*>(sqlite3_column_text(mstmt1, 0));
-			auto chara_id = name.substr(32, 4);
-			auto body_type = name.substr(37, 2);
+			auto mquery = "SELECT n FROM a WHERE n LIKE '%pfb_bdy1____0_'"s;
+			sqlite3_stmt* mstmt;
+			sqlite3_prepare_v2(metaDB, mquery.data(), mquery.size(), &mstmt, nullptr);
+			while (sqlite3_step(mstmt) == SQLITE_ROW)
+			{
+				string name = reinterpret_cast<const char*>(sqlite3_column_text(mstmt, 0));
+				auto chara_id = name.substr(32, 4);
+				auto body_type = name.substr(37, 2);
 
-			metaDressIds.emplace_back(stoi(chara_id + body_type) + 1);
+				if (stoi(body_type) <= 1)
+				{
+					body_type = "01";
+					metaDressIds.emplace_back(stoi(chara_id + body_type));
+				}
+			}
+
+			sqlite3_finalize(mstmt);
+
+			auto mquery1 = "SELECT n FROM a WHERE n LIKE '%pfb_bdy2____0_'"s;
+			sqlite3_stmt* mstmt1;
+			sqlite3_prepare_v2(metaDB, mquery1.data(), mquery1.size(), &mstmt1, nullptr);
+			while (sqlite3_step(mstmt1) == SQLITE_ROW)
+			{
+				string name = reinterpret_cast<const char*>(sqlite3_column_text(mstmt1, 0));
+				auto chara_id = name.substr(32, 4);
+				auto body_type = name.substr(37, 2);
+
+				metaDressIds.emplace_back(stoi(chara_id + body_type) + 1);
+			}
+
+			sqlite3_finalize(mstmt1);
 		}
-
-		sqlite3_finalize(mstmt1);
 
 		for (auto dressId : metaDressIds)
 		{
@@ -221,6 +248,18 @@ namespace MsgPackModify
 				if (parsed.is_object())
 				{
 					MsgPack::object object = parsed.object_items();
+
+					if (object.contains("single_mode_exec_command_request_common") && object["single_mode_exec_command_request_common"].is_object())
+					{
+						MsgPack::object single_mode_exec_command_request_common = object["single_mode_exec_command_request_common"].object_items();
+
+						if (single_mode_exec_command_request_common.contains("exec_auto_play_plan_id"))
+						{
+							single_mode_exec_command_request_common["exec_auto_play_plan_id"] = 0;
+						}
+
+						object["single_mode_exec_command_request_common"] = single_mode_exec_command_request_common;
+					}
 
 					if (object.contains("live_theater_save_info") && object["live_theater_save_info"].is_object())
 					{
@@ -491,6 +530,15 @@ namespace MsgPackModify
 							{
 								InitMasterDB();
 							}
+
+							MsgPack::object common_define = data["common_define"].object_items();
+
+							if (common_define.contains("single_mode_pioneer_auto_planning_open_date") && common_define["single_mode_pioneer_auto_planning_open_date"].is_string())
+							{
+								common_define["single_mode_pioneer_auto_planning_open_date"] = "2022-07-01 12:00:00";
+							}
+
+							data["common_define"] = common_define;
 						}
 
 						/*if (data["fan_raid_id"].is_int())
@@ -828,7 +876,7 @@ namespace MsgPackModify
 							data["circle_item_request_array"] = MsgPack::array{};
 						}*/
 
-						// object["data"] = data;
+						object["data"] = data;
 					}
 
 					MsgPack{ object }.dump(dump);
