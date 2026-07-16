@@ -6,6 +6,7 @@
 #include "StandaloneWindowResize.hpp"
 #endif
 #include "Screen.hpp"
+#include "DialogCommon.hpp"
 #include "scripts/UnityEngine.CoreModule/UnityEngine/Object.hpp"
 #include "scripts/UnityEngine.CoreModule/UnityEngine/Vector2.hpp"
 #include "scripts/UnityEngine.CoreModule/UnityEngine/Vector3.hpp"
@@ -87,6 +88,9 @@ namespace
 
 	Il2CppMethodPointer IsEnableSwitchBandMenu_addr = nullptr;
 	void* IsEnableSwitchBandMenu_orig = nullptr;
+
+	Il2CppMethodPointer CreateHeader_addr = nullptr;
+	void* CreateHeader_orig = nullptr;
 #endif
 
 	float ratio_vertical = 0.5625f;
@@ -165,6 +169,44 @@ static void ChangeResizeUIForPC_hook(Il2CppObject* self, int width, int height)
 
     ChangeResizeUI();
 }
+
+static void OnPushBandUIButton_hook(Il2CppObject* self, uint64_t buttonType)
+{
+	// no-op
+}
+
+static void RestorePrevSelectedBandMenu_hook(Il2CppObject* self)
+{
+	// no-op
+}
+
+static bool IsEnableSwitchBandMenu_hook(Il2CppObject* self)
+{
+	return true;
+}
+
+static void CreateHeader_hook(Il2CppObject* self)
+{
+	reinterpret_cast<decltype(CreateHeader_hook)*>(CreateHeader_orig)(self);
+
+	if (Gallop::Screen::IsLandscapeMode())
+	{
+		Il2CppObject* header = il2cpp_symbols::get_method_pointer<Il2CppObject * (*)()>(self->klass, "get_Header", 0)();
+
+		auto _menuButtonField = il2cpp_class_get_field_from_name(header->klass, "_menuButton");
+		Il2CppObject* _menuButton;
+		il2cpp_field_get_value(header, _menuButtonField, &_menuButton);
+
+		UnityEngine::MonoBehaviour(_menuButton).gameObject().SetActive(true);
+
+		il2cpp_symbols::get_method_pointer<void (*)(Il2CppObject*, Il2CppDelegate*)>(_menuButton->klass, "SetOnClick", 1)(_menuButton,
+			&CreateUnityAction(header, *[](Il2CppObject* self)
+				{
+					il2cpp_symbols::get_method_pointer<void (*)(Il2CppObject*, Il2CppObject*, Gallop::DialogCommon::DispStackType, Gallop::DialogCommonBase::FormType)>(ASSEMBLY_NAME, "Gallop", "DialogHomeMenuMain", "Open", 4)(nullptr, nullptr, Gallop::DialogCommon::DispStackType::DialogOnDialog, Gallop::DialogCommonBase::FormType::BIG_ONE_BUTTON);
+				})->delegate
+			);
+	}
+}
 #endif
 
 static Il2CppObject* WaitResizeUI_hook(Il2CppObject* self, bool isPortrait, bool isShowOrientationGuide)
@@ -222,21 +264,6 @@ static UnityEngine::Vector2 get_DefaultResolution_hook()
 	return UnityEngine::Vector2{ static_cast<float>(width), static_cast<float>(height) };
 }
 
-static void OnPushBandUIButton_hook(Il2CppObject* self, uint64_t buttonType)
-{
-	// no-op
-}
-
-static void RestorePrevSelectedBandMenu_hook(Il2CppObject* self)
-{
-	// no-op
-}
-
-static bool IsEnableSwitchBandMenu_hook(Il2CppObject* self)
-{
-	return true;
-}
-
 static void InitAddress()
 {
 	auto UIManager_klass = il2cpp_symbols::get_class(ASSEMBLY_NAME, "Gallop", "UIManager");
@@ -270,6 +297,7 @@ static void InitAddress()
 	OnPushBandUIButton_addr = il2cpp_symbols::get_method_pointer(UIManager_klass, "OnPushBandUIButton", 1);
 	RestorePrevSelectedBandMenu_addr = il2cpp_symbols::get_method_pointer(UIManager_klass, "RestorePrevSelectedBandMenu", 0);
 	IsEnableSwitchBandMenu_addr = il2cpp_symbols::get_method_pointer(UIManager_klass, "IsEnableSwitchBandMenu", 0);
+	CreateHeader_addr = il2cpp_symbols::get_method_pointer(UIManager_klass, "CreateHeader", 0);
 #endif
 }
 
@@ -297,6 +325,7 @@ static void HookMethods()
 		ADD_HOOK(OnPushBandUIButton, "Gallop.UIManager::OnPushBandUIButton at %p\n");
 		ADD_HOOK(RestorePrevSelectedBandMenu, "Gallop.UIManager::RestorePrevSelectedBandMenu at %p\n");
 		ADD_HOOK(IsEnableSwitchBandMenu, "Gallop.UIManager::IsEnableSwitchBandMenu at %p\n");
+		ADD_HOOK(CreateHeader, "Gallop.UIManager::CreateHeader at %p\n");
 #endif
 	}
 }

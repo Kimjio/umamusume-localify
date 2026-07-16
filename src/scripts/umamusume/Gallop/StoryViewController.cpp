@@ -17,6 +17,9 @@ namespace
 
 	Il2CppMethodPointer StoryViewController_SetupUIOnChangeOrientation_addr = nullptr;
 
+	Il2CppMethodPointer StoryViewController_ShowChoiceRewardInfoButton_addr = nullptr;
+	void* StoryViewController_ShowChoiceRewardInfoButton_orig = nullptr;
+
 	FieldInfo* StoryViewController__use3DBgField = nullptr;
 	FieldInfo* StoryViewController__controllerField = nullptr;
 	FieldInfo* StoryViewController__eyeLevelOffsetField = nullptr;
@@ -49,6 +52,32 @@ static void StoryViewController_ApplyBackgroundOffset_hook(Il2CppObject* self, U
 	bgOffset.localScale(localScale);
 }
 
+static void StoryViewController_ShowChoiceRewardInfoButton_hook(Il2CppObject* self, Il2CppObject* activeChoiceParamList, int currentBlockIndex)
+{
+	reinterpret_cast<decltype(StoryViewController_ShowChoiceRewardInfoButton_hook)*>(StoryViewController_ShowChoiceRewardInfoButton_orig)(self, activeChoiceParamList, currentBlockIndex);
+
+	auto StoryChoiceController = GetSingletonInstance(il2cpp_symbols::get_class(ASSEMBLY_NAME, "Gallop", "StoryChoiceController"));
+	auto _onCloseButtonField = il2cpp_class_get_field_from_name(StoryChoiceController->klass, "_onCloseButton");
+
+	auto _onCloseButton = CreateDelegate(self,
+		*[](Il2CppObject* self)
+		{
+			auto view = il2cpp_symbols::get_method_pointer<Il2CppObject * (*)(Il2CppObject*)>(self->klass, "GetViewBase", 0)(self);
+			auto ChoiceRewardInfoButton = il2cpp_symbols::get_method_pointer<Il2CppObject * (*)(Il2CppObject*)>(view->klass, "get_ChoiceRewardInfoButton", 0)(view);
+
+			auto _buttonRootField = il2cpp_class_get_field_from_name(ChoiceRewardInfoButton->klass, "_buttonRoot");
+			Il2CppObject* _buttonRoot;
+			il2cpp_field_get_value(ChoiceRewardInfoButton, _buttonRootField, &_buttonRoot);
+
+			if (UnityEngine::Object::IsNativeObjectAlive(_buttonRoot))
+			{
+				UnityEngine::GameObject(_buttonRoot).SetActive(false);
+			}
+		}
+	);
+	il2cpp_field_set_value(StoryChoiceController, _onCloseButtonField, _onCloseButton);
+}
+
 static void InitAddress()
 {
 	auto StoryViewController_klass = il2cpp_symbols::get_class(ASSEMBLY_NAME, "Gallop", "StoryViewController");
@@ -56,6 +85,7 @@ static void InitAddress()
 	StoryViewController_get_IsSingleModeOrGallery_addr = il2cpp_symbols::get_method_pointer(StoryViewController_klass, "get_IsSingleModeOrGallery", 0);
 	StoryViewController_SetDisplayMode_addr = il2cpp_symbols::get_method_pointer(StoryViewController_klass, "SetDisplayMode", 1);
 	StoryViewController_SetupUIOnChangeOrientation_addr = il2cpp_symbols::get_method_pointer(StoryViewController_klass, "SetupUIOnChangeOrientation", 0);
+	StoryViewController_ShowChoiceRewardInfoButton_addr = il2cpp_symbols::get_method_pointer(StoryViewController_klass, "ShowChoiceRewardInfoButton", 2);
 	StoryViewController__use3DBgField = il2cpp_class_get_field_from_name(StoryViewController_klass, "_use3DBg");
 	StoryViewController__controllerField = il2cpp_class_get_field_from_name(StoryViewController_klass, "_controller");
 	StoryViewController__eyeLevelOffsetField = il2cpp_class_get_field_from_name(StoryViewController_klass, "_eyeLevelOffset");
@@ -66,6 +96,7 @@ static void HookMethods()
 	if (config::freeform_window)
 	{
 		ADD_HOOK(StoryViewController_ApplyBackgroundOffset, "Gallop.StoryViewController::ApplyBackgroundOffset at %p\n");
+		ADD_HOOK(StoryViewController_ShowChoiceRewardInfoButton, "Gallop.StoryViewController::ShowChoiceRewardInfoButton at %p\n");
 	}
 }
 
