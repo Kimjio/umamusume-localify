@@ -65,6 +65,7 @@ static bool criAtomExAcb_GetCueInfoById_hook(void* acb_hn, int id, CriWare::CriA
 					{
 						auto elemCueIdField = il2cpp_class_get_field_from_name(elem->klass, "CueId");
 						auto elemCueSheetField = il2cpp_class_get_field_from_name(elem->klass, "CueSheet");
+						auto elemGenderField = il2cpp_class_get_field_from_name(elem->klass, "Gender");
 
 						Il2CppString* elemCueSheet;
 						il2cpp_field_get_value(elem, elemCueSheetField, &elemCueSheet);
@@ -72,10 +73,20 @@ static bool criAtomExAcb_GetCueInfoById_hook(void* acb_hn, int id, CriWare::CriA
 						int elemCueId;
 						il2cpp_field_get_value(elem, elemCueIdField, &elemCueId);
 
-						if (elemCueSheet && cueSheet16.starts_with(elemCueSheet->chars) && info->id == elemCueId) {
-							Localify::NotificationManager::currentAcbHandles.insert(acb_hn);
-							Localify::NotificationManager::currentElem = elem;
-							break;
+						int elemGender;
+						il2cpp_field_get_value(elem, elemGenderField, &elemGender);
+
+						auto workDataManager = GetSingletonInstance(il2cpp_symbols::get_class("umamusume.dll", "Gallop", "WorkDataManager"));
+						if (auto workUserData = il2cpp_symbols::get_method_pointer<Il2CppObject * (*)(Il2CppObject*)>(workDataManager->klass, "get_UserData", 0)(workDataManager))
+						{
+							auto Gender = il2cpp_symbols::get_method_pointer<int(*)(Il2CppObject*)>(workUserData->klass, "get_Gender", 0)(workUserData);
+
+							if (elemCueSheet && cueSheet16.starts_with(elemCueSheet->chars) && info->id == elemCueId && (!elemGender || elemGender == Gender))
+							{
+								Localify::NotificationManager::currentAcbHandles.insert(acb_hn);
+								Localify::NotificationManager::currentElem = elem;
+								break;
+							}
 						}
 					}
 				}
