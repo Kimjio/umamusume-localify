@@ -45,15 +45,7 @@ namespace proxy
 
 		dll_path += L"\\" + L"version.dll"s;
 
-		try
-		{
-			filesystem::copy_file(dll_path, L"version.orig.dll", filesystem::copy_options::update_existing);
-		}
-		catch (...)
-		{
-		}
-
-		HMODULE original_dll = LoadLibraryW(L"version.orig.dll");
+		HMODULE original_dll = LoadLibraryW(dll_path.data());
 
 		GetFileVersionInfoA_Original = GetProcAddress(original_dll, "GetFileVersionInfoA");
 		GetFileVersionInfoByHandle_Original = GetProcAddress(original_dll, "GetFileVersionInfoByHandle");
