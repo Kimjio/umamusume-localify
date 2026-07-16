@@ -14,6 +14,7 @@ namespace Gallop
 			class CircleChat
 			{
 			public:
+				static UnityEngine::Vector3 ITEM_BADGE_POS;
 				static UnityEngine::Vector3 STAMP_ANCHORED_POS_AFTER_BASE;
 				static UnityEngine::Vector3 INPUT_LOCAL_POS_AFTER_BASE;
 				static UnityEngine::Vector3 INPUT_ANCHORED_POS_AFTER_BASE;

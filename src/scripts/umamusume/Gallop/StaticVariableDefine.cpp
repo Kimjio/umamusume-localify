@@ -52,18 +52,26 @@ static void InitAddress()
 		StaticVariableDefine_Circle_CircleChat_INPUT_ANCHORED_POS_AFTER_addr = il2cpp_symbols::get_method_pointer(StaticVariableDefine_Circle_CircleChat_klass, "get_INPUT_ANCHORED_POS_AFTER", 0);
 		StaticVariableDefine_Circle_CircleChat_INPUT_SIZE_DELTA_POS_AFTER_addr = il2cpp_symbols::get_method_pointer(StaticVariableDefine_Circle_CircleChat_klass, "get_INPUT_SIZE_DELTA_POS_AFTER", 0);
 
+		if (auto StaticVariableDefine_Circle_CircleChat_ITEM_BADGE_POS_Field = il2cpp_class_get_field_from_name(StaticVariableDefine_Circle_CircleChat_klass, "ITEM_BADGE_POS"))
+		{
+			il2cpp_field_static_get_value(StaticVariableDefine_Circle_CircleChat_ITEM_BADGE_POS_Field, &Gallop::StaticVariableDefine::Circle::CircleChat::ITEM_BADGE_POS);
+		}
+
 		if (auto StaticVariableDefine_Circle_CircleChat_STAMP_ANCHORED_POS_AFTER_BASE_Field = il2cpp_class_get_field_from_name(StaticVariableDefine_Circle_CircleChat_klass, "STAMP_ANCHORED_POS_AFTER_BASE"))
 		{
 			il2cpp_field_static_get_value(StaticVariableDefine_Circle_CircleChat_STAMP_ANCHORED_POS_AFTER_BASE_Field, &Gallop::StaticVariableDefine::Circle::CircleChat::STAMP_ANCHORED_POS_AFTER_BASE);
 		}
+
 		if (auto StaticVariableDefine_Circle_CircleChat_INPUT_LOCAL_POS_AFTER_BASE_Field = il2cpp_class_get_field_from_name(StaticVariableDefine_Circle_CircleChat_klass, "INPUT_LOCAL_POS_AFTER_BASE"))
 		{
 			il2cpp_field_static_get_value(StaticVariableDefine_Circle_CircleChat_INPUT_LOCAL_POS_AFTER_BASE_Field, &Gallop::StaticVariableDefine::Circle::CircleChat::INPUT_LOCAL_POS_AFTER_BASE);
 		}
+
 		if (auto StaticVariableDefine_Circle_CircleChat_INPUT_ANCHORED_POS_AFTER_BASE_Field = il2cpp_class_get_field_from_name(StaticVariableDefine_Circle_CircleChat_klass, "INPUT_ANCHORED_POS_AFTER_BASE"))
 		{
 			il2cpp_field_static_get_value(StaticVariableDefine_Circle_CircleChat_INPUT_ANCHORED_POS_AFTER_BASE_Field, &Gallop::StaticVariableDefine::Circle::CircleChat::INPUT_ANCHORED_POS_AFTER_BASE);
 		}
+
 		if (auto StaticVariableDefine_Circle_CircleChat_INPUT_SIZE_DELTA_POS_AFTER_BASE_Field = il2cpp_class_get_field_from_name(StaticVariableDefine_Circle_CircleChat_klass, "INPUT_SIZE_DELTA_POS_AFTER_BASE"))
 		{
 			il2cpp_field_static_get_value(StaticVariableDefine_Circle_CircleChat_INPUT_SIZE_DELTA_POS_AFTER_BASE_Field, &Gallop::StaticVariableDefine::Circle::CircleChat::INPUT_SIZE_DELTA_POS_AFTER_BASE);
@@ -105,6 +113,7 @@ STATIC
 
 namespace Gallop
 {
+	UnityEngine::Vector3 StaticVariableDefine::Circle::CircleChat::ITEM_BADGE_POS;
 	UnityEngine::Vector3 StaticVariableDefine::Circle::CircleChat::STAMP_ANCHORED_POS_AFTER_BASE;
 	UnityEngine::Vector3 StaticVariableDefine::Circle::CircleChat::INPUT_LOCAL_POS_AFTER_BASE;
 	UnityEngine::Vector3 StaticVariableDefine::Circle::CircleChat::INPUT_ANCHORED_POS_AFTER_BASE;
