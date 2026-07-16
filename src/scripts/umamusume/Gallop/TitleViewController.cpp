@@ -56,7 +56,7 @@ namespace
 	constexpr auto DMM_UA = L"DMMGamePlayer5-Win/5.4.17";
 	constexpr auto DMM_API = L"apidgp-gameplayer.games.dmm.com";
 	constexpr auto BASE_HEADER = L"Client-App: DMMGamePlayer5\nClient-version: 5.4.17";
-	const wchar_t* ACCEPT_TYPE[] = {L"application/json", nullptr};
+	const wchar_t* ACCEPT_TYPE[] = { L"application/json", nullptr };
 }
 
 static void PrintParseError(rapidjson::Document& document)
@@ -480,7 +480,7 @@ static void PlaySfxUiDecideL01()
 
 	Cute::Cri::AudioPlayback res{};
 
-	if (auto legacy = il2cpp_symbols::get_method_pointer<Il2CppObject * (*)(Cute::Cri::AudioPlayback*, Il2CppObject*, uint64_t, bool, float, Il2CppObject*,
+	if (auto legacy = il2cpp_symbols::get_method_pointer<Cute::Cri::AudioPlayback * (*)(Cute::Cri::AudioPlayback*, Il2CppObject*, uint64_t, bool, float, Il2CppObject*,
 		float, float, float, float, float, float, bool, float, uint64_t, int
 		)>(AudioManager->klass, "PlaySe", 14))
 	{
@@ -488,7 +488,7 @@ static void PlaySfxUiDecideL01()
 		return;
 	}
 
-	il2cpp_symbols::get_method_pointer<Il2CppObject* (*)(Cute::Cri::AudioPlayback*, Il2CppObject*, uint64_t, bool, float, Il2CppObject*,
+	il2cpp_symbols::get_method_pointer<Cute::Cri::AudioPlayback* (*)(Cute::Cri::AudioPlayback*, Il2CppObject*, uint64_t, bool, float, Il2CppObject*,
 		float, float, float, float, float, float, float, float, float, bool, float, uint64_t, int
 		)>(AudioManager->klass, "PlaySe", 17)(&res, AudioManager, 200000000L, false, 0.0, nullptr, 0.0, 10.0, 100.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, false, 1.0, 0, INT_MAX);
 }

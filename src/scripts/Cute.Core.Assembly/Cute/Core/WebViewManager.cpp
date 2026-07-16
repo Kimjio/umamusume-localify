@@ -55,13 +55,12 @@ namespace
 	Il2CppMethodPointer Cute_Core_WebViewManager_CanGoBack_addr = nullptr;
 	void* Cute_Core_WebViewManager_CanGoBack_orig = nullptr;
 
-	Il2CppMethodPointer Cute_Core_WebViewManager_GoBack_addr = nullptr;
-	void* Cute_Core_WebViewManager_GoBack_orig = nullptr;
-
 	Il2CppMethodPointer Cute_Core_WebViewManager_SetVisible_addr = nullptr;
 	void* Cute_Core_WebViewManager_SetVisible_orig = nullptr;
 
-	Il2CppMethodPointer Cute_Core_WebViewManager_Callback_addr = nullptr;
+	Il2CppMethodPointer Cute_Core_WebViewManager_get_Callback_addr = nullptr;
+
+	Il2CppMethodPointer Cute_Core_WebViewManager_set_Callback_addr = nullptr;
 
 	Il2CppMethodPointer Cute_Core_WebViewManager_OnLoadedCallback_addr = nullptr;
 	void* Cute_Core_WebViewManager_OnLoadedCallback_orig = nullptr;
@@ -255,8 +254,8 @@ static void Cute_Core_WebViewManager_Awake_hook(Il2CppObject* self)
 							}
 						).Get(), &token);
 
-						webview->add_NavigationCompleted(Callback<ICoreWebView2NavigationCompletedEventHandler>(
-							[](ICoreWebView2* sender, ICoreWebView2NavigationCompletedEventArgs* args)
+						webview22->add_DOMContentLoaded(Callback<ICoreWebView2DOMContentLoadedEventHandler>(
+							[](ICoreWebView2* sender, ICoreWebView2DOMContentLoadedEventArgs* args)
 							{
 								auto script = LR"(
 const style = document.createElement('style');
@@ -267,10 +266,10 @@ document.head.appendChild(style);
 
 								webview->ExecuteScript(script, Callback<ICoreWebView2ExecuteScriptCompletedHandler>([](HRESULT errorCode, LPCWSTR result) { return S_OK; }).Get());
 
-								auto serverUrl = il2cpp_symbols::get_method_pointer<Il2CppString * (*)()>("umamusume.dll", "Gallop", "GameDefine", "get_ApplicationServerUrl", 0)()->chars;
+								auto serverUrl = GetApplicationServerUrl()->chars;
 
 								wil::unique_cotaskmem_string uri;
-								webview->get_Source(&uri);
+								sender->get_Source(&uri);
 								if (!il2cppstring(uri.get()).starts_with(serverUrl))
 								{
 									auto script1 = LR"(
@@ -299,6 +298,24 @@ viewport.content = `width=device-width, initial-scale=${zoom}, user-scalable=no`
 								return S_OK;
 							}
 						).Get(), &token);
+
+						webview->AddScriptToExecuteOnDocumentCreated(LR"(
+Object.defineProperty(CSSStyleDeclaration.prototype, 'zoom', {
+		get: function() { return this.getPropertyValue('zoom'); },
+		set: function(val) {
+			if (this.parentRule?.parentStyleSheet?.ownerNode === document.documentElement ||
+				this === document.documentElement?.style) {
+				this.setProperty('zoom', (window.innerWidth || window.screen.width) / (window.document.body.offsetWidth || 1));
+			} else {
+				this.setProperty('zoom', val);
+			}
+		},
+		configurable: true,
+		enumerable: true
+	}
+);
+document.documentElement.style.zoom = 1;
+)", nullptr);
 
 						webview->add_WebResourceRequested(Callback<ICoreWebView2WebResourceRequestedEventHandler>(
 							[env](ICoreWebView2* sender, ICoreWebView2WebResourceRequestedEventArgs* args)
@@ -542,21 +559,6 @@ viewport.content = `width=device-width, initial-scale=${zoom}, user-scalable=no`
 #endif
 }
 
-// unified no-op method
-static void Cute_Core_WebViewManager_GoBack_hook(Il2CppObject* self)
-{
-#ifdef _MSC_VER
-	auto obj = GetSingletonInstance(Cute_Core_WebViewManager);
-	if (obj && self == obj)
-	{
-		if (webview)
-		{
-			webview->GoBack();
-		}
-	}
-#endif
-}
-
 static void Cute_Core_WebViewManager_OpenWeb_hook(Il2CppObject* self, Il2CppString* url)
 {
 #ifdef _MSC_VER
@@ -610,24 +612,15 @@ static void Cute_Core_WebViewManager_SetVisible_hook(Il2CppObject* self, bool vi
 	{
 		Cute::Core::WebViewManager::webviewController->put_IsVisible(visible);
 	}
-
-	if (visible)
-	{
-		MH_EnableHook(Cute_Core_WebViewManager_GoBack_addr);
-	}
-	else
-	{
-		MH_DisableHook(Cute_Core_WebViewManager_GoBack_addr);
-	}
 #endif
 }
 
 static void Cute_Core_WebViewManager_OnLoadedCallback_hook(Il2CppObject* self, Il2CppString* msg)
 {
-    auto serverUrl = GetApplicationServerUrl();
-    if (msg && serverUrl && il2cppstring(msg->chars).find(serverUrl->chars) == il2cppstring::npos)
-    {
-	const auto WebViewInitScript = R"(
+	auto serverUrl = GetApplicationServerUrl();
+	if (msg && serverUrl && il2cppstring(msg->chars).find(serverUrl->chars) == il2cppstring::npos)
+	{
+		const auto WebViewInitScript = R"(
 window.onclick = () => { Unity.call('snd_sfx_UI_decide_m_01'); };
 window.zoomScale = (window.innerWidth || window.screen.width) / 528;
 let { viewport } = document.head.getElementsByTagName('meta');
@@ -638,20 +631,20 @@ if (!viewport) {
 }
 viewport.content = `width=device-width, initial-scale=${window.zoomScale}, user-scalable=no`;
 )";
-        il2cpp_symbols::get_method_pointer<void (*)(Il2CppObject *, Il2CppString *)>(self->klass, "EvaluateJS",1)(self, il2cpp_string_new(WebViewInitScript));
-    }
-    reinterpret_cast<decltype(Cute_Core_WebViewManager_OnLoadedCallback_hook) *>(Cute_Core_WebViewManager_OnLoadedCallback_orig)(self, msg);
+		il2cpp_symbols::get_method_pointer<void (*)(Il2CppObject*, Il2CppString*)>(self->klass, "EvaluateJS", 1)(self, il2cpp_string_new(WebViewInitScript));
+	}
+	reinterpret_cast<decltype(Cute_Core_WebViewManager_OnLoadedCallback_hook)*>(Cute_Core_WebViewManager_OnLoadedCallback_orig)(self, msg);
 }
 
 static void InitAddress()
 {
 	Cute_Core_WebViewManager = il2cpp_symbols::get_class(ASSEMBLY_NAME, "Cute.Core", "WebViewManager");
 	Cute_Core_WebViewManager_Awake_addr = il2cpp_symbols::get_method_pointer(Cute_Core_WebViewManager, "Awake", 0);
-	Cute_Core_WebViewManager_GoBack_addr = il2cpp_symbols::get_method_pointer(Cute_Core_WebViewManager, "GoBack", 0);
 	Cute_Core_WebViewManager_OpenWeb_addr = il2cpp_symbols::get_method_pointer(Cute_Core_WebViewManager, "OpenWeb", 1);
 	Cute_Core_WebViewManager_SetMargins_addr = il2cpp_symbols::get_method_pointer(Cute_Core_WebViewManager, "SetMargins", 4);
 	Cute_Core_WebViewManager_SetVisible_addr = il2cpp_symbols::get_method_pointer(Cute_Core_WebViewManager, "SetVisible", 1);
-	Cute_Core_WebViewManager_Callback_addr = il2cpp_symbols::get_method_pointer(Cute_Core_WebViewManager, "get_Callback", 0);
+	Cute_Core_WebViewManager_get_Callback_addr = il2cpp_symbols::get_method_pointer(Cute_Core_WebViewManager, "get_Callback", 0);
+	Cute_Core_WebViewManager_set_Callback_addr = il2cpp_symbols::get_method_pointer(Cute_Core_WebViewManager, "set_Callback", 1);
 	Cute_Core_WebViewManager_OnLoadedCallback_addr = il2cpp_symbols::get_method_pointer(Cute_Core_WebViewManager, "OnLoadedCallback", 1);
 	Cute_Core_WebViewManager_marginNow = il2cpp_class_get_field_from_name(Cute_Core_WebViewManager, "marginNow");
 }
@@ -660,13 +653,11 @@ static void HookMethods()
 {
 #ifdef _MSC_VER
 	ADD_HOOK(Cute_Core_WebViewManager_Awake, "Cute.Core.WebViewManager::Awake at %p\n");
-	ADD_HOOK(Cute_Core_WebViewManager_GoBack, "Cute.Core.WebViewManager::GoBack at %p\n");
-	MH_DisableHook(Cute_Core_WebViewManager_GoBack_addr);
 	ADD_HOOK(Cute_Core_WebViewManager_OpenWeb, "Cute.Core.WebViewManager::OpenWeb at %p\n");
 	ADD_HOOK(Cute_Core_WebViewManager_SetMargins, "Cute.Core.WebViewManager::SetMargins at %p\n");
 	ADD_HOOK(Cute_Core_WebViewManager_SetVisible, "Cute.Core.WebViewManager::SetVisible at %p\n");
 #else
-    ADD_HOOK(Cute_Core_WebViewManager_OnLoadedCallback, "Cute.Core.WebViewManager::OnLoadedCallback at %p\n");
+	ADD_HOOK(Cute_Core_WebViewManager_OnLoadedCallback, "Cute.Core.WebViewManager::OnLoadedCallback at %p\n");
 #endif
 }
 
@@ -712,8 +703,23 @@ namespace Cute::Core
 		reinterpret_cast<decltype(Cute_Core_WebViewManager_SetMargins_hook)*>(Cute_Core_WebViewManager_SetMargins_addr)(instance, leftMargin, topMargin, rightMargin, bottomMargin);
 	}
 
+	void WebViewManager::GoBack()
+	{
+#ifdef _MSC_VER
+		if (webview)
+		{
+			webview->GoBack();
+		}
+#endif
+	}
+
 	Il2CppDelegate* WebViewManager::Callback()
 	{
-		return reinterpret_cast<Il2CppDelegate * (*)(Il2CppObject*)>(Cute_Core_WebViewManager_Callback_addr)(instance);
+		return reinterpret_cast<Il2CppDelegate * (*)(Il2CppObject*)>(Cute_Core_WebViewManager_get_Callback_addr)(instance);
+	}
+
+	void WebViewManager::Callback(Il2CppDelegate* value)
+	{
+		reinterpret_cast<void (*)(Il2CppObject*, Il2CppDelegate*)>(Cute_Core_WebViewManager_set_Callback_addr)(instance, value);
 	}
 }

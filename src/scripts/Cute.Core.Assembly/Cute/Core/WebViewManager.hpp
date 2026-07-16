@@ -28,7 +28,11 @@ namespace Cute::Core
 
 		void SetMargins(int leftMargin, int topMargin, int rightMargin, int bottomMargin);
 
+		void GoBack();
+
 		Il2CppDelegate* Callback();
+
+		void Callback(Il2CppDelegate* value);
 
 		UnityEngine::Vector4 marginNow();
 

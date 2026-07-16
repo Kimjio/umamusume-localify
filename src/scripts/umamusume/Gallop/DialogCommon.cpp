@@ -6,6 +6,8 @@ namespace
 {
 	Il2CppMethodPointer DialogCommon_Close_addr = nullptr;
 
+	Il2CppMethodPointer DialogCommon_GetButtonObj_addr = nullptr;
+
 	Il2CppMethodPointer DialogCommon_SetContentsRootLocalScale_addr = nullptr;
 	void* DialogCommon_SetContentsRootLocalScale_orig = nullptr;
 
@@ -76,6 +78,7 @@ static void InitAddress()
 	const auto DialogCommon_Data = il2cpp_symbols::get_class(ASSEMBLY_NAME, "Gallop", "DialogCommon/Data");
 
 	DialogCommon_Close_addr = il2cpp_symbols::get_method_pointer(DialogCommon, "Close", 0);
+	DialogCommon_GetButtonObj_addr = il2cpp_symbols::get_method_pointer(DialogCommon, "GetButtonObj", 1);
 	DialogCommon_SetContentsRootLocalScale_addr = il2cpp_symbols::get_method_pointer(DialogCommon, "SetContentsRootLocalScale", 1);
 	DialogCommon_Data_SetSimpleNoButtonMessage_addr = il2cpp_symbols::get_method_pointer(DialogCommon_Data, "SetSimpleNoButtonMessage", 2);
 	DialogCommon_Data_SetSimpleOneButtonMessage_addr = il2cpp_symbols::get_method_pointer(DialogCommon_Data, "SetSimpleOneButtonMessage", 5);
@@ -126,6 +129,11 @@ namespace Gallop
 	void DialogCommon::Close()
 	{
 		reinterpret_cast<void (*)(Il2CppObject*)>(DialogCommon_Close_addr)(instance);
+	}
+
+	Il2CppObject* DialogCommon::GetButtonObj(ButtonIndex buttonIndex)
+	{
+		return reinterpret_cast<Il2CppObject * (*)(Il2CppObject*, ButtonIndex)>(DialogCommon_GetButtonObj_addr)(instance, buttonIndex);
 	}
 
 	void DialogCommon::SetContentsRootLocalScale(float scale)

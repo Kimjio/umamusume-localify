@@ -16,6 +16,13 @@ namespace Gallop
 			LandscapeModeRight,
 		};
 
+		enum class ButtonIndex
+		{
+			Left,
+			Center,
+			Right
+		};
+
 		enum class DialogObjType
 		{
 			Small,
@@ -36,6 +43,9 @@ namespace Gallop
 		};
 
 		void Close();
+
+		Il2CppObject* GetButtonObj(ButtonIndex buttonIndex);
+
 		void SetContentsRootLocalScale(float scale);
 
 		using DialogCommonBase::DialogCommonBase;
