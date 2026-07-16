@@ -202,8 +202,7 @@ static string GetOqupieToken()
 
 	auto systemLanguage = UnityEngine::Application::systemLanguage();
 
-	auto SystemInfo = il2cpp_symbols::get_class("UnityEngine.CoreModule.dll", "UnityEngine",
-		"SystemInfo");
+	auto SystemInfo = il2cpp_symbols::get_class("UnityEngine.CoreModule.dll", "UnityEngine", "SystemInfo");
 
 	auto deviceId = il2cpp_symbols::get_method_pointer<Il2CppString * (*)()>(SystemInfo, "get_deviceUniqueIdentifier", 0)();
 	auto deviceIdU8 = il2cpp_u8(deviceId->chars);
@@ -217,8 +216,7 @@ static string GetOqupieToken()
 	auto operatingSystemU8 = il2cpp_u8(operatingSystem->chars);
 
 	auto manager = GetSingletonInstance(il2cpp_symbols::get_class(ASSEMBLY_NAME, "", "KakaoManager"));
-	Il2CppString* playerId = il2cpp_symbols::get_method_pointer<Il2CppString * (*)(
-		Il2CppObject*)>(manager->klass, "get_PlayerID", 0)(manager);
+	Il2CppString* playerId = il2cpp_symbols::get_method_pointer<Il2CppString * (*)(Il2CppObject*)>(manager->klass, "get_PlayerID", 0)(manager);
 	auto playerIdU8 = il2cpp_u8(playerId->chars);
 
 	auto AppVersionName = il2cpp_symbols::get_method_pointer<Il2CppString * (*)()>(ASSEMBLY_NAME, "Gallop", "DeviceHelper", "GetAppVersionName", 0)();
@@ -753,20 +751,16 @@ static void DialogHomeMenuSupport_OnSelectMenu_hook(int menu) {
 		// FAQ
 		auto closeText = GetTextIdByName(IL2CPP_STRING("Common0007"));
 		auto faqText = GetTextIdByName(IL2CPP_STRING("Menu0013"));
-		auto url = string(
-			" https://kakaogames.oqupie.com/portals/1576/categories/3438?jwt=").append(GetOqupieToken());
-		OpenWebViewDialog(il2cpp_string_new(url.data()), Gallop::Localize::Get(faqText),
-			closeText);
-		return;
+		string url = string("https://kakaogames.oqupie.com/portals/1576/categories/3438?jwt=").append(GetOqupieToken());
+		OpenWebViewDialog(il2cpp_string_new(url.data()), Gallop::Localize::Get(faqText), closeText);
 	}
 	case 1:
 	{
 		// QNA
 		auto closeText = GetTextIdByName(IL2CPP_STRING("Common0007"));
-		auto qnaText = GetTextIdByName(IL2CPP_STRING("0ommon0050"));
-		auto url = string("https://kakaogames.oqupie.com/portals/finder?jwt=").append(GetOqupieToken());
+		auto qnaText = GetTextIdByName(IL2CPP_STRING("Common0050"));
+		string url = string("https://kakaogames.oqupie.com/portals/finder?jwt=").append(GetOqupieToken());
 		OpenWebViewDialog(il2cpp_string_new(url.data()), Gallop::Localize::Get(qnaText), closeText);
-		return;
 	}
 	case 2:
 	{
@@ -797,7 +791,6 @@ static void DialogTitleMenu_OnSelectMenu_hook(int menu)
 	{
 	case 0:
 		OpenNewsDialog();
-		return;
 	case 2:
 	{
 		auto closeText = GetTextIdByName(IL2CPP_STRING("Common0007"));
@@ -806,7 +799,6 @@ static void DialogTitleMenu_OnSelectMenu_hook(int menu)
 			GetOqupieToken());
 		OpenWebViewDialog(il2cpp_string_new(url.data()), Gallop::Localize::Get(qnaText),
 			closeText);
-		return;
 	}
 	default:
 		reinterpret_cast<decltype(DialogTitleMenu_OnSelectMenu_hook)*>(DialogTitleMenu_OnSelectMenu_orig)(menu);
