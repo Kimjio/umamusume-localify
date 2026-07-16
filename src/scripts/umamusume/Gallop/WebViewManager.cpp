@@ -11,6 +11,7 @@
 #include "../../UnityEngine.CoreModule/UnityEngine/RectTransform.hpp"
 #include "../../UnityEngine.CoreModule/UnityEngine/Screen.hpp"
 #include "../../Cute.Core.Assembly/Cute/Core/WebViewManager.hpp"
+#include "../../Cute.Cri.Assembly/Cute/Cri/AudioPlayback.hpp"
 
 #ifdef _MSC_VER
 #include <WebView2.h>
@@ -215,7 +216,7 @@ static string GetOqupieToken()
 	auto operatingSystem = il2cpp_symbols::get_method_pointer<Il2CppString * (*)()>(SystemInfo, "get_operatingSystem", 0)();
 	auto operatingSystemU8 = il2cpp_u8(operatingSystem->chars);
 
-	auto manager = GetSingletonInstanceByMethod(il2cpp_symbols::get_class(ASSEMBLY_NAME, "", "KakaoManager"));
+	auto manager = GetSingletonInstance(il2cpp_symbols::get_class(ASSEMBLY_NAME, "", "KakaoManager"));
 	Il2CppString* playerId = il2cpp_symbols::get_method_pointer<Il2CppString * (*)(
 		Il2CppObject*)>(manager->klass, "get_PlayerID", 0)(manager);
 	auto playerIdU8 = il2cpp_u8(playerId->chars);
@@ -331,7 +332,6 @@ static Il2CppString* Gallop_WebViewManager_GetUrl_hook(Il2CppObject* self, Gallo
 	{
 		return il2cpp_string_new("");
 	}
-
 
 	string path = "/contents/";
 
@@ -450,6 +450,162 @@ static void Gallop_WebViewManager_Open_hook(Il2CppObject* self, Il2CppString* ur
 
 		webViewManager.OpenWebView(url, onLoadedCallback);
 
+		webViewManager.CuteWebView().OpenWeb(url);
+
+		auto callback = &CreateDelegateWithClass(GetGenericClass(GetRuntimeType("mscorlib.dll", "System", "Action`1"), GetRuntimeType(il2cpp_defaults.string_class)), webViewManager,
+			*[](Il2CppObject* self, Il2CppString* msg)
+			{
+				IL2CPP_BASIC_STRING msgStr = msg->chars;
+
+				if (msgStr.contains(IL2CPP_STRING("showBackButton")))
+				{
+					auto _currentWebViewDialog = Gallop::WebViewManager(self)._currentWebViewDialog();
+
+					auto button = Gallop::DialogCommon(_currentWebViewDialog).GetButtonObj(Gallop::DialogCommon::ButtonIndex::Center);
+					auto TargetText = il2cpp_symbols::get_method_pointer<Il2CppObject * (*)(Il2CppObject*)>(button->klass, "get_TargetText", 0)(button);
+					il2cpp_symbols::get_method_pointer<void (*)(Il2CppObject*, Il2CppString*)>(TargetText->klass, "set_text", 1)(TargetText, Gallop::Localize::Get(GetTextIdByName(IL2CPP_STRING("Common0082"))));
+					il2cpp_symbols::get_method_pointer<void (*)(Il2CppObject*)>(button->klass, "FixTargetText", 0)(button);
+					il2cpp_symbols::get_method_pointer<void (*)(Il2CppObject*, Il2CppDelegate*)>(button->klass, "SetOnClick", 1)(button, CreateDelegate(self,
+						*[](Il2CppObject* self)
+						{
+							Cute::Core::WebViewManager::Instance().GoBack();
+
+							auto _currentWebViewDialog = Gallop::WebViewManager(self)._currentWebViewDialog();
+
+							auto button = Gallop::DialogCommon(_currentWebViewDialog).GetButtonObj(Gallop::DialogCommon::ButtonIndex::Center);
+							auto TargetText = il2cpp_symbols::get_method_pointer<Il2CppObject * (*)(Il2CppObject*)>(button->klass, "get_TargetText", 0)(button);
+							il2cpp_symbols::get_method_pointer<void (*)(Il2CppObject*, Il2CppString*)>(TargetText->klass, "set_text", 1)(TargetText, Gallop::Localize::Get(GetTextIdByName(IL2CPP_STRING("Common0007"))));
+							il2cpp_symbols::get_method_pointer<void (*)(Il2CppObject*)>(button->klass, "FixTargetText", 0)(button);
+							il2cpp_symbols::get_method_pointer<void (*)(Il2CppObject*, Il2CppDelegate*)>(button->klass, "SetOnClick", 1)(button, CreateDelegate(_currentWebViewDialog,
+								*[](Il2CppObject* self)
+								{
+									Gallop::DialogCommon(self).Close();
+								}
+							));
+						}
+					));
+				}
+
+				if (msgStr.starts_with(IL2CPP_STRING("snd_")))
+				{
+					const auto AudioManager = GetSingletonInstance(il2cpp_symbols::get_class(ASSEMBLY_NAME, "Gallop", "AudioManager"));
+
+					Cute::Cri::AudioPlayback res{};
+
+					uint8_t parameters_count = 0;
+					auto PlaySe = il2cpp_symbols::find_method(AudioManager->klass, [&parameters_count](const MethodInfo* info)
+						{
+							if (info->name == "PlaySe"s && info->parameters[0]->type == IL2CPP_TYPE_STRING)
+							{
+								parameters_count = info->parameters_count;
+								return true;
+							}
+
+							return false;
+						}
+					);
+
+					if (parameters_count == 14)
+					{
+						reinterpret_cast<Cute::Cri::AudioPlayback* (*)(Cute::Cri::AudioPlayback*, Il2CppObject*, Il2CppString*, bool, float, Il2CppObject*,
+							float, float, float, float, float, float, bool, float, uint64_t, int
+							)>(PlaySe)(&res, AudioManager, msg, false, 0.0, nullptr, 0.0, 10.0, 100.0, 0.0, 0.0, 1.0, false, 1.0, 0, INT_MAX);
+						return;
+					}
+
+					struct SelectorInfo
+					{
+						Il2CppString* Selector;
+						Il2CppString* Label;
+					};
+
+					SelectorInfo selectorInfo{};
+
+					reinterpret_cast<Cute::Cri::AudioPlayback* (*)(Cute::Cri::AudioPlayback*, Il2CppObject*, Il2CppString*, bool, float, Il2CppObject*,
+						float, float, float, float, float, float, float, float, float, bool, float, uint64_t, int, SelectorInfo*
+						)>(PlaySe)(&res, AudioManager, msg, false, 0.0, nullptr, 0.0, 10.0, 100.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, false, 1.0, 0, INT_MAX, &selectorInfo);
+				}
+
+				if (msgStr.starts_with(IL2CPP_STRING("geturl_")))
+				{
+					auto HttpManager = GetSingletonInstance(il2cpp_symbols::get_class("Cute.Http.Assembly.dll", "Cute.Http", "HttpManager"));
+
+					if (il2cpp_symbols::get_method_pointer<bool (*)(Il2CppObject*)>(HttpManager->klass, "get_IsConnecting", 0)(HttpManager))
+					{
+						return;
+					}
+
+					msgStr = msgStr.substr(7);
+					int bannerId;
+					if (il2cpp_symbols::get_method_pointer<bool (*)(Il2CppString*, int*)>(il2cpp_defaults.int32_class, "TryParse", 2)(msg, &bannerId))
+					{
+						il2cpp_symbols::get_method_pointer<void (*)(Il2CppDelegate*)>(ASSEMBLY_NAME, "Gallop", "GallopUtil", "PushOpenUrlConfirmDialog", 1)(
+							CreateDelegate(il2cpp_value_box(il2cpp_defaults.int32_class, &bannerId),
+								*[](Il2CppObject* self)
+								{
+									auto bannerId = il2cpp_object_unbox_type<int>(self);
+
+									auto bannerUrlRequest = il2cpp_object_new(il2cpp_symbols::get_class("umamusume.Http.dll", "Gallop", "BannerUrlRequest"));
+									il2cpp_runtime_object_init(bannerUrlRequest);
+
+									auto banner_id_Field = il2cpp_class_get_field_from_name(bannerUrlRequest->klass, "banner_id");
+									il2cpp_field_set_value(bannerUrlRequest, banner_id_Field, &bannerId);
+									il2cpp_symbols::get_method_pointer<void (*)(Il2CppObject*, Il2CppDelegate*, Il2CppDelegate*, bool, bool, bool, bool)>(bannerUrlRequest->klass, "Send", 6)(
+										bannerUrlRequest,
+										&CreateDelegateWithClassStatic(GetGenericClass(GetRuntimeType("mscorlib.dll", "System", "Action`1"), GetRuntimeType(il2cpp_symbols::get_class("umamusume.Http.dll", "Gallop", "BannerUrlResponse"))),
+											*[](void*, Il2CppObject* res)
+											{
+												auto dataField = il2cpp_class_get_field_from_name(res->klass, "data");
+												Il2CppObject* data;
+												il2cpp_field_get_value(res, dataField, &data);
+												auto urlField = il2cpp_class_get_field_from_name(data->klass, "url");
+												Il2CppString* url;
+												il2cpp_field_get_value(data, urlField, &url);
+												if (url && !IL2CPP_BASIC_STRING(url->chars).empty())
+												{
+													UnityEngine::Application::OpenURL(url);
+												}
+											}
+										)->delegate,
+										nullptr,
+										true,
+										true,
+										false,
+										false
+										);
+								}
+							)
+							);
+					}
+				}
+
+				if (msgStr.starts_with(IL2CPP_STRING("externalbrowser_")))
+				{
+					Gallop::DialogCommon::Data data = Gallop::DialogCommon::Data();
+					data.SetSimpleTwoButtonMessage(
+						Gallop::Localize::Get(GetTextIdByName(IL2CPP_STRING("Common0009"))),
+						Gallop::Localize::Get(GetTextIdByName(IL2CPP_STRING("Home0073"))),
+						&CreateDelegateWithClass(
+							GetGenericClass(GetRuntimeType("mscorlib.dll", "System", "Action`1"), GetRuntimeType(il2cpp_symbols::get_class(ASSEMBLY_NAME, "Gallop", "DialogCommon"))),
+							reinterpret_cast<Il2CppObject*>(msg),
+							*[](Il2CppObject* self, Il2CppObject* dialog)
+							{
+								auto msg = reinterpret_cast<Il2CppString*>(self);
+								if (IL2CPP_BASIC_STRING(msg->chars).empty())
+								{
+									return;
+								}
+								UnityEngine::Application::OpenURL(msg);
+							}
+						)->delegate
+					);
+				}
+			}
+		)->delegate;
+
+
+		webViewManager.CuteWebView().Callback(callback);
+
 		UnityEngine::Rect WebViewRectOffset;
 		auto WebViewRectOffsetField = il2cpp_class_get_field_from_name(dialogData->klass, "WebViewRectOffset");
 		il2cpp_field_get_value(dialogData, WebViewRectOffsetField, &WebViewRectOffset);
@@ -556,7 +712,7 @@ static void DialogHomeMenuMain_SetupTrainer_hook(Il2CppObject* self, Il2CppObjec
 			MH_EnableHook(reinterpret_cast<void*>(guideCallback->method_ptr));
 #else
 			DobbyHook(reinterpret_cast<void*>(guideCallback->method_ptr),
-									  reinterpret_cast<void*>(newFn), &DialogHomeMenuMain_SetupTrainer_callback);
+				reinterpret_cast<void*>(newFn), &DialogHomeMenuMain_SetupTrainer_callback);
 #endif
 		}
 	}
@@ -583,7 +739,7 @@ static void DialogHomeMenuMain_SetupOther_hook(Il2CppObject* self) {
 			MH_EnableHook(reinterpret_cast<void*>(helpCallback->method_ptr));
 #else
 			DobbyHook(reinterpret_cast<void*>(helpCallback->method_ptr),
-						  reinterpret_cast<void*>(newFn), &DialogHomeMenuMain_SetupOther_callback);
+				reinterpret_cast<void*>(newFn), &DialogHomeMenuMain_SetupOther_callback);
 #endif
 		}
 	}
@@ -694,8 +850,8 @@ static void DialogSingleModeTopMenu_Setup_hook(Il2CppObject* self)
 			MH_EnableHook(reinterpret_cast<void*>(helpCallback->method_ptr));
 #else
 			DobbyHook(reinterpret_cast<void*>(helpCallback->method_ptr),
-									  reinterpret_cast<void*>(newFn),
-									  &DialogSingleModeTopMenu_Setup_help_callback);
+				reinterpret_cast<void*>(newFn),
+				&DialogSingleModeTopMenu_Setup_help_callback);
 #endif
 		}
 	}
@@ -721,8 +877,8 @@ static void DialogSingleModeTopMenu_Setup_hook(Il2CppObject* self)
 			MH_EnableHook(reinterpret_cast<void*>(guideCallback->method_ptr));
 #else
 			DobbyHook(reinterpret_cast<void*>(guideCallback->method_ptr),
-									  reinterpret_cast<void*>(newFn),
-									  &DialogSingleModeTopMenu_Setup_guide_callback);
+				reinterpret_cast<void*>(newFn),
+				&DialogSingleModeTopMenu_Setup_guide_callback);
 #endif
 		}
 	}
@@ -735,7 +891,7 @@ static void ChampionsInfoWebViewButton_OnClick_hook(Il2CppObject*)
 	Il2CppObject* manager;
 	il2cpp_field_static_get_value(managerInstanceField, &manager);
 
-	auto url = il2cpp_symbols::get_method_pointer<Il2CppString * (*)(Il2CppObject*, Il2CppString*)>(manager->klass, "GetKakaoOptionValue",1)(manager, il2cpp_string_new("kakaoUmaChampion"));
+	auto url = il2cpp_symbols::get_method_pointer<Il2CppString * (*)(Il2CppObject*, Il2CppString*)>(manager->klass, "GetKakaoOptionValue", 1)(manager, il2cpp_string_new("kakaoUmaChampion"));
 
 	OpenWebViewDialog(url, Gallop::Localize::Get(GetTextIdByName(IL2CPP_STRING("Common0161"))),
 		GetTextIdByName(IL2CPP_STRING("Common0007")));
@@ -772,7 +928,7 @@ static void PartsNewsButton_Setup_hook(Il2CppObject* self, Il2CppDelegate* onUpd
 				MH_EnableHook(reinterpret_cast<void*>(callback->method_ptr));
 #else
 				DobbyHook(reinterpret_cast<void*>(callback->method_ptr),
-							  reinterpret_cast<void*>(newFn), &PartsNewsButton_Setup_callback);
+					reinterpret_cast<void*>(newFn), &PartsNewsButton_Setup_callback);
 #endif
 			}
 		}
@@ -1149,7 +1305,7 @@ namespace Gallop
 	Il2CppString* WebViewManager::GetGachaUrl(int gachaId, int stepupId)
 	{
 		if (Gallop_WebViewManager_GetGachaUrl1_addr) {
-			return reinterpret_cast<Il2CppString*(*)(int)>(Gallop_WebViewManager_GetGachaUrl1_addr)(gachaId);
+			return reinterpret_cast<Il2CppString * (*)(int)>(Gallop_WebViewManager_GetGachaUrl1_addr)(gachaId);
 		}
 
 		return reinterpret_cast<decltype(GetGachaUrl)*>(Gallop_WebViewManager_GetGachaUrl_addr)(gachaId, stepupId);

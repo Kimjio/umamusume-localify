@@ -428,7 +428,7 @@ static Il2CppObject* StartCoroutineManaged2_hook(Il2CppObject* self, Il2CppObjec
 							Il2CppObject* _bgCamera = uiManager._bgCamera();
 							il2cpp_symbols::get_method_pointer<void (*)(Il2CppObject*, UnityEngine::Color)>(_bgCamera->klass, "set_backgroundColor", 1)(_bgCamera,
 								il2cpp_symbols::get_method_pointer<UnityEngine::Color(*)()>("UnityEngine.CoreModule.dll", "UnityEngine", "Color", "get_clear", IgnoreNumberOfArguments)());
-							auto bgManager = GetSingletonInstanceByMethod(il2cpp_symbols::get_class("umamusume.dll", "Gallop", "BGManager"));
+							auto bgManager = GetSingletonInstance(il2cpp_symbols::get_class("umamusume.dll", "Gallop", "BGManager"));
 							il2cpp_symbols::get_method_pointer<void (*)(Il2CppObject*, uint32_t, bool)>(bgManager->klass, "SetBg", 2)(bgManager, 1, false);
 							il2cpp_symbols::get_method_pointer<void (*)(bool)>(bgManager->klass, "SetBgCameraEnable", 1)(true);
 

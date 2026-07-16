@@ -373,10 +373,17 @@ inline Il2CppMulticastDelegate* CreateUnityActionStatic(R(*fn)())
 
 inline Il2CppObject* GetSingletonInstance(Il2CppClass* klass)
 {
-	if (!klass || !klass->parent)
+	if (!klass)
 	{
 		return nullptr;
 	}
+	
+	auto get_Instance = il2cpp_symbols::get_method(klass, "get_Instance", 0);
+	if (get_Instance)
+	{
+		return reinterpret_cast<Il2CppObject * (*)(const MethodInfo*)>(get_Instance->methodPointer)(get_Instance);
+	}
+
 	auto instanceField = il2cpp_class_get_field_from_name(klass, "_instance");
 	if (!instanceField)
 	{
@@ -386,22 +393,14 @@ inline Il2CppObject* GetSingletonInstance(Il2CppClass* klass)
 			return nullptr;
 		}
 	}
-	Il2CppObject* instance;
-	il2cpp_field_static_get_value(instanceField, &instance);
-	return instance;
-}
 
-inline Il2CppObject* GetSingletonInstanceByMethod(Il2CppClass* klass)
-{
-	if (!klass || !klass->parent)
+	if (instanceField)
 	{
-		return nullptr;
+		Il2CppObject* instance;
+		il2cpp_field_static_get_value(instanceField, &instance);
+		return instance;
 	}
-	auto get_Instance = il2cpp_symbols::get_method_pointer<Il2CppObject * (*)()>(klass, "get_Instance", 0);
-	if (get_Instance)
-	{
-		return get_Instance();
-	}
+
 	return nullptr;
 }
 

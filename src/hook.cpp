@@ -1710,7 +1710,7 @@ namespace
 			return false;
 		}
 
-		auto choiceController = GetSingletonInstanceByMethod(il2cpp_symbols::get_class("umamusume.dll", "Gallop", "StoryChoiceController"));
+		auto choiceController = GetSingletonInstance(il2cpp_symbols::get_class("umamusume.dll", "Gallop", "StoryChoiceController"));
 		if (!choiceController)
 		{
 			return false;
