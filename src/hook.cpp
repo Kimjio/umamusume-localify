@@ -3615,7 +3615,10 @@ namespace
 
 		unique_ptr<DesktopNotificationHistoryCompat> history;
 		DesktopNotificationManagerCompat::get_History(&history);
-		history->Clear();
+		if (history)
+		{
+			history->Clear();
+		}
 
 		TaskbarManager::Initialze(GetHWND());
 
@@ -3894,30 +3897,34 @@ namespace
 					TaskbarManager::SetProgressState(TBPF_NOPROGRESS);
 				}
 
-				if (sceneName == IL2CPP_STRING("Live"))
+				if (SystemMediaTransportControlsManager::instance)
 				{
-					SystemMediaTransportControlsManager::instance.IsEnabled(true);
+					if (sceneName == IL2CPP_STRING("Live"))
+					{
+						SystemMediaTransportControlsManager::instance.IsEnabled(true);
 
-					auto loadSettings = il2cpp_symbols::get_method_pointer<Il2CppObject * (*)()>("umamusume.dll", "Gallop.Live", "Director", "get_LoadSettings", IgnoreNumberOfArguments)();
-					auto musicId = il2cpp_class_get_method_from_name_type<int (*)(Il2CppObject*)>(loadSettings->klass, "get_MusicId", 0)->methodPointer(loadSettings);
+						auto loadSettings = il2cpp_symbols::get_method_pointer<Il2CppObject * (*)()>("umamusume.dll", "Gallop.Live", "Director", "get_LoadSettings", IgnoreNumberOfArguments)();
+						auto musicId = il2cpp_class_get_method_from_name_type<int (*)(Il2CppObject*)>(loadSettings->klass, "get_MusicId", 0)->methodPointer(loadSettings);
 
-					SystemMediaTransportControlsManager::UpdateMetadata(musicId);
-					SystemMediaTransportControlsManager::instance.IsPreviousEnabled(false);
-					SystemMediaTransportControlsManager::instance.IsNextEnabled(true);
-				}
-				else if (sceneName == IL2CPP_STRING("Home"))
-				{
-					SystemMediaTransportControlsManager::instance.IsEnabled(true);
-					SystemMediaTransportControlsManager::instance.IsPreviousEnabled(false);
-					SystemMediaTransportControlsManager::instance.IsNextEnabled(false);
+						SystemMediaTransportControlsManager::UpdateMetadata(musicId);
+						SystemMediaTransportControlsManager::instance.IsPreviousEnabled(false);
+						SystemMediaTransportControlsManager::instance.IsNextEnabled(true);
+					}
+					else if (sceneName == IL2CPP_STRING("Home"))
+					{
+						SystemMediaTransportControlsManager::instance.IsEnabled(true);
+						SystemMediaTransportControlsManager::instance.IsPreviousEnabled(false);
+						SystemMediaTransportControlsManager::instance.IsNextEnabled(false);
 
-					SystemMediaTransportControlsManager::UpdateMetadata();
-				}
-				else
-				{
-					SystemMediaTransportControlsManager::instance.IsEnabled(false);
-					SystemMediaTransportControlsManager::instance.IsPreviousEnabled(false);
-					SystemMediaTransportControlsManager::instance.IsNextEnabled(false);
+						SystemMediaTransportControlsManager::UpdateMetadata();
+					}
+					else
+					{
+						SystemMediaTransportControlsManager::instance.IsEnabled(false);
+						SystemMediaTransportControlsManager::instance.IsPreviousEnabled(false);
+						SystemMediaTransportControlsManager::instance.IsNextEnabled(false);
+
+					}
 				}
 
 				if (sceneName == IL2CPP_STRING("Title"))
