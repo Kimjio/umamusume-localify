@@ -1152,7 +1152,14 @@ static void InitAddress()
 	Gallop_WebViewManager__errorCallback = il2cpp_class_get_field_from_name(il2cpp_symbols::get_class(ASSEMBLY_NAME, "Gallop", "WebViewManager"), "_errorCallback");
 	Gallop_WebViewManager__fontFilePaths = il2cpp_class_get_field_from_name(il2cpp_symbols::get_class(ASSEMBLY_NAME, "Gallop", "WebViewManager"), "_fontFilePaths");
 
-	Gallop_WebViewManager_WebViewInfo = il2cpp_class_from_type(Gallop_WebViewManager_TryGetWebViewInfo->parameters[1]);
+	if (Game::CurrentUnityVersion == Game::UnityVersion::Unity20)
+	{
+		Gallop_WebViewManager_WebViewInfo = il2cpp_class_from_type(reinterpret_cast<const MethodInfo2020*>(Gallop_WebViewManager_TryGetWebViewInfo)->parameters[1].parameter_type);
+	}
+	else
+	{
+		Gallop_WebViewManager_WebViewInfo = il2cpp_class_from_type(Gallop_WebViewManager_TryGetWebViewInfo->parameters[1]);
+	}
 
 	Gallop_WebViewManager_WebViewInfo_ctor_addr = il2cpp_symbols::get_method_pointer(Gallop_WebViewManager_WebViewInfo, ".ctor", 4);
 	Gallop_WebViewManager_WebViewInfo__url = il2cpp_class_get_field_from_name(Gallop_WebViewManager_WebViewInfo, "_url");

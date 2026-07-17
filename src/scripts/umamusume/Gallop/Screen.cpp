@@ -10,6 +10,11 @@
 #include "StandaloneWindowResize.hpp"
 #endif
 
+#ifdef __ANDROID__
+#include <jni.h>
+#include "zygoteloader/dex.hpp"
+#endif
+
 #include "config/config.hpp"
 
 namespace
@@ -167,8 +172,33 @@ static void Setup_hook()
 	UnityEngine::Screen::autorotateToPortrait(true);
 	UnityEngine::Screen::autorotateToPortraitUpsideDown(true);
 	UnityEngine::Screen::autorotateToLandscapeLeft(true);
-    UnityEngine::Screen::autorotateToLandscapeRight(true);
-	UnityEngine::Screen::RequestOrientation(ScreenOrientation::AutoRotation);
+	UnityEngine::Screen::autorotateToLandscapeRight(true);
+	UnityEngine::Screen::RequestOrientation(static_cast<ScreenOrientation>(6));
+#ifdef __ANDROID__
+	JavaVM *javaVM;
+	jsize numVMs = 0;
+	JNI_GetCreatedJavaVMs(&javaVM, 1, &numVMs);
+
+	JNIEnv *env;
+	javaVM->GetEnv(reinterpret_cast<void **>(&env), JNI_VERSION_1_6);
+	if (env) {
+		auto get_Activity = il2cpp_symbols::get_method_pointer<Il2CppObject *(*)()>(
+				"UnityEngine.AndroidJNIModule.dll", "UnityEngine.Android", "AndroidApp",
+				"get_Activity", 0);
+
+		if (!get_Activity) {
+			get_Activity = il2cpp_symbols::get_method_pointer<Il2CppObject *(*)()>(
+					"UnityEngine.AndroidJNIModule.dll", "UnityEngine.Android", "Permission",
+					"GetActivity", 0);
+		}
+
+		auto il2cppActivity = get_Activity();
+		auto activity = il2cpp_symbols::get_method_pointer<jobject(*)(Il2CppObject * )>(
+				il2cppActivity->klass, "GetRawObject", 0)(il2cppActivity);
+
+		// setRequestedOrientation(env, activity);
+	}
+#endif
 	Gallop::Screen::UpdateOriginalScreenSize();
 }
 

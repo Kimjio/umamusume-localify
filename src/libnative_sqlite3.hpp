@@ -105,16 +105,15 @@
 #define NOMINMAX
 #include <Windows.h>
 
-#define CALL_PROC(name) if (name##_addr) return reinterpret_cast<decltype(name)*>(name##_addr)
 #define SET_PROC(name) name##_addr = reinterpret_cast<decltype(name)*>(GetProcAddress(libnative, #name))
+#else
+#include <dlfcn.h>
+
+#define SET_PROC(name) name##_addr = reinterpret_cast<decltype(name)*>(dlsym(libnative, #name))
 #endif
 
+#define CALL_PROC(name) if (name##_addr) return reinterpret_cast<decltype(name)*>(name##_addr)
 #define ORIG_SYM(name) reinterpret_cast<decltype(name)*>(name##_orig)
-
-#include <string>
-#include <filesystem>
-
-#include "il2cpp/il2cpp_symbols.hpp"
 
 using namespace std;
 
@@ -317,6 +316,8 @@ inline void init_sqlite3()
 	SetDllDirectoryW((name + L"_Data\\Plugins\\x86_64\\"s).data());
 	libnative = LoadLibraryW(L"libnative.dll");
 	SetDllDirectoryW(nullptr);
+#else
+	libnative = dlopen("libnative.so", RTLD_NOW);
 #endif
 
 	SET_PROC(sqlite3_bind_blob);

@@ -33,13 +33,11 @@ static void InitAddress()
 
 static void HookMethods()
 {
-#ifdef _MSC_VER
 	if (Game::CurrentGameRegion == Game::Region::TWN)
 	{
 		ADD_HOOK(InjectFix_BUMA_LoadLocalPatch, "InjectFix_BUMA::LoadLocalPatch at %p\n");
 		ADD_HOOK(InjectFix_BUMA_LoadRemotePatch, "InjectFix_BUMA::LoadRemotePatch at %p\n");
 	}
-#endif
 }
 
 STATIC

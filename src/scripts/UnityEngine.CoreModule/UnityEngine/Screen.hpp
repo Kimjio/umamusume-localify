@@ -12,6 +12,16 @@ namespace UnityEngine
 	{
 		uint32_t numerator;
 		uint32_t denominator;
+
+        uint32_t value() const
+        {
+            if (denominator <= 0)
+			{
+				return numerator;
+			}
+
+            return numerator / denominator;
+        }
 	};
 
 	class Screen

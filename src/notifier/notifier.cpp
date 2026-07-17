@@ -1,4 +1,5 @@
 #include <string>
+#include <exception>
 #include <httplib.h>
 #include "stdinclude.hpp"
 

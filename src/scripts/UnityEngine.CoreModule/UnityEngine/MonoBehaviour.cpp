@@ -400,7 +400,10 @@ static Il2CppObject* StartCoroutineManaged2_hook(Il2CppObject* self, Il2CppObjec
 				}
 
 #ifdef __ANDROID__
-				il2cpp_symbols::get_method_pointer("Unity.Notifications.Android.dll", "Unity.Notifications.Android", "AndroidNotificationCenter", "CancelAllDisplayedNotifications", 0)();
+            if (auto CancelAllDisplayedNotifications = il2cpp_symbols::get_method_pointer("Unity.Notifications.Android.dll", "Unity.Notifications.Android", "AndroidNotificationCenter", "CancelAllDisplayedNotifications", 0))
+            {
+                CancelAllDisplayedNotifications();
+            }
 #endif
 
 				auto GameSystem = Gallop::GameSystem::Instance();

@@ -1,5 +1,6 @@
 #pragma once
-#include <codecvt>
+#include <cstddef>
+#include <cstdint>
 #include <string>
 #include <vector>
 #include <sstream>
@@ -61,8 +62,26 @@ inline string wide_u8(const wstring& wstr)
 
 	return result;
 #else
-	wstring_convert<codecvt_utf8_utf16<wchar_t>, wchar_t> utf8conv;
-	return utf8conv.to_bytes(wstr);
+	string u8;
+	for (const wchar_t wc : wstr) {
+		const auto cp = static_cast<uint32_t>(wc);
+		if (cp <= 0x7f) {
+			u8 += static_cast<char>(cp);
+		} else if (cp <= 0x7ff) {
+			u8 += static_cast<char>(0xc0 | (cp >> 6));
+			u8 += static_cast<char>(0x80 | (cp & 0x3f));
+		} else if (cp <= 0xffff) {
+			u8 += static_cast<char>(0xe0 | (cp >> 12));
+			u8 += static_cast<char>(0x80 | ((cp >> 6) & 0x3f));
+			u8 += static_cast<char>(0x80 | (cp & 0x3f));
+		} else {
+			u8 += static_cast<char>(0xf0 | (cp >> 18));
+			u8 += static_cast<char>(0x80 | ((cp >> 12) & 0x3f));
+			u8 += static_cast<char>(0x80 | ((cp >> 6) & 0x3f));
+			u8 += static_cast<char>(0x80 | (cp & 0x3f));
+		}
+	}
+	return u8;
 #endif
 }
 
@@ -78,8 +97,33 @@ inline string u16_u8(const u16string& str)
 
 	return result;
 #else
-	wstring_convert<codecvt_utf8_utf16<char16_t>, char16_t> utf16conv;
-	return utf16conv.to_bytes(str);
+	string u8;
+	for (size_t i = 0; i < str.length(); ++i) {
+		uint32_t cp = str[i];
+		if (cp >= 0xd800 && cp <= 0xdbff && i + 1 < str.length()) {
+			const uint32_t low = str[i + 1];
+			if (low >= 0xdc00 && low <= 0xdfff) {
+				cp = 0x10000 + ((cp - 0xd800) << 10) + (low - 0xdc00);
+				++i;
+			}
+		}
+		if (cp <= 0x7f) {
+			u8 += static_cast<char>(cp);
+		} else if (cp <= 0x7ff) {
+			u8 += static_cast<char>(0xc0 | (cp >> 6));
+			u8 += static_cast<char>(0x80 | (cp & 0x3f));
+		} else if (cp <= 0xffff) {
+			u8 += static_cast<char>(0xe0 | (cp >> 12));
+			u8 += static_cast<char>(0x80 | ((cp >> 6) & 0x3f));
+			u8 += static_cast<char>(0x80 | (cp & 0x3f));
+		} else {
+			u8 += static_cast<char>(0xf0 | (cp >> 18));
+			u8 += static_cast<char>(0x80 | ((cp >> 12) & 0x3f));
+			u8 += static_cast<char>(0x80 | ((cp >> 6) & 0x3f));
+			u8 += static_cast<char>(0x80 | (cp & 0x3f));
+		}
+	}
+	return u8;
 #endif
 }
 
@@ -95,8 +139,30 @@ inline wstring u8_wide(const string& str)
 
 	return result;
 #else
-	wstring_convert<codecvt_utf8<wchar_t>, wchar_t> wconv;
-	return wconv.from_bytes(str);
+	wstring w;
+	for (size_t i = 0; i < str.length(); ) {
+		uint32_t cp = 0;
+		const uint8_t c = str[i++];
+		if (c <= 0x7f) {
+			cp = c;
+		} else if (c <= 0xdf) {
+			if (i >= str.length()) break;
+			cp = (c & 0x1f) << 6 | (static_cast<uint8_t>(str[i++]) & 0x3f);
+		} else if (c <= 0xef) {
+			if (i + 1 >= str.length()) break;
+			const uint32_t b1 = static_cast<uint8_t>(str[i++]) & 0x3f;
+			const uint32_t b2 = static_cast<uint8_t>(str[i++]) & 0x3f;
+			cp = (c & 0x0f) << 12 | b1 << 6 | b2;
+		} else {
+			if (i + 2 >= str.length()) break;
+			const uint32_t b1 = static_cast<uint8_t>(str[i++]) & 0x3f;
+			const uint32_t b2 = static_cast<uint8_t>(str[i++]) & 0x3f;
+			const uint32_t b3 = static_cast<uint8_t>(str[i++]) & 0x3f;
+			cp = (c & 0x07) << 18 | b1 << 12 | b2 << 6 | b3;
+		}
+		w += static_cast<wchar_t>(cp);
+	}
+	return w;
 #endif
 }
 
@@ -112,8 +178,37 @@ inline u16string u8_u16(const string& str)
 
 	return result;
 #else
-	wstring_convert<codecvt_utf8<char16_t>, char16_t> wconv;
-	return wconv.from_bytes(str);
+	u16string u16;
+	for (size_t i = 0; i < str.length(); ) {
+		uint32_t cp = 0;
+		const uint8_t c = str[i++];
+		if (c <= 0x7f) {
+			cp = c;
+		} else if (c <= 0xdf) {
+			if (i >= str.length()) break;
+			cp = (c & 0x1f) << 6 | (static_cast<uint8_t>(str[i++]) & 0x3f);
+		} else if (c <= 0xef) {
+			if (i + 1 >= str.length()) break;
+			const uint32_t b1 = static_cast<uint8_t>(str[i++]) & 0x3f;
+			const uint32_t b2 = static_cast<uint8_t>(str[i++]) & 0x3f;
+			cp = (c & 0x0f) << 12 | b1 << 6 | b2;
+		} else {
+			if (i + 2 >= str.length()) break;
+			const uint32_t b1 = static_cast<uint8_t>(str[i++]) & 0x3f;
+			const uint32_t b2 = static_cast<uint8_t>(str[i++]) & 0x3f;
+			const uint32_t b3 = static_cast<uint8_t>(str[i++]) & 0x3f;
+			cp = (c & 0x07) << 18 | b1 << 12 | b2 << 6 | b3;
+		}
+
+		if (cp <= 0xffff) {
+			u16 += static_cast<char16_t>(cp);
+		} else {
+			cp -= 0x10000;
+			u16 += static_cast<char16_t>(0xd800 | (cp >> 10));
+			u16 += static_cast<char16_t>(0xdc00 | (cp & 0x3ff));
+		}
+	}
+	return u16;
 #endif
 }
 
@@ -147,8 +242,8 @@ inline il2cppstring u8_il2cpp(const string& str)
 
 	return result;
 #else
-	wstring_convert<codecvt_utf8<Il2CppChar>, Il2CppChar> wconv;
-	return wconv.from_bytes(str);
+	u16string u16 = u8_u16(str);
+	return {u16.begin(), u16.end()};
 #endif
 }
 
@@ -164,8 +259,8 @@ inline string il2cpp_u8(const il2cppstring& str)
 
 	return result;
 #else
-	wstring_convert<codecvt_utf8_utf16<Il2CppChar>, Il2CppChar> utf16conv;
-	return utf16conv.to_bytes(str);
+	const u16string u16(str.begin(), str.end());
+	return u16_u8(u16);
 #endif
 }
 

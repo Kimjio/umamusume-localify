@@ -43,13 +43,25 @@ static void InitAddress()
 {
 	// have to do this way because there's Get(TextId id) and Get(string id)
 	// the string one looks like will not be called by elsewhere
-	Localize_Get_addr = il2cpp_symbols::find_method(ASSEMBLY_NAME, "Gallop", "Localize", [](const MethodInfo* method)
+	Localize_Get_addr = il2cpp_symbols::find_method(ASSEMBLY_NAME, "Gallop", "Localize", [](const MethodInfo* info)
 		{
-			return method->name == "Get"s && (*method->parameters)->type == IL2CPP_TYPE_VALUETYPE;
+			if (Game::CurrentUnityVersion == Game::UnityVersion::Unity20)
+			{
+				auto info2020 = reinterpret_cast<const MethodInfo2020*>(info);
+				return info2020->name == "Get"s && info2020->parameters->parameter_type->type == IL2CPP_TYPE_VALUETYPE;
+			}
+
+			return info->name == "Get"s && info->parameters[0]->type == IL2CPP_TYPE_VALUETYPE;
 		});
-	Localize_Get1_addr = il2cpp_symbols::find_method(ASSEMBLY_NAME, "Gallop", "Localize", [](const MethodInfo* method)
+	Localize_Get1_addr = il2cpp_symbols::find_method(ASSEMBLY_NAME, "Gallop", "Localize", [](const MethodInfo* info)
 		{
-			return method->name == "Get"s && (*method->parameters)->type == IL2CPP_TYPE_STRING;
+			if (Game::CurrentUnityVersion == Game::UnityVersion::Unity20)
+			{
+				auto info2020 = reinterpret_cast<const MethodInfo2020*>(info);
+				return info2020->name == "Get"s && info2020->parameters->parameter_type->type == IL2CPP_TYPE_STRING;
+			}
+
+			return info->name == "Get"s && info->parameters[0]->type == IL2CPP_TYPE_STRING;
 		});
 	Localize_JP_Get_addr = il2cpp_symbols::get_method_pointer(ASSEMBLY_NAME, "Gallop", "Localize/JP", "Get", 1);
 	Localize_Set_addr = il2cpp_symbols::get_method_pointer(ASSEMBLY_NAME, "Gallop", "Localize", "Set", 3);

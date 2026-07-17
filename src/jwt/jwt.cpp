@@ -1,6 +1,7 @@
+#include <cstdint>
 #include <string>
 #include <vector>
-#include "../hmac_sha256/hmac_sha256.h"
+#include "hmac_sha256/hmac_sha256.h"
 #include "jwt.hpp"
 #include "base64.hpp"
 
@@ -38,7 +39,7 @@ string jwt::encodeJWT(string &payload) {
 }
 
 void jwt::encodeJWT(char *payload, char *jwt) {
-    auto *ptr = reinterpret_cast<unsigned char *>(jwt);
+    auto *ptr = reinterpret_cast<u_char *>(jwt);
     // Build the initial part of the jwt (header.payload)
     memcpy(ptr, jwtHeader, strlen(jwtHeader));
     ptr += strlen(jwtHeader);

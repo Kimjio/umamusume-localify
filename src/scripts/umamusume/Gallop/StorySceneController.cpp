@@ -19,6 +19,12 @@ static void InitAddress()
 {
 	StorySceneController_UpdateFovFactor_addr = il2cpp_symbols::find_method(ASSEMBLY_NAME, "Gallop", "StorySceneController", [](const MethodInfo* info)
 		{
+			if (Game::CurrentUnityVersion == Game::UnityVersion::Unity20)
+			{
+				auto info2020 = reinterpret_cast<const MethodInfo2020*>(info);
+				return info2020->name == "UpdateFovFactor"s && info2020->parameters[0].parameter_type->type == Il2CppTypeEnum::IL2CPP_TYPE_R4;
+			}
+
 			return info->name == "UpdateFovFactor"s && info->parameters[0]->type == Il2CppTypeEnum::IL2CPP_TYPE_R4;
 		}
 	);

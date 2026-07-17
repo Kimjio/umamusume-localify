@@ -22,12 +22,24 @@ static void InitAddress()
     SceneManager_GetCurrentViewController_addr = il2cpp_symbols::find_method(SceneManager_klass,
         [](const MethodInfo* info)
         {
+            if (Game::CurrentUnityVersion == Game::UnityVersion::Unity20)
+            {
+                auto info2020 = reinterpret_cast<const MethodInfo2020*>(info);
+                return info2020->name == "GetCurrentViewController"s && !info2020->is_generic;
+            }
+
             return info->name == "GetCurrentViewController"s && !info->is_generic;
         }
     );
     SceneManager_GetCurrentSceneController_addr = il2cpp_symbols::find_method(SceneManager_klass,
         [](const MethodInfo* info)
         {
+            if (Game::CurrentUnityVersion == Game::UnityVersion::Unity20)
+            {
+                auto info2020 = reinterpret_cast<const MethodInfo2020*>(info);
+                return info2020->name == "GetCurrentSceneController"s && !info2020->is_generic;
+            }
+
             return info->name == "GetCurrentSceneController"s && !info->is_generic;
         }
     );

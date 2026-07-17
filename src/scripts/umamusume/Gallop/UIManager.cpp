@@ -17,6 +17,10 @@
 #include "game.hpp"
 #include "config/config.hpp"
 
+#ifdef __ANDROID__
+#include "zygoteloader/dex.hpp"
+#endif
+
 #include <algorithm>
 
 namespace
@@ -76,6 +80,12 @@ namespace
 	Il2CppMethodPointer UpdateCanvasScaler_addr = nullptr;
 	void* UpdateCanvasScaler_orig = nullptr;
 
+    Il2CppMethodPointer IsNeedSafeAreaScaling_addr = nullptr;
+    void* IsNeedSafeAreaScaling_orig = nullptr;
+
+    Il2CppMethodPointer GetDeviceSafeArea_addr = nullptr;
+    void* GetDeviceSafeArea_orig = nullptr;
+
 #ifdef _MSC_VER
 	Il2CppMethodPointer ChangeResizeUIForPC_addr = nullptr;
 	void* ChangeResizeUIForPC_orig = nullptr;
@@ -97,6 +107,107 @@ namespace
 	float ratio_horizontal = 1.7777778f;
 }
 
+static bool IsNeedSafeAreaScaling_hook(Rect originalRect, Rect safeAreaRect)
+{
+	return false;
+}
+
+static Rect GetDeviceSafeArea_hook(Il2CppObject* self)
+{
+#ifdef __ANDROID__
+    JavaVM *javaVM;
+    jsize numVMs = 0;
+    JNI_GetCreatedJavaVMs(&javaVM, 1, &numVMs);
+
+    JNIEnv *env;
+    javaVM->GetEnv(reinterpret_cast<void **>(&env), JNI_VERSION_1_6);
+    if (env) {
+        auto get_Activity = il2cpp_symbols::get_method_pointer<Il2CppObject *(*)()>(
+                "UnityEngine.AndroidJNIModule.dll", "UnityEngine.Android", "AndroidApp",
+                "get_Activity", 0);
+
+        if (!get_Activity) {
+            get_Activity = il2cpp_symbols::get_method_pointer<Il2CppObject *(*)()>(
+                    "UnityEngine.AndroidJNIModule.dll", "UnityEngine.Android", "Permission",
+                    "GetActivity", 0);
+        }
+
+        auto il2cppActivity = get_Activity();
+        auto activity = il2cpp_symbols::get_method_pointer<jobject (*)(Il2CppObject *)>(
+                il2cppActivity->klass, "GetRawObject", 0)(il2cppActivity);
+
+        auto windowMetricsCalculatorClass = env->GetObjectClass(windowMetricsCalculator);
+
+        auto computeId = env->GetMethodID(windowMetricsCalculatorClass,
+                                          "computeCurrentWindowMetrics",
+                                          "(Landroid/app/Activity;)Landroidx/window/layout/WindowMetrics;");
+        env->DeleteLocalRef(windowMetricsCalculatorClass);
+
+        auto metrics = env->CallObjectMethod(windowMetricsCalculator, computeId, activity);
+
+        auto metricsClass = env->GetObjectClass(metrics);
+
+        auto getRectId = env->GetMethodID(metricsClass, "getBounds",
+                                          "()Landroid/graphics/Rect;");
+        auto rect = env->CallObjectMethod(metrics, getRectId);
+
+        auto rectClass = env->GetObjectClass(rect);
+
+        auto widthId = env->GetMethodID(rectClass, "width", "()I");
+        jint width = env->CallIntMethod(rect, widthId);
+
+        auto heightId = env->GetMethodID(rectClass, "height", "()I");
+        jint height = env->CallIntMethod(rect, heightId);
+
+        env->DeleteLocalRef(rect);
+        env->DeleteLocalRef(rectClass);
+
+        auto getWindowInsetsId = env->GetMethodID(metricsClass, "getWindowInsets",
+                                                  "()Landroidx/core/view/WindowInsetsCompat;");
+        auto windowInsets = env->CallObjectMethod(metrics, getWindowInsetsId);
+
+        env->DeleteLocalRef(metrics);
+        env->DeleteLocalRef(metricsClass);
+
+        auto windowInsetsClass = env->GetObjectClass(windowInsets);
+        auto getInsetsId = env->GetMethodID(windowInsetsClass, "getInsets",
+                                            "(I)Landroidx/core/graphics/Insets;");
+        auto insets = env->CallObjectMethod(windowInsets, getInsetsId, 1 << 7);
+        env->DeleteLocalRef(windowInsets);
+        env->DeleteLocalRef(windowInsetsClass);
+
+        auto insetsClass = env->GetObjectClass(insets);
+        auto leftField = env->GetFieldID(insetsClass, "left", "I");
+        auto topField = env->GetFieldID(insetsClass, "top", "I");
+        auto rightField = env->GetFieldID(insetsClass, "right", "I");
+        auto bottomField = env->GetFieldID(insetsClass, "bottom", "I");
+
+        auto left = env->GetIntField(insets, leftField);
+        auto top = env->GetIntField(insets, topField);
+        auto right = env->GetIntField(insets, rightField);
+        auto bottom = env->GetIntField(insets, bottomField);
+
+        env->DeleteLocalRef(insets);
+        env->DeleteLocalRef(insetsClass);
+
+        const auto isPortrait = width <= height;
+
+        if (isPortrait) {
+            width -= left + right;
+            height -= top + bottom;
+        } else {
+            width -= top + bottom;
+            height -= left + right;
+        }
+
+        auto safeArea = reinterpret_cast<decltype(GetDeviceSafeArea_hook)*>(GetDeviceSafeArea_orig)(self);
+
+        return { .x = 0, .y = 0, .width = static_cast<float>(width), .height = static_cast<float>(height) };
+    }
+#endif
+    return reinterpret_cast<decltype(GetDeviceSafeArea_hook)*>(GetDeviceSafeArea_orig)(self);
+}
+
 static void SetBGCanvasScalerSize()
 {
 	auto bgManager = il2cpp_symbols::get_method_pointer<Il2CppObject * (*)()>(ASSEMBLY_NAME, "Gallop", "BGManager", "get_Instance", 0)();
@@ -108,10 +219,10 @@ static void SetBGCanvasScalerSize()
 
 		if (_mainBg)
 		{
-			UnityEngine::Transform transform = UnityEngine::MonoBehaviour(_mainBg).transform();
+			Transform transform = MonoBehaviour(_mainBg).transform();
 
-			int width = UnityEngine::Screen::width();
-			int height = UnityEngine::Screen::height();
+			int width = Screen::width();
+			int height = Screen::height();
 
 			if (width > height)
 			{
@@ -119,7 +230,7 @@ static void SetBGCanvasScalerSize()
 
 				if (pos.y == 0)
 				{
-					transform.localPosition(UnityEngine::Vector3{ 0, 0, 0 });
+					transform.localPosition(Vector3{ 0, 0, 0 });
 				}
 			}
 		}
@@ -251,17 +362,17 @@ static float GetCameraSizeByOrientation_hook(int orientation)
 	return 5;
 }
 
-static UnityEngine::Vector2 get_DefaultResolution_hook()
+static Vector2 get_DefaultResolution_hook()
 {
 	int width = Gallop::Screen::Width();
 	int height = Gallop::Screen::Height();
 
 	if (Gallop::Screen::IsVertical())
 	{
-		return UnityEngine::Vector2{ static_cast<float>(height), static_cast<float>(width) };
+		return Vector2{ static_cast<float>(height), static_cast<float>(width) };
 	}
 
-	return UnityEngine::Vector2{ static_cast<float>(width), static_cast<float>(height) };
+	return Vector2{ static_cast<float>(width), static_cast<float>(height) };
 }
 
 static void InitAddress()
@@ -292,6 +403,8 @@ static void InitAddress()
 	GetCameraSizeByOrientation_addr = il2cpp_symbols::get_method_pointer(UIManager_klass, "GetCameraSizeByOrientation", 1);
     get_DefaultResolution_addr = il2cpp_symbols::get_method_pointer(UIManager_klass, "get_DefaultResolution", 0);
     UpdateCanvasScaler_addr = il2cpp_symbols::get_method_pointer(UIManager_klass, "UpdateCanvasScaler", 1);
+    IsNeedSafeAreaScaling_addr = il2cpp_symbols::get_method_pointer(UIManager_klass, "IsNeedSafeAreaScaling", 2);
+    GetDeviceSafeArea_addr = il2cpp_symbols::get_method_pointer(UIManager_klass, "GetDeviceSafeArea", 0);
 #ifdef _MSC_VER
 	ChangeResizeUIForPC_addr = il2cpp_symbols::get_method_pointer(UIManager_klass, "ChangeResizeUIForPC", 2);
 	OnPushBandUIButton_addr = il2cpp_symbols::get_method_pointer(UIManager_klass, "OnPushBandUIButton", 1);
@@ -320,7 +433,9 @@ static void HookMethods()
 	if (config::freeform_window)
 	{
 		ADD_HOOK(GetCameraSizeByOrientation, "Gallop.UIManager::GetCameraSizeByOrientation at %p\n");
-        ADD_HOOK(get_DefaultResolution, "Gallop.UIManager::get_DefaultResolution at %p\n");
+		ADD_HOOK(get_DefaultResolution, "Gallop.UIManager::get_DefaultResolution at %p\n");
+		ADD_HOOK(IsNeedSafeAreaScaling, "Gallop.UIManager::IsNeedSafeAreaScaling at %p\n");
+        // ADD_HOOK(GetDeviceSafeArea, "Gallop.UIManager::GetDeviceSafeArea at %p\n");
 #ifdef _MSC_VER
 		ADD_HOOK(OnPushBandUIButton, "Gallop.UIManager::OnPushBandUIButton at %p\n");
 		ADD_HOOK(RestorePrevSelectedBandMenu, "Gallop.UIManager::RestorePrevSelectedBandMenu at %p\n");
@@ -500,9 +615,9 @@ namespace Gallop
 		reinterpret_cast<void (*)(Il2CppObject*, Il2CppString*)>(ShowNotification_addr)(instance, text);
 	}
 
-	void UIManager::SetCameraSizeByOrientation(UnityEngine::ScreenOrientation orientation)
+	void UIManager::SetCameraSizeByOrientation(ScreenOrientation orientation)
 	{
-		reinterpret_cast<void (*)(Il2CppObject*, UnityEngine::ScreenOrientation)>(SetCameraSizeByOrientation_addr)(instance, orientation);
+		reinterpret_cast<void (*)(Il2CppObject*, ScreenOrientation)>(SetCameraSizeByOrientation_addr)(instance, orientation);
 	}
 
 	void UIManager::CheckUIToFrameBufferBlitInstance()
@@ -533,10 +648,10 @@ namespace Gallop
 
 		auto scaleMode = il2cpp_symbols::get_method_pointer<int (*)(Il2CppObject*)>(canvasScaler->klass, "get_uiScaleMode", 0)(canvasScaler);
 
-		if (UnityEngine::Object::Name(canvasScaler)->chars == il2cppstring(IL2CPP_STRING("SystemCanvas")) ||
-		    UnityEngine::Object::Name(canvasScaler)->chars == il2cppstring(IL2CPP_STRING("GameCanvas")) ||
-		    UnityEngine::Object::Name(canvasScaler)->chars == il2cppstring(IL2CPP_STRING("BGCanvas")) ||
-		    UnityEngine::Object::Name(canvasScaler)->chars == il2cppstring(IL2CPP_STRING("NoImageEffectGameCanvas")))
+		if (Object::Name(canvasScaler)->chars == il2cppstring(IL2CPP_STRING("SystemCanvas")) ||
+		    Object::Name(canvasScaler)->chars == il2cppstring(IL2CPP_STRING("GameCanvas")) ||
+		    Object::Name(canvasScaler)->chars == il2cppstring(IL2CPP_STRING("BGCanvas")) ||
+		    Object::Name(canvasScaler)->chars == il2cppstring(IL2CPP_STRING("NoImageEffectGameCanvas")))
 		{
 			il2cpp_symbols::get_method_pointer<void (*)(Il2CppObject*, int)>(canvasScaler->klass, "set_uiScaleMode", 1)(canvasScaler, 0);
 
@@ -550,12 +665,12 @@ namespace Gallop
 				if (width < height)
 				{
 					float scale = min(config::freeform_ui_scale_portrait, max(1.0f, static_cast<float>(height) * ratio_vertical) * config::freeform_ui_scale_portrait);
-					il2cpp_symbols::get_method_pointer<void (*)(Il2CppObject*, UnityEngine::Vector2)>(canvasScaler->klass, "set_referenceResolution", 1)(canvasScaler, UnityEngine::Vector2{ static_cast<float>(width / scale), static_cast<float>(height / scale) });
+					il2cpp_symbols::get_method_pointer<void (*)(Il2CppObject*, Vector2)>(canvasScaler->klass, "set_referenceResolution", 1)(canvasScaler, Vector2{ static_cast<float>(width / scale), static_cast<float>(height / scale) });
 				}
 				else
 				{
 					float scale = min(config::freeform_ui_scale_landscape, max(1.0f, static_cast<float>(width) / ratio_horizontal) * config::freeform_ui_scale_landscape);
-					il2cpp_symbols::get_method_pointer<void (*)(Il2CppObject*, UnityEngine::Vector2)>(canvasScaler->klass, "set_referenceResolution", 1)(canvasScaler, UnityEngine::Vector2{ static_cast<float>(width / scale), static_cast<float>(height / scale) });
+					il2cpp_symbols::get_method_pointer<void (*)(Il2CppObject*, Vector2)>(canvasScaler->klass, "set_referenceResolution", 1)(canvasScaler, Vector2{ static_cast<float>(width / scale), static_cast<float>(height / scale) });
 
 				}
 			}
@@ -581,12 +696,12 @@ namespace Gallop
 				if (width < height)
 				{
 					float scale = min(config::ui_scale, max(1.0f, static_cast<float>(height) * ratio_vertical) * config::ui_scale);
-					il2cpp_symbols::get_method_pointer<void (*)(Il2CppObject*, UnityEngine::Vector2)>(canvasScaler->klass, "set_referenceResolution", 1)(canvasScaler, UnityEngine::Vector2{ static_cast<float>(width / scale), static_cast<float>(height / scale) });
+					il2cpp_symbols::get_method_pointer<void (*)(Il2CppObject*, Vector2)>(canvasScaler->klass, "set_referenceResolution", 1)(canvasScaler, Vector2{ static_cast<float>(width / scale), static_cast<float>(height / scale) });
 				}
 				else
 				{
 					float scale = min(config::ui_scale, max(1.0f, static_cast<float>(width) / ratio_horizontal) * config::ui_scale);
-					il2cpp_symbols::get_method_pointer<void (*)(Il2CppObject*, UnityEngine::Vector2)>(canvasScaler->klass, "set_referenceResolution", 1)(canvasScaler, UnityEngine::Vector2{ static_cast<float>(width / scale), static_cast<float>(height / scale) });
+					il2cpp_symbols::get_method_pointer<void (*)(Il2CppObject*, Vector2)>(canvasScaler->klass, "set_referenceResolution", 1)(canvasScaler, Vector2{ static_cast<float>(width / scale), static_cast<float>(height / scale) });
 				}
 			}
 			if (scaleMode == 0)
@@ -685,7 +800,7 @@ namespace Gallop
 		return reinterpret_cast<decltype(GetCameraSizeByOrientation)*>(GetCameraSizeByOrientation_addr)(orientation);
 	}
 
-	UnityEngine::Vector2 UIManager::DefaultResolution()
+	Vector2 UIManager::DefaultResolution()
 	{
 		return reinterpret_cast<decltype(DefaultResolution)*>(get_DefaultResolution_addr)();
 	}

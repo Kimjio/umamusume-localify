@@ -21,7 +21,7 @@ namespace UnityEngine
 			y = y * other;
 			width = width * other;
 			height = height * other;
-			return Rect{ x, y, width, height };
+			return Rect{ .x = x, .y = y, .width = width, .height = height };
 		}
 
 		Rect operator/=(float other)
@@ -30,7 +30,7 @@ namespace UnityEngine
 			y = y / other;
 			width = width / other;
 			height = height / other;
-			return Rect{ x, y, width, height };
+			return Rect{ .x = x, .y = y, .width = width, .height = height };
 		}
 	};
 }
