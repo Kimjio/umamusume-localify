@@ -17,6 +17,7 @@ namespace Gallop
 			Job6,
 			Job7,
 			Job8,
+			IdleSingleMode,
 		};
 
 		static LocalPushType GetJobsLocalPushTypeByIndex(int index)

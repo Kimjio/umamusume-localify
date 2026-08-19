@@ -60,6 +60,8 @@ namespace MsgPackData
 
 	inline MsgPack::array jobs_going_info_array;
 
+	inline MsgPack::object idle_single_mode_load_info;
+
 #ifdef _MSC_VER
 	inline Il2CppString* GetIconPath(Gallop::LocalPushDefine::LocalPushType localPushType)
 	{
@@ -166,15 +168,12 @@ namespace MsgPackData
 
 			DumpTexture2D(leader_chara_id, Gallop::LocalPushDefine::LocalPushType::Tp, texture2D);
 
-			if (config::notification_tp)
+			if ((!MsgPackData::user_info.empty() || !MsgPackData::tp_info.empty()) && config::notification_tp)
 			{
-				if ((!MsgPackData::user_info.empty() || !MsgPackData::tp_info.empty()) && config::notification_tp)
-				{
-					DesktopNotificationManagerCompat::RemoveFromScheduleByTag(L"TP");
-					auto title = u8_wide(MasterDB::GetTextData(6, leader_chara_id));
-					auto content = u8_wide(MasterDB::GetTextData(184, leader_chara_id));
-					DesktopNotificationManagerCompat::AddScheduledToastNotification(title.data(), content.data(), L"TP", GetIconPath(Gallop::LocalPushDefine::LocalPushType::Tp)->chars, MsgPackData::tp_info["max_recovery_time"].int64_value() * 1000);
-				}
+				DesktopNotificationManagerCompat::RemoveFromScheduleByTag(L"TP");
+				auto title = u8_wide(MasterDB::GetTextData(6, leader_chara_id));
+				auto content = u8_wide(MasterDB::GetTextData(184, leader_chara_id));
+				DesktopNotificationManagerCompat::AddScheduledToastNotification(title.data(), content.data(), L"TP", GetIconPath(Gallop::LocalPushDefine::LocalPushType::Tp)->chars, MsgPackData::tp_info["max_recovery_time"].int64_value() * 1000);
 			}
 		}
 	}
@@ -194,71 +193,110 @@ namespace MsgPackData
 
 			DumpTexture2D(leader_chara_id, Gallop::LocalPushDefine::LocalPushType::Rp, texture2D);
 
-			if (config::notification_rp)
+			if ((!MsgPackData::user_info.empty() || !MsgPackData::rp_info.empty()) && config::notification_rp)
 			{
-				if ((!MsgPackData::user_info.empty() || !MsgPackData::rp_info.empty()) && config::notification_rp)
-				{
-					DesktopNotificationManagerCompat::RemoveFromScheduleByTag(L"RP");
-					auto title = u8_wide(MasterDB::GetTextData(6, leader_chara_id));
-					auto content = u8_wide(MasterDB::GetTextData(185, leader_chara_id));
-					DesktopNotificationManagerCompat::AddScheduledToastNotification(title.data(), content.data(), L"RP", GetIconPath(Gallop::LocalPushDefine::LocalPushType::Rp)->chars, MsgPackData::rp_info["max_recovery_time"].int64_value() * 1000);
-				}
+				DesktopNotificationManagerCompat::RemoveFromScheduleByTag(L"RP");
+				auto title = u8_wide(MasterDB::GetTextData(6, leader_chara_id));
+				auto content = u8_wide(MasterDB::GetTextData(185, leader_chara_id));
+				DesktopNotificationManagerCompat::AddScheduledToastNotification(title.data(), content.data(), L"RP", GetIconPath(Gallop::LocalPushDefine::LocalPushType::Rp)->chars, MsgPackData::rp_info["max_recovery_time"].int64_value() * 1000);
 			}
 		}
 	}
 
 	inline void RegisterJobsScheduledToast()
 	{
-		if (!MsgPackData::jobs_going_info_array.empty())
+		if (!MsgPackData::jobs_going_info_array.empty() && config::notification_jobs)
 		{
-			if (config::notification_rp)
+			DesktopNotificationManagerCompat::RemoveFromScheduleByGroup(L"Jobs");
+
+			for (MsgPack msgPack : MsgPackData::jobs_going_info_array)
 			{
-				if ((!MsgPackData::user_info.empty() || !MsgPackData::rp_info.empty()) && config::notification_rp)
+				MsgPack::object info = msgPack.object_items();
+				MsgPack::array attend_card_info_array = info["attend_card_info_array"].array_items();
+				MsgPack::object leader_card_info = attend_card_info_array[0].object_items();
+
+				int leader_chara_id = static_cast<int>(floorf(leader_card_info["card_id"].int_value() * 0.01f));
+				int leader_chara_dress_id = leader_card_info["dress_id"].int_value();
+
+				auto texture2D = GetCharaPushIcon(leader_chara_id, leader_chara_dress_id);
+				if (!texture2D)
 				{
-					DesktopNotificationManagerCompat::RemoveFromScheduleByGroup(L"Jobs");
-
-					for (MsgPack msgPack : MsgPackData::jobs_going_info_array)
-					{
-						MsgPack::object info = msgPack.object_items();
-						MsgPack::array attend_card_info_array = info["attend_card_info_array"].array_items();
-						MsgPack::object leader_card_info = attend_card_info_array[0].object_items();
-
-						int leader_chara_id = static_cast<int>(floorf(leader_card_info["card_id"].int_value() * 0.01f));
-						int leader_chara_dress_id = leader_card_info["dress_id"].int_value();
-
-						auto texture2D = GetCharaPushIcon(leader_chara_id, leader_chara_dress_id);
-						if (!texture2D)
-						{
-							continue;
-						}
-
-						auto title = u8_wide(MasterDB::GetTextData(6, leader_chara_id));
-						auto jobs_reward_id = info["jobs_reward_id"].int_value();
-						auto local_push_type_index = info["local_push_type_index"].int_value();
-
-						DumpTexture2D(leader_chara_id, Gallop::LocalPushDefine::GetJobsLocalPushTypeByIndex(local_push_type_index), texture2D);
-
-						auto jobsInfo = MasterDB::GetJobsInfo(jobs_reward_id);
-						auto raceTrackId = MasterDB::GetJobsPlaceRaceTrackId(std::get<0>(jobsInfo));
-						auto raceTrack = u8_wide(MasterDB::GetTextData(34, raceTrackId));
-						auto genre = u8_wide(MasterDB::GetTextData(357, std::get<1>(jobsInfo)));
-						auto content = u8_wide(MasterDB::GetTextData(360, leader_chara_id));
-
-						auto jobs_placename = L"\u3010" + raceTrack + L"\u3011" + genre;
-						replaceAll(content, LR"(<jobs_placename>)", jobs_placename);
-						replaceAll(content, L"\\n", L"\n");
-
-						tm tm{};
-						stringstream ss(info["end_time"].string_value());
-						ss >> get_time(&tm, "%Y-%m-%d %H:%M:%S");
-						chrono::system_clock::time_point tp = chrono::system_clock::from_time_t(mktime(&tm));
-						int64_t end_time = chrono::duration_cast<chrono::milliseconds>(tp.time_since_epoch()).count();
-
-						int notiId = Gallop::PushNotificationManager::Instance().MakeNotificationId(Gallop::LocalPushDefine::GetJobsLocalPushTypeByIndex(local_push_type_index), 0);
-
-						DesktopNotificationManagerCompat::AddScheduledToastNotification(title.data(), content.data(), (L"Jobs" + to_wstring(notiId)).data(), GetIconPath(Gallop::LocalPushDefine::GetJobsLocalPushTypeByIndex(local_push_type_index))->chars, end_time, L"Jobs");
-					}
+					continue;
 				}
+
+				auto title = u8_wide(MasterDB::GetTextData(6, leader_chara_id));
+				auto jobs_reward_id = info["jobs_reward_id"].int_value();
+				auto local_push_type_index = info["local_push_type_index"].int_value();
+
+				DumpTexture2D(leader_chara_id, Gallop::LocalPushDefine::GetJobsLocalPushTypeByIndex(local_push_type_index), texture2D);
+
+				auto jobsInfo = MasterDB::GetJobsInfo(jobs_reward_id);
+				auto raceTrackId = MasterDB::GetJobsPlaceRaceTrackId(std::get<0>(jobsInfo));
+				auto raceTrack = u8_wide(MasterDB::GetTextData(34, raceTrackId));
+				auto genre = u8_wide(MasterDB::GetTextData(357, std::get<1>(jobsInfo)));
+				auto content = u8_wide(MasterDB::GetTextData(360, leader_chara_id));
+
+				auto jobs_placename = L"\u3010" + raceTrack + L"\u3011" + genre;
+				replaceAll(content, LR"(<jobs_placename>)", jobs_placename);
+				replaceAll(content, L"\\n", L"\n");
+
+				tm tm{};
+				stringstream ss(info["end_time"].string_value());
+				ss >> get_time(&tm, "%Y-%m-%d %H:%M:%S");
+				chrono::system_clock::time_point tp = chrono::system_clock::from_time_t(mktime(&tm));
+				int64_t end_time = chrono::duration_cast<chrono::milliseconds>(tp.time_since_epoch()).count();
+
+				int notiId = Gallop::PushNotificationManager::Instance().MakeNotificationId(Gallop::LocalPushDefine::GetJobsLocalPushTypeByIndex(local_push_type_index), 0);
+
+				DesktopNotificationManagerCompat::AddScheduledToastNotification(title.data(), content.data(), (L"Jobs" + to_wstring(notiId)).data(), GetIconPath(Gallop::LocalPushDefine::GetJobsLocalPushTypeByIndex(local_push_type_index))->chars, end_time, L"Jobs");
+			}
+		}
+	}
+
+	inline void RegisterIdleSingleModeScheduledToast()
+	{
+		if (!MsgPackData::idle_single_mode_load_info.empty())
+		{
+			MsgPack::object chara_info;
+
+			if (MsgPackData::idle_single_mode_load_info.contains("single_mode_chara_light"))
+			{
+				chara_info = MsgPackData::idle_single_mode_load_info["single_mode_chara_light"].object_items();
+			}
+			else if (MsgPackData::idle_single_mode_load_info.contains("progress_info"))
+			{
+				chara_info = MsgPackData::idle_single_mode_load_info["progress_info"].object_items();
+			}
+
+			if (chara_info.empty())
+			{
+				return;
+			}
+
+			int card_id = chara_info["card_id"].int_value();
+			int chara_id = MasterDB::GetCharaIdByCardId(card_id);
+			int rarity = chara_info["rarity"].int_value();
+			int dress_id = MasterDB::GetDressIdByCardIdAndRarity(card_id, rarity);
+
+			auto texture2D = GetCharaPushIcon(chara_id, dress_id);
+			if (!texture2D)
+			{
+				return;
+			}
+
+			DumpTexture2D(chara_id, Gallop::LocalPushDefine::LocalPushType::IdleSingleMode, texture2D);
+
+			if (!MsgPackData::idle_single_mode_load_info.empty() && config::notification_idle_single_mode)
+			{
+				DesktopNotificationManagerCompat::RemoveFromScheduleByTag(L"IdleSingleMode");
+				auto title = u8_wide(MasterDB::GetTextData(6, chara_id));
+				auto content = u8_wide(MasterDB::GetTextData(469, chara_id));
+				tm tm{};
+				stringstream ss(MsgPackData::idle_single_mode_load_info["end_time"].string_value());
+				ss >> get_time(&tm, "%Y-%m-%d %H:%M:%S");
+				chrono::system_clock::time_point tp = chrono::system_clock::from_time_t(mktime(&tm));
+				int64_t end_time = chrono::duration_cast<chrono::milliseconds>(tp.time_since_epoch()).count();
+				DesktopNotificationManagerCompat::AddScheduledToastNotification(title.data(), content.data(), L"IdleSingleMode", GetIconPath(Gallop::LocalPushDefine::LocalPushType::IdleSingleMode)->chars, end_time);
 			}
 		}
 	}
@@ -296,11 +334,9 @@ namespace MsgPackData
 
 					if (data["tp_info"].is_object() || data["rp_info"].is_object() ||
 						data["jobs_load_info"].is_object() || data["jobs_going_info_array"].is_object() ||
+						data["idle_single_mode_load_info"].is_object() || data["progress_info"].is_object() ||
 						data["user_info"].is_object())
 					{
-						int leader_chara_id;
-						int leader_chara_dress_id;
-
 						if (data["user_info"].is_object())
 						{
 							MsgPackData::user_info = data["user_info"].object_items();
@@ -327,17 +363,27 @@ namespace MsgPackData
 							MsgPackData::jobs_going_info_array = data["jobs_going_info_array"].array_items();
 						}
 
-						leader_chara_id = MsgPackData::user_info["leader_chara_id"].int_value();
-						leader_chara_dress_id = MsgPackData::user_info["leader_chara_dress_id"].int_value();
-
-						auto texture2D = GetCharaPushIcon(leader_chara_id, leader_chara_dress_id);
-						if (!texture2D)
+						if (data["idle_single_mode_load_info"].is_object())
 						{
-							return;
+							MsgPackData::idle_single_mode_load_info = data["idle_single_mode_load_info"].object_items();
 						}
 
-						if (config::notification_tp || config::notification_rp || config::notification_jobs)
+						if (data["progress_info"].is_object())
 						{
+							MsgPackData::idle_single_mode_load_info = data["progress_info"].object_items();
+						}
+
+						if (config::notification_tp || config::notification_rp)
+						{
+							auto leader_chara_id = MsgPackData::user_info["leader_chara_id"].int_value();
+							auto leader_chara_dress_id = MsgPackData::user_info["leader_chara_dress_id"].int_value();
+
+							auto texture2D = GetCharaPushIcon(leader_chara_id, leader_chara_dress_id);
+							if (!texture2D)
+							{
+								return;
+							}
+
 							auto title = u8_wide(MasterDB::GetTextData(6, leader_chara_id));
 							if ((data["user_info"].is_object() || data["tp_info"].is_object()) && config::notification_tp)
 							{
@@ -353,6 +399,10 @@ namespace MsgPackData
 								auto content = u8_wide(MasterDB::GetTextData(185, leader_chara_id));
 								DesktopNotificationManagerCompat::AddScheduledToastNotification(title.data(), content.data(), L"RP", GetIconPath(Gallop::LocalPushDefine::LocalPushType::Rp)->chars, MsgPackData::rp_info["max_recovery_time"].int64_value() * 1000);
 							}
+						}
+
+						if (config::notification_jobs || config::notification_idle_single_mode)
+						{
 							if ((data["jobs_load_info"].is_object() || data["jobs_going_info_array"].is_array()) && config::notification_jobs)
 							{
 								DesktopNotificationManagerCompat::RemoveFromScheduleByGroup(L"Jobs");
@@ -398,6 +448,48 @@ namespace MsgPackData
 
 									DesktopNotificationManagerCompat::AddScheduledToastNotification(title.data(), content.data(), (L"Jobs" + to_wstring(notiId)).data(), GetIconPath(Gallop::LocalPushDefine::GetJobsLocalPushTypeByIndex(local_push_type_index))->chars, end_time, L"Jobs");
 								}
+							}
+
+							if ((data["idle_single_mode_load_info"].is_object() || data["progress_info"].is_object()) && config::notification_idle_single_mode)
+							{
+								MsgPack::object chara_info;
+
+								if (MsgPackData::idle_single_mode_load_info.contains("single_mode_chara_light"))
+								{
+									chara_info = MsgPackData::idle_single_mode_load_info["single_mode_chara_light"].object_items();
+								}
+								else if (MsgPackData::idle_single_mode_load_info.contains("progress_info"))
+								{
+									chara_info = MsgPackData::idle_single_mode_load_info["progress_info"].object_items();
+								}
+
+								if (chara_info.empty())
+								{
+									return;
+								}
+
+								int card_id = chara_info["card_id"].int_value();
+								int chara_id = MasterDB::GetCharaIdByCardId(card_id);
+								int rarity = chara_info["rarity"].int_value();
+								int dress_id = MasterDB::GetDressIdByCardIdAndRarity(card_id, rarity);
+
+								auto texture2D = GetCharaPushIcon(chara_id, dress_id);
+								if (!texture2D)
+								{
+									return;
+								}
+
+								DumpTexture2D(chara_id, Gallop::LocalPushDefine::LocalPushType::IdleSingleMode, texture2D);
+								DesktopNotificationManagerCompat::RemoveFromScheduleByTag(L"IdleSingleMode");
+								auto content = u8_wide(MasterDB::GetTextData(469, chara_id));
+								tm tm{};
+								stringstream ss(MsgPackData::idle_single_mode_load_info["end_time"].string_value());
+								ss >> get_time(&tm, "%Y-%m-%d %H:%M:%S");
+								chrono::system_clock::time_point tp = chrono::system_clock::from_time_t(mktime(&tm));
+								int64_t end_time = chrono::duration_cast<chrono::milliseconds>(tp.time_since_epoch()).count();
+
+								auto title = u8_wide(MasterDB::GetTextData(6, chara_id));
+								DesktopNotificationManagerCompat::AddScheduledToastNotification(title.data(), content.data(), L"IdleSingleMode", GetIconPath(Gallop::LocalPushDefine::LocalPushType::IdleSingleMode)->chars, end_time);
 							}
 						}
 					}

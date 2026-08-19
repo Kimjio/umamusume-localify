@@ -212,6 +212,57 @@ namespace MasterDB
 		return 0;
 	}
 
+	inline int GetCharaIdByCardId(int cardId)
+	{
+		if (!masterDB)
+		{
+			InitMasterDB();
+		}
+
+		auto query = R"(SELECT chara_id FROM card_data WHERE "id" = ?1)"s;
+		sqlite3_stmt* stmt;
+		sqlite3_prepare_v2(masterDB, query.data(), query.size(), &stmt, nullptr);
+
+		sqlite3_bind_int(stmt, 1, cardId);
+
+		while (sqlite3_step(stmt) == SQLITE_ROW)
+		{
+			auto charaId = sqlite3_column_int(stmt, 0);
+			sqlite3_finalize(stmt);
+			return charaId;
+		}
+
+		sqlite3_finalize(stmt);
+
+		return 0;
+	}
+
+	inline int GetDressIdByCardIdAndRarity(int cardId, int rarity)
+	{
+		if (!masterDB)
+		{
+			InitMasterDB();
+		}
+
+		auto query = R"(SELECT race_dress_id FROM card_rarity_data WHERE "card_id" = ?1 AND "rarity" = ?2)"s;
+		sqlite3_stmt* stmt;
+		sqlite3_prepare_v2(masterDB, query.data(), query.size(), &stmt, nullptr);
+
+		sqlite3_bind_int(stmt, 1, cardId);
+		sqlite3_bind_int(stmt, 2, rarity);
+
+		while (sqlite3_step(stmt) == SQLITE_ROW)
+		{
+			auto dressId = sqlite3_column_int(stmt, 0);
+			sqlite3_finalize(stmt);
+			return dressId;
+		}
+
+		sqlite3_finalize(stmt);
+
+		return 0;
+	}
+
 	inline int GetSingleModeRaceLiveMusicId(int raceInstanceId, int grade)
 	{
 		if (!masterDB)

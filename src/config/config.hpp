@@ -120,6 +120,7 @@ namespace config
 	extern bool notification_tp;
 	extern bool notification_rp;
 	extern bool notification_jobs;
+	extern bool notification_idle_single_mode;
 	extern bool msgpack_notifier;
 	extern bool msgpack_notifier_request;
 	extern il2cppstring msgpack_notifier_host;

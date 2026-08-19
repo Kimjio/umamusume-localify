@@ -489,6 +489,8 @@ namespace Localify
 				AddOrSet(configDocument, IL2CPP_STRING("notificationRp"), UIParts::GetOptionItemOnOffIsOn("notification_rp"));
 
 				AddOrSet(configDocument, IL2CPP_STRING("notificationJobs"), UIParts::GetOptionItemOnOffIsOn("notification_jobs"));
+
+				AddOrSet(configDocument, IL2CPP_STRING("notificationIdleSingleMode"), UIParts::GetOptionItemOnOffIsOn("notification_idle_single_mode"));
 #endif
 
 				AddOrSet(configDocument, IL2CPP_STRING("dumpMsgPack"), UIParts::GetOptionItemOnOffIsOn("dump_msgpack"));
@@ -643,6 +645,17 @@ namespace Localify
 					DesktopNotificationManagerCompat::RemoveFromScheduleByGroup(L"Jobs");
 				}
 
+				config::notification_idle_single_mode = configDocument[IL2CPP_STRING("notificationIdleSingleMode")].GetBool();
+
+				if (config::notification_idle_single_mode)
+				{
+					MsgPackData::RegisterIdleSingleModeScheduledToast();
+				}
+				else
+				{
+					DesktopNotificationManagerCompat::RemoveFromScheduleByTag(L"IdleSingleMode");
+				}
+
 				config::taskbar_show_progress_on_download = configDocument[IL2CPP_STRING("taskbarShowProgressOnDownload")].GetBool();
 
 				config::taskbar_show_progress_on_connecting = configDocument[IL2CPP_STRING("taskbarShowProgressOnConnecting")].GetBool();
@@ -768,6 +781,7 @@ namespace Localify
 		bool notificationTp = false;
 		bool notificationRp = false;
 		bool notificationJobs = false;
+		bool notificationIdleSingleMode = false;
 #endif
 		bool dumpMsgPack = false;
 		bool dumpMsgPackRequest = false;
@@ -935,6 +949,11 @@ namespace Localify
 			if (configDocument.HasMember(IL2CPP_STRING("notificationJobs")))
 			{
 				notificationJobs = configDocument[IL2CPP_STRING("notificationJobs")].GetBool();
+			}
+
+			if (configDocument.HasMember(IL2CPP_STRING("notificationIdleSingleMode")))
+			{
+				notificationIdleSingleMode = configDocument[IL2CPP_STRING("notificationIdleSingleMode")].GetBool();
 			}
 #endif
 
@@ -1269,6 +1288,7 @@ namespace Localify
 				UIParts::GetOptionItemOnOff("notification_tp", Gallop::Localize::Get(GetTextIdByName(IL2CPP_STRING("Outgame0294")))->chars),
 				UIParts::GetOptionItemOnOff("notification_rp", Gallop::Localize::Get(GetTextIdByName(IL2CPP_STRING("Outgame0437")))->chars),
 				isJobsExist ? UIParts::GetOptionItemOnOff("notification_jobs", Gallop::Localize::Get(GetTextIdByName(IL2CPP_STRING("Jobs600005")))->chars) : nullptr,
+				UIParts::GetOptionItemOnOff("notification_idle_single_mode", Gallop::Localize::Get(GetTextIdByName(IL2CPP_STRING("SingleMode608025")))->chars),
 				UIParts::GetOptionItemButton("show_notification", LocalifySettings::GetText("show_notification")),
 				UIParts::GetOptionItemAttention(Gallop::Localize::Get(GetTextIdByName(IL2CPP_STRING("Outgame0297")))->chars),
 				UIParts::GetOptionItemTitle(LocalifySettings::GetText("taskbar")),
@@ -1344,6 +1364,11 @@ namespace Localify
 		);
 
 		UIParts::SetOptionItemOnOffAction("notification_jobs", notificationJobs, *([](Il2CppObject*, bool isOn)
+			{
+			})
+		);
+
+		UIParts::SetOptionItemOnOffAction("notification_idle_single_mode", notificationIdleSingleMode, *([](Il2CppObject*, bool isOn)
 			{
 			})
 		);

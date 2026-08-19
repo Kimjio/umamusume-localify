@@ -93,6 +93,7 @@ namespace config
 	bool notification_tp = false;
 	bool notification_rp = false;
 	bool notification_jobs = false;
+	bool notification_idle_single_mode = false;
 	bool msgpack_notifier = false;
 	bool msgpack_notifier_request = false;
 	il2cppstring msgpack_notifier_host = IL2CPP_STRING("http://localhost:4693");
@@ -492,6 +493,8 @@ if (document.HasMember(IL2CPP_STRING(_name_)) && document[IL2CPP_STRING(_name_)]
 			GetValue("notificationRp", Bool, notification_rp);
 
 			GetValue("notificationJobs", Bool, notification_jobs);
+
+			GetValue("notificationIdleSingleMode", Bool, notification_idle_single_mode);
 
 			GetValue("taskbarShowProgressOnDownload", Bool, taskbar_show_progress_on_download);
 
