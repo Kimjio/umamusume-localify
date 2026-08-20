@@ -480,16 +480,16 @@ static void PlaySfxUiDecideL01()
 
 	Cute::Cri::AudioPlayback res{};
 
-	if (auto legacy = il2cpp_symbols::get_method_pointer<Cute::Cri::AudioPlayback * (*)(Cute::Cri::AudioPlayback*, Il2CppObject*, uint64_t, bool, float, Il2CppObject*,
-		float, float, float, float, float, float, bool, float, uint64_t, int
+	if (auto legacy = il2cpp_symbols::get_method_pointer<Cute::Cri::AudioPlayback * (*)(Cute::Cri::AudioPlayback*, Il2CppObject*, int, bool, float, Il2CppObject*,
+		float, float, float, float, float, float, bool, float, int, int
 		)>(AudioManager->klass, "PlaySe", 14))
 	{
 		legacy(&res, AudioManager, 200000000L, false, 0.0, nullptr, 0.0, 10.0, 100.0, 0.0, 0.0, 1.0, false, 1.0, 0, INT_MAX);
 		return;
 	}
 
-	il2cpp_symbols::get_method_pointer<Cute::Cri::AudioPlayback* (*)(Cute::Cri::AudioPlayback*, Il2CppObject*, uint64_t, bool, float, Il2CppObject*,
-		float, float, float, float, float, float, float, float, float, bool, float, uint64_t, int
+	il2cpp_symbols::get_method_pointer<Cute::Cri::AudioPlayback* (*)(Cute::Cri::AudioPlayback*, Il2CppObject*, int, bool, float, Il2CppObject*,
+		float, float, float, float, float, float, float, float, float, bool, float, int, int
 		)>(AudioManager->klass, "PlaySe", 17)(&res, AudioManager, 200000000L, false, 0.0, nullptr, 0.0, 10.0, 100.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, false, 1.0, 0, INT_MAX);
 }
 
@@ -511,7 +511,7 @@ static void TitleViewController_OnClickPushStart_hook(Il2CppObject* self)
 
 			if (il2cpp_symbols::get_class(ASSEMBLY_NAME, "Gallop", "DialogSimpleCheckNoWarning"))
 			{
-				il2cpp_symbols::get_method_pointer<Il2CppObject* (*)(Il2CppString*, Il2CppString*, Il2CppString*, uint64_t, Il2CppDelegate*, Il2CppDelegate*, bool, bool, Il2CppString*)>
+				il2cpp_symbols::get_method_pointer<Il2CppObject* (*)(Il2CppString*, Il2CppString*, Il2CppString*, int, Il2CppDelegate*, Il2CppDelegate*, bool, bool, Il2CppString*)>
 					(ASSEMBLY_NAME, "Gallop", "DialogSimpleCheckNoWarning", "OpenMiddleOneButton", 9)(Gallop::Localize::Get(GetTextIdByName(IL2CPP_STRING("Common0081"))), il2cpp_string_new16(
 						(LocalifySettings::GetText("initial_disclaimer_1") + il2cppstring(Gallop::Localize::Get(GetTextIdByName(IL2CPP_STRING("Common187002")))->chars) + LocalifySettings::GetText("initial_disclaimer_2")).data()),
 						Gallop::Localize::Get(GetTextIdByName(IL2CPP_STRING("Common187002"))), GetTextIdByName(IL2CPP_STRING("Common0007")),

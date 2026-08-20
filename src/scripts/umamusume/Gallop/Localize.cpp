@@ -17,7 +17,7 @@ namespace
 	Il2CppMethodPointer Localize_Set_addr = nullptr;
 }
 
-static Il2CppString* Localize_JP_Get_hook(uint64_t id)
+static Il2CppString* Localize_JP_Get_hook(int id)
 {
 	auto orig_result = reinterpret_cast<decltype(Localize_JP_Get_hook)*>(Localize_JP_Get_orig)(id);
 
@@ -81,9 +81,9 @@ STATIC
 
 namespace Gallop
 {
-	Il2CppString* Localize::Get(uint64_t id)
+	Il2CppString* Localize::Get(int id)
 	{
-		return reinterpret_cast<Il2CppString * (*)(uint64_t)>(Localize_Get_addr)(id);
+		return reinterpret_cast<Il2CppString * (*)(int)>(Localize_Get_addr)(id);
 	}
 
 	Il2CppString* Localize::Get(Il2CppString* id)
@@ -102,7 +102,7 @@ namespace Gallop
 		vector<pair<const il2cppstring, const il2cppstring>> text_id_static_entries;
 		vector<pair<const il2cppstring, const il2cppstring>> text_id_not_matched_entries;
 		// 0 is None
-		for (uint64_t i = 1;; i++)
+		for (int i = 1;; i++)
 		{
 			auto textIdName = GetTextIdNameById(i);
 

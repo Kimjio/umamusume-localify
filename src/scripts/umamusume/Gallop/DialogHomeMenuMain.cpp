@@ -15,7 +15,7 @@ namespace
 	void* DialogHomeMenuMain_ChangeView2_orig = nullptr;
 }
 
-static void DialogHomeMenuMain_ChangeView_hook(Il2CppObject* self, uint64_t viewId)
+static void DialogHomeMenuMain_ChangeView_hook(Il2CppObject* self, int viewId)
 {
 	reinterpret_cast<decltype(DialogHomeMenuMain_ChangeView_hook)*>(DialogHomeMenuMain_ChangeView_orig)(self, viewId);
 
@@ -37,7 +37,7 @@ static void DialogHomeMenuMain_ChangeView_hook(Il2CppObject* self, uint64_t view
 	}
 }
 
-static void DialogHomeMenuMain_ChangeView2_hook(Il2CppObject* self, uint64_t viewId, Il2CppObject* viewInfo)
+static void DialogHomeMenuMain_ChangeView2_hook(Il2CppObject* self, int viewId, Il2CppObject* viewInfo)
 {
 	reinterpret_cast<decltype(DialogHomeMenuMain_ChangeView2_hook)*>(DialogHomeMenuMain_ChangeView2_orig)(self, viewId, viewInfo);
 

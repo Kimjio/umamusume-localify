@@ -140,14 +140,14 @@ namespace Gallop
 		auto LoadOnView = GetGenericMethod(il2cpp_symbols::get_method(ASSEMBLY_NAME, "Gallop", "ResourceManager", "LoadOnView", 2), GetRuntimeType("UnityEngine.CoreModule.dll", "UnityEngine", "Texture2D"));
 
 		Il2CppString* jacketPath = nullptr;
-		auto GetJacketPath = il2cpp_symbols::get_method_pointer<Il2CppString * (*)(int, uint64_t, bool)>(ASSEMBLY_NAME, "Gallop", "ResourcePath", "GetJacketPath", 3);
+		auto GetJacketPath = il2cpp_symbols::get_method_pointer<Il2CppString * (*)(int, int, bool)>(ASSEMBLY_NAME, "Gallop", "ResourcePath", "GetJacketPath", 3);
 		if (GetJacketPath)
 		{
 			jacketPath = GetJacketPath(musicId, 0, false);
 		}
 		else
 		{
-			jacketPath = il2cpp_symbols::get_method_pointer<Il2CppString * (*)(int, uint64_t)>(ASSEMBLY_NAME, "Gallop", "ResourcePath", "GetJacketPath", 2)(musicId, 0);
+			jacketPath = il2cpp_symbols::get_method_pointer<Il2CppString * (*)(int, int)>(ASSEMBLY_NAME, "Gallop", "ResourcePath", "GetJacketPath", 2)(musicId, 0);
 		}
 
 		Il2CppObject* _icon;
@@ -159,7 +159,7 @@ namespace Gallop
 		Il2CppObject* _name;
 		il2cpp_field_get_value(instance, DialogLiveStartConfirm__name, &_name);
 
-		auto masterLiveTitle = il2cpp_symbols::get_method_pointer<Il2CppString * (*)(uint64_t, int)>(ASSEMBLY_NAME, "Gallop", "TextUtil", "GetMasterText", 2)(GetEnumValue(ParseEnum(GetRuntimeType(ASSEMBLY_NAME, "Gallop", "MasterString/Category"), IL2CPP_STRING("MasterLiveTitle"))), musicId);
+		auto masterLiveTitle = il2cpp_symbols::get_method_pointer<Il2CppString * (*)(int, int)>(ASSEMBLY_NAME, "Gallop", "TextUtil", "GetMasterText", 2)(GetEnumValue(ParseEnum(GetRuntimeType(ASSEMBLY_NAME, "Gallop", "MasterString/Category"), IL2CPP_STRING("MasterLiveTitle"))), musicId);
 		il2cpp_symbols::get_method_pointer<void (*)(Il2CppObject*, Il2CppString*)>(_name->klass, "set_text", 1)(_name, masterLiveTitle);
 
 		SetupToggle();

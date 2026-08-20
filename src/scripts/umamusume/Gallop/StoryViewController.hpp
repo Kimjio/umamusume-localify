@@ -8,7 +8,7 @@ namespace Gallop
 	{
 	public:
 		bool IsSingleModeOrGallery();
-		void SetDisplayMode(uint64_t displayMode);
+		void SetDisplayMode(int displayMode);
 		void SetupUIOnChangeOrientation();
 
 		using Object::Object;

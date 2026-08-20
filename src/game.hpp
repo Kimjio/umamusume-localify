@@ -30,7 +30,10 @@ namespace Game {
 #ifdef _MSC_VER
         Steam,
 #endif
-        // Ex. OneStore, MyCard...
+#ifdef __ANDROID__
+        MyCard,
+        Tencent,
+#endif
         Other
     };
 
@@ -48,9 +51,9 @@ namespace Game {
     inline auto GamePackageName = "jp.co.cygames.umamusume"s;
     inline auto GamePackageNameKor = "com.kakaogames.umamusume"s;
     inline auto GamePackageNameTwnGoogle = "com.komoe.kmumamusumegp"s;
-    inline auto GamePackageNameTwnMyCard = "com.komoe.kmumamusumemc"s;
-    inline auto GamePackageNameTwnMyCardAlt = "com.komoe.umamusumeofficial"s;
+    inline auto GamePackageNameTwnMyCard = "com.komoe.umamusumeofficial"s;
     inline auto GamePackageNameChn = "com.bilibili.umamusu"s;
+    inline auto GamePackageNameChnAlt = "com.tencent.tmgp.bilibili.umamusu"s;
     inline auto GamePackageNameEng = "com.cygames.umamusume"s;
 
     static bool IsPackageNameEqualsByGameRegion(const char *pkgNm, Region gameRegion) {
@@ -78,10 +81,9 @@ namespace Game {
                     CurrentGameRegion = Region::TWN;
                     CurrentGameStore = Store::Google;
                     return true;
-                } else if (pkgNmStr == GamePackageNameTwnMyCard ||
-                           pkgNmStr == GamePackageNameTwnMyCardAlt) {
+                } else if (pkgNmStr == GamePackageNameTwnMyCard) {
                     CurrentGameRegion = Region::TWN;
-                    CurrentGameStore = Store::Other;
+                    CurrentGameStore = Store::MyCard;
                     return true;
                 }
                 break;
@@ -89,6 +91,10 @@ namespace Game {
                 if (pkgNmStr == GamePackageNameChn) {
                     CurrentGameRegion = Region::CHN;
                     CurrentGameStore = Store::Other;
+                    return true;
+                } else if (pkgNmStr == GamePackageNameChnAlt) {
+                    CurrentGameRegion = Region::CHN;
+                    CurrentGameStore = Store::Tencent;
                     return true;
                 }
                 break;
@@ -107,7 +113,7 @@ namespace Game {
     }
 
     static string
-    GetPackageNameByGameRegionAndGameStore(Region gameRegion, Store gameStore, bool isAlt = false) {
+    GetPackageNameByGameRegionAndGameStore(Region gameRegion, Store gameStore) {
         if (gameRegion == Region::JPN) {
             return GamePackageName;
         }
@@ -115,11 +121,7 @@ namespace Game {
             return GamePackageNameKor;
         }
         if (gameRegion == Region::TWN) {
-            if (gameStore == Store::Other) {
-                if (isAlt) {
-                    return GamePackageNameTwnMyCardAlt;
-                }
-
+            if (gameStore == Store::MyCard) {
                 return GamePackageNameTwnMyCard;
             }
             return GamePackageNameTwnGoogle;
@@ -128,6 +130,10 @@ namespace Game {
             return GamePackageNameEng;
         }
         if (gameRegion == Region::CHN) {
+            if (gameStore == Store::Tencent) {
+                return GamePackageNameChnAlt;
+            }
+
             return GamePackageNameChn;
         }
         return "";
@@ -165,19 +171,10 @@ namespace Game {
         if (access(
                 "/data/data/"s
                         .append(GetPackageNameByGameRegionAndGameStore(Region::TWN,
-                                                                       Store::Other)).append(
+                                                                       Store::MyCard)).append(
                         "/cache").data(),
                 F_OK) == 0) {
-            CurrentGameStore = Store::Other;
-            return Region::TWN;
-        }
-        if (access(
-                "/data/data/"s
-                        .append(GetPackageNameByGameRegionAndGameStore(Region::TWN,
-                                                                       Store::Other, true)).append(
-                        "/cache").data(),
-                F_OK) == 0) {
-            CurrentGameStore = Store::Other;
+            CurrentGameStore = Store::MyCard;
             return Region::TWN;
         }
         if (access(
@@ -186,6 +183,16 @@ namespace Game {
                                                                        Store::Other)).append(
                         "/cache").data(),
                 F_OK) == 0) {
+            CurrentGameStore = Store::Other;
+            return Region::CHN;
+        }
+        if (access(
+                "/data/data/"s
+                        .append(GetPackageNameByGameRegionAndGameStore(Region::CHN,
+                                                                       Store::Tencent)).append(
+                        "/cache").data(),
+                F_OK) == 0) {
+            CurrentGameStore = Store::Tencent;
             return Region::CHN;
         }
         if (access(

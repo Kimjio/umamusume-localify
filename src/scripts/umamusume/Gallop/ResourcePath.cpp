@@ -21,7 +21,7 @@ static Il2CppString* ResourcePath_GetPreInTitleMoviePath_hook()
 {
 	auto GameDefine = il2cpp_symbols::get_class(ASSEMBLY_NAME, "Gallop", "GameDefine");
 	auto PREIN_TITLE_OP_VERSION_Field = il2cpp_class_get_field_from_name(GameDefine, "PREIN_TITLE_OP_VERSION");
-	uint64_t PREIN_TITLE_OP_VERSION;
+	int PREIN_TITLE_OP_VERSION;
 	il2cpp_field_static_get_value(PREIN_TITLE_OP_VERSION_Field, &PREIN_TITLE_OP_VERSION);
 
 	auto ResourcePath = il2cpp_symbols::get_class(ASSEMBLY_NAME, "Gallop", "ResourcePath");

@@ -10,11 +10,6 @@
 #include "StandaloneWindowResize.hpp"
 #endif
 
-#ifdef __ANDROID__
-#include <jni.h>
-#include "zygoteloader/dex.hpp"
-#endif
-
 #include "config/config.hpp"
 
 namespace
@@ -83,6 +78,10 @@ namespace
 
 	Il2CppMethodPointer get_IsVertical_addr = nullptr;
 	void* get_IsVertical_orig = nullptr;
+
+    FieldInfo* _originalScreenWidthField = nullptr;
+
+    FieldInfo* _originalScreenHeightField = nullptr;
 }
 
 static int get_Width_hook()
@@ -174,31 +173,6 @@ static void Setup_hook()
 	UnityEngine::Screen::autorotateToLandscapeLeft(true);
 	UnityEngine::Screen::autorotateToLandscapeRight(true);
 	UnityEngine::Screen::RequestOrientation(static_cast<ScreenOrientation>(6));
-#ifdef __ANDROID__
-	JavaVM *javaVM;
-	jsize numVMs = 0;
-	JNI_GetCreatedJavaVMs(&javaVM, 1, &numVMs);
-
-	JNIEnv *env;
-	javaVM->GetEnv(reinterpret_cast<void **>(&env), JNI_VERSION_1_6);
-	if (env) {
-		auto get_Activity = il2cpp_symbols::get_method_pointer<Il2CppObject *(*)()>(
-				"UnityEngine.AndroidJNIModule.dll", "UnityEngine.Android", "AndroidApp",
-				"get_Activity", 0);
-
-		if (!get_Activity) {
-			get_Activity = il2cpp_symbols::get_method_pointer<Il2CppObject *(*)()>(
-					"UnityEngine.AndroidJNIModule.dll", "UnityEngine.Android", "Permission",
-					"GetActivity", 0);
-		}
-
-		auto il2cppActivity = get_Activity();
-		auto activity = il2cpp_symbols::get_method_pointer<jobject(*)(Il2CppObject * )>(
-				il2cppActivity->klass, "GetRawObject", 0)(il2cppActivity);
-
-		// setRequestedOrientation(env, activity);
-	}
-#endif
 	Gallop::Screen::UpdateOriginalScreenSize();
 }
 
@@ -255,8 +229,7 @@ static int get_OriginalScreenWidth_hook()
 
 static void set_OriginalScreenWidth_hook(int value)
 {
-	auto widthField = il2cpp_class_get_field_from_name(ScreenClass, "_originalScreenWidth");
-	il2cpp_field_static_set_value(widthField, &value);
+	il2cpp_field_static_set_value(_originalScreenWidthField, &value);
 }
 
 static int get_OriginalScreenHeight_hook()
@@ -283,8 +256,7 @@ static int get_OriginalScreenHeight_hook()
 
 static void set_OriginalScreenHeight_hook(int value)
 {
-	auto heightField = il2cpp_class_get_field_from_name(ScreenClass, "_originalScreenHeight");
-	il2cpp_field_static_set_value(heightField, &value);
+	il2cpp_field_static_set_value(_originalScreenHeightField, &value);
 }
 
 static Il2CppObject* ChangeScreenOrientation_hook(UnityEngine::ScreenOrientation targetOrientation, bool isForce)
@@ -348,6 +320,8 @@ static void InitAddress()
 	ChangeScreenOrientationPortraitAsync_addr = il2cpp_symbols::get_method_pointer(ASSEMBLY_NAME, "Gallop", "Screen", "ChangeScreenOrientationPortraitAsync", 0);
 	ChangeScreenOrientationPortraitAsyncDefault_addr = il2cpp_symbols::get_method_pointer(ASSEMBLY_NAME, "Gallop", "Screen", "ChangeScreenOrientationPortraitAsyncDefault", 0);
 	ChangeScreenOrientationPortraitAsyncLandscapeMode_addr = il2cpp_symbols::get_method_pointer(ASSEMBLY_NAME, "Gallop", "Screen", "ChangeScreenOrientationPortraitAsyncLandscapeMode", 0);
+	_originalScreenWidthField = il2cpp_class_get_field_from_name(ScreenClass, "_originalScreenWidth");
+	_originalScreenHeightField = il2cpp_class_get_field_from_name(ScreenClass, "_originalScreenHeight");
 }
 
 static void HookMethods()
@@ -393,7 +367,7 @@ namespace Gallop
 
 	void Screen::OriginalScreenWidth(int value)
 	{
-		reinterpret_cast<void (*)(int)>(set_OriginalScreenWidth_addr)(value);
+		il2cpp_field_static_set_value(_originalScreenWidthField, &value);
 	}
 
 	int Screen::OriginalScreenHeight()
@@ -403,7 +377,7 @@ namespace Gallop
 
 	void Screen::OriginalScreenHeight(int value)
 	{
-		reinterpret_cast<void (*)(int)>(set_OriginalScreenHeight_addr)(value);
+		il2cpp_field_static_set_value(_originalScreenHeightField, &value);
 	}
 
 	int Screen::Width()

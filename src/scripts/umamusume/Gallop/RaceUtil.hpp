@@ -6,8 +6,8 @@ namespace Gallop
 	class RaceUtil
 	{
 	public:
-		static bool GetRaceDynamicCameraSettingData(uint64_t bootMode);
+		static bool GetRaceDynamicCameraSettingData(int bootMode);
 
-		static bool IsEnableDynamicRaceType(uint64_t raceType);
+		static bool IsEnableDynamicRaceType(int raceType);
 	};
 }

@@ -46,7 +46,10 @@ static Il2CppObject* PushDialog_hook(Il2CppObject* data)
 
 	if (config::freeform_window && Gallop::Screen::IsLandscapeMode() && dialog)
 	{
-		il2cpp_symbols::get_method_pointer<void (*)(Il2CppObject*, float)>(dialog->klass, "SetContentsRootLocalScale", 1)(dialog, 1.f);
+		if (auto SetContentsRootLocalScale = il2cpp_symbols::get_method_pointer<void (*)(Il2CppObject*, float)>(dialog->klass, "SetContentsRootLocalScale", 1))
+		{
+		    SetContentsRootLocalScale(dialog, 1.f);
+		}
 	}
 
 	return dialog;

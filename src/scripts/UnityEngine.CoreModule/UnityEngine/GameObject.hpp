@@ -23,6 +23,8 @@ namespace UnityEngine
 
 		Il2CppObject* GetComponentInChildren(Il2CppReflectionType* runtimeType, bool includeInactive);
 
+		Il2CppObject* GetComponentInParent(Il2CppReflectionType* runtimeType, bool includeInactive);
+
 		Il2CppObject* AddComponent(Il2CppReflectionType* runtimeType)
 		{
 			return Internal_AddComponentWithType(runtimeType);

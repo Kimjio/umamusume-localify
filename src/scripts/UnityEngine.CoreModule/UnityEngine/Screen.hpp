@@ -4,6 +4,7 @@
 #include "EnabledOrientation.hpp"
 #include "ScreenOrientation.hpp"
 #include "Resolution.hpp"
+#include "Rect.hpp"
 #include "FullScreenMode.hpp"
 
 namespace UnityEngine
@@ -34,6 +35,8 @@ namespace UnityEngine
 		static bool fullScreen();
 
 		static Resolution currentResolution();
+
+		static Rect safeArea();
 
         static void autorotateToPortrait(bool value);
 

@@ -57,9 +57,9 @@ namespace Gallop
     const char* SceneManager::namespaze = "Gallop";
     const char* SceneManager::klassName = "SceneManager";
 
-    uint64_t SceneManager::GetCurrentSceneId()
+    int SceneManager::GetCurrentSceneId()
     {
-        return reinterpret_cast<uint64_t (*)(Il2CppObject*)>(SceneManager_GetCurrentSceneId_addr)(instance);
+        return reinterpret_cast<int (*)(Il2CppObject*)>(SceneManager_GetCurrentSceneId_addr)(instance);
     }
 
     Il2CppString* SceneManager::GetCurrentSceneIdName()

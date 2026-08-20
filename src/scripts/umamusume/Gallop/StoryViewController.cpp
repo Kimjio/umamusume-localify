@@ -113,9 +113,9 @@ namespace Gallop
 		return reinterpret_cast<bool (*)(Il2CppObject*)>(StoryViewController_get_IsSingleModeOrGallery_addr)(instance);
 	}
 
-	void StoryViewController::SetDisplayMode(uint64_t displayMode)
+	void StoryViewController::SetDisplayMode(int displayMode)
 	{
-		reinterpret_cast<void (*)(Il2CppObject*, uint64_t)>(StoryViewController_SetDisplayMode_addr)(instance, displayMode);
+		reinterpret_cast<void (*)(Il2CppObject*, int)>(StoryViewController_SetDisplayMode_addr)(instance, displayMode);
 	}
 
 	void StoryViewController::SetupUIOnChangeOrientation()

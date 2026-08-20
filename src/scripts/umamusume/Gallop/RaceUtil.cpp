@@ -34,13 +34,13 @@ STATIC
 
 namespace Gallop
 {
-	bool RaceUtil::GetRaceDynamicCameraSettingData(uint64_t bootMode)
+	bool RaceUtil::GetRaceDynamicCameraSettingData(int bootMode)
 	{
 		auto RaceInfo = il2cpp_symbols::get_method_pointer<Il2CppObject * (*)()>(ASSEMBLY_NAME, "Gallop", "RaceManager", "get_RaceInfo", 0)();
 
 		if (RaceInfo)
 		{
-			auto RaceType = il2cpp_symbols::get_method_pointer<uint64_t(*)(Il2CppObject*)>(RaceInfo->klass, "get_RaceType", 0)(RaceInfo);
+			auto RaceType = il2cpp_symbols::get_method_pointer<int(*)(Il2CppObject*)>(RaceInfo->klass, "get_RaceType", 0)(RaceInfo);
 
 			if (RaceType == 3)
 			{
@@ -54,7 +54,7 @@ namespace Gallop
 		return IsTryRaceDynamicCamera;
 	}
 
-	bool RaceUtil::IsEnableDynamicRaceType(uint64_t raceType)
+	bool RaceUtil::IsEnableDynamicRaceType(int raceType)
 	{
 		return true;
 	}

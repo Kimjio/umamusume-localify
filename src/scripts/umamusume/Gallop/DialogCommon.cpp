@@ -152,38 +152,38 @@ namespace Gallop
 		return *this;
 	}
 
-	DialogCommon::Data DialogCommon::Data::SetSimpleOneButtonMessage(Il2CppString* headerTextArg, Il2CppString* message, Il2CppDelegate* onClickCenterButton, uint64_t closeTextId, DialogCommonBase::FormType dialogFormType)
+	DialogCommon::Data DialogCommon::Data::SetSimpleOneButtonMessage(Il2CppString* headerTextArg, Il2CppString* message, Il2CppDelegate* onClickCenterButton, int closeTextId, DialogCommonBase::FormType dialogFormType)
 	{
-		reinterpret_cast<Il2CppObject * (*)(Il2CppObject*, Il2CppString*, Il2CppString*, Il2CppDelegate*, uint64_t, DialogCommonBase::FormType)>(DialogCommon_Data_SetSimpleOneButtonMessage_addr)(instance, headerTextArg, message, onClickCenterButton, closeTextId, dialogFormType);
+		reinterpret_cast<Il2CppObject * (*)(Il2CppObject*, Il2CppString*, Il2CppString*, Il2CppDelegate*, int, DialogCommonBase::FormType)>(DialogCommon_Data_SetSimpleOneButtonMessage_addr)(instance, headerTextArg, message, onClickCenterButton, closeTextId, dialogFormType);
 		return *this;
 	}
 
-	DialogCommon::Data DialogCommon::Data::SetSimpleOneButtonMessage(uint64_t headerTextId, Il2CppString* message, Il2CppDelegate* onClose, uint64_t closeTextId)
+	DialogCommon::Data DialogCommon::Data::SetSimpleOneButtonMessage(int headerTextId, Il2CppString* message, Il2CppDelegate* onClose, int closeTextId)
 	{
-		reinterpret_cast<Il2CppObject * (*)(Il2CppObject*, uint64_t, Il2CppString*, Il2CppDelegate*, uint64_t)>(DialogCommon_Data_SetSimpleOneButtonMessage2_addr)(instance, headerTextId, message, onClose, closeTextId);
+		reinterpret_cast<Il2CppObject * (*)(Il2CppObject*, int, Il2CppString*, Il2CppDelegate*, int)>(DialogCommon_Data_SetSimpleOneButtonMessage2_addr)(instance, headerTextId, message, onClose, closeTextId);
 		return *this;
 	}
 
-	DialogCommon::Data DialogCommon::Data::SetSimpleTwoButtonMessage(Il2CppString* headerTextArg, Il2CppString* message, Il2CppDelegate* onRight, uint64_t leftTextId, uint64_t rightTextId, Il2CppDelegate* onLeft, DialogCommonBase::FormType dialogFormType)
+	DialogCommon::Data DialogCommon::Data::SetSimpleTwoButtonMessage(Il2CppString* headerTextArg, Il2CppString* message, Il2CppDelegate* onRight, int leftTextId, int rightTextId, Il2CppDelegate* onLeft, DialogCommonBase::FormType dialogFormType)
 	{
-		reinterpret_cast<Il2CppObject * (*)(Il2CppObject*, Il2CppString*, Il2CppString*, Il2CppDelegate*, uint64_t, uint64_t, Il2CppDelegate*, DialogCommonBase::FormType)>(DialogCommon_Data_SetSimpleTwoButtonMessage_addr)(instance, headerTextArg, message, onRight, leftTextId, rightTextId, onLeft, dialogFormType);
+		reinterpret_cast<Il2CppObject * (*)(Il2CppObject*, Il2CppString*, Il2CppString*, Il2CppDelegate*, int, int, Il2CppDelegate*, DialogCommonBase::FormType)>(DialogCommon_Data_SetSimpleTwoButtonMessage_addr)(instance, headerTextArg, message, onRight, leftTextId, rightTextId, onLeft, dialogFormType);
 		return *this;
 	}
 
-	DialogCommon::Data DialogCommon::Data::SetSimpleThreeButtonMessage(Il2CppString* headerTextArg, Il2CppString* message, Il2CppDelegate* onRight, uint64_t rightTextId, Il2CppDelegate* onCenter, uint64_t centerTextId, Il2CppDelegate* onLeft, uint64_t leftTextId, DialogCommonBase::FormType dialogFormType)
+	DialogCommon::Data DialogCommon::Data::SetSimpleThreeButtonMessage(Il2CppString* headerTextArg, Il2CppString* message, Il2CppDelegate* onRight, int rightTextId, Il2CppDelegate* onCenter, int centerTextId, Il2CppDelegate* onLeft, int leftTextId, DialogCommonBase::FormType dialogFormType)
 	{
-		reinterpret_cast<Il2CppObject * (*)(Il2CppObject*, Il2CppString*, Il2CppString*, Il2CppDelegate*, uint64_t, Il2CppDelegate*, uint64_t, Il2CppDelegate*, uint64_t, DialogCommonBase::FormType)>(DialogCommon_Data_SetSimpleThreeButtonMessage_addr)(instance, headerTextArg, message, onRight, rightTextId, onCenter, centerTextId, onLeft, leftTextId, dialogFormType);
+		reinterpret_cast<Il2CppObject * (*)(Il2CppObject*, Il2CppString*, Il2CppString*, Il2CppDelegate*, int, Il2CppDelegate*, int, Il2CppDelegate*, int, DialogCommonBase::FormType)>(DialogCommon_Data_SetSimpleThreeButtonMessage_addr)(instance, headerTextArg, message, onRight, rightTextId, onCenter, centerTextId, onLeft, leftTextId, dialogFormType);
 		return *this;
 	}
 
-	uint64_t DialogCommon::Data::DialogHash()
+	int DialogCommon::Data::DialogHash()
 	{
-		return reinterpret_cast<uint64_t(*)(Il2CppObject*)>(DialogCommon_Data_get_DialogHash_addr)(instance);
+		return reinterpret_cast<int(*)(Il2CppObject*)>(DialogCommon_Data_get_DialogHash_addr)(instance);
 	}
 
-	void DialogCommon::Data::DialogHash(uint64_t value)
+	void DialogCommon::Data::DialogHash(int value)
 	{
-		reinterpret_cast<void (*)(Il2CppObject*, uint64_t)>(DialogCommon_Data_set_DialogHash_addr)(instance, value);
+		reinterpret_cast<void (*)(Il2CppObject*, int)>(DialogCommon_Data_set_DialogHash_addr)(instance, value);
 	}
 
 	void DialogCommon::Data::AddOpenCallback(Il2CppDelegate* callback)

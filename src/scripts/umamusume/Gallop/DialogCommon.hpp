@@ -63,13 +63,13 @@ namespace Gallop
 
 			Data SetSimpleNoButtonMessage(Il2CppString* headerTextArg, Il2CppString* message);
 
-			Data SetSimpleOneButtonMessage(Il2CppString* headerTextArg, Il2CppString* message, Il2CppDelegate* onClickCenterButton = nullptr, uint64_t closeTextId = GetTextIdByName(IL2CPP_STRING("Common0007")), DialogCommonBase::FormType dialogFormType = DialogCommonBase::FormType::SMALL_ONE_BUTTON);
+			Data SetSimpleOneButtonMessage(Il2CppString* headerTextArg, Il2CppString* message, Il2CppDelegate* onClickCenterButton = nullptr, int closeTextId = GetTextIdByName(IL2CPP_STRING("Common0007")), DialogCommonBase::FormType dialogFormType = DialogCommonBase::FormType::SMALL_ONE_BUTTON);
 
-			Data SetSimpleOneButtonMessage(uint64_t headerTextId, Il2CppString* message, Il2CppDelegate* onClose = nullptr, uint64_t closeTextId = GetTextIdByName(IL2CPP_STRING("Common0007")));
+			Data SetSimpleOneButtonMessage(int headerTextId, Il2CppString* message, Il2CppDelegate* onClose = nullptr, int closeTextId = GetTextIdByName(IL2CPP_STRING("Common0007")));
 
-			Data SetSimpleTwoButtonMessage(Il2CppString* headerTextArg, Il2CppString* message, Il2CppDelegate* onRight = nullptr, uint64_t leftTextId = GetTextIdByName(IL2CPP_STRING("Common0002")), uint64_t rightTextId = GetTextIdByName(IL2CPP_STRING("Common0001")), Il2CppDelegate* onLeft = nullptr, DialogCommonBase::FormType dialogFormType = DialogCommonBase::FormType::SMALL_TWO_BUTTON);
+			Data SetSimpleTwoButtonMessage(Il2CppString* headerTextArg, Il2CppString* message, Il2CppDelegate* onRight = nullptr, int leftTextId = GetTextIdByName(IL2CPP_STRING("Common0002")), int rightTextId = GetTextIdByName(IL2CPP_STRING("Common0001")), Il2CppDelegate* onLeft = nullptr, DialogCommonBase::FormType dialogFormType = DialogCommonBase::FormType::SMALL_TWO_BUTTON);
 
-			Data SetSimpleThreeButtonMessage(Il2CppString* headerTextArg, Il2CppString* message, Il2CppDelegate* onRight = nullptr, uint64_t rightTextId = GetTextIdByName(IL2CPP_STRING("Common0001")), Il2CppDelegate* onCenter = nullptr, uint64_t centerTextId = GetTextIdByName(IL2CPP_STRING("Common0002")), Il2CppDelegate* onLeft = nullptr, uint64_t leftTextId = GetTextIdByName(IL2CPP_STRING("Common0002")), DialogCommonBase::FormType dialogFormType = DialogCommonBase::FormType::SMALL_THREE_BUTTON);
+			Data SetSimpleThreeButtonMessage(Il2CppString* headerTextArg, Il2CppString* message, Il2CppDelegate* onRight = nullptr, int rightTextId = GetTextIdByName(IL2CPP_STRING("Common0001")), Il2CppDelegate* onCenter = nullptr, int centerTextId = GetTextIdByName(IL2CPP_STRING("Common0002")), Il2CppDelegate* onLeft = nullptr, int leftTextId = GetTextIdByName(IL2CPP_STRING("Common0002")), DialogCommonBase::FormType dialogFormType = DialogCommonBase::FormType::SMALL_THREE_BUTTON);
 
 			void AddOpenCallback(Il2CppDelegate* callback);
 
@@ -85,9 +85,9 @@ namespace Gallop
 
 			void ReleaseDialogResourceAndHash();
 
-			uint64_t DialogHash();
+			int DialogHash();
 
-			void DialogHash(uint64_t value);
+			void DialogHash(int value);
 
 			int HeaderSortOrderOffset();
 

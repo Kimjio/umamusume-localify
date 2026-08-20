@@ -3322,7 +3322,7 @@ namespace
 			}
 
 			auto sceneManager = Gallop::SceneManager::Instance();
-			
+
 			if (!sceneManager)
 			{
 				StartTickFrame();
@@ -3737,10 +3737,7 @@ namespace
 
 											if (SetListId > 0)
 											{
-												auto _jukeboxBgmSelectorField = il2cpp_class_get_field_from_name(topUi->klass, "_jukeboxBgmSelector");
-												Il2CppObject* _jukeboxBgmSelector;
-												il2cpp_field_get_value(topUi, _jukeboxBgmSelectorField, &_jukeboxBgmSelector);
-
+												Il2CppObject* _jukeboxBgmSelector = il2cpp_symbols::get_method_pointer<Il2CppObject * (*)(Il2CppObject*)>(topUi->klass, "get_JukeboxBgmSelector", 0)(topUi);
 												il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, bool, float, bool)>(_jukeboxBgmSelector->klass, "PlayCoroutinePlaySetList", 3)->methodPointer(_jukeboxBgmSelector, true, 0.0f, true);
 											}
 											else
@@ -4205,7 +4202,7 @@ CreateWindowExW_hook(
 	_In_opt_ LPVOID lpParam)
 {
 	bool isUnity = false;
-	
+
 	if (reinterpret_cast<uint16_t>(lpClassName) != UNITY_BATCH_CLASS_ID)
 	{
 		isUnity = wcscmp(lpClassName, L"UnityWndClass") == 0;

@@ -12,7 +12,7 @@ namespace Gallop
 			JP,
 		};
 
-		static Il2CppString* Get(uint64_t id);
+		static Il2CppString* Get(int id);
 
 		static Il2CppString* Get(Il2CppString* id);
 

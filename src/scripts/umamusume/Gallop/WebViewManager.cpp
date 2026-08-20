@@ -153,7 +153,7 @@ extern wil::com_ptr<ICoreWebView2Controller> webviewController;
 extern wil::com_ptr<ICoreWebView2> webview;
 #endif
 
-static void OpenWebViewDialog(Il2CppString* url, Il2CppString* headerTextArg, uint64_t closeTextId,
+static void OpenWebViewDialog(Il2CppString* url, Il2CppString* headerTextArg, int closeTextId,
 	Il2CppDelegate* onClose = nullptr) {
 	auto data = Gallop::DialogCommon::Data();
 	data.SetSimpleOneButtonMessage(headerTextArg, nullptr, onClose, closeTextId, Gallop::DialogCommonBase::FormType::BIG_ONE_BUTTON);
@@ -506,7 +506,7 @@ static void Gallop_WebViewManager_Open_hook(Il2CppObject* self, Il2CppString* ur
 					if (parameters_count == 14)
 					{
 						reinterpret_cast<Cute::Cri::AudioPlayback* (*)(Cute::Cri::AudioPlayback*, Il2CppObject*, Il2CppString*, bool, float, Il2CppObject*,
-							float, float, float, float, float, float, bool, float, uint64_t, int
+							float, float, float, float, float, float, bool, float, int, int
 							)>(PlaySe)(&res, AudioManager, msg, false, 0.0, nullptr, 0.0, 10.0, 100.0, 0.0, 0.0, 1.0, false, 1.0, 0, INT_MAX);
 						return;
 					}
@@ -520,7 +520,7 @@ static void Gallop_WebViewManager_Open_hook(Il2CppObject* self, Il2CppString* ur
 					SelectorInfo selectorInfo{};
 
 					reinterpret_cast<Cute::Cri::AudioPlayback* (*)(Cute::Cri::AudioPlayback*, Il2CppObject*, Il2CppString*, bool, float, Il2CppObject*,
-						float, float, float, float, float, float, float, float, float, bool, float, uint64_t, int, SelectorInfo*
+						float, float, float, float, float, float, float, float, float, bool, float, int, int, SelectorInfo*
 						)>(PlaySe)(&res, AudioManager, msg, false, 0.0, nullptr, 0.0, 10.0, 100.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, false, 1.0, 0, INT_MAX, &selectorInfo);
 				}
 
@@ -651,10 +651,10 @@ static Il2CppString* Gallop_WebViewManager_GetGachaURLProperty_hook(int gachaId)
 	auto params = il2cpp_symbols::get_method_pointer<Il2CppString * (*)(Il2CppString*, Il2CppString*, Il2CppString*, Il2CppObject*)>("mscorlib.dll", "System", "String", "Format", 4)(
 		il2cpp_string_new("?v={0}&r={1}&g={2}"), AppVersionName, SafeResourceVer, gachaIdObj);
 
-	uint64_t gachaType;
-	if (il2cpp_symbols::get_method_pointer<bool (*)(int, uint64_t*)>(ASSEMBLY_NAME, "Gallop", "WebViewManager", "IsSelectPickupGacha", 2)(gachaId, &gachaType))
+	int gachaType;
+	if (il2cpp_symbols::get_method_pointer<bool (*)(int, int*)>(ASSEMBLY_NAME, "Gallop", "WebViewManager", "IsSelectPickupGacha", 2)(gachaId, &gachaType))
 	{
-		auto SelectPickupGachaURLProperty = il2cpp_symbols::get_method_pointer<Il2CppString * (*)(int, uint64_t)>(ASSEMBLY_NAME, "Gallop", "WebViewManager", "GetSelectPickupGachaURLProperty", 2)(gachaId, gachaType);
+		auto SelectPickupGachaURLProperty = il2cpp_symbols::get_method_pointer<Il2CppString * (*)(int, int)>(ASSEMBLY_NAME, "Gallop", "WebViewManager", "GetSelectPickupGachaURLProperty", 2)(gachaId, gachaType);
 
 		params = il2cpp_symbols::get_method_pointer<Il2CppString * (*)(Il2CppString*, Il2CppString*)>("mscorlib.dll", "System", "String", "Concat", 2)(params, SelectPickupGachaURLProperty);
 	}

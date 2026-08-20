@@ -515,7 +515,7 @@ inline uint64_t GetTextIdByName(const il2cppstring& name)
 	return GetEnumValue(ParseEnum(GetRuntimeType("umamusume.dll", "Gallop", "TextId"), name));
 }
 
-inline il2cppstring GetTextIdNameById(uint64_t id)
+inline il2cppstring GetTextIdNameById(int id)
 {
 	auto name = GetEnumName(GetRuntimeType("umamusume.dll", "Gallop", "TextId"), id);
 

@@ -22,6 +22,8 @@ namespace
 
 	Il2CppMethodPointer GetComponentInChildren_addr = nullptr;
 
+	Il2CppMethodPointer GetComponentInParent_addr = nullptr;
+
 	Il2CppMethodPointer GetComponentsInternal_addr = nullptr;
 
 	Il2CppMethodPointer GameObject_get_transform_addr = nullptr;
@@ -129,6 +131,7 @@ static void InitAddress()
 	TryGetComponentFastPath_addr = il2cpp_resolve_icall("UnityEngine.GameObject::TryGetComponentFastPath");
 	GetComponent_addr = il2cpp_resolve_icall("UnityEngine.GameObject::GetComponent");
 	GetComponentInChildren_addr = il2cpp_resolve_icall("UnityEngine.GameObject::GetComponentInChildren");
+	GetComponentInParent_addr = il2cpp_resolve_icall("UnityEngine.GameObject::GetComponentInParent");
 	GetComponentsInternal_addr = il2cpp_resolve_icall("UnityEngine.GameObject::GetComponentsInternal");
 	GameObject_get_transform_addr = il2cpp_resolve_icall("UnityEngine.GameObject::get_transform");
 	get_tag_addr = il2cpp_resolve_icall("UnityEngine.GameObject::get_tag");
@@ -184,6 +187,11 @@ namespace UnityEngine
 	Il2CppObject* GameObject::GetComponentInChildren(Il2CppReflectionType* runtimeType, bool includeInactive)
 	{
 		return reinterpret_cast<Il2CppObject * (*)(Il2CppObject*, Il2CppReflectionType*, bool)>(GetComponentInChildren_addr)(instance, runtimeType, includeInactive);
+	}
+
+	Il2CppObject* GameObject::GetComponentInParent(Il2CppReflectionType* runtimeType, bool includeInactive)
+	{
+		return reinterpret_cast<Il2CppObject * (*)(Il2CppObject*, Il2CppReflectionType*, bool)>(GetComponentInParent_addr)(instance, runtimeType, includeInactive);
 	}
 
 	Il2CppArraySize_t<Il2CppObject*>* GameObject::GetComponentsInternal(Il2CppReflectionType* runtimeType, bool useSearchTypeAsArrayReturnType, bool recursive, bool includeInactive, bool reverse, Il2CppObject** resultList)

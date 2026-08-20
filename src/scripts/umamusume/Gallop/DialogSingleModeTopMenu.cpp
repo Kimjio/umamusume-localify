@@ -38,7 +38,7 @@ static void DialogSingleModeTopMenu_Setup_hook(Il2CppObject* self)
 	}
 }
 
-static void DialogSingleModeTopMenu_Setup1_hook(Il2CppObject* self, uint64_t dialogType)
+static void DialogSingleModeTopMenu_Setup1_hook(Il2CppObject* self, int dialogType)
 {
 	reinterpret_cast<decltype(DialogSingleModeTopMenu_Setup1_hook)*>(DialogSingleModeTopMenu_Setup1_orig)(self, dialogType);
 

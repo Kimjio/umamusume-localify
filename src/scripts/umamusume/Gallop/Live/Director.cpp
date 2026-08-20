@@ -14,6 +14,10 @@ namespace
 
 	Il2CppMethodPointer Director_get_Instance_addr = nullptr;
 
+    Il2CppMethodPointer Director_get_IsInitialized_addr = nullptr;
+
+    Il2CppMethodPointer Director_get_IsStarted_addr = nullptr;
+
 	Il2CppMethodPointer Director_Live3DSettings_get_ScreenMode_addr = nullptr;
 
 	Il2CppMethodPointer Director_Live3DSettings_set_ScreenMode_addr = nullptr;
@@ -53,6 +57,8 @@ static void InitAddress()
 {
 	Director_SetupOrientation_addr = il2cpp_symbols::get_method_pointer(ASSEMBLY_NAME, "Gallop.Live", "Director", "SetupOrientation", 1);
 	Director_get_Instance_addr = il2cpp_symbols::get_method_pointer(ASSEMBLY_NAME, "Gallop.Live", "Director", "get_Instance", 0);
+    Director_get_IsInitialized_addr = il2cpp_symbols::get_method_pointer(ASSEMBLY_NAME, "Gallop.Live", "Director", "get_IsInitialized", 0);
+    Director_get_IsStarted_addr = il2cpp_symbols::get_method_pointer(ASSEMBLY_NAME, "Gallop.Live", "Director", "get_IsStarted", 0);
 	Director_Live3DSettings_get_ScreenMode_addr = il2cpp_symbols::get_method_pointer(ASSEMBLY_NAME, "Gallop.Live", "Director/Live3DSettings", "get_ScreenMode", 0);
 	Director_Live3DSettings_set_ScreenMode_addr = il2cpp_symbols::get_method_pointer(ASSEMBLY_NAME, "Gallop.Live", "Director/Live3DSettings", "set_ScreenMode", 1);
 	Director_Live3DSettings_SetData_addr = il2cpp_symbols::get_method_pointer(ASSEMBLY_NAME, "Gallop.Live", "Director/Live3DSettings", "SetData", 2);
@@ -80,6 +86,16 @@ namespace Gallop::Live
 	{
 		return reinterpret_cast<Il2CppObject* (*)()>(Director_get_Instance_addr)();
 	}
+
+    bool Director::IsInitialized()
+    {
+        return reinterpret_cast<bool (*)(Il2CppObject*)>(Director_get_IsInitialized_addr)(instance);
+    }
+
+    bool Director::IsStarted()
+    {
+        return reinterpret_cast<bool (*)(Il2CppObject*)>(Director_get_IsStarted_addr)(instance);
+    }
 
 	void Director::Live3DSettings::ScreenMode(int value)
 	{

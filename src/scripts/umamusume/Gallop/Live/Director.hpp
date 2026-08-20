@@ -24,6 +24,10 @@ namespace Gallop::Live
 
 		static Director Instance();
 
+        bool IsInitialized();
+
+		bool IsStarted();
+
 		using MonoBehaviour::MonoBehaviour;
 	};
 }

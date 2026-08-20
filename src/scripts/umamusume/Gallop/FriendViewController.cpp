@@ -83,8 +83,8 @@ static void FriendViewController_OnClickIDSearch_hook(Il2CppObject* self)
 
 			auto valueChangeFn = *[](Il2CppObject* obj)
 				{
-					auto dialog = GetFrontDialog();
-					auto data = il2cpp_symbols::get_method_pointer<Il2CppObject * (*)(Il2CppObject*)>(dialog->klass, "get_DialogData", 0)(dialog);
+					Gallop::DialogCommon dialog = GetFrontDialog();
+					auto data = il2cpp_symbols::get_method_pointer<Il2CppObject * (*)(Il2CppObject*)>(dialog, "get_DialogData", 0)(dialog);
 
 					auto ContentsObjectField = il2cpp_class_get_field_from_name(data->klass, "ContentsObject");
 					Il2CppObject* ContentsObject;
@@ -98,7 +98,7 @@ static void FriendViewController_OnClickIDSearch_hook(Il2CppObject* self)
 
 					auto value = il2cpp_symbols::get_method_pointer<Il2CppString * (*)(Il2CppObject*)>(_inputField->klass, "get_text", 0)(_inputField);
 
-					Il2CppObject* rightButton = il2cpp_symbols::get_method_pointer<Il2CppObject * (*)(Il2CppObject*, uint64_t)>(dialog->klass, "GetButtonObj", 1)(dialog, 2);
+					Il2CppObject* rightButton = dialog.GetButtonObj(Gallop::DialogCommon::ButtonIndex::Right);
 
 					bool valid = false;
 

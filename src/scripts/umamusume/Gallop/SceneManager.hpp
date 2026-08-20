@@ -9,7 +9,7 @@ namespace Gallop
     class SceneManager : public MonoSingleton<SceneManager>
     {
     public:
-        uint64_t GetCurrentSceneId();
+        int GetCurrentSceneId();
 
         Il2CppString* GetCurrentSceneIdName();
 

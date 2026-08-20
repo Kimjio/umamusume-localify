@@ -17,10 +17,6 @@
 #include "game.hpp"
 #include "config/config.hpp"
 
-#ifdef __ANDROID__
-#include "zygoteloader/dex.hpp"
-#endif
-
 #include <algorithm>
 
 namespace
@@ -80,11 +76,8 @@ namespace
 	Il2CppMethodPointer UpdateCanvasScaler_addr = nullptr;
 	void* UpdateCanvasScaler_orig = nullptr;
 
-    Il2CppMethodPointer IsNeedSafeAreaScaling_addr = nullptr;
-    void* IsNeedSafeAreaScaling_orig = nullptr;
-
-    Il2CppMethodPointer GetDeviceSafeArea_addr = nullptr;
-    void* GetDeviceSafeArea_orig = nullptr;
+	Il2CppMethodPointer GetDeviceSafeArea_addr = nullptr;
+	void* GetDeviceSafeArea_orig = nullptr;
 
 #ifdef _MSC_VER
 	Il2CppMethodPointer ChangeResizeUIForPC_addr = nullptr;
@@ -107,105 +100,9 @@ namespace
 	float ratio_horizontal = 1.7777778f;
 }
 
-static bool IsNeedSafeAreaScaling_hook(Rect originalRect, Rect safeAreaRect)
-{
-	return false;
-}
-
 static Rect GetDeviceSafeArea_hook(Il2CppObject* self)
 {
-#ifdef __ANDROID__
-    JavaVM *javaVM;
-    jsize numVMs = 0;
-    JNI_GetCreatedJavaVMs(&javaVM, 1, &numVMs);
-
-    JNIEnv *env;
-    javaVM->GetEnv(reinterpret_cast<void **>(&env), JNI_VERSION_1_6);
-    if (env) {
-        auto get_Activity = il2cpp_symbols::get_method_pointer<Il2CppObject *(*)()>(
-                "UnityEngine.AndroidJNIModule.dll", "UnityEngine.Android", "AndroidApp",
-                "get_Activity", 0);
-
-        if (!get_Activity) {
-            get_Activity = il2cpp_symbols::get_method_pointer<Il2CppObject *(*)()>(
-                    "UnityEngine.AndroidJNIModule.dll", "UnityEngine.Android", "Permission",
-                    "GetActivity", 0);
-        }
-
-        auto il2cppActivity = get_Activity();
-        auto activity = il2cpp_symbols::get_method_pointer<jobject (*)(Il2CppObject *)>(
-                il2cppActivity->klass, "GetRawObject", 0)(il2cppActivity);
-
-        auto windowMetricsCalculatorClass = env->GetObjectClass(windowMetricsCalculator);
-
-        auto computeId = env->GetMethodID(windowMetricsCalculatorClass,
-                                          "computeCurrentWindowMetrics",
-                                          "(Landroid/app/Activity;)Landroidx/window/layout/WindowMetrics;");
-        env->DeleteLocalRef(windowMetricsCalculatorClass);
-
-        auto metrics = env->CallObjectMethod(windowMetricsCalculator, computeId, activity);
-
-        auto metricsClass = env->GetObjectClass(metrics);
-
-        auto getRectId = env->GetMethodID(metricsClass, "getBounds",
-                                          "()Landroid/graphics/Rect;");
-        auto rect = env->CallObjectMethod(metrics, getRectId);
-
-        auto rectClass = env->GetObjectClass(rect);
-
-        auto widthId = env->GetMethodID(rectClass, "width", "()I");
-        jint width = env->CallIntMethod(rect, widthId);
-
-        auto heightId = env->GetMethodID(rectClass, "height", "()I");
-        jint height = env->CallIntMethod(rect, heightId);
-
-        env->DeleteLocalRef(rect);
-        env->DeleteLocalRef(rectClass);
-
-        auto getWindowInsetsId = env->GetMethodID(metricsClass, "getWindowInsets",
-                                                  "()Landroidx/core/view/WindowInsetsCompat;");
-        auto windowInsets = env->CallObjectMethod(metrics, getWindowInsetsId);
-
-        env->DeleteLocalRef(metrics);
-        env->DeleteLocalRef(metricsClass);
-
-        auto windowInsetsClass = env->GetObjectClass(windowInsets);
-        auto getInsetsId = env->GetMethodID(windowInsetsClass, "getInsets",
-                                            "(I)Landroidx/core/graphics/Insets;");
-        auto insets = env->CallObjectMethod(windowInsets, getInsetsId, 1 << 7);
-        env->DeleteLocalRef(windowInsets);
-        env->DeleteLocalRef(windowInsetsClass);
-
-        auto insetsClass = env->GetObjectClass(insets);
-        auto leftField = env->GetFieldID(insetsClass, "left", "I");
-        auto topField = env->GetFieldID(insetsClass, "top", "I");
-        auto rightField = env->GetFieldID(insetsClass, "right", "I");
-        auto bottomField = env->GetFieldID(insetsClass, "bottom", "I");
-
-        auto left = env->GetIntField(insets, leftField);
-        auto top = env->GetIntField(insets, topField);
-        auto right = env->GetIntField(insets, rightField);
-        auto bottom = env->GetIntField(insets, bottomField);
-
-        env->DeleteLocalRef(insets);
-        env->DeleteLocalRef(insetsClass);
-
-        const auto isPortrait = width <= height;
-
-        if (isPortrait) {
-            width -= left + right;
-            height -= top + bottom;
-        } else {
-            width -= top + bottom;
-            height -= left + right;
-        }
-
-        auto safeArea = reinterpret_cast<decltype(GetDeviceSafeArea_hook)*>(GetDeviceSafeArea_orig)(self);
-
-        return { .x = 0, .y = 0, .width = static_cast<float>(width), .height = static_cast<float>(height) };
-    }
-#endif
-    return reinterpret_cast<decltype(GetDeviceSafeArea_hook)*>(GetDeviceSafeArea_orig)(self);
+	return Screen::safeArea();
 }
 
 static void SetBGCanvasScalerSize()
@@ -281,7 +178,7 @@ static void ChangeResizeUIForPC_hook(Il2CppObject* self, int width, int height)
     ChangeResizeUI();
 }
 
-static void OnPushBandUIButton_hook(Il2CppObject* self, uint64_t buttonType)
+static void OnPushBandUIButton_hook(Il2CppObject* self, int buttonType)
 {
 	// no-op
 }
@@ -403,7 +300,6 @@ static void InitAddress()
 	GetCameraSizeByOrientation_addr = il2cpp_symbols::get_method_pointer(UIManager_klass, "GetCameraSizeByOrientation", 1);
     get_DefaultResolution_addr = il2cpp_symbols::get_method_pointer(UIManager_klass, "get_DefaultResolution", 0);
     UpdateCanvasScaler_addr = il2cpp_symbols::get_method_pointer(UIManager_klass, "UpdateCanvasScaler", 1);
-    IsNeedSafeAreaScaling_addr = il2cpp_symbols::get_method_pointer(UIManager_klass, "IsNeedSafeAreaScaling", 2);
     GetDeviceSafeArea_addr = il2cpp_symbols::get_method_pointer(UIManager_klass, "GetDeviceSafeArea", 0);
 #ifdef _MSC_VER
 	ChangeResizeUIForPC_addr = il2cpp_symbols::get_method_pointer(UIManager_klass, "ChangeResizeUIForPC", 2);
@@ -434,8 +330,7 @@ static void HookMethods()
 	{
 		ADD_HOOK(GetCameraSizeByOrientation, "Gallop.UIManager::GetCameraSizeByOrientation at %p\n");
 		ADD_HOOK(get_DefaultResolution, "Gallop.UIManager::get_DefaultResolution at %p\n");
-		ADD_HOOK(IsNeedSafeAreaScaling, "Gallop.UIManager::IsNeedSafeAreaScaling at %p\n");
-        // ADD_HOOK(GetDeviceSafeArea, "Gallop.UIManager::GetDeviceSafeArea at %p\n");
+		ADD_HOOK(GetDeviceSafeArea, "Gallop.UIManager::GetDeviceSafeArea at %p\n");
 #ifdef _MSC_VER
 		ADD_HOOK(OnPushBandUIButton, "Gallop.UIManager::OnPushBandUIButton at %p\n");
 		ADD_HOOK(RestorePrevSelectedBandMenu, "Gallop.UIManager::RestorePrevSelectedBandMenu at %p\n");
@@ -609,7 +504,7 @@ namespace Gallop
 	{
 		if (ShowNotification2_addr)
 		{
-			reinterpret_cast<void (*)(Il2CppObject*, Il2CppString*, uint64_t)>(ShowNotification2_addr)(instance, text, 0);
+			reinterpret_cast<void (*)(Il2CppObject*, Il2CppString*, int)>(ShowNotification2_addr)(instance, text, 0);
 			return;
 		}
 		reinterpret_cast<void (*)(Il2CppObject*, Il2CppString*)>(ShowNotification_addr)(instance, text);
@@ -640,23 +535,12 @@ namespace Gallop
         auto width = Gallop::Screen::Width();
         auto height = Gallop::Screen::Height();
 
-		auto gameObject = il2cpp_symbols::get_method_pointer<Il2CppObject * (*)(Il2CppObject*)>(canvasScaler->klass, "get_gameObject", 0)(canvasScaler);
-
-		bool keepActive = il2cpp_symbols::get_method_pointer<bool (*)(Il2CppObject*)>(gameObject->klass, "get_activeSelf", 0)(gameObject);
-
-		il2cpp_symbols::get_method_pointer<void (*)(Il2CppObject*, bool)>(gameObject->klass, "SetActive", 1)(gameObject, true);
+		if (UpdateCanvasScaler_orig)
+		{
+			reinterpret_cast<void (*)(Il2CppObject*)>(UpdateCanvasScaler_orig)(canvasScaler);
+		}
 
 		auto scaleMode = il2cpp_symbols::get_method_pointer<int (*)(Il2CppObject*)>(canvasScaler->klass, "get_uiScaleMode", 0)(canvasScaler);
-
-		if (Object::Name(canvasScaler)->chars == il2cppstring(IL2CPP_STRING("SystemCanvas")) ||
-		    Object::Name(canvasScaler)->chars == il2cppstring(IL2CPP_STRING("GameCanvas")) ||
-		    Object::Name(canvasScaler)->chars == il2cppstring(IL2CPP_STRING("BGCanvas")) ||
-		    Object::Name(canvasScaler)->chars == il2cppstring(IL2CPP_STRING("NoImageEffectGameCanvas")))
-		{
-			il2cpp_symbols::get_method_pointer<void (*)(Il2CppObject*, int)>(canvasScaler->klass, "set_uiScaleMode", 1)(canvasScaler, 0);
-
-			scaleMode = 0;
-		}
 
 		if (config::freeform_window)
 		{
@@ -719,12 +603,6 @@ namespace Gallop
 				}
 			}
 		}
-
-		// il2cpp_symbols::get_method_pointer<void (*)(Il2CppObject*, int)>(canvasScaler->klass, "set_uiScaleMode", 1)(canvasScaler, 0);
-
-		// il2cpp_symbols::get_method_pointer<void (*)(Il2CppObject*, int)>(canvasScaler->klass, "set_screenMatchMode", 1)(canvasScaler, 0);
-
-		il2cpp_symbols::get_method_pointer<void (*)(Il2CppObject*, bool)>(gameObject->klass, "SetActive", 1)(gameObject, keepActive);
 	}
 
 	void UIManager::AdjustMissionClearContentsRootRect()

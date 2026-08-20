@@ -2,12 +2,19 @@
 #include "../../ScriptInternal.hpp"
 #include "Screen.hpp"
 
+#ifdef _MSC_VER
 #include "scripts/umamusume/Gallop/StandaloneWindowResize.hpp"
+#endif
+
+#ifdef __ANDROID__
+
+#include "zygoteloader/dex.hpp"
+
+#endif
 
 #include "config/config.hpp"
 
-namespace
-{
+namespace {
 	Il2CppMethodPointer get_width_addr = nullptr;
 
 	Il2CppMethodPointer get_height_addr = nullptr;
@@ -16,13 +23,15 @@ namespace
 
 	Il2CppMethodPointer get_currentResolution_Injected_addr = nullptr;
 
-    Il2CppMethodPointer SetOrientationEnabled_addr = nullptr;
+	Il2CppMethodPointer SetOrientationEnabled_addr = nullptr;
 
 	Il2CppMethodPointer RequestOrientation_addr = nullptr;
 
 	Il2CppMethodPointer SetResolution_Injected_addr = nullptr;
 
 	Il2CppMethodPointer SetResolution_addr = nullptr;
+
+	Il2CppMethodPointer get_safeArea_Injected_addr = nullptr;
 }
 
 static void RequestOrientation_hook(UnityEngine::ScreenOrientation orientation)
@@ -44,7 +53,7 @@ static void RequestOrientation_hook(UnityEngine::ScreenOrientation orientation)
 	}
 }
 
-void SetResolution_Injected_hook(int width, int height, int fullscreenMode, UnityEngine::RefreshRate* perferredRefreshRate)
+static void SetResolution_Injected_hook(int width, int height, int fullscreenMode, UnityEngine::RefreshRate* perferredRefreshRate)
 {
 #ifdef _MSC_VER
 	if (width < 72)
@@ -86,6 +95,34 @@ void SetResolution_Injected_hook(int width, int height, int fullscreenMode, Unit
 	reinterpret_cast<decltype(SetResolution_Injected_hook)*>(SetResolution_Injected_addr)(width, height, fullscreenMode, perferredRefreshRate);
 }
 
+static void get_safeArea_Injected_hook(Rect* safeArea)
+{
+	reinterpret_cast<decltype(get_safeArea_Injected_hook)*>(get_safeArea_Injected_addr)(safeArea);
+
+#ifdef __ANDROID__
+	auto env = GetJNIEnv();
+	auto activity = GetActivity();
+
+	auto insets = getCaptionBarInsets(env, activity);
+	auto insetsClass = env->GetObjectClass(insets);
+	auto leftField = env->GetFieldID(insetsClass, "left", "I");
+	auto topField = env->GetFieldID(insetsClass, "top", "I");
+	auto rightField = env->GetFieldID(insetsClass, "right", "I");
+	auto bottomField = env->GetFieldID(insetsClass, "bottom", "I");
+
+	auto left = env->GetIntField(insets, leftField);
+	auto top = env->GetIntField(insets, topField);
+	auto right = env->GetIntField(insets, rightField);
+	auto bottom = env->GetIntField(insets, bottomField);
+
+	env->DeleteLocalRef(insets);
+	env->DeleteLocalRef(insetsClass);
+
+	safeArea->width -= static_cast<float>(left + right);
+	safeArea->height -= static_cast<float>(top + bottom);
+#endif
+}
+
 static void InitAddress()
 {
 	get_width_addr = il2cpp_resolve_icall("UnityEngine.Screen::get_width");
@@ -93,9 +130,10 @@ static void InitAddress()
 	get_fullScreen_addr = il2cpp_resolve_icall("UnityEngine.Screen::get_fullScreen");
 	get_currentResolution_Injected_addr = il2cpp_resolve_icall("UnityEngine.Screen::get_currentResolution_Injected");
 	RequestOrientation_addr = il2cpp_resolve_icall("UnityEngine.Screen::RequestOrientation");
-    SetOrientationEnabled_addr = il2cpp_resolve_icall("UnityEngine.Screen::SetOrientationEnabled");
+	SetOrientationEnabled_addr = il2cpp_resolve_icall("UnityEngine.Screen::SetOrientationEnabled");
 	SetResolution_Injected_addr = il2cpp_resolve_icall("UnityEngine.Screen::SetResolution_Injected");
 	SetResolution_addr = il2cpp_resolve_icall("UnityEngine.Screen::SetResolution");
+	get_safeArea_Injected_addr = il2cpp_resolve_icall("UnityEngine.Screen::get_safeArea_Injected");
 }
 
 static void HookMethods()
@@ -103,11 +141,12 @@ static void HookMethods()
 	if (config::freeform_window)
 	{
 		il2cpp_add_internal_call("UnityEngine.Screen::RequestOrientation", reinterpret_cast<Il2CppMethodPointer>(RequestOrientation_hook));
+		il2cpp_add_internal_call("UnityEngine.Screen::get_safeArea_Injected", reinterpret_cast<Il2CppMethodPointer>(get_safeArea_Injected_hook));
 	}
 
 	if (config::unlock_size || config::freeform_window)
 	{
-        il2cpp_add_internal_call("UnityEngine.Screen.SetResolution_Injected", reinterpret_cast<Il2CppMethodPointer>(SetResolution_Injected_hook));
+		il2cpp_add_internal_call("UnityEngine.Screen.SetResolution_Injected", reinterpret_cast<Il2CppMethodPointer>(SetResolution_Injected_hook));
 	}
 }
 
@@ -119,7 +158,7 @@ STATIC
 
 namespace UnityEngine
 {
-	int Screen::width()
+	int Screen::width() 
 	{
 		return reinterpret_cast<decltype(width)*>(get_width_addr)();
 	}
@@ -128,7 +167,7 @@ namespace UnityEngine
 	{
 		return reinterpret_cast<decltype(height)*>(get_height_addr)();
 	}
-	
+
 	bool Screen::fullScreen()
 	{
 		return reinterpret_cast<decltype(fullScreen)*>(get_fullScreen_addr)();
@@ -141,43 +180,55 @@ namespace UnityEngine
 		return resolution;
 	}
 
-    void Screen::SetOrientationEnabled(EnabledOrientation orient, bool enabled)
-    {
-        reinterpret_cast<decltype(SetOrientationEnabled)*>(SetOrientationEnabled_addr)(orient, enabled);
-    }
+	Rect Screen::safeArea()
+	{
+		Rect rect;
+		get_safeArea_Injected_hook(&rect);
+		return rect;
+	}
 
-    void Screen::autorotateToPortrait(bool value)
-    {
-        SetOrientationEnabled(EnabledOrientation::kAutorotateToPortrait, value);
-    }
+	void Screen::SetOrientationEnabled(EnabledOrientation orient, bool enabled)
+	{
+		reinterpret_cast<decltype(SetOrientationEnabled)*>(SetOrientationEnabled_addr)(orient, enabled);
+	}
+
+	void Screen::autorotateToPortrait(bool value)
+	{
+		SetOrientationEnabled(EnabledOrientation::kAutorotateToPortrait, value);
+	}
 
 	void Screen::autorotateToPortraitUpsideDown(bool value)
 	{
 		SetOrientationEnabled(EnabledOrientation::kAutorotateToPortraitUpsideDown, value);
 	}
 
-    void Screen::autorotateToLandscapeLeft(bool value)
+	void Screen::autorotateToLandscapeLeft(bool value)
 	{
-        SetOrientationEnabled(EnabledOrientation::kAutorotateToLandscapeLeft, value);
+		SetOrientationEnabled(EnabledOrientation::kAutorotateToLandscapeLeft, value);
 	}
 
 	void Screen::autorotateToLandscapeRight(bool value)
 	{
-        SetOrientationEnabled(EnabledOrientation::kAutorotateToLandscapeRight, value);
+		SetOrientationEnabled(EnabledOrientation::kAutorotateToLandscapeRight, value);
 	}
-	
+
 	void Screen::RequestOrientation(ScreenOrientation orientation)
 	{
 		reinterpret_cast<decltype(RequestOrientation)*>(RequestOrientation_addr)(orientation);
 	}
 
-	void Screen::SetResolution_Injected(int width, int height, FullScreenMode fullscreenMode, RefreshRate* perferredRefreshRate)
-	{
-        if (SetResolution_addr)
-        {
-            reinterpret_cast<void (*)(int, int, FullScreenMode, int)>(SetResolution_addr)(width, height, fullscreenMode, perferredRefreshRate->value());
-            return;
-        }
+	void Screen::SetResolution_Injected(int width, int height, FullScreenMode fullscreenMode, RefreshRate* perferredRefreshRate) {
+		if (SetResolution_addr)
+		{
+			reinterpret_cast<void (*)(int, int, FullScreenMode, int)>(SetResolution_addr)(width, height, fullscreenMode, perferredRefreshRate->value());
+			return;
+		}
+
+		if (!SetResolution_Injected_addr)
+		{
+			return;
+		}
+
 		reinterpret_cast<decltype(SetResolution_Injected)*>(SetResolution_Injected_addr)(width, height, fullscreenMode, perferredRefreshRate);
 	}
 }

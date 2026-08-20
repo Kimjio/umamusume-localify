@@ -13,7 +13,7 @@ namespace
 	void* SingleModeRaceEntryViewController_SetupBottomButtons_orig = nullptr;
 }
 
-static void SingleModeRaceEntryViewController_SetupBottomButtons_hook(Il2CppObject* self, uint64_t degree)
+static void SingleModeRaceEntryViewController_SetupBottomButtons_hook(Il2CppObject* self, int degree)
 {
 	reinterpret_cast<decltype(SingleModeRaceEntryViewController_SetupBottomButtons_hook)*>(SingleModeRaceEntryViewController_SetupBottomButtons_orig)(self, degree);
 

@@ -87,7 +87,7 @@ static float LandscapeUIManager_get_WindowScaleRate_hook()
 	return static_cast<float>(UnityEngine::Screen::width()) / LandscapeUIManager_GetWindowsWidthMax_hook();
 }
 
-static void LandscapeUIManager_OnPushBandUIButton_hook(Il2CppObject* self, uint64_t buttonType)
+static void LandscapeUIManager_OnPushBandUIButton_hook(Il2CppObject* self, int buttonType)
 {
 	// no-op
 }
