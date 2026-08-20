@@ -458,9 +458,9 @@ namespace MsgPackData
 								{
 									chara_info = MsgPackData::idle_single_mode_load_info["single_mode_chara_light"].object_items();
 								}
-								else if (MsgPackData::idle_single_mode_load_info.contains("progress_info"))
+								else if (MsgPackData::idle_single_mode_load_info.contains("chara_info"))
 								{
-									chara_info = MsgPackData::idle_single_mode_load_info["progress_info"].object_items();
+									chara_info = MsgPackData::idle_single_mode_load_info["chara_info"].object_items();
 								}
 
 								if (chara_info.empty())
