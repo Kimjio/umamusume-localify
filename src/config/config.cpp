@@ -26,7 +26,11 @@ namespace config
 	bool unlock_size = false;
 	float ui_scale = 1.f;
 	bool freeform_window = false;
+#ifdef _MSC_VER
 	float freeform_ui_scale_portrait = .5f;
+#else
+	float freeform_ui_scale_portrait = 1.f;
+#endif
 	float freeform_ui_scale_landscape = .5f;
 	int initial_width = -1;
 	int initial_height = -1;
