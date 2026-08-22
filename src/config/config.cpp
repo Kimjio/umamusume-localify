@@ -94,10 +94,10 @@ namespace config
 	bool dump_msgpack = false;
 	bool dump_msgpack_request = false;
 	bool unlock_live_chara = false;
-	bool notification_tp = false;
-	bool notification_rp = false;
-	bool notification_jobs = false;
-	bool notification_idle_single_mode = false;
+	bool notification_tp = true;
+	bool notification_rp = true;
+	bool notification_jobs = true;
+	bool notification_idle_single_mode = true;
 	bool msgpack_notifier = false;
 	bool msgpack_notifier_request = false;
 	il2cppstring msgpack_notifier_host = IL2CPP_STRING("http://localhost:4693");
@@ -559,11 +559,11 @@ if (document.HasMember(IL2CPP_STRING(_name_)) && document[IL2CPP_STRING(_name_)]
 
 	bool read_config()
 	{
-        string path;
+		string path;
 #ifdef _MSC_VER
-        path = "config.json";
+		path = "config.json";
 #else
-        path = string("/sdcard/Android/data/").append(Game::GetCurrentPackageName()).append("/config.json");
+		path = string("/sdcard/Android/data/").append(Game::GetCurrentPackageName()).append("/config.json");
 #endif
 		ifstream config_stream{ path };
 
