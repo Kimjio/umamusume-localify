@@ -57,6 +57,19 @@ static bool UpdateHomeMenuMainButton()
 	}
 
 	auto dialog = GetFrontDialog();
+
+	if (!dialog)
+	{
+		if (auto field = il2cpp_class_get_field_from_name(il2cpp_symbols::get_class("umamusume.dll", "Gallop", "DialogManager"), "_dialogLandscapeMode"))
+		{
+			il2cpp_field_get_value(Gallop::DialogManager::Instance(), field, &dialog);
+		}
+		else
+		{
+			return true;
+		}
+	}
+
 	auto data = il2cpp_symbols::get_method_pointer<Il2CppObject * (*)(Il2CppObject*)>(dialog->klass, "get_DialogData", 0)(dialog);
 
 	auto ContentsObjectField = il2cpp_class_get_field_from_name(data->klass, "ContentsObject");
