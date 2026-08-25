@@ -1010,7 +1010,7 @@ static void Gallop_WebViewManager_SetMargin_hook(Il2CppObject* self, UnityEngine
 	auto rectWebView = webViewRect.rect();
 
 	auto _systemCanvas = Gallop::UIManager::Instance()._systemCanvas();
-	float scaleFactor = 1.0f;
+	auto scaleFactor = 1.0f;
 
 	scaleFactor = il2cpp_symbols::get_method_pointer<float (*)(Il2CppObject*)>(_systemCanvas->klass, "get_scaleFactor", 0)(_systemCanvas);
 
@@ -1019,7 +1019,7 @@ static void Gallop_WebViewManager_SetMargin_hook(Il2CppObject* self, UnityEngine
 	UnityEngine::Rect evacuationRect;
 	UnityEngine::Rect _bandMenuRect;
 
-	bool IsSplitWindow = false;
+	auto IsSplitWindow = false;
 
 	if (!config::freeform_window)
 	{
@@ -1059,7 +1059,9 @@ static void Gallop_WebViewManager_SetMargin_hook(Il2CppObject* self, UnityEngine
 	auto rectTransform = static_cast<UnityEngine::RectTransform>(UnityEngine::Behaviour(gameCanvas).transform());
 	auto rect = rectTransform.rect();
 
-	if (Gallop::Screen::IsLandscapeMode())
+	const auto IsLandscapeMode = Gallop::Screen::IsLandscapeMode();
+
+	if (IsLandscapeMode)
 	{
 		if (!IsSplitWindow && !config::freeform_window)
 		{
@@ -1075,7 +1077,7 @@ static void Gallop_WebViewManager_SetMargin_hook(Il2CppObject* self, UnityEngine
 	Vector2 vector2 = UnityEngine::Vector2{ vector.x - width / 2.0f + offsetRect.xMin() * scaleFactor, vector.y + height / 2.0f + offsetRect.yMax() * scaleFactor };
 	Vector2 vector3 = UnityEngine::Vector2{ vector.x + width / 2.0f + offsetRect.xMax() * scaleFactor, vector.y - height / 2.0f + offsetRect.yMin() * scaleFactor };
 
-	if (Gallop::Screen::IsLandscapeMode() && !config::freeform_window)
+	if (IsLandscapeMode && !config::freeform_window)
 	{
 		if (IsSplitWindow)
 		{
@@ -1093,32 +1095,67 @@ static void Gallop_WebViewManager_SetMargin_hook(Il2CppObject* self, UnityEngine
 		width = static_cast<float>(Gallop::Screen::OriginalScreenWidth());
 		height = static_cast<float>(Gallop::Screen::OriginalScreenHeight());
 	}
+
 	width /= static_cast<float>(Gallop::Screen::Width());
 	height /= static_cast<float>(Gallop::Screen::Height());
 
+	auto widthOffset = 0.0f;
+	auto heightOffset = 0.0f;
 
-	if (Gallop::Screen::IsLandscapeMode() && IsSplitWindow && !config::freeform_window)
+	if (UnityEngine::Screen::fullScreen() && !config::freeform_window)
+	{
+		if (IsLandscapeMode)
+		{
+			if (static_cast<float>(UnityEngine::Screen::width()) / static_cast<float>(UnityEngine::Screen::height()) != ratio_16_9)
+			{
+				RECT clientRect;
+				GetClientRect(GetHWND(), &clientRect);
+
+				auto clientWidth = clientRect.right - clientRect.left;
+				auto clientHeight = clientRect.bottom - clientRect.top;
+
+				heightOffset = max(0.0f, (clientHeight - clientWidth / ratio_16_9) / 2);
+
+				if (!Gallop::Screen::IsSplitWindow())
+				{
+					heightOffset /= (static_cast<float>(UnityEngine::Screen::height()) / static_cast<float>(Gallop::Screen::Height()));
+				}
+			}
+		}
+		else
+		{
+			RECT clientRect;
+			GetClientRect(GetHWND(), &clientRect);
+
+			auto clientWidth = clientRect.right - clientRect.left;
+			auto clientHeight = clientRect.bottom - clientRect.top;
+
+			widthOffset = max(0.0f, (static_cast<float>(clientWidth) - static_cast<float>(UnityEngine::Screen::width())) / 2) * (static_cast<float>(Gallop::Screen::Width()) / static_cast<float>(UnityEngine::Screen::width()));
+		}
+	}
+
+	if (IsLandscapeMode && IsSplitWindow && !config::freeform_window)
 	{
 		auto mainRect = static_cast<UnityEngine::RectTransform>(UnityEngine::Behaviour(Gallop::UIManager::Instance()._mainCanvas()).transform()).rect();
 
-		float wRatio = width / 1920.0f;
+		auto wRatio = UnityEngine::Screen::width() / 1920.0f;
 
 		auto margin = ((mainRect.width * height) - (rectWebView.width * height)) / 2;
 
 		instance.CuteWebView().SetMargins(
 			(static_cast<int>(leftRect.width) * wRatio) + (margin), // l
-			static_cast<int>((static_cast<float>(rect.height) - vector2.y) * height), // t
+			static_cast<int>((static_cast<float>(rect.height) - vector2.y) * height) + static_cast<int>(heightOffset), // t
 			((evacuationRect.width * wRatio) + (_bandMenuRect.width * wRatio)) + (margin), // r
-			static_cast<int>(vector3.y * height) // b
+			static_cast<int>(vector3.y * height) + static_cast<int>(heightOffset)  // b
 		);
 	}
 	else
 	{
 		instance.CuteWebView().SetMargins(
-			static_cast<int>(ceilf(vector2.x * width)), // l
-			static_cast<int>(ceilf((static_cast<float>(Gallop::Screen::Height()) - vector2.y) * height)), // t
-			static_cast<int>(ceilf((static_cast<float>(Gallop::Screen::Width()) - vector3.x) * width)), // r
-			static_cast<int>(ceilf(vector3.y * height)) // b
+			static_cast<int>(ceilf(vector2.x * width)) + static_cast<int>(widthOffset), // l
+			static_cast<int>(ceilf((static_cast<float>(Gallop::Screen::Height()) - vector2.y) * height)) + static_cast<int>(heightOffset), // t
+			static_cast<int>(ceilf((static_cast<float>(Gallop::Screen::Width()) - vector3.x) * width)) + static_cast<int>(widthOffset), // r
+			static_cast<int>(ceilf(vector3.y * height)) + static_cast<int>(heightOffset) // b
 		);
 	}
 }

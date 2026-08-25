@@ -583,7 +583,14 @@ static void Cute_Core_WebViewManager_SetMargins_hook(Il2CppObject* self, int lef
 	{
 		if (!Gallop::Screen::IsSplitWindow())
 		{
-			scale = Gallop::Screen::OriginalScreenWidth() / static_cast<float>(UnityEngine::Screen::width());
+			if (Gallop::Screen::IsLandscapeMode())
+			{
+				scale = Gallop::Screen::OriginalScreenHeight() / static_cast<float>(UnityEngine::Screen::width());
+			}
+			else
+			{
+				scale = Gallop::Screen::OriginalScreenWidth() / static_cast<float>(UnityEngine::Screen::width());
+			}
 		}
 	}
 
