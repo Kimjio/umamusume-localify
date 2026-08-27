@@ -577,6 +577,27 @@ namespace MsgPackModify
 								{ "state", 1 },
 								}
 								);
+							watchable_episodes.emplace_back(
+								MsgPack::object
+								{
+								{ "episode_id", 13 },
+								{ "state", 1 },
+								}
+								);
+							/*watchable_episodes.emplace_back(
+								MsgPack::object
+								{
+								{ "episode_id", 14 },
+								{ "state", 1 },
+								}
+								);
+							watchable_episodes.emplace_back(
+								MsgPack::object
+								{
+								{ "episode_id", 15 },
+								{ "state", 1 },
+								}
+								);
 							data["watchable_episodes"] = watchable_episodes;
 						}*/
 
