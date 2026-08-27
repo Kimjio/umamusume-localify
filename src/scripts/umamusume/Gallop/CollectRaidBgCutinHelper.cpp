@@ -27,8 +27,8 @@ static bool CollectRaidBgCutinHelper_InstantiateTimeline_hook(Il2CppObject* self
 
 		auto ratio = static_cast<float>(width) / static_cast<float>(height);
 
-		auto newWidth = Gallop::Screen::Height();
-		auto newHeight = static_cast<int>(static_cast<float>(newWidth) / ratio);
+		auto newHeight = Gallop::Screen::Height();
+		auto newWidth = static_cast<int>(static_cast<float>(newHeight) * ratio);
 
 		texture.width(newWidth);
 		texture.height(newHeight);
@@ -47,8 +47,8 @@ static bool CollectRaidBgCutinHelper_InstantiateTimeline4_hook(Il2CppObject* sel
 
 		auto ratio = static_cast<float>(width) / static_cast<float>(height);
 
-		auto newWidth = Gallop::Screen::Height();
-		auto newHeight = static_cast<int>(static_cast<float>(newWidth) / ratio);
+		auto newHeight = Gallop::Screen::Height();
+		auto newWidth = static_cast<int>(static_cast<float>(newHeight) * ratio);
 
 		texture.width(newWidth);
 		texture.height(newHeight);
@@ -64,6 +64,7 @@ static void InitAddress()
 	{
 		auto CollectRaidBgCutinHelper_InstantiateTimeline = il2cpp_symbols::get_method(CollectRaidBgCutinHelper_klass, "InstantiateTimeline", 5);
 
+			cout << il2cpp_method_get_param_name(CollectRaidBgCutinHelper_InstantiateTimeline, 2) << endl;
 		if (CollectRaidBgCutinHelper_InstantiateTimeline->klass == CollectRaidBgCutinHelper_klass)
 		{
 			CollectRaidBgCutinHelper_InstantiateTimeline_addr = il2cpp_symbols::get_method_pointer(CollectRaidBgCutinHelper_InstantiateTimeline);
