@@ -7,5 +7,7 @@ namespace Localify
 	{
 	public:
 		static void MoveLivePlayback(float value);
+
+		static bool IsRequiredIgnoreLoop(int musicId);
 	};
 }

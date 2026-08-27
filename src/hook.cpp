@@ -3386,8 +3386,14 @@ namespace
 							{
 								if (LiveCurrentTime >= LiveTotalTime - 0.1f)
 								{
-									LiveCurrentTime = 0;
-									Localify::LiveUtils::MoveLivePlayback(LiveCurrentTime);
+									auto loadSettings = il2cpp_symbols::get_method_pointer<Il2CppObject * (*)()>("umamusume.dll", "Gallop.Live", "Director", "get_LoadSettings", IgnoreNumberOfArguments)();
+									auto musicId = il2cpp_class_get_method_from_name_type<int (*)(Il2CppObject*)>(loadSettings->klass, "get_MusicId", 0)->methodPointer(loadSettings);
+									
+									if (!Localify::LiveUtils::IsRequiredIgnoreLoop(musicId))
+									{
+										LiveCurrentTime = 0;
+										Localify::LiveUtils::MoveLivePlayback(LiveCurrentTime);
+									}
 								}
 							}
 
