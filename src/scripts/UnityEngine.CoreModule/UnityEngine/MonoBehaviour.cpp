@@ -400,10 +400,10 @@ static Il2CppObject* StartCoroutineManaged2_hook(Il2CppObject* self, Il2CppObjec
 				}
 
 #ifdef __ANDROID__
-            if (auto CancelAllDisplayedNotifications = il2cpp_symbols::get_method_pointer("Unity.Notifications.Android.dll", "Unity.Notifications.Android", "AndroidNotificationCenter", "CancelAllDisplayedNotifications", 0))
-            {
-                CancelAllDisplayedNotifications();
-            }
+				if (auto CancelAllDisplayedNotifications = il2cpp_symbols::get_method_pointer("Unity.Notifications.Android.dll", "Unity.Notifications.Android", "AndroidNotificationCenter", "CancelAllDisplayedNotifications", 0))
+				{
+					CancelAllDisplayedNotifications();
+				}
 #endif
 
 				auto GameSystem = Gallop::GameSystem::Instance();
@@ -413,6 +413,46 @@ static Il2CppObject* StartCoroutineManaged2_hook(Il2CppObject* self, Il2CppObjec
 					GetRuntimeType("mscorlib.dll", "System", "Boolean"));
 				auto predicate = CreateDelegateWithClass(Func, GameSystem, *[](Il2CppObject* gameSystem)
 					{
+						if (Gallop::GameSystem(gameSystem)._systemState() == Gallop::GameSystem::SystemState::Deactive)
+						{
+							try
+							{
+								filesystem::path meta_path = filesystem::path(il2cpp_symbols::get_method_pointer<Il2CppString * (*)()>("Cute.Core.Assembly.dll", "Cute.Core", "Device", "GetPersistentDataPath", 0)()->chars).append("meta");
+								if (filesystem::exists(meta_path))
+								{
+									ifstream meta(meta_path);
+									if (meta.is_open())
+									{
+										meta.close();
+									}
+									else
+									{
+										filesystem::status(meta_path);
+									}
+								}
+
+								filesystem::path meta_journal_path = filesystem::path(il2cpp_symbols::get_method_pointer<Il2CppString * (*)()>("Cute.Core.Assembly.dll", "Cute.Core", "Device", "GetPersistentDataPath", 0)()->chars).append("meta-journal");
+								if (filesystem::exists(meta_journal_path))
+								{
+									ifstream meta_journal(meta_journal_path);
+									if (meta_journal.is_open())
+									{
+										meta_journal.close();
+									}
+									else
+									{
+										filesystem::status(meta_journal_path);
+									}
+								}
+							}
+							catch (exception e)
+							{
+								cout << e.what() << endl;
+								MessageBoxW(GetHWND(), Gallop::Localize::Get(GetTextIdByName(IL2CPP_STRING("Error0037")))->chars, Gallop::Localize::Get(GetTextIdByName(IL2CPP_STRING("Common0071")))->chars, MB_OK | MB_ICONWARNING);
+								return true;
+							}
+						}
+
 						if (Gallop::GameSystem(gameSystem)._systemState() == Gallop::GameSystem::SystemState::Active)
 						{
 							auto uiManager = Gallop::UIManager::Instance();
