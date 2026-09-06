@@ -11,6 +11,7 @@
 #include "scripts/UnityEngine.CoreModule/UnityEngine/RectTransform.hpp"
 #include "scripts/UnityEngine.CoreModule/UnityEngine/RenderTexture.hpp"
 #include "scripts/UnityEngine.CoreModule/UnityEngine/Vector4.hpp"
+#include "scripts/umamusume/Gallop/Localize.hpp"
 
 #include "masterdb/masterdb.hpp"
 
@@ -264,12 +265,12 @@ namespace Localify
 		auto array = optionItemSimple.GetComponentsInChildren(GetRuntimeType("umamusume.dll", "Gallop", "TextCommon"), false);
 
 		auto textCommon = Gallop::TextCommon(array->vector[0]);
-        textCommon.TextId(0);
-        textCommon.text(il2cpp_string_new16(text));
+		textCommon.TextId(0);
+		textCommon.text(il2cpp_string_new16(text));
 
-        auto titleTextCommon = Gallop::TextCommon(array->vector[1]);
-        titleTextCommon.TextId(0);
-        titleTextCommon.text(il2cpp_string_new16(title));
+		auto titleTextCommon = Gallop::TextCommon(array->vector[1]);
+		titleTextCommon.TextId(0);
+		titleTextCommon.text(il2cpp_string_new16(title));
 
 		return optionItemSimple;
 	}
@@ -725,6 +726,185 @@ namespace Localify
 		transform.localPosition({ 0, 0, -10 });
 
 		return dropdownGameObject;
+	}
+
+	UnityEngine::GameObject UIParts::GetToggleOptionSeason(const char* name, int value, void (*onChange)(Il2CppObject*, int))
+	{
+		UnityEngine::MonoBehaviour toggleOptionSeason = il2cpp_symbols::get_method_pointer<Il2CppObject * (*)(Il2CppObject*)>("umamusume.dll", "Gallop", "PartsPhotoStudioToggleOptionSeason", "Create", 1)(nullptr);
+
+		auto delegateClass = GetGenericClass(GetRuntimeType("mscorlib.dll", "System", "Action`1"), GetRuntimeType("umamusume.dll", "Gallop", "GameDefine/BgSeason"));
+		auto delegate = CreateDelegateWithClass(delegateClass, toggleOptionSeason, onChange);
+
+		struct OptionInfo
+		{
+			int Season;
+			bool IsInteractableToggle;
+		};
+
+		auto array = il2cpp_array_new_type<OptionInfo>(il2cpp_symbols::get_class("umamusume.dll", "Gallop", "PartsPhotoStudioToggleOptionSeason/OptionInfo"), 6);
+
+		OptionInfo opt0 = { 1, true };
+		il2cpp_array_setref_type(array, OptionInfo, 0, opt0);
+
+		OptionInfo opt1 = { 1, true };
+		il2cpp_array_setref_type(array, OptionInfo, 1, opt1);
+		OptionInfo opt2 = { 2, true };
+		il2cpp_array_setref_type(array, OptionInfo, 2, opt2);
+		OptionInfo opt3 = { 3, true };
+		il2cpp_array_setref_type(array, OptionInfo, 3, opt3);
+		OptionInfo opt4 = { 4, true };
+		il2cpp_array_setref_type(array, OptionInfo, 4, opt4);
+		OptionInfo opt5 = { 5, true };
+		il2cpp_array_setref_type(array, OptionInfo, 5, opt5);
+
+		il2cpp_symbols::get_method_pointer<void (*)(Il2CppObject*, Il2CppDelegate*, Il2CppArraySize_t<OptionInfo>*, int, Il2CppString*)>(toggleOptionSeason, "SetupToggle", 4)(toggleOptionSeason, &delegate->delegate, array, value, nullptr);
+
+		auto _toggleOptionArrayField = il2cpp_class_get_field_from_name(toggleOptionSeason, "_toggleOptionArray");
+		Il2CppArraySize_t<Il2CppObject*>* _toggleOptionArray;
+		il2cpp_field_get_value(toggleOptionSeason, _toggleOptionArrayField, &_toggleOptionArray);
+
+		auto toggleRadioButton = _toggleOptionArray->vector[0];
+		il2cpp_symbols::get_method_pointer<void (*)(Il2CppObject*, Il2CppObject*, Il2CppString*)>(toggleRadioButton->klass, "Setup", 2)(toggleRadioButton, nullptr, Gallop::Localize::Get(GetTextIdByName(IL2CPP_STRING("Outgame0204"))));
+
+		opt0.Season = -1;
+		il2cpp_array_setref_type(array, OptionInfo, 0, opt0);
+
+		onChange(toggleOptionSeason, value);
+
+		UnityEngine::GameObject toggleOptionSeasonObject = toggleOptionSeason.gameObject();
+
+		UnityEngine::Object::Name(toggleOptionSeasonObject, il2cpp_string_new(name));
+
+		auto transform = GetRectTransform(toggleOptionSeasonObject);
+		transform.anchorMax({ 0, 0 });
+		transform.anchorMin({ 0, 0 });
+		transform.pivot({ 0.5, 0.5 });
+		transform.anchoredPosition({ 0, 0 });
+
+		for (int i = 0; i < transform.childCount(); i++)
+		{
+			auto childTransform = static_cast<UnityEngine::RectTransform>(transform.GetChild(i));
+			if (childTransform)
+			{
+				auto childName = UnityEngine::Object::Name(childTransform);
+				if (childName->chars == il2cppstring(IL2CPP_STRING("TitleRoot")))
+				{
+					UnityEngine::Object::Destroy(childTransform.gameObject());
+				}
+
+				if (childName->chars == il2cppstring(IL2CPP_STRING("RadioButtonParent")))
+				{
+					childTransform.anchorMax({ 0.5, 0.5 });
+					childTransform.anchorMin({ 0.5, 0.5 });
+					childTransform.pivot({ 0.5, 0.5 });
+					childTransform.anchoredPosition({ 0, 0 });
+				}
+			}
+		}
+
+		auto verticalLayoutGroup = toggleOptionSeasonObject.AddComponent(GetRuntimeType("UnityEngine.UI.dll", "UnityEngine.UI", "VerticalLayoutGroup"));
+		il2cpp_symbols::get_method_pointer<void (*)(Il2CppObject*, float)>(verticalLayoutGroup->klass, "set_spacing", 1)(verticalLayoutGroup, 1);
+		il2cpp_symbols::get_method_pointer<void (*)(Il2CppObject*, int)>(verticalLayoutGroup->klass, "set_childAlignment", 1)(verticalLayoutGroup, 1);
+		il2cpp_symbols::get_method_pointer<void (*)(Il2CppObject*, bool)>(verticalLayoutGroup->klass, "set_childForceExpandWidth", 1)(verticalLayoutGroup, false);
+		il2cpp_symbols::get_method_pointer<void (*)(Il2CppObject*, bool)>(verticalLayoutGroup->klass, "set_childControlWidth", 1)(verticalLayoutGroup, false);
+
+		auto padding = il2cpp_symbols::get_method_pointer<Il2CppObject * (*)(Il2CppObject*)>(verticalLayoutGroup->klass, "get_padding", 0)(verticalLayoutGroup);
+		il2cpp_symbols::get_method_pointer<void (*)(Il2CppObject*, int)>(padding->klass, "set_top", 1)(padding, -40);
+		il2cpp_symbols::get_method_pointer<void (*)(Il2CppObject*, int)>(padding->klass, "set_bottom", 1)(padding, -40);
+
+		return toggleOptionSeasonObject;
+	}
+
+	UnityEngine::GameObject UIParts::GetToggleOptionTimeZone(const char* name, int value, void (*onChange)(Il2CppObject*, int))
+	{
+		UnityEngine::MonoBehaviour toggleOptionSeason = il2cpp_symbols::get_method_pointer<Il2CppObject * (*)(Il2CppObject*)>("umamusume.dll", "Gallop", "PartsPhotoStudioToggleOptionSeason", "Create", 1)(nullptr);
+
+		auto delegateClass = GetGenericClass(GetRuntimeType("mscorlib.dll", "System", "Action`1"), GetRuntimeType("umamusume.dll", "Gallop", "GameDefine/BgSeason"));
+		auto delegate = CreateDelegateWithClass(delegateClass, toggleOptionSeason, onChange);
+
+		struct OptionInfo
+		{
+			int Season;
+			bool IsInteractableToggle;
+		};
+
+		auto array = il2cpp_array_new_type<OptionInfo>(il2cpp_symbols::get_class("umamusume.dll", "Gallop", "PartsPhotoStudioToggleOptionSeason/OptionInfo"), 5);
+
+		OptionInfo opt0 = { 1, true };
+		il2cpp_array_setref_type(array, OptionInfo, 0, opt0);
+
+		OptionInfo opt1 = { 1, true };
+		il2cpp_array_setref_type(array, OptionInfo, 1, opt1);
+		OptionInfo opt2 = { 2, true };
+		il2cpp_array_setref_type(array, OptionInfo, 2, opt2);
+		OptionInfo opt3 = { 3, true };
+		il2cpp_array_setref_type(array, OptionInfo, 3, opt3);
+		OptionInfo opt4 = { 4, true };
+		il2cpp_array_setref_type(array, OptionInfo, 4, opt4);
+
+		il2cpp_symbols::get_method_pointer<void (*)(Il2CppObject*, Il2CppDelegate*, Il2CppArraySize_t<OptionInfo>*, int, Il2CppString*)>(toggleOptionSeason, "SetupToggle", 4)(toggleOptionSeason, &delegate->delegate, array, value, nullptr);
+
+		auto _toggleOptionArrayField = il2cpp_class_get_field_from_name(toggleOptionSeason, "_toggleOptionArray");
+		Il2CppArraySize_t<Il2CppObject*>* _toggleOptionArray;
+		il2cpp_field_get_value(toggleOptionSeason, _toggleOptionArrayField, &_toggleOptionArray);
+
+		auto toggleRadioButton = _toggleOptionArray->vector[0];
+		auto Setup = il2cpp_symbols::get_method_pointer<void (*)(Il2CppObject*, Il2CppObject*, Il2CppString*)>(toggleRadioButton->klass, "Setup", 2);
+		Setup(toggleRadioButton, nullptr, Gallop::Localize::Get(GetTextIdByName(IL2CPP_STRING("Outgame0204"))));
+
+		auto GetTimeZoneSprite = il2cpp_symbols::get_method_pointer<Il2CppObject * (*)(int)>("umamusume.dll", "Gallop", "RaceUtil", "GetTimeZoneSprite", 1);
+		Setup(_toggleOptionArray->vector[1], nullptr, Gallop::Localize::Get(GetTextIdByName(IL2CPP_STRING("Outgame213075"))));
+		Setup(_toggleOptionArray->vector[2], GetTimeZoneSprite(2), nullptr);
+		Setup(_toggleOptionArray->vector[3], GetTimeZoneSprite(3), nullptr);
+		Setup(_toggleOptionArray->vector[4], GetTimeZoneSprite(4), nullptr);
+
+		opt0.Season = -1;
+		il2cpp_array_setref_type(array, OptionInfo, 0, opt0);
+
+		onChange(toggleOptionSeason, value);
+
+		UnityEngine::GameObject toggleOptionSeasonObject = toggleOptionSeason.gameObject();
+
+		UnityEngine::Object::Name(toggleOptionSeasonObject, il2cpp_string_new(name));
+
+		auto transform = GetRectTransform(toggleOptionSeasonObject);
+		transform.anchorMax({ 0, 0 });
+		transform.anchorMin({ 0, 0 });
+		transform.pivot({ 0.5, 0.5 });
+		transform.anchoredPosition({ 0, 0 });
+
+		for (int i = 0; i < transform.childCount(); i++)
+		{
+			auto childTransform = static_cast<UnityEngine::RectTransform>(transform.GetChild(i));
+			if (childTransform)
+			{
+				auto childName = UnityEngine::Object::Name(childTransform);
+				if (childName->chars == il2cppstring(IL2CPP_STRING("TitleRoot")))
+				{
+					UnityEngine::Object::Destroy(childTransform.gameObject());
+				}
+
+				if (childName->chars == il2cppstring(IL2CPP_STRING("RadioButtonParent")))
+				{
+					childTransform.anchorMax({ 0.5, 0.5 });
+					childTransform.anchorMin({ 0.5, 0.5 });
+					childTransform.pivot({ 0.5, 0.5 });
+					childTransform.anchoredPosition({ 0, 0 });
+				}
+			}
+		}
+
+		auto verticalLayoutGroup = toggleOptionSeasonObject.AddComponent(GetRuntimeType("UnityEngine.UI.dll", "UnityEngine.UI", "VerticalLayoutGroup"));
+		il2cpp_symbols::get_method_pointer<void (*)(Il2CppObject*, float)>(verticalLayoutGroup->klass, "set_spacing", 1)(verticalLayoutGroup, 1);
+		il2cpp_symbols::get_method_pointer<void (*)(Il2CppObject*, int)>(verticalLayoutGroup->klass, "set_childAlignment", 1)(verticalLayoutGroup, 1);
+		il2cpp_symbols::get_method_pointer<void (*)(Il2CppObject*, bool)>(verticalLayoutGroup->klass, "set_childForceExpandWidth", 1)(verticalLayoutGroup, false);
+		il2cpp_symbols::get_method_pointer<void (*)(Il2CppObject*, bool)>(verticalLayoutGroup->klass, "set_childControlWidth", 1)(verticalLayoutGroup, false);
+
+		auto padding = il2cpp_symbols::get_method_pointer<Il2CppObject * (*)(Il2CppObject*)>(verticalLayoutGroup->klass, "get_padding", 0)(verticalLayoutGroup);
+		il2cpp_symbols::get_method_pointer<void (*)(Il2CppObject*, int)>(padding->klass, "set_top", 1)(padding, -40);
+		il2cpp_symbols::get_method_pointer<void (*)(Il2CppObject*, int)>(padding->klass, "set_bottom", 1)(padding, -40);
+
+		return toggleOptionSeasonObject;
 	}
 
 	UnityEngine::GameObject UIParts::GetLiveSlider(const char* name, float value, float min, float max, bool wholeNumbers, void (*onChange)(Il2CppObject*))

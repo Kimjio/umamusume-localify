@@ -41,6 +41,8 @@ namespace Localify
 		static UnityEngine::GameObject GetCheckboxWithText(const char* name);
 		static UnityEngine::GameObject GetRadioButtonWithText(const char* name, const Il2CppChar* title);
 		static UnityEngine::GameObject GetRadioButtonWithImageAndText(const char* name, const Il2CppChar* title, const Il2CppChar* atlasName, const Il2CppChar* spriteName);
+		static UnityEngine::GameObject GetToggleOptionSeason(const char* name, int value, void (*onChange)(Il2CppObject*, int));
+		static UnityEngine::GameObject GetToggleOptionTimeZone(const char* name, int value, void (*onChange)(Il2CppObject*, int));
 		static UnityEngine::GameObject GetLiveSlider(const char* name, float value, float min = 0, float max = 10, bool wholeNumbers = true, void (*onChange)(Il2CppObject*) = nullptr);
 		
 		static void AddToLayout(Il2CppObject* layout, vector<Il2CppObject*> objects, bool setAsFirstSibling = true);

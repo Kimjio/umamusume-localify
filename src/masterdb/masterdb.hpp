@@ -388,4 +388,54 @@ namespace MasterDB
 		sqlite3_finalize(stmt);
 		return "";
 	}
+
+	inline vector<int> GetHomeEventScheduleIds()
+	{
+		if (!masterDB)
+		{
+			InitMasterDB();
+		}
+
+		vector<int> pairs;
+
+		auto query = R"(SELECT event_id FROM home_event_schedule WHERE event_id <> 0 GROUP BY event_id ORDER BY event_id ASC)"s;
+		sqlite3_stmt* stmt = nullptr;
+
+		sqlite3_prepare_v2(masterDB, query.data(), query.size(), &stmt, nullptr);
+
+		while (sqlite3_step(stmt) == SQLITE_ROW)
+		{
+			pairs.emplace_back(sqlite3_column_int(stmt, 0));
+		}
+
+		sqlite3_finalize(stmt);
+
+		return pairs;
+	}
+
+	inline vector<int> GetHomeAvailableBgSeasonByEventId(int eventId)
+	{
+		if (!masterDB)
+		{
+			InitMasterDB();
+		}
+
+		vector<int> pairs;
+
+		auto query = R"(SELECT season FROM home_env_setting WHERE home_event_type = ?1 GROUP BY home_event_type, season)"s;
+		sqlite3_stmt* stmt = nullptr;
+
+		sqlite3_prepare_v2(masterDB, query.data(), query.size(), &stmt, nullptr);
+
+		sqlite3_bind_int(stmt, 1, eventId);
+
+		while (sqlite3_step(stmt) == SQLITE_ROW)
+		{
+			pairs.emplace_back(sqlite3_column_int(stmt, 0));
+		}
+
+		sqlite3_finalize(stmt);
+
+		return pairs;
+	}
 }

@@ -131,6 +131,23 @@ namespace config
 	extern bool taskbar_show_progress_on_connecting;
 	extern bool decrypt_manifest_db;
 
+	/*
+	 * Spring 1
+	 * Summer 2
+	 * Fall 3
+	 * Winter 4
+	 * CherryBlossom 5
+	 */
+	extern int home_bg_override_bg_season;
+	/*
+	 * Morning 1
+	 * Daytime 2
+	 * Evening 3
+	 * Night 4
+	 */
+	extern int home_bg_override_time;
+	extern int home_bg_override_event_id;
+
 	extern il2cppstring text_id_dict;
 
 	extern rapidjson::Document code_map;

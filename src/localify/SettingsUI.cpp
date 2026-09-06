@@ -264,11 +264,11 @@ namespace Localify
 
 		auto gameObject = UnityEngine::GameObject();
 		UnityEngine::RectTransform rootTransform = gameObject.AddComponent(GetRuntimeType("UnityEngine.CoreModule.dll", "UnityEngine", "RectTransform"));
-		rootTransform.sizeDelta({ .x=0, .y=0 });
-		rootTransform.anchorMax({ .x=1, .y=1 });
-		rootTransform.anchorMin({ .x=0, .y=0 });
-		rootTransform.pivot({ .x=0.5, .y=0.5 });
-		rootTransform.anchoredPosition({ .x=0, .y=0 });
+		rootTransform.sizeDelta({ .x = 0, .y = 0 });
+		rootTransform.anchorMax({ .x = 1, .y = 1 });
+		rootTransform.anchorMin({ .x = 0, .y = 0 });
+		rootTransform.pivot({ .x = 0.5, .y = 0.5 });
+		rootTransform.anchoredPosition({ .x = 0, .y = 0 });
 
 		UnityEngine::GameObject scrollViewBase = UnityEngine::ResourcesAPIInternal::Load(il2cpp_string_new("ui/parts/base/scrollviewbase"), GetRuntimeType("UnityEngine.CoreModule.dll", "UnityEngine", "GameObject"));
 		Il2CppObject* _mainCanvas = Gallop::UIManager::Instance()._mainCanvas();
@@ -280,28 +280,28 @@ namespace Localify
 		Il2CppObject* m_Viewport;
 		il2cpp_field_get_value(scrollRect, m_ViewportField, &m_Viewport);
 		UnityEngine::RectTransform scrollRectTransform = il2cpp_symbols::get_method_pointer<Il2CppObject * (*)(Il2CppObject*)>(m_Viewport->klass, "get_parent", 0)(m_Viewport);
-		scrollRectTransform.sizeDelta({ .x=-24, .y=-12 });
-		scrollRectTransform.anchorMax({ .x=1, .y=1 });
-		scrollRectTransform.anchorMin({ .x=0, .y=0 });
-		scrollRectTransform.pivot({ .x=0.5, .y=0.5 });
-		scrollRectTransform.anchoredPosition({ .x=0, .y=-6 });
+		scrollRectTransform.sizeDelta({ .x = -24, .y = -12 });
+		scrollRectTransform.anchorMax({ .x = 1, .y = 1 });
+		scrollRectTransform.anchorMin({ .x = 0, .y = 0 });
+		scrollRectTransform.pivot({ .x = 0.5, .y = 0.5 });
+		scrollRectTransform.anchoredPosition({ .x = 0, .y = -6 });
 		scrollRectTransform.SetParent(rootTransform, false);
 
 		auto m_ContentField = il2cpp_class_get_field_from_name(scrollRect->klass, "m_Content");
 		Il2CppObject* m_Content;
 		il2cpp_field_get_value(scrollRect, m_ContentField, &m_Content);
-		il2cpp_symbols::get_method_pointer<void (*)(Il2CppObject*, UnityEngine::Vector2)>(m_Content->klass, "set_sizeDelta", 1)(m_Content, UnityEngine::Vector2{ .x=56, .y=150.0f * ceilf(options.size() / 2.0f) });
-		il2cpp_symbols::get_method_pointer<void (*)(Il2CppObject*, UnityEngine::Vector2)>(m_Content->klass, "set_anchorMax", 1)(m_Content, UnityEngine::Vector2{ .x=1, .y=1 });
-		il2cpp_symbols::get_method_pointer<void (*)(Il2CppObject*, UnityEngine::Vector2)>(m_Content->klass, "set_anchorMin", 1)(m_Content, UnityEngine::Vector2{ .x=0, .y=1 });
-		il2cpp_symbols::get_method_pointer<void (*)(Il2CppObject*, UnityEngine::Vector2)>(m_Content->klass, "set_pivot", 1)(m_Content, UnityEngine::Vector2{ .x=0.5, .y=1 });
-		il2cpp_symbols::get_method_pointer<void (*)(Il2CppObject*, UnityEngine::Vector2)>(m_Content->klass, "set_anchoredPosition", 1)(m_Content, UnityEngine::Vector2{ .x=0, .y=0 });
+		il2cpp_symbols::get_method_pointer<void (*)(Il2CppObject*, UnityEngine::Vector2)>(m_Content->klass, "set_sizeDelta", 1)(m_Content, UnityEngine::Vector2{ .x = 56, .y = 150.0f * ceilf(options.size() / 2.0f) });
+		il2cpp_symbols::get_method_pointer<void (*)(Il2CppObject*, UnityEngine::Vector2)>(m_Content->klass, "set_anchorMax", 1)(m_Content, UnityEngine::Vector2{ .x = 1, .y = 1 });
+		il2cpp_symbols::get_method_pointer<void (*)(Il2CppObject*, UnityEngine::Vector2)>(m_Content->klass, "set_anchorMin", 1)(m_Content, UnityEngine::Vector2{ .x = 0, .y = 1 });
+		il2cpp_symbols::get_method_pointer<void (*)(Il2CppObject*, UnityEngine::Vector2)>(m_Content->klass, "set_pivot", 1)(m_Content, UnityEngine::Vector2{ .x = 0.5, .y = 1 });
+		il2cpp_symbols::get_method_pointer<void (*)(Il2CppObject*, UnityEngine::Vector2)>(m_Content->klass, "set_anchoredPosition", 1)(m_Content, UnityEngine::Vector2{ .x = 0, .y = 0 });
 
 		UnityEngine::GameObject contentGameObject = il2cpp_symbols::get_method_pointer<Il2CppObject * (*)(Il2CppObject*)>(m_Content->klass, "get_gameObject", 0)(m_Content);
 		auto gridLayoutGroup = contentGameObject.AddComponent(GetRuntimeType("UnityEngine.UI.dll", "UnityEngine.UI", "GridLayoutGroup"));
 		il2cpp_symbols::get_method_pointer<void (*)(Il2CppObject*, int)>(gridLayoutGroup->klass, "set_childAlignment", 1)(gridLayoutGroup, 0);
 		il2cpp_symbols::get_method_pointer<void (*)(Il2CppObject*, int)>(gridLayoutGroup->klass, "set_constraintCount", 1)(gridLayoutGroup, 2);
-		il2cpp_symbols::get_method_pointer<void (*)(Il2CppObject*, UnityEngine::Vector2)>(gridLayoutGroup->klass, "set_cellSize", 1)(gridLayoutGroup, UnityEngine::Vector2{ .x=400, .y=100 });
-		il2cpp_symbols::get_method_pointer<void (*)(Il2CppObject*, UnityEngine::Vector2)>(gridLayoutGroup->klass, "set_spacing", 1)(gridLayoutGroup, UnityEngine::Vector2{ .x=34, .y=50 });
+		il2cpp_symbols::get_method_pointer<void (*)(Il2CppObject*, UnityEngine::Vector2)>(gridLayoutGroup->klass, "set_cellSize", 1)(gridLayoutGroup, UnityEngine::Vector2{ .x = 400, .y = 100 });
+		il2cpp_symbols::get_method_pointer<void (*)(Il2CppObject*, UnityEngine::Vector2)>(gridLayoutGroup->klass, "set_spacing", 1)(gridLayoutGroup, UnityEngine::Vector2{ .x = 34, .y = 50 });
 
 		auto padding = il2cpp_symbols::get_method_pointer<Il2CppObject * (*)(Il2CppObject*)>(gridLayoutGroup->klass, "get_padding", 0)(gridLayoutGroup);
 		il2cpp_symbols::get_method_pointer<void (*)(Il2CppObject*, int)>(padding->klass, "set_top", 1)(padding, 26);
@@ -352,11 +352,11 @@ namespace Localify
 
 		auto gameObject = UnityEngine::GameObject();
 		UnityEngine::RectTransform rootTransform = gameObject.AddComponent(GetRuntimeType("UnityEngine.CoreModule.dll", "UnityEngine", "RectTransform"));
-		rootTransform.sizeDelta({ .x=0, .y=0 });
-		rootTransform.anchorMax({ .x=1, .y=1 });
-		rootTransform.anchorMin({ .x=0, .y=0 });
-		rootTransform.pivot({ .x=0.5, .y=0.5 });
-		rootTransform.anchoredPosition({ .x=0, .y=0 });
+		rootTransform.sizeDelta({ .x = 0, .y = 0 });
+		rootTransform.anchorMax({ .x = 1, .y = 1 });
+		rootTransform.anchorMin({ .x = 0, .y = 0 });
+		rootTransform.pivot({ .x = 0.5, .y = 0.5 });
+		rootTransform.anchoredPosition({ .x = 0, .y = 0 });
 
 		UnityEngine::GameObject scrollViewBase = UnityEngine::ResourcesAPIInternal::Load(il2cpp_string_new("ui/parts/base/scrollviewbase"), GetRuntimeType("UnityEngine.CoreModule.dll", "UnityEngine", "GameObject"));
 		Il2CppObject* _mainCanvas = Gallop::UIManager::Instance()._mainCanvas();
@@ -368,28 +368,28 @@ namespace Localify
 		Il2CppObject* m_Viewport;
 		il2cpp_field_get_value(scrollRect, m_ViewportField, &m_Viewport);
 		UnityEngine::RectTransform scrollRectTransform = il2cpp_symbols::get_method_pointer<Il2CppObject * (*)(Il2CppObject*)>(m_Viewport->klass, "get_parent", 0)(m_Viewport);
-		scrollRectTransform.sizeDelta({ .x=-24, .y=-12 });
-		scrollRectTransform.anchorMax({ .x=1, .y=1 });
-		scrollRectTransform.anchorMin({ .x=0, .y=0 });
-		scrollRectTransform.pivot({ .x=0.5, .y=0.5 });
-		scrollRectTransform.anchoredPosition({ .x=0, .y=-6 });
+		scrollRectTransform.sizeDelta({ .x = -24, .y = -12 });
+		scrollRectTransform.anchorMax({ .x = 1, .y = 1 });
+		scrollRectTransform.anchorMin({ .x = 0, .y = 0 });
+		scrollRectTransform.pivot({ .x = 0.5, .y = 0.5 });
+		scrollRectTransform.anchoredPosition({ .x = 0, .y = -6 });
 		scrollRectTransform.SetParent(rootTransform, false);
 
 		auto m_ContentField = il2cpp_class_get_field_from_name(scrollRect->klass, "m_Content");
 		Il2CppObject* m_Content;
 		il2cpp_field_get_value(scrollRect, m_ContentField, &m_Content);
-		il2cpp_symbols::get_method_pointer<void (*)(Il2CppObject*, UnityEngine::Vector2)>(m_Content->klass, "set_sizeDelta", 1)(m_Content, UnityEngine::Vector2{ .x=56, .y=150.0f * ceilf(options.size() / 2.0f) });
-		il2cpp_symbols::get_method_pointer<void (*)(Il2CppObject*, UnityEngine::Vector2)>(m_Content->klass, "set_anchorMax", 1)(m_Content, UnityEngine::Vector2{ .x=1, .y=1 });
-		il2cpp_symbols::get_method_pointer<void (*)(Il2CppObject*, UnityEngine::Vector2)>(m_Content->klass, "set_anchorMin", 1)(m_Content, UnityEngine::Vector2{ .x=0, .y=1 });
-		il2cpp_symbols::get_method_pointer<void (*)(Il2CppObject*, UnityEngine::Vector2)>(m_Content->klass, "set_pivot", 1)(m_Content, UnityEngine::Vector2{ .x=0.5, .y=1 });
-		il2cpp_symbols::get_method_pointer<void (*)(Il2CppObject*, UnityEngine::Vector2)>(m_Content->klass, "set_anchoredPosition", 1)(m_Content, UnityEngine::Vector2{ .x=0, .y=0 });
+		il2cpp_symbols::get_method_pointer<void (*)(Il2CppObject*, UnityEngine::Vector2)>(m_Content->klass, "set_sizeDelta", 1)(m_Content, UnityEngine::Vector2{ .x = 56, .y = 150.0f * ceilf(options.size() / 2.0f) });
+		il2cpp_symbols::get_method_pointer<void (*)(Il2CppObject*, UnityEngine::Vector2)>(m_Content->klass, "set_anchorMax", 1)(m_Content, UnityEngine::Vector2{ .x = 1, .y = 1 });
+		il2cpp_symbols::get_method_pointer<void (*)(Il2CppObject*, UnityEngine::Vector2)>(m_Content->klass, "set_anchorMin", 1)(m_Content, UnityEngine::Vector2{ .x = 0, .y = 1 });
+		il2cpp_symbols::get_method_pointer<void (*)(Il2CppObject*, UnityEngine::Vector2)>(m_Content->klass, "set_pivot", 1)(m_Content, UnityEngine::Vector2{ .x = 0.5, .y = 1 });
+		il2cpp_symbols::get_method_pointer<void (*)(Il2CppObject*, UnityEngine::Vector2)>(m_Content->klass, "set_anchoredPosition", 1)(m_Content, UnityEngine::Vector2{ .x = 0, .y = 0 });
 
 		UnityEngine::GameObject contentGameObject = il2cpp_symbols::get_method_pointer<Il2CppObject * (*)(Il2CppObject*)>(m_Content->klass, "get_gameObject", 0)(m_Content);
 		auto gridLayoutGroup = contentGameObject.AddComponent(GetRuntimeType("UnityEngine.UI.dll", "UnityEngine.UI", "GridLayoutGroup"));
 		il2cpp_symbols::get_method_pointer<void (*)(Il2CppObject*, int)>(gridLayoutGroup->klass, "set_childAlignment", 1)(gridLayoutGroup, 0);
 		il2cpp_symbols::get_method_pointer<void (*)(Il2CppObject*, int)>(gridLayoutGroup->klass, "set_constraintCount", 1)(gridLayoutGroup, 2);
-		il2cpp_symbols::get_method_pointer<void (*)(Il2CppObject*, UnityEngine::Vector2)>(gridLayoutGroup->klass, "set_cellSize", 1)(gridLayoutGroup, UnityEngine::Vector2{ .x=400, .y=100 });
-		il2cpp_symbols::get_method_pointer<void (*)(Il2CppObject*, UnityEngine::Vector2)>(gridLayoutGroup->klass, "set_spacing", 1)(gridLayoutGroup, UnityEngine::Vector2{ .x=34, .y=50 });
+		il2cpp_symbols::get_method_pointer<void (*)(Il2CppObject*, UnityEngine::Vector2)>(gridLayoutGroup->klass, "set_cellSize", 1)(gridLayoutGroup, UnityEngine::Vector2{ .x = 400, .y = 100 });
+		il2cpp_symbols::get_method_pointer<void (*)(Il2CppObject*, UnityEngine::Vector2)>(gridLayoutGroup->klass, "set_spacing", 1)(gridLayoutGroup, UnityEngine::Vector2{ .x = 34, .y = 50 });
 
 		auto padding = il2cpp_symbols::get_method_pointer<Il2CppObject * (*)(Il2CppObject*)>(gridLayoutGroup->klass, "get_padding", 0)(gridLayoutGroup);
 		il2cpp_symbols::get_method_pointer<void (*)(Il2CppObject*, int)>(padding->klass, "set_top", 1)(padding, 26);
@@ -611,6 +611,12 @@ namespace Localify
 
 				config::freeform_ui_scale_landscape = configDocument[IL2CPP_STRING("freeFormUiScaleLandscape")].GetFloat();
 
+				config::home_bg_override_bg_season = configDocument[IL2CPP_STRING("homeBgOverrideBgSeason")].GetInt();
+
+				config::home_bg_override_time = configDocument[IL2CPP_STRING("homeBgOverrideTime")].GetInt();
+
+				config::home_bg_override_event_id = configDocument[IL2CPP_STRING("homeBgOverrideEventId")].GetInt();
+
 #ifdef _MSC_VER
 				config::notification_tp = configDocument[IL2CPP_STRING("notificationTp")].GetBool();
 
@@ -697,11 +703,11 @@ namespace Localify
 		auto gameObject = UnityEngine::GameObject();
 		UnityEngine::RectTransform rootTransform = gameObject.AddComponent(GetRuntimeType("UnityEngine.CoreModule.dll", "UnityEngine", "RectTransform"));
 
-		rootTransform.sizeDelta({ .x=0, .y=0 });
-		rootTransform.anchorMax({ .x=1, .y=1 });
-		rootTransform.anchorMin({ .x=0, .y=0 });
-		rootTransform.pivot({ .x=0.5, .y=0.5 });
-		rootTransform.anchoredPosition({ .x=0, .y=0 });
+		rootTransform.sizeDelta({ .x = 0, .y = 0 });
+		rootTransform.anchorMax({ .x = 1, .y = 1 });
+		rootTransform.anchorMin({ .x = 0, .y = 0 });
+		rootTransform.pivot({ .x = 0.5, .y = 0.5 });
+		rootTransform.anchoredPosition({ .x = 0, .y = 0 });
 
 		UnityEngine::GameObject scrollViewBase = UnityEngine::ResourcesAPIInternal::Load(il2cpp_string_new("ui/parts/base/scrollviewbase"), GetRuntimeType("UnityEngine.CoreModule.dll", "UnityEngine", "GameObject"));
 
@@ -722,22 +728,22 @@ namespace Localify
 
 		UnityEngine::RectTransform scrollRectTransform = il2cpp_symbols::get_method_pointer<Il2CppObject * (*)(Il2CppObject*)>(m_Viewport->klass, "get_parent", 0)(m_Viewport);
 
-		scrollRectTransform.sizeDelta({ .x=-24, .y=-12 });
-		scrollRectTransform.anchorMax({ .x=1, .y=1 });
-		scrollRectTransform.anchorMin({ .x=0, .y=0 });
-		scrollRectTransform.pivot({ .x=0.5, .y=0.5 });
-		scrollRectTransform.anchoredPosition({ .x=0, .y=-6 });
+		scrollRectTransform.sizeDelta({ .x = -24, .y = -12 });
+		scrollRectTransform.anchorMax({ .x = 1, .y = 1 });
+		scrollRectTransform.anchorMin({ .x = 0, .y = 0 });
+		scrollRectTransform.pivot({ .x = 0.5, .y = 0.5 });
+		scrollRectTransform.anchoredPosition({ .x = 0, .y = -6 });
 		scrollRectTransform.SetParent(rootTransform, false);
 
 		auto m_ContentField = il2cpp_class_get_field_from_name(scrollRect->klass, "m_Content");
 		Il2CppObject* m_Content;
 		il2cpp_field_get_value(scrollRect, m_ContentField, &m_Content);
 
-		il2cpp_symbols::get_method_pointer<void (*)(Il2CppObject*, UnityEngine::Vector2)>(m_Content->klass, "set_sizeDelta", 1)(m_Content, UnityEngine::Vector2{ .x=56, .y=0 });
-		il2cpp_symbols::get_method_pointer<void (*)(Il2CppObject*, UnityEngine::Vector2)>(m_Content->klass, "set_anchorMax", 1)(m_Content, UnityEngine::Vector2{ .x=1, .y=1 });
-		il2cpp_symbols::get_method_pointer<void (*)(Il2CppObject*, UnityEngine::Vector2)>(m_Content->klass, "set_anchorMin", 1)(m_Content, UnityEngine::Vector2{ .x=0, .y=1 });
-		il2cpp_symbols::get_method_pointer<void (*)(Il2CppObject*, UnityEngine::Vector2)>(m_Content->klass, "set_pivot", 1)(m_Content, UnityEngine::Vector2{ .x=0.5, .y=1 });
-		il2cpp_symbols::get_method_pointer<void (*)(Il2CppObject*, UnityEngine::Vector2)>(m_Content->klass, "set_anchoredPosition", 1)(m_Content, UnityEngine::Vector2{ .x=0, .y=0 });
+		il2cpp_symbols::get_method_pointer<void (*)(Il2CppObject*, UnityEngine::Vector2)>(m_Content->klass, "set_sizeDelta", 1)(m_Content, UnityEngine::Vector2{ .x = 56, .y = 0 });
+		il2cpp_symbols::get_method_pointer<void (*)(Il2CppObject*, UnityEngine::Vector2)>(m_Content->klass, "set_anchorMax", 1)(m_Content, UnityEngine::Vector2{ .x = 1, .y = 1 });
+		il2cpp_symbols::get_method_pointer<void (*)(Il2CppObject*, UnityEngine::Vector2)>(m_Content->klass, "set_anchorMin", 1)(m_Content, UnityEngine::Vector2{ .x = 0, .y = 1 });
+		il2cpp_symbols::get_method_pointer<void (*)(Il2CppObject*, UnityEngine::Vector2)>(m_Content->klass, "set_pivot", 1)(m_Content, UnityEngine::Vector2{ .x = 0.5, .y = 1 });
+		il2cpp_symbols::get_method_pointer<void (*)(Il2CppObject*, UnityEngine::Vector2)>(m_Content->klass, "set_anchoredPosition", 1)(m_Content, UnityEngine::Vector2{ .x = 0, .y = 0 });
 
 		UnityEngine::GameObject contentGameObject = il2cpp_symbols::get_method_pointer<Il2CppObject * (*)(Il2CppObject*)>(m_Content->klass, "get_gameObject", 0)(m_Content);
 
@@ -777,6 +783,9 @@ namespace Localify
 		float cySpringAddMoveRateScale = 1;
 		float resolution3dScale = 1;
 		float uiAnimationScale = 1;
+		int homeBgOverrideBgSeason = -1;
+		int homeBgOverrideTime = -1;
+		int homeBgOverrideEventId = -1;
 #ifdef _MSC_VER
 		bool notificationTp = false;
 		bool notificationRp = false;
@@ -933,6 +942,21 @@ namespace Localify
 			if (configDocument.HasMember(IL2CPP_STRING("uiAnimationScale")))
 			{
 				uiAnimationScale = configDocument[IL2CPP_STRING("uiAnimationScale")].GetFloat();
+			}
+
+			if (configDocument.HasMember(IL2CPP_STRING("homeBgOverrideBgSeason")))
+			{
+				homeBgOverrideBgSeason = configDocument[IL2CPP_STRING("homeBgOverrideBgSeason")].GetInt();
+			}
+
+			if (configDocument.HasMember(IL2CPP_STRING("homeBgOverrideTime")))
+			{
+				homeBgOverrideTime = configDocument[IL2CPP_STRING("homeBgOverrideTime")].GetInt();
+			}
+
+			if (configDocument.HasMember(IL2CPP_STRING("homeBgOverrideEventId")))
+			{
+				homeBgOverrideEventId = configDocument[IL2CPP_STRING("homeBgOverrideEventId")].GetInt();
 			}
 
 #ifdef _MSC_VER
@@ -1283,6 +1307,21 @@ namespace Localify
 					Gallop::Localize::Get(GetTextIdByName(IL2CPP_STRING("Circle0206")))->chars),
 				UIParts::GetOptionItemButton("show_caption", LocalifySettings::GetText("show_caption")),
 				UIParts::GetOptionItemAttention(LocalifySettings::GetText("applied_after_restart")),
+				UIParts::GetOptionItemTitle(Gallop::Localize::Get(GetTextIdByName(IL2CPP_STRING("Home0036")))->chars),
+				UIParts::GetToggleOptionSeason("home_bg_override_bg_season", homeBgOverrideBgSeason,
+					*[](Il2CppObject* toggle, int value)
+					{
+						AddOrSet(config::config_document, IL2CPP_STRING("homeBgOverrideBgSeason"), value);
+					}
+				),
+				UIParts::GetToggleOptionTimeZone("home_bg_override_time", homeBgOverrideTime,
+					*[](Il2CppObject* toggle, int value)
+					{
+						AddOrSet(config::config_document, IL2CPP_STRING("homeBgOverrideTime"), value);
+					}
+				),
+				UIParts::GetOptionItemSimpleWithButton("home_bg_override_event_id", (LocalifySettings::GetText("home_bg_override_event_id") + il2cppstring(IL2CPP_STRING(": ")) + (homeBgOverrideEventId == -1 ? Gallop::Localize::Get(GetTextIdByName(IL2CPP_STRING("Outgame0204")))->chars : u8_il2cpp(to_string(homeBgOverrideEventId)))).data(),
+					Gallop::Localize::Get(GetTextIdByName(IL2CPP_STRING("Circle0206")))->chars),
 #ifdef _MSC_VER
 				UIParts::GetOptionItemTitle(Gallop::Localize::Get(GetTextIdByName(IL2CPP_STRING("Outgame0293")))->chars),
 				UIParts::GetOptionItemOnOff("notification_tp", Gallop::Localize::Get(GetTextIdByName(IL2CPP_STRING("Outgame0294")))->chars),
@@ -1617,7 +1656,7 @@ namespace Localify
 					championsLiveResourceIndex = config::config_document[IL2CPP_STRING("championsLiveResourceId")].GetInt();
 				}
 
-				OpenSelectOption(LocalifySettings::GetText("champions_live_resource_id"), MasterDB::GetChampionsResources(),  championsLiveResourceIndex - 1,
+				OpenSelectOption(LocalifySettings::GetText("champions_live_resource_id"), MasterDB::GetChampionsResources(), championsLiveResourceIndex - 1,
 					[](int value)
 					{
 						AddOrSet(config::config_document, IL2CPP_STRING("championsLiveResourceId"), value + 1);
@@ -1796,6 +1835,117 @@ namespace Localify
 					[](string name, il2cppstring value)
 					{
 						UIParts::GetTextCommon(name.data()).OutlineColor(value.data());
+					}
+				);
+			})
+		);
+
+		if (auto optionToggleSeason = UnityEngine::GameObject::Find(il2cpp_string_new("home_bg_override_bg_season")))
+		{
+			if (homeBgOverrideEventId > 0)
+			{
+				auto availableBgSeasons = MasterDB::GetHomeAvailableBgSeasonByEventId(homeBgOverrideEventId);
+				auto toggleSeason = optionToggleSeason.GetComponent(GetRuntimeType("umamusume.dll", "Gallop", "PartsPhotoStudioToggleOptionSeason"));
+				auto _toggleOptionArrayField = il2cpp_class_get_field_from_name(toggleSeason->klass, "_toggleOptionArray");
+				Il2CppArraySize_t<Il2CppObject*>* _toggleOptionArray;
+				il2cpp_field_get_value(toggleSeason, _toggleOptionArrayField, &_toggleOptionArray);
+
+				for (int i = 1; i < _toggleOptionArray->max_length; i++)
+				{
+					auto toggleOption = _toggleOptionArray->vector[i];
+					il2cpp_symbols::get_method_pointer<void (*)(Il2CppObject*, Il2CppString*)>(toggleOption->klass, "SetInteractableToggle", 1)(toggleOption, ranges::find(availableBgSeasons, i) != availableBgSeasons.end() ? nullptr : il2cpp_string_new16(LocalifySettings::GetText("home_bg_override_bg_season_disabled")));
+				}
+
+				auto _toggleGroupField = il2cpp_class_get_field_from_name(toggleSeason->klass, "_toggleGroup");
+				Il2CppObject* _toggleGroup;
+				il2cpp_field_get_value(toggleSeason, _toggleGroupField, &_toggleGroup);
+
+				il2cpp_symbols::get_method_pointer<void (*)(Il2CppObject*, int)>(_toggleGroup->klass, "SetToggleOnFromNumber", 1)(_toggleGroup, ranges::find(availableBgSeasons, homeBgOverrideBgSeason) != availableBgSeasons.end() ? homeBgOverrideBgSeason : availableBgSeasons[0]);
+			}
+		}
+
+		UIParts::SetOptionItemButtonAction("home_bg_override_event_id", *([](Il2CppObject*)
+			{
+				auto ids = MasterDB::GetHomeEventScheduleIds();
+				vector<string> options = { il2cpp_u8(Gallop::Localize::Get(GetTextIdByName(IL2CPP_STRING("Outgame0204")))->chars) };
+				int index = 0;
+
+				for (int id : ids)
+				{
+					options.emplace_back(to_string(id));
+				}
+
+				if (config::config_document.HasMember(IL2CPP_STRING("homeBgOverrideEventId")))
+				{
+					auto value = config::config_document[IL2CPP_STRING("homeBgOverrideEventId")].GetInt();
+					auto found = ranges::find(ids, value);
+
+					if (found != ids.end())
+					{
+						index = found - ids.begin() + 1;
+					}
+				}
+
+				OpenSelectOption(LocalifySettings::GetText("home_bg_override_event_id"), options, index,
+					[](int value)
+					{
+						if (value <= 0)
+						{
+							value = -1;
+
+							if (auto optionToggleSeason = UnityEngine::GameObject::Find(il2cpp_string_new("home_bg_override_bg_season")))
+							{
+								auto toggleSeason = optionToggleSeason.GetComponent(GetRuntimeType("umamusume.dll", "Gallop", "PartsPhotoStudioToggleOptionSeason"));
+								auto _toggleOptionArrayField = il2cpp_class_get_field_from_name(toggleSeason->klass, "_toggleOptionArray");
+								Il2CppArraySize_t<Il2CppObject*>* _toggleOptionArray;
+								il2cpp_field_get_value(toggleSeason, _toggleOptionArrayField, &_toggleOptionArray);
+
+								for (int i = 1; i < _toggleOptionArray->max_length; i++)
+								{
+									auto toggleOption = _toggleOptionArray->vector[i];
+									il2cpp_symbols::get_method_pointer<void (*)(Il2CppObject*, Il2CppString*)>(toggleOption->klass, "SetInteractableToggle", 1)(toggleOption, nullptr);
+								}
+							}
+						}
+						else
+						{
+							value = MasterDB::GetHomeEventScheduleIds()[value - 1];
+
+							auto availableBgSeasons = MasterDB::GetHomeAvailableBgSeasonByEventId(value);
+
+							if (auto optionToggleSeason = UnityEngine::GameObject::Find(il2cpp_string_new("home_bg_override_bg_season")))
+							{
+								auto toggleSeason = optionToggleSeason.GetComponent(GetRuntimeType("umamusume.dll", "Gallop", "PartsPhotoStudioToggleOptionSeason"));
+								auto _toggleOptionArrayField = il2cpp_class_get_field_from_name(toggleSeason->klass, "_toggleOptionArray");
+								Il2CppArraySize_t<Il2CppObject*>* _toggleOptionArray;
+								il2cpp_field_get_value(toggleSeason, _toggleOptionArrayField, &_toggleOptionArray);
+
+								for (int i = 1; i < _toggleOptionArray->max_length; i++)
+								{
+									auto toggleOption = _toggleOptionArray->vector[i];
+									il2cpp_symbols::get_method_pointer<void (*)(Il2CppObject*, Il2CppString*)>(toggleOption->klass, "SetInteractableToggle", 1)(toggleOption, ranges::find(availableBgSeasons, i) != availableBgSeasons.end() ? nullptr : il2cpp_string_new16(LocalifySettings::GetText("home_bg_override_bg_season_disabled")));
+								}
+
+								auto _toggleGroupField = il2cpp_class_get_field_from_name(toggleSeason->klass, "_toggleGroup");
+								Il2CppObject* _toggleGroup;
+								il2cpp_field_get_value(toggleSeason, _toggleGroupField, &_toggleGroup);
+
+								il2cpp_symbols::get_method_pointer<void (*)(Il2CppObject*, int)>(_toggleGroup->klass, "SetToggleOnFromNumber", 1)(_toggleGroup, availableBgSeasons[0]);
+							}
+
+							AddOrSet(config::config_document, IL2CPP_STRING("homeBgOverrideBgSeason"), availableBgSeasons[0]);
+						}
+
+						AddOrSet(config::config_document, IL2CPP_STRING("homeBgOverrideEventId"), value);
+
+						il2cppstring titleValue = Gallop::Localize::Get(GetTextIdByName(IL2CPP_STRING("Outgame0204")))->chars;
+						if (value != -1)
+						{
+							titleValue = u8_il2cpp(to_string(config::config_document[IL2CPP_STRING("homeBgOverrideEventId")].GetInt()));
+						}
+
+						auto textCommon = UIParts::GetOptionItemSimpleWithButtonTextCommon("home_bg_override_event_id");
+						textCommon.text(il2cpp_string_new16((LocalifySettings::GetText("home_bg_override_event_id") + il2cppstring(IL2CPP_STRING(": ")) + titleValue).data()));
 					}
 				);
 			})
@@ -2045,22 +2195,22 @@ namespace Localify
 		il2cpp_field_get_value(scrollRect, m_ViewportField, &m_Viewport);
 
 		UnityEngine::RectTransform scrollRectTransform = il2cpp_symbols::get_method_pointer<Il2CppObject * (*)(Il2CppObject*)>(m_Viewport->klass, "get_parent", 0)(m_Viewport);
-		scrollRectTransform.sizeDelta({ .x=-24, .y=-12 });
-		scrollRectTransform.anchorMax({ .x=1, .y=1 });
-		scrollRectTransform.anchorMin({ .x=0, .y=0 });
-		scrollRectTransform.pivot({ .x=0.5, .y=0.5 });
-		scrollRectTransform.anchoredPosition({ .x=0, .y=-6 });
+		scrollRectTransform.sizeDelta({ .x = -24, .y = -12 });
+		scrollRectTransform.anchorMax({ .x = 1, .y = 1 });
+		scrollRectTransform.anchorMin({ .x = 0, .y = 0 });
+		scrollRectTransform.pivot({ .x = 0.5, .y = 0.5 });
+		scrollRectTransform.anchoredPosition({ .x = 0, .y = -6 });
 		scrollRectTransform.SetParent(rootTransform, false);
 
 		auto m_ContentField = il2cpp_class_get_field_from_name(scrollRect->klass, "m_Content");
 		Il2CppObject* m_Content;
 		il2cpp_field_get_value(scrollRect, m_ContentField, &m_Content);
 
-		il2cpp_symbols::get_method_pointer<void (*)(Il2CppObject*, UnityEngine::Vector2)>(m_Content->klass, "set_sizeDelta", 1)(m_Content, UnityEngine::Vector2{ .x=56, .y=0 });
-		il2cpp_symbols::get_method_pointer<void (*)(Il2CppObject*, UnityEngine::Vector2)>(m_Content->klass, "set_anchorMax", 1)(m_Content, UnityEngine::Vector2{ .x=1, .y=1 });
-		il2cpp_symbols::get_method_pointer<void (*)(Il2CppObject*, UnityEngine::Vector2)>(m_Content->klass, "set_anchorMin", 1)(m_Content, UnityEngine::Vector2{ .x=0, .y=1 });
-		il2cpp_symbols::get_method_pointer<void (*)(Il2CppObject*, UnityEngine::Vector2)>(m_Content->klass, "set_pivot", 1)(m_Content, UnityEngine::Vector2{ .x=0.5, .y=1 });
-		il2cpp_symbols::get_method_pointer<void (*)(Il2CppObject*, UnityEngine::Vector2)>(m_Content->klass, "set_anchoredPosition", 1)(m_Content, UnityEngine::Vector2{ .x=0, .y=0 });
+		il2cpp_symbols::get_method_pointer<void (*)(Il2CppObject*, UnityEngine::Vector2)>(m_Content->klass, "set_sizeDelta", 1)(m_Content, UnityEngine::Vector2{ .x = 56, .y = 0 });
+		il2cpp_symbols::get_method_pointer<void (*)(Il2CppObject*, UnityEngine::Vector2)>(m_Content->klass, "set_anchorMax", 1)(m_Content, UnityEngine::Vector2{ .x = 1, .y = 1 });
+		il2cpp_symbols::get_method_pointer<void (*)(Il2CppObject*, UnityEngine::Vector2)>(m_Content->klass, "set_anchorMin", 1)(m_Content, UnityEngine::Vector2{ .x = 0, .y = 1 });
+		il2cpp_symbols::get_method_pointer<void (*)(Il2CppObject*, UnityEngine::Vector2)>(m_Content->klass, "set_pivot", 1)(m_Content, UnityEngine::Vector2{ .x = 0.5, .y = 1 });
+		il2cpp_symbols::get_method_pointer<void (*)(Il2CppObject*, UnityEngine::Vector2)>(m_Content->klass, "set_anchoredPosition", 1)(m_Content, UnityEngine::Vector2{ .x = 0, .y = 0 });
 
 		UnityEngine::GameObject contentGameObject = il2cpp_symbols::get_method_pointer<Il2CppObject * (*)(Il2CppObject*)>(m_Content->klass, "get_gameObject", 0)(m_Content);
 
@@ -2078,8 +2228,8 @@ namespace Localify
 		bool championsLiveShowText = false;
 		int championsLiveYear = 2022;
 
-        string championsResourceText;
-        int championsLiveResourceIndex = -1;
+		string championsResourceText;
+		int championsLiveResourceIndex = -1;
 
 		if (config::read_config())
 		{
@@ -2105,10 +2255,10 @@ namespace Localify
 				championsLiveYear = configDocument[IL2CPP_STRING("championsLiveYear")].GetInt();
 			}
 
-            if (configDocument.HasMember(IL2CPP_STRING("championsLiveResourceId")))
-            {
-                championsLiveResourceIndex = configDocument[IL2CPP_STRING("championsLiveResourceId")].GetInt() - 1;
-            }
+			if (configDocument.HasMember(IL2CPP_STRING("championsLiveResourceId")))
+			{
+				championsLiveResourceIndex = configDocument[IL2CPP_STRING("championsLiveResourceId")].GetInt() - 1;
+			}
 		}
 
 		auto championsResources = MasterDB::GetChampionsResources();

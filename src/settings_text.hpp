@@ -941,6 +941,40 @@ namespace LocalifySettings
 			return IL2CPP_STRING("アプリ内お知らせの代わりにサードパーティのお知らせを使用します");
 		}
 
+		if (id == "home_bg_override_event_id")
+		{
+			if (isKor)
+			{
+				return IL2CPP_STRING("재정의할 홈 이벤트");
+			}
+			if (isEng)
+			{
+				return IL2CPP_STRING("Home event to override");
+			}
+			if (isZhHant)
+			{
+				return IL2CPP_STRING("要覆蓋的主頁活動");
+			}
+			return IL2CPP_STRING("上書きするホームイベント");
+		}
+
+		if (id == "home_bg_override_bg_season_disabled")
+		{
+			if (isKor)
+			{
+				return IL2CPP_STRING("선택한 홈 이벤트에서 사용할 수 없는 계절입니다");
+			}
+			if (isEng)
+			{
+				return IL2CPP_STRING("This season is not available for the selected home event");
+			}
+			if (isZhHant)
+			{
+				return IL2CPP_STRING("此季節不適用於所選的主頁活動");
+			}
+			return IL2CPP_STRING("選択したホームイベントでは使用できない季節です");
+		}
+
 		if (id == "taskbar")
 		{
 			if (isKor)

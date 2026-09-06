@@ -108,6 +108,23 @@ namespace config
 	bool taskbar_show_progress_on_connecting = true;
 	bool decrypt_manifest_db = false;
 
+	/*
+	 * Spring 1
+	 * Summer 2
+	 * Fall 3
+	 * Winter 4
+	 * CherryBlossom 5
+	 */
+	int home_bg_override_bg_season = -1;
+	/*
+	 * Morning 1
+	 * Daytime 2
+	 * Evening 3
+	 * Night 4
+	 */
+	int home_bg_override_time = -1;
+	int home_bg_override_event_id = -1;
+
 	il2cppstring text_id_dict;
 
 	rapidjson::Document code_map;
@@ -505,6 +522,20 @@ if (document.HasMember(IL2CPP_STRING(_name_)) && document[IL2CPP_STRING(_name_)]
 			GetValue("taskbarShowProgressOnConnecting", Bool, taskbar_show_progress_on_connecting);
 
 			GetValue("decryptManifestDB", Bool, decrypt_manifest_db);
+
+			GetValue("homeBgOverrideBgSeason", Int, home_bg_override_bg_season,
+				{
+					vector<int> options = { 1, 2, 3, 4, 5, -1 };
+					home_bg_override_bg_season = options[find(options.begin(), options.end(), home_bg_override_bg_season) - options.begin()];
+				});
+
+			GetValue("homeBgOverrideTime", Int, home_bg_override_time,
+				{
+					vector<int> options = { 1, 2, 3, 4, -1 };
+					home_bg_override_time = options[find(options.begin(), options.end(), home_bg_override_time) - options.begin()];
+				});
+
+			GetValue("homeBgOverrideEventId", Int, home_bg_override_event_id);
 
 #ifdef EXPERIMENTS
 			GetValue("unlockLiveChara", Bool, unlock_live_chara);
