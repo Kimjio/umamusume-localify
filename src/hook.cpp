@@ -3385,7 +3385,7 @@ namespace
 								{
 									auto loadSettings = il2cpp_symbols::get_method_pointer<Il2CppObject * (*)()>("umamusume.dll", "Gallop.Live", "Director", "get_LoadSettings", IgnoreNumberOfArguments)();
 									auto musicId = il2cpp_class_get_method_from_name_type<int (*)(Il2CppObject*)>(loadSettings->klass, "get_MusicId", 0)->methodPointer(loadSettings);
-									
+
 									if (!Localify::LiveUtils::IsRequiredIgnoreLoop(musicId))
 									{
 										LiveCurrentTime = 0;
@@ -4369,8 +4369,8 @@ static NTSTATUS NTAPI NtQueryDirectoryFile_hook(
 
 	if (NT_SUCCESS(status))
 	{
-						return STATUS_NO_MORE_FILES;
-					}
+		return STATUS_NO_MORE_FILES;
+	}
 
 	return status;
 }
@@ -4429,8 +4429,11 @@ void init_hook(filesystem::path module_path)
 	MH_CreateHook(CreateWindowExW, CreateWindowExW_hook, &CreateWindowExW_orig);
 	MH_EnableHook(CreateWindowExW);
 
-	MH_CreateHook(SetWindowTextW, SetWindowTextW_hook, &SetWindowTextW_orig);
-	MH_EnableHook(SetWindowTextW);
+	if (!config::custom_title_name.empty())
+	{
+		MH_CreateHook(SetWindowTextW, SetWindowTextW_hook, &SetWindowTextW_orig);
+		MH_EnableHook(SetWindowTextW);
+	}
 }
 
 void uninit_hook()
