@@ -730,7 +730,13 @@ namespace Localify
 
 	UnityEngine::GameObject UIParts::GetToggleOptionSeason(const char* name, int value, void (*onChange)(Il2CppObject*, int))
 	{
-		UnityEngine::MonoBehaviour toggleOptionSeason = il2cpp_symbols::get_method_pointer<Il2CppObject * (*)(Il2CppObject*)>("umamusume.dll", "Gallop", "PartsPhotoStudioToggleOptionSeason", "Create", 1)(nullptr);
+		auto PartsPhotoStudioToggleOptionSeason_klass = il2cpp_symbols::get_class("umamusume.dll", "Gallop", "PartsPhotoStudioToggleOptionSeason");
+		if (!PartsPhotoStudioToggleOptionSeason_klass)
+		{
+			return nullptr;
+		}
+
+		UnityEngine::MonoBehaviour toggleOptionSeason = il2cpp_symbols::get_method_pointer<Il2CppObject * (*)(Il2CppObject*)>(PartsPhotoStudioToggleOptionSeason_klass, "Create", 1)(nullptr);
 
 		auto delegateClass = GetGenericClass(GetRuntimeType("mscorlib.dll", "System", "Action`1"), GetRuntimeType("umamusume.dll", "Gallop", "GameDefine/BgSeason"));
 		auto delegate = CreateDelegateWithClass(delegateClass, toggleOptionSeason, onChange);
@@ -817,7 +823,13 @@ namespace Localify
 
 	UnityEngine::GameObject UIParts::GetToggleOptionTimeZone(const char* name, int value, void (*onChange)(Il2CppObject*, int))
 	{
-		UnityEngine::MonoBehaviour toggleOptionSeason = il2cpp_symbols::get_method_pointer<Il2CppObject * (*)(Il2CppObject*)>("umamusume.dll", "Gallop", "PartsPhotoStudioToggleOptionSeason", "Create", 1)(nullptr);
+		auto PartsPhotoStudioToggleOptionSeason_klass = il2cpp_symbols::get_class("umamusume.dll", "Gallop", "PartsPhotoStudioToggleOptionSeason");
+		if (!PartsPhotoStudioToggleOptionSeason_klass)
+		{
+			return nullptr;
+		}
+
+		UnityEngine::MonoBehaviour toggleOptionSeason = il2cpp_symbols::get_method_pointer<Il2CppObject * (*)(Il2CppObject*)>(PartsPhotoStudioToggleOptionSeason_klass, "Create", 1)(nullptr);
 
 		auto delegateClass = GetGenericClass(GetRuntimeType("mscorlib.dll", "System", "Action`1"), GetRuntimeType("umamusume.dll", "Gallop", "GameDefine/BgSeason"));
 		auto delegate = CreateDelegateWithClass(delegateClass, toggleOptionSeason, onChange);

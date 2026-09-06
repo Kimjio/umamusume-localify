@@ -1058,7 +1058,7 @@ namespace Localify
 
 		auto championsResources = MasterDB::GetChampionsResources();
 
-		if (championsLiveResourceIndex < 0 && championsResources.size() <= championsLiveResourceIndex)
+		if (championsLiveResourceIndex < 0 || championsResources.size() <= championsLiveResourceIndex)
 		{
 			championsResourceText = il2cpp_u8(LocalifySettings::GetText("unknown"));
 		}
