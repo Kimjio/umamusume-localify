@@ -177,9 +177,6 @@ namespace
 
 		if (Game::CurrentGameRegion == Game::Region::KOR)
 		{
-			auto NtCreateFile_addr = NtCreateFile;
-			ADD_HOOK(NtCreateFile, "NtCreateFile at %p\n");
-
 			auto NtQueryDirectoryFile_addr = NtQueryDirectoryFile;
 			ADD_HOOK(NtQueryDirectoryFile, "NtQueryDirectoryFile at %p\n");
 
@@ -4317,15 +4314,7 @@ static BOOL InternetCrackUrlW_hook(
 	return reinterpret_cast<decltype(InternetCrackUrlW_hook)*>(InternetCrackUrlW_orig)(lpszUrl, dwUrlLength, dwFlags, lpUrlComponents);
 }
 
-constexpr int MAX_DLL_COUNT = 25;
-constexpr int MAX_ROOT_FILE_COUNT = 9 + /* self (.) */1 + /* parent (..) */1;
-
 HANDLE currentFindHandle;
-vector<HANDLE> findHandles;
-HANDLE currentRootFindHandle;
-
-int dllCount;
-int rootFileCount;
 
 void* CreateFileW_orig = nullptr;
 static HANDLE WINAPI CreateFileW_hook(
@@ -4343,45 +4332,9 @@ static HANDLE WINAPI CreateFileW_hook(
 	if (filesystem::current_path() == lpFileName)
 	{
 		currentFindHandle = hFile;
-		dllCount = 0;
 	}
 
 	return hFile;
-}
-
-static NTSTATUS NTAPI NtCreateFile_hook(
-	_Out_ PHANDLE FileHandle,
-	_In_ ACCESS_MASK DesiredAccess,
-	_In_ POBJECT_ATTRIBUTES ObjectAttributes,
-	_Out_ PIO_STATUS_BLOCK IoStatusBlock,
-	_In_opt_ PLARGE_INTEGER AllocationSize,
-	_In_ ULONG FileAttributes,
-	_In_ ULONG ShareAccess,
-	_In_ ULONG CreateDisposition,
-	_In_ ULONG CreateOptions,
-	_In_reads_bytes_opt_(EaLength) PVOID EaBuffer,
-	_In_ ULONG EaLength
-)
-{
-	if (ObjectAttributes)
-	{
-		if (ObjectAttributes->ObjectName)
-		{
-			wstring fileName(ObjectAttributes->ObjectName->Buffer, ObjectAttributes->ObjectName->Length / sizeof(WCHAR));
-			if (fileName == L"dat")
-			{
-				return STATUS_OBJECT_NAME_NOT_FOUND;
-			}
-		}
-
-		if (ObjectAttributes->RootDirectory == currentFindHandle)
-		{
-			findHandles.emplace_back(ObjectAttributes->RootDirectory);
-		}
-	}
-
-	return reinterpret_cast<decltype(NtCreateFile)*>(NtCreateFile_orig)(FileHandle, DesiredAccess, ObjectAttributes, IoStatusBlock,
-		AllocationSize, FileAttributes, ShareAccess, CreateDisposition, CreateOptions, EaBuffer, EaLength);
 }
 
 static NTSTATUS NTAPI NtQueryDirectoryFile_hook(
@@ -4398,7 +4351,7 @@ static NTSTATUS NTAPI NtQueryDirectoryFile_hook(
 	_In_ BOOLEAN RestartScan
 )
 {
-	if (FileHandle != currentFindHandle && find(findHandles.begin(), findHandles.end(), FileHandle) != findHandles.end())
+	if (FileHandle != currentFindHandle)
 	{
 		return reinterpret_cast<decltype(NtQueryDirectoryFile)*>(NtQueryDirectoryFile_orig)(FileHandle, Event, ApcRoutine, ApcContext, IoStatusBlock,
 			FileInformation, Length, FileInformationClass,
@@ -4416,213 +4369,10 @@ static NTSTATUS NTAPI NtQueryDirectoryFile_hook(
 
 	if (NT_SUCCESS(status))
 	{
-		auto curr = reinterpret_cast<PFILE_FULL_DIR_INFORMATION>(FileInformation);
-		PFILE_FULL_DIR_INFORMATION prev = nullptr;
-
-		while (true)
-		{
-			std::wstring fName(curr->FileName, curr->FileNameLength / sizeof(WCHAR));
-
-			bool removeEntry = false;
-
-			if (fName.ends_with(L".dll"))
-			{
-				dllCount++;
-				if (dllCount > MAX_DLL_COUNT)
-				{
-					removeEntry = true;
-				}
-			}
-
-			if (removeEntry)
-			{
-				if (prev)
-				{
-					if (curr->NextEntryOffset != 0)
-					{
-						prev->NextEntryOffset += curr->NextEntryOffset;
-					}
-					else
-					{
-						prev->NextEntryOffset = 0;
-					}
-
-					if (prev->NextEntryOffset == 0)
-					{
-						break;
-					}
-					curr = reinterpret_cast<PFILE_FULL_DIR_INFORMATION>(reinterpret_cast<PUCHAR>(prev) + prev->NextEntryOffset);
-					continue;
-				}
-				else
-				{
-					if (curr->NextEntryOffset != 0)
-					{
-						ULONG nextOffset = curr->NextEntryOffset;
-						ULONG totalValidBytes = static_cast<ULONG>(IoStatusBlock->Information);
-						ULONG bytesToMove = totalValidBytes - nextOffset;
-
-						memmove(curr, reinterpret_cast<PUCHAR>(curr) + nextOffset, bytesToMove);
-
-						IoStatusBlock->Information -= nextOffset;
-						continue;
-					}
-					else
-					{
 						return STATUS_NO_MORE_FILES;
 					}
-				}
-			}
-
-			if (curr->NextEntryOffset == 0)
-			{
-				break;
-			}
-			prev = curr;
-			curr = reinterpret_cast<PFILE_FULL_DIR_INFORMATION>(reinterpret_cast<PUCHAR>(curr) + curr->NextEntryOffset);
-		}
-	}
 
 	return status;
-}
-
-void* FindNextFileW_orig = nullptr;
-static BOOL WINAPI FindNextFileW_hook(
-	_In_ HANDLE hFindFile,
-	_Out_ LPWIN32_FIND_DATAW lpFindFileData
-)
-{
-	if (currentFindHandle == hFindFile && dllCount >= MAX_DLL_COUNT)
-	{
-		lpFindFileData = nullptr;
-		SetLastError(ERROR_NO_MORE_FILES);
-		return FALSE;
-	}
-
-	if (currentRootFindHandle == hFindFile && rootFileCount >= MAX_ROOT_FILE_COUNT)
-	{
-		lpFindFileData = nullptr;
-		SetLastError(ERROR_NO_MORE_FILES);
-		return FALSE;
-	}
-
-	auto result = reinterpret_cast<decltype(FindNextFileW_hook)*>(FindNextFileW_orig)(hFindFile, lpFindFileData);
-
-	if (currentRootFindHandle == hFindFile)
-	{
-		if (lpFindFileData && lpFindFileData->cFileName)
-		{
-			rootFileCount++;
-
-			if (!result && rootFileCount <= MAX_ROOT_FILE_COUNT && GetLastError() == ERROR_NO_MORE_FILES)
-			{
-				SetLastError(ERROR_SUCCESS);
-				return TRUE;
-			}
-		}
-		else if (rootFileCount < MAX_ROOT_FILE_COUNT && GetLastError() == ERROR_NO_MORE_FILES)
-		{
-			if (lpFindFileData)
-			{
-				*lpFindFileData = WIN32_FIND_DATAW{};
-			}
-			SetLastError(ERROR_SUCCESS);
-			return TRUE;
-		}
-	}
-
-	if (currentFindHandle == hFindFile)
-	{
-		if (lpFindFileData && lpFindFileData->cFileName)
-		{
-			if (wstring(lpFindFileData->cFileName).ends_with(L".dll"))
-			{
-				dllCount++;
-
-				if (!result && dllCount <= MAX_DLL_COUNT && GetLastError() == ERROR_NO_MORE_FILES)
-				{
-					SetLastError(ERROR_SUCCESS);
-					return TRUE;
-				}
-			}
-			else if (dllCount < MAX_DLL_COUNT && GetLastError() == ERROR_NO_MORE_FILES)
-			{
-				dllCount++;
-
-				// fake data
-				*lpFindFileData = WIN32_FIND_DATAW{ .cFileName = L"GameAssembly.dll" };
-
-				SetLastError(ERROR_SUCCESS);
-				return TRUE;
-			}
-		}
-	}
-
-	return result;
-}
-
-void* FindFirstFileExW_orig = nullptr;
-static HANDLE WINAPI FindFirstFileExW_hook(
-	_In_ LPCWSTR lpFileName,
-	_In_ FINDEX_INFO_LEVELS fInfoLevelId,
-	_Out_writes_bytes_(sizeof(WIN32_FIND_DATAW)) LPVOID lpFindFileData,
-	_In_ FINDEX_SEARCH_OPS fSearchOp,
-	_Reserved_ LPVOID lpSearchFilter,
-	_In_ DWORD dwAdditionalFlags
-)
-{
-	if (wstring(lpFileName).find(L"\\dat\\") != wstring::npos)
-	{
-		// Skipping dat path due performance issue
-		SetLastError(ERROR_FILE_NOT_FOUND);
-		return INVALID_HANDLE_VALUE;
-	}
-
-	auto result = reinterpret_cast<decltype(FindFirstFileExW_hook)*>(FindFirstFileExW_orig)(lpFileName, fInfoLevelId, lpFindFileData,
-		fSearchOp, lpSearchFilter, dwAdditionalFlags);
-
-	if (filesystem::current_path().wstring() + L"\\*.dll" == lpFileName)
-	{
-		// reset count
-		dllCount = 0;
-	}
-
-	if (filesystem::current_path().wstring() + L"\\*.*" == lpFileName)
-	{
-		currentRootFindHandle = result;
-		rootFileCount = 1;
-	}
-
-	if (wstring(lpFileName).find(L"*.dll") != wstring::npos)
-	{
-		if (dllCount >= MAX_DLL_COUNT)
-		{
-			CloseHandle(result);
-			lpFindFileData = nullptr;
-			SetLastError(ERROR_FILE_NOT_FOUND);
-			return INVALID_HANDLE_VALUE;
-		}
-
-		currentFindHandle = result;
-
-		if (lpFindFileData && result != INVALID_HANDLE_VALUE)
-		{
-			if (wstring(reinterpret_cast<LPWIN32_FIND_DATAW>(lpFindFileData)->cFileName).ends_with(L".dll"))
-			{
-				dllCount++;
-			}
-
-			if (dllCount > MAX_DLL_COUNT)
-			{
-				CloseHandle(result);
-				lpFindFileData = nullptr;
-				SetLastError(ERROR_FILE_NOT_FOUND);
-				return INVALID_HANDLE_VALUE;
-			}
-		}
-	}
-
-	return result;
 }
 
 void init_hook(filesystem::path module_path)
@@ -4652,12 +4402,6 @@ void init_hook(filesystem::path module_path)
 		MH_EnableHook(InternetCrackUrlW);
 #endif
 	}
-
-	MH_CreateHook(FindFirstFileExW, FindFirstFileExW_hook, &FindFirstFileExW_orig);
-	MH_EnableHook(FindFirstFileExW);
-
-	MH_CreateHook(FindNextFileW, FindNextFileW_hook, &FindNextFileW_orig);
-	MH_EnableHook(FindNextFileW);
 
 	MH_CreateHook(CreateFileW, CreateFileW_hook, &CreateFileW_orig);
 	MH_EnableHook(CreateFileW);
