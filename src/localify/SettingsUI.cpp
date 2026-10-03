@@ -512,6 +512,10 @@ namespace Localify
 
 				AddOrSet(configDocument, IL2CPP_STRING("freeFormUiScaleLandscape"), static_cast<int>(round(UIParts::GetOptionSliderValue("ui_scale_landscape") * 100)) / 100.0 / 10.0);
 
+#ifdef __ANDROID__
+				AddOrSet(configDocument, IL2CPP_STRING("freeFormWindowIncludeCaptionBarPadding"), UIParts::GetOptionItemOnOffIsOn("freeform_window_include_caption_bar_padding"));
+#endif
+
 #ifdef _MSC_VER
 				AddOrSet(configDocument, IL2CPP_STRING("taskbarShowProgressOnDownload"), UIParts::GetOptionItemOnOffIsOn("taskbar_show_progress_on_download"));
 
@@ -610,6 +614,10 @@ namespace Localify
 				config::freeform_ui_scale_portrait = configDocument[IL2CPP_STRING("freeFormUiScalePortrait")].GetFloat();
 
 				config::freeform_ui_scale_landscape = configDocument[IL2CPP_STRING("freeFormUiScaleLandscape")].GetFloat();
+
+#ifdef __ANDROID__
+                config::freeform_window_include_caption_bar_padding = configDocument[IL2CPP_STRING("freeFormWindowIncludeCaptionBarPadding")].GetBool();
+#endif
 
 				config::home_bg_override_bg_season = configDocument[IL2CPP_STRING("homeBgOverrideBgSeason")].GetInt();
 
@@ -799,6 +807,7 @@ namespace Localify
 		bool unlockSize = false;
 		float uiScale = 1;
 		bool freeFormWindow = false;
+		bool freeFormWindowIncludeCaptionBarPadding = false;
 		float freeFormUiScalePortrait = .5f;
 		float freeFormUiScaleLandscape = .5f;
 
@@ -1017,6 +1026,13 @@ namespace Localify
 				freeFormWindow = configDocument[IL2CPP_STRING("freeFormWindow")].GetBool();
 			}
 
+#ifdef __ANDROID__
+			if (configDocument.HasMember(IL2CPP_STRING("freeFormWindowIncludeCaptionBarPadding")))
+			{
+				freeFormWindowIncludeCaptionBarPadding = configDocument[IL2CPP_STRING("freeFormWindowIncludeCaptionBarPadding")].GetBool();
+			}
+#endif
+
 			if (configDocument.HasMember(IL2CPP_STRING("freeFormUiScalePortrait")))
 			{
 				freeFormUiScalePortrait = configDocument[IL2CPP_STRING("freeFormUiScalePortrait")].GetFloat();
@@ -1224,6 +1240,9 @@ namespace Localify
 						numText.text(il2cpp_string_new16(u8_il2cpp(format("{:.2f}", value)).data()));
 					}
 				),
+#ifdef __ANDROID__
+				UIParts::GetOptionItemOnOff("freeform_window_include_caption_bar_padding", LocalifySettings::GetText("freeform_window_include_caption_bar_padding")),
+#endif
 				UIParts::GetOptionItemTitle(Gallop::Localize::Get(GetTextIdByName(IL2CPP_STRING("Common0035")))->chars),
 				UIParts::GetOptionItemOnOff("live_slider_always_show", LocalifySettings::GetText("live_slider_always_show")),
 				UIParts::GetOptionItemOnOff("live_playback_loop", LocalifySettings::GetText("live_playback_loop")),
@@ -1579,6 +1598,13 @@ namespace Localify
 			{
 			})
 		);
+
+#ifdef __ANDROID__
+		UIParts::SetOptionItemOnOffAction("freeform_window_include_caption_bar_padding", freeFormWindowIncludeCaptionBarPadding, *([](Il2CppObject*, bool isOn)
+			{
+			})
+		);
+#endif
 
 		UIParts::SetOptionItemOnOffAction("unlock_live_chara", unlockLiveChara, *([](Il2CppObject*, bool isOn)
 			{

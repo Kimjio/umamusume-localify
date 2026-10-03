@@ -413,6 +413,7 @@ static Il2CppObject* StartCoroutineManaged2_hook(Il2CppObject* self, Il2CppObjec
 					GetRuntimeType("mscorlib.dll", "System", "Boolean"));
 				auto predicate = CreateDelegateWithClass(Func, GameSystem, *[](Il2CppObject* gameSystem)
 					{
+#ifdef _MSC_VER
 						if (Gallop::GameSystem(gameSystem)._systemState() == Gallop::GameSystem::SystemState::Deactive)
 						{
 							try
@@ -452,6 +453,7 @@ static Il2CppObject* StartCoroutineManaged2_hook(Il2CppObject* self, Il2CppObjec
 								return true;
 							}
 						}
+#endif
 
 						if (Gallop::GameSystem(gameSystem)._systemState() == Gallop::GameSystem::SystemState::Active)
 						{

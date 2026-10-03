@@ -55,6 +55,7 @@ namespace config
 	extern bool freeform_window;
 	extern float freeform_ui_scale_portrait;
 	extern float freeform_ui_scale_landscape;
+	extern bool freeform_window_include_caption_bar_padding;
 	extern int initial_width;
 	extern int initial_height;
 	extern float ui_animation_scale;

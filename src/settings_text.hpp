@@ -11,11 +11,11 @@ using namespace std;
 
 namespace LocalifySettings
 {
-	inline const Il2CppChar* GetText(string id)
+	inline const Il2CppChar* GetText(const string& id)
 	{
-		bool isKor = Game::CurrentGameRegion == Game::Region::KOR || config::localify_settings_language == IL2CPP_STRING("ko");
-		bool isEng = Game::CurrentGameRegion == Game::Region::ENG || config::localify_settings_language == IL2CPP_STRING("en");
-		bool isZhHant = Game::CurrentGameRegion == Game::Region::TWN || config::localify_settings_language == IL2CPP_STRING("zh-TW") ||
+		const auto isKor = Game::CurrentGameRegion == Game::Region::KOR || config::localify_settings_language == IL2CPP_STRING("ko");
+		const auto isEng = Game::CurrentGameRegion == Game::Region::ENG || config::localify_settings_language == IL2CPP_STRING("en");
+		const auto isZhHant = Game::CurrentGameRegion == Game::Region::TWN || config::localify_settings_language == IL2CPP_STRING("zh-TW") ||
 			config::localify_settings_language == IL2CPP_STRING("zh-Hant") || config::localify_settings_language == IL2CPP_STRING("zh-Hant-TW");
 
 		if (id == "settings_title")
@@ -873,6 +873,23 @@ namespace LocalifySettings
 			return IL2CPP_STRING("自由形式ウィンドウ");
 		}
 
+		if (id == "freeform_window_include_caption_bar_padding")
+		{
+			if (isKor)
+			{
+				return IL2CPP_STRING("자유 형식 창 캡션바 패딩 포함");
+			}
+			if (isEng)
+			{
+				return IL2CPP_STRING("Free-form window include caption bar padding");
+			}
+			if (isZhHant)
+			{
+				return IL2CPP_STRING("自由格式視窗Caption欄內距包含");
+			}
+			return IL2CPP_STRING("自由形式ウィンドウキャプションバーのパディングを含む");
+		}
+
 		if (id == "ui_scale_portrait")
 		{
 			if (isKor)
@@ -941,39 +958,22 @@ namespace LocalifySettings
 			return IL2CPP_STRING("アプリ内お知らせの代わりにサードパーティのお知らせを使用します");
 		}
 
-		if (id == "home_bg_override_event_id")
-		{
-			if (isKor)
-			{
-				return IL2CPP_STRING("재정의할 홈 이벤트");
-			}
-			if (isEng)
-			{
-				return IL2CPP_STRING("Home event to override");
-			}
-			if (isZhHant)
-			{
-				return IL2CPP_STRING("要覆蓋的主頁活動");
-			}
-			return IL2CPP_STRING("上書きするホームイベント");
-		}
-
-		if (id == "home_bg_override_bg_season_disabled")
-		{
-			if (isKor)
-			{
-				return IL2CPP_STRING("선택한 홈 이벤트에서 사용할 수 없는 계절입니다");
-			}
-			if (isEng)
-			{
-				return IL2CPP_STRING("This season is not available for the selected home event");
-			}
-			if (isZhHant)
-			{
-				return IL2CPP_STRING("此季節不適用於所選的主頁活動");
-			}
-			return IL2CPP_STRING("選択したホームイベントでは使用できない季節です");
-		}
+        if (id == "home_bg_override_event_id")
+        {
+            if (isKor)
+            {
+                return IL2CPP_STRING("재정의할 홈 이벤트 ID");
+            }
+            if (isEng)
+            {
+                return IL2CPP_STRING("Override the home event ID");
+            }
+            if (isZhHant)
+            {
+                return IL2CPP_STRING("要重新定義的首頁事件 ID");
+            }
+            return IL2CPP_STRING("オーバーライドするホームイベントID");
+        }
 
 		if (id == "taskbar")
 		{

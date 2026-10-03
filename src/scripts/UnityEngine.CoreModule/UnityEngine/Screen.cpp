@@ -100,26 +100,29 @@ static void get_safeArea_Injected_hook(Rect* safeArea)
 	reinterpret_cast<decltype(get_safeArea_Injected_hook)*>(get_safeArea_Injected_addr)(safeArea);
 
 #ifdef __ANDROID__
-	auto env = GetJNIEnv();
-	auto activity = GetActivity();
+	if (config::freeform_window_include_caption_bar_padding)
+	{
+		auto env = GetJNIEnv();
+		auto activity = GetActivity();
 
-	auto insets = getCaptionBarInsets(env, activity);
-	auto insetsClass = env->GetObjectClass(insets);
-	auto leftField = env->GetFieldID(insetsClass, "left", "I");
-	auto topField = env->GetFieldID(insetsClass, "top", "I");
-	auto rightField = env->GetFieldID(insetsClass, "right", "I");
-	auto bottomField = env->GetFieldID(insetsClass, "bottom", "I");
+		auto insets = getCaptionBarInsets(env, activity);
+		auto insetsClass = env->GetObjectClass(insets);
+		auto leftField = env->GetFieldID(insetsClass, "left", "I");
+		auto topField = env->GetFieldID(insetsClass, "top", "I");
+		auto rightField = env->GetFieldID(insetsClass, "right", "I");
+		auto bottomField = env->GetFieldID(insetsClass, "bottom", "I");
 
-	auto left = env->GetIntField(insets, leftField);
-	auto top = env->GetIntField(insets, topField);
-	auto right = env->GetIntField(insets, rightField);
-	auto bottom = env->GetIntField(insets, bottomField);
+		auto left = env->GetIntField(insets, leftField);
+		auto top = env->GetIntField(insets, topField);
+		auto right = env->GetIntField(insets, rightField);
+		auto bottom = env->GetIntField(insets, bottomField);
 
-	env->DeleteLocalRef(insets);
-	env->DeleteLocalRef(insetsClass);
+		env->DeleteLocalRef(insets);
+		env->DeleteLocalRef(insetsClass);
 
-	safeArea->width -= static_cast<float>(left + right);
-	safeArea->height -= static_cast<float>(top + bottom);
+		safeArea->width -= static_cast<float>(left + right);
+		safeArea->height -= static_cast<float>(top + bottom);
+	}
 #endif
 }
 
