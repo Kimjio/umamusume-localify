@@ -4184,8 +4184,6 @@ RegisterClassExW_hook(
 	return reinterpret_cast<decltype(RegisterClassExW)*>(RegisterClassExW_orig)(lpwcx);
 }
 
-constexpr uint16_t UNITY_BATCH_CLASS_ID = 0xC03e;
-
 void* CreateWindowExW_orig = nullptr;
 static
 HWND
@@ -4206,7 +4204,7 @@ CreateWindowExW_hook(
 {
 	bool isUnity = false;
 
-	if (reinterpret_cast<uint16_t>(lpClassName) != UNITY_BATCH_CLASS_ID)
+	if (!IS_INTRESOURCE(lpClassName))
 	{
 		isUnity = wcscmp(lpClassName, L"UnityWndClass") == 0;
 	}
