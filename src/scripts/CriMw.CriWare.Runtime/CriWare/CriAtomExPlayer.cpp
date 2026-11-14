@@ -28,6 +28,141 @@ namespace
 	void* criAtomExPlayer_Pause_orig = nullptr;
 }
 
+static bool FilterSystemText(int characterId, int voiceId, string cueSheet, int cueId)
+{
+	if (cueSheet.find("_home_") != string::npos ||
+		cueSheet.find("_tc_") != string::npos ||
+		cueSheet.find("_title_") != string::npos ||
+		cueSheet.find("_kakao_") != string::npos ||
+		cueSheet.find("_gacha_") != string::npos)
+	{
+		return false;
+	}
+
+	if (voiceId >= 20000 && voiceId <= 20037)
+	{
+		return false;
+	}
+
+	if (voiceId >= 92000 && voiceId < 93000)
+	{
+		return false;
+	}
+
+	if (voiceId >= 400000 && voiceId < 410000)
+	{
+		return false;
+	}
+
+	if (voiceId >= 220000 && voiceId < 220100)
+	{
+		return false;
+	}
+
+	if (voiceId >= 23001 && voiceId <= 23020)
+	{
+		return false;
+	}
+
+	if (voiceId >= 210001 && voiceId <= 210004)
+	{
+		return false;
+	}
+
+	if (voiceId >= 230000 && voiceId <= 230003)
+	{
+		return false;
+	}
+
+	if (voiceId >= 200000 && voiceId < 200100)
+	{
+		return false;
+	}
+
+	if (voiceId == 240001)
+	{
+		return false;
+	}
+
+	if (voiceId >= 250000 && voiceId <= 250001)
+	{
+		return false;
+	}
+
+	if (voiceId >= 400012 && voiceId <= 400025)
+	{
+		return false;
+	}
+
+	if (voiceId == 400120)
+	{
+		return false;
+	}
+
+	if (voiceId >= 2000 && voiceId <= 2040)
+	{
+		return false;
+	}
+
+	if (voiceId >= 500000 && voiceId <= 500007)
+	{
+		return false;
+	}
+
+	if (voiceId >= 260000 && voiceId <= 260008)
+	{
+		return false;
+	}
+
+	if (voiceId >= 510000 && voiceId <= 510012)
+	{
+		return false;
+	}
+
+	if (voiceId >= 82000 && voiceId <= 82001)
+	{
+		return false;
+	}
+
+	if (voiceId >= 95005 && voiceId <= 95006)
+	{
+		return false;
+	}
+
+	if (voiceId >= 141000 && voiceId <= 141002)
+	{
+		return false;
+	}
+
+	if (voiceId >= 260009 && voiceId <= 260013)
+	{
+		return false;
+	}
+
+	if (voiceId >= 300000 && voiceId <= 300010)
+	{
+		return false;
+	}
+
+	if (voiceId >= 700000 && voiceId <= 700010)
+	{
+		return false;
+	}
+
+	if (voiceId == 910000)
+	{
+		return false;
+	}
+
+	if (voiceId >= 600000 && voiceId <= 600100)
+	{
+		return false;
+	}
+
+
+	return true;
+}
+
 static void ShowCaptionByNotification(Il2CppObject* audioManager, Il2CppObject* elem)
 {
 	if (!audioManager || !elem)
@@ -73,44 +208,8 @@ static void ShowCaptionByNotification(Il2CppObject* audioManager, Il2CppObject* 
 	auto u16Text = il2cppstring(text->chars);
 	replaceAll(u16Text, IL2CPP_STRING("\n\n"), IL2CPP_STRING(" "));
 	replaceAll(u16Text, IL2CPP_STRING("\n"), IL2CPP_STRING(" "));
-	if (il2cppstring(cueSheet->chars).find(IL2CPP_STRING("_home_")) == il2cppstring::npos &&
-		il2cppstring(cueSheet->chars).find(IL2CPP_STRING("_tc_")) == il2cppstring::npos &&
-		il2cppstring(cueSheet->chars).find(IL2CPP_STRING("_title_")) == il2cppstring::npos &&
-		il2cppstring(cueSheet->chars).find(IL2CPP_STRING("_kakao_")) == il2cppstring::npos &&
-		il2cppstring(cueSheet->chars).find(IL2CPP_STRING("_gacha_")) == il2cppstring::npos &&
-		voiceId != 95001 &&
-		(characterId < 9000 || voiceId == 95005 || voiceId == 95006 || voiceId == 70000))
+	if (FilterSystemText(characterId, voiceId, il2cpp_u8(cueSheet->chars), cueId))
 	{
-
-		if (il2cppstring(cueSheet->chars).find(IL2CPP_STRING("_training_")) != il2cppstring::npos && (cueId < 29 || cueId == 39))
-		{
-			if (!(voiceId >= 2030 && voiceId <= 2037) && voiceId < 93000 && !(cueId == 8 || cueId == 9 || cueId == 12 || cueId == 13))
-			{
-				if (voiceId == 20025)
-				{
-					auto sceneManager = GetSingletonInstance(il2cpp_symbols::get_class("umamusume.dll", "Gallop", "SceneManager"));
-
-					if (sceneManager)
-					{
-						auto viewId = il2cpp_symbols::get_method_pointer<int (*)(Il2CppObject*)>(sceneManager->klass, "GetCurrentViewId", 0)(sceneManager);
-
-						if (viewId != 5901)
-						{
-							return;
-						}
-					}
-					else
-					{
-						return;
-					}
-				}
-				else
-				{
-					return;
-				}
-			}
-		}
-
 		float length =
 			il2cpp_symbols::get_method_pointer<float (*)(Il2CppObject*, Il2CppString*, int)>(audioManager->klass, "GetCueLength", 2)(audioManager, cueSheet, cueId);
 
