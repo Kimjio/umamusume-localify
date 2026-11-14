@@ -166,7 +166,7 @@ namespace Localify
 	public:
 		IFACEMETHODIMP QueryInterface(REFIID riid, void** ppv)
 		{
-			static const QITAB qit[] = { QITABENT(CDialogEventHandler, IFileDialogEvents), { 0 }, };
+			static const QITAB qit[] = { QITABENT(CDialogEventHandler, IFileDialogEvents),{ 0 }, };
 			return QISearch(this, qit, riid, ppv);
 		}
 		IFACEMETHODIMP_(ULONG) AddRef() { return InterlockedIncrement(&_cRef); }
@@ -479,6 +479,14 @@ namespace Localify
 
 				AddOrSet(configDocument, IL2CPP_STRING("cySpringAddMoveRateScale"), static_cast<int>(UIParts::GetOptionSliderValue("cyspring_add_move_rate_scale") * 100) / 100.0 / 10.0);
 
+				AddOrSet(configDocument, IL2CPP_STRING("cySpringGravityRateScale"), static_cast<int>(UIParts::GetOptionSliderValue("cyspring_gravity_rate_scale") * 100) / 100.0 / 10.0);
+
+				AddOrSet(configDocument, IL2CPP_STRING("cySpringDisableLimitRotation"), UIParts::GetOptionItemOnOffIsOn("cyspring_disable_limit_rotation"));
+
+				AddOrSet(configDocument, IL2CPP_STRING("cySpringLimitRotationMinScale"), static_cast<int>(UIParts::GetOptionSliderValue("cyspring_limit_rotation_min_scale") * 100) / 100.0 / 10.0);
+
+				AddOrSet(configDocument, IL2CPP_STRING("cySpringLimitRotationMaxScale"), static_cast<int>(UIParts::GetOptionSliderValue("cyspring_limit_rotation_max_scale") * 100) / 100.0 / 10.0);
+
 				AddOrSet(configDocument, IL2CPP_STRING("uiAnimationScale"), static_cast<int>(round(UIParts::GetOptionSliderValue("ui_animation_scale") * 100)) / 100.0 / 10.0);
 
 				AddOrSet(configDocument, IL2CPP_STRING("resolution3dScale"), static_cast<int>(round(UIParts::GetOptionSliderValue("resolution_3d_scale") * 100)) / 100.0 / 10.0);
@@ -590,6 +598,14 @@ namespace Localify
 
 				config::cyspring_add_move_rate_scale = configDocument[IL2CPP_STRING("cySpringAddMoveRateScale")].GetFloat();
 
+				config::cyspring_gravity_rate_scale = configDocument[IL2CPP_STRING("cySpringGravityRateScale")].GetFloat();
+
+				config::cyspring_disable_limit_rotation = configDocument[IL2CPP_STRING("cySpringDisableLimitRotation")].GetBool();
+
+				config::cyspring_limit_rotation_min_scale = configDocument[IL2CPP_STRING("cySpringLimitRotationMinScale")].GetFloat();
+
+				config::cyspring_limit_rotation_max_scale = configDocument[IL2CPP_STRING("cySpringLimitRotationMaxScale")].GetFloat();
+
 				config::ui_animation_scale = configDocument[IL2CPP_STRING("uiAnimationScale")].GetFloat();
 
 				config::resolution_3d_scale = configDocument[IL2CPP_STRING("resolution3dScale")].GetFloat();
@@ -618,7 +634,7 @@ namespace Localify
 				config::freeform_ui_scale_landscape = configDocument[IL2CPP_STRING("freeFormUiScaleLandscape")].GetFloat();
 
 #ifdef __ANDROID__
-                config::freeform_window_include_caption_bar_padding = configDocument[IL2CPP_STRING("freeFormWindowIncludeCaptionBarPadding")].GetBool();
+				config::freeform_window_include_caption_bar_padding = configDocument[IL2CPP_STRING("freeFormWindowIncludeCaptionBarPadding")].GetBool();
 #endif
 
 				config::freeform_window_auto_ui_scale = configDocument[IL2CPP_STRING("freeFormWindowAutoUiScale")].GetBool();
@@ -793,6 +809,10 @@ namespace Localify
 		float cySpringStiffnessForceRateScale = 1;
 		float cySpringMoveRateScale = 1;
 		float cySpringAddMoveRateScale = 1;
+		float cySpringGravityRateScale = 1;
+		bool cySpringDisableLimitRotation = false;
+		float cySpringLimitRotationMinScale = 1;
+		float cySpringLimitRotationMaxScale = 1;
 		float resolution3dScale = 1;
 		float uiAnimationScale = 1;
 		int homeBgOverrideBgSeason = -1;
@@ -946,6 +966,26 @@ namespace Localify
 			if (configDocument.HasMember(IL2CPP_STRING("cySpringAddMoveRateScale")))
 			{
 				cySpringAddMoveRateScale = configDocument[IL2CPP_STRING("cySpringAddMoveRateScale")].GetFloat();
+			}
+
+			if (configDocument.HasMember(IL2CPP_STRING("cySpringGravityRateScale")))
+			{
+				cySpringGravityRateScale = configDocument[IL2CPP_STRING("cySpringGravityRateScale")].GetFloat();
+			}
+
+			if (configDocument.HasMember(IL2CPP_STRING("cySpringDisableLimitRotation")))
+			{
+				cySpringDisableLimitRotation = configDocument[IL2CPP_STRING("cySpringDisableLimitRotation")].GetBool();
+			}
+
+			if (configDocument.HasMember(IL2CPP_STRING("cySpringLimitRotationMinScale")))
+			{
+				cySpringLimitRotationMinScale = configDocument[IL2CPP_STRING("cySpringLimitRotationMinScale")].GetFloat();
+			}
+
+			if (configDocument.HasMember(IL2CPP_STRING("cySpringLimitRotationMaxScale")))
+			{
+				cySpringLimitRotationMaxScale = configDocument[IL2CPP_STRING("cySpringLimitRotationMaxScale")].GetFloat();
 			}
 
 			if (configDocument.HasMember(IL2CPP_STRING("resolution3dScale")))
@@ -1206,6 +1246,37 @@ namespace Localify
 					}
 				),
 				UIParts::GetOptionSlider("cyspring_add_move_rate_scale", LocalifySettings::GetText("cyspring_add_move_rate_scale"), cySpringAddMoveRateScale * 10, 0, 50, true,
+					*[](Il2CppObject* slider)
+					{
+						auto numText = UIParts::GetOptionSliderNumText(slider);
+						auto value = UIParts::GetOptionSliderValue(slider);
+						value = value / 10;
+
+						numText.text(il2cpp_string_new16(u8_il2cpp(format("{:.2f}", value)).data()));
+					}
+				),
+				UIParts::GetOptionSlider("cyspring_gravity_rate_scale", LocalifySettings::GetText("cyspring_gravity_rate_scale"), cySpringGravityRateScale * 10, 0, 50, true,
+					*[](Il2CppObject* slider)
+					{
+						auto numText = UIParts::GetOptionSliderNumText(slider);
+						auto value = UIParts::GetOptionSliderValue(slider);
+						value = value / 10;
+
+						numText.text(il2cpp_string_new16(u8_il2cpp(format("{:.2f}", value)).data()));
+					}
+				),
+				UIParts::GetOptionItemOnOff("cyspring_disable_limit_rotation", LocalifySettings::GetText("cyspring_disable_limit_rotation")),
+				UIParts::GetOptionSlider("cyspring_limit_rotation_min_scale", LocalifySettings::GetText("cyspring_limit_rotation_min_scale"), cySpringLimitRotationMinScale * 10, 1, 50, true,
+					*[](Il2CppObject* slider)
+					{
+						auto numText = UIParts::GetOptionSliderNumText(slider);
+						auto value = UIParts::GetOptionSliderValue(slider);
+						value = value / 10;
+
+						numText.text(il2cpp_string_new16(u8_il2cpp(format("{:.2f}", value)).data()));
+					}
+				),
+				UIParts::GetOptionSlider("cyspring_limit_rotation_max_scale", LocalifySettings::GetText("cyspring_limit_rotation_max_scale"), cySpringLimitRotationMaxScale * 10, 1, 50, true,
 					*[](Il2CppObject* slider)
 					{
 						auto numText = UIParts::GetOptionSliderNumText(slider);
@@ -1523,6 +1594,45 @@ namespace Localify
 						il2cpp_symbols::get_method_pointer<void (*)(Il2CppObject*, UnityEngine::Color)>(cySpringAddMoveRateScaleSliderFillImage->klass, "set_color", 1)(cySpringAddMoveRateScaleSliderFillImage, !isOn ? UnityEngine::Color::white() : UnityEngine::Color::gray());
 					}
 				}
+
+				if (auto cySpringGravityRateScaleSlider = UIParts::GetOptionSlider("cyspring_gravity_rate_scale"))
+				{
+					il2cpp_symbols::get_method_pointer<void (*)(Il2CppObject*, bool)>(cySpringGravityRateScaleSlider->klass, "set_interactable", 1)(cySpringGravityRateScaleSlider, !isOn);
+					if (auto cySpringGravityRateScaleSliderFillImageField = il2cpp_class_get_field_from_name(cySpringGravityRateScaleSlider->klass, "m_FillImage"))
+					{
+						Il2CppObject* cySpringGravityRateScaleSliderFillImage;
+						il2cpp_field_get_value(cySpringGravityRateScaleSlider, cySpringGravityRateScaleSliderFillImageField, &cySpringGravityRateScaleSliderFillImage);
+						il2cpp_symbols::get_method_pointer<void (*)(Il2CppObject*, UnityEngine::Color)>(cySpringGravityRateScaleSliderFillImage->klass, "set_color", 1)(cySpringGravityRateScaleSliderFillImage, !isOn ? UnityEngine::Color::white() : UnityEngine::Color::gray());
+					}
+				}
+
+				if (auto cySpringDisableLimitRotationToggle = UIParts::GetPartsOnOffToggleSwitch("cyspring_disable_limit_rotation"))
+				{
+					il2cpp_symbols::get_method_pointer<void (*)(Il2CppObject*, bool)>(cySpringDisableLimitRotationToggle->klass, "SetOnInteractable", 1)(cySpringDisableLimitRotationToggle, !isOn);
+					il2cpp_symbols::get_method_pointer<void (*)(Il2CppObject*, Il2CppString*)>(cySpringDisableLimitRotationToggle->klass, "SetNotificationMessage", 1)(cySpringDisableLimitRotationToggle, isOn ? il2cpp_string_new16(LocalifySettings::GetText("cyspring_disable_limit_rotation_disabled")) : nullptr);
+				}
+
+				if (auto cySpringLimitRotationMinScaleSlider = UIParts::GetOptionSlider("cyspring_limit_rotation_min_scale"))
+				{
+					il2cpp_symbols::get_method_pointer<void (*)(Il2CppObject*, bool)>(cySpringLimitRotationMinScaleSlider->klass, "set_interactable", 1)(cySpringLimitRotationMinScaleSlider, !isOn);
+					if (auto cySpringLimitRotationMinScaleSliderFillImageField = il2cpp_class_get_field_from_name(cySpringLimitRotationMinScaleSlider->klass, "m_FillImage"))
+					{
+						Il2CppObject* cySpringLimitRotationMinScaleSliderFillImage;
+						il2cpp_field_get_value(cySpringLimitRotationMinScaleSlider, cySpringLimitRotationMinScaleSliderFillImageField, &cySpringLimitRotationMinScaleSliderFillImage);
+						il2cpp_symbols::get_method_pointer<void (*)(Il2CppObject*, UnityEngine::Color)>(cySpringLimitRotationMinScaleSliderFillImage->klass, "set_color", 1)(cySpringLimitRotationMinScaleSliderFillImage, !isOn ? UnityEngine::Color::white() : UnityEngine::Color::gray());
+					}
+				}
+
+				if (auto cySpringLimitRotationMaxScaleSlider = UIParts::GetOptionSlider("cyspring_limit_rotation_max_scale"))
+				{
+					il2cpp_symbols::get_method_pointer<void (*)(Il2CppObject*, bool)>(cySpringLimitRotationMaxScaleSlider->klass, "set_interactable", 1)(cySpringLimitRotationMaxScaleSlider, !isOn);
+					if (auto cySpringLimitRotationMaxScaleSliderFillImageField = il2cpp_class_get_field_from_name(cySpringLimitRotationMaxScaleSlider->klass, "m_FillImage"))
+					{
+						Il2CppObject* cySpringLimitRotationMaxScaleSliderFillImage;
+						il2cpp_field_get_value(cySpringLimitRotationMaxScaleSlider, cySpringLimitRotationMaxScaleSliderFillImageField, &cySpringLimitRotationMaxScaleSliderFillImage);
+						il2cpp_symbols::get_method_pointer<void (*)(Il2CppObject*, UnityEngine::Color)>(cySpringLimitRotationMaxScaleSliderFillImage->klass, "set_color", 1)(cySpringLimitRotationMaxScaleSliderFillImage, !isOn ? UnityEngine::Color::white() : UnityEngine::Color::gray());
+					}
+				}
 			})
 		);
 
@@ -1598,6 +1708,50 @@ namespace Localify
 		{
 			il2cpp_symbols::get_method_pointer<void (*)(Il2CppObject*, bool)>(cySpringLegacyBehaviorToggle->klass, "SetOnInteractable", 1)(cySpringLegacyBehaviorToggle, !cySpringDisableNative);
 			il2cpp_symbols::get_method_pointer<void (*)(Il2CppObject*, Il2CppString*)>(cySpringLegacyBehaviorToggle->klass, "SetNotificationMessage", 1)(cySpringLegacyBehaviorToggle, cySpringDisableNative ? il2cpp_string_new16(LocalifySettings::GetText("cyspring_legacy_behavior_disabled")) : nullptr);
+		}
+
+		if (auto cySpringGravityRateScaleSlider = UIParts::GetOptionSlider("cyspring_gravity_rate_scale"))
+		{
+			il2cpp_symbols::get_method_pointer<void (*)(Il2CppObject*, bool)>(cySpringGravityRateScaleSlider->klass, "set_interactable", 1)(cySpringGravityRateScaleSlider, !cySpringDisableNative);
+			if (auto cySpringGravityRateScaleSliderFillImageField = il2cpp_class_get_field_from_name(cySpringGravityRateScaleSlider->klass, "m_FillImage"))
+			{
+				Il2CppObject* cySpringGravityRateScaleSliderFillImage;
+				il2cpp_field_get_value(cySpringGravityRateScaleSlider, cySpringGravityRateScaleSliderFillImageField, &cySpringGravityRateScaleSliderFillImage);
+				il2cpp_symbols::get_method_pointer<void (*)(Il2CppObject*, UnityEngine::Color)>(cySpringGravityRateScaleSliderFillImage->klass, "set_color", 1)(cySpringGravityRateScaleSliderFillImage, !cySpringDisableNative ? UnityEngine::Color::white() : UnityEngine::Color::gray());
+			}
+		}
+
+		UIParts::SetOptionItemOnOffAction("cyspring_disable_limit_rotation", cySpringDisableLimitRotation, *([](Il2CppObject*, bool isOn)
+			{
+			})
+		);
+
+		if (auto cySpringDisableLimitRotationToggle = UIParts::GetPartsOnOffToggleSwitch("cyspring_disable_limit_rotation"))
+		{
+			il2cpp_symbols::get_method_pointer<void (*)(Il2CppObject*, bool)>(cySpringDisableLimitRotationToggle->klass, "SetOnInteractable", 1)(cySpringDisableLimitRotationToggle, !cySpringDisableNative);
+			il2cpp_symbols::get_method_pointer<void (*)(Il2CppObject*, Il2CppString*)>(cySpringDisableLimitRotationToggle->klass, "SetNotificationMessage", 1)(cySpringDisableLimitRotationToggle, cySpringDisableNative ? il2cpp_string_new16(LocalifySettings::GetText("cyspring_disable_limit_rotation_disabled")) : nullptr);
+		}
+
+		if (auto cySpringLimitRotationMinScaleSlider = UIParts::GetOptionSlider("cyspring_limit_rotation_min_scale"))
+		{
+			il2cpp_symbols::get_method_pointer<void (*)(Il2CppObject*, bool)>(cySpringLimitRotationMinScaleSlider->klass, "set_interactable", 1)(cySpringLimitRotationMinScaleSlider, !cySpringDisableNative);
+			if (auto cySpringLimitRotationMinScaleSliderFillImageField = il2cpp_class_get_field_from_name(cySpringLimitRotationMinScaleSlider->klass, "m_FillImage"))
+			{
+				Il2CppObject* cySpringLimitRotationMinScaleSliderFillImage;
+				il2cpp_field_get_value(cySpringLimitRotationMinScaleSlider, cySpringLimitRotationMinScaleSliderFillImageField, &cySpringLimitRotationMinScaleSliderFillImage);
+				il2cpp_symbols::get_method_pointer<void (*)(Il2CppObject*, UnityEngine::Color)>(cySpringLimitRotationMinScaleSliderFillImage->klass, "set_color", 1)(cySpringLimitRotationMinScaleSliderFillImage, !cySpringDisableNative ? UnityEngine::Color::white() : UnityEngine::Color::gray());
+			}
+		}
+
+		if (auto cySpringLimitRotationMaxScaleSlider = UIParts::GetOptionSlider("cyspring_limit_rotation_max_scale"))
+		{
+			il2cpp_symbols::get_method_pointer<void (*)(Il2CppObject*, bool)>(cySpringLimitRotationMaxScaleSlider->klass, "set_interactable", 1)(cySpringLimitRotationMaxScaleSlider, !cySpringDisableNative);
+			if (auto cySpringLimitRotationMaxScaleSliderFillImageField = il2cpp_class_get_field_from_name(cySpringLimitRotationMaxScaleSlider->klass, "m_FillImage"))
+			{
+				Il2CppObject* cySpringLimitRotationMaxScaleSliderFillImage;
+				il2cpp_field_get_value(cySpringLimitRotationMaxScaleSlider, cySpringLimitRotationMaxScaleSliderFillImageField, &cySpringLimitRotationMaxScaleSliderFillImage);
+				il2cpp_symbols::get_method_pointer<void (*)(Il2CppObject*, UnityEngine::Color)>(cySpringLimitRotationMaxScaleSliderFillImage->klass, "set_color", 1)(cySpringLimitRotationMaxScaleSliderFillImage, !cySpringDisableNative ? UnityEngine::Color::white() : UnityEngine::Color::gray());
+			}
 		}
 
 		UIParts::SetOptionItemOnOffAction("unlock_size", unlockSize, *([](Il2CppObject*, bool isOn)

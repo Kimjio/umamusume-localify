@@ -110,6 +110,10 @@ namespace config
 	extern float cyspring_stiffness_force_rate_scale;
 	extern float cyspring_move_rate_scale;
 	extern float cyspring_add_move_rate_scale;
+	extern float cyspring_gravity_rate_scale;
+	extern bool cyspring_disable_limit_rotation;
+	extern float cyspring_limit_rotation_min_scale;
+	extern float cyspring_limit_rotation_max_scale;
 	extern bool hide_now_loading;
 #ifdef _MSC_VER
 	extern bool discord_rich_presence;

@@ -87,6 +87,10 @@ namespace config
 	float cyspring_stiffness_force_rate_scale = 1;
 	float cyspring_move_rate_scale = 1;
 	float cyspring_add_move_rate_scale = 1;
+	float cyspring_gravity_rate_scale = 1;
+	bool cyspring_disable_limit_rotation = false;
+	float cyspring_limit_rotation_min_scale = 1;
+	float cyspring_limit_rotation_max_scale = 1;
 	bool hide_now_loading = false;
 #ifdef _MSC_VER
 	bool discord_rich_presence = false;
@@ -435,6 +439,14 @@ if (document.HasMember(IL2CPP_STRING(_name_)) && document[IL2CPP_STRING(_name_)]
 			GetValue("cySpringMoveRateScale", Float, cyspring_move_rate_scale);
 
 			GetValue("cySpringAddMoveRateScale", Float, cyspring_add_move_rate_scale);
+
+			GetValue("cySpringGravityRateScale", Float, cyspring_gravity_rate_scale);
+
+			GetValue("cySpringDisableLimitRotation", Bool, cyspring_disable_limit_rotation);
+			
+			GetValue("cySpringLimitRotationMinScale", Float, cyspring_limit_rotation_min_scale);
+
+			GetValue("cySpringLimitRotationMaxScale", Float, cyspring_limit_rotation_max_scale);
 
 			GetValue("hideNowLoading", Bool, hide_now_loading);
 

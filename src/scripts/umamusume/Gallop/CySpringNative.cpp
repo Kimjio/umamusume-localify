@@ -375,6 +375,14 @@ static void CySpringNative_NativeClothUpdate_hook(Gallop::NativeClothWorking* co
 	dragForceRate *= config::cyspring_drag_force_rate_scale;
 	moveRate *= config::cyspring_move_rate_scale;
 	addMoveRate *= config::cyspring_add_move_rate_scale;
+	gravityRate *= config::cyspring_gravity_rate_scale;
+	cond->LimitRotationMin *= config::cyspring_limit_rotation_min_scale;
+	cond->LimitRotationMax *= config::cyspring_limit_rotation_max_scale;
+
+	if (config::cyspring_disable_limit_rotation)
+	{
+		cond->IsLimit = false;
+	}
 
 	if (config::cyspring_legacy_behavior)
 	{
@@ -400,6 +408,14 @@ static void CySpringNative_NativeClothSkirtUpdate_hook(Gallop::NativeClothWorkin
 	dragForceRate *= config::cyspring_drag_force_rate_scale;
 	moveRate *= config::cyspring_move_rate_scale;
 	addMoveRate *= config::cyspring_add_move_rate_scale;
+	gravityRate *= config::cyspring_gravity_rate_scale;
+	cond->LimitRotationMin *= config::cyspring_limit_rotation_min_scale;
+	cond->LimitRotationMax *= config::cyspring_limit_rotation_max_scale;
+
+	if (config::cyspring_disable_limit_rotation)
+	{
+		cond->IsLimit = false;
+	}
 
 	if (config::cyspring_legacy_behavior)
 	{

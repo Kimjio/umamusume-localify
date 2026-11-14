@@ -104,6 +104,14 @@ namespace UnityEngine
 			return Vector3{.x=x - v.x, .y=y - v.y, .z=z - v.z};
 		}
 
+		Vector3& operator*=(float v) noexcept
+		{
+			x = x * v;
+			y = y * v;
+			z = z * v;
+			return *this;
+		}
+
 		explicit operator Vector2() const
 		{
 			return Vector2{ .x=x, .y=y };

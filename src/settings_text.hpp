@@ -754,6 +754,74 @@ namespace LocalifySettings
 			return IL2CPP_STRING("モーション慣性");
 		}
 
+		if (id == "cyspring_gravity_rate_scale")
+		{
+			if (isKor)
+			{
+				return IL2CPP_STRING("중력");
+			}
+			if (isEng)
+			{
+				return IL2CPP_STRING("Gravity");
+			}
+			if (isZhHant)
+			{
+				return IL2CPP_STRING("重力");
+			}
+			return IL2CPP_STRING("重力");
+		}
+
+		if (id == "cyspring_disable_limit_rotation")
+		{
+			if (isKor)
+			{
+				return IL2CPP_STRING("회전 제한 해제");
+			}
+			if (isEng)
+			{
+				return IL2CPP_STRING("Disable rotation limit");
+			}
+			if (isZhHant)
+			{
+				return IL2CPP_STRING("取消旋轉限制");
+			}
+			return IL2CPP_STRING("回転制限の無効化");
+		}
+
+		if (id == "cyspring_limit_rotation_min_scale")
+		{
+			if (isKor)
+			{
+				return IL2CPP_STRING("회전 제한 최소값");
+			}
+			if (isEng)
+			{
+				return IL2CPP_STRING("Rotation limit minimum value");
+			}
+			if (isZhHant)
+			{
+				return IL2CPP_STRING("旋轉限制最小值");
+			}
+			return IL2CPP_STRING("回転制限の最小値");
+		}
+
+		if (id == "cyspring_limit_rotation_max_scale")
+		{
+			if (isKor)
+			{
+				return IL2CPP_STRING("회전 제한 최대값");
+			}
+			if (isEng)
+			{
+				return IL2CPP_STRING("Rotation limit maximum value");
+			}
+			if (isZhHant)
+			{
+				return IL2CPP_STRING("旋轉限制最大值");
+			}
+			return IL2CPP_STRING("回転制限の最大値");
+		}
+
 		if (id == "graphics")
 		{
 			if (isKor)
