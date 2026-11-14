@@ -455,6 +455,8 @@ namespace Localify
 
 				AddOrSet(configDocument, IL2CPP_STRING("characterSystemTextCaptionBackgroundAlpha"), UIParts::GetOptionSliderValue("character_system_text_caption_background_alpha") / 100);
 
+				AddOrSet(configDocument, IL2CPP_STRING("removeHeadDecorationsOnCommonOutfit"), UIParts::GetOptionItemOnOffIsOn("remove_head_decorations_on_common_outfit"));
+
 				AddOrSet(configDocument, IL2CPP_STRING("liveSliderAlwaysShow"), UIParts::GetOptionItemOnOffIsOn("live_slider_always_show"));
 
 				AddOrSet(configDocument, IL2CPP_STRING("livePlaybackLoop"), UIParts::GetOptionItemOnOffIsOn("live_playback_loop"));
@@ -563,6 +565,8 @@ namespace Localify
 				{
 					config::character_system_text_caption_outline_color = configDocument[IL2CPP_STRING("characterSystemTextCaptionOutlineColor")].GetString();
 				}
+
+				config::remove_head_decorations_on_common_outfit = configDocument[IL2CPP_STRING("removeHeadDecorationsOnCommonOutfit")].GetBool();
 
 				config::live_slider_always_show = configDocument[IL2CPP_STRING("liveSliderAlwaysShow")].GetBool();
 
@@ -800,6 +804,7 @@ namespace Localify
 		il2cppstring characterSystemTextCaptionFontColor = IL2CPP_STRING("White");
 		il2cppstring characterSystemTextCaptionOutlineSize = IL2CPP_STRING("L");
 		il2cppstring characterSystemTextCaptionOutlineColor = IL2CPP_STRING("Brown");
+		bool removeHeadDecorationsOnCommonOutfit = false;
 		bool allowDeleteCookie = false;
 		int cySpringUpdateMode = -1;
 		bool cySpringDisableNative = false;
@@ -921,6 +926,11 @@ namespace Localify
 			if (configDocument.HasMember(IL2CPP_STRING("characterSystemTextCaptionOutlineColor")))
 			{
 				characterSystemTextCaptionOutlineColor = configDocument[IL2CPP_STRING("characterSystemTextCaptionOutlineColor")].GetString();
+			}
+
+			if (configDocument.HasMember(IL2CPP_STRING("removeHeadDecorationsOnCommonOutfit")))
+			{
+				removeHeadDecorationsOnCommonOutfit = configDocument[IL2CPP_STRING("removeHeadDecorationsOnCommonOutfit")].GetBool();
 			}
 
 			if (configDocument.HasMember(IL2CPP_STRING("allowDeleteCookie")))
@@ -1408,6 +1418,8 @@ namespace Localify
 					Gallop::Localize::Get(GetTextIdByName(IL2CPP_STRING("Circle0206")))->chars),
 				UIParts::GetOptionItemButton("show_caption", LocalifySettings::GetText("show_caption")),
 				UIParts::GetOptionItemAttention(LocalifySettings::GetText("applied_after_restart")),
+				UIParts::GetOptionItemTitle(Gallop::Localize::Get(GetTextIdByName(IL2CPP_STRING("Outgame0028")))->chars),
+				UIParts::GetOptionItemOnOff("remove_head_decorations_on_common_outfit", LocalifySettings::GetText("remove_head_decorations_on_common_outfit")),
 				UIParts::GetOptionItemTitle(Gallop::Localize::Get(GetTextIdByName(IL2CPP_STRING("Home0036")))->chars),
 				UIParts::GetToggleOptionSeason("home_bg_override_bg_season", homeBgOverrideBgSeason,
 					*[](Il2CppObject* toggle, int value)
@@ -2033,6 +2045,11 @@ namespace Localify
 						UIParts::GetTextCommon(name.data()).OutlineColor(value.data());
 					}
 				);
+			})
+		);
+
+		UIParts::SetOptionItemOnOffAction("remove_head_decorations_on_common_outfit", removeHeadDecorationsOnCommonOutfit, *([](Il2CppObject*, bool isOn)
+			{
 			})
 		);
 

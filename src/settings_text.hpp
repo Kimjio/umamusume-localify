@@ -341,6 +341,23 @@ namespace LocalifySettings
 			return IL2CPP_STRING("サンプル字幕");
 		}
 
+		if (id == "remove_head_decorations_on_common_outfit")
+		{
+			if (isKor)
+			{
+				return IL2CPP_STRING("공통 의상 착용 시 머리 장식 제거");
+			}
+			if (isEng)
+			{
+				return IL2CPP_STRING("Remove head decorations when wearing common outfit");
+			}
+			if (isZhHant)
+			{
+				return IL2CPP_STRING("穿著共通服裝時移除頭部裝飾");
+			}
+			return IL2CPP_STRING("共通衣装着用時に頭部装飾を削除");
+		}
+
 		if (id == "champions_live_show_text")
 		{
 			if (isKor)

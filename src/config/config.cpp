@@ -68,6 +68,7 @@ namespace config
 	float character_system_text_caption_background_alpha = 0;
 	float character_system_text_caption_position_x = 0;
 	float character_system_text_caption_position_y = -3;
+	bool remove_head_decorations_on_common_outfit = false;
 	bool champions_live_show_text = false;
 	int champions_live_resource_id = 1;
 	int champions_live_year = 2022;
@@ -402,6 +403,8 @@ if (document.HasMember(IL2CPP_STRING(_name_)) && document[IL2CPP_STRING(_name_)]
 			GetValue("liveSliderAlwaysShow", Bool, live_slider_always_show);
 
 			GetValue("livePlaybackLoop", Bool, live_playback_loop);
+
+			GetValue("removeHeadDecorationsOnCommonOutfit", Bool, remove_head_decorations_on_common_outfit);
 
 			GetValue("championsLiveShowText", Bool, champions_live_show_text);
 

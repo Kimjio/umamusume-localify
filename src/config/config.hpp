@@ -91,6 +91,7 @@ namespace config
 	extern float character_system_text_caption_background_alpha;
 	extern float character_system_text_caption_position_x;
 	extern float character_system_text_caption_position_y;
+	extern bool remove_head_decorations_on_common_outfit;
 	extern bool champions_live_show_text;
 	extern int champions_live_resource_id;
 	extern int champions_live_year;
