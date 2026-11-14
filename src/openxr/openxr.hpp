@@ -227,12 +227,35 @@ namespace Unity
 				Depth24Bit
 			};
 
+			enum SpaceWarpMotionVectorTextureFormat
+			{
+				RGBA16f,
+				RG16f
+			};
+			
+			enum ColorSubmissionModeGroup
+			{
+				kRenderTextureFormatGroup8888,
+				kRenderTextureFormatGroup1010102_Float,
+				kRenderTextureFormatGroup16161616_Float,
+				kRenderTextureFormatGroup565,
+				kRenderTextureFormatGroup111110_Float
+			};
+
 			static void ApplyRenderSettings();
 
 		private:
 			static void Internal_SetRenderMode(RenderMode renderMode);
 
 			static void Internal_SetDepthSubmissionMode(DepthSubmissionMode depthSubmissionMode);
+
+			static void Internal_SetSpaceWarpMotionVectorTextureFormat(SpaceWarpMotionVectorTextureFormat spaceWarpMotionVectorTextureFormat);
+
+			static void Internal_SetSymmetricProjection(bool enabled);
+
+			static void Internal_SetOptimizeBufferDiscards(bool enabled);
+
+			static void Internal_SetColorSubmissionModes(Il2CppArraySize_t<int>* colorSubmissionMode, int arraySize);
 		};
 
 		typedef void (*ReceiveNativeEventDelegate)(Unity::OpenXR::Feature::NativeEvent, ULONG payload);

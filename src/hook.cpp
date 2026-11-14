@@ -14,8 +14,6 @@
 #include "discord/core.h"
 #include "discord/activity_manager.h"
 
-#include "unity/IUnityInterface.h"
-
 #include "openxr/openxr.hpp"
 
 #include "rich_presence.hpp"
@@ -169,6 +167,17 @@ namespace
 		il2cpp_symbols::init_defaults();
 		il2cpp_symbols::call_init_callbacks();
 
+		auto handler = CreateDelegateWithClassStatic(il2cpp_symbols::get_class("mscorlib.dll", "System", "UnhandledExceptionEventHandler"),
+			*[](void*, Il2CppObject* sender, Il2CppObject* e)
+			{
+				auto ex = il2cpp_symbols::get_method_pointer<Il2CppException * (*)(Il2CppObject*)>(e->klass, "get_ExceptionObject", 0)(e);
+				wcout << "Unhandled exception: " << ex->message->chars << endl;
+				PrintStackTrace();
+			}
+		);
+
+		il2cpp_symbols::get_method_pointer<void (*)(Il2CppAppDomain*, Il2CppDelegate*)>(il2cpp_defaults.appdomain_class, "add_UnhandledException", 1)(il2cpp_domain_get()->domain, &handler->delegate);
+
 		il2cpp_symbols::late_init_callbacks.emplace_back(patch_game_assembly);
 
 		il2cpp_runtime_class_init(il2cpp_symbols::get_class("UnityEngine.SubsystemsModule.dll", "UnityEngine", "SubsystemManager"));
@@ -261,8 +270,6 @@ namespace
 		return reinterpret_cast<decltype(LoadLibraryExW)*>(LoadLibraryExW_orig)(lpLibFileName, hFile, dwFlags);
 	}
 
-	IUnityInterfaces* unityInterfaces;
-
 	void* UnityPluginLoad_orig = nullptr;
 	void UnityPluginLoad_hook(IUnityInterfaces* unityInterfaces)
 	{
@@ -271,8 +278,7 @@ namespace
 		::unityInterfaces = unityInterfaces;
 		Unity::OpenXR::UnityPluginLoad(unityInterfaces);
 
-		Unity::OpenXR::DiagnosticReport::StartReport();
-		Unity::OpenXR::Init();
+		// Unity::OpenXR::Init();
 		// Unity::OpenXR::Start();
 	}
 
@@ -407,7 +413,7 @@ namespace
 			return il2cpp;
 		}
 
-		/*static bool criWareInit = false;
+		static bool criWareInit = false;
 		if (lpLibFileName == L"cri_ware_unity.dll"s && !criWareInit)
 		{
 			criWareInit = true;
@@ -418,7 +424,7 @@ namespace
 			MH_CreateHook(UnityPluginLoad_addr, UnityPluginLoad_hook, &UnityPluginLoad_orig);
 			MH_EnableHook(UnityPluginLoad_addr);
 			return module;
-		}*/
+		}
 
 		if (lpLibFileName == L"UnityOpenXR.dll"s)
 		{

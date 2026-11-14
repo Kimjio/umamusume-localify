@@ -444,6 +444,8 @@ namespace Unity
 			}
 		}
 
+		DiagnosticReport::StartReport();
+
 		Internal_SetSuccessfullyInitialized(false);
 
 		if (!Internal_LoadOpenXRLibrary(L"openxr_loader"))
@@ -466,6 +468,11 @@ namespace Unity
 
 		Settings::ApplyRenderSettings();
 
+		/*if (auto id = il2cpp_resolve_icall_type<Il2CppString * (*)(int)>("UnityEngine::SubsystemDescriptorBindings::GetId()")(0))
+		{
+			wcout << "SubsystemDescriptorBindings::GetId(0) " << id->chars << endl;
+		}*/
+
 		auto SubsystemDescriptorStore = il2cpp_symbols::get_class("UnityEngine.SubsystemsModule.dll", "UnityEngine.SubsystemsImplementation", "SubsystemDescriptorStore");
 
 		auto s_IntegratedDescriptorsField = il2cpp_class_get_field_from_name(SubsystemDescriptorStore, "s_IntegratedDescriptors");
@@ -484,6 +491,8 @@ namespace Unity
 		Il2CppArraySize_t<Il2CppObject*>* arr;
 		il2cpp_field_get_value(s_IntegratedDescriptors, itemsField, &arr);
 		cout << "s_IntegratedDescriptors _items " << arr->max_length << endl;
+
+		il2cpp_resolve_icall_type<void (*)(Il2CppString*)>("UnityEngine.SubsystemsImplementation.SubsystemDescriptorStore::ReportSingleSubsystemAnalytics")(il2cpp_string_new("OpenXR Display"));
 
 		if (arr)
 		{
@@ -983,6 +992,46 @@ namespace Unity
 		reinterpret_cast<decltype(Internal_SetDepthSubmissionMode)*>(GetProcAddress(module, "NativeConfig_SetDepthSubmissionMode"))(depthSubmissionMode);
 	}
 
+	void OpenXR::Settings::Internal_SetSpaceWarpMotionVectorTextureFormat(SpaceWarpMotionVectorTextureFormat spaceWarpMotionVectorTextureFormat)
+	{
+		if (!module)
+		{
+			return;
+		}
+
+		reinterpret_cast<decltype(Internal_SetSpaceWarpMotionVectorTextureFormat)*>(GetProcAddress(module, "NativeConfig_SetSpaceWarpMotionVectorTextureFormat"))(spaceWarpMotionVectorTextureFormat);
+	}
+
+	void OpenXR::Settings::Internal_SetSymmetricProjection(bool enabled)
+	{
+		if (!module)
+		{
+			return;
+		}
+
+		reinterpret_cast<decltype(Internal_SetSymmetricProjection)*>(GetProcAddress(module, "NativeConfig_SetSymmetricProjection"))(enabled);
+	}
+
+	void OpenXR::Settings::Internal_SetOptimizeBufferDiscards(bool enabled)
+	{
+		if (!module)
+		{
+			return;
+		}
+
+		reinterpret_cast<decltype(Internal_SetOptimizeBufferDiscards)*>(GetProcAddress(module, "NativeConfig_SetOptimizeBufferDiscards"))(enabled);
+	}
+
+	void OpenXR::Settings::Internal_SetColorSubmissionModes(Il2CppArraySize_t<int>* colorSubmissionMode, int arraySize)
+	{
+		if (!module)
+		{
+			return;
+		}
+
+		reinterpret_cast<decltype(Internal_SetColorSubmissionModes)*>(GetProcAddress(module, "NativeConfig_SetColorSubmissionModes"))(colorSubmissionMode, arraySize);
+	}
+
 	uint64_t OpenXR::Input::Internal_RegisterDeviceDefinition(const char* userPath, const char* interactionProfile, uint32_t characteristics, const char* name, const char* manufacturer, const char* serialNumber)
 	{
 		if (!module)
@@ -1040,8 +1089,15 @@ namespace Unity
 			return;
 		}
 
-		OpenXR::Settings::Internal_SetRenderMode(OpenXR::Settings::RenderMode::MultiPass);
-		OpenXR::Settings::Internal_SetDepthSubmissionMode(OpenXR::Settings::DepthSubmissionMode::Depth24Bit);
+		OpenXR::Settings::Internal_SetSymmetricProjection(true);
+		OpenXR::Settings::Internal_SetRenderMode(RenderMode::MultiPass);
+		auto array = il2cpp_array_new_type<int>(il2cpp_defaults.int32_class, 1);
+		auto value = ColorSubmissionModeGroup::kRenderTextureFormatGroup8888;
+		il2cpp_array_setref_type(array, int, 0, value);
+		OpenXR::Settings::Internal_SetColorSubmissionModes(array, array->max_length);
+		OpenXR::Settings::Internal_SetDepthSubmissionMode(DepthSubmissionMode::Depth24Bit);
+		OpenXR::Settings::Internal_SetSpaceWarpMotionVectorTextureFormat(SpaceWarpMotionVectorTextureFormat::RGBA16f);
+		OpenXR::Settings::Internal_SetOptimizeBufferDiscards(true);
 	}
 
 	/*
