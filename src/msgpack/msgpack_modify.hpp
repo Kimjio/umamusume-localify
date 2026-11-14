@@ -249,6 +249,11 @@ namespace MsgPackModify
 				{
 					MsgPack::object object = parsed.object_items();
 
+					if (object.contains("exec_auto_play_plan_id"))
+					{
+						object["exec_auto_play_plan_id"] = 0;
+					}
+
 					if (object.contains("single_mode_exec_command_request_common") && object["single_mode_exec_command_request_common"].is_object())
 					{
 						MsgPack::object single_mode_exec_command_request_common = object["single_mode_exec_command_request_common"].object_items();
