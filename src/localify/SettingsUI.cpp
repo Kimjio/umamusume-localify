@@ -516,6 +516,8 @@ namespace Localify
 				AddOrSet(configDocument, IL2CPP_STRING("freeFormWindowIncludeCaptionBarPadding"), UIParts::GetOptionItemOnOffIsOn("freeform_window_include_caption_bar_padding"));
 #endif
 
+				AddOrSet(configDocument, IL2CPP_STRING("freeFormWindowAutoUiScale"), UIParts::GetOptionItemOnOffIsOn("freeform_window_auto_ui_scale"));
+
 #ifdef _MSC_VER
 				AddOrSet(configDocument, IL2CPP_STRING("taskbarShowProgressOnDownload"), UIParts::GetOptionItemOnOffIsOn("taskbar_show_progress_on_download"));
 
@@ -618,6 +620,8 @@ namespace Localify
 #ifdef __ANDROID__
                 config::freeform_window_include_caption_bar_padding = configDocument[IL2CPP_STRING("freeFormWindowIncludeCaptionBarPadding")].GetBool();
 #endif
+
+				config::freeform_window_auto_ui_scale = configDocument[IL2CPP_STRING("freeFormWindowAutoUiScale")].GetBool();
 
 				config::home_bg_override_bg_season = configDocument[IL2CPP_STRING("homeBgOverrideBgSeason")].GetInt();
 
@@ -807,9 +811,10 @@ namespace Localify
 		bool unlockSize = false;
 		float uiScale = 1;
 		bool freeFormWindow = false;
-		bool freeFormWindowIncludeCaptionBarPadding = false;
 		float freeFormUiScalePortrait = .5f;
 		float freeFormUiScaleLandscape = .5f;
+		bool freeFormWindowIncludeCaptionBarPadding = false;
+		bool freeFormWindowAutoUiScale = false;
 
 		string championsResourceText;
 		int championsLiveResourceIndex = -1;
@@ -1026,13 +1031,6 @@ namespace Localify
 				freeFormWindow = configDocument[IL2CPP_STRING("freeFormWindow")].GetBool();
 			}
 
-#ifdef __ANDROID__
-			if (configDocument.HasMember(IL2CPP_STRING("freeFormWindowIncludeCaptionBarPadding")))
-			{
-				freeFormWindowIncludeCaptionBarPadding = configDocument[IL2CPP_STRING("freeFormWindowIncludeCaptionBarPadding")].GetBool();
-			}
-#endif
-
 			if (configDocument.HasMember(IL2CPP_STRING("freeFormUiScalePortrait")))
 			{
 				freeFormUiScalePortrait = configDocument[IL2CPP_STRING("freeFormUiScalePortrait")].GetFloat();
@@ -1041,6 +1039,18 @@ namespace Localify
 			if (configDocument.HasMember(IL2CPP_STRING("freeFormUiScaleLandscape")))
 			{
 				freeFormUiScaleLandscape = configDocument[IL2CPP_STRING("freeFormUiScaleLandscape")].GetFloat();
+			}
+
+#ifdef __ANDROID__
+			if (configDocument.HasMember(IL2CPP_STRING("freeFormWindowIncludeCaptionBarPadding")))
+			{
+				freeFormWindowIncludeCaptionBarPadding = configDocument[IL2CPP_STRING("freeFormWindowIncludeCaptionBarPadding")].GetBool();
+			}
+#endif
+
+			if (configDocument.HasMember(IL2CPP_STRING("freeFormWindowAutoUiScale")))
+			{
+				freeFormWindowAutoUiScale = configDocument[IL2CPP_STRING("freeFormWindowAutoUiScale")].GetBool();
 			}
 
 			if (configDocument.HasMember(IL2CPP_STRING("championsLiveResourceId")))
@@ -1243,6 +1253,7 @@ namespace Localify
 #ifdef __ANDROID__
 				UIParts::GetOptionItemOnOff("freeform_window_include_caption_bar_padding", LocalifySettings::GetText("freeform_window_include_caption_bar_padding")),
 #endif
+				UIParts::GetOptionItemOnOff("freeform_window_auto_ui_scale", LocalifySettings::GetText("freeform_window_auto_ui_scale")),
 				UIParts::GetOptionItemTitle(Gallop::Localize::Get(GetTextIdByName(IL2CPP_STRING("Common0035")))->chars),
 				UIParts::GetOptionItemOnOff("live_slider_always_show", LocalifySettings::GetText("live_slider_always_show")),
 				UIParts::GetOptionItemOnOff("live_playback_loop", LocalifySettings::GetText("live_playback_loop")),
@@ -1605,6 +1616,11 @@ namespace Localify
 			})
 		);
 #endif
+
+		UIParts::SetOptionItemOnOffAction("freeform_window_auto_ui_scale", freeFormWindowAutoUiScale, *([](Il2CppObject*, bool isOn)
+			{
+			})
+		);
 
 		UIParts::SetOptionItemOnOffAction("unlock_live_chara", unlockLiveChara, *([](Il2CppObject*, bool isOn)
 			{

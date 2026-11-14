@@ -95,9 +95,6 @@ namespace
 	Il2CppMethodPointer CreateHeader_addr = nullptr;
 	void* CreateHeader_orig = nullptr;
 #endif
-
-	float ratio_vertical = 0.5625f;
-	float ratio_horizontal = 1.7777778f;
 }
 
 static Rect GetDeviceSafeArea_hook(Il2CppObject* self)
@@ -541,67 +538,67 @@ namespace Gallop
 		}
 
 		auto scaleMode = il2cpp_symbols::get_method_pointer<int (*)(Il2CppObject*)>(canvasScaler->klass, "get_uiScaleMode", 0)(canvasScaler);
-
+		
+		float scale;
 		if (config::freeform_window)
 		{
-			if (scaleMode == 1)
+			if (width < height)
 			{
-				if (width < height)
+				if (config::freeform_window_auto_ui_scale)
 				{
-					float scale = min(config::freeform_ui_scale_portrait, max(1.0f, static_cast<float>(height) * ratio_vertical) * config::freeform_ui_scale_portrait);
-					il2cpp_symbols::get_method_pointer<void (*)(Il2CppObject*, Vector2)>(canvasScaler->klass, "set_referenceResolution", 1)(canvasScaler, Vector2{ static_cast<float>(width / scale), static_cast<float>(height / scale) });
+					const auto ratio = UnityEngine::Screen::width() / static_cast<float>(UnityEngine::Screen::height());
+
+					if (ratio > ratio_3_4)
+					{
+						scale = UnityEngine::Screen::width() * ratio_4_3 / 2560.0f;
+					}
+					else if (ratio > ratio_9_16)
+					{
+						scale = UnityEngine::Screen::width() * ratio_4_3 / 1920.0f;
+					}
+					else
+					{
+						scale = UnityEngine::Screen::width() * ratio_16_9 / 1920.0f;
+					}
 				}
 				else
 				{
-					float scale = min(config::freeform_ui_scale_landscape, max(1.0f, static_cast<float>(width) / ratio_horizontal) * config::freeform_ui_scale_landscape);
-					il2cpp_symbols::get_method_pointer<void (*)(Il2CppObject*, Vector2)>(canvasScaler->klass, "set_referenceResolution", 1)(canvasScaler, Vector2{ static_cast<float>(width / scale), static_cast<float>(height / scale) });
-
+					scale = min(config::freeform_ui_scale_portrait, max(1.0f, static_cast<float>(height) * config::runtime::ratioVertical) * config::freeform_ui_scale_portrait);
 				}
 			}
-
-			if (scaleMode == 0)
+			else
 			{
-				if (width < height)
+				if (config::freeform_window_auto_ui_scale)
 				{
-					float scale = min(config::freeform_ui_scale_portrait, max(1.0f, static_cast<float>(height) * ratio_vertical) * config::freeform_ui_scale_portrait);
-					il2cpp_symbols::get_method_pointer<void (*)(Il2CppObject*, float)>(canvasScaler->klass, "set_scaleFactor", 1)(canvasScaler, scale);
+					scale = UnityEngine::Screen::height() * ratio_3_4 / 1440.0f;
 				}
 				else
 				{
-					float scale = min(config::freeform_ui_scale_landscape, max(1.0f, static_cast<float>(width) / ratio_horizontal) * config::freeform_ui_scale_landscape);
-					il2cpp_symbols::get_method_pointer<void (*)(Il2CppObject*, float)>(canvasScaler->klass, "set_scaleFactor", 1)(canvasScaler, scale);
+					scale = min(config::freeform_ui_scale_landscape, max(1.0f, static_cast<float>(width) / config::runtime::ratioHorizontal) * config::freeform_ui_scale_landscape);
 				}
 			}
 		}
 		else
 		{
-			if (scaleMode == 1)
+			if (width < height)
 			{
-				if (width < height)
-				{
-					float scale = min(config::ui_scale, max(1.0f, static_cast<float>(height) * ratio_vertical) * config::ui_scale);
-					il2cpp_symbols::get_method_pointer<void (*)(Il2CppObject*, Vector2)>(canvasScaler->klass, "set_referenceResolution", 1)(canvasScaler, Vector2{ static_cast<float>(width / scale), static_cast<float>(height / scale) });
-				}
-				else
-				{
-					float scale = min(config::ui_scale, max(1.0f, static_cast<float>(width) / ratio_horizontal) * config::ui_scale);
-					il2cpp_symbols::get_method_pointer<void (*)(Il2CppObject*, Vector2)>(canvasScaler->klass, "set_referenceResolution", 1)(canvasScaler, Vector2{ static_cast<float>(width / scale), static_cast<float>(height / scale) });
-				}
+				scale = min(config::ui_scale, max(1.0f, static_cast<float>(height) * config::runtime::ratioVertical) * config::ui_scale);
 			}
-			if (scaleMode == 0)
+			else
 			{
-				// set scale factor to make ui bigger on hi-res screen
-				if (width < height)
-				{
-					float scale = min(config::ui_scale, max(1.0f, static_cast<float>(height) * ratio_vertical) * config::ui_scale);
-					il2cpp_symbols::get_method_pointer<void (*)(Il2CppObject*, float)>(canvasScaler->klass, "set_scaleFactor", 1)(canvasScaler, scale);
-				}
-				else
-				{
-					float scale = min(config::ui_scale, max(1.0f, static_cast<float>(width) / ratio_horizontal) * config::ui_scale);
-					il2cpp_symbols::get_method_pointer<void (*)(Il2CppObject*, float)>(canvasScaler->klass, "set_scaleFactor", 1)(canvasScaler, scale);
-				}
+				scale = min(config::ui_scale, max(1.0f, static_cast<float>(width) / config::runtime::ratioHorizontal) * config::ui_scale);
 			}
+		}
+
+		// set scale factor to make ui bigger on hi-res screen
+		if (scaleMode == 1)
+		{
+			il2cpp_symbols::get_method_pointer<void (*)(Il2CppObject*, Vector2)>(canvasScaler->klass, "set_referenceResolution", 1)(canvasScaler, Vector2{ static_cast<float>(width / scale), static_cast<float>(height / scale) });
+		}
+
+		if (scaleMode == 0)
+		{
+			il2cpp_symbols::get_method_pointer<void (*)(Il2CppObject*, float)>(canvasScaler->klass, "set_scaleFactor", 1)(canvasScaler, scale);
 		}
 	}
 

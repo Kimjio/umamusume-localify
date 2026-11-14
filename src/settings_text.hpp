@@ -890,6 +890,23 @@ namespace LocalifySettings
 			return IL2CPP_STRING("自由形式ウィンドウキャプションバーのパディングを含む");
 		}
 
+		if (id == "freeform_window_auto_ui_scale")
+		{
+			if (isKor)
+			{
+				return IL2CPP_STRING("자유 형식 창 자동 UI 스케일");
+			}
+			if (isEng)
+			{
+				return IL2CPP_STRING("Free-form window auto UI scale");
+			}
+			if (isZhHant)
+			{
+				return IL2CPP_STRING("自由格式視窗自動UI縮放");
+			}
+			return IL2CPP_STRING("自由形式ウィンドウ自動UIスケール");
+		}
+
 		if (id == "ui_scale_portrait")
 		{
 			if (isKor)
@@ -1116,6 +1133,6 @@ namespace LocalifySettings
 			return IL2CPP_STRING("不明");
 		}
 
-		return IL2CPP_STRING("");
+		return u8_il2cpp(id).data();
 	}
 }

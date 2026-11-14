@@ -33,6 +33,7 @@ namespace config
 #endif
 	float freeform_ui_scale_landscape = .5f;
 	bool freeform_window_include_caption_bar_padding = false;
+	bool freeform_window_auto_ui_scale = false;
 	int initial_width = -1;
 	int initial_height = -1;
 	float ui_animation_scale = 1.f;
@@ -239,6 +240,8 @@ if (document.HasMember(IL2CPP_STRING(_name_)) && document[IL2CPP_STRING(_name_)]
 				});
 
 			GetValue("freeFormWindowIncludeCaptionBarPadding", Bool, freeform_window_include_caption_bar_padding);
+
+			GetValue("freeFormWindowAutoUiScale", Bool, freeform_window_auto_ui_scale);
 
 			GetValue("initialWidth", Int, initial_width,
 				{

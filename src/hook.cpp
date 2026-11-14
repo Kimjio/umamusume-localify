@@ -1304,6 +1304,43 @@ namespace
 							canvasScalerList = UnityEngine::Object::FindObjectsByType(
 								GetRuntimeType("UnityEngine.UI.dll", "UnityEngine.UI", "CanvasScaler"), UnityEngine::FindObjectsInactive::Include, UnityEngine::FindObjectsSortMode::None);
 
+							float scale;
+							if (isPortrait)
+							{
+								if (config::freeform_window_auto_ui_scale)
+								{
+									const auto ratio = UnityEngine::Screen::width() / static_cast<float>(UnityEngine::Screen::height());
+
+									if (ratio > ratio_3_4)
+									{
+										scale = UnityEngine::Screen::width() * ratio_4_3 / 2560.0f;
+									}
+									else if (ratio > ratio_9_16)
+									{
+										scale = UnityEngine::Screen::width() * ratio_4_3 / 1920.0f;
+									}
+									else
+									{
+										scale = UnityEngine::Screen::width() * ratio_16_9 / 1920.0f;
+									}
+								}
+								else
+								{
+									scale = min(config::freeform_ui_scale_portrait, max(1.0f, contentHeight * config::runtime::ratioVertical) * config::freeform_ui_scale_portrait);
+								}
+							}
+							else
+							{
+								if (config::freeform_window_auto_ui_scale)
+								{
+									scale = UnityEngine::Screen::height() * ratio_3_4 / 1440.0f;
+								}
+								else
+								{
+									scale = min(config::freeform_ui_scale_landscape, max(1.0f, contentWidth / config::runtime::ratioHorizontal) * config::freeform_ui_scale_landscape);
+								}
+							}
+
 							for (int i = 0; i < canvasScalerList->max_length; i++)
 							{
 								auto canvasScaler = canvasScalerList->vector[i];
@@ -1321,33 +1358,15 @@ namespace
 
 									if (scaleMode == 1)
 									{
-										if (isPortrait)
-										{
-											float scale = min(config::freeform_ui_scale_portrait, max(1.0f, contentHeight * config::runtime::ratioVertical) * config::freeform_ui_scale_portrait);
 											il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, UnityEngine::Vector2)>(canvasScaler->klass, "set_referenceResolution", 1)->methodPointer(canvasScaler, UnityEngine::Vector2{ static_cast<float>(contentWidth / scale), static_cast<float>(contentHeight / scale) });
 										}
-										else
-										{
-											float scale = min(config::freeform_ui_scale_landscape, max(1.0f, contentWidth / config::runtime::ratioHorizontal) * config::freeform_ui_scale_landscape);
-											il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, UnityEngine::Vector2)>(canvasScaler->klass, "set_referenceResolution", 1)->methodPointer(canvasScaler, UnityEngine::Vector2{ static_cast<float>(contentWidth / scale), static_cast<float>(contentHeight / scale) });
-										}
-									}
 
 									if (scaleMode == 0)
 									{
-										if (isPortrait)
-										{
-											float scale = min(config::freeform_ui_scale_portrait, max(1.0f, contentHeight * config::runtime::ratioVertical) * config::freeform_ui_scale_portrait);
 											il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, float)>(canvasScaler->klass, "set_scaleFactor", 1)->methodPointer(canvasScaler, scale);
 										}
-										else
-										{
-											float scale = min(config::freeform_ui_scale_landscape, max(1.0f, contentWidth / config::runtime::ratioHorizontal) * config::freeform_ui_scale_landscape);
-											il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, float)>(canvasScaler->klass, "set_scaleFactor", 1)->methodPointer(canvasScaler, scale);
 										}
 									}
-								}
-							}
 
 							SetBGCanvasScalerSize();
 						}
@@ -1392,28 +1411,42 @@ namespace
 								{
 									il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, int)>(director, "SetupOrientation", 1)->methodPointer(director, isPortrait ? 2 : 1);
 
-									auto ChampionsTextControllerField = il2cpp_class_get_field_from_name(director, "ChampionsTextController");
-									Il2CppObject* ChampionsTextController;
-									il2cpp_field_get_value(director, ChampionsTextControllerField, &ChampionsTextController);
-
-									if (ChampionsTextController)
+									float scale;
+									if (_contentWidth < _contentHeight)
 									{
-										auto _flashPlayerField = il2cpp_class_get_field_from_name(ChampionsTextController->klass, "_flashPlayer");
-										Il2CppObject* _flashPlayer;
-										il2cpp_field_get_value(ChampionsTextController, _flashPlayerField, &_flashPlayer);
+										if (config::freeform_window_auto_ui_scale)
+										{
+											const auto ratio = UnityEngine::Screen::width() / static_cast<float>(UnityEngine::Screen::height());
 
-										auto root = il2cpp_class_get_method_from_name_type<Il2CppObject * (*)(Il2CppObject*)>(_flashPlayer->klass, "get_Root", 0)->methodPointer(_flashPlayer);
-
-										float scale = 1.0f;
-
-										if (_contentWidth < _contentHeight)
+											if (ratio > ratio_3_4)
+										{
+												scale = UnityEngine::Screen::width() * ratio_4_3 / 2560.0f;
+											}
+											else if (ratio > ratio_9_16)
+											{
+												scale = UnityEngine::Screen::width() * ratio_4_3 / 1920.0f;
+											}
+											else
+											{
+												scale = UnityEngine::Screen::width() * ratio_16_9 / 1920.0f;
+											}
+										}
+										else
 										{
 											scale = min(config::freeform_ui_scale_portrait, max(1.0f, _contentHeight * config::runtime::ratioVertical) * config::freeform_ui_scale_portrait);
+										}
+									}
+										else
+										{
+										if (config::freeform_window_auto_ui_scale)
+										{
+											scale = UnityEngine::Screen::height() * ratio_3_4 / 1440.0f;
 										}
 										else
 										{
 											scale = min(config::freeform_ui_scale_landscape, max(1.0f, _contentWidth / config::runtime::ratioHorizontal) * config::freeform_ui_scale_landscape);
 										}
+									}
 
 										float availableWidth = static_cast<float>(_contentWidth) / scale;
 										float availableHeight = static_cast<float>(_contentHeight) / scale;
@@ -1427,6 +1460,17 @@ namespace
 											height = width / ratio_16_9;
 										}
 
+									auto ChampionsTextControllerField = il2cpp_class_get_field_from_name(director, "ChampionsTextController");
+									Il2CppObject* ChampionsTextController;
+									il2cpp_field_get_value(director, ChampionsTextControllerField, &ChampionsTextController);
+
+									if (ChampionsTextController)
+									{
+										auto _flashPlayerField = il2cpp_class_get_field_from_name(ChampionsTextController->klass, "_flashPlayer");
+										Il2CppObject* _flashPlayer;
+										il2cpp_field_get_value(ChampionsTextController, _flashPlayerField, &_flashPlayer);
+
+										auto root = il2cpp_class_get_method_from_name_type<Il2CppObject * (*)(Il2CppObject*)>(_flashPlayer->klass, "get_Root", 0)->methodPointer(_flashPlayer);
 										il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, UnityEngine::Vector2)>(root->klass, "SetScreenReferenceSize", 1)->methodPointer(root, UnityEngine::Vector2{ width, height });
 									}
 
@@ -1443,30 +1487,6 @@ namespace
 											il2cpp_field_get_value(liveFlashController, _flashPlayerField, &_flashPlayer);
 
 											auto root = il2cpp_class_get_method_from_name_type<Il2CppObject * (*)(Il2CppObject*)>(_flashPlayer->klass, "get_Root", 0)->methodPointer(_flashPlayer);
-
-											float scale = 1.0f;
-
-											if (_contentWidth < _contentHeight)
-											{
-												scale = min(config::freeform_ui_scale_portrait, max(1.0f, _contentHeight * config::runtime::ratioVertical) * config::freeform_ui_scale_portrait);
-											}
-											else
-											{
-												scale = min(config::freeform_ui_scale_landscape, max(1.0f, _contentWidth / config::runtime::ratioHorizontal) * config::freeform_ui_scale_landscape);
-											}
-
-											float availableWidth = static_cast<float>(_contentWidth) / scale;
-											float availableHeight = static_cast<float>(_contentHeight) / scale;
-
-											float width = ratio_16_9 * availableHeight;
-											float height = availableHeight;
-
-											if (width > availableWidth)
-											{
-												width = availableWidth;
-												height = width / ratio_16_9;
-											}
-
 											il2cpp_class_get_method_from_name_type<void (*)(Il2CppObject*, UnityEngine::Vector2)>(root->klass, "SetScreenReferenceSize", 1)->methodPointer(root, UnityEngine::Vector2{ width, height });
 										}
 									}
