@@ -40,8 +40,9 @@ using namespace Microsoft::WRL::Wrappers;
 
 namespace DesktopNotificationManagerCompat
 {
-	HRESULT RegisterAUMID(const wchar_t* aumid, GUID clsid, const wchar_t* displayName, const wchar_t exePath[]);
-	HRESULT RegisterComServer(GUID clsid, const wchar_t exePath[]);
+	HRESULT RegisterAUMID(const wchar_t* aumid, GUID clsid, const wchar_t* displayName);
+	HRESULT RegisterTileCategory(const wchar_t* aumid, const wchar_t* exePath);
+	HRESULT RegisterComServer(GUID clsid, const wchar_t* exePath);
 	HRESULT EnsureRegistered();
 	wstring GetAppDataFolderIconPath(const wchar_t* amuid);
 
@@ -97,7 +98,9 @@ namespace DesktopNotificationManagerCompat
 
 		SaveIconToFile(hIcon, GetAppDataFolderIconPath(aumid).data(), 32);
 
-		RETURN_IF_FAILED(RegisterAUMID(aumid, clsid, displayName, exePath));
+		RETURN_IF_FAILED(RegisterAUMID(aumid, clsid, displayName));
+
+		RETURN_IF_FAILED(RegisterTileCategory(aumid, exePath));
 
 		// Register the COM server
 		RETURN_IF_FAILED(RegisterComServer(clsid, exePath));
@@ -125,7 +128,7 @@ namespace DesktopNotificationManagerCompat
 		return S_OK;
 	}
 
-	HRESULT RegisterAUMID(const wchar_t* aumid, GUID clsid, const wchar_t* displayName, const wchar_t exePath[])
+	HRESULT RegisterAUMID(const wchar_t* aumid, GUID clsid, const wchar_t* displayName)
 	{
 		// Turn the GUID into a string
 		OLECHAR* clsidOlechar;
@@ -190,7 +193,36 @@ namespace DesktopNotificationManagerCompat
 		return S_OK;
 	}
 
-	HRESULT RegisterComServer(GUID clsid, const wchar_t exePath[])
+	HRESULT RegisterTileCategory(const wchar_t* aumid, const wchar_t* exePath)
+	{
+		HKEY hKey;
+		if (HRESULT_FROM_WIN32(RegOpenKeyExW(
+			HKEY_CURRENT_USER,
+			LR"(Software\Microsoft\Windows\CurrentVersion\Start\TileProperties)",
+			0,
+			KEY_ALL_ACCESS,
+			&hKey) == S_OK))
+		{
+			wstring subKey = LR"(W~)"s + aumid;
+			
+			// Category 3: Game
+			DWORD category = 3;
+
+			RETURN_IF_FAILED(HRESULT_FROM_WIN32(RegSetKeyValueW(
+				hKey, subKey.c_str(), L"Category", REG_DWORD, &category, sizeof(DWORD))));
+
+			wstring subKeyModulePath = LR"(W~)"s + exePath;
+
+			RETURN_IF_FAILED(HRESULT_FROM_WIN32(RegSetKeyValueW(
+				hKey, subKeyModulePath.c_str(), L"Category", REG_DWORD, &category, sizeof(DWORD))));
+
+			RETURN_IF_FAILED(HRESULT_FROM_WIN32(RegCloseKey(hKey)));
+		}
+
+		return S_OK;
+	}
+
+	HRESULT RegisterComServer(GUID clsid, const wchar_t* exePath)
 	{
 		// Turn the GUID into a string
 		OLECHAR* clsidOlechar;
