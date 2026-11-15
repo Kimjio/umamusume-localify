@@ -647,7 +647,10 @@ namespace Localify
 
 				config::home_bg_override_time = configDocument[IL2CPP_STRING("homeBgOverrideTime")].GetInt();
 
-				config::home_bg_override_event_id = configDocument[IL2CPP_STRING("homeBgOverrideEventId")].GetInt();
+				if (configDocument.HasMember(IL2CPP_STRING("homeBgOverrideEventId")))
+				{
+					config::home_bg_override_event_id = configDocument[IL2CPP_STRING("homeBgOverrideEventId")].GetInt();
+				}
 
 #ifdef _MSC_VER
 				config::notification_tp = configDocument[IL2CPP_STRING("notificationTp")].GetBool();
