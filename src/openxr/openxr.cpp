@@ -468,11 +468,6 @@ namespace Unity
 
 		Settings::ApplyRenderSettings();
 
-		/*if (auto id = il2cpp_resolve_icall_type<Il2CppString * (*)(int)>("UnityEngine::SubsystemDescriptorBindings::GetId()")(0))
-		{
-			wcout << "SubsystemDescriptorBindings::GetId(0) " << id->chars << endl;
-		}*/
-
 		auto SubsystemDescriptorStore = il2cpp_symbols::get_class("UnityEngine.SubsystemsModule.dll", "UnityEngine.SubsystemsImplementation", "SubsystemDescriptorStore");
 
 		auto s_IntegratedDescriptorsField = il2cpp_class_get_field_from_name(SubsystemDescriptorStore, "s_IntegratedDescriptors");
