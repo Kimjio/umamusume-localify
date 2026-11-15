@@ -1554,97 +1554,6 @@ namespace Localify
 					il2cpp_symbols::get_method_pointer<void (*)(Il2CppObject*, bool)>(cySpringLegacyBehaviorToggle->klass, "SetOnInteractable", 1)(cySpringLegacyBehaviorToggle, !isOn);
 					il2cpp_symbols::get_method_pointer<void (*)(Il2CppObject*, Il2CppString*)>(cySpringLegacyBehaviorToggle->klass, "SetNotificationMessage", 1)(cySpringLegacyBehaviorToggle, isOn ? il2cpp_string_new16(LocalifySettings::GetText("cyspring_legacy_behavior_disabled")) : nullptr);
 				}
-
-				if (auto cySpringDragForceRateScaleSlider = UIParts::GetOptionSlider("cyspring_drag_force_rate_scale"))
-				{
-					il2cpp_symbols::get_method_pointer<void (*)(Il2CppObject*, bool)>(cySpringDragForceRateScaleSlider->klass, "set_interactable", 1)(cySpringDragForceRateScaleSlider, !isOn);
-
-					if (auto cySpringDragForceRateScaleSliderFillImageField = il2cpp_class_get_field_from_name(cySpringDragForceRateScaleSlider->klass, "m_FillImage"))
-					{
-						Il2CppObject* cySpringDragForceRateScaleSliderFillImage;
-						il2cpp_field_get_value(cySpringDragForceRateScaleSlider, cySpringDragForceRateScaleSliderFillImageField, &cySpringDragForceRateScaleSliderFillImage);
-
-						il2cpp_symbols::get_method_pointer<void (*)(Il2CppObject*, UnityEngine::Color)>(cySpringDragForceRateScaleSliderFillImage->klass, "set_color", 1)(cySpringDragForceRateScaleSliderFillImage, !isOn ? UnityEngine::Color::white() : UnityEngine::Color::gray());
-					}
-				}
-
-				if (auto cySpringStiffnessForceRateScaleSlider = UIParts::GetOptionSlider("cyspring_stiffness_force_rate_scale"))
-				{
-					il2cpp_symbols::get_method_pointer<void (*)(Il2CppObject*, bool)>(cySpringStiffnessForceRateScaleSlider->klass, "set_interactable", 1)(cySpringStiffnessForceRateScaleSlider, !isOn);
-
-					if (auto cySpringStiffnessForceRateScaleSliderFillImageField = il2cpp_class_get_field_from_name(cySpringStiffnessForceRateScaleSlider->klass, "m_FillImage"))
-					{
-						Il2CppObject* cySpringStiffnessForceRateScaleSliderFillImage;
-						il2cpp_field_get_value(cySpringStiffnessForceRateScaleSlider, cySpringStiffnessForceRateScaleSliderFillImageField, &cySpringStiffnessForceRateScaleSliderFillImage);
-
-						il2cpp_symbols::get_method_pointer<void (*)(Il2CppObject*, UnityEngine::Color)>(cySpringStiffnessForceRateScaleSliderFillImage->klass, "set_color", 1)(cySpringStiffnessForceRateScaleSliderFillImage, !isOn ? UnityEngine::Color::white() : UnityEngine::Color::gray());
-					}
-				}
-
-				if (auto cySpringMoveRateScaleSlider = UIParts::GetOptionSlider("cyspring_move_rate_scale"))
-				{
-					il2cpp_symbols::get_method_pointer<void (*)(Il2CppObject*, bool)>(cySpringMoveRateScaleSlider->klass, "set_interactable", 1)(cySpringMoveRateScaleSlider, !isOn);
-
-					if (auto cySpringMoveRateScaleSliderFillImageField = il2cpp_class_get_field_from_name(cySpringMoveRateScaleSlider->klass, "m_FillImage"))
-					{
-						Il2CppObject* cySpringMoveRateScaleSliderFillImage;
-						il2cpp_field_get_value(cySpringMoveRateScaleSlider, cySpringMoveRateScaleSliderFillImageField, &cySpringMoveRateScaleSliderFillImage);
-
-						il2cpp_symbols::get_method_pointer<void (*)(Il2CppObject*, UnityEngine::Color)>(cySpringMoveRateScaleSliderFillImage->klass, "set_color", 1)(cySpringMoveRateScaleSliderFillImage, !isOn ? UnityEngine::Color::white() : UnityEngine::Color::gray());
-					}
-				}
-
-				if (auto cySpringAddMoveRateScaleSlider = UIParts::GetOptionSlider("cyspring_add_move_rate_scale"))
-				{
-					il2cpp_symbols::get_method_pointer<void (*)(Il2CppObject*, bool)>(cySpringAddMoveRateScaleSlider->klass, "set_interactable", 1)(cySpringAddMoveRateScaleSlider, !isOn);
-
-					if (auto cySpringAddMoveRateScaleSliderFillImageField = il2cpp_class_get_field_from_name(cySpringAddMoveRateScaleSlider->klass, "m_FillImage"))
-					{
-						Il2CppObject* cySpringAddMoveRateScaleSliderFillImage;
-						il2cpp_field_get_value(cySpringAddMoveRateScaleSlider, cySpringAddMoveRateScaleSliderFillImageField, &cySpringAddMoveRateScaleSliderFillImage);
-
-						il2cpp_symbols::get_method_pointer<void (*)(Il2CppObject*, UnityEngine::Color)>(cySpringAddMoveRateScaleSliderFillImage->klass, "set_color", 1)(cySpringAddMoveRateScaleSliderFillImage, !isOn ? UnityEngine::Color::white() : UnityEngine::Color::gray());
-					}
-				}
-
-				if (auto cySpringGravityRateScaleSlider = UIParts::GetOptionSlider("cyspring_gravity_rate_scale"))
-				{
-					il2cpp_symbols::get_method_pointer<void (*)(Il2CppObject*, bool)>(cySpringGravityRateScaleSlider->klass, "set_interactable", 1)(cySpringGravityRateScaleSlider, !isOn);
-					if (auto cySpringGravityRateScaleSliderFillImageField = il2cpp_class_get_field_from_name(cySpringGravityRateScaleSlider->klass, "m_FillImage"))
-					{
-						Il2CppObject* cySpringGravityRateScaleSliderFillImage;
-						il2cpp_field_get_value(cySpringGravityRateScaleSlider, cySpringGravityRateScaleSliderFillImageField, &cySpringGravityRateScaleSliderFillImage);
-						il2cpp_symbols::get_method_pointer<void (*)(Il2CppObject*, UnityEngine::Color)>(cySpringGravityRateScaleSliderFillImage->klass, "set_color", 1)(cySpringGravityRateScaleSliderFillImage, !isOn ? UnityEngine::Color::white() : UnityEngine::Color::gray());
-					}
-				}
-
-				if (auto cySpringDisableLimitRotationToggle = UIParts::GetPartsOnOffToggleSwitch("cyspring_disable_limit_rotation"))
-				{
-					il2cpp_symbols::get_method_pointer<void (*)(Il2CppObject*, bool)>(cySpringDisableLimitRotationToggle->klass, "SetOnInteractable", 1)(cySpringDisableLimitRotationToggle, !isOn);
-					il2cpp_symbols::get_method_pointer<void (*)(Il2CppObject*, Il2CppString*)>(cySpringDisableLimitRotationToggle->klass, "SetNotificationMessage", 1)(cySpringDisableLimitRotationToggle, isOn ? il2cpp_string_new16(LocalifySettings::GetText("cyspring_disable_limit_rotation_disabled")) : nullptr);
-				}
-
-				if (auto cySpringLimitRotationMinScaleSlider = UIParts::GetOptionSlider("cyspring_limit_rotation_min_scale"))
-				{
-					il2cpp_symbols::get_method_pointer<void (*)(Il2CppObject*, bool)>(cySpringLimitRotationMinScaleSlider->klass, "set_interactable", 1)(cySpringLimitRotationMinScaleSlider, !isOn);
-					if (auto cySpringLimitRotationMinScaleSliderFillImageField = il2cpp_class_get_field_from_name(cySpringLimitRotationMinScaleSlider->klass, "m_FillImage"))
-					{
-						Il2CppObject* cySpringLimitRotationMinScaleSliderFillImage;
-						il2cpp_field_get_value(cySpringLimitRotationMinScaleSlider, cySpringLimitRotationMinScaleSliderFillImageField, &cySpringLimitRotationMinScaleSliderFillImage);
-						il2cpp_symbols::get_method_pointer<void (*)(Il2CppObject*, UnityEngine::Color)>(cySpringLimitRotationMinScaleSliderFillImage->klass, "set_color", 1)(cySpringLimitRotationMinScaleSliderFillImage, !isOn ? UnityEngine::Color::white() : UnityEngine::Color::gray());
-					}
-				}
-
-				if (auto cySpringLimitRotationMaxScaleSlider = UIParts::GetOptionSlider("cyspring_limit_rotation_max_scale"))
-				{
-					il2cpp_symbols::get_method_pointer<void (*)(Il2CppObject*, bool)>(cySpringLimitRotationMaxScaleSlider->klass, "set_interactable", 1)(cySpringLimitRotationMaxScaleSlider, !isOn);
-					if (auto cySpringLimitRotationMaxScaleSliderFillImageField = il2cpp_class_get_field_from_name(cySpringLimitRotationMaxScaleSlider->klass, "m_FillImage"))
-					{
-						Il2CppObject* cySpringLimitRotationMaxScaleSliderFillImage;
-						il2cpp_field_get_value(cySpringLimitRotationMaxScaleSlider, cySpringLimitRotationMaxScaleSliderFillImageField, &cySpringLimitRotationMaxScaleSliderFillImage);
-						il2cpp_symbols::get_method_pointer<void (*)(Il2CppObject*, UnityEngine::Color)>(cySpringLimitRotationMaxScaleSliderFillImage->klass, "set_color", 1)(cySpringLimitRotationMaxScaleSliderFillImage, !isOn ? UnityEngine::Color::white() : UnityEngine::Color::gray());
-					}
-				}
 			})
 		);
 
@@ -1659,58 +1568,6 @@ namespace Localify
 			il2cpp_symbols::get_method_pointer<void (*)(Il2CppObject*, Il2CppString*)>(cySpringMonoUncapFrameScaleToggle->klass, "SetNotificationMessage", 1)(cySpringMonoUncapFrameScaleToggle, !cySpringMonoUncapFrameScale ? il2cpp_string_new16(LocalifySettings::GetText("cyspring_mono_uncap_frame_scale_disabled")) : nullptr);
 		}
 
-		if (auto cySpringDragForceRateScaleSlider = UIParts::GetOptionSlider("cyspring_drag_force_rate_scale"))
-		{
-			il2cpp_symbols::get_method_pointer<void (*)(Il2CppObject*, bool)>(cySpringDragForceRateScaleSlider->klass, "set_interactable", 1)(cySpringDragForceRateScaleSlider, !cySpringDisableNative);
-
-			if (auto cySpringDragForceRateScaleSliderFillImageField = il2cpp_class_get_field_from_name(cySpringDragForceRateScaleSlider->klass, "m_FillImage"))
-			{
-				Il2CppObject* cySpringDragForceRateScaleSliderFillImage;
-				il2cpp_field_get_value(cySpringDragForceRateScaleSlider, cySpringDragForceRateScaleSliderFillImageField, &cySpringDragForceRateScaleSliderFillImage);
-
-				il2cpp_symbols::get_method_pointer<void (*)(Il2CppObject*, UnityEngine::Color)>(cySpringDragForceRateScaleSliderFillImage->klass, "set_color", 1)(cySpringDragForceRateScaleSliderFillImage, !cySpringDisableNative ? UnityEngine::Color::white() : UnityEngine::Color::gray());
-			}
-		}
-
-		if (auto cySpringStiffnessForceRateScaleSlider = UIParts::GetOptionSlider("cyspring_stiffness_force_rate_scale"))
-		{
-			il2cpp_symbols::get_method_pointer<void (*)(Il2CppObject*, bool)>(cySpringStiffnessForceRateScaleSlider->klass, "set_interactable", 1)(cySpringStiffnessForceRateScaleSlider, !cySpringDisableNative);
-
-			if (auto cySpringStiffnessForceRateScaleSliderFillImageField = il2cpp_class_get_field_from_name(cySpringStiffnessForceRateScaleSlider->klass, "m_FillImage"))
-			{
-				Il2CppObject* cySpringStiffnessForceRateScaleSliderFillImage;
-				il2cpp_field_get_value(cySpringStiffnessForceRateScaleSlider, cySpringStiffnessForceRateScaleSliderFillImageField, &cySpringStiffnessForceRateScaleSliderFillImage);
-
-				il2cpp_symbols::get_method_pointer<void (*)(Il2CppObject*, UnityEngine::Color)>(cySpringStiffnessForceRateScaleSliderFillImage->klass, "set_color", 1)(cySpringStiffnessForceRateScaleSliderFillImage, !cySpringDisableNative ? UnityEngine::Color::white() : UnityEngine::Color::gray());
-			}
-		}
-
-		if (auto cySpringMoveRateScaleSlider = UIParts::GetOptionSlider("cyspring_move_rate_scale"))
-		{
-			il2cpp_symbols::get_method_pointer<void (*)(Il2CppObject*, bool)>(cySpringMoveRateScaleSlider->klass, "set_interactable", 1)(cySpringMoveRateScaleSlider, !cySpringDisableNative);
-
-			if (auto cySpringMoveRateScaleSliderFillImageField = il2cpp_class_get_field_from_name(cySpringMoveRateScaleSlider->klass, "m_FillImage"))
-			{
-				Il2CppObject* cySpringMoveRateScaleSliderFillImage;
-				il2cpp_field_get_value(cySpringMoveRateScaleSlider, cySpringMoveRateScaleSliderFillImageField, &cySpringMoveRateScaleSliderFillImage);
-
-				il2cpp_symbols::get_method_pointer<void (*)(Il2CppObject*, UnityEngine::Color)>(cySpringMoveRateScaleSliderFillImage->klass, "set_color", 1)(cySpringMoveRateScaleSliderFillImage, !cySpringDisableNative ? UnityEngine::Color::white() : UnityEngine::Color::gray());
-			}
-		}
-
-		if (auto cySpringAddMoveRateScaleSlider = UIParts::GetOptionSlider("cyspring_add_move_rate_scale"))
-		{
-			il2cpp_symbols::get_method_pointer<void (*)(Il2CppObject*, bool)>(cySpringAddMoveRateScaleSlider->klass, "set_interactable", 1)(cySpringAddMoveRateScaleSlider, !cySpringDisableNative);
-
-			if (auto cySpringAddMoveRateScaleSliderFillImageField = il2cpp_class_get_field_from_name(cySpringAddMoveRateScaleSlider->klass, "m_FillImage"))
-			{
-				Il2CppObject* cySpringAddMoveRateScaleSliderFillImage;
-				il2cpp_field_get_value(cySpringAddMoveRateScaleSlider, cySpringAddMoveRateScaleSliderFillImageField, &cySpringAddMoveRateScaleSliderFillImage);
-
-				il2cpp_symbols::get_method_pointer<void (*)(Il2CppObject*, UnityEngine::Color)>(cySpringAddMoveRateScaleSliderFillImage->klass, "set_color", 1)(cySpringAddMoveRateScaleSliderFillImage, !cySpringDisableNative ? UnityEngine::Color::white() : UnityEngine::Color::gray());
-			}
-		}
-
 		UIParts::SetOptionItemOnOffAction("cyspring_legacy_behavior", cySpringLegacyBehavior, *([](Il2CppObject*, bool isOn)
 			{
 			})
@@ -1722,49 +1579,10 @@ namespace Localify
 			il2cpp_symbols::get_method_pointer<void (*)(Il2CppObject*, Il2CppString*)>(cySpringLegacyBehaviorToggle->klass, "SetNotificationMessage", 1)(cySpringLegacyBehaviorToggle, cySpringDisableNative ? il2cpp_string_new16(LocalifySettings::GetText("cyspring_legacy_behavior_disabled")) : nullptr);
 		}
 
-		if (auto cySpringGravityRateScaleSlider = UIParts::GetOptionSlider("cyspring_gravity_rate_scale"))
-		{
-			il2cpp_symbols::get_method_pointer<void (*)(Il2CppObject*, bool)>(cySpringGravityRateScaleSlider->klass, "set_interactable", 1)(cySpringGravityRateScaleSlider, !cySpringDisableNative);
-			if (auto cySpringGravityRateScaleSliderFillImageField = il2cpp_class_get_field_from_name(cySpringGravityRateScaleSlider->klass, "m_FillImage"))
-			{
-				Il2CppObject* cySpringGravityRateScaleSliderFillImage;
-				il2cpp_field_get_value(cySpringGravityRateScaleSlider, cySpringGravityRateScaleSliderFillImageField, &cySpringGravityRateScaleSliderFillImage);
-				il2cpp_symbols::get_method_pointer<void (*)(Il2CppObject*, UnityEngine::Color)>(cySpringGravityRateScaleSliderFillImage->klass, "set_color", 1)(cySpringGravityRateScaleSliderFillImage, !cySpringDisableNative ? UnityEngine::Color::white() : UnityEngine::Color::gray());
-			}
-		}
-
 		UIParts::SetOptionItemOnOffAction("cyspring_disable_limit_rotation", cySpringDisableLimitRotation, *([](Il2CppObject*, bool isOn)
 			{
 			})
 		);
-
-		if (auto cySpringDisableLimitRotationToggle = UIParts::GetPartsOnOffToggleSwitch("cyspring_disable_limit_rotation"))
-		{
-			il2cpp_symbols::get_method_pointer<void (*)(Il2CppObject*, bool)>(cySpringDisableLimitRotationToggle->klass, "SetOnInteractable", 1)(cySpringDisableLimitRotationToggle, !cySpringDisableNative);
-			il2cpp_symbols::get_method_pointer<void (*)(Il2CppObject*, Il2CppString*)>(cySpringDisableLimitRotationToggle->klass, "SetNotificationMessage", 1)(cySpringDisableLimitRotationToggle, cySpringDisableNative ? il2cpp_string_new16(LocalifySettings::GetText("cyspring_disable_limit_rotation_disabled")) : nullptr);
-		}
-
-		if (auto cySpringLimitRotationMinScaleSlider = UIParts::GetOptionSlider("cyspring_limit_rotation_min_scale"))
-		{
-			il2cpp_symbols::get_method_pointer<void (*)(Il2CppObject*, bool)>(cySpringLimitRotationMinScaleSlider->klass, "set_interactable", 1)(cySpringLimitRotationMinScaleSlider, !cySpringDisableNative);
-			if (auto cySpringLimitRotationMinScaleSliderFillImageField = il2cpp_class_get_field_from_name(cySpringLimitRotationMinScaleSlider->klass, "m_FillImage"))
-			{
-				Il2CppObject* cySpringLimitRotationMinScaleSliderFillImage;
-				il2cpp_field_get_value(cySpringLimitRotationMinScaleSlider, cySpringLimitRotationMinScaleSliderFillImageField, &cySpringLimitRotationMinScaleSliderFillImage);
-				il2cpp_symbols::get_method_pointer<void (*)(Il2CppObject*, UnityEngine::Color)>(cySpringLimitRotationMinScaleSliderFillImage->klass, "set_color", 1)(cySpringLimitRotationMinScaleSliderFillImage, !cySpringDisableNative ? UnityEngine::Color::white() : UnityEngine::Color::gray());
-			}
-		}
-
-		if (auto cySpringLimitRotationMaxScaleSlider = UIParts::GetOptionSlider("cyspring_limit_rotation_max_scale"))
-		{
-			il2cpp_symbols::get_method_pointer<void (*)(Il2CppObject*, bool)>(cySpringLimitRotationMaxScaleSlider->klass, "set_interactable", 1)(cySpringLimitRotationMaxScaleSlider, !cySpringDisableNative);
-			if (auto cySpringLimitRotationMaxScaleSliderFillImageField = il2cpp_class_get_field_from_name(cySpringLimitRotationMaxScaleSlider->klass, "m_FillImage"))
-			{
-				Il2CppObject* cySpringLimitRotationMaxScaleSliderFillImage;
-				il2cpp_field_get_value(cySpringLimitRotationMaxScaleSlider, cySpringLimitRotationMaxScaleSliderFillImageField, &cySpringLimitRotationMaxScaleSliderFillImage);
-				il2cpp_symbols::get_method_pointer<void (*)(Il2CppObject*, UnityEngine::Color)>(cySpringLimitRotationMaxScaleSliderFillImage->klass, "set_color", 1)(cySpringLimitRotationMaxScaleSliderFillImage, !cySpringDisableNative ? UnityEngine::Color::white() : UnityEngine::Color::gray());
-			}
-		}
 
 		UIParts::SetOptionItemOnOffAction("unlock_size", unlockSize, *([](Il2CppObject*, bool isOn)
 			{
