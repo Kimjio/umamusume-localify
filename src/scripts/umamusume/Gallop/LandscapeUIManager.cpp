@@ -158,5 +158,15 @@ namespace Gallop
 	{
 		return reinterpret_cast<float (*)(CameraType)>(LandscapeUIManager_GetTouchPositionOffsetX_addr)(cameraType);
 	}
+
+	int LandscapeUIManager::GetWindowsWidthMax()
+	{
+		return reinterpret_cast<int (*)()>(LandscapeUIManager_GetWindowsWidthMax_addr)();
+	}
+
+	int LandscapeUIManager::GetWindowsHeightMax()
+	{
+		return reinterpret_cast<int (*)()>(LandscapeUIManager_GetWindowsHeightMax_addr)();
+	}
 }
 #endif

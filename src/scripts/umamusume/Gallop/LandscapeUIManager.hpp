@@ -22,6 +22,10 @@ namespace Gallop
 
 		static float GetTouchPositionOffsetX(CameraType cameraType);
 
+		static int GetWindowsWidthMax();
+
+		static int GetWindowsHeightMax();
+
 		using MonoBehaviour::MonoBehaviour;
 	};
 }
