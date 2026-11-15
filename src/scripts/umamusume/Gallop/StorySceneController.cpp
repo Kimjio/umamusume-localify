@@ -4,6 +4,7 @@
 
 #include "scripts/UnityEngine.CoreModule/UnityEngine/Material.hpp"
 #include "scripts/UnityEngine.CoreModule/UnityEngine/Shader.hpp"
+#include "scripts/UnityEngine.CoreModule/UnityEngine/Time.hpp"
 
 #include "config/config.hpp"
 
@@ -125,7 +126,7 @@ namespace Gallop
 
 		if (_isFlowBgEnabled)
 		{
-			_flowBgTimer += il2cpp_resolve_icall_type<float (*)()>("UnityEngine.Time::get_deltaTime()")();
+			_flowBgTimer += UnityEngine::Time::deltaTime();
 
 			while (_flowBgTimer >= FLOW_BG_INTERVAL)
 			{

@@ -410,7 +410,7 @@ static Il2CppObject* StartCoroutineManaged2_hook(Il2CppObject* self, Il2CppObjec
 				reinterpret_cast<decltype(StartCoroutineManaged2_hook)*>(StartCoroutineManaged2_addr)(GameSystem, GameSystem.InitializeGame(nullptr));
 
 				auto Func = GetGenericClass(GetRuntimeType("mscorlib.dll", "System", "Func`1"),
-					GetRuntimeType("mscorlib.dll", "System", "Boolean"));
+					GetRuntimeType(il2cpp_defaults.boolean_class));
 				auto predicate = CreateDelegateWithClass(Func, GameSystem, *[](Il2CppObject* gameSystem)
 					{
 #ifdef _MSC_VER

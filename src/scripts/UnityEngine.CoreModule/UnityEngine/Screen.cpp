@@ -14,7 +14,8 @@
 
 #include "config/config.hpp"
 
-namespace {
+namespace
+{
 	Il2CppMethodPointer get_width_addr = nullptr;
 
 	Il2CppMethodPointer get_height_addr = nullptr;
