@@ -307,8 +307,8 @@ static void Gallop_WebViewManager_cctor_hook()
 		Gallop::WebViewManager::WebViewInfo(il2cpp_string_new("heroes_help?p=2")), methodInfo);
 	WebViewUrlDict_Add_methodPointer(WebViewUrlDict, Gallop::WebViewDefine::Url::UltimateRaceHelp,
 		Gallop::WebViewManager::WebViewInfo(il2cpp_string_new("ultimate_race_help?p=2")), methodInfo);
-	WebViewUrlDict_Add_methodPointer(WebViewUrlDict, Gallop::WebViewDefine::Url::RatingRaceHelp,
-		Gallop::WebViewManager::WebViewInfo(il2cpp_string_new("rating_race_help?p=2")), methodInfo);
+	WebViewUrlDict_Add_methodPointer(WebViewUrlDict, Gallop::WebViewDefine::Url::GachaExchangeDetail,
+		Gallop::WebViewManager::WebViewInfo(il2cpp_string_new("gacha_exchange_detail?p=2")), methodInfo);
 	WebViewUrlDict_Add_methodPointer(WebViewUrlDict, Gallop::WebViewDefine::Url::TermOfService,
 		Gallop::WebViewManager::WebViewInfo(il2cpp_string_new("terms_of_service/")), methodInfo);
 	WebViewUrlDict_Add_methodPointer(WebViewUrlDict, Gallop::WebViewDefine::Url::Tokusho,

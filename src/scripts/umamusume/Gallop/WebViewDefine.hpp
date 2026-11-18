@@ -28,7 +28,7 @@ namespace Gallop
 			FactorResearchHelp,
 			HeroesHelp,
 			UltimateRaceHelp,
-			RatingRaceHelp,
+			GachaExchangeDetail,
 		};
 
 		enum HelpCategory
