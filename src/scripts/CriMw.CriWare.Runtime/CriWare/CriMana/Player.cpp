@@ -72,7 +72,7 @@ static void Player_Prepare_hook(Il2CppObject* self)
 	int id;
 	il2cpp_field_get_value(self, Player_playerIdField, &id);
 	players.emplace(id, self);
-	reinterpret_cast<void (*)(Il2CppObject*, int)>(Player_SetManualTimerUnit_addr)(self, 4);
+	reinterpret_cast<void (*)(Il2CppObject*, int)>(Player_SetMasterTimerType_addr)(self, 4);
 	reinterpret_cast<void (*)(Il2CppObject*, unsigned long, unsigned long)>(Player_SetManualTimerUnit_addr)(self, 1, 60);
 
 	reinterpret_cast<decltype(Player_Prepare_hook)*>(Player_Prepare_orig)(self);
